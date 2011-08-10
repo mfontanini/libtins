@@ -38,7 +38,7 @@ namespace Tins {
         void dest_address(uint32_t ip);
         
         /* Virtual methods */
-        uint32_t header_size();
+        uint32_t header_size() const;
         void write_serialization(uint8_t *buffer, uint32_t total_sz);
     private:
         struct iphdr {

@@ -27,7 +27,7 @@ namespace Tins {
         void inner_pdu(PDU *next_pdu);
         
         /* Serializes the whole chain of PDU's, including this one. */
-        uint8_t *serialize();
+        uint8_t *serialize(uint32_t &sz);
         
         /* Serialize this PDU storing the result in buffer. */
         void serialize(uint8_t *buffer, uint32_t total_sz);

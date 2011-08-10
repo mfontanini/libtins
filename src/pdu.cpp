@@ -28,8 +28,8 @@ void Tins::PDU::inner_pdu(PDU *next_pdu) {
     _inner_pdu = next_pdu;
 }
 
-uint8_t *Tins::PDU::serialize() {
-    uint32_t sz(size());
+uint8_t *Tins::PDU::serialize(uint32_t &sz) {
+    sz = size();
     uint8_t *buffer = new uint8_t[sz];
     serialize(buffer, sz);
     return buffer;

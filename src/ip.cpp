@@ -67,7 +67,7 @@ void Tins::IP::dest_address(uint32_t ip) {
     _ip.daddr = ip;
 }
 
-uint32_t Tins::IP::header_size() {
+uint32_t Tins::IP::header_size() const {
     return sizeof(iphdr);
 }
 
