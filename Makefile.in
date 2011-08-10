@@ -1,0 +1,23 @@
+CXX=@CXX@
+CFLAGS=-c -Wall @CFLAGS@ -DTINS_VERSION=@PACKAGE_VERSION@
+LDFLAGS=
+SOURCES=$(wildcard src/*.cpp)
+
+OBJECTS=$(SOURCES:.cpp=.o)
+INCLUDE = -Iinclude/
+EXECUTABLE=client
+
+all: $(SOURCES) $(EXECUTABLE)
+
+compile: $(OBJECTS)
+
+recompile: clean all
+
+$(EXECUTABLE): $(OBJECTS)
+	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
+
+.cpp.o:
+	$(CXX) $(CFLAGS) $(INCLUDE) $< -o $@
+
+clean:
+	rm $(OBJECTS) $(EXECUTABLE)

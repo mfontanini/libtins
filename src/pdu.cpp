@@ -1,18 +1,17 @@
-#include <cassert.h>
+#include <cassert>
 #include "pdu.h"
 
-
-PDU::PDU(uint32_t pdu_flag, , PDU *next_pdu) : _pdu_flag(pdu_flag), _inner_pdu(next_pdu) {
+Tins::PDU::PDU(uint32_t flag, PDU *next_pdu) : _flag(flag), _inner_pdu(next_pdu) {
     
 }
 
-PDU::~PDU() {
+Tins::PDU::~PDU() {
     delete _inner_pdu;
 }
 
-uint32_t PDU::size() const {
+uint32_t Tins::PDU::size() const {
     uint32_t sz = header_size() + trailer_size();
-    PDU *ptr(_inner_pdu);
+    const PDU *ptr(_inner_pdu);
     while(ptr) {
         sz += ptr->header_size() + trailer_size();
         ptr = ptr->inner_pdu();
@@ -20,22 +19,28 @@ uint32_t PDU::size() const {
     return sz;
 }
 
-void PDU::inner_pdu(PDU *next_pdu) {
+void Tins::PDU::flag(uint32_t new_flag) {
+    _flag = new_flag;
+}
+
+void Tins::PDU::inner_pdu(PDU *next_pdu) {
     delete _inner_pdu;
     _inner_pdu = next_pdu;
 }
 
-uint8_t *PDU::serialize() {
+uint8_t *Tins::PDU::serialize() {
     uint32_t sz(size());
     uint8_t *buffer = new uint8_t[sz];
-    
+    serialize(buffer, sz);
+    return buffer;
 }
 
-void PDU::serialize(uint8_t *buffer, uint32_t total_sz) {
+void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = header_size() + trailer_size();
     write_serialization(buffer, total_sz);
     /* Must not happen... */
-    std::assert(total_sz >= sz);
+    assert(total_sz >= sz);
     if(_inner_pdu)
         _inner_pdu->serialize(buffer + header_size(), total_sz - sz);
 }
+
