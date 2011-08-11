@@ -1,5 +1,9 @@
 #include <stdexcept>
 #include <sstream>
+#include <cassert>
+#ifndef WIN32
+    #include <netdb.h>
+#endif
 #include "utils.h"
 
 using namespace std;
@@ -22,13 +26,13 @@ uint32_t Tins::Utils::ip_to_int(const string &ip) {
     }
     if(bytes_found < 4 || (i < ip.size() && bytes_found == 4))
         throw std::runtime_error("Invalid ip address");
-    return ntohl(result);
+    return net_to_host_l(result);
 }
 
 string Tins::Utils::ip_to_string(uint32_t ip) {
     ostringstream oss;
     int mask(24);
-    ip = ntohl(ip);
+    ip = net_to_host_l(ip);
     while(mask >=0) {
         oss << ((ip >> mask) & 0xff);
         if(mask)
@@ -36,4 +40,11 @@ string Tins::Utils::ip_to_string(uint32_t ip) {
         mask -= 8;
     }
     return oss.str();
+}
+
+uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
+    struct hostent *data = gethostbyname(to_resolve.c_str());
+    if(!data)
+        return 0;
+    return ((struct in_addr**)data->h_addr_list)[0]->s_addr;
 }
