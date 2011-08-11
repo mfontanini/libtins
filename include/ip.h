@@ -5,15 +5,14 @@
     #include <endian.h>
 #endif
 #include <string>
-#include <stdint.h>
 #include "pdu.h"
 
 namespace Tins {
 
     class IP : public PDU {
     public:
-        IP(const std::string &ip_dst = "", const std::string &ip_src = "");
-        IP(uint32_t ip_dst = 0, uint32_t ip_src = 0);
+        IP(const std::string &ip_dst = "", const std::string &ip_src = "", PDU *child = 0);
+        IP(uint32_t ip_dst = 0, uint32_t ip_src = 0, PDU *child = 0);
 
         inline uint8_t tos() const { return _ip.tos; }
         inline uint16_t tot_len() const { return _ip.tot_len; }
@@ -62,6 +61,8 @@ namespace Tins {
             uint32_t daddr;
             /*The options start here. */
         } __attribute__((packed));
+
+        static const uint8_t DEFAULT_TTL;
 
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz);

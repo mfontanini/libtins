@@ -10,8 +10,9 @@
 
 using namespace std;
 
+const uint8_t Tins::IP::DEFAULT_TTL = 128;
 
-Tins::IP::IP(const string &ip_dst, const string &ip_src) : PDU(IPPROTO_IP) {
+Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(IPPROTO_IP, child) {
     init_ip_fields();
     if(ip_dst.size())
         _ip.daddr = Utils::resolve_ip(ip_dst);
@@ -20,7 +21,7 @@ Tins::IP::IP(const string &ip_dst, const string &ip_src) : PDU(IPPROTO_IP) {
 
 }
 
-Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src) : PDU(IPPROTO_IP) {
+Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src, PDU *child) : PDU(IPPROTO_IP, child) {
     init_ip_fields();
     _ip.daddr = ip_dst;
     _ip.saddr = ip_src;
@@ -30,7 +31,7 @@ void Tins::IP::init_ip_fields() {
     memset(&_ip, 0, sizeof(iphdr));
     _ip.version = 4;
     _ip.ihl = sizeof(iphdr) / sizeof(uint32_t);
-    _ip.ttl = 128;
+    _ip.ttl = DEFAULT_TTL;
 }
 
 /* Setters */

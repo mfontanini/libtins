@@ -13,18 +13,18 @@
 #include <string.h>
 #include "packetsender.h"
 
-const uint32_t Tins::PacketSender::IP_SOCKET = 0;
+
+Tins::PacketSender::PacketSender() : _sockets(SOCKETS_END, INVALID_RAW_SOCKET) {
+
+}
 
 bool Tins::PacketSender::open_l3_socket() {
-    if(_sockets.find(IP_SOCKET) != _sockets.end())
+    if(_sockets[IP_SOCKET] != INVALID_RAW_SOCKET)
         return true;
     int sockfd;
     sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-    if (sockfd < 0) {
-        std::cout << "No se pudo abrir el fucking socket\n";
-        std::cout << "Errno: " << errno << "\n";
+    if (sockfd < 0)
         return false;
-    }
 
     const int on = 1;
     setsockopt(sockfd, IPPROTO_IP,IP_HDRINCL,(const void *)&on,sizeof(on));
@@ -34,11 +34,10 @@ bool Tins::PacketSender::open_l3_socket() {
 }
 
 bool Tins::PacketSender::close_socket(uint32_t flag) {
-    SocketMap::iterator it = _sockets.find(flag);
-    if(it == _sockets.end())
+    if(flag >= SOCKETS_END || _sockets[flag] == INVALID_RAW_SOCKET)
         return false;
-    close(it->second);
-    _sockets.erase(it);
+    close(_sockets[flag]);
+    _sockets[flag] = INVALID_RAW_SOCKET;
     return true;
 }
 
