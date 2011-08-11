@@ -1,3 +1,24 @@
+/*
+ * libtins is a net packet wrapper library for crafting and 
+ * interpreting sniffed packets.
+ * 
+ * Copyright (C) 2011 Nasel
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #ifndef __TCP_H
 #define __TCP_H
 
@@ -40,6 +61,7 @@ namespace Tins {
         void window(uint16_t new_window);
         void check(uint16_t new_check);
         void urg_ptr(uint16_t new_urg_ptr);
+        void payload(uint8_t *new_payload, uint32_t new_payload_size);
         
         void set_flag(Flags tcp_flag, uint8_t value);
         
@@ -87,6 +109,8 @@ namespace Tins {
         static const uint16_t DEFAULT_WINDOW;
         
         tcphdr _tcp;
+        uint8_t *_payload;
+        uint32_t _payload_size;
     };
 };
 

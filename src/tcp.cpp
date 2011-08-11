@@ -1,3 +1,24 @@
+/*
+ * libtins is a net packet wrapper library for crafting and 
+ * interpreting sniffed packets.
+ * 
+ * Copyright (C) 2011 Nasel
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include <cstring>
 #include <cassert>
 #ifndef WIN32
@@ -9,7 +30,7 @@
 
 const uint16_t Tins::TCP::DEFAULT_WINDOW = 32678;
 
-Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP) {
+Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _payload(0), _payload_size(0) {
     std::memset(&_tcp, 0, sizeof(tcphdr));
     _tcp.dport = Utils::net_to_host_s(dport);
     _tcp.sport = Utils::net_to_host_s(sport);
@@ -45,6 +66,12 @@ void Tins::TCP::urg_ptr(uint16_t new_urg_ptr) {
     _tcp.urg_ptr = new_urg_ptr;
 }
 
+void Tins::TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
+    delete[] _payload;
+    _payload = new_payload;
+    _payload_size = new_payload_size;
+}
+
 void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
     switch(tcp_flag) {
         case FIN:
@@ -75,7 +102,7 @@ void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
 }
 
 uint16_t Tins::TCP::do_checksum() const {
-    const uint8_t *ptr = (const uint8_t*)&_tcp, *end = (const uint8_t*)&_tcp + sizeof(tcphdr);
+    const uint8_t *ptr = (const uint8_t*)_payload, *end = (const uint8_t*)_payload + _payload_size;
     uint16_t checksum(0);
     while(ptr < end)
         checksum += *(ptr++);
@@ -83,11 +110,12 @@ uint16_t Tins::TCP::do_checksum() const {
 }
 
 uint32_t Tins::TCP::header_size() const {
-    return sizeof(tcphdr);
+    return sizeof(tcphdr) + _payload_size;
 }
 
 void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz) {
-    assert(total_sz >= sizeof(tcphdr));
+    assert(total_sz >= header_size());
     _tcp.check = Utils::net_to_host_s(do_checksum());
     memcpy(buffer, &_tcp, sizeof(tcphdr));
+    memcpy(buffer + sizeof(tcphdr), _payload, _payload_size);
 }
