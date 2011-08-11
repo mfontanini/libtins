@@ -1,10 +1,11 @@
 #ifndef WIN32
     #include <sys/socket.h>
-	#include <sys/select.h>
-	#include <arpa/inet.h>
+    #include <sys/select.h>
+    #include <arpa/inet.h>
     #include <unistd.h>
     #include </usr/include/linux/if_ether.h>
     #include </usr/include/linux/if_packet.h>
+    #include <netdb.h>
 #endif
 #include <assert.h>
 #include <iostream>
@@ -12,37 +13,23 @@
 #include <string.h>
 #include "packetsender.h"
 
+const uint32_t Tins::PacketSender::IP_SOCKET = 0;
 
-bool Tins::PacketSender::open_socket(uint32_t flag) {
-    if(_sockets.find(flag) != _sockets.end())
+bool Tins::PacketSender::open_l3_socket() {
+    if(_sockets.find(IP_SOCKET) != _sockets.end())
         return true;
     int sockfd;
-    sockfd = socket(PF_PACKET, SOCK_RAW, 255);
+    sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
     if (sockfd < 0) {
-        std::cout << "Flag: " << flag << "\n";
+        std::cout << "No se pudo abrir el fucking socket\n";
         std::cout << "Errno: " << errno << "\n";
         return false;
     }
-    struct sockaddr_ll sa;
-    memset(&sa, 0, sizeof(sa));
-        sa.sll_family = AF_PACKET;
-        sa.sll_protocol = htons(ETH_P_IP);
-        sa.sll_ifindex = 1;                         
-        sa.sll_hatype = 1;
-        sa.sll_pkttype = PACKET_BROADCAST;
-        sa.sll_halen = 0;
-        sa.sll_addr[2] = 0xde;
-    if(bind(sockfd, (struct sockaddr *)&sa, sizeof(sockaddr_ll)) != 0) {
-        std::cout << "Error: " << errno << "\n";
-        return false;
-    }
-  /*  {				
-        int one = 1;
-        const int *val = &one;
-        if (setsockopt (sockfd, IPPROTO_IP, IP_HDRINCL, val, sizeof (one)) < 0)
-          std::cout << "Warning: Cannot set HDRINCL!\n";
-      }*/
-    _sockets[flag] = sockfd;
+
+    const int on = 1;
+    setsockopt(sockfd, IPPROTO_IP,IP_HDRINCL,(const void *)&on,sizeof(on));
+
+    _sockets[IP_SOCKET] = sockfd;
     return true;
 }
 
@@ -55,28 +42,23 @@ bool Tins::PacketSender::close_socket(uint32_t flag) {
     return true;
 }
 
-bool Tins::PacketSender::write(int sock, uint8_t *buffer, uint32_t size) {
-	uint32_t index = 0;
-    int ret;
-	while(size) {
-		if((ret = ::send(sock, &buffer[index], size, 0)) <= 0) {
-            std::cout << errno << "\n";
-            return false;
-        }
-		index += ret;
-		size -= ret;
-	}
-    /*if(!sendto(sock, buffer, size, 0,
-                      const struct sockaddr *dest_addr, socklen_t addrlen);))*/
-	return true;
+bool Tins::PacketSender::send(PDU *pdu) {
+    return pdu->send(this);
 }
 
-bool Tins::PacketSender::send(PDU *pdu) {
-    uint32_t sz, flag(pdu->flag());
-    uint8_t *buffer = pdu->serialize(sz);
+bool Tins::PacketSender::send_l3(PDU *pdu, const struct sockaddr* link_addr, uint32_t len_link_addr) {
     bool ret_val = true;
-    if(!open_socket(flag) || !write(_sockets[flag], buffer, sz))
+    if(!open_l3_socket())
         ret_val = false;
-    delete[] buffer;
+
+    if (ret_val) {
+        uint32_t sz;
+        int sock = _sockets[IP_SOCKET];
+        uint8_t *buffer = pdu->serialize(sz);
+        ret_val = (sendto(sock, buffer, sz, 0, link_addr, len_link_addr) != -1);
+        delete[] buffer;
+    }
+
     return ret_val;
+
 }

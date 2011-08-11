@@ -7,21 +7,25 @@
 #include "pdu.h"
 
 namespace Tins {
+    class PDU;
 
     class PacketSender {
     public:
-        /* Opens a socket, using flag as protocol family. 
+        /* Opens a socket, using flag as protocol family.
          * Return true if it was possible to open it(or it was already open),
          * false otherwise.  */
-        bool open_socket(uint32_t flag);
-        
+        bool open_l3_socket();
+
         bool close_socket(uint32_t flag);
-        
-        bool send(PDU *pdu);
+
+        bool send(PDU* pdu);
+
+        bool send_l3(PDU *pdu, const struct sockaddr* link_addr, uint32_t len_link_addr);
     private:
         typedef std::map<uint32_t, int> SocketMap;
-        bool write(int sock, uint8_t *buffer, uint32_t size);
-        
+
+        static const uint32_t IP_SOCKET;
+
         SocketMap _sockets;
     };
 };

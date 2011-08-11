@@ -22,12 +22,13 @@ uint32_t Tins::Utils::ip_to_int(const string &ip) {
     }
     if(bytes_found < 4 || (i < ip.size() && bytes_found == 4))
         throw std::runtime_error("Invalid ip address");
-    return result;
+    return ntohl(result);
 }
 
 string Tins::Utils::ip_to_string(uint32_t ip) {
     ostringstream oss;
     int mask(24);
+    ip = ntohl(ip);
     while(mask >=0) {
         oss << ((ip >> mask) & 0xff);
         if(mask)

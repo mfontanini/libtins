@@ -9,12 +9,12 @@
 #include "pdu.h"
 
 namespace Tins {
-    
+
     class IP : public PDU {
     public:
         IP(const std::string &ip_dst = "", const std::string &ip_src = "");
         IP(uint32_t ip_dst = 0, uint32_t ip_src = 0);
-        
+
         inline uint8_t tos() const { return _ip.tos; }
         inline uint16_t tot_len() const { return _ip.tot_len; }
         inline uint16_t id() const { return _ip.id; }
@@ -24,7 +24,7 @@ namespace Tins {
         inline uint16_t check() const { return _ip.check; }
         inline uint32_t source_address() const { return _ip.saddr; }
         inline uint32_t dest_address() const  { return _ip.daddr; }
-        
+
         void tos(uint8_t new_tos);
         void tot_len(uint16_t new_tot_len);
         void id(uint16_t new_id);
@@ -36,9 +36,10 @@ namespace Tins {
         void source_address(uint32_t ip);
         void dest_address(const std::string &ip);
         void dest_address(uint32_t ip);
-        
+
         /* Virtual methods */
         uint32_t header_size() const;
+        bool send(PacketSender* sender);
     private:
         struct iphdr {
         #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -48,7 +49,7 @@ namespace Tins {
             unsigned int version:4;
             unsigned int ihl:4;
         #else
-        # error	"Endian is not LE nor BE..."
+        # error "Endian is not LE nor BE..."
         #endif
             uint8_t tos;
             uint16_t tot_len;
@@ -61,10 +62,10 @@ namespace Tins {
             uint32_t daddr;
             /*The options start here. */
         } __attribute__((packed));
-        
+
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz);
-        
+
         iphdr _ip;
     };
 };
