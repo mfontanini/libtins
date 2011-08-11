@@ -10,18 +10,27 @@ using namespace std;
 
 
 Tins::IP::IP(const string &ip_dst, const string &ip_src) : PDU(IPPROTO_IP) {
-    memset(&_ip, 0, sizeof(iphdr));
+    init_ip_fields();
     if(ip_dst.size())
         _ip.daddr = Utils::ip_to_int(ip_dst);
     if(ip_src.size())
         _ip.saddr = Utils::ip_to_int(ip_src);
+    
 }
 
 Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src) : PDU(IPPROTO_IP) {
-    memset(&_ip, 0, sizeof(iphdr));
+    init_ip_fields();
     _ip.daddr = ip_dst;
     _ip.saddr = ip_src;
 }
+
+void Tins::IP::init_ip_fields() {
+    memset(&_ip, 0, sizeof(iphdr));
+    _ip.version = 4;
+    _ip.ihl = sizeof(iphdr) / sizeof(uint32_t);
+}
+
+/* Setters */
 
 void Tins::IP::tos(uint8_t new_tos) {
     _ip.tos = new_tos;
@@ -67,11 +76,20 @@ void Tins::IP::dest_address(uint32_t ip) {
     _ip.daddr = ip;
 }
 
+/* Virtual method overriding. */
+
 uint32_t Tins::IP::header_size() const {
     return sizeof(iphdr);
 }
 
 void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz) {
-    assert(total_sz >= sizeof(iphdr));
+    uint32_t my_sz = header_size() + trailer_size(), new_flag = inner_pdu()->flag();
+    assert(total_sz >= my_sz);
+    if(new_flag == IPPROTO_IP)
+        new_flag = IPPROTO_IPIP;
+    flag(new_flag);
+    _ip.protocol = new_flag;
+    _ip.tot_len = total_sz;
     memcpy(buffer, &_ip, sizeof(iphdr));
+    /* IP Options here... */
 }

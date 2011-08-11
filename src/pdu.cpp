@@ -37,10 +37,10 @@ uint8_t *Tins::PDU::serialize(uint32_t &sz) {
 
 void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = header_size() + trailer_size();
-    write_serialization(buffer, total_sz);
     /* Must not happen... */
     assert(total_sz >= sz);
     if(_inner_pdu)
         _inner_pdu->serialize(buffer + header_size(), total_sz - sz);
+    write_serialization(buffer, total_sz);
 }
 

@@ -39,7 +39,6 @@ namespace Tins {
         
         /* Virtual methods */
         uint32_t header_size() const;
-        void write_serialization(uint8_t *buffer, uint32_t total_sz);
     private:
         struct iphdr {
         #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -62,6 +61,9 @@ namespace Tins {
             uint32_t daddr;
             /*The options start here. */
         } __attribute__((packed));
+        
+        void init_ip_fields();
+        void write_serialization(uint8_t *buffer, uint32_t total_sz);
         
         iphdr _ip;
     };
