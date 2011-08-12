@@ -117,7 +117,7 @@ namespace Tins {
         void dport(uint16_t new_dport);
         
         /** \brief Set the source port.
-         * \param new_dport New source port.
+         * \param new_sport New source port.
          */
         void sport(uint16_t new_sport);
         
@@ -151,6 +151,7 @@ namespace Tins {
          * Payload is NOT copied. Therefore, pointers provided as 
          * payloads must be freed manually by the user.
          * \param new_payload New payload.
+         * \param new_payload_size New payload's size
          */
         void payload(uint8_t *new_payload, uint32_t new_payload_size);
         

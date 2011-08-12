@@ -126,8 +126,6 @@ void Tins::IP::set_option(uint8_t copied,
     option.type.number = number;
     uint8_t* buffer(0);
     if (data_size) {
-        /* data must be a valid pointer */
-        assert(data);
         buffer = new uint8_t[data_size];
         memcpy(buffer, data, data_size);
     }

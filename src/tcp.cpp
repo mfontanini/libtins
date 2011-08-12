@@ -37,6 +37,7 @@ Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _payload(0), 
     _tcp.sport = Utils::net_to_host_s(sport);
     _tcp.doff = sizeof(tcphdr) / sizeof(uint32_t);
     _tcp.window = Utils::net_to_host_s(DEFAULT_WINDOW);
+    _tcp.check = 0;
 }
 
 Tins::TCP::~TCP() {
@@ -153,7 +154,8 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz) {
     }
         
     memcpy(buffer, _payload, _payload_size);
-    _tcp.check = Utils::net_to_host_s(do_checksum(tcp_start + sizeof(tcphdr), buffer));
+    if(!_tcp.check)
+        _tcp.check = Utils::net_to_host_s(do_checksum(tcp_start + sizeof(tcphdr), buffer));
     memcpy(tcp_start, &_tcp, sizeof(tcphdr));
 }
 
