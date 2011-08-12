@@ -32,13 +32,27 @@
 
 namespace Tins {
 
+    /**
+     * \brief IP represents IP PDU.
+     */
     class IP : public PDU {
     public:
+        /**
+         * \brief Enum indicating the option's class.
+         *
+         * Enum OptionClass represents the different classes of
+         * IP Options.
+         */
         enum OptionClass {
             CONTROL = 0,
             MEASUREMENT = 2
         };
 
+        /**
+         * \brief Enum indicating the option's id number.
+         *
+         * Enum OptionNumber indicates the possible IP Options.
+         */
         enum OptionNumber {
             IPOPT_END = 0,
             IPOPT_NOOP = 1,
@@ -61,6 +75,16 @@ namespace Tins {
             IPOPT_QS = 25
         };
 
+        /**
+         * \brief Constructor for building the IP PDU taking strings.
+         *
+         * Constructor that builds an IP using strings as addresses. They
+         * can be hostnames or IPs.
+         *
+         * \param ip_dst string containing the destination hostname(optional).
+         * \param ip_src string containing the source hostname(optional).
+         * \param child pointer to a PDU which will be set as the inner_pdu for the packet being constructed(optional).
+         */
         IP(const std::string &ip_dst = "", const std::string &ip_src = "", PDU *child = 0);
         IP(uint32_t ip_dst = 0, uint32_t ip_src = 0, PDU *child = 0);
 
