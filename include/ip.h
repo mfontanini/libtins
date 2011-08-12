@@ -1,19 +1,19 @@
 /*
- * libtins is a net packet wrapper library for crafting and 
+ * libtins is a net packet wrapper library for crafting and
  * interpreting sniffed packets.
- * 
+ *
  * Copyright (C) 2011 Nasel
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -26,12 +26,41 @@
     #include <endian.h>
 #endif
 #include <string>
+#include <utility>
+#include <vector>
 #include "pdu.h"
 
 namespace Tins {
 
     class IP : public PDU {
     public:
+        enum OptionClass {
+            CONTROL = 0,
+            MEASUREMENT = 2
+        };
+
+        enum OptionNumber {
+            IPOPT_END = 0,
+            IPOPT_NOOP = 1,
+            IPOPT_SEC = 2,
+            IPOPT_LSSR = 3,
+            IPOPT_TIMESTAMP = 4,
+            IPOPT_EXTSEC = 5,
+            IPOPT_RR = 7,
+            IPOPT_SID = 8,
+            IPOPT_SSRR = 9,
+            IPOPT_MTUPROBE = 11,
+            IPOPT_MTUREPLY = 12,
+            IPOPT_EIP = 17,
+            IPOPT_TR = 18,
+            IPOPT_ADDEXT = 19,
+            IPOPT_RTRALT = 20,
+            IPOPT_SDB = 21,
+            IPOPT_DPS = 23,
+            IPOPT_UMP = 24,
+            IPOPT_QS = 25
+        };
+
         IP(const std::string &ip_dst = "", const std::string &ip_src = "", PDU *child = 0);
         IP(uint32_t ip_dst = 0, uint32_t ip_src = 0, PDU *child = 0);
 
@@ -56,6 +85,12 @@ namespace Tins {
         void source_address(uint32_t ip);
         void dest_address(const std::string &ip);
         void dest_address(uint32_t ip);
+        void set_option(uint8_t copied, OptionClass op_class, OptionNumber number, uint8_t* data = 0, uint32_t data_size = 0);
+
+        void set_option_eol();
+        void set_option_noop();
+        void set_option_sec(uint8_t* data, uint32_t data_len);
+        /* Add more option setters */
 
         /* Virtual methods */
         uint32_t header_size() const;
@@ -81,7 +116,26 @@ namespace Tins {
             uint32_t saddr;
             uint32_t daddr;
             /*The options start here. */
-        } __attribute__((packed));
+        } __attribute__((__packed__));
+
+        struct IpOption {
+            struct {
+            #if __BYTE_ORDER == __LITTLE_ENDIAN
+                unsigned int number:5;
+                unsigned int op_class:2;
+                unsigned int copied:1;
+            #elif __BYTE_ORDER == __BIG_ENDIAN
+                unsigned int copied:1;
+                unsigned int op_class:2;
+                unsigned int number:5;
+            #endif
+            } type;
+            uint8_t* optional_data;
+            uint32_t optional_data_size;
+
+            uint8_t* write(uint8_t* buffer);
+
+        } __attribute__((__packed__));
 
         static const uint8_t DEFAULT_TTL;
 
@@ -89,6 +143,9 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz);
 
         iphdr _ip;
+        std::vector<IpOption> _ip_options;
+        uint32_t _options_size;
+        uint32_t _padded_options_size;
     };
 };
 
