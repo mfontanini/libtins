@@ -52,16 +52,16 @@ void Tins::PDU::inner_pdu(PDU *next_pdu) {
 uint8_t *Tins::PDU::serialize(uint32_t &sz) {
     sz = size();
     uint8_t *buffer = new uint8_t[sz];
-    serialize(buffer, sz);
+    serialize(buffer, sz, 0);
     return buffer;
 }
 
-void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz) {
+void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz, PDU *parent) {
     uint32_t sz = header_size() + trailer_size();
     /* Must not happen... */
     assert(total_sz >= sz);
     if(_inner_pdu)
-        _inner_pdu->serialize(buffer + header_size(), total_sz - sz);
-    write_serialization(buffer, total_sz);
+        _inner_pdu->serialize(buffer + header_size(), total_sz - sz, this);
+    write_serialization(buffer, total_sz, parent);
 }
 
