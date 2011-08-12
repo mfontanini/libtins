@@ -73,7 +73,6 @@ void Tins::TCP::urg_ptr(uint16_t new_urg_ptr) {
 }
 
 void Tins::TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
-    delete[] _payload;
     _payload = new_payload;
     _payload_size = new_payload_size;
 }
