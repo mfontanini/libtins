@@ -54,6 +54,7 @@ void Tins::IP::init_ip_fields() {
     _ip.ihl = sizeof(iphdr) / sizeof(uint32_t);
     _ip.ttl = DEFAULT_TTL;
     _options_size = 0;
+    _padded_options_size = 0;
 }
 
 /* Setters */
@@ -164,7 +165,7 @@ bool Tins::IP::send(PacketSender* sender) {
     return sender->send_l3(this, (const struct sockaddr*)&link_addr, sizeof(link_addr));
 }
 
-void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz) {
+void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, PDU *) {
     uint32_t my_sz = header_size();
     uint32_t new_flag;
     assert(total_sz >= my_sz);

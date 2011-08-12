@@ -186,12 +186,6 @@ namespace Tins {
          * payload and options size.
          */
         uint32_t header_size() const;
-        
-        /** \brief Serialices this TCP PDU.
-         * \param buffer The buffer in which the PDU will be serialized.
-         * \param total_sz The size available in the buffer.
-         */
-        void write_serialization(uint8_t *buffer, uint32_t total_sz);
     private:
         struct tcphdr {
             uint16_t sport;
@@ -240,7 +234,15 @@ namespace Tins {
         
         static const uint16_t DEFAULT_WINDOW;
         
-        uint16_t do_checksum(uint8_t *start, uint8_t *end) const;
+        /** \brief Serialices this TCP PDU.
+         * \param buffer The buffer in which the PDU will be serialized.
+         * \param total_sz The size available in the buffer.
+         * \param parent The PDU that's one level below this one on the stack.
+         */
+        void write_serialization(uint8_t *buffer, uint32_t total_sz, PDU *parent);
+        
+        uint32_t do_checksum(uint8_t *start, uint8_t *end) const;
+        uint32_t pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip) const;
         
         tcphdr _tcp;
         std::vector<TCPOption> _options;
