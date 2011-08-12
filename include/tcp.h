@@ -23,6 +23,7 @@
 #define __TCP_H
 
 
+#include <vector>
 #include <stdint.h>
 #ifndef WIN32
     #include <endian.h>
@@ -43,8 +44,14 @@ namespace Tins {
             ECE,
             CWR
         };
+        
+        enum Options {
+            MSS = 2,
+            TSOPT = 8
+        };
     
         TCP(uint16_t dport = 0, uint16_t sport = 0);
+        ~TCP();
         
         inline uint16_t dport() const { return _tcp.dport; }
         inline uint16_t sport() const { return _tcp.sport; }
@@ -63,9 +70,10 @@ namespace Tins {
         void urg_ptr(uint16_t new_urg_ptr);
         void payload(uint8_t *new_payload, uint32_t new_payload_size);
         
+        void set_mss(uint16_t value);
+        void set_timestamp(uint32_t value, uint32_t reply);
         void set_flag(Flags tcp_flag, uint8_t value);
-        
-        uint16_t do_checksum() const;
+        void add_option(Options tcp_option, uint8_t length = 0, uint8_t *data = 0);
         
         /* Virtual methods */
         uint32_t header_size() const;
@@ -106,11 +114,24 @@ namespace Tins {
             uint16_t	urg_ptr;
         } __attribute__((packed));
         
+        struct TCPOption {
+            TCPOption(uint8_t okind, uint8_t olength, uint8_t *odata) :
+                      kind(okind), length(olength), data(odata) { } 
+            
+            uint8_t *write(uint8_t *buffer);
+            
+            uint8_t kind, length;
+            uint8_t *data;
+        };
+        
         static const uint16_t DEFAULT_WINDOW;
         
+        uint16_t do_checksum(uint8_t *start, uint8_t *end) const;
+        
         tcphdr _tcp;
+        std::vector<TCPOption> _options;
         uint8_t *_payload;
-        uint32_t _payload_size;
+        uint32_t _payload_size, _options_size, _total_options_size;
     };
 };
 

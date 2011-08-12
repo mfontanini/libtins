@@ -30,12 +30,18 @@
 
 const uint16_t Tins::TCP::DEFAULT_WINDOW = 32678;
 
-Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _payload(0), _payload_size(0) {
+Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _payload(0), _payload_size(0), 
+                                                 _options_size(0), _total_options_size(0) {
     std::memset(&_tcp, 0, sizeof(tcphdr));
     _tcp.dport = Utils::net_to_host_s(dport);
     _tcp.sport = Utils::net_to_host_s(sport);
     _tcp.doff = sizeof(tcphdr) / sizeof(uint32_t);
     _tcp.window = Utils::net_to_host_s(DEFAULT_WINDOW);
+}
+
+Tins::TCP::~TCP() {
+    for(unsigned i(0); i < _options.size(); ++i)
+        delete[] _options[i].data;
 }
 
 void Tins::TCP::dport(uint16_t new_dport) {
@@ -72,6 +78,16 @@ void Tins::TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
     _payload_size = new_payload_size;
 }
 
+void Tins::TCP::set_mss(uint16_t value) {
+    value = Utils::net_to_host_s(value);
+    add_option(MSS, 2, (uint8_t*)&value);
+}
+
+void Tins::TCP::set_timestamp(uint32_t value, uint32_t reply) {
+    uint64_t buffer = ((uint64_t)Utils::net_to_host_l(reply) << 32) | Utils::net_to_host_l(value);
+    add_option(TSOPT, 8, (uint8_t*)&buffer);
+}
+
 void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
     switch(tcp_flag) {
         case FIN:
@@ -101,21 +117,59 @@ void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
     };
 }
 
-uint16_t Tins::TCP::do_checksum() const {
-    const uint8_t *ptr = (const uint8_t*)_payload, *end = (const uint8_t*)_payload + _payload_size;
-    uint16_t checksum(0);
-    while(ptr < end)
-        checksum += *(ptr++);
+void Tins::TCP::add_option(Options tcp_option, uint8_t length, uint8_t *data) {
+    uint8_t *new_data = new uint8_t[length], padding;
+    memcpy(new_data, data, length);
+    _options.push_back(TCPOption(tcp_option, length, new_data));
+    _options_size += length + (sizeof(uint8_t) << 1);
+    padding = _options_size & 3;
+    _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
+}
+
+uint16_t Tins::TCP::do_checksum(uint8_t *start, uint8_t *end) const {
+    unsigned checksum(0);
+    while(start < end)
+        checksum += *(start++);
     return checksum;
 }
 
 uint32_t Tins::TCP::header_size() const {
-    return sizeof(tcphdr) + _payload_size;
+    return sizeof(tcphdr) + _payload_size + _total_options_size;
 }
 
 void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz) {
     assert(total_sz >= header_size());
-    _tcp.check = Utils::net_to_host_s(do_checksum());
-    memcpy(buffer, &_tcp, sizeof(tcphdr));
-    memcpy(buffer + sizeof(tcphdr), _payload, _payload_size);
+    uint8_t *tcp_start = buffer;
+    buffer += sizeof(tcphdr);
+    _tcp.doff = (sizeof(tcphdr) + _total_options_size) / sizeof(uint32_t);
+    for(unsigned i(0); i < _options.size(); ++i)
+        buffer = _options[i].write(buffer);
+
+    if(_options_size < _total_options_size) {    
+        uint8_t padding = _total_options_size;
+        while(padding < _options_size) {
+            *(buffer++) = 1;
+            padding++;
+        }
+    }
+        
+    memcpy(buffer, _payload, _payload_size);
+    _tcp.check = Utils::net_to_host_s(do_checksum(tcp_start + sizeof(tcphdr), buffer));
+    memcpy(tcp_start, &_tcp, sizeof(tcphdr));
+}
+
+
+/* TCPOptions */
+
+uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
+    if(kind == 1) {
+        *buffer = kind;
+        return buffer + 1;
+    }
+    else {
+        buffer[0] = kind;
+        buffer[1] = length + (sizeof(uint8_t) << 1);
+        memcpy(buffer + 2, data, length);
+        return buffer + length + (sizeof(uint8_t) << 1);
+    }
 }
