@@ -1,19 +1,19 @@
 /*
- * libtins is a net packet wrapper library for crafting and 
+ * libtins is a net packet wrapper library for crafting and
  * interpreting sniffed packets.
- * 
+ *
  * Copyright (C) 2011 Nasel
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -41,6 +41,13 @@ Tins::PacketSender::PacketSender() : _sockets(SOCKETS_END, INVALID_RAW_SOCKET) {
 
 }
 
+bool Tins::PacketSender::open_l2_socket() {
+
+    /* To be implemented */
+
+    return false;
+}
+
 bool Tins::PacketSender::open_l3_socket() {
     if(_sockets[IP_SOCKET] != INVALID_RAW_SOCKET)
         return true;
@@ -66,6 +73,13 @@ bool Tins::PacketSender::close_socket(uint32_t flag) {
 
 bool Tins::PacketSender::send(PDU *pdu) {
     return pdu->send(this);
+}
+
+bool Tins::PacketSender::send_l2(PDU *pdu) {
+
+    /* To be implemented */
+
+    return false;
 }
 
 bool Tins::PacketSender::send_l3(PDU *pdu, const struct sockaddr* link_addr, uint32_t len_link_addr) {
