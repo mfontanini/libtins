@@ -111,10 +111,6 @@ namespace Tins {
          */
         inline uint16_t urg_ptr() const { return _tcp.urg_ptr; }
         
-        /** \brief Returns the payload.
-         */
-         inline const uint8_t *payload() const { return _payload; }
-        
         /** \brief Set the destination port.
          * \param new_dport New destination port.
          */
@@ -153,7 +149,10 @@ namespace Tins {
         /** \brief Set the payload.
          * 
          * Payload is NOT copied. Therefore, pointers provided as 
-         * payloads must be freed manually by the user.
+         * payloads must be freed manually by the user. This actually
+         * creates a RawPDU that holds the payload, and sets it as the 
+         * inner_pdu. Therefore, if an inner_pdu was set previously,
+         * a call to TCP::payload will delete it.
          * \param new_payload New payload.
          * \param new_payload_size New payload's size
          */
@@ -247,8 +246,7 @@ namespace Tins {
         
         tcphdr _tcp;
         std::vector<TCPOption> _options;
-        uint8_t *_payload;
-        uint32_t _payload_size, _options_size, _total_options_size;
+        uint32_t _options_size, _total_options_size;
     };
 };
 

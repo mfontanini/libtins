@@ -21,19 +21,18 @@
 
 #include <cstring>
 #include <cassert>
-#include <iostream> //borrame
 #ifndef WIN32
     #include <netinet/in.h>
 #endif
 #include "tcp.h"
 #include "ip.h"
+#include "rawpdu.h"
 #include "utils.h"
 
 
 const uint16_t Tins::TCP::DEFAULT_WINDOW = 32678;
 
-Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _payload(0), _payload_size(0), 
-                                                 _options_size(0), _total_options_size(0) {
+Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _options_size(0), _total_options_size(0) {
     std::memset(&_tcp, 0, sizeof(tcphdr));
     _tcp.dport = Utils::net_to_host_s(dport);
     _tcp.sport = Utils::net_to_host_s(sport);
@@ -76,8 +75,7 @@ void Tins::TCP::urg_ptr(uint16_t new_urg_ptr) {
 }
 
 void Tins::TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
-    _payload = new_payload;
-    _payload_size = new_payload_size;
+    inner_pdu(new RawPDU(new_payload, new_payload_size));
 }
 
 void Tins::TCP::set_mss(uint16_t value) {
@@ -129,7 +127,7 @@ void Tins::TCP::add_option(Options tcp_option, uint8_t length, uint8_t *data) {
 }
 
 uint32_t Tins::TCP::header_size() const {
-    return sizeof(tcphdr) + _payload_size + _total_options_size;
+    return sizeof(tcphdr) + _total_options_size;
 }
 
 void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
@@ -148,14 +146,12 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
         }
     }
         
-    memcpy(buffer, _payload, _payload_size);
-    buffer += _payload_size;
     const IP *ip_packet = dynamic_cast<const IP*>(parent);
     if(!_tcp.check && ip_packet) {
-        uint32_t checksum = PDU::pseudoheader_checksum(ip_packet->source_address(), ip_packet->dest_address(), header_size(), IPPROTO_TCP) + 
-                            PDU::do_checksum(tcp_start + sizeof(tcphdr), buffer) + PDU::do_checksum((uint8_t*)&_tcp, ((uint8_t*)&_tcp) + sizeof(tcphdr));
+        uint32_t checksum = PDU::pseudoheader_checksum(ip_packet->source_address(), ip_packet->dest_address(), size(), IPPROTO_TCP) + 
+                            PDU::do_checksum(tcp_start + sizeof(tcphdr), tcp_start + total_sz) + PDU::do_checksum((uint8_t*)&_tcp, ((uint8_t*)&_tcp) + sizeof(tcphdr));
         while (checksum >> 16)
-            checksum = (checksum & 0xffff)+(checksum >> 16);
+            checksum = (checksum & 0xffff) + (checksum >> 16);
         _tcp.check = Utils::net_to_host_s(~checksum);
     }
     memcpy(tcp_start, &_tcp, sizeof(tcphdr));
