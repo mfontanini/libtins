@@ -108,7 +108,7 @@ namespace Tins {
         virtual bool send(PacketSender* sender) { return false; }
     protected:
         /* Serialize this PDU storing the result in buffer. */
-        void serialize(uint8_t *buffer, uint32_t total_sz, PDU *parent);
+        void serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         /** \brief Serialices this TCP PDU.
          * 
@@ -118,7 +118,10 @@ namespace Tins {
          * \param total_sz The size available in the buffer.
          * \param parent The PDU that's one level below this one on the stack. Might be 0.
          */
-        virtual void write_serialization(uint8_t *buffer, uint32_t total_sz, PDU *parent) = 0;
+        virtual void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) = 0;
+        
+        static uint32_t do_checksum(uint8_t *start, uint8_t *end);
+        static uint32_t pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, uint32_t len, uint32_t flag);
     private:
         uint32_t _flag;
         PDU *_inner_pdu;

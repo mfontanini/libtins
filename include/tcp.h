@@ -111,6 +111,10 @@ namespace Tins {
          */
         inline uint16_t urg_ptr() const { return _tcp.urg_ptr; }
         
+        /** \brief Returns the payload.
+         */
+         inline const uint8_t *payload() const { return _payload; }
+        
         /** \brief Set the destination port.
          * \param new_dport New destination port.
          */
@@ -183,7 +187,7 @@ namespace Tins {
         /** \brief Returns the header size.
          * 
          * This metod overrides PDU::header_size. This size includes the
-         * payload and options size.
+         * payload and options size. \sa PDU::header_size
          */
         uint32_t header_size() const;
     private:
@@ -239,10 +243,7 @@ namespace Tins {
          * \param total_sz The size available in the buffer.
          * \param parent The PDU that's one level below this one on the stack.
          */
-        void write_serialization(uint8_t *buffer, uint32_t total_sz, PDU *parent);
-        
-        uint32_t do_checksum(uint8_t *start, uint8_t *end) const;
-        uint32_t pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip) const;
+        void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         tcphdr _tcp;
         std::vector<TCPOption> _options;

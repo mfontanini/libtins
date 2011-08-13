@@ -164,7 +164,7 @@ namespace Tins {
         static const uint8_t DEFAULT_TTL;
 
         void init_ip_fields();
-        void write_serialization(uint8_t *buffer, uint32_t total_sz, PDU *parent);
+        void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         iphdr _ip;
         std::vector<IpOption> _ip_options;

@@ -165,7 +165,7 @@ bool Tins::IP::send(PacketSender* sender) {
     return sender->send_l3(this, (const struct sockaddr*)&link_addr, sizeof(link_addr));
 }
 
-void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, PDU *) {
+void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     uint32_t my_sz = header_size();
     uint32_t new_flag;
     assert(total_sz >= my_sz);

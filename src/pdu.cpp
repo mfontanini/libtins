@@ -20,7 +20,9 @@
  */
 
 #include <cassert>
+#include "utils.h"
 #include "pdu.h"
+
 
 Tins::PDU::PDU(uint32_t flag, PDU *next_pdu) : _flag(flag), _inner_pdu(next_pdu) {
     
@@ -56,12 +58,38 @@ uint8_t *Tins::PDU::serialize(uint32_t &sz) {
     return buffer;
 }
 
-void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz, PDU *parent) {
+void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t sz = header_size() + trailer_size();
     /* Must not happen... */
     assert(total_sz >= sz);
     if(_inner_pdu)
         _inner_pdu->serialize(buffer + header_size(), total_sz - sz, this);
     write_serialization(buffer, total_sz, parent);
+}
+
+/* Static methods */
+uint32_t Tins::PDU::do_checksum(uint8_t *start, uint8_t *end) {
+    uint32_t checksum(0);
+    uint16_t *ptr = (uint16_t*)start, *last = (uint16_t*)end, padding(0);
+    if(((end - start) & 1) == 1) {
+        last = (uint16_t*)end - 1;
+        padding = *(end - 1) << 8;
+    }
+    while(ptr < last)
+        checksum += Utils::net_to_host_s(*(ptr++));
+    return checksum + padding;
+}
+
+uint32_t Tins::PDU::pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, uint32_t len, uint32_t flag) {
+    uint32_t checksum(0);
+    source_ip = Utils::net_to_host_l(source_ip);
+    dest_ip = Utils::net_to_host_l(dest_ip);
+    uint16_t *ptr = (uint16_t*)&source_ip;
+    
+    checksum += *ptr + ptr[1];
+    ptr = (uint16_t*)&dest_ip;
+    checksum += *ptr + ptr[1];
+    checksum += flag + len;
+    return checksum;
 }
 
