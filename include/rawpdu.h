@@ -35,6 +35,13 @@ namespace Tins {
      */
     class RawPDU : public PDU {
     public:
+        /** \brief Creates an instance of RawPDU.
+         * 
+         * The payload is NOT copied. Therefore, it must be manually freed by the user.
+         * \param payload The payload which the RawPDU will contain.
+         * \param size The size of the payload.
+         */
+        
         RawPDU(uint8_t *payload, uint32_t size);
         
         /** \brief Returns the header size.

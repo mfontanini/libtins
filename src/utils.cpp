@@ -21,13 +21,56 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 #include <cassert>
+#include <cstring>
 #ifndef WIN32
     #include <netdb.h>
+    #include <linux/if_packet.h>
 #endif
 #include "utils.h"
 
+
 using namespace std;
+
+
+struct InterfaceCollector {
+    set<string> ifaces;
+    
+    void operator() (struct ifaddrs *addr) {
+        ifaces.insert(addr->ifa_name);
+    }
+};
+
+struct IPv4Collector {
+    uint32_t ip;
+    bool found;
+    const char *iface;
+    
+    IPv4Collector(const char *interface) : ip(0), found(false), iface(interface) { }
+    
+    void operator() (struct ifaddrs *addr) {
+        if(!found && addr->ifa_addr->sa_family == AF_INET && !strcmp(addr->ifa_name, iface)) {
+            ip = ((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr;
+            found = true;
+        }
+    }
+};
+
+struct HWAddressCollector {
+    uint8_t *result;
+    bool found;
+    const char *iface;
+    
+    HWAddressCollector(uint8_t *res, const char *interface) : result(res), found(false), iface(interface) { }
+    
+    void operator() (struct ifaddrs *addr) {
+        if(!found && addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface)) {
+            memcpy(result, ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr, 6);
+            found = true;
+        }
+    }
+};
 
 uint32_t Tins::Utils::ip_to_int(const string &ip) {
     uint32_t result(0), i(0), end, bytes_found(0);
@@ -63,11 +106,71 @@ string Tins::Utils::ip_to_string(uint32_t ip) {
     return oss.str();
 }
 
+bool Tins::Utils::hwaddr_to_byte(const std::string &hw_addr, uint8_t *array) {
+    if(hw_addr.size() != 17)
+        return false;
+    unsigned i(0), arr_index(0);
+    uint8_t tmp;
+    while(i < hw_addr.size()) {
+        unsigned end=i+2;
+        tmp = 0;
+        while(i < end) {
+            if(hw_addr[i] >= 'a' && hw_addr[i] <= 'f')
+                tmp = (tmp << 4) | (hw_addr[i] - 'a' + 10);
+            else if(hw_addr[i] >= '0' && hw_addr[i] <= '9')
+                tmp = (tmp << 4) | (hw_addr[i] - '0');
+            else
+                return false;
+            i++;
+        }
+        array[arr_index++] = tmp;
+        if(i < hw_addr.size()) {
+            if(hw_addr[i] == ':')
+                i++;
+            else
+                return false;
+        }
+    }
+    return true;
+}
+
+string Tins::Utils::hwaddr_to_string(uint8_t *array) {
+    ostringstream oss;
+    oss << hex;
+    for(unsigned i(0); i < 6; ++i) {
+        if(array[i] < 0x10)
+            oss << '0';
+        oss << (unsigned)array[i];
+        if(i < 5)
+            oss << ':';
+    }
+    return oss.str();
+}
+
 uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
     struct hostent *data = gethostbyname(to_resolve.c_str());
     if(!data)
         return 0;
     return ((struct in_addr**)data->h_addr_list)[0]->s_addr;
+}
+
+set<string> Tins::Utils::network_interfaces() {
+    InterfaceCollector collector;
+    generic_iface_loop(collector);
+    return collector.ifaces;
+}
+
+bool Tins::Utils::interface_ip(const string &iface, uint32_t &ip) {
+    IPv4Collector collector(iface.c_str());
+    generic_iface_loop(collector);
+    ip = collector.ip;
+    return collector.found;
+}
+
+bool Tins::Utils::interface_hwaddr(const string &iface, uint8_t *buffer) {
+    HWAddressCollector collector(buffer, iface.c_str());
+    generic_iface_loop(collector);
+    return collector.found;
 }
 
 uint32_t Tins::Utils::crc32(uint8_t* data, uint32_t data_size) {
