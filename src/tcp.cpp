@@ -155,6 +155,7 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
         _tcp.check = Utils::net_to_host_s(~checksum);
     }
     memcpy(tcp_start, &_tcp, sizeof(tcphdr));
+    _tcp.check = 0;
 }
 
 

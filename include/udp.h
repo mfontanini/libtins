@@ -76,7 +76,6 @@ namespace Tins {
          */
         void payload(uint8_t *new_payload, uint32_t new_payload_size);
         
-        /* Virtual methods */
         /** \brief Returns the header size.
          * 
          * This metod overrides PDU::header_size. This size includes the

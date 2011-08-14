@@ -182,7 +182,6 @@ namespace Tins {
          */
         void add_option(Options tcp_option, uint8_t length = 0, uint8_t *data = 0);
         
-        /* Virtual methods */
         /** \brief Returns the header size.
          * 
          * This metod overrides PDU::header_size. This size includes the

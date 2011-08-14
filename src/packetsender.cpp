@@ -91,7 +91,6 @@ bool Tins::PacketSender::send_l3(PDU *pdu, const struct sockaddr* link_addr, uin
         int sock = _sockets[IP_SOCKET];
         uint8_t *buffer = pdu->serialize(sz);
         ret_val = (sendto(sock, buffer, sz, 0, link_addr, len_link_addr) != -1);
-        std::cout << "Ret_val: " << ret_val << "\n";
         delete[] buffer;
     }
 

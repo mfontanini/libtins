@@ -64,5 +64,6 @@ void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
         _udp.check = Utils::net_to_host_s(~checksum);
     }
     std::memcpy(buffer, &_udp, sizeof(udphdr));
+    _udp.check = 0;
 }
 
