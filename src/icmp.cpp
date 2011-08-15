@@ -7,7 +7,6 @@
 #include "rawpdu.h"
 #include "utils.h"
 
-
 uint16_t Tins::ICMP::global_id = 0, Tins::ICMP::global_seq = 0;
 
 
@@ -149,7 +148,7 @@ Tins::PDU *Tins::ICMP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
         }
         else
             child = new RawPDU(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr));
-            
+
     }
     cloned = new ICMP(icmp_ptr);
     cloned->inner_pdu(child);

@@ -45,9 +45,16 @@ Tins::PacketSender::PacketSender() : _sockets(SOCKETS_END, INVALID_RAW_SOCKET) {
 
 bool Tins::PacketSender::open_l2_socket() {
 
-    /* To be implemented */
+    if (_sockets[ETHER_SOCKET] != INVALID_RAW_SOCKET)
+        return true;
 
-    return false;
+    int sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    if (sock == -1)
+        return false;
+
+    _sockets[ETHER_SOCKET] = sock;
+
+    return true;
 }
 
 bool Tins::PacketSender::open_l3_socket(SocketType type) {
@@ -86,21 +93,28 @@ Tins::PDU *Tins::PacketSender::send_recv(PDU *pdu) {
     return pdu->recv_response(this);
 }
 
-bool Tins::PacketSender::send_l2(PDU *pdu) {
+bool Tins::PacketSender::send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t len_link_addr) {
 
-    /* To be implemented */
+    if(!open_l2_socket())
+        return false;
 
-    return false;
+    uint32_t sz;
+    int sock = _sockets[ETHER_SOCKET];
+    uint8_t *buffer = pdu->serialize(sz);
+    bool ret_val = (sendto(sock, buffer, sz, 0, link_addr, len_link_addr) != -1);
+    delete[] buffer;
+
+    return ret_val;
 }
 
-Tins::PDU *Tins::PacketSender::recv_l3(PDU *pdu, struct sockaddr *link_addr, uint32_t len_link_addr, SocketType type) {
+Tins::PDU *Tins::PacketSender::recv_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t len_link_addr, SocketType type) {
     if(!open_l3_socket(type))
         return 0;
     uint8_t buffer[2048];
     int sock = _sockets[type];
     bool done = false;
     socklen_t addrlen = len_link_addr;
-    
+
     while(!done) {
         ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);
         if(size == -1)

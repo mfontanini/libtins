@@ -1,19 +1,19 @@
 /*
- * libtins is a net packet wrapper library for crafting and 
+ * libtins is a net packet wrapper library for crafting and
  * interpreting sniffed packets.
- * 
+ *
  * Copyright (C) 2011 Nasel
- * 
+ *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
- * 
+ *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -25,7 +25,7 @@
 
 
 Tins::PDU::PDU(uint32_t flag, PDU *next_pdu) : _flag(flag), _inner_pdu(next_pdu) {
-    
+
 }
 
 Tins::PDU::~PDU() {
@@ -85,10 +85,10 @@ uint32_t Tins::PDU::pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, 
     source_ip = Utils::net_to_host_l(source_ip);
     dest_ip = Utils::net_to_host_l(dest_ip);
     uint16_t *ptr = (uint16_t*)&source_ip;
-    
-    checksum += *ptr + ptr[1];
+
+    checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
     ptr = (uint16_t*)&dest_ip;
-    checksum += *ptr + ptr[1];
+    checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
     checksum += flag + len;
     return checksum;
 }

@@ -27,6 +27,7 @@
 #ifndef WIN32
     #include <netdb.h>
     #include <linux/if_packet.h>
+    #include <net/if.h>
 #endif
 #include "utils.h"
 
@@ -36,7 +37,7 @@ using namespace std;
 
 struct InterfaceCollector {
     set<string> ifaces;
-    
+
     void operator() (struct ifaddrs *addr) {
         ifaces.insert(addr->ifa_name);
     }
@@ -46,27 +47,12 @@ struct IPv4Collector {
     uint32_t ip;
     bool found;
     const char *iface;
-    
+
     IPv4Collector(const char *interface) : ip(0), found(false), iface(interface) { }
-    
+
     void operator() (struct ifaddrs *addr) {
         if(!found && addr->ifa_addr->sa_family == AF_INET && !strcmp(addr->ifa_name, iface)) {
             ip = ((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr;
-            found = true;
-        }
-    }
-};
-
-struct InterfaceIDCollector {
-    uint32_t id;
-    bool found;
-    const char *iface;
-    
-    InterfaceIDCollector(const char *interface) : id(0), found(false), iface(interface) { }
-    
-    void operator() (struct ifaddrs *addr) {
-        if(!found && !strcmp(addr->ifa_name, iface)) {
-            id = addr->ifa_flags;
             found = true;
         }
     }
@@ -76,9 +62,9 @@ struct HWAddressCollector {
     uint8_t *result;
     bool found;
     const char *iface;
-    
+
     HWAddressCollector(uint8_t *res, const char *interface) : result(res), found(false), iface(interface) { }
-    
+
     void operator() (struct ifaddrs *addr) {
         if(!found && addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface)) {
             memcpy(result, ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr, 6);
@@ -189,10 +175,10 @@ bool Tins::Utils::interface_hwaddr(const string &iface, uint8_t *buffer) {
 }
 
 bool Tins::Utils::interface_id(const string &iface, uint32_t &id) {
-    InterfaceIDCollector collector(iface.c_str());
-    generic_iface_loop(collector);
-    id = collector.id;
-    return collector.found;
+
+    id = if_nametoindex(iface.c_str());
+    return (((int32_t)id) != -1);
+
 }
 
 uint32_t Tins::Utils::crc32(uint8_t* data, uint32_t data_size) {

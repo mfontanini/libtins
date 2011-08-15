@@ -185,7 +185,7 @@ Tins::PDU *Tins::IP::recv_response(PacketSender *sender) {
     return sender->recv_l3(this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
-void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
     uint32_t my_sz = header_size();
     uint32_t new_flag;
     assert(total_sz >= my_sz);
@@ -198,8 +198,16 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
         new_flag = IPPROTO_IP;
     flag(new_flag);
     _ip.protocol = new_flag;
-    _ip.tot_len = total_sz;
+    _ip.tot_len = Utils::net_to_host_s(total_sz);
     _ip.ihl = my_sz / sizeof(uint32_t);
+    if (parent && (_ip.check == 0)) {
+        uint32_t checksum = PDU::do_checksum((uint8_t*)&_ip, ((uint8_t*)&_ip) + sizeof(iphdr));
+        checksum += PDU::do_checksum(buffer + sizeof(iphdr), buffer + total_sz);
+        while (checksum >> 16)
+            checksum = (checksum & 0xffff) + (checksum >> 16);
+        _ip.check = Utils::net_to_host_s(~checksum);
+    }
+
     memcpy(buffer, &_ip, sizeof(iphdr));
 
     /* IP Options here... */

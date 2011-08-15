@@ -26,6 +26,11 @@
 #include <vector>
 #include <stdint.h>
 #include <map>
+
+#ifndef WIN32
+    #include <netinet/in.h>
+#endif
+
 #include "pdu.h"
 
 namespace Tins {
@@ -40,17 +45,21 @@ namespace Tins {
     class PacketSender {
     public:
         enum SocketType {
+            ETHER_SOCKET,
             IP_SOCKET,
             ICMP_SOCKET,
             SOCKETS_END
         };
-    
+
         /**
          * \brief Constructor for PacketSender objects.
          */
         PacketSender();
 
-
+        /**
+         * \brief
+         *
+         */
         bool open_l2_socket();
 
         bool open_l3_socket(SocketType type);
@@ -58,19 +67,19 @@ namespace Tins {
         bool close_socket(uint32_t flag);
 
         bool send(PDU* pdu);
-        
+
         PDU *send_recv(PDU *pdu);
 
-        bool send_l2(PDU *pdu);
-        
+        bool send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t len_link_addr);
+
         PDU *recv_l3(PDU *pdu, struct sockaddr *link_addr, uint32_t len_link_addr, SocketType type);
 
         bool send_l3(PDU *pdu, struct sockaddr *link_addr, uint32_t len_link_addr, SocketType type);
     private:
         static const int INVALID_RAW_SOCKET;
-        
+
         typedef std::map<SocketType, int> SocketTypeMap;
-        
+
         int find_type(SocketType type);
 
         std::vector<int> _sockets;
