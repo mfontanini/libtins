@@ -135,6 +135,10 @@ namespace Tins {
          * payload and options size. \sa PDU::header_size
          */
         uint32_t header_size() const;
+        
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+        
+        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
     private:
         static uint16_t global_id, global_seq;
     
@@ -154,6 +158,12 @@ namespace Tins {
                 } frag;
             } un;
         } __attribute__((packed));
+        
+        /** \brief Creates an instance of ICMP from a icmphdr pointer.
+         * 
+         * \param ptr The icmphdr to clone.
+         */
+        ICMP(icmphdr *ptr);
         
         /** \brief Serialices this ICMP PDU.
          * \param buffer The buffer in which the PDU will be serialized.

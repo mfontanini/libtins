@@ -4,6 +4,7 @@
 #include <cstring>
 #include <cassert>
 #include "icmp.h"
+#include "rawpdu.h"
 #include "utils.h"
 
 
@@ -24,6 +25,10 @@ Tins::ICMP::ICMP(Flags flag) : PDU(IPPROTO_ICMP) {
         default:
             break;
     };
+}
+
+Tins::ICMP::ICMP(icmphdr *ptr) : PDU(IPPROTO_ICMP) {
+    std::memcpy(&_icmp, ptr, sizeof(icmphdr));
 }
 
 void Tins::ICMP::code(uint8_t new_code) {
@@ -121,4 +126,32 @@ void Tins::ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     _icmp.check = 0;
 }
 
+bool Tins::ICMP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(icmphdr))
+        return false;
+    icmphdr *icmp_ptr = (icmphdr*)ptr;
+    if(_icmp.type == ECHO_REQUEST) {
+        return icmp_ptr->type == ECHO_REPLY && icmp_ptr->un.echo.id == _icmp.un.echo.id && icmp_ptr->un.echo.sequence == _icmp.un.echo.sequence;
+    }
+    return false;
+}
 
+Tins::PDU *Tins::ICMP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(icmphdr))
+        return 0;
+    icmphdr *icmp_ptr = (icmphdr*)ptr;
+    PDU *child = 0, *cloned;
+    if(total_sz > sizeof(icmphdr)) {
+        if(inner_pdu()) {
+            child = inner_pdu()->clone_packet(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr));
+            if(!child)
+                return 0;
+        }
+        else
+            child = new RawPDU(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr));
+            
+    }
+    cloned = new ICMP(icmp_ptr);
+    cloned->inner_pdu(child);
+    return cloned;
+}

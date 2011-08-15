@@ -73,7 +73,7 @@ namespace Tins {
         
         /** \brief The child PDU.
          */
-        inline const PDU *inner_pdu() const { return _inner_pdu; }
+        inline PDU *inner_pdu() const { return _inner_pdu; }
 
         /** \brief Sets the flag identifier.
          */
@@ -105,7 +105,27 @@ namespace Tins {
          * those methods.
          * \param sender The PacketSender which will send the packet.
          */
-        virtual bool send(PacketSender* sender) { return false; }
+        virtual bool send(PacketSender *sender) { return false; }
+        
+        /** \brief Receives a matching response for this packet.
+         * 
+         * This method should act as a proxy for PacketSender::recv_lX methods.
+         * \param sender The packet sender which will receive the packet.
+         */
+        virtual PDU *recv_response(PacketSender *sender) { return false; }
+        
+        /** \brief Check wether ptr points to a valid response for this PDU.
+         * 
+         * This method must check wether the buffer pointed by ptr is a valid
+         * response for this PDU. If it is valid, then it might want to propagate
+         * the call to the next PDU. Note that in some cases, such as ICMP
+         * Host Unreachable, there is no need to ask the next layer for matching.
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
+        virtual bool matches_response(uint8_t *ptr, uint32_t total_sz) { return false; }
+        
+        virtual PDU *clone_packet(uint8_t *ptr, uint32_t total_sz) { return 0; }
     protected:
         /* Serialize this PDU storing the result in buffer. */
         void serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

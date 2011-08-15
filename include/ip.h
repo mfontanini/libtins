@@ -119,7 +119,15 @@ namespace Tins {
         /* Virtual methods */
         uint32_t header_size() const;
         bool send(PacketSender* sender);
+        
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+        
+        PDU *recv_response(PacketSender *sender);
+        
+        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
     private:
+        static const uint8_t DEFAULT_TTL;
+    
         struct iphdr {
         #if __BYTE_ORDER == __LITTLE_ENDIAN
             unsigned int ihl:4;
@@ -161,8 +169,12 @@ namespace Tins {
 
         } __attribute__((__packed__));
 
-        static const uint8_t DEFAULT_TTL;
-
+        /** \brief Creates an instance of IP from an iphdr pointer.
+         * 
+         * \param ptr The ip header pointer.
+         */
+        IP(const iphdr *ptr);
+        
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 

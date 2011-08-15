@@ -25,6 +25,7 @@
     #include <netinet/in.h>
 #endif
 #include "ip.h"
+#include "rawpdu.h"
 #include "utils.h"
 
 #include <iostream>
@@ -40,6 +41,11 @@ Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(IPPRO
     if(ip_src.size())
         _ip.saddr = Utils::resolve_ip(ip_src);
 
+}
+
+Tins::IP::IP(const iphdr *ptr) : PDU(IPPROTO_IP) {
+    std::memcpy(&_ip, ptr, sizeof(iphdr));
+    /* Options... */
 }
 
 Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src, PDU *child) : PDU(IPPROTO_IP, child) {
@@ -153,16 +159,30 @@ uint8_t* Tins::IP::IpOption::write(uint8_t* buffer) {
 
 uint32_t Tins::IP::header_size() const {
     return sizeof(iphdr) + _padded_options_size;
-
 }
 
 bool Tins::IP::send(PacketSender* sender) {
     struct sockaddr_in link_addr;
+    PacketSender::SocketType type = PacketSender::IP_SOCKET;
     link_addr.sin_family = AF_INET;
     link_addr.sin_port = 0;
     link_addr.sin_addr.s_addr = _ip.daddr;
+    if(inner_pdu() && inner_pdu()->flag() == IPPROTO_ICMP)
+        type = PacketSender::ICMP_SOCKET;
 
-    return sender->send_l3(this, (const struct sockaddr*)&link_addr, sizeof(link_addr));
+    return sender->send_l3(this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+}
+
+Tins::PDU *Tins::IP::recv_response(PacketSender *sender) {
+    struct sockaddr_in link_addr;
+    PacketSender::SocketType type = PacketSender::IP_SOCKET;
+    link_addr.sin_family = AF_INET;
+    link_addr.sin_port = 0;
+    link_addr.sin_addr.s_addr = _ip.daddr;
+    if(inner_pdu() && inner_pdu()->flag() == IPPROTO_ICMP)
+        type = PacketSender::ICMP_SOCKET;
+
+    return sender->recv_l3(this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
 void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
@@ -186,4 +206,37 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     buffer += sizeof(iphdr);
     for (uint32_t i = 0; i < _ip_options.size(); ++i)
         buffer = _ip_options[i].write(buffer);
+}
+
+bool Tins::IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(iphdr))
+        return false;
+    iphdr *ip_ptr = (iphdr*)ptr;
+    if(_ip.daddr == ip_ptr->saddr && _ip.saddr == ip_ptr->daddr) {
+        uint32_t sz = _ip.ihl * sizeof(uint32_t);
+        return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
+    }
+    return false;
+}
+
+Tins::PDU *Tins::IP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(iphdr))
+        return 0;
+    iphdr *ip_ptr = (iphdr*)ptr;
+    uint32_t sz = ip_ptr->ihl * sizeof(uint32_t);
+    if(total_sz < sz)
+        return 0;
+    PDU *child = 0, *cloned;
+    if(total_sz > sz) {
+        if(inner_pdu()) {
+            child = inner_pdu()->clone_packet(ptr + sz, total_sz - sz);
+            if(!child)
+                return 0;
+        }
+        else
+            child = new RawPDU(ptr + sz, total_sz - sz);
+    }
+    cloned = new IP(ip_ptr);
+    cloned->inner_pdu(child);
+    return cloned;
 }
