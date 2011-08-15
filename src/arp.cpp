@@ -29,12 +29,3 @@ void Tins::ARP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     memcpy(buffer, &_arp, sizeof(arphdr));
 }
 
-bool Tins::ARP::send(PacketSender* sender) {
-    struct sockaddr_in link_addr;
-    link_addr.sin_family = AF_INET;
-    link_addr.sin_port = 0;
-    link_addr.sin_addr.s_addr = _arp.ar_sip;
-
-    return sender->send_l3(this, (struct sockaddr*)&link_addr, sizeof(link_addr), PacketSender::IP_SOCKET);
-}
-

@@ -47,6 +47,7 @@ namespace Tins {
         enum SocketType {
             ETHER_SOCKET,
             IP_SOCKET,
+            ARP_SOCKET,
             ICMP_SOCKET,
             SOCKETS_END
         };

@@ -138,6 +138,8 @@ namespace Tins {
 
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
 
+        PDUType pdu_type() const { return PDU::ICMP; }
+
         PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
     private:
         static uint16_t global_id, global_seq;

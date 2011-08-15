@@ -32,7 +32,7 @@ namespace Tins {
     /**
      * \brief Class representing an ethernet IEEE 802.3 packet
      */
-    class Ethernet : public PDU {
+    class EthernetII : public PDU {
 
     public:
         /**
@@ -46,7 +46,7 @@ namespace Tins {
          * \param iface string containing the interface's name from where to send the packet.
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        Ethernet(const uint8_t* mac_dst, const uint8_t* mac_src, const std::string& iface, PDU* child = 0) throw (std::runtime_error);
+        EthernetII(const uint8_t* mac_dst, const uint8_t* mac_src, const std::string& iface, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an ethernet PDU
@@ -59,7 +59,7 @@ namespace Tins {
          * \param iface_index uint32_t containing the interface's index from where to send the packet.
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        Ethernet(const uint8_t* mac_dst, const uint8_t* mac_src, const uint32_t iface_index, PDU* child = 0);
+        EthernetII(const uint8_t* mac_dst, const uint8_t* mac_src, const uint32_t iface_index, PDU* child = 0);
 
         /* Getters */
         /**
@@ -125,6 +125,8 @@ namespace Tins {
          * \sa PDU::send()
          */
         bool send(PacketSender* sender);
+
+        PDUType pdu_type() const { return PDU::ETHERNET_II; }
 
     private:
         /**

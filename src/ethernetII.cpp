@@ -28,46 +28,50 @@
     #include <netinet/in.h>
 #endif
 
-#include "ethernet.h"
+#include "ethernetII.h"
 #include "utils.h"
 
-Tins::Ethernet::Ethernet(const uint8_t* mac_dst, const uint8_t* mac_src, const std::string& iface, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
+#include <iostream>
+
+Tins::EthernetII::EthernetII(const uint8_t* mac_dst, const uint8_t* mac_src, const std::string& iface, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
 
     this->dst_mac(mac_dst);
     this->src_mac(mac_src);
     this->iface(iface);
+    this->header.payload_type = 0;
 
 }
 
-Tins::Ethernet::Ethernet(const uint8_t* mac_dst, const uint8_t* mac_src, uint32_t iface_index, PDU* child) : PDU(ETHERTYPE_IP, child) {
+Tins::EthernetII::EthernetII(const uint8_t* mac_dst, const uint8_t* mac_src, uint32_t iface_index, PDU* child) : PDU(ETHERTYPE_IP, child) {
     this->dst_mac(mac_dst);
     this->src_mac(mac_src);
     this->iface(iface_index);
+    this->header.payload_type = 0;
 }
 
-void Tins::Ethernet::dst_mac(const uint8_t* new_dst_mac) {
+void Tins::EthernetII::dst_mac(const uint8_t* new_dst_mac) {
     memcpy(this->header.dst_mac, new_dst_mac, 6);
 }
 
-void Tins::Ethernet::src_mac(const uint8_t* new_src_mac) {
+void Tins::EthernetII::src_mac(const uint8_t* new_src_mac) {
     memcpy(this->header.src_mac, new_src_mac, 6);
 }
 
-void Tins::Ethernet::iface(uint32_t new_iface_index) {
+void Tins::EthernetII::iface(uint32_t new_iface_index) {
     this->_iface_index = new_iface_index;
 }
 
-void Tins::Ethernet::iface(const std::string& new_iface) throw (std::runtime_error) {
+void Tins::EthernetII::iface(const std::string& new_iface) throw (std::runtime_error) {
     if (!Tins::Utils::interface_id(new_iface, this->_iface_index)) {
         throw std::runtime_error("Invalid interface name!");
     }
 }
 
-uint32_t Tins::Ethernet::header_size() const {
+uint32_t Tins::EthernetII::header_size() const {
     return sizeof(ethernet_header);
 }
 
-bool Tins::Ethernet::send(PacketSender* sender) {
+bool Tins::EthernetII::send(PacketSender* sender) {
 
     struct sockaddr_ll addr;
 
@@ -83,21 +87,28 @@ bool Tins::Ethernet::send(PacketSender* sender) {
 
 }
 
-void Tins::Ethernet::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void Tins::EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t my_sz = header_size();
     assert(total_sz >= my_sz);
-    /*
-    if (this->inner_pdu()) {
-        new_flag = this->inner_pdu()->flag();
 
-        switch (new_flag) {
+    /* Inner type defaults to IP */
 
+    if ((this->header.payload_type == 0) && this->inner_pdu()) {
+        uint16_t type = ETHERTYPE_IP;
+        switch (this->inner_pdu()->pdu_type()) {
+            case PDU::IP:
+                type = ETHERTYPE_IP;
+                break;
+            case PDU::ARP:
+                type = ETHERTYPE_ARP;
+                break;
+            default:
+                type = 0;
         }
-
+        std::cout << std::hex << type << '\n';
+        this->header.payload_type = Utils::net_to_host_s(type);
     }
-    */
-    /* This should be replaced by a switch statement */
-    this->header.payload_type = Utils::net_to_host_s(ETHERTYPE_IP);
+
 
     memcpy(buffer, &this->header, sizeof(ethernet_header));
 
