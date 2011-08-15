@@ -31,8 +31,6 @@
 #include "ethernetII.h"
 #include "utils.h"
 
-#include <iostream>
-
 Tins::EthernetII::EthernetII(const uint8_t* mac_dst, const uint8_t* mac_src, const std::string& iface, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
 
     this->dst_mac(mac_dst);
@@ -105,7 +103,6 @@ void Tins::EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, c
             default:
                 type = 0;
         }
-        std::cout << std::hex << type << '\n';
         this->header.payload_type = Utils::net_to_host_s(type);
     }
 
