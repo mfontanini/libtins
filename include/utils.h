@@ -102,6 +102,14 @@ namespace Tins {
          */
         bool interface_hwaddr(const std::string &iface, uint8_t *buffer);
 
+        /** \brief Lookup the interface identifier.
+         * 
+         * If the lookup fails, false will be returned, true otherwise.
+         * \param iface The interface from which to extract the identifier.
+         * \param flag The interface id will be returned in this parameter.
+         */
+        bool interface_id(const std::string &iface, uint32_t &id);
+        
         /** \brief Convert 32 bit integer into network byte order.
          * 
          * \param data The data to convert.

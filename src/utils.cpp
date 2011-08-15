@@ -57,6 +57,21 @@ struct IPv4Collector {
     }
 };
 
+struct InterfaceIDCollector {
+    uint32_t id;
+    bool found;
+    const char *iface;
+    
+    InterfaceIDCollector(const char *interface) : id(0), found(false), iface(interface) { }
+    
+    void operator() (struct ifaddrs *addr) {
+        if(!found && !strcmp(addr->ifa_name, iface)) {
+            id = addr->ifa_flags;
+            found = true;
+        }
+    }
+};
+
 struct HWAddressCollector {
     uint8_t *result;
     bool found;
@@ -170,6 +185,13 @@ bool Tins::Utils::interface_ip(const string &iface, uint32_t &ip) {
 bool Tins::Utils::interface_hwaddr(const string &iface, uint8_t *buffer) {
     HWAddressCollector collector(buffer, iface.c_str());
     generic_iface_loop(collector);
+    return collector.found;
+}
+
+bool Tins::Utils::interface_id(const string &iface, uint32_t &id) {
+    InterfaceIDCollector collector(iface.c_str());
+    generic_iface_loop(collector);
+    id = collector.id;
     return collector.found;
 }
 
