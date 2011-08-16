@@ -59,9 +59,9 @@ Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
     return eth;
 }
 
-Tins::PDU* Tins::ARP::make_arp_reply(const std::string& iface,
-                                     const std::string& target,
-                                     const std::string& sender,
+Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
+                                     const string& target,
+                                     const string& sender,
                                      const uint8_t* hw_tgt,
                                      const uint8_t* hw_snd) {
 
@@ -70,7 +70,7 @@ Tins::PDU* Tins::ARP::make_arp_reply(const std::string& iface,
     return make_arp_reply(iface, target_ip, sender_ip, hw_tgt, hw_snd);
 }
 
-Tins::PDU* Tins::ARP::make_arp_reply(const std::string& iface,
+Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
                                      uint32_t target,
                                      uint32_t sender,
                                      const uint8_t* hw_tgt,

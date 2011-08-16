@@ -30,6 +30,8 @@
     #include <net/if.h>
 #endif
 #include "utils.h"
+#include "pdu.h"
+#include "arp.h"
 
 
 using namespace std;
@@ -155,8 +157,23 @@ uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
     return ((struct in_addr**)data->h_addr_list)[0]->s_addr;
 }
 
-bool Tins::Utils::resolve_hwaddr(uint32_t ip, uint8_t *buffer, PacketSender *sender) {
-    return false;
+bool Tins::Utils::resolve_hwaddr(const string &iface, uint32_t ip, uint8_t *buffer, PacketSender *sender) {
+    uint32_t my_ip;
+    uint8_t my_hw[6];
+    if(!interface_ip(iface, my_ip) || !interface_hwaddr(iface, my_hw))
+        return false;
+    PDU *packet = ARP::make_arp_request(iface, ip, my_ip, my_hw);
+    PDU *response = sender->send_recv(packet);
+    delete packet;
+    if(response) {
+        ARP *arp_resp = dynamic_cast<ARP*>(response->inner_pdu());
+        if(arp_resp)
+            memcpy(buffer, arp_resp->sender_hw_addr(), 6);
+        delete response;
+        return arp_resp;
+    }
+    else
+        return false;
 }
 
 set<string> Tins::Utils::network_interfaces() {
@@ -179,10 +196,8 @@ bool Tins::Utils::interface_hwaddr(const string &iface, uint8_t *buffer) {
 }
 
 bool Tins::Utils::interface_id(const string &iface, uint32_t &id) {
-
     id = if_nametoindex(iface.c_str());
     return (((int32_t)id) != -1);
-
 }
 
 uint32_t Tins::Utils::crc32(uint8_t* data, uint32_t data_size) {
