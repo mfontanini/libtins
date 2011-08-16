@@ -156,7 +156,7 @@ uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
 }
 
 bool Tins::Utils::resolve_hwaddr(uint32_t ip, uint8_t *buffer, PacketSender *sender) {
-    
+    return false;
 }
 
 set<string> Tins::Utils::network_interfaces() {

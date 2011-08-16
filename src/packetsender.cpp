@@ -46,7 +46,7 @@ Tins::PacketSender::PacketSender(uint32_t recv_timeout) : _sockets(SOCKETS_END, 
 Tins::PacketSender::~PacketSender() {
     for(unsigned i(0); i < _sockets.size(); ++i) {
         if(_sockets[i] != INVALID_RAW_SOCKET)
-            ::close(sockets[i]);
+            ::close(_sockets[i]);
     }
 }
 

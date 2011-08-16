@@ -29,6 +29,7 @@
 #include <string>
 #include <set>
 #include <stdint.h>
+#include "packetsender.h"
 
 namespace Tins {
     /** \brief Network utils namespace.
