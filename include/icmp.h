@@ -149,6 +149,14 @@ namespace Tins {
         /** \brief Returns the ICMP code flag.
          */
         uint8_t code() const { return _icmp.code; }
+        
+        /** \brief Returns the echo id.
+         */
+        uint16_t id() const { return _icmp.un.echo.id; }
+        
+        /** \brief Returns the echo sequence number.
+         */
+        uint16_t sequence() const { return _icmp.un.echo.sequence; }
 
         /** \brief Returns the header size.
          *

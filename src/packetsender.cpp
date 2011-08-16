@@ -31,13 +31,15 @@
 #include <assert.h>
 #include <errno.h>
 #include <string.h>
+#include <ctime>
 #include "packetsender.h"
 #include "utils.h" //borrar
 
 
 const int Tins::PacketSender::INVALID_RAW_SOCKET = -10;
+const uint32_t Tins::PacketSender::DEFAULT_TIMEOUT = 2;
 
-Tins::PacketSender::PacketSender() : _sockets(SOCKETS_END, INVALID_RAW_SOCKET) {
+Tins::PacketSender::PacketSender(uint32_t recv_timeout) : _sockets(SOCKETS_END, INVALID_RAW_SOCKET), _timeout(recv_timeout) {
     _types[IP_SOCKET] = IPPROTO_RAW;
     _types[ICMP_SOCKET] = IPPROTO_ICMP;
 }
@@ -109,38 +111,13 @@ bool Tins::PacketSender::send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t 
 Tins::PDU *Tins::PacketSender::recv_l2(PDU *pdu, struct sockaddr *link_addr, uint32_t len_link_addr) {
     if(!open_l2_socket())
         return 0;
-    uint8_t buffer[2048];
-    int sock = _sockets[ETHER_SOCKET];
-    bool done = false;
-    socklen_t addrlen = len_link_addr;
-
-    while(!done) {
-        ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);
-        if(size == -1)
-            return 0;
-        if(pdu->matches_response(buffer, size)) {
-            return pdu->clone_packet(buffer, size);
-        }
-    }
-    return 0;
+    return recv_match_loop(_sockets[ETHER_SOCKET], pdu, link_addr, len_link_addr);
 }
 
 Tins::PDU *Tins::PacketSender::recv_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t len_link_addr, SocketType type) {
     if(!open_l3_socket(type))
         return 0;
-    uint8_t buffer[2048];
-    int sock = _sockets[type];
-    bool done = false;
-    socklen_t addrlen = len_link_addr;
-
-    while(!done) {
-        ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);
-        if(size == -1)
-            return 0;
-        if(pdu->matches_response(buffer, size))
-            return pdu->clone_packet(buffer, size);
-    }
-    return 0;
+    return recv_match_loop(_sockets[type], pdu, link_addr, len_link_addr);
 }
 
 bool Tins::PacketSender::send_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t len_link_addr, SocketType type) {
@@ -155,6 +132,32 @@ bool Tins::PacketSender::send_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t 
         delete[] buffer;
     }
     return ret_val;
+}
+
+Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockaddr* link_addr, socklen_t addrlen) {
+    fd_set readfds;
+    struct timeval timeout;
+    int read;
+    uint8_t buffer[2048];
+    time_t end_time = time(0) + _timeout;
+    timeout.tv_sec  = _timeout;
+    timeout.tv_usec = 0;
+    while(true) {
+        FD_ZERO(&readfds);
+        FD_SET(sock, &readfds);
+        if((read = select(sock + 1, &readfds, 0, 0, &timeout)) == -1)
+            return 0;
+        if(FD_ISSET(sock, &readfds)) {
+            ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);            
+            if(pdu->matches_response(buffer, size))
+                return pdu->clone_packet(buffer, size);
+        }
+        time_t this_time = time(0);
+        if(end_time <= this_time)
+            return 0;
+        timeout.tv_sec = end_time - this_time;
+    }
+    return 0;
 }
 
 int Tins::PacketSender::find_type(SocketType type) {

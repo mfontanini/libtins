@@ -44,6 +44,8 @@ namespace Tins {
      */
     class PacketSender {
     public:
+        static const uint32_t DEFAULT_TIMEOUT;
+    
         enum SocketType {
             ETHER_SOCKET,
             IP_SOCKET,
@@ -55,7 +57,7 @@ namespace Tins {
         /**
          * \brief Constructor for PacketSender objects.
          */
-        PacketSender();
+        PacketSender(uint32_t recv_timeout = DEFAULT_TIMEOUT);
 
         /**
          * \brief
@@ -84,9 +86,12 @@ namespace Tins {
         typedef std::map<SocketType, int> SocketTypeMap;
 
         int find_type(SocketType type);
+        
+        PDU *recv_match_loop(int sock, PDU *pdu, struct sockaddr* link_addr, socklen_t addrlen);
 
         std::vector<int> _sockets;
         SocketTypeMap _types;
+        uint32_t _timeout;
     };
 };
 
