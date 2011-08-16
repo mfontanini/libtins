@@ -31,6 +31,8 @@
 #include "rawpdu.h"
 #include "utils.h"
 
+const uint8_t* Tins::EthernetII::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
+
 Tins::EthernetII::EthernetII(const std::string& iface, const uint8_t* mac_dst, const uint8_t* mac_src, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
     memset(&_eth, 0, sizeof(ethhdr));
     if(mac_dst)
