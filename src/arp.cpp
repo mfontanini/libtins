@@ -19,16 +19,75 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
+#include <string>
 #include <cstring>
 #include <cassert>
 #include <netinet/in.h>
 #include "arp.h"
+#include "ethernetII.h"
 #include "rawpdu.h"
 #include "utils.h"
 
 
 using namespace std;
+
+Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
+                                       const std::string& target,
+                                       const std::string& sender,
+                                       const uint8_t* hw_snd) {
+    uint32_t target_ip = Tins::Utils::resolve_ip(target);
+    uint32_t sender_ip = Tins::Utils::resolve_ip(sender);
+    return make_arp_request(iface, target_ip, sender_ip, hw_snd);
+}
+
+Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
+                                       uint32_t target,
+                                       uint32_t sender,
+                                       const uint8_t* hw_snd) {
+
+    /* Create ARP packet and set its attributes */
+    ARP* arp = new ARP();
+    arp->_arp.ar_tip = target;
+    arp->_arp.ar_sip = sender;
+    if (hw_snd) {
+        memcpy(arp->_arp.ar_sha, hw_snd, 6);
+    }
+    arp->_arp.ar_op = Tins::ARP::REQUEST;
+
+    /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
+    EthernetII* eth = new EthernetII(iface, Tins::EthernetII::BROADCAST, hw_snd, arp);
+    return eth;
+}
+
+Tins::PDU* Tins::ARP::make_arp_reply(const std::string& iface,
+                                     const std::string& target,
+                                     const std::string& sender,
+                                     const uint8_t* hw_tgt,
+                                     const uint8_t* hw_snd) {
+
+    uint32_t target_ip = Tins::Utils::resolve_ip(target);
+    uint32_t sender_ip = Tins::Utils::resolve_ip(sender);
+    return make_arp_reply(iface, target_ip, sender_ip, hw_tgt, hw_snd);
+}
+
+Tins::PDU* Tins::ARP::make_arp_reply(const std::string& iface,
+                                     uint32_t target,
+                                     uint32_t sender,
+                                     const uint8_t* hw_tgt,
+                                     const uint8_t* hw_snd) {
+
+    /* Create ARP packet and set its attributes */
+    ARP* arp = new ARP();
+    arp->_arp.ar_tip = target;
+    arp->_arp.ar_sip = sender;
+    memcpy(arp->_arp.ar_sha, hw_snd, 6);
+    memcpy(arp->_arp.ar_tha, hw_tgt, 6);
+    arp->_arp.ar_op = Tins::ARP::REPLY;
+
+    /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
+    EthernetII* eth = new EthernetII(iface, hw_tgt, hw_snd, arp);
+    return eth;
+}
 
 Tins::ARP::ARP() : PDU(0x0608) {
     std::memset(&_arp, 0, sizeof(arphdr));
@@ -78,10 +137,26 @@ void Tins::ARP::opcode(Flags new_opcode) {
     this->_arp.ar_op = new_opcode;
 }
 
-void Tins::ARP::set_arp_request(const string &ip_dst, const string &ip_src, const string &hw_src) {
-    _arp.ar_tip = Utils::resolve_ip(ip_dst);
-    _arp.ar_sip = Utils::resolve_ip(ip_src);
-    _arp.ar_op = REQUEST;
+void Tins::ARP::set_arp_request(const std::string& ip_tgt, const std::string& ip_snd, const uint8_t* hw_snd) {
+    this->_arp.ar_tip = Utils::resolve_ip(ip_tgt);
+    this->_arp.ar_sip = Utils::resolve_ip(ip_snd);
+    if (hw_snd) {
+        memcpy(this->_arp.ar_sha, hw_snd, 6);
+    }
+    this->_arp.ar_op = REQUEST;
+}
+
+void Tins::ARP::set_arp_reply(const std::string& ip_tgt,
+                              const std::string& ip_snd,
+                              const uint8_t* hw_tgt,
+                              const uint8_t* hw_snd) {
+
+    this->_arp.ar_tip = Utils::resolve_ip(ip_tgt);
+    this->_arp.ar_sip = Utils::resolve_ip(ip_snd);
+    memcpy(this->_arp.ar_tha, hw_tgt, 6);
+    memcpy(this->_arp.ar_sha, hw_snd, 6);
+    this->_arp.ar_op = REPLY;
+
 }
 
 uint32_t Tins::ARP::header_size() const {
