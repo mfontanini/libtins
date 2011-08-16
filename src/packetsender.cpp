@@ -106,7 +106,7 @@ bool Tins::PacketSender::send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t 
     uint8_t *buffer = pdu->serialize(sz);
     bool ret_val = (sendto(sock, buffer, sz, 0, link_addr, len_addr) != -1);
     delete[] buffer;
-    
+
     return ret_val;
 }
 
@@ -150,7 +150,7 @@ Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockad
         if((read = select(sock + 1, &readfds, 0, 0, &timeout)) == -1)
             return 0;
         if(FD_ISSET(sock, &readfds)) {
-            ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);            
+            ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);
             if(pdu->matches_response(buffer, size))
                 return pdu->clone_packet(buffer, size);
         }
