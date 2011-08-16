@@ -135,7 +135,7 @@ bool Tins::Utils::hwaddr_to_byte(const std::string &hw_addr, uint8_t *array) {
     return true;
 }
 
-string Tins::Utils::hwaddr_to_string(uint8_t *array) {
+string Tins::Utils::hwaddr_to_string(const uint8_t *array) {
     ostringstream oss;
     oss << hex;
     for(unsigned i(0); i < 6; ++i) {

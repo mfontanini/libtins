@@ -181,8 +181,25 @@ namespace Tins {
 
         void set_arp_request(const std::string &ip_dst, const std::string &ip_src, const std::string &hw_src = "");
 
+        /** \brief Check wether ptr points to a valid response for this PDU.
+         * 
+         * \sa PDU::matches_response
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+
         uint32_t header_size() const;
 
+        /** \brief Clones this pdu, filling the corresponding header with data
+         * extracted from a buffer.
+         * 
+         * \param ptr The pointer to the from from which the data will be extracted.
+         * \param total_sz The size of the buffer.
+         * \return The cloned PDU.
+         * \sa PDU::clone_packet
+         */
+        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
     private:
         struct arphdr {
             uint16_t ar_hrd;	/* format of hardware address	*/
@@ -197,6 +214,12 @@ namespace Tins {
             uint32_t ar_tip;	/* target IP address		*/
         } __attribute__((__packed__));
 
+        /** \brief Creates an instance of ARP using an arphdr pointer.
+         * 
+         * \param arp_ptr The pointer to the arphdr.
+         */
+        ARP(arphdr *arp_ptr);
+        
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         arphdr _arp;

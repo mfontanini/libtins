@@ -71,6 +71,8 @@ namespace Tins {
 
         PDU *send_recv(PDU *pdu);
 
+        PDU *recv_l2(PDU *pdu, struct sockaddr *link_addr, uint32_t len_link_addr);
+
         bool send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t len_link_addr);
 
         PDU *recv_l3(PDU *pdu, struct sockaddr *link_addr, uint32_t len_link_addr, SocketType type);

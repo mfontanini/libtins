@@ -41,12 +41,12 @@ namespace Tins {
          * Constructor that builds an ethernet PDU taking the destination's
          * and source's MAC.
          *
+         * \param iface string containing the interface's name from where to send the packet.
          * \param mac_dst uint8_t array of 6 bytes containing the destination's MAC.
          * \param mac_src uint8_t array of 6 bytes containing the source's MAC.
-         * \param iface string containing the interface's name from where to send the packet.
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        EthernetII(const uint8_t* mac_dst, const uint8_t* mac_src, const std::string& iface, PDU* child = 0) throw (std::runtime_error);
+        EthernetII(const std::string& iface, const uint8_t* mac_dst, const uint8_t* mac_src, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an ethernet PDU
@@ -59,7 +59,7 @@ namespace Tins {
          * \param iface_index uint32_t containing the interface's index from where to send the packet.
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        EthernetII(const uint8_t* mac_dst, const uint8_t* mac_src, const uint32_t iface_index, PDU* child = 0);
+        EthernetII(const uint32_t iface_index, const uint8_t* mac_dst = 0, const uint8_t* mac_src = 0, PDU* child = 0);
 
         /* Getters */
         /**
@@ -67,14 +67,14 @@ namespace Tins {
          *
          * \return Returns the destination's mac address as a constant uint8_t pointer.
          */
-        inline const uint8_t* dst_mac() const { return this->header.dst_mac; }
+        inline const uint8_t* dst_mac() const { return _eth.dst_mac; }
 
         /**
          * \brief Getter for the source's mac address.
          *
          * \return Returns the source's mac address as a constant uint8_t pointer.
          */
-        inline const uint8_t* src_mac() const { return this->header.src_mac; }
+        inline const uint8_t* src_mac() const { return _eth.src_mac; }
 
         /**
          * \brief Getter for the interface.
@@ -125,20 +125,50 @@ namespace Tins {
          * \sa PDU::send()
          */
         bool send(PacketSender* sender);
+        
+        /** \brief Check wether ptr points to a valid response for this PDU.
+         * 
+         * \sa PDU::matches_response
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+        
+        /** \brief Receives a matching response for this packet.
+         *
+         * \sa PDU::recv_response
+         * \param sender The packet sender which will receive the packet.
+         */
+        PDU *recv_response(PacketSender *sender);
 
         PDUType pdu_type() const { return PDU::ETHERNET_II; }
 
+        /** \brief Clones this pdu, filling the corresponding header with data
+         * extracted from a buffer.
+         * 
+         * \param ptr The pointer to the from from which the data will be extracted.
+         * \param total_sz The size of the buffer.
+         * \return The cloned PDU.
+         * \sa PDU::clone_packet
+         */
+        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
     private:
         /**
          * Struct that represents the Ethernet II header
          */
-        struct ethernet_header {
+        struct ethhdr {
             uint8_t dst_mac[6];
             uint8_t src_mac[6];
             uint16_t payload_type;
         } __attribute__((__packed__));
 
-        ethernet_header header;
+        /** \brief Creates an instance of EthernetII using an ethhdr pointer.
+         * 
+         * \param eth_ptr The pointer to the ethhdr.
+         */
+        EthernetII(ethhdr *eth_ptr);
+        
+        ethhdr _eth;
         uint32_t _iface_index;
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

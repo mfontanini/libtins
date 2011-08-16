@@ -66,7 +66,7 @@ namespace Tins {
          * The input buffer must be at least 6 bytes long.
          * \param array The input buffer.
          */ 
-        std::string hwaddr_to_string(uint8_t *array);
+        std::string hwaddr_to_string(const uint8_t *array);
 
         /** \brief Resolves a domain name and returns its corresponding ip address.
          * 

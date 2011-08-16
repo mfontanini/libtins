@@ -24,6 +24,7 @@
 #include <cassert>
 #include <netinet/in.h>
 #include "arp.h"
+#include "rawpdu.h"
 #include "utils.h"
 
 
@@ -35,6 +36,10 @@ Tins::ARP::ARP() : PDU(0x0608) {
     _arp.ar_pro = 0x0008;
     _arp.ar_hln = 6;
     _arp.ar_pln = 4;
+}
+
+Tins::ARP::ARP(arphdr *arp_ptr) : PDU(0x0608) {
+    memcpy(&_arp, arp_ptr, sizeof(arphdr));
 }
 
 void Tins::ARP::sender_hw_addr(uint8_t* new_snd_hw_addr) {
@@ -88,3 +93,28 @@ void Tins::ARP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     memcpy(buffer, &_arp, sizeof(arphdr));
 }
 
+bool Tins::ARP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(arphdr))
+        return false;
+    arphdr *arp_ptr = (arphdr*)ptr;
+    return arp_ptr->ar_sip == _arp.ar_tip && arp_ptr->ar_tip == _arp.ar_sip;
+}
+
+Tins::PDU *Tins::ARP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(arphdr))
+        return 0;
+    arphdr *arp_ptr = (arphdr*)ptr;
+    PDU *child = 0, *cloned;
+    if(total_sz > sizeof(arphdr)) {
+        if(inner_pdu()) {
+            child = inner_pdu()->clone_packet(ptr + sizeof(arphdr), total_sz - sizeof(arphdr));
+            if(!child)
+                return 0;
+        }
+        else
+            child = new RawPDU(ptr + sizeof(arphdr), total_sz - sizeof(arphdr));
+    }
+    cloned = new ARP(arp_ptr);
+    cloned->inner_pdu(child);
+    return cloned;
+}

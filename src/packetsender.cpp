@@ -29,7 +29,6 @@
     #include <netdb.h>
 #endif
 #include <assert.h>
-#include <iostream> //borrar
 #include <errno.h>
 #include <string.h>
 #include "packetsender.h"
@@ -103,8 +102,27 @@ bool Tins::PacketSender::send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t 
     uint8_t *buffer = pdu->serialize(sz);
     bool ret_val = (sendto(sock, buffer, sz, 0, link_addr, len_link_addr) != -1);
     delete[] buffer;
-
+    
     return ret_val;
+}
+
+Tins::PDU *Tins::PacketSender::recv_l2(PDU *pdu, struct sockaddr *link_addr, uint32_t len_link_addr) {
+    if(!open_l2_socket())
+        return 0;
+    uint8_t buffer[2048];
+    int sock = _sockets[ETHER_SOCKET];
+    bool done = false;
+    socklen_t addrlen = len_link_addr;
+
+    while(!done) {
+        ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);
+        if(size == -1)
+            return 0;
+        if(pdu->matches_response(buffer, size)) {
+            return pdu->clone_packet(buffer, size);
+        }
+    }
+    return 0;
 }
 
 Tins::PDU *Tins::PacketSender::recv_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t len_link_addr, SocketType type) {
