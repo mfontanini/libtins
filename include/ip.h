@@ -123,7 +123,11 @@ namespace Tins {
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
 
         PDU *recv_response(PacketSender *sender);
-
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
         PDUType pdu_type() const { return PDU::IP; }
 
         PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);

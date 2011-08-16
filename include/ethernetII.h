@@ -147,6 +147,10 @@ namespace Tins {
          */
         PDU *recv_response(PacketSender *sender);
 
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
         PDUType pdu_type() const { return PDU::ETHERNET_II; }
 
         /** \brief Clones this pdu, filling the corresponding header with data

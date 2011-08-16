@@ -52,7 +52,7 @@ Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
     if (hw_snd) {
         memcpy(arp->_arp.ar_sha, hw_snd, 6);
     }
-    arp->_arp.ar_op = Tins::ARP::REQUEST;
+    arp->_arp.ar_op = Utils::net_to_host_s(REQUEST);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
     EthernetII* eth = new EthernetII(iface, Tins::EthernetII::BROADCAST, hw_snd, arp);
@@ -82,7 +82,7 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
     arp->_arp.ar_sip = sender;
     memcpy(arp->_arp.ar_sha, hw_snd, 6);
     memcpy(arp->_arp.ar_tha, hw_tgt, 6);
-    arp->_arp.ar_op = Tins::ARP::REPLY;
+    arp->_arp.ar_op = Utils::net_to_host_s(REPLY);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
     EthernetII* eth = new EthernetII(iface, hw_tgt, hw_snd, arp);
@@ -91,13 +91,13 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
 
 Tins::ARP::ARP() : PDU(0x0608) {
     std::memset(&_arp, 0, sizeof(arphdr));
-    _arp.ar_hrd = 0x0100;
-    _arp.ar_pro = 0x0008;
+    _arp.ar_hrd = Utils::net_to_host_s(0x0001);
+    _arp.ar_pro = Utils::net_to_host_s(0x0800);
     _arp.ar_hln = 6;
     _arp.ar_pln = 4;
 }
 
-Tins::ARP::ARP(arphdr *arp_ptr) : PDU(0x0608) {
+Tins::ARP::ARP(arphdr *arp_ptr) : PDU(Utils::net_to_host_s(0x0806)) {
     memcpy(&_arp, arp_ptr, sizeof(arphdr));
 }
 
@@ -140,10 +140,9 @@ void Tins::ARP::opcode(Flags new_opcode) {
 void Tins::ARP::set_arp_request(const std::string& ip_tgt, const std::string& ip_snd, const uint8_t* hw_snd) {
     this->_arp.ar_tip = Utils::resolve_ip(ip_tgt);
     this->_arp.ar_sip = Utils::resolve_ip(ip_snd);
-    if (hw_snd) {
+    if (hw_snd)
         memcpy(this->_arp.ar_sha, hw_snd, 6);
-    }
-    this->_arp.ar_op = REQUEST;
+    this->_arp.ar_op = Utils::net_to_host_s(REQUEST);
 }
 
 void Tins::ARP::set_arp_reply(const std::string& ip_tgt,
@@ -155,7 +154,7 @@ void Tins::ARP::set_arp_reply(const std::string& ip_tgt,
     this->_arp.ar_sip = Utils::resolve_ip(ip_snd);
     memcpy(this->_arp.ar_tha, hw_tgt, 6);
     memcpy(this->_arp.ar_sha, hw_snd, 6);
-    this->_arp.ar_op = REPLY;
+    this->_arp.ar_op = Utils::net_to_host_s(REPLY);
 
 }
 
@@ -181,13 +180,8 @@ Tins::PDU *Tins::ARP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
     arphdr *arp_ptr = (arphdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(arphdr)) {
-        if(inner_pdu()) {
-            child = inner_pdu()->clone_packet(ptr + sizeof(arphdr), total_sz - sizeof(arphdr));
-            if(!child)
-                return 0;
-        }
-        else
-            child = new RawPDU(ptr + sizeof(arphdr), total_sz - sizeof(arphdr));
+        if((child = PDU::clone_inner_pdu(ptr + sizeof(arphdr), total_sz - sizeof(arphdr))) == 0)
+            return 0;
     }
     cloned = new ARP(arp_ptr);
     cloned->inner_pdu(child);

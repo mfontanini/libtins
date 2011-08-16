@@ -163,14 +163,8 @@ Tins::PDU *Tins::ICMP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
     icmphdr *icmp_ptr = (icmphdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(icmphdr)) {
-        if(inner_pdu()) {
-            child = inner_pdu()->clone_packet(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr));
-            if(!child)
-                return 0;
-        }
-        else
-            child = new RawPDU(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr));
-
+        if((child = PDU::clone_inner_pdu(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr))) == 0)
+            return 0;
     }
     cloned = new ICMP(icmp_ptr);
     cloned->inner_pdu(child);

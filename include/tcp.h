@@ -189,6 +189,10 @@ namespace Tins {
          */
         uint32_t header_size() const;
 
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
         PDUType pdu_type() const { return PDU::TCP; }
 
     private:

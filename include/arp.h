@@ -39,12 +39,15 @@ namespace Tins {
          * \brief Enum which indicates the type of ARP packet.
          */
         enum Flags {
-            REQUEST = 0x0100,
-            REPLY   = 0x0200
+            REQUEST = 0x0001,
+            REPLY   = 0x0002
         };
 
         /**
          * \brief Default constructor for ARP PDU objects.
+         * 
+         * ARP requests and replies can be constructed easily using
+         * ARP::make_arp_request/reply static functions.
          */
         ARP();
 
@@ -112,6 +115,11 @@ namespace Tins {
          */
         inline uint16_t opcode() { return this->_arp.ar_op; }
 
+        /** \brief Getter for the header size.
+         * \return Returns the ARP header size.
+         * \sa PDU::header_size
+         */ 
+        uint32_t header_size() const;
         /* Setters */
 
         /**
@@ -176,27 +184,11 @@ namespace Tins {
          * \param new_opcode Flag enum value of the ARP opcode to set.
          */
         void opcode(Flags new_opcode);
-
-        /** \brief Check wether ptr points to a valid response for this PDU.
-         *
-         * \sa PDU::matches_response
-         * \param ptr The pointer to the buffer.
-         * \param total_sz The size of the buffer.
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
          */
-        bool matches_response(uint8_t *ptr, uint32_t total_sz);
-
-        uint32_t header_size() const;
-
-        /** \brief Clones this pdu, filling the corresponding header with data
-         * extracted from a buffer.
-         *
-         * \param ptr The pointer to the from from which the data will be extracted.
-         * \param total_sz The size of the buffer.
-         * \return The cloned PDU.
-         * \sa PDU::clone_packet
-         */
-        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
-
         PDUType pdu_type() const { return PDU::ARP; }
 
         /**
@@ -281,6 +273,24 @@ namespace Tins {
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          */
          void set_arp_reply(const std::string& ip_tgt, const std::string& ip_snd, const uint8_t* hw_tgt, const uint8_t* hw_snd);
+         
+        /** \brief Check wether ptr points to a valid response for this PDU.
+         *
+         * \sa PDU::matches_response
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+
+        /** \brief Clones this pdu, filling the corresponding header with data
+         * extracted from a buffer.
+         *
+         * \param ptr The pointer to the from from which the data will be extracted.
+         * \param total_sz The size of the buffer.
+         * \return The cloned PDU.
+         * \sa PDU::clone_packet
+         */
+        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
 
     private:
         struct arphdr {

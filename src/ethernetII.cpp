@@ -108,9 +108,8 @@ bool Tins::EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
 void Tins::EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t my_sz = header_size();
     assert(total_sz >= my_sz);
-
+    
     /* Inner type defaults to IP */
-
     if ((this->_eth.payload_type == 0) && this->inner_pdu()) {
         uint16_t type = ETHERTYPE_IP;
         switch (this->inner_pdu()->pdu_type()) {
@@ -125,15 +124,11 @@ void Tins::EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, c
         }
         this->_eth.payload_type = Utils::net_to_host_s(type);
     }
-
-
     memcpy(buffer, &this->_eth, sizeof(ethhdr));
-
 }
 
 Tins::PDU *Tins::EthernetII::recv_response(PacketSender *sender) {
     struct sockaddr_ll addr;
-
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
     addr.sll_family = Utils::net_to_host_s(PF_PACKET);
@@ -151,13 +146,8 @@ Tins::PDU *Tins::EthernetII::clone_packet(uint8_t *ptr, uint32_t total_sz) {
     ethhdr *eth_ptr = (ethhdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(ethhdr)) {
-        if(inner_pdu()) {
-            child = inner_pdu()->clone_packet(ptr + sizeof(ethhdr), total_sz - sizeof(ethhdr));
-            if(!child)
-                return 0;
-        }
-        else
-            child = new RawPDU(ptr + sizeof(ethhdr), total_sz - sizeof(ethhdr));
+        if((child = PDU::clone_inner_pdu(ptr + sizeof(ethhdr), total_sz - sizeof(ethhdr))) == 0)
+            return 0;
     }
     cloned = new EthernetII(eth_ptr);
     cloned->inner_pdu(child);

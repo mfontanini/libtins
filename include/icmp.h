@@ -150,11 +150,13 @@ namespace Tins {
          */
         uint8_t code() const { return _icmp.code; }
         
-        /** \brief Returns the echo id.
+        /** \brief Getter for the echo id.
+         * \return Returns the echo id.
          */
         uint16_t id() const { return _icmp.un.echo.id; }
         
-        /** \brief Returns the echo sequence number.
+        /** \brief Getter for the echo sequence number.
+         * \return Returns the echo sequence number.
          */
         uint16_t sequence() const { return _icmp.un.echo.sequence; }
 
@@ -166,7 +168,11 @@ namespace Tins {
         uint32_t header_size() const;
 
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
-
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
         PDUType pdu_type() const { return PDU::ICMP; }
 
         PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
