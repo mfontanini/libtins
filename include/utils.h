@@ -77,6 +77,16 @@ namespace Tins {
          */ 
         uint32_t resolve_ip(const std::string &to_resolve);
 
+        /** \brief Resolves the hardware address for a given ip.
+         * 
+         * \param ip The ip to resolve, in integer format.
+         * \param buffer The buffer in which the host's hardware address will be stored.
+         * \param sender The sender to use to send and receive the ARP requests.(optional)
+         * \return Returns true if the hardware address was resolved successfully,
+         * false otherwise.
+         */
+        bool resolve_hwaddr(uint32_t ip, uint8_t *buffer, PacketSender *sender = 0);
+    
         /** \brief List all network interfaces.
          * 
          * Returns a set of strings, each of them representing the name

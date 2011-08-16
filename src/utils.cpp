@@ -155,6 +155,10 @@ uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
     return ((struct in_addr**)data->h_addr_list)[0]->s_addr;
 }
 
+bool Tins::Utils::resolve_hwaddr(uint32_t ip, uint8_t *buffer, PacketSender *sender) {
+    
+}
+
 set<string> Tins::Utils::network_interfaces() {
     InterfaceCollector collector;
     generic_iface_loop(collector);
