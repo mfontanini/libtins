@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __ETHERNET_H
-#define __ETHERNET_H
+#ifndef __ETHERNET_II_H
+#define __ETHERNET_II_H
 
 #include <stdint.h>
 #include <stdexcept>
@@ -30,7 +30,7 @@
 namespace Tins {
 
     /**
-     * \brief Class representing an ethernet IEEE 802.3 packet
+     * \brief Class representing an Ethernet II packet
      */
     class EthernetII : public PDU {
 
