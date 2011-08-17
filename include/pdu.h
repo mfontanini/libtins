@@ -56,7 +56,8 @@ namespace Tins {
             ARP,
             TCP,
             UDP,
-            ICMP
+            ICMP,
+            DHCP
         };
 
         /** \brief PDU constructor

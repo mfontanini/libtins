@@ -29,24 +29,27 @@
 #include "ip.h"
 #include "rawpdu.h"
 
-Tins::UDP::UDP(uint16_t sport, uint16_t dport) : PDU(IPPROTO_UDP) {
-    _udp.sport = sport;
-    _udp.dport = dport;
+Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) : PDU(IPPROTO_UDP, child) {
+    this->dport(dport);
+    this->sport(sport);
     _udp.check = 0;
     _udp.len = 0;
 }
 
 void Tins::UDP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
     inner_pdu(new RawPDU(new_payload, new_payload_size));
-    _udp.len = Utils::net_to_host_s(sizeof(udphdr) + new_payload_size);
 }
 
 void Tins::UDP::dport(uint16_t new_dport) {
-    _udp.dport = new_dport;
+    _udp.dport = Utils::net_to_host_s(new_dport);
 }
 
 void Tins::UDP::sport(uint16_t new_sport) {
-    _udp.sport = new_sport;
+    _udp.sport = Utils::net_to_host_s(new_sport);
+}
+
+void Tins::UDP::length(uint16_t new_len) {
+    _udp.len = Utils::net_to_host_s(new_len);
 }
 
 uint32_t Tins::UDP::header_size() const {
@@ -56,6 +59,8 @@ uint32_t Tins::UDP::header_size() const {
 void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= sizeof(udphdr));
     const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
+    if(inner_pdu())
+        length(sizeof(udphdr) + inner_pdu()->size());
     if(!_udp.check && ip_packet) {
         uint32_t checksum = PDU::pseudoheader_checksum(ip_packet->source_address(), ip_packet->dest_address(), size(), IPPROTO_UDP) +
                             PDU::do_checksum(buffer + sizeof(udphdr), buffer + total_sz) + PDU::do_checksum((uint8_t*)&_udp, ((uint8_t*)&_udp) + sizeof(udphdr));

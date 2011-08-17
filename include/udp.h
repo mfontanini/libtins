@@ -41,7 +41,7 @@ namespace Tins {
          * \param dport Destination port.
          * \param sport Source port.
          * */
-        UDP(uint16_t sport = 0, uint16_t dport = 0);
+        UDP(uint16_t dport = 0, uint16_t sport = 0, PDU *child = 0);
 
 
          /** \brief Returns the destination port
@@ -63,6 +63,12 @@ namespace Tins {
          * \param new_sport The new source port.
          */
         void sport(uint16_t new_sport);
+        
+        /** \brief Getter for the length field.
+         * \param new_len The new length field.
+         * \return The length field.
+         */
+        void length(uint16_t new_len);
 
         /** \brief Set the payload.
          *
@@ -88,7 +94,6 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::UDP; }
-
     private:
         struct udphdr {
             uint16_t sport;

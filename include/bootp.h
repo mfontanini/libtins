@@ -133,14 +133,14 @@ namespace Tins {
         /** \brief Getter for the vend field.
          * \return The vend field for this BootP PDU.
          */
-        uint8_t *vend() { return _bootp.vend; }
+        uint8_t *vend() { return _vend; }
         
         /** \brief Getter for the vend field.
          */
         uint32_t vend_size() const { return _vend_size; }
         
         /** \brief Getter for the header size.
-         * \return Returns the ARP header size.
+         * \return Returns the BOOTP header size.
          * \sa PDU::header_size
          */ 
         uint32_t header_size() const;
@@ -221,6 +221,8 @@ namespace Tins {
          * \param size The size of the new vend field.
          */
         void vend(uint8_t *new_vend, uint32_t size);
+    protected:
+        void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     private:
         /**
          * Struct that represents the Bootp datagram.
@@ -242,7 +244,6 @@ namespace Tins {
             uint8_t file[128];
         } __attribute__((__packed__));
         
-        void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         bootphdr _bootp;
         uint8_t *_vend;

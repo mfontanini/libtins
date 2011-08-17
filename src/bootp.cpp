@@ -4,16 +4,18 @@
 #include "utils.h"
 
 
-Tins::BootP::BootP() : PDU(255) {
+Tins::BootP::BootP() : PDU(255), _vend_size(64) {
     _vend = new uint8_t[64];
+    std::memset(&_bootp, 0, sizeof(bootphdr));
+    std::memset(_vend, 0, 64);
 }
 
 Tins::BootP::~BootP() {
-    delete[] vend;
+    delete[] _vend;
 }
 
 uint32_t Tins::BootP::header_size() const {
-    return sizeof(bootphdr);
+    return sizeof(bootphdr) + _vend_size;
 }
 
 void Tins::BootP::opcode(uint8_t new_opcode) {
@@ -61,7 +63,7 @@ void Tins::BootP::giaddr(uint32_t new_giaddr) {
 }
 
 void Tins::BootP::chaddr(uint8_t *new_chaddr) {
-    std::memcpy(_bootp.chaddr, new_chaddr, sizeof(_bootp.chaddr));
+    std::memcpy(_bootp.chaddr, new_chaddr, _bootp.hlen);
 }
 
 void Tins::BootP::sname(uint8_t *new_sname) {
@@ -80,6 +82,7 @@ void Tins::BootP::vend(uint8_t *new_vend, uint32_t size) {
 }
 
 void Tins::BootP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    assert(total_sz >= sizeof(bootphdr));
+    assert(total_sz >= sizeof(bootphdr) + _vend_size);
     std::memcpy(buffer, &_bootp, sizeof(bootphdr));
+    std::memcpy(buffer + sizeof(bootphdr), _vend, _vend_size);
 }
