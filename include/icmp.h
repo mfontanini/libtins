@@ -24,6 +24,7 @@
 
 
 #include "pdu.h"
+#include "utils.h"
 
 namespace Tins {
 
@@ -48,14 +49,16 @@ namespace Tins {
             INFO_REPLY       = 16
         };
 
-        /** \brief Creates an instance of ICMP.
+        /**
+         * \brief Creates an instance of ICMP.
          *
          * If no flag is specified, then ECHO_REPLY will be used.
          * \param flag The type flag which will be set.
          */
         ICMP(Flags flag = ECHO_REQUEST);
 
-        /** \brief Sets the code field.
+        /**
+         * \brief Sets the code field.
          *
          * \param new_code The code which will be stored in the ICMP struct.
          */
@@ -67,53 +70,96 @@ namespace Tins {
          */
         void type(Flags type);
 
-        /** \brief Sets echo request flag for this PDU.
+        /**
+         * \brief Setter for checksum field.
+         *
+         * \param new_check uint16_t with the new checksum.
+         */
+        void check(uint16_t new_check);
+
+        /**
+         * \brief Setter for the id field.
+         *
+         * \param new_id uint16_t with the new id.
+         */
+        void id(uint16_t new_id);
+
+        /**
+         * \brief Setter for the sequence field.
+         *
+         * \param new_seq uint16_t with the new sequence.
+         */
+        void sequence(uint16_t new_seq);
+
+        /**
+         * \brief Setter for the gateway field.
+         *
+         * \param new_gw uint32_t with the new gateway.
+         */
+        void gateway(uint32_t new_gw);
+
+        /**
+         * \brief Setter for the mtu field.
+         *
+         * \param new_mtu uint16_t with the new sequence.
+         */
+        void mtu(uint16_t new_mtu);
+
+        /**
+         * \brief Sets echo request flag for this PDU.
          *
          * \param id The identifier for this request.
          * \param seq The sequence number for this request.
          */
         void set_echo_request(uint16_t id, uint16_t seq);
 
-        /** \brief Sets echo request flag for this PDU.
+        /**
+         * \brief Sets echo request flag for this PDU.
          *
          * This uses a global id and sequence number to fill the request's
          * fields.
          */
         void set_echo_request();
 
-        /** \brief Sets echo reply flag for this PDU.
+        /**
+         * \brief Sets echo reply flag for this PDU.
          *
          * \param id The identifier for this request.
          * \param seq The sequence number for this request.
          */
         void set_echo_reply(uint16_t id, uint16_t seq);
 
-        /** \brief Sets echo reply flag for this PDU.
+        /**
+         * \brief Sets echo reply flag for this PDU.
          *
          * This uses a global id and sequence number to fill the request's
          * fields.
          */
         void set_echo_reply();
 
-        /** \brief Sets information request flag for this PDU.
+        /**
+         * \brief Sets information request flag for this PDU.
          *
          * \param id The identifier for this request.
          * \param seq The sequence number for this request.
          */
         void set_info_request(uint16_t id, uint16_t seq);
 
-        /** \brief Sets information reply flag for this PDU.
+        /**
+         * \brief Sets information reply flag for this PDU.
          *
          * \param id The identifier for this request.
          * \param seq The sequence number for this request.
          */
         void set_info_reply(uint16_t id, uint16_t seq);
 
-        /** \brief Sets destination unreachable for this PDU.
+        /**
+         * \brief Sets destination unreachable for this PDU.
          */
         void set_dest_unreachable();
 
-        /** \brief Sets time exceeded flag for this PDU.
+        /**
+         * \brief Sets time exceeded flag for this PDU.
          *
          * \param ttl_exceeded If true this PDU will represent a ICMP ttl
          * exceeded, otherwise it will represent a fragment reassembly
@@ -121,7 +167,8 @@ namespace Tins {
          */
         void set_time_exceeded(bool ttl_exceeded = true);
 
-        /** \brief Sets parameter problem flag for this PDU.
+        /**
+         * \brief Sets parameter problem flag for this PDU.
          *
          * \param set_pointer Indicates wether a pointer to the bad octet
          * is provided.
@@ -130,11 +177,13 @@ namespace Tins {
          */
         void set_param_problem(bool set_pointer = false, uint8_t bad_octet = 0);
 
-        /** \brief Sets source quench flag for this PDU.
+        /**
+         * \brief Sets source quench flag for this PDU.
          */
         void set_source_quench();
 
-        /** \brief Sets redirect flag for this PDU.
+        /**
+         * \brief Sets redirect flag for this PDU.
          *
          * \param icode The code to be set.
          * \param address Address of the gateway to which traffic should
@@ -142,50 +191,81 @@ namespace Tins {
          */
         void set_redirect(uint8_t icode, uint32_t address);
 
-        /** \brief Getter for the ICMP type flag.
-         * 
+        /**
+         * \brief Getter for the ICMP type flag.
+         *
          * \return The type flag for this ICMP PDU.
          */
         Flags type() const { return (Flags)_icmp.type; }
 
-        /** \brief Getter for the ICMP code flag.
-         * 
+        /**
+         * \brief Getter for the ICMP code flag.
+         *
          * \return The code flag for this ICMP PDU.
          */
         uint8_t code() const { return _icmp.code; }
-        
-        /** \brief Getter for the echo id.
+
+        /**
+         * \brief Getter for the checksum field.
+         *
+         * \return Returns the checksum as an unit16_t.
+         */
+        uint16_t check() const { return Utils::net_to_host_s(this->_icmp.check); }
+
+        /**
+         * \brief Getter for the echo id.
+         *
          * \return Returns the echo id.
          */
-        uint16_t id() const { return _icmp.un.echo.id; }
-        
-        /** \brief Getter for the echo sequence number.
+        uint16_t id() const { return Utils::net_to_host_s(_icmp.un.echo.id); }
+
+        /**
+         * \brief Getter for the echo sequence number.
+         *
          * \return Returns the echo sequence number.
          */
-        uint16_t sequence() const { return _icmp.un.echo.sequence; }
+        uint16_t sequence() const { return Utils::net_to_host_s(_icmp.un.echo.sequence); }
 
-        /** \brief Returns the header size.
+        /**
+         * \brief Getter for the gateway field.
+         *
+         * \return Returns the gateways in an unit32_t.
+         */
+         uint32_t gateway() const { return Utils::net_to_host_l(this->_icmp.un.gateway); }
+
+         /**
+          * \brief Getter for the mtu field.
+          *
+          * \return Returns the mtu value in an uint16_t.
+          */
+        uint16_t mtu() const { return Utils::net_to_host_s(this->_icmp.un.frag.mtu); }
+
+        /**
+         * \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. This size includes the
          * payload and options size. \sa PDU::header_size
          */
         uint32_t header_size() const;
 
-        /** \brief Check wether ptr points to a valid response for this PDU.
+        /**
+         * \brief Check wether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
          * \param total_sz The size of the buffer.
          */
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
-        
+
         /**
          * \brief Getter for the PDU's type.
+         *
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::ICMP; }
 
-        /** \brief Clones this pdu, filling the corresponding header with data
+        /**
+         * \brief Clones this pdu, filling the corresponding header with data
          * extracted from a buffer.
          *
          * \param ptr The pointer to the from from which the data will be extracted.
