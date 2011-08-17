@@ -1,3 +1,24 @@
+/*
+ * libtins is a net packet wrapper library for crafting and
+ * interpreting sniffed packets.
+ *
+ * Copyright (C) 2011 Nasel
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
 #include <cstring>
 #include <cassert>
 #include <iostream> //borrame
@@ -28,8 +49,17 @@ bool Tins::DHCP::add_option(Options opt, uint8_t len, uint8_t *val) {
     return true;
 }
 
-void Tins::DHCP::add_type_option(Flags type) {
-    add_option(DHCP_MESSAGE_TYPE, 1, (uint8_t*)&type);
+bool Tins::DHCP::add_type_option(Flags type) {
+    return add_option(DHCP_MESSAGE_TYPE, 1, (uint8_t*)&type);
+}
+
+bool Tins::DHCP::add_server_identifier(uint32_t ip) {
+    return add_option(DHCP_SERVER_IDENTIFIER, 4, (uint8_t*)&ip);
+}
+
+bool Tins::DHCP::add_lease_time(uint32_t time) {
+    time = Utils::net_to_host_l(time);
+    return add_option(DHCP_LEASE_TIME, 4, (uint8_t*)&time);
 }
 
 uint32_t Tins::DHCP::header_size() const {
@@ -43,10 +73,12 @@ void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     for(std::list<DHCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(ptr++) = it->option;
         *(ptr++) = it->length;
-        std::memcpy(ptr++, it->value, it->length);
+        std::memcpy(ptr, it->value, it->length);
+        ptr += it->length;
     }
     result[_size-1] = END;
     vend(result, _size);
     BootP::write_serialization(buffer, total_sz, parent);
+    delete[] result;
 }
 

@@ -58,6 +58,7 @@ void Tins::IP::init_ip_fields() {
     _ip.version = 4;
     _ip.ihl = sizeof(iphdr) / sizeof(uint32_t);
     _ip.ttl = DEFAULT_TTL;
+    _ip.id = Utils::net_to_host_s(1);
     _options_size = 0;
     _padded_options_size = 0;
 }

@@ -29,13 +29,15 @@
 
 namespace Tins {
     
-    /** \brief Class that represents the DHCP PDU.
+    /** 
+     * \brief Class that represents the DHCP PDU.
      * 
      * The end option is added automatically at the end of the option list.
      */
     class DHCP : public BootP {
     public:
-        /** \brief DHCP flags.
+        /** 
+         * \brief DHCP flags.
          */
         enum Flags {
             DHCPDISCOVER = 1,
@@ -48,7 +50,8 @@ namespace Tins {
             DHCPINFORM   = 8
         };
         
-        /** \brief DHCP options enum.
+        /** 
+         * \brief DHCP options enum.
          */
         enum Options {
             PAD,
@@ -123,7 +126,8 @@ namespace Tins {
             END	= 255
         };
         
-        /** \brief DHCP options struct.
+        /** 
+         * \brief DHCP options struct.
          */
         struct DHCPOption {
             uint8_t option, length;
@@ -132,14 +136,16 @@ namespace Tins {
             DHCPOption(uint8_t opt, uint8_t len, uint8_t *val);
         };
         
-        /** \brief Creates an instance of DHCP.
+        /** 
+         * \brief Creates an instance of DHCP.
          * 
          * This sets the hwtype and hlen fields to match the ethernet
          * type and length.
          */
         DHCP();
         
-        /** \brief Adds a new option to this DHCP PDU.
+        /** 
+         * \brief Adds a new option to this DHCP PDU.
          * 
          * This copies the value buffer. Adding options may fail if
          * there's not enough size to hold a new option.
@@ -150,10 +156,26 @@ namespace Tins {
          */
         bool add_option(Options opt, uint8_t len, uint8_t *val);
         
-        /** \brief Adds a type option the the option list.
+        /** 
+         * \brief Adds a type option the the option list.
          * \param type The type of this DHCP PDU.
+         * \return True if the option was added successfully. \sa DHCP::add_option
          */
-        void add_type_option(Flags type);
+        bool add_type_option(Flags type);
+        
+        /** 
+         * \brief Adds a server identifier option.
+         * \param ip The ip of the server.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_server_identifier(uint32_t ip);
+        
+        /** 
+         * \brief Adds an IP address lease time option.
+         * \param time The lease time.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_lease_time(uint32_t time);
         
         /** \brief Getter for the options list.
          * \return The option list.
@@ -166,7 +188,8 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::UDP; }
         
-        /** \brief Getter for the header size.
+        /** 
+         * \brief Getter for the header size.
          * \return Returns the BOOTP header size.
          * \sa PDU::header_size
          */ 
