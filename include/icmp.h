@@ -63,9 +63,9 @@ namespace Tins {
 
         /** \brief Sets the type field.
          *
-         * \param new_code The type which will be stored in the ICMP struct.
+         * \param type The type which will be stored in the ICMP struct.
          */
-        void type(uint8_t type);
+        void type(Flags type);
 
         /** \brief Sets echo request flag for this PDU.
          *
@@ -142,11 +142,15 @@ namespace Tins {
          */
         void set_redirect(uint8_t icode, uint32_t address);
 
-        /** \brief Returns the ICMP type flag.
+        /** \brief Getter for the ICMP type flag.
+         * 
+         * \return The type flag for this ICMP PDU.
          */
         Flags type() const { return (Flags)_icmp.type; }
 
-        /** \brief Returns the ICMP code flag.
+        /** \brief Getter for the ICMP code flag.
+         * 
+         * \return The code flag for this ICMP PDU.
          */
         uint8_t code() const { return _icmp.code; }
         
@@ -167,6 +171,12 @@ namespace Tins {
          */
         uint32_t header_size() const;
 
+        /** \brief Check wether ptr points to a valid response for this PDU.
+         *
+         * \sa PDU::matches_response
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
         
         /**
@@ -175,6 +185,14 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::ICMP; }
 
+        /** \brief Clones this pdu, filling the corresponding header with data
+         * extracted from a buffer.
+         *
+         * \param ptr The pointer to the from from which the data will be extracted.
+         * \param total_sz The size of the buffer.
+         * \return The cloned PDU.
+         * \sa PDU::clone_packet
+         */
         PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
     private:
         static uint16_t global_id, global_seq;

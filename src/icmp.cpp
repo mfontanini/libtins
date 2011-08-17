@@ -56,7 +56,7 @@ void Tins::ICMP::code(uint8_t new_code) {
     _icmp.code = new_code;
 }
 
-void Tins::ICMP::type(uint8_t new_type) {
+void Tins::ICMP::type(Flags new_type) {
     _icmp.type = new_type;
 }
 

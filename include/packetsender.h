@@ -44,6 +44,8 @@ namespace Tins {
      */
     class PacketSender {
     public:
+        /** \brief The default timeout for receive actions.
+         */
         static const uint32_t DEFAULT_TIMEOUT;
     
         /** \brief Flags to indicate the socket type.
@@ -63,6 +65,10 @@ namespace Tins {
          */
         PacketSender(uint32_t recv_timeout = DEFAULT_TIMEOUT);
         
+        /** \brief PacketSender destructor.
+         * 
+         * This gracefully closes all open sockets.
+         */
         ~PacketSender();
 
         /** \brief Opens a layer y socket.

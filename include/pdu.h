@@ -26,6 +26,8 @@
 #include <stdint.h>
 #include "packetsender.h"
 
+/** \brief The Tins namespace.
+ */
 namespace Tins {
 
     class PacketSender;
@@ -64,6 +66,12 @@ namespace Tins {
          * \param next_pdu The child PDU. Can be obviated.
          */
         PDU(uint32_t flag, PDU *next_pdu = 0);
+        
+        /** \brief PDU destructor.
+         * 
+         * Deletes the inner pdu, as a consequence every child pdu is 
+         * deleted.
+         */
         virtual ~PDU();
 
         /** \brief The header's size

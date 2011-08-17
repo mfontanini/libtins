@@ -36,8 +36,7 @@ namespace Tins {
 
     public:
 
-        /**
-         *
+        /** \brief Represents the ethernetII broadcast address.
          */
         static const uint8_t* BROADCAST;
 

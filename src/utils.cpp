@@ -37,6 +37,7 @@
 using namespace std;
 
 
+/** \cond */
 struct InterfaceCollector {
     set<string> ifaces;
 
@@ -74,6 +75,8 @@ struct HWAddressCollector {
         }
     }
 };
+
+/** \endcond */
 
 uint32_t Tins::Utils::ip_to_int(const string &ip) {
     uint32_t result(0), i(0), end, bytes_found(0);
