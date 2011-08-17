@@ -29,6 +29,7 @@
 #include <utility>
 #include <vector>
 #include "pdu.h"
+#include "utils.h"
 
 namespace Tins {
 
@@ -86,7 +87,7 @@ namespace Tins {
          * \param child pointer to a PDU which will be set as the inner_pdu for the packet being constructed(optional).
          */
         IP(const std::string &ip_dst = "", const std::string &ip_src = "", PDU *child = 0);
-        
+
         /**
          * \brief Constructor for building the IP PDU taking integer as ip addresses.
          *
@@ -100,110 +101,110 @@ namespace Tins {
         IP(uint32_t ip_dst = 0, uint32_t ip_src = 0, PDU *child = 0);
 
         /* Getters */
-        
+
         /** \brief Getter for the type of service field.
-         * 
+         *
          * \return The this IP PDU's type of service.
          */
         inline uint8_t tos() const { return _ip.tos; }
-        
+
         /** \brief Getter for the total length field.
          * \return The total length of this IP PDU.
          */
-        inline uint16_t tot_len() const { return _ip.tot_len; }
-        
+        inline uint16_t tot_len() const { return Utils::net_to_host_s(_ip.tot_len); }
+
         /** \brief Getter for the id field.
          * \return The id for this IP PDU.
          */
-        inline uint16_t id() const { return _ip.id; }
-        
+        inline uint16_t id() const { return Utils::net_to_host_s(_ip.id); }
+
         /** \brief Getter for the fragment offset field.
          * \return The fragment offset for this IP PDU.
          */
-        inline uint16_t frag_off() const { return _ip.frag_off; }
-        
+        inline uint16_t frag_off() const { return Utils::net_to_host_s(_ip.frag_off); }
+
         /** \brief Getter for the time to live field.
          * \return The time to live for this IP PDU.
          */
         inline uint8_t ttl() const { return _ip.ttl; }
-        
+
         /** \brief Getter for the protocol field.
          * \return The protocol for this IP PDU.
          */
         inline uint8_t protocol() const { return _ip.protocol; }
-        
+
         /** \brief Getter for the checksum field.
          * \return The checksum for this IP PDU.
          */
-        inline uint16_t check() const { return _ip.check; }
-        
+        inline uint16_t check() const { return Utils::net_to_host_s(_ip.check); }
+
         /** \brief Getter for the source address field.
          * \return The source address for this IP PDU.
          */
         inline uint32_t source_address() const { return _ip.saddr; }
-        
+
         /** \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
         inline uint32_t dest_address() const  { return _ip.daddr; }
 
         /* Setters */
-        
+
         /** \brief Setter for the type of service field.
          * \param new_tos The new type of service.
          */
         void tos(uint8_t new_tos);
-        
+
         /** \brief Setter for the total length field.
          * \param new_tot_len The new total length.
          */
         void tot_len(uint16_t new_tot_len);
-        
+
         /** \brief Setter for the id field.
          * \param new_id The new id.
          */
         void id(uint16_t new_id);
-        
+
         /** \brief Setter for the fragment offset field.
          * \param new_frag_off The new fragment offset.
          */
         void frag_off(uint16_t new_frag_off);
-        
+
         /** \brief Setter for the time to live field.
          * \param new_ttl The new time to live.
          */
         void ttl(uint8_t new_ttl);
-        
+
         /** \brief Setter for the protocol field.
          * \param new_protocol The new protocol.
          */
         void protocol(uint8_t new_protocol);
-        
+
         /** \brief Setter for the checksum field.
          * \param new_check The new checksum.
          */
         void check(uint16_t new_check);
-        
+
         /** \brief Setter for the source address field.
          * \param ip The ip address in dotted string notation.
          */
         void source_address(const std::string &ip);
-        
+
         /** \brief Setter for the source address field.
          * \param ip The ip address in integer notation.
          */
         void source_address(uint32_t ip);
-        
+
         /** \brief Setter for the destination address field.
          * \param ip The ip address in dotted string notation.
          */
         void dest_address(const std::string &ip);
-        
+
         /** \brief Setter for the destination address field.
          * \param ip The ip address in integer notation.
          */
         void dest_address(uint32_t ip);
-        
+
         /** \brief Sets an IP option.
          * \param copied The copied flag for this option.
          * \param op_class The option class to be set.
@@ -216,11 +217,11 @@ namespace Tins {
         /** \brief Sets the End of List option.
          */
         void set_option_eol();
-        
+
         /** \brief Sets the NOP option.
          */
         void set_option_noop();
-        
+
         /** \brief Sets the security option.
          * \param data The data for this option
          * \param data_len The length of the data.
@@ -229,13 +230,13 @@ namespace Tins {
         /* Add more option setters */
 
         /* Virtual methods */
-        
+
         /** \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. \sa PDU::header_size
          */
         uint32_t header_size() const;
-        
+
         /**
          * \sa PDU::send()
          */
@@ -255,7 +256,7 @@ namespace Tins {
          * \param sender The packet sender which will receive the packet.
          */
         PDU *recv_response(PacketSender *sender);
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type

@@ -52,7 +52,7 @@ Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
     if (hw_snd) {
         memcpy(arp->_arp.ar_sha, hw_snd, 6);
     }
-    arp->_arp.ar_op = Utils::net_to_host_s(REQUEST);
+    arp->opcode(REQUEST);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
     EthernetII* eth = new EthernetII(iface, Tins::EthernetII::BROADCAST, hw_snd, arp);
@@ -82,7 +82,7 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
     arp->_arp.ar_sip = sender;
     memcpy(arp->_arp.ar_sha, hw_snd, 6);
     memcpy(arp->_arp.ar_tha, hw_tgt, 6);
-    arp->_arp.ar_op = Utils::net_to_host_s(REPLY);
+    arp->opcode(REPLY);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
     EthernetII* eth = new EthernetII(iface, hw_tgt, hw_snd, arp);
@@ -118,11 +118,11 @@ void Tins::ARP::target_ip_addr(uint32_t new_tgt_ip_addr) {
 }
 
 void Tins::ARP::hw_addr_format(uint16_t new_hw_addr_fmt) {
-    this->_arp.ar_hrd = new_hw_addr_fmt;
+    this->_arp.ar_hrd = Utils::net_to_host_s(new_hw_addr_fmt);
 }
 
 void Tins::ARP::prot_addr_format(uint16_t new_prot_addr_fmt) {
-    this->_arp.ar_pro = new_prot_addr_fmt;
+    this->_arp.ar_pro = Utils::net_to_host_s(new_prot_addr_fmt);
 }
 
 void Tins::ARP::hw_addr_length(uint8_t new_hw_addr_len) {
@@ -134,7 +134,7 @@ void Tins::ARP::prot_addr_length(uint8_t new_prot_addr_len) {
 }
 
 void Tins::ARP::opcode(Flags new_opcode) {
-    this->_arp.ar_op = new_opcode;
+    this->_arp.ar_op = Utils::net_to_host_s(new_opcode);
 }
 
 void Tins::ARP::set_arp_request(const std::string& ip_tgt, const std::string& ip_snd, const uint8_t* hw_snd) {
@@ -142,7 +142,7 @@ void Tins::ARP::set_arp_request(const std::string& ip_tgt, const std::string& ip
     this->_arp.ar_sip = Utils::resolve_ip(ip_snd);
     if (hw_snd)
         memcpy(this->_arp.ar_sha, hw_snd, 6);
-    this->_arp.ar_op = Utils::net_to_host_s(REQUEST);
+    this->opcode(REQUEST);
 }
 
 void Tins::ARP::set_arp_reply(const std::string& ip_tgt,
@@ -154,7 +154,7 @@ void Tins::ARP::set_arp_reply(const std::string& ip_tgt,
     this->_arp.ar_sip = Utils::resolve_ip(ip_snd);
     memcpy(this->_arp.ar_tha, hw_tgt, 6);
     memcpy(this->_arp.ar_sha, hw_snd, 6);
-    this->_arp.ar_op = Utils::net_to_host_s(REPLY);
+    this->opcode(REPLY);
 
 }
 

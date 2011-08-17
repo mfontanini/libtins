@@ -34,11 +34,11 @@ const uint16_t Tins::TCP::DEFAULT_WINDOW = 32678;
 
 Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _options_size(0), _total_options_size(0) {
     std::memset(&_tcp, 0, sizeof(tcphdr));
-    _tcp.dport = Utils::net_to_host_s(dport);
-    _tcp.sport = Utils::net_to_host_s(sport);
-    _tcp.doff = sizeof(tcphdr) / sizeof(uint32_t);
-    _tcp.window = Utils::net_to_host_s(DEFAULT_WINDOW);
-    _tcp.check = 0;
+    this->dport(dport);
+    this->sport(sport);
+    this->data_offset(sizeof(tcphdr) / sizeof(uint32_t));
+    this->window(DEFAULT_WINDOW);
+    this->check(0);
 }
 
 Tins::TCP::~TCP() {
@@ -55,27 +55,31 @@ void Tins::TCP::sport(uint16_t new_sport) {
 }
 
 void Tins::TCP::seq(uint32_t new_seq) {
-    _tcp.seq = new_seq;
+    _tcp.seq = Utils::net_to_host_l(new_seq);
 }
 
 void Tins::TCP::ack_seq(uint32_t new_ack_seq) {
-    _tcp.ack_seq = new_ack_seq;
+    _tcp.ack_seq = Utils::net_to_host_l(new_ack_seq);
 }
 
 void Tins::TCP::window(uint16_t new_window) {
-    _tcp.window = new_window;
+    _tcp.window = Utils::net_to_host_s(new_window);
 }
 
 void Tins::TCP::check(uint16_t new_check) {
-    _tcp.check = new_check;
+    _tcp.check = Utils::net_to_host_s(new_check);
 }
 
 void Tins::TCP::urg_ptr(uint16_t new_urg_ptr) {
-    _tcp.urg_ptr = new_urg_ptr;
+    _tcp.urg_ptr = Utils::net_to_host_s(new_urg_ptr);
 }
 
 void Tins::TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
     inner_pdu(new RawPDU(new_payload, new_payload_size));
+}
+
+void Tins::TCP::data_offset(uint8_t new_doff) {
+    this->_tcp.doff = new_doff;
 }
 
 void Tins::TCP::set_mss(uint16_t value) {

@@ -26,6 +26,7 @@
 
 #include <string>
 #include "pdu.h"
+#include "utils.h"
 
 namespace Tins {
 
@@ -45,7 +46,7 @@ namespace Tins {
 
         /**
          * \brief Default constructor for ARP PDU objects.
-         * 
+         *
          * ARP requests and replies can be constructed easily using
          * ARP::make_arp_request/reply static functions.
          */
@@ -85,14 +86,14 @@ namespace Tins {
          *
          * \return Returns the hardware address' format in an uint16_t.
          */
-        inline uint16_t hw_addr_format() { return this->_arp.ar_hrd; }
+        inline uint16_t hw_addr_format() { return Utils::net_to_host_s(this->_arp.ar_hrd); }
 
         /**
          * \brief Getter for the protocol address format.
          *
          * \return Returns the protocol address' format in an uint16_t.
          */
-        inline uint16_t prot_addr_format() { return this->_arp.ar_pro; }
+        inline uint16_t prot_addr_format() { return Utils::net_to_host_s(this->_arp.ar_pro); }
 
         /**
          * \brief Getter for the hardware address length.
@@ -118,7 +119,7 @@ namespace Tins {
         /** \brief Getter for the header size.
          * \return Returns the ARP header size.
          * \sa PDU::header_size
-         */ 
+         */
         uint32_t header_size() const;
         /* Setters */
 
@@ -184,7 +185,7 @@ namespace Tins {
          * \param new_opcode Flag enum value of the ARP opcode to set.
          */
         void opcode(Flags new_opcode);
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -273,7 +274,7 @@ namespace Tins {
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          */
          void set_arp_reply(const std::string& ip_tgt, const std::string& ip_snd, const uint8_t* hw_tgt, const uint8_t* hw_snd);
-         
+
         /** \brief Check wether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
