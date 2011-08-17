@@ -70,15 +70,15 @@ void Tins::IP::tos(uint8_t new_tos) {
 }
 
 void Tins::IP::tot_len(uint16_t new_tot_len) {
-    _ip.tot_len = new_tot_len;
+    _ip.tot_len = Utils::net_to_host_s(new_tot_len);
 }
 
 void Tins::IP::id(uint16_t new_id) {
-    _ip.id = new_id;
+    _ip.id = Utils::net_to_host_s(new_id);
 }
 
 void Tins::IP::frag_off(uint16_t new_frag_off) {
-    _ip.frag_off = new_frag_off;
+    _ip.frag_off = Utils::net_to_host_s(new_frag_off);
 }
 
 void Tins::IP::ttl(uint8_t new_ttl) {
@@ -90,7 +90,7 @@ void Tins::IP::protocol(uint8_t new_protocol) {
 }
 
 void Tins::IP::check(uint16_t new_check) {
-    _ip.check = new_check;
+    _ip.check = Utils::net_to_host_s(new_check);
 }
 
 void Tins::IP::source_address(const string &ip) {
