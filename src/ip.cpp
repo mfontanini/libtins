@@ -28,7 +28,6 @@
 #include "rawpdu.h"
 #include "utils.h"
 
-#include <iostream>
 
 using namespace std;
 
@@ -200,16 +199,13 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     _ip.protocol = new_flag;
     _ip.tot_len = Utils::net_to_host_s(total_sz);
     _ip.ihl = my_sz / sizeof(uint32_t);
-    if (parent && (_ip.check == 0)) {
-        uint32_t checksum = PDU::do_checksum((uint8_t*)&_ip, ((uint8_t*)&_ip) + sizeof(iphdr));
-        checksum += PDU::do_checksum(buffer + sizeof(iphdr), buffer + total_sz);
+    memcpy(buffer, &_ip, sizeof(iphdr));
+    if (parent && !_ip.check) {
+        uint32_t checksum = PDU::do_checksum(buffer, buffer + sizeof(iphdr));
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
-        _ip.check = Utils::net_to_host_s(~checksum);
+        ((iphdr*)buffer)->check = Utils::net_to_host_s(~checksum);
     }
-
-    memcpy(buffer, &_ip, sizeof(iphdr));
-
     /* IP Options here... */
     buffer += sizeof(iphdr);
     for (uint32_t i = 0; i < _ip_options.size(); ++i)
