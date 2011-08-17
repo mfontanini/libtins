@@ -37,13 +37,28 @@ namespace Tins {
     public:
         /** \brief Creates an instance of RawPDU.
          *
-         * The payload is NOT copied. Therefore, it must be manually freed by the user.
-         * \param payload The payload which the RawPDU will contain.
+         * The payload is not copied by default, therefore it must be 
+         * manually freed by the user. If the payload was to be copied,
+         * then the copy flag must be set to true.
+         * \param pload The payload which the RawPDU will contain.
          * \param size The size of the payload.
+         * \param copy Flag indicating wether to copy the payload.
          */
+        RawPDU(uint8_t *pload, uint32_t size, bool copy = false);
 
-        RawPDU(uint8_t *payload, uint32_t size);
+        /** \brief RawPDU destructor.
+         * 
+         * Deletes the payload only if it was created setting the copy
+         * flag to true.
+         */
+        ~RawPDU();
 
+        /** \brief Getter for the payload.
+         * 
+         * \return The RawPDU's payload.
+         */
+        const uint8_t *payload() const { return _payload; }
+        
         /** \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. \sa PDU::header_size
@@ -55,12 +70,12 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::RAW; }
-
     private:
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         uint8_t *_payload;
         uint32_t _payload_size;
+        bool _owns_payload;
     };
 };
 

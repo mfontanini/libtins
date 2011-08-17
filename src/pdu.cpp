@@ -76,7 +76,7 @@ Tins::PDU *Tins::PDU::clone_inner_pdu(uint8_t *ptr, uint32_t total_sz) {
             return 0;
     }
     else
-        child = new RawPDU(ptr, total_sz);
+        child = new RawPDU(ptr, total_sz, true);
     return child;
 }
 
