@@ -5,6 +5,18 @@
 
 using namespace std;
 
+/** \cond */
+
+struct LoopData {
+    pcap_t *handle;
+    Tins::AbstractSnifferHandler *c_handler;
+    
+    LoopData(pcap_t *_handle, Tins::AbstractSnifferHandler *_handler) : handle(_handle), c_handler(_handler) { }
+};
+
+/** \endcond */
+
+
 Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size) {
     char error[PCAP_ERRBUF_SIZE];
     if (pcap_lookupnet(device.c_str(), &ip, &mask, error) == -1)
@@ -45,7 +57,8 @@ Tins::PDU *Tins::Sniffer::next_pdu(const string &filter) {
 void Tins::Sniffer::sniff_loop(const std::string &filter, AbstractSnifferHandler *cback_handler, uint32_t max_packets) {
     bpf_program prog;
     if(compile_set_filter(filter, prog)) {
-        pcap_loop(handle, max_packets, Sniffer::callback_handler, (u_char*)cback_handler);
+        LoopData data(handle, cback_handler);
+        pcap_loop(handle, max_packets, Sniffer::callback_handler, (u_char*)&data);
         pcap_freecode(&prog);
     }
 }
@@ -54,8 +67,11 @@ void Tins::Sniffer::sniff_loop(const std::string &filter, AbstractSnifferHandler
 void Tins::Sniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
     try {
         PDU *pdu = new EthernetII((const uint8_t*)packet, header->caplen);
-        reinterpret_cast<AbstractSnifferHandler*>(args)->handle(pdu);
+        LoopData *data = reinterpret_cast<LoopData*>(args);
+        bool ret_val = data->c_handler->handle(pdu);
         delete pdu;
+        if(!ret_val)
+            pcap_breakloop(data->handle);
     }
     catch(...) {
         
