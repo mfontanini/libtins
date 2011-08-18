@@ -47,10 +47,10 @@ Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
 
     /* Create ARP packet and set its attributes */
     ARP* arp = new ARP();
-    arp->_arp.ar_tip = target;
-    arp->_arp.ar_sip = sender;
+    arp->target_ip_addr(target);
+    arp->sender_ip_addr(sender);
     if (hw_snd) {
-        memcpy(arp->_arp.ar_sha, hw_snd, 6);
+        arp->sender_hw_addr(hw_snd);
     }
     arp->opcode(REQUEST);
 
@@ -78,10 +78,10 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
 
     /* Create ARP packet and set its attributes */
     ARP* arp = new ARP();
-    arp->_arp.ar_tip = target;
-    arp->_arp.ar_sip = sender;
-    memcpy(arp->_arp.ar_sha, hw_snd, 6);
-    memcpy(arp->_arp.ar_tha, hw_tgt, 6);
+    arp->target_ip_addr(target);
+    arp->sender_ip_addr(sender);
+    arp->target_hw_addr(hw_tgt);
+    arp->sender_hw_addr(hw_snd);
     arp->opcode(REPLY);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
@@ -91,17 +91,17 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
 
 Tins::ARP::ARP() : PDU(0x0608) {
     std::memset(&_arp, 0, sizeof(arphdr));
-    _arp.ar_hrd = Utils::net_to_host_s(0x0001);
-    _arp.ar_pro = Utils::net_to_host_s(0x0800);
-    _arp.ar_hln = 6;
-    _arp.ar_pln = 4;
+    this->hw_addr_format(1);
+    this->prot_addr_format(0x0800);
+    this->hw_addr_length(6);
+    this->prot_addr_length(4);
 }
 
 Tins::ARP::ARP(arphdr *arp_ptr) : PDU(Utils::net_to_host_s(0x0806)) {
     memcpy(&_arp, arp_ptr, sizeof(arphdr));
 }
 
-void Tins::ARP::sender_hw_addr(uint8_t* new_snd_hw_addr) {
+void Tins::ARP::sender_hw_addr(const uint8_t* new_snd_hw_addr) {
     memcpy(this->_arp.ar_sha, new_snd_hw_addr, 6); //Should this use hardware address' length?
 }
 
@@ -109,12 +109,20 @@ void Tins::ARP::sender_ip_addr(uint32_t new_snd_ip_addr) {
     this->_arp.ar_sip = new_snd_ip_addr;
 }
 
-void Tins::ARP::target_hw_addr(uint8_t* new_tgt_hw_addr) {
+void Tins::ARP::sender_ip_addr(const string& new_snd_ip_addr) {
+    this->_arp.ar_sip = Utils::ip_to_int(new_snd_ip_addr);
+}
+
+void Tins::ARP::target_hw_addr(const uint8_t* new_tgt_hw_addr) {
     memcpy(this->_arp.ar_tha, new_tgt_hw_addr, 6); //Should this use hardware address' length?
 }
 
 void Tins::ARP::target_ip_addr(uint32_t new_tgt_ip_addr) {
     this->_arp.ar_tip = new_tgt_ip_addr;
+}
+
+void Tins::ARP::target_ip_addr(const std::string& new_tgt_ip_addr) {
+    this->_arp.ar_tip = Utils::ip_to_int(new_tgt_ip_addr);
 }
 
 void Tins::ARP::hw_addr_format(uint16_t new_hw_addr_fmt) {
@@ -138,10 +146,10 @@ void Tins::ARP::opcode(Flags new_opcode) {
 }
 
 void Tins::ARP::set_arp_request(const std::string& ip_tgt, const std::string& ip_snd, const uint8_t* hw_snd) {
-    this->_arp.ar_tip = Utils::resolve_ip(ip_tgt);
-    this->_arp.ar_sip = Utils::resolve_ip(ip_snd);
+    this->target_ip_addr(ip_tgt);
+    this->sender_ip_addr(ip_snd);
     if (hw_snd)
-        memcpy(this->_arp.ar_sha, hw_snd, 6);
+        this->sender_hw_addr(hw_snd);
     this->opcode(REQUEST);
 }
 
@@ -150,10 +158,10 @@ void Tins::ARP::set_arp_reply(const std::string& ip_tgt,
                               const uint8_t* hw_tgt,
                               const uint8_t* hw_snd) {
 
-    this->_arp.ar_tip = Utils::resolve_ip(ip_tgt);
-    this->_arp.ar_sip = Utils::resolve_ip(ip_snd);
-    memcpy(this->_arp.ar_tha, hw_tgt, 6);
-    memcpy(this->_arp.ar_sha, hw_snd, 6);
+    this->target_ip_addr(ip_tgt);
+    this->sender_ip_addr(ip_snd);
+    this->sender_hw_addr(hw_snd);
+    this->target_hw_addr(hw_tgt);
     this->opcode(REPLY);
 
 }
