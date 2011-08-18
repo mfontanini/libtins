@@ -89,12 +89,18 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
     return eth;
 }
 
-Tins::ARP::ARP() : PDU(0x0608) {
+Tins::ARP::ARP(uint32_t target_ip, uint32_t sender_ip, const uint8_t *target_hw, const uint8_t *sender_hw) : PDU(0x0608) {
     std::memset(&_arp, 0, sizeof(arphdr));
-    this->hw_addr_format(1);
-    this->prot_addr_format(0x0800);
-    this->hw_addr_length(6);
-    this->prot_addr_length(4);
+    hw_addr_format(1);
+    prot_addr_format(0x0800);
+    hw_addr_length(6);
+    prot_addr_length(4);
+    sender_ip_addr(sender_ip);
+    target_ip_addr(target_ip);
+    if(sender_hw)
+        sender_hw_addr(sender_hw);
+    if(target_hw)
+        target_hw_addr(target_hw);
 }
 
 Tins::ARP::ARP(arphdr *arp_ptr) : PDU(Utils::net_to_host_s(0x0806)) {

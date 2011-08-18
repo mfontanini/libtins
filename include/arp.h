@@ -50,7 +50,7 @@ namespace Tins {
          * ARP requests and replies can be constructed easily using
          * ARP::make_arp_request/reply static functions.
          */
-        ARP();
+        ARP(uint32_t target_ip = 0, uint32_t sender_ip = 0, const uint8_t *target_hw = 0, const uint8_t *sender_hw = 0);
 
         /* Getters */
         /**
