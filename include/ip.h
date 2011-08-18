@@ -100,45 +100,75 @@ namespace Tins {
          */
         IP(uint32_t ip_dst = 0, uint32_t ip_src = 0, PDU *child = 0);
 
+        /**
+         * \brief Destructor for IP objects.
+         *
+         * Destructs IP objects releasing the allocated memory for the options
+         * if options exist.
+         */
+        ~IP();
+
         /* Getters */
 
-        /** \brief Getter for the type of service field.
+        /**
+         * \brief Getter for the header length field.
+         *
+         * \return The number of dwords the header occupies in an uin8_t.
+         */
+        inline uint8_t head_len() const { return this->_ip.ihl; }
+
+        /**
+         * \brief Getter for the type of service field.
          *
          * \return The this IP PDU's type of service.
          */
         inline uint8_t tos() const { return _ip.tos; }
 
-        /** \brief Getter for the total length field.
+        /**
+         * \brief Getter for the total length field.
+         *
          * \return The total length of this IP PDU.
          */
         inline uint16_t tot_len() const { return Utils::net_to_host_s(_ip.tot_len); }
 
-        /** \brief Getter for the id field.
+        /**
+         * \brief Getter for the id field.
+         *
          * \return The id for this IP PDU.
          */
         inline uint16_t id() const { return Utils::net_to_host_s(_ip.id); }
 
-        /** \brief Getter for the fragment offset field.
+        /**
+         * \brief Getter for the fragment offset field.
+         *
          * \return The fragment offset for this IP PDU.
          */
         inline uint16_t frag_off() const { return Utils::net_to_host_s(_ip.frag_off); }
 
-        /** \brief Getter for the time to live field.
+        /**
+         * \brief Getter for the time to live field.
+         *
          * \return The time to live for this IP PDU.
          */
         inline uint8_t ttl() const { return _ip.ttl; }
 
-        /** \brief Getter for the protocol field.
+        /**
+         * \brief Getter for the protocol field.
+         *
          * \return The protocol for this IP PDU.
          */
         inline uint8_t protocol() const { return _ip.protocol; }
 
-        /** \brief Getter for the checksum field.
+        /**
+         * \brief Getter for the checksum field.
+         *
          * \return The checksum for this IP PDU.
          */
         inline uint16_t check() const { return Utils::net_to_host_s(_ip.check); }
 
-        /** \brief Getter for the source address field.
+        /**
+         * \brief Getter for the source address field.
+         *
          * \return The source address for this IP PDU.
          */
         inline uint32_t source_address() const { return _ip.saddr; }
@@ -150,62 +180,93 @@ namespace Tins {
 
         /* Setters */
 
-        /** \brief Setter for the type of service field.
+        /**
+         * \brief Setter for the header length field.
+         *
+         * \param new_head_len uint8_t with the new header length.
+         */
+        void head_len(uint8_t new_head_len);
+
+        /**
+         * \brief Setter for the type of service field.
+         *
          * \param new_tos The new type of service.
          */
         void tos(uint8_t new_tos);
 
-        /** \brief Setter for the total length field.
+        /**
+         * \brief Setter for the total length field.
+         *
          * \param new_tot_len The new total length.
          */
         void tot_len(uint16_t new_tot_len);
 
-        /** \brief Setter for the id field.
+        /**
+         * \brief Setter for the id field.
+         *
          * \param new_id The new id.
          */
         void id(uint16_t new_id);
 
-        /** \brief Setter for the fragment offset field.
+        /**
+         * \brief Setter for the fragment offset field.
+         *
          * \param new_frag_off The new fragment offset.
          */
         void frag_off(uint16_t new_frag_off);
 
-        /** \brief Setter for the time to live field.
+        /**
+         * \brief Setter for the time to live field.
+         *
          * \param new_ttl The new time to live.
          */
         void ttl(uint8_t new_ttl);
 
-        /** \brief Setter for the protocol field.
+        /**
+         * \brief Setter for the protocol field.
+         *
          * \param new_protocol The new protocol.
          */
         void protocol(uint8_t new_protocol);
 
-        /** \brief Setter for the checksum field.
+        /**
+         * \brief Setter for the checksum field.
+         *
          * \param new_check The new checksum.
          */
         void check(uint16_t new_check);
 
-        /** \brief Setter for the source address field.
+        /**
+         * \brief Setter for the source address field.
+         *
          * \param ip The ip address in dotted string notation.
          */
         void source_address(const std::string &ip);
 
-        /** \brief Setter for the source address field.
+        /**
+         * \brief Setter for the source address field.
+         *
          * \param ip The ip address in integer notation.
          */
         void source_address(uint32_t ip);
 
-        /** \brief Setter for the destination address field.
+        /**
+         * \brief Setter for the destination address field.
+         *
          * \param ip The ip address in dotted string notation.
          */
         void dest_address(const std::string &ip);
 
-        /** \brief Setter for the destination address field.
+        /**
+         * \brief Setter for the destination address field.
+         *
          * \param ip The ip address in integer notation.
          */
         void dest_address(uint32_t ip);
 
-        /** \brief Sets an IP option.
+        /**
+         * \brief Sets an IP option.
+         *
          * \param copied The copied flag for this option.
          * \param op_class The option class to be set.
          * \param number The options number to be set.
@@ -214,15 +275,19 @@ namespace Tins {
          */
         void set_option(uint8_t copied, OptionClass op_class, OptionNumber number, uint8_t* data = 0, uint32_t data_size = 0);
 
-        /** \brief Sets the End of List option.
+        /**
+         * \brief Sets the End of List option.
          */
         void set_option_eol();
 
-        /** \brief Sets the NOP option.
+        /**
+         * \brief Sets the NOP option.
          */
         void set_option_noop();
 
-        /** \brief Sets the security option.
+        /**
+         * \brief Sets the security option.
+         *
          * \param data The data for this option
          * \param data_len The length of the data.
          */
@@ -231,7 +296,8 @@ namespace Tins {
 
         /* Virtual methods */
 
-        /** \brief Returns the header size.
+        /**
+         * \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. \sa PDU::header_size
          */
@@ -242,7 +308,8 @@ namespace Tins {
          */
         bool send(PacketSender* sender);
 
-        /** \brief Check wether ptr points to a valid response for this PDU.
+        /**
+         * \brief Check wether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
@@ -250,7 +317,8 @@ namespace Tins {
          */
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
 
-        /** \brief Receives a matching response for this packet.
+        /**
+         * \brief Receives a matching response for this packet.
          *
          * \sa PDU::recv_response
          * \param sender The packet sender which will receive the packet.
@@ -263,7 +331,8 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::IP; }
 
-        /** \brief Clones this pdu, filling the corresponding header with data
+        /**
+         * \brief Clones this pdu, filling the corresponding header with data
          * extracted from a buffer.
          *
          * \param ptr The pointer to the from from which the data will be extracted.

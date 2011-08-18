@@ -128,7 +128,7 @@ namespace Tins {
          *
          * \param new_snd_hw_addr uint8_t array containing the new sender's hardware address.
          */
-        void sender_hw_addr(uint8_t* new_snd_hw_addr);
+        void sender_hw_addr(const uint8_t* new_snd_hw_addr);
 
         /**
          * \brief Setter for the sender's IP address.
@@ -138,11 +138,18 @@ namespace Tins {
         void sender_ip_addr(uint32_t new_snd_ip_addr);
 
         /**
+         * \brief Setter for the sender's IP address.
+         *
+         * \param new_snd_ip_addr string containing the new sender's IP address or hostname.
+         */
+        void sender_ip_addr(const std::string& new_snd_ip_addr);
+
+        /**
          * \brief Setter for the target's hardware address.
          *
          * \param new_tgt_hw_addr uint8_t array containing the new target's hardware address.
          */
-        void target_hw_addr(uint8_t* new_tgt_hw_addr);
+        void target_hw_addr(const uint8_t* new_tgt_hw_addr);
 
         /**
          * \brief Setter for the target's IP address.
@@ -150,6 +157,13 @@ namespace Tins {
          * \param new_tgt_ip_addr uint32_t containing the new target's IP address.
          */
         void target_ip_addr(uint32_t new_tgt_ip_addr);
+
+        /**
+         * \brief Setter for the target's IP address.
+         *
+         * \param new_tgt_ip_addr string containing the new target's IP address or hostname.
+         */
+        void target_ip_addr(const std::string& new_tgt_ip_addr);
 
         /**
          * \brief Setter for the hardware address format.
