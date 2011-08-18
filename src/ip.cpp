@@ -53,14 +53,20 @@ Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src, PDU *child) : PDU(IPPROTO_IP, chi
     _ip.saddr = ip_src;
 }
 
+Tins::IP::~IP() {
+    for (vector<IpOption>::iterator it = this->_ip_options.begin(); it != this->_ip_options.end(); it++) {
+        if (it->optional_data)
+            delete[] it->optional_data;
+    }
+}
+
 void Tins::IP::init_ip_fields() {
     memset(&_ip, 0, sizeof(iphdr));
-    _ip.version = 4;
-    _ip.ihl = sizeof(iphdr) / sizeof(uint32_t);
-    _ip.ttl = DEFAULT_TTL;
-    _ip.id = Utils::net_to_host_s(1);
-    _options_size = 0;
-    _padded_options_size = 0;
+    this->_ip.version = 4;
+    this->ttl(DEFAULT_TTL);
+    this->id(1);
+    this->_options_size = 0;
+    this->_padded_options_size = 0;
 }
 
 /* Setters */
@@ -107,6 +113,10 @@ void Tins::IP::dest_address(const string &ip) {
 
 void Tins::IP::dest_address(uint32_t ip) {
     _ip.daddr = ip;
+}
+
+void Tins::IP::head_len(uint8_t new_head_len) {
+    this->_ip.ihl = new_head_len;
 }
 
 void Tins::IP::set_option_eol() {
@@ -196,21 +206,28 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     }
     else
         new_flag = IPPROTO_IP;
-    flag(new_flag);
-    _ip.protocol = new_flag;
-    _ip.tot_len = Utils::net_to_host_s(total_sz);
-    _ip.ihl = my_sz / sizeof(uint32_t);
+    this->flag(new_flag);
+    this->protocol(new_flag);
+    this->tot_len(total_sz);
+    this->head_len (my_sz / sizeof(uint32_t));
+
     memcpy(buffer, &_ip, sizeof(iphdr));
+
+    uint8_t* ptr_buffer = buffer + sizeof(iphdr);
+    for (uint32_t i = 0; i < _ip_options.size(); ++i)
+        ptr_buffer = _ip_options[i].write(ptr_buffer);
+
+    memset(buffer + sizeof(iphdr) + this->_options_size, 0, this->_padded_options_size - this->_options_size);
+
     if (parent && !_ip.check) {
-        uint32_t checksum = PDU::do_checksum(buffer, buffer + sizeof(iphdr));
+        uint32_t checksum = PDU::do_checksum(buffer, buffer + sizeof(iphdr) + _padded_options_size);
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
         ((iphdr*)buffer)->check = Utils::net_to_host_s(~checksum);
+        this->check(0);
     }
-    /* IP Options here... */
-    buffer += sizeof(iphdr);
-    for (uint32_t i = 0; i < _ip_options.size(); ++i)
-        buffer = _ip_options[i].write(buffer);
+
+
 }
 
 bool Tins::IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
