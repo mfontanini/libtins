@@ -131,9 +131,28 @@ namespace Tins {
          * \brief DHCP options struct.
          */
         struct DHCPOption {
-            uint8_t option, length;
+            /** 
+             * \brief The option number.
+             */
+            uint8_t option;
+            /** 
+             * \brief The value's length in bytes.
+             */
+            uint8_t length;
+            /** 
+             * \brief The option's value.
+             */
             uint8_t *value;
-           
+            
+            /**
+             * \brief Creates an instance of DHCPOption.
+             * 
+             * The option's value is copied, therefore the user should
+             * manually free any memory pointed by the "val" parameter.
+             * \param opt The option number.
+             * \param len The length of the option's value in bytes.
+             * \param val The option's value.
+             */
             DHCPOption(uint8_t opt, uint8_t len, const uint8_t *val);
         };
         
@@ -201,7 +220,7 @@ namespace Tins {
         
         /** 
          * \brief Adds a domain name servers option.
-         * \param routers A list of ip addresses in integer notation.
+         * \param dns A list of ip addresses in integer notation.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
         bool add_dns_options(const std::list<uint32_t> &dns);

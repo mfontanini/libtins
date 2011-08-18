@@ -66,6 +66,14 @@ namespace Tins {
          */
         EthernetII(uint32_t iface_index, const uint8_t* mac_dst = 0, const uint8_t* mac_src = 0, PDU* child = 0);
 
+        /**
+         * \brief Constructor which creates an EthernetII object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        EthernetII(const uint8_t *buffer, uint32_t total_sz);
+        
         /* Getters */
         /**
          * \brief Getter for the destination's mac address.
@@ -88,7 +96,14 @@ namespace Tins {
          */
         inline uint32_t iface() const { return this->_iface_index; }
 
+        /**
+         * \brief Getter for the payload_type
+         * \return The payload type.
+         */
+        uint16_t payload_type() const;
+
         /* Setters */
+        
         /**
          * \brief Setter for the destination's MAC.
          *
@@ -177,11 +192,11 @@ namespace Tins {
          */
         EthernetII(ethhdr *eth_ptr);
 
+        void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        
+
         ethhdr _eth;
         uint32_t _iface_index;
-
-        void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-
     };
 
 };

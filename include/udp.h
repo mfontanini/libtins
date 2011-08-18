@@ -34,15 +34,24 @@ namespace Tins {
      */
     class UDP : public PDU {
     public:
-        /** \brief UDP constructor.
+        /** 
+         * \brief UDP constructor.
          *
          * Creates an instance of UDP. Destination and source port can
          * be provided, otherwise both will be 0.
          * \param dport Destination port.
          * \param sport Source port.
+         * \param child The child PDU(optional).
          * */
         UDP(uint16_t dport = 0, uint16_t sport = 0, PDU *child = 0);
 
+        /**
+         * \brief Constructor which creates an UDP object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        UDP(const uint8_t *buffer, uint32_t total_sz);
 
          /** \brief Returns the destination port
           */

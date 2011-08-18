@@ -58,6 +58,14 @@ namespace Tins {
         ICMP(Flags flag = ECHO_REQUEST);
 
         /**
+         * \brief Constructor which creates an ICMP object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        ICMP(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
          * \brief Sets the code field.
          *
          * \param new_code The code which will be stored in the ICMP struct.
@@ -273,7 +281,7 @@ namespace Tins {
          * \return The cloned PDU.
          * \sa PDU::clone_packet
          */
-        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
+        PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
     private:
         static uint16_t global_id, global_seq;
 
@@ -298,7 +306,7 @@ namespace Tins {
          *
          * \param ptr The icmphdr to clone.
          */
-        ICMP(icmphdr *ptr);
+        ICMP(const icmphdr *ptr);
 
         /** \brief Serialices this ICMP PDU.
          * \param buffer The buffer in which the PDU will be serialized.

@@ -19,11 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <stdexcept>
+#include <cassert>
+#include <cstring>
 #ifndef WIN32
     #include <netinet/in.h>
 #endif
-#include <cassert>
-#include <cstring>
 #include "utils.h"
 #include "udp.h"
 #include "ip.h"
@@ -34,6 +35,15 @@ Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) : PDU(IPPROTO_UDP, ch
     this->sport(sport);
     _udp.check = 0;
     _udp.len = 0;
+}
+
+Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_UDP) {
+    if(total_sz < sizeof(udphdr))
+        throw std::runtime_error("Not enought size for an UDP header in the buffer.");
+    std::memcpy(&_udp, buffer, sizeof(udphdr));
+    total_sz -= sizeof(udphdr);
+    if(total_sz)
+        inner_pdu(new RawPDU(buffer + sizeof(udphdr), total_sz));
 }
 
 void Tins::UDP::payload(uint8_t *new_payload, uint32_t new_payload_size) {

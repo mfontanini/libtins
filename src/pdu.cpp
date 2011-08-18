@@ -20,7 +20,6 @@
  */
 
 #include <cassert>
-#include <iostream> //borrame
 #include "utils.h"
 #include "pdu.h"
 #include "rawpdu.h"
@@ -69,7 +68,7 @@ void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent)
     write_serialization(buffer, total_sz, parent);
 }
 
-Tins::PDU *Tins::PDU::clone_inner_pdu(uint8_t *ptr, uint32_t total_sz) {
+Tins::PDU *Tins::PDU::clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz) {
     PDU *child = 0;
     if(inner_pdu()) {
         child = inner_pdu()->clone_packet(ptr, total_sz);
@@ -77,7 +76,7 @@ Tins::PDU *Tins::PDU::clone_inner_pdu(uint8_t *ptr, uint32_t total_sz) {
             return 0;
     }
     else
-        child = new RawPDU(ptr, total_sz, true);
+        child = new RawPDU(ptr, total_sz);
     return child;
 }
 

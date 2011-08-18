@@ -101,6 +101,14 @@ namespace Tins {
         IP(uint32_t ip_dst = 0, uint32_t ip_src = 0, PDU *child = 0);
 
         /**
+         * \brief Constructor which creates an IP object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        IP(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
          * \brief Destructor for IP objects.
          *
          * Destructs IP objects releasing the allocated memory for the options
@@ -340,7 +348,7 @@ namespace Tins {
          * \return The cloned PDU.
          * \sa PDU::clone_packet
          */
-        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
+        PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
     private:
         static const uint8_t DEFAULT_TTL;
 

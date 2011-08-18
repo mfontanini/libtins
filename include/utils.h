@@ -118,7 +118,7 @@ namespace Tins {
          * 
          * If the lookup fails, false will be returned, true otherwise.
          * \param iface The interface from which to extract the identifier.
-         * \param flag The interface id will be returned in this parameter.
+         * \param id The interface id will be returned in this parameter.
          */
         bool interface_id(const std::string &iface, uint32_t &id);
         

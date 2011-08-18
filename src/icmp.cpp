@@ -19,12 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
+#include <stdexcept>
+#include <cstring>
+#include <cassert>
 #ifndef WIN32
     #include <netinet/in.h>
 #endif
-#include <cstring>
-#include <cassert>
 #include "icmp.h"
 #include "rawpdu.h"
 #include "utils.h"
@@ -48,7 +48,16 @@ Tins::ICMP::ICMP(Flags flag) : PDU(IPPROTO_ICMP) {
     };
 }
 
-Tins::ICMP::ICMP(icmphdr *ptr) : PDU(IPPROTO_ICMP) {
+Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_ICMP) {
+    if(total_sz < sizeof(icmphdr))
+        throw std::runtime_error("Not enought size for an ICMP header in the buffer.");
+    std::memcpy(&_icmp, buffer, sizeof(icmphdr));
+    total_sz -= sizeof(icmphdr);
+    if(total_sz)
+        inner_pdu(new RawPDU(buffer + sizeof(icmphdr), total_sz));
+}
+
+Tins::ICMP::ICMP(const icmphdr *ptr) : PDU(IPPROTO_ICMP) {
     std::memcpy(&_icmp, ptr, sizeof(icmphdr));
 }
 
@@ -177,10 +186,10 @@ bool Tins::ICMP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     return false;
 }
 
-Tins::PDU *Tins::ICMP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
+Tins::PDU *Tins::ICMP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(icmphdr))
         return 0;
-    icmphdr *icmp_ptr = (icmphdr*)ptr;
+    const icmphdr *icmp_ptr = (icmphdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(icmphdr)) {
         if((child = PDU::clone_inner_pdu(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr))) == 0)

@@ -31,66 +31,9 @@
 
 using namespace std;
 
-Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
-                                       const std::string& target,
-                                       const std::string& sender,
-                                       const uint8_t* hw_snd) {
-    uint32_t target_ip = Tins::Utils::resolve_ip(target);
-    uint32_t sender_ip = Tins::Utils::resolve_ip(sender);
-    return make_arp_request(iface, target_ip, sender_ip, hw_snd);
-}
-
-Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
-                                       uint32_t target,
-                                       uint32_t sender,
-                                       const uint8_t* hw_snd) {
-
-    /* Create ARP packet and set its attributes */
-    ARP* arp = new ARP();
-    arp->target_ip_addr(target);
-    arp->sender_ip_addr(sender);
-    if (hw_snd) {
-        arp->sender_hw_addr(hw_snd);
-    }
-    arp->opcode(REQUEST);
-
-    /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
-    EthernetII* eth = new EthernetII(iface, Tins::EthernetII::BROADCAST, hw_snd, arp);
-    return eth;
-}
-
-Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
-                                     const string& target,
-                                     const string& sender,
-                                     const uint8_t* hw_tgt,
-                                     const uint8_t* hw_snd) {
-
-    uint32_t target_ip = Tins::Utils::resolve_ip(target);
-    uint32_t sender_ip = Tins::Utils::resolve_ip(sender);
-    return make_arp_reply(iface, target_ip, sender_ip, hw_tgt, hw_snd);
-}
-
-Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
-                                     uint32_t target,
-                                     uint32_t sender,
-                                     const uint8_t* hw_tgt,
-                                     const uint8_t* hw_snd) {
-
-    /* Create ARP packet and set its attributes */
-    ARP* arp = new ARP();
-    arp->target_ip_addr(target);
-    arp->sender_ip_addr(sender);
-    arp->target_hw_addr(hw_tgt);
-    arp->sender_hw_addr(hw_snd);
-    arp->opcode(REPLY);
-
-    /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
-    EthernetII* eth = new EthernetII(iface, hw_tgt, hw_snd, arp);
-    return eth;
-}
 
 Tins::ARP::ARP(uint32_t target_ip, uint32_t sender_ip, const uint8_t *target_hw, const uint8_t *sender_hw) : PDU(0x0608) {
-    std::memset(&_arp, 0, sizeof(arphdr));
+    memset(&_arp, 0, sizeof(arphdr));
     hw_addr_format(1);
     prot_addr_format(0x0800);
     hw_addr_length(6);
@@ -103,7 +46,16 @@ Tins::ARP::ARP(uint32_t target_ip, uint32_t sender_ip, const uint8_t *target_hw,
         target_hw_addr(target_hw);
 }
 
-Tins::ARP::ARP(arphdr *arp_ptr) : PDU(Utils::net_to_host_s(0x0806)) {
+Tins::ARP::ARP(const uint8_t *buffer, uint32_t total_sz) : PDU(0x0608) {
+    if(total_sz < sizeof(arphdr))
+        throw std::runtime_error("Not enought size for an ARP header in the buffer.");
+    memcpy(&_arp, buffer, sizeof(arphdr));
+    total_sz -= sizeof(arphdr);
+    if(total_sz)
+        inner_pdu(new RawPDU(buffer + sizeof(arphdr), total_sz));
+}
+
+Tins::ARP::ARP(const arphdr *arp_ptr) : PDU(Utils::net_to_host_s(0x0806)) {
     memcpy(&_arp, arp_ptr, sizeof(arphdr));
 }
 
@@ -188,10 +140,10 @@ bool Tins::ARP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     return arp_ptr->ar_sip == _arp.ar_tip && arp_ptr->ar_tip == _arp.ar_sip;
 }
 
-Tins::PDU *Tins::ARP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
+Tins::PDU *Tins::ARP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(arphdr))
         return 0;
-    arphdr *arp_ptr = (arphdr*)ptr;
+    const arphdr *arp_ptr = (arphdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(arphdr)) {
         if((child = PDU::clone_inner_pdu(ptr + sizeof(arphdr), total_sz - sizeof(arphdr))) == 0)
@@ -200,4 +152,62 @@ Tins::PDU *Tins::ARP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
     cloned = new ARP(arp_ptr);
     cloned->inner_pdu(child);
     return cloned;
+}
+
+Tins::PDU* Tins::ARP::make_arp_request(const string& iface,
+                                       const string& target,
+                                       const string& sender,
+                                       const uint8_t* hw_snd) {
+    uint32_t target_ip = Tins::Utils::resolve_ip(target);
+    uint32_t sender_ip = Tins::Utils::resolve_ip(sender);
+    return make_arp_request(iface, target_ip, sender_ip, hw_snd);
+}
+
+Tins::PDU* Tins::ARP::make_arp_request(const std::string& iface,
+                                       uint32_t target,
+                                       uint32_t sender,
+                                       const uint8_t* hw_snd) {
+
+    /* Create ARP packet and set its attributes */
+    ARP* arp = new ARP();
+    arp->target_ip_addr(target);
+    arp->sender_ip_addr(sender);
+    if (hw_snd) {
+        arp->sender_hw_addr(hw_snd);
+    }
+    arp->opcode(REQUEST);
+
+    /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
+    EthernetII* eth = new EthernetII(iface, Tins::EthernetII::BROADCAST, hw_snd, arp);
+    return eth;
+}
+
+Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
+                                     const string& target,
+                                     const string& sender,
+                                     const uint8_t* hw_tgt,
+                                     const uint8_t* hw_snd) {
+
+    uint32_t target_ip = Tins::Utils::resolve_ip(target);
+    uint32_t sender_ip = Tins::Utils::resolve_ip(sender);
+    return make_arp_reply(iface, target_ip, sender_ip, hw_tgt, hw_snd);
+}
+
+Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
+                                     uint32_t target,
+                                     uint32_t sender,
+                                     const uint8_t* hw_tgt,
+                                     const uint8_t* hw_snd) {
+
+    /* Create ARP packet and set its attributes */
+    ARP* arp = new ARP();
+    arp->target_ip_addr(target);
+    arp->sender_ip_addr(sender);
+    arp->target_hw_addr(hw_tgt);
+    arp->sender_hw_addr(hw_snd);
+    arp->opcode(REPLY);
+
+    /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
+    EthernetII* eth = new EthernetII(iface, hw_tgt, hw_snd, arp);
+    return eth;
 }
