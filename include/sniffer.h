@@ -52,6 +52,12 @@ namespace Tins {
     
     /** 
      * \brief Sniffer class can be used to sniff packets using filters.
+     * 
+     * This class uses a given filter to sniff packets and allow the user
+     * to handle them. Each time a filter is set, it's used until a new one
+     * is set. Both Sniffer::next_packet and Sniffer::sniff_loop have an
+     * optional filter parameter. If a filter is set using those parameter,
+     * the previously set filter is freed and the new one is used.
      */
     class Sniffer {
     public:
@@ -71,15 +77,15 @@ namespace Tins {
         /**
          * \brief Compiles a filter and uses it to capture one packet.
          * 
-         * This method should be used only when expecting few packets.
-         * It's innefficient since it recompiles the filter every time it
-         * is called. To reuse a filter and sniff more efficiently, use
-         * Sniffer::sniff_loop.
+         * This method returns the first sniffed PDU that matches the given
+         * filter. If no filter is given, the previously set filter will be used.
+         * If no filter has been set, then no filtering is applied to sniffed
+         * packets.
          * \param filter The filter which will be used while sniffing.
          * \return The captured packet, matching the given filter, 0 if an
          * error occured(probably compiling the filter).
          */
-        PDU *next_pdu(const std::string &filter = "");
+        PDU *next_packet(const std::string &filter = "");
         
         /**
          * \brief Starts a sniffing loop, using a callback object for every
@@ -89,10 +95,17 @@ namespace Tins {
          * or it could be a specific SnifferHandler specialization. This method deletes
          * packets after they are handled, therefore the handlers MUST NOT delete them.
          * \param cback_handler The callback handler object which should process packets.
-         * \param filter The filter to use when sniffing.
+         * \param filter The filter to use when sniffing(optional).
          * \param max_packets The maximum amount of packets to sniff. 0 == infinite.
          */
-        void sniff_loop(AbstractSnifferHandler *cback_handler, const std::string &filter, uint32_t max_packets = 0);
+        void sniff_loop(AbstractSnifferHandler *cback_handler, const std::string &filter = "", uint32_t max_packets = 0);
+        
+        /**
+         * \brief Sets a filter on this sniffer.
+         * \param filter The filter to be set.
+         * \return True iif it was possible to apply the filter.
+         */
+        bool set_filter(const std::string &filter);
         
         /**
          * \brief Stops sniffing loops.

@@ -60,13 +60,9 @@ bool Tins::Sniffer::compile_set_filter(const string &filter, bpf_program &prog) 
     return (pcap_compile(handle, &prog, filter.c_str(), 0, ip) != -1 && pcap_setfilter(handle, &prog) != -1);
 }
 
-Tins::PDU *Tins::Sniffer::next_pdu(const string &filter) {
-    if(filter.size()) {
-        if(actual_filter.bf_insns)
-            pcap_freecode(&actual_filter);
-        if(!compile_set_filter(filter, actual_filter))
-            return 0;
-    }
+Tins::PDU *Tins::Sniffer::next_packet(const string &filter) {
+    if(filter.size())
+        set_filter(filter);
     pcap_pkthdr header;
     PDU *ret = 0;
     while(!ret) {
@@ -86,14 +82,16 @@ void Tins::Sniffer::stop_sniff() {
 }
 
 void Tins::Sniffer::sniff_loop(AbstractSnifferHandler *cback_handler, const string &filter, uint32_t max_packets) {
-    if(filter.size()) {
-        if(actual_filter.bf_insns)
-            pcap_freecode(&actual_filter);
-        if(!compile_set_filter(filter, actual_filter))
-            return;
-    }
+    if(filter.size())
+        set_filter(filter);
     LoopData data(handle, cback_handler);
     pcap_loop(handle, max_packets, Sniffer::callback_handler, (u_char*)&data);
+}
+
+bool Tins::Sniffer::set_filter(const std::string &filter) {
+    if(actual_filter.bf_insns)
+        pcap_freecode(&actual_filter);
+    return compile_set_filter(filter, actual_filter);
 }
 
 // Static
