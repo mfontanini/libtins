@@ -80,14 +80,14 @@ namespace Tins {
          *
          * \return Returns the destination's mac address as a constant uint8_t pointer.
          */
-        inline const uint8_t* dst_hw_addr() const { return _eth.dst_mac; }
+        inline const uint8_t* dst_addr() const { return _eth.dst_mac; }
 
         /**
          * \brief Getter for the source's mac address.
          *
          * \return Returns the source's mac address as a constant uint8_t pointer.
          */
-        inline const uint8_t* src_hw_addr() const { return _eth.src_mac; }
+        inline const uint8_t* src_addr() const { return _eth.src_mac; }
 
         /**
          * \brief Getter for the interface.
@@ -109,14 +109,14 @@ namespace Tins {
          *
          * \param new_dst_mac uint8_t array of 6 bytes containing the new destination's MAC.
          */
-        void dst_hw_addr(const uint8_t* new_dst_mac);
+        void dst_addr(const uint8_t* new_dst_mac);
 
         /**
          * \brief Setter for the source's MAC.
          *
          * \param new_src_mac uint8_t array of 6 bytes containing the new source's MAC.
          */
-        void src_hw_addr(const uint8_t* new_src_mac);
+        void src_addr(const uint8_t* new_src_mac);
 
         /**
          * \brief Setter for the interface.

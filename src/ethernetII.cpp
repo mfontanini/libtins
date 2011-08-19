@@ -38,9 +38,9 @@ const uint8_t* Tins::EthernetII::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\x
 Tins::EthernetII::EthernetII(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
     memset(&_eth, 0, sizeof(ethhdr));
     if(dst_hw_addr)
-        this->dst_hw_addr(dst_hw_addr);
+        this->dst_addr(dst_hw_addr);
     if(src_hw_addr)
-        this->src_hw_addr(src_hw_addr);
+        this->src_addr(src_hw_addr);
     this->iface(iface);
     this->_eth.payload_type = 0;
 
@@ -49,9 +49,9 @@ Tins::EthernetII::EthernetII(const std::string& iface, const uint8_t* dst_hw_add
 Tins::EthernetII::EthernetII(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child) {
     memset(&_eth, 0, sizeof(ethhdr));
     if(dst_hw_addr)
-        this->dst_hw_addr(dst_hw_addr);
+        this->dst_addr(dst_hw_addr);
     if(src_hw_addr)
-        this->src_hw_addr(src_hw_addr);
+        this->src_addr(src_hw_addr);
     this->iface(iface_index);
     this->_eth.payload_type = 0;
 }
@@ -81,11 +81,11 @@ uint16_t Tins::EthernetII::payload_type() const {
     return Utils::net_to_host_s(_eth.payload_type);
 }
 
-void Tins::EthernetII::dst_hw_addr(const uint8_t* new_dst_mac) {
+void Tins::EthernetII::dst_addr(const uint8_t* new_dst_mac) {
     memcpy(this->_eth.dst_mac, new_dst_mac, 6);
 }
 
-void Tins::EthernetII::src_hw_addr(const uint8_t* new_src_mac) {
+void Tins::EthernetII::src_addr(const uint8_t* new_src_mac) {
     memcpy(this->_eth.src_mac, new_src_mac, 6);
 }
 
