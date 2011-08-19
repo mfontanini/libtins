@@ -107,7 +107,7 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         IP(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Destructor for IP objects.
          *

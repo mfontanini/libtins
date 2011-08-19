@@ -50,9 +50,51 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_IP) {
     if(total_sz < sizeof(iphdr))
         throw std::runtime_error("Not enought size for an IP header in the buffer.");
     std::memcpy(&_ip, buffer, sizeof(iphdr));
+
     /* Options... */
+    /* Establish beginning and ending of the options */
+    const uint8_t* ptr_buffer = buffer + sizeof(iphdr);
     buffer += head_len() * sizeof(uint32_t);
+    this->_options_size = 0;
+    this->_padded_options_size = head_len() * sizeof(uint32_t) - sizeof(iphdr);
+    /* While the end of the options is not reached read an option */
+    while (ptr_buffer < buffer && (*ptr_buffer != 0)) {
+        IpOption opt_to_add;
+        opt_to_add.optional_data = NULL;
+        opt_to_add.optional_data_size = 0;
+        memcpy(&opt_to_add.type, ptr_buffer, 1);
+        ptr_buffer++;
+        switch (opt_to_add.type.number) {
+            /* Multibyte options with length as second byte */
+            case IPOPT_SEC:
+            case IPOPT_LSSR:
+            case IPOPT_TIMESTAMP:
+            case IPOPT_EXTSEC:
+            case IPOPT_RR:
+            case IPOPT_SID:
+            case IPOPT_SSRR:
+            case IPOPT_MTUPROBE:
+            case IPOPT_MTUREPLY:
+            case IPOPT_EIP:
+            case IPOPT_TR:
+            case IPOPT_ADDEXT:
+            case IPOPT_RTRALT:
+            case IPOPT_SDB:
+            case IPOPT_DPS:
+            case IPOPT_UMP:
+            case IPOPT_QS:
+                opt_to_add.optional_data_size = *ptr_buffer - 1;
+                opt_to_add.optional_data = new uint8_t[opt_to_add.optional_data_size];
+                memcpy(opt_to_add.optional_data, ptr_buffer, opt_to_add.optional_data_size);
+                ptr_buffer += opt_to_add.optional_data_size;
+        }
+        this->_ip_options.push_back(opt_to_add);
+        this->_options_size += 1 + opt_to_add.optional_data_size;
+    }
+
     total_sz -= head_len() * sizeof(uint32_t);
+    if (total_sz == 0)
+        return;
     switch(_ip.protocol) {
         case IPPROTO_TCP:
             inner_pdu(new Tins::TCP(buffer, total_sz));
@@ -224,17 +266,16 @@ Tins::PDU *Tins::IP::recv_response(PacketSender *sender) {
 
 void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
     uint32_t my_sz = header_size();
-    uint32_t new_flag;
     assert(total_sz >= my_sz);
     if(inner_pdu()) {
+        uint32_t new_flag;
         new_flag = inner_pdu()->flag();
         if(new_flag == IPPROTO_IP)
             new_flag = IPPROTO_IPIP;
+
+        this->protocol(new_flag);
+        this->flag(new_flag);
     }
-    else
-        new_flag = IPPROTO_IP;
-    this->flag(new_flag);
-    this->protocol(new_flag);
     this->tot_len(total_sz);
     this->head_len (my_sz / sizeof(uint32_t));
 
