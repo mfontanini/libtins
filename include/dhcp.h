@@ -165,6 +165,15 @@ namespace Tins {
         DHCP();
         
         /**
+         * \brief Constructor which creates a DHCP object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         * Subclasses might use 0 to provide their own interpretation of this field.
+         */
+        DHCP(const uint8_t *buffer, uint32_t total_sz);
+         
+        /**
          * \brief DHCP destructor
          * 
          * Releases the memory allocated for options.

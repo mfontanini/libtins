@@ -53,16 +53,26 @@ namespace Tins {
          */
         UDP(const uint8_t *buffer, uint32_t total_sz);
 
-         /** \brief Returns the destination port
-          */
+        /** 
+         * \brief Getter for the destination port.
+         * \return The datagram's destination port.
+         */
         inline uint16_t dport() const { return _udp.dport; }
 
-        /** \brief Returns the source port
-          */
+        /** 
+         * \brief Getter for the source port.
+         * \return The datagram's source port.
+         */
         inline uint16_t sport() const { return _udp.sport; }
+        
+        /**
+         * \brief Getter for the length of the datagram.
+         * \return The length of the datagram.
+         */
+        inline uint16_t length() const { return _udp.len; }
 
-        /** \brief Set the destination port.
-         *
+        /** 
+         * \brief Set the destination port.
          * \param new_dport The new destination port.
          */
         void dport(uint16_t new_dport);

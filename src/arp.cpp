@@ -200,11 +200,7 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
                                      const uint8_t* hw_snd) {
 
     /* Create ARP packet and set its attributes */
-    ARP* arp = new ARP();
-    arp->target_ip_addr(target);
-    arp->sender_ip_addr(sender);
-    arp->target_hw_addr(hw_tgt);
-    arp->sender_hw_addr(hw_snd);
+    ARP* arp = new ARP(target, sender, hw_tgt, hw_snd);
     arp->opcode(REPLY);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */

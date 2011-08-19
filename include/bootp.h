@@ -45,12 +45,23 @@ namespace Tins {
             BOOTREPLY = 2   
         };
          
-        /** \brief Creates an instance of BootP.
+        /** 
+         * \brief Creates an instance of BootP.
          * 
          * This sets the size of the vend field to 64, as the BootP RFC
          * states.
          */
         BootP();
+        
+        /**
+         * \brief Constructor which creates a BootP object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         * \param vend_field_size The vend field size to allocate. 
+         * Subclasses might use 0 to provide their own interpretation of this field.
+         */
+        BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size = 64);
         
         /** \brief BootP destructor.
          * 

@@ -23,6 +23,7 @@
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
+#include <iostream> //borrame
 #include <cassert>
 #include <cstring>
 #ifndef WIN32

@@ -179,12 +179,12 @@ namespace Tins {
          *
          * \return The source address for this IP PDU.
          */
-        inline uint32_t source_address() const { return _ip.saddr; }
+        inline uint32_t src_addr() const { return _ip.saddr; }
 
         /** \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
-        inline uint32_t dest_address() const  { return _ip.daddr; }
+        inline uint32_t dst_addr() const  { return _ip.daddr; }
 
         /* Setters */
 
@@ -249,28 +249,28 @@ namespace Tins {
          *
          * \param ip The ip address in dotted string notation.
          */
-        void source_address(const std::string &ip);
+        void src_addr(const std::string &ip);
 
         /**
          * \brief Setter for the source address field.
          *
          * \param ip The ip address in integer notation.
          */
-        void source_address(uint32_t ip);
+        void src_addr(uint32_t ip);
 
         /**
          * \brief Setter for the destination address field.
          *
          * \param ip The ip address in dotted string notation.
          */
-        void dest_address(const std::string &ip);
+        void dst_addr(const std::string &ip);
 
         /**
          * \brief Setter for the destination address field.
          *
          * \param ip The ip address in integer notation.
          */
-        void dest_address(uint32_t ip);
+        void dst_addr(uint32_t ip);
 
         /**
          * \brief Sets an IP option.

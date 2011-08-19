@@ -73,7 +73,7 @@ Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
     inner_pdu(next);
 }
 
-Tins::EthernetII::EthernetII(ethhdr *eth_ptr) : PDU(ETHERTYPE_IP) {
+Tins::EthernetII::EthernetII(const ethhdr *eth_ptr) : PDU(ETHERTYPE_IP) {
     memcpy(&_eth, eth_ptr, sizeof(ethhdr));
 }
 
@@ -163,10 +163,10 @@ Tins::PDU *Tins::EthernetII::recv_response(PacketSender *sender) {
     return sender->recv_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 
-Tins::PDU *Tins::EthernetII::clone_packet(uint8_t *ptr, uint32_t total_sz) {
+Tins::PDU *Tins::EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(ethhdr))
         return 0;
-    ethhdr *eth_ptr = (ethhdr*)ptr;
+    const ethhdr *eth_ptr = (ethhdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(ethhdr)) {
         if((child = PDU::clone_inner_pdu(ptr + sizeof(ethhdr), total_sz - sizeof(ethhdr))) == 0)

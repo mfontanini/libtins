@@ -175,7 +175,7 @@ namespace Tins {
          * \return The cloned PDU.
          * \sa PDU::clone_packet
          */
-        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
+        PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
     private:
         /**
          * Struct that represents the Ethernet II header
@@ -190,7 +190,7 @@ namespace Tins {
          *
          * \param eth_ptr The pointer to the ethhdr.
          */
-        EthernetII(ethhdr *eth_ptr);
+        EthernetII(const ethhdr *eth_ptr);
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         

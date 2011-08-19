@@ -126,19 +126,19 @@ void Tins::IP::check(uint16_t new_check) {
     _ip.check = Utils::net_to_host_s(new_check);
 }
 
-void Tins::IP::source_address(const string &ip) {
+void Tins::IP::src_addr(const string &ip) {
     _ip.saddr = Utils::resolve_ip(ip);
 }
 
-void Tins::IP::source_address(uint32_t ip) {
+void Tins::IP::src_addr(uint32_t ip) {
     _ip.saddr = ip;
 }
 
-void Tins::IP::dest_address(const string &ip) {
+void Tins::IP::dst_addr(const string &ip) {
     _ip.daddr = Utils::resolve_ip(ip);
 }
 
-void Tins::IP::dest_address(uint32_t ip) {
+void Tins::IP::dst_addr(uint32_t ip) {
     _ip.daddr = ip;
 }
 

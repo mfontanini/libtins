@@ -73,7 +73,7 @@ void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
         length(sizeof(udphdr) + inner_pdu()->size());
     std::memcpy(buffer, &_udp, sizeof(udphdr));
     if(!_udp.check && ip_packet) {
-        uint32_t checksum = PDU::pseudoheader_checksum(ip_packet->source_address(), ip_packet->dest_address(), size(), IPPROTO_UDP) +
+        uint32_t checksum = PDU::pseudoheader_checksum(ip_packet->src_addr(), ip_packet->dst_addr(), size(), IPPROTO_UDP) +
                             PDU::do_checksum(buffer, buffer + total_sz);
         while (checksum >> 16)
             checksum = (checksum & 0xffff)+(checksum >> 16);

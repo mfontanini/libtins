@@ -79,7 +79,7 @@ namespace Tins {
          * \return The captured packet, matching the given filter, 0 if an
          * error occured(probably compiling the filter).
          */
-        PDU *next_pdu(const std::string &filter);
+        PDU *next_pdu(const std::string &filter = "");
         
         /**
          * \brief Starts a sniffing loop, using a callback object for every
@@ -88,11 +88,11 @@ namespace Tins {
          * Handlers could be user-provided classes which inherit AbstractSnifferHandler,
          * or it could be a specific SnifferHandler specialization. This method deletes
          * packets after they are handled, therefore the handlers MUST NOT delete them.
-         * \param filter The filter to use when sniffing.
          * \param cback_handler The callback handler object which should process packets.
+         * \param filter The filter to use when sniffing.
          * \param max_packets The maximum amount of packets to sniff. 0 == infinite.
          */
-        void sniff_loop(const std::string &filter, AbstractSnifferHandler *cback_handler, uint32_t max_packets = 0);
+        void sniff_loop(AbstractSnifferHandler *cback_handler, const std::string &filter, uint32_t max_packets = 0);
         
         /**
          * \brief Stops sniffing loops.
@@ -105,6 +105,7 @@ namespace Tins {
         
         pcap_t *handle;
         bpf_u_int32 ip, mask;
+        bpf_program actual_filter;
     };
     
     /**

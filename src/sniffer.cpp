@@ -46,9 +46,12 @@ Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size) {
     handle = pcap_open_live(device.c_str(), max_packet_size, 0, 0, error);
     if(!handle)
         throw runtime_error(error);
+    actual_filter.bf_insns = 0;
 }
 
 Tins::Sniffer::~Sniffer() {
+    if(actual_filter.bf_insns)
+        pcap_freecode(&actual_filter);
     if(handle)
         pcap_close(handle);
 }
@@ -58,9 +61,12 @@ bool Tins::Sniffer::compile_set_filter(const string &filter, bpf_program &prog) 
 }
 
 Tins::PDU *Tins::Sniffer::next_pdu(const string &filter) {
-    bpf_program prog;
-    if(!compile_set_filter(filter, prog))
-        return 0;
+    if(filter.size()) {
+        if(actual_filter.bf_insns)
+            pcap_freecode(&actual_filter);
+        if(!compile_set_filter(filter, actual_filter))
+            return 0;
+    }
     pcap_pkthdr header;
     PDU *ret = 0;
     while(!ret) {
@@ -72,7 +78,6 @@ Tins::PDU *Tins::Sniffer::next_pdu(const string &filter) {
             ret = 0;
         }
     }
-    pcap_freecode(&prog);
     return ret;
 }
 
@@ -80,13 +85,15 @@ void Tins::Sniffer::stop_sniff() {
     pcap_breakloop(handle);
 }
 
-void Tins::Sniffer::sniff_loop(const std::string &filter, AbstractSnifferHandler *cback_handler, uint32_t max_packets) {
-    bpf_program prog;
-    if(compile_set_filter(filter, prog)) {
-        LoopData data(handle, cback_handler);
-        pcap_loop(handle, max_packets, Sniffer::callback_handler, (u_char*)&data);
-        pcap_freecode(&prog);
+void Tins::Sniffer::sniff_loop(AbstractSnifferHandler *cback_handler, const string &filter, uint32_t max_packets) {
+    if(filter.size()) {
+        if(actual_filter.bf_insns)
+            pcap_freecode(&actual_filter);
+        if(!compile_set_filter(filter, actual_filter))
+            return;
     }
+    LoopData data(handle, cback_handler);
+    pcap_loop(handle, max_packets, Sniffer::callback_handler, (u_char*)&data);
 }
 
 // Static
