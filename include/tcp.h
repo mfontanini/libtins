@@ -23,7 +23,7 @@
 #define __TCP_H
 
 
-#include <vector>
+#include <list>
 #include <stdint.h>
 #ifndef WIN32
     #include <endian.h>
@@ -66,8 +66,34 @@ namespace Tins {
          */
 
         enum Options {
-            MSS = 2,
+            EOL   = 0,
+            NOP   = 1,
+            MSS   = 2,
             TSOPT = 8
+        };
+        
+        /**
+         * \brief Class that represents a TCP option field.
+         */
+        struct TCPOption {
+            /**
+             * \brief Creates an instance of a TCPOption.
+             * \param okind The option kind.
+             * \param olength The option's data length.
+             * \param odata The option's data(if any).
+             */
+            TCPOption(uint8_t okind, uint8_t olength, uint8_t *odata) :
+                      kind(okind), length(olength), data(odata) { }
+
+            /**
+             * \brief Writes the option into a buffer.
+             * \param buffer The buffer in which to write the option.
+             * \return The buffer pointer incremented by the size of this option.
+             */
+            uint8_t *write(uint8_t *buffer);
+            
+            uint8_t kind, length;
+            uint8_t *data;
         };
 
         /**
@@ -152,6 +178,13 @@ namespace Tins {
         inline uint8_t data_offset() const { return this->_tcp.doff; }
 
         /**
+         * \brief Getter for the option list.
+         * 
+         * \return The options list.
+         */
+        inline const std::list<TCPOption> &options() const { return _options; }
+
+        /**
          * \brief Gets the value of a flag.
          * 
          * \param tcp_flag The polled flag.
@@ -164,56 +197,56 @@ namespace Tins {
         /**
          * \brief Setter for the destination port field.
          *
-         * \param new_dport uint16_t with the new destination port.
+         * \param new_dport The new destination port.
          */
         void dport(uint16_t new_dport);
 
         /**
          * \brief Setter for the source port field.
          *
-         * \param new_sport uint16_t with the new source port.
+         * \param new_sport The new source port.
          */
         void sport(uint16_t new_sport);
 
         /**
          * \brief Setter for the sequence number.
          *
-         * \param new_seq uint32_t with the new sequence number.
+         * \param new_seq The new sequence number.
          */
         void seq(uint32_t new_seq);
 
         /**
          * \brief Setter for the acknowledge number.
          *
-         * \param new_ack_seq uint32_t with the new acknowledge number.
+         * \param new_ack_seq The new acknowledge number.
          */
         void ack_seq(uint32_t new_ack_seq);
 
         /**
          * \brief Setter for the window size.
          *
-         * \param new_window uint16_t with the new window size.
+         * \param new_window The new window size.
          */
         void window(uint16_t new_window);
 
         /**
          * \brief Setter for the checksum field.
          *
-         * \param new_check uint16_t with the new checksum.
+         * \param new_check The new checksum.
          */
         void check(uint16_t new_check);
 
         /**
          * \brief Setter for the urgent pointer field.
          *
-         * \param new_urg_ptr uint16_t with the new urgent pointer.
+         * \param new_urg_ptr The new urgent pointer.
          */
         void urg_ptr(uint16_t new_urg_ptr);
 
         /**
          * \brief Setter for the data offset pointer field.
          *
-         * \param new_doff uint8_t with the new data offset pointer.
+         * \param new_doff The new data offset pointer.
          */
         void data_offset(uint8_t new_doff);
 
@@ -234,34 +267,34 @@ namespace Tins {
         /**
          * \brief Set the maximum segment size.
          *
-         * \param value uint16_t with the new maximum segment size.
+         * \param value The new maximum segment size.
          */
         void set_mss(uint16_t value);
 
         /**
          * \brief Set the timestamp.
          *
-         * \param value uint32_t with the current value of the timestamp clock.
-         * \param reply uint32_t with the echo reply field.
+         * \param value The current value of the timestamp clock.
+         * \param reply The echo reply field.
          */
         void set_timestamp(uint32_t value, uint32_t reply);
 
         /**
          * \brief Set a TCP flag value.
          *
-         * \param tcp_flag Flag which indicates the flag to be set.
-         * \param value uint8_t with the new value for this flag. Must be 0 or 1.
+         * \param tcp_flag The flag to be set.
+         * \param value The new value for this flag. Must be 0 or 1.
          */
         void set_flag(Flags tcp_flag, uint8_t value);
 
         /**
          * \brief Adds a TCP option.
          *
-         * \param tcp_option Options indicating the option to be set.
-         * \param length uint8_t with the length of this option(optional).
-         * \param data uint8_t* containing this option's data(optional).
+         * \param tcp_option The option type flag to be set.
+         * \param length The length of this option(optional).
+         * \param data Pointer to this option's data(optional).
          */
-        void add_option(Options tcp_option, uint8_t length = 0, uint8_t *data = 0);
+        void add_option(Options tcp_option, uint8_t length = 0, const uint8_t *data = 0);
 
         /**
          * \brief Returns the header size.
@@ -316,16 +349,6 @@ namespace Tins {
             uint16_t	urg_ptr;
         } __attribute__((packed));
 
-        struct TCPOption {
-            TCPOption(uint8_t okind, uint8_t olength, uint8_t *odata) :
-                      kind(okind), length(olength), data(odata) { }
-
-            uint8_t *write(uint8_t *buffer);
-
-            uint8_t kind, length;
-            uint8_t *data;
-        };
-
         static const uint16_t DEFAULT_WINDOW;
 
         /** \brief Serialices this TCP PDU.
@@ -336,7 +359,7 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         tcphdr _tcp;
-        std::vector<TCPOption> _options;
+        std::list<TCPOption> _options;
         uint32_t _options_size, _total_options_size;
     };
 };

@@ -40,20 +40,26 @@ Tins::DHCP::DHCP() : _size(sizeof(uint32_t) + 1) {
 Tins::DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) : BootP(buffer, total_sz, 0) {
     buffer += BootP::header_size();
     total_sz -= BootP::header_size();
-    uint8_t args[2];
+    uint8_t args[2] = {0};
     while(total_sz) {
-        for(unsigned i(0); i < 2; ++i) {
+        for(unsigned i(0); i < 2 && args[0] != END; ++i) {
             args[i] = *(buffer++);
             total_sz--;
             if(!total_sz)
                 throw std::runtime_error("Not enought size for a DHCP header in the buffer.");
         }
-        // Not enough size for this option
-        if(total_sz < args[1])
-            throw std::runtime_error("Not enought size for a DHCP header in the buffer.");
-        add_option((Options)args[0], args[1], buffer);
-        buffer += args[1];
-        total_sz -= args[1];
+        // If the END-OF-OPTIONS was not found...
+        if(args[0] != END) {            
+            // Not enough size for this option
+            if(total_sz < args[1])
+                throw std::runtime_error("Not enought size for a DHCP header in the buffer.");
+            add_option((Options)args[0], args[1], buffer);
+            buffer += args[1];
+            total_sz -= args[1];
+        }
+        // Otherwise, break the loop.
+        else
+            total_sz = 0;
     }
 }
 

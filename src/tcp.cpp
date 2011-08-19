@@ -47,16 +47,47 @@ Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_TCP) {
         throw std::runtime_error("Not enought size for an TCP header in the buffer.");
     std::memcpy(&_tcp, buffer, sizeof(tcphdr));
     
-    /* Options... */
-    
+    buffer += sizeof(tcphdr);
     total_sz -= sizeof(tcphdr);
+    
+    uint32_t index = 0, header_end = (data_offset() * sizeof(uint32_t)) - sizeof(tcphdr);
+    if(total_sz >= header_end) {
+        uint8_t args[2] = {0};
+        while(index < header_end) {
+            for(unsigned i(0); i < 2 && args[0] != NOP; ++i) {
+                args[i] = buffer[index++];
+                if(index == header_end)
+                    throw std::runtime_error("Not enought size for a TCP header in the buffer.");
+            }
+            // We don't want to store NOPs and EOLs
+            if(args[0] != NOP && args[0] != EOL)  {
+                if(args[1]) {
+                    // Not enough size for this option
+                    if(header_end - index < args[1] - (sizeof(uint8_t) << 1)) {
+                        throw std::runtime_error("Not enought size for a TCP header in the buffer.");
+                    }
+                    args[1] -= (sizeof(uint8_t) << 1);
+                    add_option((Options)args[0], args[1], buffer + index);
+                }
+                index += args[1];
+            }
+            else if(args[0] == EOL)
+                index = header_end;
+            else // Skip the NOP
+                args[0] = 0;
+        }
+        buffer += index;
+        total_sz -= index;
+        _total_options_size = header_end;
+        _options_size = (_total_options_size / 4) * 4;
+    }
     if(total_sz)
-        inner_pdu(new RawPDU(buffer + sizeof(tcphdr), total_sz));
+        inner_pdu(new RawPDU(buffer, total_sz));
 }
 
 Tins::TCP::~TCP() {
-    for(unsigned i(0); i < _options.size(); ++i)
-        delete[] _options[i].data;
+    for(std::list<TCPOption>::iterator it = _options.begin(); it != _options.end(); ++it)
+        delete[] it->data;
 }
 
 void Tins::TCP::dport(uint16_t new_dport) {
@@ -166,7 +197,7 @@ void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
     };
 }
 
-void Tins::TCP::add_option(Options tcp_option, uint8_t length, uint8_t *data) {
+void Tins::TCP::add_option(Options tcp_option, uint8_t length, const uint8_t *data) {
     uint8_t *new_data = new uint8_t[length], padding;
     memcpy(new_data, data, length);
     _options.push_back(TCPOption(tcp_option, length, new_data));
@@ -184,8 +215,8 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     uint8_t *tcp_start = buffer;
     buffer += sizeof(tcphdr);
     _tcp.doff = (sizeof(tcphdr) + _total_options_size) / sizeof(uint32_t);
-    for(unsigned i(0); i < _options.size(); ++i)
-        buffer = _options[i].write(buffer);
+    for(std::list<TCPOption>::iterator it = _options.begin(); it != _options.end(); ++it)
+        buffer = it->write(buffer);
 
     if(_options_size < _total_options_size) {
         uint8_t padding = _total_options_size;
