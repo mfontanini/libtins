@@ -24,6 +24,7 @@
 
 
 #include <list>
+#include <string>
 #include "bootp.h"
 
 
@@ -130,10 +131,29 @@ namespace Tins {
          * \brief DHCP options struct.
          */
         struct DHCPOption {
-            uint8_t option, length;
+            /** 
+             * \brief The option number.
+             */
+            uint8_t option;
+            /** 
+             * \brief The value's length in bytes.
+             */
+            uint8_t length;
+            /** 
+             * \brief The option's value.
+             */
             uint8_t *value;
-           
-            DHCPOption(uint8_t opt, uint8_t len, uint8_t *val);
+            
+            /**
+             * \brief Creates an instance of DHCPOption.
+             * 
+             * The option's value is copied, therefore the user should
+             * manually free any memory pointed by the "val" parameter.
+             * \param opt The option number.
+             * \param len The length of the option's value in bytes.
+             * \param val The option's value.
+             */
+            DHCPOption(uint8_t opt, uint8_t len, const uint8_t *val);
         };
         
         /** 
@@ -143,6 +163,13 @@ namespace Tins {
          * type and length.
          */
         DHCP();
+        
+        /**
+         * \brief DHCP destructor
+         * 
+         * Releases the memory allocated for options.
+         */
+        ~DHCP();
         
         /** 
          * \brief Adds a new option to this DHCP PDU.
@@ -154,7 +181,7 @@ namespace Tins {
          * \param val The value of this option.
          * \return True if the option was added successfully.
          */
-        bool add_option(Options opt, uint8_t len, uint8_t *val);
+        bool add_option(Options opt, uint8_t len, const uint8_t *val);
         
         /** 
          * \brief Adds a type option the the option list.
@@ -177,6 +204,41 @@ namespace Tins {
          */
         bool add_lease_time(uint32_t time);
         
+        /**
+         * \brief Adds a subnet mask option.
+         * \param mask The subnet mask.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_subnet_mask(uint32_t mask);
+        
+        /** 
+         * \brief Adds a routers option.
+         * \param routers A list of ip addresses in integer notation.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_routers_option(const std::list<uint32_t> &routers);
+        
+        /** 
+         * \brief Adds a domain name servers option.
+         * \param dns A list of ip addresses in integer notation.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_dns_options(const std::list<uint32_t> &dns);
+        
+        /** 
+         * \brief Adds a broadcast address option.
+         * \param addr The broadcast address.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_broadcast_option(uint32_t addr);
+        
+        /** 
+         * \brief Adds a domain name option.
+         * \param name The domain name.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_domain_name(const std::string &name);
+        
         /** \brief Getter for the options list.
          * \return The option list.
          */
@@ -198,6 +260,8 @@ namespace Tins {
         static const uint32_t MAX_DHCP_SIZE;
         
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        
+        uint8_t *serialize_list(const std::list<uint32_t> &int_list, uint32_t &sz);
         
         std::list<DHCPOption> _options;
         uint32_t _size;

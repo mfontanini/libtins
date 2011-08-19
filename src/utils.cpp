@@ -21,6 +21,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <fstream>
 #include <stdexcept>
 #include <cassert>
 #include <cstring>
@@ -75,6 +76,29 @@ struct HWAddressCollector {
         }
     }
 };
+
+bool from_hex(const string &str, uint32_t &result) {
+    unsigned i(0);
+    result = 0;
+    while(i < str.size()) {
+        uint8_t tmp;
+        if(str[i] >= 'A' && str[i] <= 'F')
+            tmp = (str[i] - 'A' + 10);
+        else if(str[i] >= '0' && str[i] <= '9')
+            tmp = (str[i] - '0');
+        else
+            return false;
+        result = (result << 4) | tmp;
+        i++;
+    }
+    return true;
+}
+
+void skip_line(istream &input) {
+    int c = 0;
+    while(c != '\n' && input)
+         c = input.get();
+}
 
 /** \endcond */
 
@@ -177,6 +201,26 @@ bool Tins::Utils::resolve_hwaddr(const string &iface, uint32_t ip, uint8_t *buff
     }
     else
         return false;
+}
+
+string Tins::Utils::interface_from_ip(uint32_t ip) {
+    ifstream input("/proc/net/route");
+    bool match(false);
+    string iface;
+    string destination, mask;
+    uint32_t destination_int, mask_int;
+    skip_line(input);
+    while(!match) {
+        input >> iface >> destination;
+        for(unsigned i(0); i < 6; ++i)
+            input >> mask;
+        from_hex(destination, destination_int);
+        from_hex(mask, mask_int);
+        if((ip & mask_int) == destination_int)
+            return iface;
+        skip_line(input);
+    }
+    return "";
 }
 
 set<string> Tins::Utils::network_interfaces() {

@@ -21,11 +21,12 @@
 
 #include <cstring>
 #include <cassert>
-#include <iostream> //borrame
 #include "utils.h"
 #include "dhcp.h"
 
 const uint32_t Tins::DHCP::MAX_DHCP_SIZE = 312;
+
+using namespace std;
 
 /* Magic cookie: uint32_t.
  * end of options: 1 byte. */
@@ -35,12 +36,19 @@ Tins::DHCP::DHCP() : _size(sizeof(uint32_t) + 1) {
     hlen(6);
 }
 
-Tins::DHCP::DHCPOption::DHCPOption(uint8_t opt, uint8_t len, uint8_t *val) : option(opt), length(len) {
+Tins::DHCP::~DHCP() {
+    while(_options.size()) {
+        delete[] _options.front().value;
+        _options.pop_front();
+    }
+}
+
+Tins::DHCP::DHCPOption::DHCPOption(uint8_t opt, uint8_t len, const uint8_t *val) : option(opt), length(len) {
     value = new uint8_t[len];
     std::memcpy(value, val, len);
 }
 
-bool Tins::DHCP::add_option(Options opt, uint8_t len, uint8_t *val) {
+bool Tins::DHCP::add_option(Options opt, uint8_t len, const uint8_t *val) {
     uint32_t opt_size = len + (sizeof(uint8_t) << 1);
     if(_size + opt_size > MAX_DHCP_SIZE)
         return false;
@@ -50,16 +58,53 @@ bool Tins::DHCP::add_option(Options opt, uint8_t len, uint8_t *val) {
 }
 
 bool Tins::DHCP::add_type_option(Flags type) {
-    return add_option(DHCP_MESSAGE_TYPE, 1, (uint8_t*)&type);
+    return add_option(DHCP_MESSAGE_TYPE, 1, (const uint8_t*)&type);
 }
 
 bool Tins::DHCP::add_server_identifier(uint32_t ip) {
-    return add_option(DHCP_SERVER_IDENTIFIER, 4, (uint8_t*)&ip);
+    return add_option(DHCP_SERVER_IDENTIFIER, 4, (const uint8_t*)&ip);
 }
 
 bool Tins::DHCP::add_lease_time(uint32_t time) {
     time = Utils::net_to_host_l(time);
-    return add_option(DHCP_LEASE_TIME, 4, (uint8_t*)&time);
+    return add_option(DHCP_LEASE_TIME, 4, (const uint8_t*)&time);
+}
+
+bool Tins::DHCP::add_subnet_mask(uint32_t mask) {
+    return add_option(SUBNET_MASK, 4, (const uint8_t*)&mask);
+}
+
+bool Tins::DHCP::add_routers_option(const list<uint32_t> &routers) {
+    uint32_t size;
+    uint8_t *buffer = serialize_list(routers, size);
+    bool ret = add_option(ROUTERS, size, buffer);
+    delete[] buffer;
+    return ret;
+}
+
+bool Tins::DHCP::add_dns_options(const list<uint32_t> &dns) {
+    uint32_t size;
+    uint8_t *buffer = serialize_list(dns, size);
+    bool ret = add_option(DOMAIN_NAME_SERVERS, size, buffer);
+    delete[] buffer;
+    return ret;
+}
+
+bool Tins::DHCP::add_broadcast_option(uint32_t addr) {
+    return add_option(BROADCAST_ADDRESS, 4, (uint8_t*)&addr);
+}
+
+bool Tins::DHCP::add_domain_name(const string &name) {
+    return add_option(DOMAIN_NAME, name.size(), (const uint8_t*)name.c_str());
+}
+
+uint8_t *Tins::DHCP::serialize_list(const list<uint32_t> &int_list, uint32_t &sz) {
+    uint8_t *buffer = new uint8_t[int_list.size() * sizeof(uint32_t)];
+    uint32_t *ptr = (uint32_t*)buffer;
+    for(list<uint32_t>::const_iterator it = int_list.begin(); it != int_list.end(); ++it)
+        *(ptr++) = *it;
+    sz = sizeof(uint32_t) * int_list.size();
+    return buffer;
 }
 
 uint32_t Tins::DHCP::header_size() const {
@@ -69,6 +114,7 @@ uint32_t Tins::DHCP::header_size() const {
 void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= header_size());
     uint8_t *result = new uint8_t[_size], *ptr = result + sizeof(uint32_t);
+    // Magic cookie
     *((uint32_t*)result) = Utils::net_to_host_l(0x63825363);
     for(std::list<DHCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(ptr++) = it->option;
@@ -76,6 +122,7 @@ void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
         std::memcpy(ptr, it->value, it->length);
         ptr += it->length;
     }
+    // End of options
     result[_size-1] = END;
     vend(result, _size);
     BootP::write_serialization(buffer, total_sz, parent);

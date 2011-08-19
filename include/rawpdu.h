@@ -37,14 +37,21 @@ namespace Tins {
     public:
         /** \brief Creates an instance of RawPDU.
          *
-         * The payload is not copied by default, therefore it must be 
-         * manually freed by the user. If the payload was to be copied,
-         * then the copy flag must be set to true.
+         * The payload is copied, therefore the original payload's memory
+         * must be freed by the user.
          * \param pload The payload which the RawPDU will contain.
          * \param size The size of the payload.
-         * \param copy Flag indicating wether to copy the payload.
          */
-        RawPDU(uint8_t *pload, uint32_t size, bool copy = false);
+        RawPDU(const uint8_t *pload, uint32_t size);
+        
+        /** \brief Creates an instance of RawPDU.
+         *
+         * The payload is not copied in this constructor, therefore 
+         * it must be manually freed by the user. 
+         * \param pload The payload which the RawPDU will contain.
+         * \param size The size of the payload.
+         */
+        RawPDU(uint8_t *pload, uint32_t size);
 
         /** \brief RawPDU destructor.
          * 

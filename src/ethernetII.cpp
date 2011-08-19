@@ -21,7 +21,7 @@
 
 #include <cassert>
 #include <cstring>
-
+#include <stdexcept>
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -29,6 +29,8 @@
 #endif
 #include "ethernetII.h"
 #include "rawpdu.h"
+#include "ip.h"
+#include "arp.h"
 #include "utils.h"
 
 const uint8_t* Tins::EthernetII::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
@@ -54,8 +56,29 @@ Tins::EthernetII::EthernetII(uint32_t iface_index, const uint8_t* dst_hw_addr, c
     this->_eth.payload_type = 0;
 }
 
+Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP) {
+    if(total_sz < sizeof(ethhdr))
+        throw std::runtime_error("Not enought size for an ethernetII header in the buffer.");
+    memcpy(&_eth, buffer, sizeof(ethhdr));
+    PDU *next = 0;
+    switch(payload_type()) {
+        case ETHERTYPE_IP:
+            next = new Tins::IP(buffer + sizeof(ethhdr), total_sz - sizeof(ethhdr));
+            break;
+        case ETHERTYPE_ARP:
+            next = new Tins::ARP(buffer + sizeof(ethhdr), total_sz - sizeof(ethhdr));
+            break;
+        // Other protos plz
+    }
+    inner_pdu(next);
+}
+
 Tins::EthernetII::EthernetII(ethhdr *eth_ptr) : PDU(ETHERTYPE_IP) {
     memcpy(&_eth, eth_ptr, sizeof(ethhdr));
+}
+
+uint16_t Tins::EthernetII::payload_type() const {
+    return Utils::net_to_host_s(_eth.payload_type);
 }
 
 void Tins::EthernetII::dst_hw_addr(const uint8_t* new_dst_mac) {

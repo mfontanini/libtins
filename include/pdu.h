@@ -164,7 +164,7 @@ namespace Tins {
          * \param total_sz The size of the buffer.
          * \return The cloned PDU.
          */
-        virtual PDU *clone_packet(uint8_t *ptr, uint32_t total_sz) { return 0; }
+        virtual PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz) { return 0; }
     protected:
         /** \brief Serializes this PDU and propagates this action to child PDUs.
          * 
@@ -181,7 +181,7 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          * \return Returns the cloned PDU. Will be 0 if cloning failed.
          */
-        PDU *clone_inner_pdu(uint8_t *ptr, uint32_t total_sz);
+        PDU *clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz);
 
         /** \brief Serializes this TCP PDU.
          *

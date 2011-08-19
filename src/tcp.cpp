@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <stdexcept>
 #include <cstring>
 #include <cassert>
 #ifndef WIN32
@@ -39,6 +40,18 @@ Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _options_size
     this->data_offset(sizeof(tcphdr) / sizeof(uint32_t));
     this->window(DEFAULT_WINDOW);
     this->check(0);
+}
+
+Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_TCP) {
+    if(total_sz < sizeof(tcphdr))
+        throw std::runtime_error("Not enought size for an TCP header in the buffer.");
+    std::memcpy(&_tcp, buffer, sizeof(tcphdr));
+    
+    /* Options... */
+    
+    total_sz -= sizeof(tcphdr);
+    if(total_sz)
+        inner_pdu(new RawPDU(buffer + sizeof(tcphdr), total_sz));
 }
 
 Tins::TCP::~TCP() {
@@ -90,6 +103,38 @@ void Tins::TCP::set_mss(uint16_t value) {
 void Tins::TCP::set_timestamp(uint32_t value, uint32_t reply) {
     uint64_t buffer = ((uint64_t)Utils::net_to_host_l(reply) << 32) | Utils::net_to_host_l(value);
     add_option(TSOPT, 8, (uint8_t*)&buffer);
+}
+
+uint8_t Tins::TCP::get_flag(Flags tcp_flag) {
+    switch(tcp_flag) {
+        case FIN:
+            return _tcp.fin;
+            break;
+        case SYN:
+            return _tcp.syn;
+            break;
+        case RST:
+            return _tcp.rst;
+            break;
+        case PSH:
+            return _tcp.psh;
+            break;
+        case ACK:
+            return _tcp.ack;
+            break;
+        case URG:
+            return _tcp.urg;
+            break;
+        case ECE:
+            return _tcp.ece;
+            break;
+        case CWR:
+            return _tcp.cwr;
+            break;
+        default:
+            return 0;
+            break;
+    };
 }
 
 void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {

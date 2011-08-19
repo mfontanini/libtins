@@ -97,7 +97,8 @@ namespace Tins {
          */ 
         std::set<std::string> network_interfaces();
         
-        /** \brief Lookup the ip address of the given interface.
+        /** 
+         * \brief Lookup the ip address of the given interface.
          * 
          * If the lookup fails, false will be returned, true otherwise.
          * \param iface The interface from which to extract the ip address.
@@ -105,7 +106,8 @@ namespace Tins {
          */
         bool interface_ip(const std::string &iface, uint32_t &ip);
         
-        /** \brief Lookup the hardware address of the given interface.
+        /** 
+         * \brief Lookup the hardware address of the given interface.
          * 
          * If the lookup fails, false will be returned, true otherwise.
          * \param iface The interface from which to extract the hardware address.
@@ -114,15 +116,27 @@ namespace Tins {
          */
         bool interface_hwaddr(const std::string &iface, uint8_t *buffer);
 
-        /** \brief Lookup the interface identifier.
+        /** 
+         * \brief Lookup the interface identifier.
          * 
          * If the lookup fails, false will be returned, true otherwise.
          * \param iface The interface from which to extract the identifier.
-         * \param flag The interface id will be returned in this parameter.
+         * \param id The interface id will be returned in this parameter.
          */
         bool interface_id(const std::string &iface, uint32_t &id);
         
-        /** \brief Convert 32 bit integer into network byte order.
+        /**
+         * \brief Finds the gateway interface matching the given ip.
+         * 
+         * This function find the interface which would be the gateway
+         * when sending a packet to the given ip.
+         * \param ip The ip of the interface we are looking for.
+         * \return The interface's name.
+         */
+        std::string interface_from_ip(uint32_t ip);
+        
+        /** 
+         * \brief Convert 32 bit integer into network byte order.
          * 
          * \param data The data to convert.
          */

@@ -78,15 +78,21 @@ namespace Tins {
          * \param dport Destination port.
          * \param sport Source port.
          * */
-
         TCP(uint16_t dport = 0, uint16_t sport = 0);
+
+        /**
+         * \brief Constructor which creates an TCP object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        TCP(const uint8_t *buffer, uint32_t total_sz);
 
         /**
          * \brief TCP destructor.
          *
          * Destructs the TCP instance. Does not free the payload.
          * */
-
         ~TCP();
 
         /**
@@ -144,6 +150,16 @@ namespace Tins {
          * \return Data offset in an uint8_t.
          */
         inline uint8_t data_offset() const { return this->_tcp.doff; }
+
+        /**
+         * \brief Gets the value of a flag.
+         * 
+         * \param tcp_flag The polled flag.
+         * \return The value of the flag.
+         */
+        uint8_t get_flag(Flags tcp_flag);
+        
+        /* Setters */
 
         /**
          * \brief Setter for the destination port field.

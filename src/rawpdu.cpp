@@ -24,11 +24,13 @@
 #include "rawpdu.h"
 
 
-Tins::RawPDU::RawPDU(uint8_t *pload, uint32_t size, bool copy) : PDU(255), _payload(pload), _payload_size(size), _owns_payload(copy) {
-    if(copy) {
-        _payload = new uint8_t[size];
-        std::memcpy(_payload, pload, size);
-    }
+Tins::RawPDU::RawPDU(const uint8_t *pload, uint32_t size) : PDU(255), _payload_size(size), _owns_payload(true) {
+    _payload = new uint8_t[size];
+    std::memcpy(_payload, pload, size);
+}
+
+Tins::RawPDU::RawPDU(uint8_t *pload, uint32_t size) : PDU(255), _payload(pload), _payload_size(size), _owns_payload(false) {
+    
 }
 
 Tins::RawPDU::~RawPDU() {

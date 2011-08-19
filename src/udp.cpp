@@ -19,11 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <stdexcept>
+#include <cassert>
+#include <cstring>
 #ifndef WIN32
     #include <netinet/in.h>
 #endif
-#include <cassert>
-#include <cstring>
 #include "utils.h"
 #include "udp.h"
 #include "ip.h"
@@ -34,6 +35,15 @@ Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) : PDU(IPPROTO_UDP, ch
     this->sport(sport);
     _udp.check = 0;
     _udp.len = 0;
+}
+
+Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_UDP) {
+    if(total_sz < sizeof(udphdr))
+        throw std::runtime_error("Not enought size for an UDP header in the buffer.");
+    std::memcpy(&_udp, buffer, sizeof(udphdr));
+    total_sz -= sizeof(udphdr);
+    if(total_sz)
+        inner_pdu(new RawPDU(buffer + sizeof(udphdr), total_sz));
 }
 
 void Tins::UDP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
@@ -61,14 +71,14 @@ void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
     if(inner_pdu())
         length(sizeof(udphdr) + inner_pdu()->size());
+    std::memcpy(buffer, &_udp, sizeof(udphdr));
     if(!_udp.check && ip_packet) {
         uint32_t checksum = PDU::pseudoheader_checksum(ip_packet->source_address(), ip_packet->dest_address(), size(), IPPROTO_UDP) +
-                            PDU::do_checksum(buffer + sizeof(udphdr), buffer + total_sz) + PDU::do_checksum((uint8_t*)&_udp, ((uint8_t*)&_udp) + sizeof(udphdr));
+                            PDU::do_checksum(buffer, buffer + total_sz);
         while (checksum >> 16)
             checksum = (checksum & 0xffff)+(checksum >> 16);
-        _udp.check = Utils::net_to_host_s(~checksum);
+        ((udphdr*)buffer)->check = Utils::net_to_host_s(~checksum);
     }
-    std::memcpy(buffer, &_udp, sizeof(udphdr));
     _udp.check = 0;
 }
 

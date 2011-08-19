@@ -50,7 +50,15 @@ namespace Tins {
          * ARP requests and replies can be constructed easily using
          * ARP::make_arp_request/reply static functions.
          */
-        ARP();
+        ARP(uint32_t target_ip = 0, uint32_t sender_ip = 0, const uint8_t *target_hw = 0, const uint8_t *sender_hw = 0);
+
+        /**
+         * \brief Constructor which creates an TCP object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        ARP(const uint8_t *buffer, uint32_t total_sz);
 
         /* Getters */
         /**
@@ -305,7 +313,7 @@ namespace Tins {
          * \return The cloned PDU.
          * \sa PDU::clone_packet
          */
-        PDU *clone_packet(uint8_t *ptr, uint32_t total_sz);
+        PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
 
     private:
         struct arphdr {
@@ -325,7 +333,7 @@ namespace Tins {
          *
          * \param arp_ptr The pointer to the arphdr.
          */
-        ARP(arphdr *arp_ptr);
+        ARP(const arphdr *arp_ptr);
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 

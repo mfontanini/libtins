@@ -19,12 +19,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <stdexcept>
 #include <cstring>
 #include <cassert>
 #ifndef WIN32
     #include <netinet/in.h>
 #endif
 #include "ip.h"
+#include "tcp.h"
+#include "udp.h"
+#include "icmp.h"
 #include "rawpdu.h"
 #include "utils.h"
 
@@ -40,6 +44,29 @@ Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(IPPRO
     if(ip_src.size())
         _ip.saddr = Utils::resolve_ip(ip_src);
 
+}
+
+Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_IP) {
+    if(total_sz < sizeof(iphdr))
+        throw std::runtime_error("Not enought size for an IP header in the buffer.");
+    std::memcpy(&_ip, buffer, sizeof(iphdr));
+    /* Options... */
+    buffer += head_len() * sizeof(uint32_t);
+    total_sz -= head_len() * sizeof(uint32_t);
+    switch(_ip.protocol) {
+        case IPPROTO_TCP:
+            inner_pdu(new Tins::TCP(buffer, total_sz));
+            break;
+        case IPPROTO_UDP:
+            inner_pdu(new Tins::UDP(buffer, total_sz));
+            break;
+        case IPPROTO_ICMP:
+            inner_pdu(new Tins::ICMP(buffer, total_sz));
+            break;
+        default:
+            inner_pdu(new Tins::RawPDU(buffer, total_sz));
+            break;
+    }
 }
 
 Tins::IP::IP(const iphdr *ptr) : PDU(IPPROTO_IP) {
@@ -241,10 +268,10 @@ bool Tins::IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     return false;
 }
 
-Tins::PDU *Tins::IP::clone_packet(uint8_t *ptr, uint32_t total_sz) {
+Tins::PDU *Tins::IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(iphdr))
         return 0;
-    iphdr *ip_ptr = (iphdr*)ptr;
+    const iphdr *ip_ptr = (iphdr*)ptr;
     uint32_t sz = ip_ptr->ihl * sizeof(uint32_t);
     if(total_sz < sz)
         return 0;
