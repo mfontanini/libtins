@@ -1,3 +1,25 @@
+/*
+ * libtins is a net packet wrapper library for crafting and
+ * interpreting sniffed packets.
+ *
+ * Copyright (C) 2011 Nasel
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+
 #include <stdexcept>
 #include "sniffer.h"
 #include "ethernetII.h"
@@ -52,6 +74,10 @@ Tins::PDU *Tins::Sniffer::next_pdu(const string &filter) {
     }
     pcap_freecode(&prog);
     return ret;
+}
+
+void Tins::Sniffer::stop_sniff() {
+    pcap_breakloop(handle);
 }
 
 void Tins::Sniffer::sniff_loop(const std::string &filter, AbstractSnifferHandler *cback_handler, uint32_t max_packets) {

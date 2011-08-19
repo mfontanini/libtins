@@ -74,7 +74,7 @@ int do_arp_spoofing(uint32_t iface, const string &iface_name, uint32_t gw, uint3
 }
 
 int main(int argc, char *argv[]) {
-    if(argc < 3 && cout << "Usage: <Gateway> <Victim> [Interface=eth0]\n")
+    if(argc < 3 && cout << "Usage: " << *argv << " <Gateway> <Victim> [Interface=eth0]\n")
         return 1;
     uint32_t gw, victim, own_ip;
     uint8_t own_hw[6];
