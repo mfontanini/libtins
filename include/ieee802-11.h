@@ -381,7 +381,7 @@ namespace Tins {
                 unsigned int wep:1;
                 unsigned int order:1;
             #endif
-            } control;
+            } __attribute__((__packed__)) control;
             uint16_t duration_id;
             uint8_t dst_addr[6];
             uint8_t src_addr[6];
@@ -394,7 +394,7 @@ namespace Tins {
                 unsigned int frag_number:4;
                 unsigned int seq_number:12;
             #endif
-            } seq_control;
+            } __attribute__((__packed__)) seq_control;
             uint8_t opt_addr[6];
 
         } __attribute__((__packed__));
