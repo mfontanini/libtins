@@ -357,17 +357,17 @@ namespace Tins {
         struct ieee80211_header {
             struct {
             #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int order:1;
-                unsigned int wep:1;
-                unsigned int more_data:1;
-                unsigned int power_mgmt:1;
-                unsigned int retry:1;
-                unsigned int more_frag:1;
-                unsigned int from_ds:1;
-                unsigned int to_ds:1;
-                unsigned int subtype:4;
-                unsigned int type:2;
                 unsigned int protocol:2;
+                unsigned int type:2;
+                unsigned int subtype:4;
+                unsigned int to_ds:1;
+                unsigned int from_ds:1;
+                unsigned int more_frag:1;
+                unsigned int retry:1;
+                unsigned int power_mgmt:1;
+                unsigned int more_data:1;
+                unsigned int wep:1;
+                unsigned int order:1;
             #elif __BYTE_ORDER == __BIG_ENDIAN
                 unsigned int protocol:2;
                 unsigned int type:2;
