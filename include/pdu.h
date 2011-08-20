@@ -52,6 +52,7 @@ namespace Tins {
         enum PDUType {
             RAW,
             ETHERNET_II,
+            IEEE802_11,
             IP,
             ARP,
             TCP,
@@ -67,10 +68,10 @@ namespace Tins {
          * \param next_pdu The child PDU. Can be obviated.
          */
         PDU(uint32_t flag, PDU *next_pdu = 0);
-        
+
         /** \brief PDU destructor.
-         * 
-         * Deletes the inner pdu, as a consequence every child pdu is 
+         *
+         * Deletes the inner pdu, as a consequence every child pdu is
          * deleted.
          */
         virtual ~PDU();
@@ -159,7 +160,7 @@ namespace Tins {
 
         /** \brief Clones this pdu, filling the corresponding header with data
          * extracted from a buffer.
-         * 
+         *
          * \param ptr The pointer to the from from which the data will be extracted.
          * \param total_sz The size of the buffer.
          * \return The cloned PDU.
@@ -167,15 +168,15 @@ namespace Tins {
         virtual PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz) { return 0; }
     protected:
         /** \brief Serializes this PDU and propagates this action to child PDUs.
-         * 
+         *
          * \param buffer The buffer in which to store this PDU's serialization.
          * \param total_sz The total size of the buffer.
          * \param parent The parent PDU. Will be 0 if there's the parent does not exist.
          */
         void serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-        
+
         /** \brief Clones the inner pdu(if any).
-         * 
+         *
          * This method clones the inner pdu using data from a buffer.
          * \param ptr The pointer from which the child PDU must be cloned.
          * \param total_sz The total size of the buffer.
@@ -194,7 +195,7 @@ namespace Tins {
         virtual void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) = 0;
 
         /** \brief Does the 16 bits sum of all 2 bytes elements between start and end.
-         * 
+         *
          * This is the checksum used by IP, UDP and TCP. If there's and odd number of
          * bytes, the last one is padded and added to the checksum. The checksum is performed
          * using network endiannes.
@@ -203,9 +204,9 @@ namespace Tins {
          * \return Returns the checksum between start and end(non inclusive).
          */
         static uint32_t do_checksum(uint8_t *start, uint8_t *end);
-        
+
         /** \brief Performs the pseudo header checksum used in TCP and UDP PDUs.
-         * 
+         *
          * \param source_ip The source ip address.
          * \param dest_ip The destination ip address.
          * \param len The length to be included in the pseudo header.
