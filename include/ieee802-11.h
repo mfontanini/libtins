@@ -38,6 +38,62 @@ namespace Tins {
     public:
 
         /**
+         * \brief Enum for the different types of 802.11 frames.
+         *
+         */
+        enum Types {
+            MANAGEMENT = 0,
+            CONTROL = 1,
+            DATA = 2
+        };
+
+        /**
+         * \brief Enum for the different subtypes of 802.11 management frames.
+         *
+         */
+        enum ManagementSubtypes {
+            ASSOC_REQ = 0,
+            ASSOC_RESP = 1,
+            REASSOC_REQ = 2,
+            REASSOC_RESP = 3,
+            PROBE_REQ = 4,
+            PROBE_RESP = 5,
+            BEACON = 8,
+            ATIM = 9,
+            DISASSOC = 10,
+            AUTH = 11,
+            DEAUTH = 12
+        };
+
+        /**
+         * \brief Enum for the different subtypes of 802.11 control frames.
+         *
+         */
+        enum ControlSubtypes {
+            PS = 10,
+            RTS = 11,
+            CTS = 12,
+            ACK = 13,
+            CF = 14,
+            CFE_CFA = 15
+        };
+
+        /**
+         * \brief Enum fro the different subtypes of 802.11 data frames.
+         *
+         */
+        enum DataSubtypes {
+            DATA_DATA = 0,
+            DATA_CF_ACK = 1,
+            DATA_CF_POLL = 2,
+            DATA_CF_ACK_POLL = 3,
+            DATA_NULL = 4,
+            CF_ACK = 5,
+            CF_POLL = 6,
+            CF_ACK_POLL = 7
+        };
+
+        /**
          * \brief Constructor for creating a 802.11 PDU
          *
          * Constructor that builds a 802.11 PDU taking the interface name,
