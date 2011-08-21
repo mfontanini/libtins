@@ -53,6 +53,7 @@ namespace Tins {
             RAW,
             ETHERNET_II,
             IEEE802_11,
+            SNAP,
             IP,
             ARP,
             TCP,

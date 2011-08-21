@@ -349,7 +349,6 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::IEEE802_11; }
-
     private:
         /**
          * Struct that represents the 802.11 header

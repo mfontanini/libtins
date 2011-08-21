@@ -133,9 +133,9 @@ void Tins::EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     assert(total_sz >= my_sz);
 
     /* Inner type defaults to IP */
-    if ((this->_eth.payload_type == 0) && this->inner_pdu()) {
+    if ((_eth.payload_type == 0) && inner_pdu()) {
         uint16_t type = ETHERTYPE_IP;
-        switch (this->inner_pdu()->pdu_type()) {
+        switch (inner_pdu()->pdu_type()) {
             case PDU::IP:
                 type = ETHERTYPE_IP;
                 break;
@@ -145,9 +145,9 @@ void Tins::EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, c
             default:
                 type = 0;
         }
-        this->_eth.payload_type = Utils::net_to_host_s(type);
+        _eth.payload_type = Utils::net_to_host_s(type);
     }
-    memcpy(buffer, &this->_eth, sizeof(ethhdr));
+    memcpy(buffer, &_eth, sizeof(ethhdr));
 }
 
 Tins::PDU *Tins::EthernetII::recv_response(PacketSender *sender) {
