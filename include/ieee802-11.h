@@ -96,6 +96,17 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 PDU
          *
+         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
+         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
+         */
+        IEEE802_11(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        
+        /**
+         * \brief Constructor for creating a 802.11 PDU
+         *
          * Constructor that builds a 802.11 PDU taking the interface name,
          * destination's and source's MAC.
          *

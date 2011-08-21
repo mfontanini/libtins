@@ -35,6 +35,14 @@
 
 using namespace std;
 
+Tins::IEEE802_11::IEEE802_11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child) {
+    memset(&this->_header, 0, sizeof(ieee80211_header));
+    if(dst_hw_addr)
+        this->dst_addr(dst_hw_addr);
+    if(src_hw_addr)
+        this->src_addr(src_hw_addr);
+}
+
 Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
@@ -42,7 +50,6 @@ Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_add
     if(src_hw_addr)
         this->src_addr(src_hw_addr);
     this->iface(iface);
-
 }
 
 
