@@ -188,7 +188,7 @@ namespace Tins {
          *
          * \return The optional address as a constant uint8_t pointer.
          */
-        inline const uint8_t* opt_addr() const { return this->_header.opt_addr; }
+        inline const uint8_t* opt_addr() const { return this->_opt_addr; }
 
         /**
          * \brief Getter for the interface.
@@ -394,15 +394,14 @@ namespace Tins {
                 unsigned int seq_number:12;
             #endif
             } __attribute__((__packed__)) seq_control;
-            uint8_t opt_addr[6];
 
         } __attribute__((__packed__));
 
         IEEE802_11(const ieee80211_header *header_ptr);
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-
         ieee80211_header _header;
+        uint8_t _opt_addr[6];
         uint32_t _iface_index;
     };
 

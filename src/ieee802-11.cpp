@@ -124,7 +124,7 @@ void Tins::IEEE802_11::seq_num(uint16_t new_seq_num) {
 }
 
 void Tins::IEEE802_11::opt_addr(const uint8_t* new_opt_addr) {
-    memcpy(this->_header.opt_addr, new_opt_addr, 6);
+    memcpy(this->_opt_addr, new_opt_addr, 6);
 }
 
 void Tins::IEEE802_11::iface(uint32_t new_iface_index) {
@@ -138,7 +138,10 @@ void Tins::IEEE802_11::iface(const std::string& new_iface) throw (std::runtime_e
 }
 
 uint32_t Tins::IEEE802_11::header_size() const {
-    return sizeof(ieee80211_header);
+    uint32_t sz = sizeof(ieee80211_header);
+    if (this->to_ds() && this->from_ds())
+        sz += 6;
+    return sz;
 }
 
 bool Tins::IEEE802_11::send(PacketSender* sender) {
@@ -160,6 +163,9 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     assert(total_sz >= my_sz);
 
     memcpy(buffer, &this->_header, sizeof(ieee80211_header));
+    if (this->to_ds() && this->from_ds()) {
+        memcpy(buffer + sizeof(ieee80211_header), this->_opt_addr, 6);
+    }
 }
 
 Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE_IP) {
