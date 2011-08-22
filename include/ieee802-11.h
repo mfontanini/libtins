@@ -103,7 +103,7 @@ namespace Tins {
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         IEEE802_11(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
-        
+
         /**
          * \brief Constructor for creating a 802.11 PDU
          *
@@ -471,6 +471,80 @@ namespace Tins {
         uint8_t _opt_addr[6];
         uint32_t _iface_index;
     };
+
+
+    /**
+     * \brief Abstract class that englobes all Management frames in the 802.11 protocol.
+     */
+    class ManagementFrame : public IEEE802_11 {
+
+    public:
+
+    protected:
+
+        ManagementFrame();
+
+        struct CapabilityInformation {
+            unsigned int ess:1;
+            unsigned int ibss:1;
+            unsigned int cf_poll:1;
+            unsigned int cf_poll_req:1;
+            unsigned int privacy:1;
+            unsigned int short_preamble:1;
+            unsigned int pbcc:1;
+            unsigned int chanel_agility:1;
+            unsigned int spectrum_mgmt:1;
+            unsigned int qos:1;
+            unsigned int sst:1;
+            unsigned int apsd:1;
+            unsigned int reserved:1;
+            unsigned int dsss_ofdm:1;
+            unsigned int delayed_block_ack:1;
+            unsigned int immediate_block_ack:1;
+        } __attribute__((__packed__));
+
+    private:
+
+
+    };
+
+    /**
+     * \brief Class representing a Beacon in the IEEE 802.11 Protocol.
+     *
+     */
+    class IEEE802_11_Beacon : public ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the beacon frame.
+         *
+         */
+        IEEE802_11_Beacon();
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+    private:
+
+        struct BeaconBody {
+            uint64_t timestamp;
+            uint16_t interval;
+            CapabilityInformation capability;
+        } __attribute__((__packed__));
+
+        BeaconBody _body;
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+    };
+
+
 
 }
 

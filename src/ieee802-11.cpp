@@ -178,3 +178,23 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
 Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE_IP) {
 
 }
+
+Tins::ManagementFrame::ManagementFrame() : IEEE802_11() {
+    this->type(IEEE802_11::MANAGEMENT);
+}
+
+Tins::IEEE802_11_Beacon::IEEE802_11_Beacon() : ManagementFrame() {
+    this->subtype(IEEE802_11::BEACON);
+}
+
+uint32_t Tins::IEEE802_11_Beacon::header_size() const {
+    return IEEE802_11::header_size() + sizeof(BeaconBody);
+}
+
+uint32_t Tins::IEEE802_11_Beacon::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(BeaconBody);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
