@@ -22,13 +22,12 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
-
+#include <iostream> //borrame
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
     #include <netinet/in.h>
 #endif
-
 #include "ieee802-11.h"
 #include "rawpdu.h"
 #include "utils.h"
@@ -73,7 +72,7 @@ Tins::IEEE802_11::~IEEE802_11() {
     }
 }
 
-Tins::IEEE802_11::IEEE802_11_Option::IEEE802_11_Option(uint8_t opt, uint8_t len, const uint8_t *val) {
+Tins::IEEE802_11::IEEE802_11_Option::IEEE802_11_Option(uint8_t opt, uint8_t len, const uint8_t *val) : option(opt), length(len) {
     value = new uint8_t[len];
     std::memcpy(value, val, len);
 }
@@ -197,9 +196,12 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     
     uint32_t child_len = write_fixed_parameters(buffer, total_sz - sizeof(ieee80211_header) - _options_size);
     buffer += child_len;
+    cout << "Child len: " << child_len << "\n";
     for(std::list<IEEE802_11_Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option;
         *(buffer++) = it->length;
+        cout << "Length: " << (int)it->length << "\n";
+        cout << "Value: " << it->value << "\n";
         std::memcpy(buffer, it->value, it->length);
         buffer += it->length;
     }
