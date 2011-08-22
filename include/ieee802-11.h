@@ -47,7 +47,7 @@ namespace Tins {
             CONTROL = 1,
             DATA = 2
         };
-        
+
         /**
          * \brief Enum for the different types of tagged options.
          */
@@ -133,26 +133,26 @@ namespace Tins {
             CF_ACK_POLL = 7
         };
 
-        /** 
+        /**
          * \brief IEEE 802.11 options struct.
          */
         struct IEEE802_11_Option {
-            /** 
+            /**
              * \brief The option number.
              */
             uint8_t option;
-            /** 
+            /**
              * \brief The value's length in bytes.
              */
             uint8_t length;
-            /** 
+            /**
              * \brief The option's value.
              */
             uint8_t *value;
-            
+
             /**
              * \brief Creates an instance of IEEE802_11_Option.
-             * 
+             *
              * The option's value is copied, therefore the user should
              * manually free any memory pointed by the "val" parameter.
              * \param opt The option number.
@@ -206,14 +206,14 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         IEEE802_11(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief IEEE802_11 destructor.
-         * 
+         *
          * Releases the memory allocated for tagged options.
          */
         ~IEEE802_11();
-         
+
         /**
          * \brief Getter for the protocol version.
          *
@@ -486,11 +486,11 @@ namespace Tins {
          * \sa PDU::send()
          */
         bool send(PacketSender* sender);
-        
-        /** 
+
+        /**
          * \brief Adds a new option to this IEEE802_11 PDU.
-         * 
-         * This copies the value buffer. 
+         *
+         * This copies the value buffer.
          * \param opt The option identifier.
          * \param len The length of the value field.
          * \param val The value of this option.
@@ -503,7 +503,7 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::IEEE802_11; }
     protected:
-        virtual size_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
+        virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
     private:
         /**
          * Struct that represents the 802.11 header
@@ -553,10 +553,10 @@ namespace Tins {
         } __attribute__((__packed__));
 
         IEEE802_11(const ieee80211_header *header_ptr);
-        
+
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-        
-        
+
+
         ieee80211_header _header;
         uint8_t _opt_addr[6];
         uint32_t _iface_index, _options_size;
