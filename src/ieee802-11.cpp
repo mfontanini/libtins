@@ -35,7 +35,7 @@
 
 using namespace std;
 
-Tins::IEEE802_11::IEEE802_11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child) {
+Tins::IEEE802_11::IEEE802_11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
         this->dst_addr(dst_hw_addr);
@@ -43,7 +43,7 @@ Tins::IEEE802_11::IEEE802_11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_a
         this->src_addr(src_hw_addr);
 }
 
-Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
+Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
         this->dst_addr(dst_hw_addr);
@@ -53,7 +53,7 @@ Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_add
 }
 
 
-Tins::IEEE802_11::IEEE802_11(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child) {
+Tins::IEEE802_11::IEEE802_11(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
         this->dst_addr(dst_hw_addr);
@@ -62,8 +62,26 @@ Tins::IEEE802_11::IEEE802_11(uint32_t iface_index, const uint8_t* dst_hw_addr, c
     this->iface(iface_index);
 }
 
-Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP) {
+Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
 
+}
+
+Tins::IEEE802_11::~IEEE802_11() {
+    while(_options.size()) {
+        delete[] _options.front().value;
+        _options.pop_front();
+    }
+}
+
+Tins::IEEE802_11::IEEE802_11_Option::IEEE802_11_Option(uint8_t opt, uint8_t len, const uint8_t *val) {
+    value = new uint8_t[len];
+    std::memcpy(value, val, len);
+}
+
+void Tins::IEEE802_11::add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val) {
+    uint32_t opt_size = len + (sizeof(uint8_t) << 1);
+    _options.push_back(IEEE802_11_Option((uint8_t)opt, len, val));
+    _options_size += opt_size;
 }
 
 void Tins::IEEE802_11::protocol(uint8_t new_proto) {
@@ -145,7 +163,7 @@ void Tins::IEEE802_11::iface(const std::string& new_iface) throw (std::runtime_e
 }
 
 uint32_t Tins::IEEE802_11::header_size() const {
-    uint32_t sz = sizeof(ieee80211_header);
+    uint32_t sz = sizeof(ieee80211_header) + _options_size;
     if (this->to_ds() && this->from_ds())
         sz += 6;
     return sz;
@@ -170,8 +188,20 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     assert(total_sz >= my_sz);
 
     memcpy(buffer, &this->_header, sizeof(ieee80211_header));
+    buffer += sizeof(ieee80211_header);
     if (this->to_ds() && this->from_ds()) {
-        memcpy(buffer + sizeof(ieee80211_header), this->_opt_addr, 6);
+        memcpy(buffer, this->_opt_addr, 6);
+        buffer += 6;
+        total_sz -= 6;
+    }
+    
+    uint32_t child_len = write_fixed_parameters(buffer, total_sz - sizeof(ieee80211_header) - _options_size);
+    buffer += child_len;
+    for(std::list<IEEE802_11_Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+        *(buffer++) = it->option;
+        *(buffer++) = it->length;
+        std::memcpy(buffer, it->value, it->length);
+        buffer += it->length;
     }
 }
 

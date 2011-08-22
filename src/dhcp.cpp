@@ -140,18 +140,22 @@ uint32_t Tins::DHCP::header_size() const {
 
 void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= header_size());
-    uint8_t *result = new uint8_t[_size], *ptr = result + sizeof(uint32_t);
-    // Magic cookie
-    *((uint32_t*)result) = Utils::net_to_host_l(0x63825363);
-    for(std::list<DHCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-        *(ptr++) = it->option;
-        *(ptr++) = it->length;
-        std::memcpy(ptr, it->value, it->length);
-        ptr += it->length;
+    uint8_t *result = 0;
+    if(_size) {
+        result = new uint8_t[_size];
+        uint8_t *ptr = result + sizeof(uint32_t);
+        // Magic cookie
+        *((uint32_t*)result) = Utils::net_to_host_l(0x63825363);
+        for(std::list<DHCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+            *(ptr++) = it->option;
+            *(ptr++) = it->length;
+            std::memcpy(ptr, it->value, it->length);
+            ptr += it->length;
+        }
+        // End of options
+        result[_size-1] = END;
+        vend(result, _size);
     }
-    // End of options
-    result[_size-1] = END;
-    vend(result, _size);
     BootP::write_serialization(buffer, total_sz, parent);
     delete[] result;
 }
