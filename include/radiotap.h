@@ -30,7 +30,7 @@ namespace Tins {
     /** 
      * \brief Class that represents the IEEE 802.11 radio tap header.
      */
-    class RadioTap {
+    class RadioTap : public PDU {
     public:
         /**
          * Creates an instance of RadioTap.
@@ -44,10 +44,62 @@ namespace Tins {
          */
         RadioTap(uint32_t iface_index);
         
+        /* Setters */
+        
         /**
          * \sa PDU::send()
          */
         bool send(PacketSender* sender);
+        
+        /**
+         * \brief Setter for the version field.
+         * \param new_version The new version.
+         */
+        void version(uint8_t new_version);
+        
+        /**
+         * \brief Setter for the padding field.
+         * \param new_padding The new padding.
+         */
+        void padding(uint8_t new_padding);
+        
+        /**
+         * \brief Setter for the length field.
+         * \param new_length The new length.
+         */
+        void length(uint8_t new_length);
+        
+        /**
+         * \brief Setter for the present field.
+         * \param new_present The new present.
+         */
+        void present(uint8_t new_present);
+        
+        /* Getters */
+        
+        /**
+         * \brief Getter for the version field.
+         * \return The version field.
+         */
+        inline uint8_t version() const { return _radio.it_version; }
+    
+        /**
+         * \brief Getter for the padding field.
+         * \return The padding field.
+         */
+        inline uint8_t padding() const { return _radio.it_pad; }
+        
+        /**
+         * \brief Getter for the length field.
+         * \return The length field.
+         */
+        inline uint8_t length() const { return _radio.it_len; }
+        
+        /**
+         * \brief Getter for the present field.
+         * \return The present field.
+         */
+        inline uint8_t present() const { return _radio.it_present; }
         
         /**
          * \brief Returns the 802.11 frame's header length.
@@ -56,6 +108,12 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::RADIOTAP; }
     private:
         struct radiotap_hdr {
             u_int8_t it_version;	

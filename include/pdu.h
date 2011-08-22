@@ -54,6 +54,7 @@ namespace Tins {
             ETHERNET_II,
             IEEE802_11,
             SNAP,
+            RADIOTAP,
             IP,
             ARP,
             TCP,

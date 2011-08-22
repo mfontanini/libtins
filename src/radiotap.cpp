@@ -20,10 +20,13 @@
  */
 
 #include <cstring>
+#include <cassert>
 #ifndef WIN32
+    #include <net/ethernet.h>
     #include <netpacket/packet.h>
 #endif
 #include "radiotap.h"
+#include "ieee802-11.h"
 #include "utils.h"
 
 
@@ -35,6 +38,22 @@ Tins::RadioTap::RadioTap(const std::string &iface) throw (std::runtime_error) : 
 
 Tins::RadioTap::RadioTap(uint32_t iface_index) : PDU(0xff), _iface_index(iface_index) {
     std::memset(&_radio, 0, sizeof(_radio));
+}
+
+void Tins::RadioTap::version(uint8_t new_version) {
+    _radio.it_version = new_version;
+}
+        
+void Tins::RadioTap::padding(uint8_t new_padding) {
+    _radio.it_pad = new_padding;
+}
+
+void Tins::RadioTap::length(uint8_t new_length) {
+    _radio.it_len = new_length;
+}
+
+void Tins::RadioTap::present(uint8_t new_present) {
+    _radio.it_present = new_present;
 }
 
 uint32_t Tins::RadioTap::header_size() const {
@@ -50,7 +69,10 @@ bool Tins::RadioTap::send(PacketSender* sender) {
     addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
     addr.sll_halen = 6;
     addr.sll_ifindex = _iface_index;
-    memcpy(&(addr.sll_addr), _header.dst_addr, 6);
+    
+    Tins::IEEE802_11 *wlan = dynamic_cast<Tins::IEEE802_11*>(inner_pdu());
+    if(wlan)
+        memcpy(&(addr.sll_addr), wlan->dst_addr(), 6);
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
@@ -58,6 +80,7 @@ bool Tins::RadioTap::send(PacketSender* sender) {
 void Tins::RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t sz = header_size();
     assert(total_sz >= sz);
-    _radio.it_len = sz;
+    if(!_radio.it_len)
+        _radio.it_len = sz;
     memcpy(buffer, &_radio, sizeof(_radio));
 }
