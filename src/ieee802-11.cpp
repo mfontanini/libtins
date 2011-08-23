@@ -33,6 +33,8 @@
 
 using namespace std;
 
+const uint8_t *Tins::IEEE802_11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
+
 Tins::IEEE802_11::IEEE802_11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)

@@ -39,6 +39,11 @@ namespace Tins {
     public:
 
         /**
+         * \brief Broadcast hardware address.
+         */
+        static const uint8_t *BROADCAST;
+         
+        /**
          * \brief Enum for the different types of 802.11 frames.
          *
          */
