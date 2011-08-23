@@ -37,7 +37,7 @@ uint32_t Tins::PDU::size() const {
     uint32_t sz = header_size() + trailer_size();
     const PDU *ptr(_inner_pdu);
     while(ptr) {
-        sz += ptr->header_size() + trailer_size();
+        sz += ptr->header_size() + ptr->trailer_size();
         ptr = ptr->inner_pdu();
     }
     return sz;
