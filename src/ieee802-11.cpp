@@ -191,7 +191,7 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
         buffer += 6;
         total_sz -= 6;
     }
-    
+
     uint32_t child_len = write_fixed_parameters(buffer, total_sz - sizeof(ieee80211_header) - _options_size);
     buffer += child_len;
     assert(total_sz > child_len + _options_size);
@@ -211,9 +211,30 @@ Tins::ManagementFrame::ManagementFrame() : IEEE802_11() {
     this->type(IEEE802_11::MANAGEMENT);
 }
 
+Tins::ManagementFrame::ManagementFrame(const std::string& iface,
+                                       const uint8_t* dst_hw_addr,
+                                       const uint8_t* src_hw_addr) throw (std::runtime_error) : IEEE802_11(iface, dst_hw_addr, src_hw_addr) {
+    this->type(IEEE802_11::MANAGEMENT);
+}
+
 Tins::IEEE802_11_Beacon::IEEE802_11_Beacon() : ManagementFrame() {
     this->subtype(IEEE802_11::BEACON);
     memset(&_body, 0, sizeof(_body));
+}
+
+Tins::IEEE802_11_Beacon::IEEE802_11_Beacon(const std::string& iface,
+                                           const uint8_t* dst_hw_addr,
+                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+    this->subtype(IEEE802_11::BEACON);
+    memset(&_body, 0, sizeof(_body));
+}
+
+void Tins::IEEE802_11_Beacon::timestamp(uint64_t new_timestamp) {
+    this->_body.timestamp = new_timestamp;
+}
+
+void Tins::IEEE802_11_Beacon::interval(uint16_t new_interval) {
+    this->_body.interval = Utils::net_to_host_s(new_interval);
 }
 
 void Tins::IEEE802_11_Beacon::essid(const std::string &new_essid) {
