@@ -112,7 +112,7 @@ uint32_t Tins::RadioTap::header_size() const {
 
 uint32_t Tins::RadioTap::trailer_size() const {
     // will be sizeof(uint32_t) if the FCS-at-the-end bit is on.
-    return ((_radio.flags & 0x10) == 1) ? sizeof(uint32_t) : 0;
+    return ((_flags & 0x10) != 0) ? sizeof(uint32_t) : 0;
 }
 
 bool Tins::RadioTap::send(PacketSender* sender) {
@@ -174,6 +174,6 @@ void Tins::RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, con
         memcpy(buffer, &_rx_flags, sizeof(_rx_flags));
         buffer += sizeof(_rx_flags);
     }
-    if((_radio.flags & 0x10) == 1 && inner_pdu())
+    if((_flags & 0x10) != 0 && inner_pdu())
         *(uint32_t*)(buffer + inner_pdu()->size()) = Utils::crc32(buffer, inner_pdu()->size());
 }
