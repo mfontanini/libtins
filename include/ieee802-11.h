@@ -614,13 +614,30 @@ namespace Tins {
         IEEE802_11_Beacon();
 
         /**
+         * \brief Helper method to set the essid.
+         * \param new_essid The essid to be set.
+         */
+        void essid(const std::string &new_essid);
+        
+        /**
+         * \brief Helper method to set the supported rates.
+         * \param new_rates A list of rates to be set.
+         */
+        void rates(const std::list<float> &new_rates);
+        
+        /**
+         * \brief Helper method to set the current channel.
+         * \param new_channel The new channel to be set.
+         */
+        void channel(uint8_t new_channel);
+        
+        /**
          * \brief Returns the frame's header length.
          *
          * \return An uint32_t with the header's size.
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-
     private:
 
         struct BeaconBody {

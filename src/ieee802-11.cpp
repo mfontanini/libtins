@@ -22,7 +22,6 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
-#include <iostream> //borrame
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -185,7 +184,6 @@ bool Tins::IEEE802_11::send(PacketSender* sender) {
 void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t my_sz = header_size();
     assert(total_sz >= my_sz);
-
     memcpy(buffer, &this->_header, sizeof(ieee80211_header));
     buffer += sizeof(ieee80211_header);
     if (this->to_ds() && this->from_ds()) {
@@ -196,12 +194,10 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     
     uint32_t child_len = write_fixed_parameters(buffer, total_sz - sizeof(ieee80211_header) - _options_size);
     buffer += child_len;
-    cout << "Child len: " << child_len << "\n";
+    assert(total_sz > child_len + _options_size);
     for(std::list<IEEE802_11_Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option;
         *(buffer++) = it->length;
-        cout << "Length: " << (int)it->length << "\n";
-        cout << "Value: " << it->value << "\n";
         std::memcpy(buffer, it->value, it->length);
         buffer += it->length;
     }
@@ -217,6 +213,27 @@ Tins::ManagementFrame::ManagementFrame() : IEEE802_11() {
 
 Tins::IEEE802_11_Beacon::IEEE802_11_Beacon() : ManagementFrame() {
     this->subtype(IEEE802_11::BEACON);
+    memset(&_body, 0, sizeof(_body));
+}
+
+void Tins::IEEE802_11_Beacon::essid(const std::string &new_essid) {
+    add_tagged_option(IEEE802_11::SSID, new_essid.size(), (const uint8_t*)new_essid.c_str());
+}
+
+void Tins::IEEE802_11_Beacon::rates(const std::list<float> &new_rates) {
+    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
+    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
+        uint8_t result = 0x80, left = *it / 0.5;
+        if(*it - left > 0) //arbitrary value
+            left++;
+        *(ptr++) = (result | left);
+    }
+    add_tagged_option(SUPPORTED_RATES, new_rates.size(), buffer);
+    delete[] buffer;
+}
+
+void Tins::IEEE802_11_Beacon::channel(uint8_t new_channel) {
+    add_tagged_option(DS_SET, 1, &new_channel);
 }
 
 uint32_t Tins::IEEE802_11_Beacon::header_size() const {
