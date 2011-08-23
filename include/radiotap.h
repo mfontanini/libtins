@@ -70,10 +70,47 @@ namespace Tins {
         void length(uint8_t new_length);
         
         /**
-         * \brief Setter for the present field.
-         * \param new_present The new present.
+         * \brief Setter for the TSFT field.
+         * \param new_tsft The new TSFT
          */
-        void present(uint8_t new_present);
+        void tsft(uint64_t new_tsft);
+        
+        /**
+         * \brief Setter for the flags field.
+         * \param new_flags The new flags.
+         */
+        void flags(uint8_t new_flags);
+        
+        /**
+         * \brief Setter for the rate field.
+         * \param new_rate The new rate.
+         */
+        void rate(uint8_t new_rate);
+        
+        /**
+         * \brief Setter for the channel frequency and type field.
+         * \param new_freq The new channel frequency.
+         * \param new_type The new channel type.
+         */
+        void channel(uint16_t new_freq, uint16_t new_type);
+        
+        /**
+         * \brief Setter for the dbm signal field.
+         * \param new_dbm_signal The new dbm signal.
+         */
+        void dbm_signal(uint8_t new_dbm_signal);
+        
+        /**
+         * \brief Setter for the antenna field.
+         * \param new_antenna The antenna signal.
+         */
+        void antenna(uint8_t new_antenna);
+        
+        /**
+         * \brief Setter for the rx flag field.
+         * \param new_rx_flag The antenna signal.
+         */
+        void rx_flag(uint16_t new_rx_flag);
         
         /* Getters */
         
@@ -96,18 +133,67 @@ namespace Tins {
         inline uint8_t length() const { return _radio.it_len; }
         
         /**
-         * \brief Getter for the present field.
-         * \return The present field.
+         * \brief Getter for the tsft field.
+         * \return The tsft field.
          */
-        inline uint8_t present() const { return _radio.it_present; }
+        inline uint64_t tsft() const { return _tsft; }
         
         /**
-         * \brief Returns the 802.11 frame's header length.
+         * \brief Getter for the flags field.
+         * \return The flags field.
+         */
+        inline uint8_t flags() const { return _flags; }
+        
+        /**
+         * \brief Getter for the rate field.
+         * \return The rate field.
+         */
+        inline uint8_t rate() const { return _rate; }
+        
+        /**
+         * \brief Getter for the channel frequency field.
+         * \return The channel frequency field.
+         */
+        inline uint16_t channel_freq() const { return _channel_freq; }
+        
+        /**
+         * \brief Getter for the channel type field.
+         * \return The channel type field.
+         */
+        inline uint16_t channel_type() const { return _channel_type; }
+        
+        /**
+         * \brief Getter for the dbm signal field.
+         * \return The dbm signal field.
+         */
+        inline uint8_t dbm_signal() const { return _dbm_signal; }
+        
+        /**
+         * \brief Getter for the antenna field.
+         * \return The antenna field.
+         */
+        inline uint8_t antenna() const { return _antenna; }
+        
+        /**
+         * \brief Getter for the rx flags field.
+         * \return The rx flags field.
+         */
+        inline uint16_t rx_flags() const { return _rx_flags; }
+        
+        
+        /**
+         * \brief Returns the RadioTap frame's header length.
          *
          * \return An uint32_t with the header's size.
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Returns the frame's trailer size.
+         * \return The trailer's size.
+         */
+        uint32_t trailer_size() const;
         
         /**
          * \brief Getter for the PDU's type.
@@ -119,13 +205,38 @@ namespace Tins {
             u_int8_t it_version;	
             u_int8_t it_pad;
             u_int16_t it_len;
-            u_int32_t it_present;
+            u_int32_t tsft:1,
+                flags:1,
+                rate:1,
+                channel:1,
+                fhss:1,
+                dbm_signal:1,
+                dbm_noise:1,
+                lock_quality:1,
+                tx_attenuation:1,
+                db_tx_attenuation:1,
+                dbm_tx_attenuation:1,
+                antenna:1,
+                db_signal:1,
+                db_noise:1,
+                rx_flags:1,
+                reserved1:3,
+                channel_plus:1,
+                reserved2:12,
+                ext:1;
         } __attribute__((__packed__));
         
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         radiotap_hdr _radio;
-        uint32_t _iface_index;
+        uint32_t _iface_index, _options_size;
+        // present fields...
+        uint64_t _tsft;
+        uint8_t _flags, _rate;
+        uint16_t _channel_freq, _channel_type;
+        uint8_t _dbm_signal;
+        uint8_t _antenna;
+        uint16_t _rx_flags;
     };
 };
 #endif

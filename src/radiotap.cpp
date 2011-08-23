@@ -30,7 +30,7 @@
 #include "utils.h"
 
 
-Tins::RadioTap::RadioTap(const std::string &iface) throw (std::runtime_error) : PDU(0xff) {
+Tins::RadioTap::RadioTap(const std::string &iface) throw (std::runtime_error) : PDU(0xff), _options_size(0) {
     if(!Utils::interface_id(iface, _iface_index))
         throw std::runtime_error("Invalid interface name!");
     std::memset(&_radio, 0, sizeof(_radio));
@@ -52,12 +52,67 @@ void Tins::RadioTap::length(uint8_t new_length) {
     _radio.it_len = new_length;
 }
 
-void Tins::RadioTap::present(uint8_t new_present) {
-    _radio.it_present = new_present;
+void Tins::RadioTap::tsft(uint64_t new_tsft) {
+    _tsft = new_tsft;
+    if(!_radio.tsft)
+        _options_size += sizeof(_tsft);
+    _radio.tsft = 1;
+}
+
+void Tins::RadioTap::flags(uint8_t new_flags) {
+    _flags = new_flags;
+    if(!_radio.flags)
+        _options_size += sizeof(_flags);
+    _radio.flags = 1;
+}
+
+void Tins::RadioTap::rate(uint8_t new_rate) {
+    _rate = new_rate;
+    if(!_radio.rate)
+        _options_size += sizeof(uint8_t);
+    _radio.rate = 1;
+}
+
+void Tins::RadioTap::channel(uint16_t new_freq, uint16_t new_type) {
+    _channel_freq = new_freq;
+    _channel_type = new_type;
+    if(!_radio.channel)
+        _options_size += sizeof(_channel_freq) + sizeof(_channel_type);
+    _radio.channel = 1;
+}
+void Tins::RadioTap::dbm_signal(uint8_t new_dbm_signal) {
+    _dbm_signal = new_dbm_signal;
+    if(!_radio.dbm_signal)
+        _options_size += sizeof(_dbm_signal);
+    _radio.dbm_signal = 1;
+}
+
+void Tins::RadioTap::antenna(uint8_t new_antenna) {
+    _antenna = new_antenna;
+    if(!_radio.antenna)
+        _options_size += sizeof(_antenna);
+    _radio.antenna = 1;
+}
+
+void Tins::RadioTap::rx_flag(uint16_t new_rx_flag) {
+    _rx_flags = new_rx_flag;
+    if(!_radio.rx_flags)
+        _options_size += sizeof(_rx_flags);
+    _radio.rx_flags = 1;
 }
 
 uint32_t Tins::RadioTap::header_size() const {
-    return sizeof(_radio);
+    uint8_t padding = 0;
+    if((_radio.flags ^ _radio.rate) == 1)
+        padding++;
+    if((_radio.dbm_signal ^ _radio.antenna) == 1)
+        padding++;
+    return sizeof(_radio) + _options_size + padding;
+}
+
+uint32_t Tins::RadioTap::trailer_size() const {
+    // will be sizeof(uint32_t) if the FCS-at-the-end bit is on.
+    return ((_radio.flags & 0x10) == 1) ? sizeof(uint32_t) : 0;
 }
 
 bool Tins::RadioTap::send(PacketSender* sender) {
@@ -79,8 +134,46 @@ bool Tins::RadioTap::send(PacketSender* sender) {
 
 void Tins::RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t sz = header_size();
+    uint8_t *buffer_start = buffer;
     assert(total_sz >= sz);
     if(!_radio.it_len)
         _radio.it_len = sz;
     memcpy(buffer, &_radio, sizeof(_radio));
+    buffer += sizeof(_radio);
+    if(_radio.tsft) {
+        memcpy(buffer, &_tsft, sizeof(_tsft));
+        buffer += sizeof(_tsft);
+    }
+    if(_radio.flags) {
+        memcpy(buffer, &_flags, sizeof(_flags));
+        buffer += sizeof(_flags);
+    }
+    if(_radio.rate) {
+        memcpy(buffer, &_rate, sizeof(_rate));
+        buffer += sizeof(_rate);
+    }
+    if(_radio.channel) {
+        if(((buffer_start - buffer) & 1) == 1)
+            *(buffer++) = 0;
+        memcpy(buffer, &_channel_freq, sizeof(_channel_freq));
+        buffer += sizeof(_channel_freq);
+        memcpy(buffer, &_channel_type, sizeof(_channel_type));
+        buffer += sizeof(_channel_type);
+    }
+    if(_radio.dbm_signal) {
+        memcpy(buffer, &_dbm_signal, sizeof(_dbm_signal));
+        buffer += sizeof(_dbm_signal);
+    }
+    if(_radio.antenna) {
+        memcpy(buffer, &_antenna, sizeof(_antenna));
+        buffer += sizeof(_antenna);
+    }
+    if(_radio.rx_flags) {
+        if(((buffer_start - buffer) & 1) == 1)
+            *(buffer++) = 0;
+        memcpy(buffer, &_rx_flags, sizeof(_rx_flags));
+        buffer += sizeof(_rx_flags);
+    }
+    if((_radio.flags & 0x10) == 1 && inner_pdu())
+        *(uint32_t*)(buffer + inner_pdu()->size()) = Utils::crc32(buffer, inner_pdu()->size());
 }
