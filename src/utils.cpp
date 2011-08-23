@@ -248,6 +248,10 @@ bool Tins::Utils::interface_id(const string &iface, uint32_t &id) {
     return (((int32_t)id) != -1);
 }
 
+uint16_t Tins::Utils::channel_to_mhz(uint16_t channel) {
+    return 2407 + (channel * 5);
+}
+
 uint32_t Tins::Utils::crc32(uint8_t* data, uint32_t data_size) {
     uint32_t i, crc = 0;
     static uint32_t crc_table[] = {

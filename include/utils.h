@@ -164,7 +164,14 @@ namespace Tins {
          * \param data_size The size of the input buffer.
          */
         uint32_t crc32(uint8_t* data, uint32_t data_size);
-
+        
+        /**
+         * \brief Converts a channel number to its mhz representation.
+         * \param channel The channel number.
+         * \return The channel's mhz representation.
+         */
+        uint16_t channel_to_mhz(uint16_t channel);
+        
         /** \brief Generic function to iterate through interface and collect
          * data.
          *
