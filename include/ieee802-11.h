@@ -509,7 +509,7 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::IEEE802_11; }
     protected:
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
-    private:
+    protected:
         /**
          * Struct that represents the 802.11 header
          */
@@ -556,7 +556,8 @@ namespace Tins {
             } __attribute__((__packed__)) seq_control;
 
         } __attribute__((__packed__));
-
+        private:
+        
         IEEE802_11(const ieee80211_header *header_ptr);
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

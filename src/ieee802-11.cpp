@@ -63,11 +63,18 @@ Tins::IEEE802_11::IEEE802_11(uint32_t iface_index, const uint8_t* dst_hw_addr, c
 }
 
 Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE_IP) {
-
+    
 }
 
 Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
-
+    if(total_sz < sizeof(_header))
+        throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+    std::memcpy(&_header, buffer, sizeof(_header));
+    buffer += sizeof(_header);
+    total_sz -= sizeof(_header);
+    
+    // Tagged arguments missing.
+    // subclass specific parsing missing too.
 }
 
 Tins::IEEE802_11::~IEEE802_11() {
