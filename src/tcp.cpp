@@ -44,7 +44,7 @@ Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _options_size
 
 Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_TCP) {
     if(total_sz < sizeof(tcphdr))
-        throw std::runtime_error("Not enought size for an TCP header in the buffer.");
+        throw std::runtime_error("Not enough size for an TCP header in the buffer.");
     std::memcpy(&_tcp, buffer, sizeof(tcphdr));
     
     buffer += sizeof(tcphdr);

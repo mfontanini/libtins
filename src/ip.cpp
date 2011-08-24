@@ -48,7 +48,7 @@ Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(IPPRO
 
 Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_IP) {
     if(total_sz < sizeof(iphdr))
-        throw std::runtime_error("Not enought size for an IP header in the buffer.");
+        throw std::runtime_error("Not enough size for an IP header in the buffer.");
     std::memcpy(&_ip, buffer, sizeof(iphdr));
 
     /* Options... */

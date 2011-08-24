@@ -39,7 +39,7 @@ Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) : PDU(IPPROTO_UDP, ch
 
 Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_UDP) {
     if(total_sz < sizeof(udphdr))
-        throw std::runtime_error("Not enought size for an UDP header in the buffer.");
+        throw std::runtime_error("Not enough size for an UDP header in the buffer.");
     std::memcpy(&_udp, buffer, sizeof(udphdr));
     total_sz -= sizeof(udphdr);
     if(total_sz)

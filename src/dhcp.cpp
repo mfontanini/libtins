@@ -46,13 +46,13 @@ Tins::DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) : BootP(buffer, total
             args[i] = *(buffer++);
             total_sz--;
             if(!total_sz)
-                throw std::runtime_error("Not enought size for a DHCP header in the buffer.");
+                throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
         }
         // If the END-OF-OPTIONS was not found...
         if(args[0] != END) {            
             // Not enough size for this option
             if(total_sz < args[1])
-                throw std::runtime_error("Not enought size for a DHCP header in the buffer.");
+                throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
             add_option((Options)args[0], args[1], buffer);
             buffer += args[1];
             total_sz -= args[1];
