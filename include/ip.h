@@ -34,7 +34,7 @@
 namespace Tins {
 
     /**
-     * \brief IP represents IP PDU.
+     * \brief Class that represents an IP PDU.
      */
     class IP : public PDU {
     public:

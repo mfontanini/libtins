@@ -35,7 +35,7 @@
 namespace Tins {
 
     /**
-     * \brief TCP represents the TCP PDU.
+     * \brief Class that represents an TCP PDU.
      *
      * TCP is the representation of the TCP PDU. Instances of this class
      * must be sent over a level 3 PDU, this will otherwise fail.

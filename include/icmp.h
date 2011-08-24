@@ -28,7 +28,7 @@
 
 namespace Tins {
 
-    /** \brief ICMP represents the ICMP PDU.
+    /** \brief Class that represents an ICMP PDU.
      *
      * ICMP is the representation of the ICMP PDU. Instances of this class
      * must be sent over a level 3 PDU, this will otherwise fail.

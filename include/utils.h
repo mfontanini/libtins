@@ -153,6 +153,11 @@ namespace Tins {
                     ((data & 0x0000ff00) << 8)  | ((data & 0x000000ff) << 24));
         }
 
+        /**
+         * \brief Convert 64 bit integer into network byte order.
+         *
+         * \param data The data to convert.
+         */
         inline uint64_t net_to_host_ll(uint64_t data) {
             return (((uint64_t)(net_to_host_l((uint32_t)((data << 32) >> 32))) << 32) |
                     (net_to_host_l(((uint32_t)(data >> 32)))));
