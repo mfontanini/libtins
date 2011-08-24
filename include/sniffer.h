@@ -119,6 +119,7 @@ namespace Tins {
         pcap_t *handle;
         bpf_u_int32 ip, mask;
         bpf_program actual_filter;
+        bool wired;
     };
     
     /**
