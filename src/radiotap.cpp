@@ -40,6 +40,74 @@ Tins::RadioTap::RadioTap(uint32_t iface_index) : PDU(0xff), _iface_index(iface_i
     std::memset(&_radio, 0, sizeof(_radio));
 }
 
+Tins::RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
+    if(total_sz < sizeof(_radio))
+        throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+    const uint8_t *buffer_start = buffer;
+    std::memcpy(&_radio, buffer, sizeof(_radio));
+    buffer += sizeof(_radio);
+    total_sz -= sizeof(_radio);
+    if(_radio.tsft) {
+        if(total_sz < sizeof(_tsft))
+            throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+        memcpy(&_tsft, buffer, sizeof(_tsft));
+        buffer += sizeof(_tsft);
+        total_sz -= sizeof(_tsft);
+    }
+    if(_radio.flags) {
+        if(total_sz < sizeof(_flags))
+            throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+        memcpy(&_flags, buffer, sizeof(_flags));
+        buffer += sizeof(_flags);
+        total_sz -= sizeof(_flags);
+    }
+    if(_radio.rate) {
+        if(total_sz < sizeof(_rate))
+            throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+        memcpy(&_rate, buffer, sizeof(_rate));
+        buffer += sizeof(_rate);
+        total_sz -= sizeof(_rate);
+    }
+    if(_radio.channel) {
+        if(((buffer_start - buffer) & 1) == 1) {
+            buffer++;
+            total_sz--;
+        }
+        if(total_sz < sizeof(uint32_t))
+            throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+        memcpy(&_channel_freq, buffer, sizeof(_channel_freq));
+        buffer += sizeof(_channel_freq);
+        memcpy(&_channel_type, buffer, sizeof(_channel_type));
+        buffer += sizeof(_channel_type);
+        total_sz -= sizeof(uint32_t);
+    }
+    if(_radio.dbm_signal) {
+        if(total_sz < sizeof(_dbm_signal))
+            throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+        memcpy(&_dbm_signal, buffer, sizeof(_dbm_signal));
+        buffer += sizeof(_dbm_signal);
+        total_sz -= sizeof(_dbm_signal);
+    }
+    if(_radio.antenna) {
+        if(total_sz < sizeof(_antenna))
+            throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+        memcpy(&_antenna, buffer, sizeof(_antenna));
+        buffer += sizeof(_antenna);
+        total_sz -= sizeof(_antenna);
+    }
+    if(_radio.rx_flags) {
+        if(((buffer_start - buffer) & 1) == 1) {
+            buffer++;
+            total_sz--;
+        }
+        if(total_sz < sizeof(_rx_flags))
+            throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+        memcpy(&_rx_flags, buffer, sizeof(_rx_flags));
+        buffer += sizeof(_rx_flags);
+        total_sz -= sizeof(_rx_flags);
+    }
+}
+
 void Tins::RadioTap::version(uint8_t new_version) {
     _radio.it_version = new_version;
 }
