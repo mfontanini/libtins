@@ -571,6 +571,41 @@ namespace Tins {
 
     public:
 
+        enum ReasonCodes {
+            UNSPECIFIED = 1,
+            PREV_AUTH_NOT_VALID = 2,
+            STA_LEAVING_IBSS_ESS = 3,
+            INACTIVITY = 4,
+            CANT_HANDLE_STA = 5,
+            CLASS2_FROM_NO_AUTH = 6,
+            CLASS3_FROM_NO_AUTH = 7,
+            STA_LEAVING_BSS = 8,
+            STA_NOT_AUTH_WITH_STA = 9,
+            POW_CAP_NOT_VALID = 10,
+            SUPPORTED_CHANN_NOT_VALID = 11,
+            INVALID_CONTENT = 13,
+            MIC_FAIL = 14,
+            HANDSHAKE_TIMEOUT = 15,
+            GROUP_KEY_TIMEOUT = 16,
+            WRONG_HANDSHAKE = 17,
+            INVALID_GROUP_CIPHER = 18,
+            INVALID_PAIRWISE_CIPHER = 19,
+            INVALID_AKMP = 20,
+            UNSOPPORTED_RSN_VERSION = 21,
+            INVALID_RSN_CAPABILITIES = 22,
+            AUTH_FAILED = 23,
+            CIPHER_SUITE_REJECTED = 24,
+            UNSPECIFIED_QOS_REASON = 32,
+            NOT_ENOUGH_BANDWITH = 33,
+            POOR_CHANNEL = 34,
+            STA_OUT_OF_LIMITS = 35,
+            REQUESTED_BY_STA_LEAVING = 36,
+            REQUESTED_BY_STA_REJECT_MECHANISM = 37,
+            REQUESTED_BY_STA_REJECT_SETUP = 38,
+            REQUESTED_BY_STA_TIMEOUT = 39,
+            PEER_STA_NOT_SUPPORT_CIPHER = 45
+        };
+
     protected:
 
         ManagementFrame();
@@ -952,7 +987,66 @@ namespace Tins {
 
     };
 
+    /**
+     * \brief Class representing a Disassociation frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class IEEE802_11_Disassoc : public ManagementFrame {
 
+    public:
+
+        /**
+         * \brief Default constructor for the Disassociation frame.
+         *
+         */
+        IEEE802_11_Disassoc();
+
+        /**
+         * \brief Constructor for creating a 802.11 Disassociation.
+         *
+         * Constructor that builds a 802.11 Disassociation taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        IEEE802_11_Disassoc(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Getter for the reason code.
+         *
+         * \return uint16_t with the reason code.
+         */
+        inline uint16_t reason_code() const { return this->_body.reason_code; }
+
+        /**
+         * \brief Setter for the reason code.
+         *
+         * \param new_reason_code uint16_t with the new reason code.
+         */
+        void reason_code(uint16_t new_reason_code);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+    private:
+
+        struct DisassocBody {
+            uint16_t reason_code;
+        };
+
+        DisassocBody _body;
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+
+    };
 
 }
 

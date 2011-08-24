@@ -268,3 +268,29 @@ uint32_t Tins::IEEE802_11_Beacon::write_fixed_parameters(uint8_t *buffer, uint32
     return sz;
 }
 
+Tins::IEEE802_11_Disassoc::IEEE802_11_Disassoc() : ManagementFrame() {
+    this->subtype(IEEE802_11::DISASSOC);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::IEEE802_11_Disassoc::IEEE802_11_Disassoc(const std::string& iface,
+                                           const uint8_t* dst_hw_addr,
+                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+    this->subtype(IEEE802_11::DISASSOC);
+    memset(&_body, 0, sizeof(_body));
+}
+
+void Tins::IEEE802_11_Disassoc::reason_code(uint16_t new_reason_code) {
+    this->_body.reason_code = new_reason_code;
+}
+
+uint32_t Tins::IEEE802_11_Disassoc::header_size() const {
+    return IEEE802_11::header_size() + sizeof(DisassocBody);
+}
+
+uint32_t Tins::IEEE802_11_Disassoc::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(DisassocBody);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
