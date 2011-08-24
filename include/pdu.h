@@ -32,14 +32,14 @@ namespace Tins {
 
     class PacketSender;
 
-    /** \brief PDU is the base class for protocol data units.
+    /** \brief Base class for protocol data units.
      *
      * Every PDU implementation must inherit this one. PDUs can be serialized,
-     * therefore allowing a PacketSender to send them through sockets. PDUs
-     * are created upwards: upper layers will be children of the lower ones.
-     * Each PDU must provide its flag identifier. This will be most likely added
-     * to its parent's data, hence it should be a valid identifier. For example,
-     * IP should provide IPPROTO_IP.
+     * therefore allowing a PacketSender to send them through the corresponding 
+     * sockets. PDUs are created upwards: upper layers will be children of the 
+     * lower ones. Each PDU must provide its flag identifier. This will be most 
+     * likely added to its parent's data, hence it should be a valid identifier. 
+     * For example, IP should provide IPPROTO_IP.
      */
     class PDU {
     public:

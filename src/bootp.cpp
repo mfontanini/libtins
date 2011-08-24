@@ -13,7 +13,7 @@ Tins::BootP::BootP() : PDU(255), _vend_size(64) {
 
 Tins::BootP::BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size) : PDU(255), _vend(0), _vend_size(vend_field_size) {
     if(total_sz < sizeof(bootphdr) + vend_field_size)
-        throw std::runtime_error("Not enought size for a BootP header in the buffer.");
+        throw std::runtime_error("Not enough size for a BootP header in the buffer.");
     std::memcpy(&_bootp, buffer, sizeof(bootphdr));
     buffer += sizeof(bootphdr);
     total_sz -= sizeof(bootphdr);

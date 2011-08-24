@@ -50,7 +50,7 @@ Tins::ICMP::ICMP(Flags flag) : PDU(IPPROTO_ICMP) {
 
 Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_ICMP) {
     if(total_sz < sizeof(icmphdr))
-        throw std::runtime_error("Not enought size for an ICMP header in the buffer.");
+        throw std::runtime_error("Not enough size for an ICMP header in the buffer.");
     std::memcpy(&_icmp, buffer, sizeof(icmphdr));
     total_sz -= sizeof(icmphdr);
     if(total_sz)

@@ -153,6 +153,11 @@ namespace Tins {
                     ((data & 0x0000ff00) << 8)  | ((data & 0x000000ff) << 24));
         }
 
+        /**
+         * \brief Convert 64 bit integer into network byte order.
+         *
+         * \param data The data to convert.
+         */
         inline uint64_t net_to_host_ll(uint64_t data) {
             return (((uint64_t)(net_to_host_l((uint32_t)((data << 32) >> 32))) << 32) |
                     (net_to_host_l(((uint32_t)(data >> 32)))));
@@ -164,7 +169,14 @@ namespace Tins {
          * \param data_size The size of the input buffer.
          */
         uint32_t crc32(uint8_t* data, uint32_t data_size);
-
+        
+        /**
+         * \brief Converts a channel number to its mhz representation.
+         * \param channel The channel number.
+         * \return The channel's mhz representation.
+         */
+        uint16_t channel_to_mhz(uint16_t channel);
+        
         /** \brief Generic function to iterate through interface and collect
          * data.
          *

@@ -48,7 +48,7 @@ Tins::ARP::ARP(uint32_t target_ip, uint32_t sender_ip, const uint8_t *target_hw,
 
 Tins::ARP::ARP(const uint8_t *buffer, uint32_t total_sz) : PDU(0x0608) {
     if(total_sz < sizeof(arphdr))
-        throw std::runtime_error("Not enought size for an ARP header in the buffer.");
+        throw std::runtime_error("Not enough size for an ARP header in the buffer.");
     memcpy(&_arp, buffer, sizeof(arphdr));
     total_sz -= sizeof(arphdr);
     if(total_sz)

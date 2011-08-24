@@ -33,16 +33,24 @@ namespace Tins {
     class RadioTap : public PDU {
     public:
         /**
-         * Creates an instance of RadioTap.
+         * \brief Creates an instance of RadioTap.
          * \param iface The name of the interface in which to send this PDU.
          */
         RadioTap(const std::string &iface) throw (std::runtime_error);
         
         /**
-         * Creates an instance of RadioTap.
+         * \brief Creates an instance of RadioTap.
          * \param iface_index The index of the interface in which to send this PDU.
          */
         RadioTap(uint32_t iface_index);
+        
+        /**
+         * \brief Constructor which creates a RadioTap object from a buffer and adds all
+         * identifiable PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        RadioTap(const uint8_t *buffer, uint32_t total_sz);
         
         /* Setters */
         

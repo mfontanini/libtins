@@ -20,9 +20,11 @@
  */
 
 
+#include <iostream> //borrame
 #include <stdexcept>
 #include "sniffer.h"
 #include "ethernetII.h"
+#include "radiotap.h"
 
 
 using namespace std;
@@ -32,8 +34,9 @@ using namespace std;
 struct LoopData {
     pcap_t *handle;
     Tins::AbstractSnifferHandler *c_handler;
+    bool wired;
     
-    LoopData(pcap_t *_handle, Tins::AbstractSnifferHandler *_handler) : handle(_handle), c_handler(_handler) { }
+    LoopData(pcap_t *_handle, Tins::AbstractSnifferHandler *_handler, bool is_wired) : handle(_handle), c_handler(_handler), wired(is_wired) { }
 };
 
 /** \endcond */
@@ -41,11 +44,14 @@ struct LoopData {
 
 Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size) {
     char error[PCAP_ERRBUF_SIZE];
-    if (pcap_lookupnet(device.c_str(), &ip, &mask, error) == -1)
-        throw runtime_error(error);
+    if (pcap_lookupnet(device.c_str(), &ip, &mask, error) == -1) {
+        ip = 0;
+        mask = 0;
+    }
     handle = pcap_open_live(device.c_str(), max_packet_size, 0, 0, error);
     if(!handle)
         throw runtime_error(error);
+    wired = (pcap_datalink (handle) != DLT_IEEE802_11_RADIO); //better plx
     actual_filter.bf_insns = 0;
 }
 
@@ -65,12 +71,17 @@ Tins::PDU *Tins::Sniffer::next_packet(const string &filter) {
         set_filter(filter);
     pcap_pkthdr header;
     PDU *ret = 0;
+    std::cout << "Wired: " << wired << "\n";
     while(!ret) {
         const u_char *content = pcap_next(handle, &header);
         try {
-            ret = new EthernetII((const uint8_t*)content, header.caplen);
+            if(wired)
+                ret = new EthernetII((const uint8_t*)content, header.caplen);
+            else
+                ret = new RadioTap((const uint8_t*)content, header.caplen);
         }
         catch(...) {
+            std::cout << "Except!\n";
             ret = 0;
         }
     }
@@ -84,7 +95,7 @@ void Tins::Sniffer::stop_sniff() {
 void Tins::Sniffer::sniff_loop(AbstractSnifferHandler *cback_handler, const string &filter, uint32_t max_packets) {
     if(filter.size())
         set_filter(filter);
-    LoopData data(handle, cback_handler);
+    LoopData data(handle, cback_handler, wired);
     pcap_loop(handle, max_packets, Sniffer::callback_handler, (u_char*)&data);
 }
 
@@ -97,8 +108,12 @@ bool Tins::Sniffer::set_filter(const std::string &filter) {
 // Static
 void Tins::Sniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
     try {
-        PDU *pdu = new EthernetII((const uint8_t*)packet, header->caplen);
+        PDU *pdu = 0;
         LoopData *data = reinterpret_cast<LoopData*>(args);
+        if(data->wired)
+            pdu = new EthernetII((const uint8_t*)packet, header->caplen);
+        else
+            pdu = new RadioTap((const uint8_t*)packet, header->caplen);
         bool ret_val = data->c_handler->handle(pdu);
         delete pdu;
         if(!ret_val)

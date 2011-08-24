@@ -58,7 +58,7 @@ Tins::EthernetII::EthernetII(uint32_t iface_index, const uint8_t* dst_hw_addr, c
 
 Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP) {
     if(total_sz < sizeof(ethhdr))
-        throw std::runtime_error("Not enought size for an ethernetII header in the buffer.");
+        throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
     memcpy(&_eth, buffer, sizeof(ethhdr));
     PDU *next = 0;
     switch(payload_type()) {

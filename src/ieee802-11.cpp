@@ -33,6 +33,8 @@
 
 using namespace std;
 
+const uint8_t *Tins::IEEE802_11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
+
 Tins::IEEE802_11::IEEE802_11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
@@ -60,8 +62,19 @@ Tins::IEEE802_11::IEEE802_11(uint32_t iface_index, const uint8_t* dst_hw_addr, c
     this->iface(iface_index);
 }
 
-Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
+Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE_IP) {
 
+}
+
+Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
+    if(total_sz < sizeof(_header))
+        throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+    std::memcpy(&_header, buffer, sizeof(_header));
+    buffer += sizeof(_header);
+    total_sz -= sizeof(_header);
+
+    // Tagged arguments missing.
+    // subclass specific parsing missing too.
 }
 
 Tins::IEEE802_11::~IEEE802_11() {
@@ -203,11 +216,12 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     }
 }
 
-Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE_IP) {
 
-}
+/*
+ * ManagementFrame
+ */
 
-Tins::ManagementFrame::ManagementFrame() : IEEE802_11() {
+Tins::ManagementFrame::ManagementFrame(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : IEEE802_11(dst_hw_addr, src_hw_addr) {
     this->type(IEEE802_11::MANAGEMENT);
 }
 
@@ -217,7 +231,12 @@ Tins::ManagementFrame::ManagementFrame(const std::string& iface,
     this->type(IEEE802_11::MANAGEMENT);
 }
 
-Tins::IEEE802_11_Beacon::IEEE802_11_Beacon() : ManagementFrame() {
+
+/*
+ * Beacon
+ */
+
+Tins::IEEE802_11_Beacon::IEEE802_11_Beacon(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : ManagementFrame() {
     this->subtype(IEEE802_11::BEACON);
     memset(&_body, 0, sizeof(_body));
 }
@@ -245,7 +264,7 @@ void Tins::IEEE802_11_Beacon::rates(const std::list<float> &new_rates) {
     uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
     for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
         uint8_t result = 0x80, left = *it / 0.5;
-        if(*it - left > 0) //arbitrary value
+        if(*it - left > 0)
             left++;
         *(ptr++) = (result | left);
     }
@@ -255,6 +274,13 @@ void Tins::IEEE802_11_Beacon::rates(const std::list<float> &new_rates) {
 
 void Tins::IEEE802_11_Beacon::channel(uint8_t new_channel) {
     add_tagged_option(DS_SET, 1, &new_channel);
+}
+
+void Tins::IEEE802_11_Beacon::rsn_information(const RSNInformation& info) {
+    uint32_t size;
+    uint8_t *buffer = info.serialize(size);
+    add_tagged_option(RSN, size, buffer);
+    delete[] buffer;
 }
 
 uint32_t Tins::IEEE802_11_Beacon::header_size() const {
@@ -293,4 +319,57 @@ uint32_t Tins::IEEE802_11_Disassoc::write_fixed_parameters(uint8_t *buffer, uint
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
+}
+
+/*
+ * RSNInformation class
+ */
+Tins::RSNInformation::RSNInformation() : _version(1), _capabilities(0) {
+
+}
+
+void Tins::RSNInformation::add_pairwise_cypher(CypherSuites cypher) {
+    _pairwise_cyphers.push_back(cypher);
+}
+
+void Tins::RSNInformation::add_akm_cypher(AKMSuites akm) {
+    _akm_cyphers.push_back(akm);
+}
+
+void Tins::RSNInformation::group_suite(CypherSuites group) {
+    _group_suite = group;
+}
+
+uint8_t *Tins::RSNInformation::serialize(uint32_t &size) const {
+    size = sizeof(_version) + sizeof(_capabilities) + sizeof(uint32_t);
+    size += (sizeof(uint16_t) << 1); // 2 lists count.
+    size += sizeof(uint32_t) * (_akm_cyphers.size() + _pairwise_cyphers.size());
+
+    uint8_t *buffer = new uint8_t[size], *ptr = buffer;
+    *(uint16_t*)ptr = _version;
+    ptr += sizeof(_version);
+    *(uint32_t*)ptr = _group_suite;
+    ptr += sizeof(uint32_t);
+    *(uint16_t*)ptr = _pairwise_cyphers.size();
+    ptr += sizeof(uint16_t);
+    for(std::list<CypherSuites>::const_iterator it = _pairwise_cyphers.begin(); it != _pairwise_cyphers.end(); ++it) {
+        *(uint32_t*)ptr = *it;
+        ptr += sizeof(uint32_t);
+    }
+    *(uint16_t*)ptr = _akm_cyphers.size();
+    ptr += sizeof(uint16_t);
+    for(std::list<AKMSuites>::const_iterator it = _akm_cyphers.begin(); it != _akm_cyphers.end(); ++it) {
+        *(uint32_t*)ptr = *it;
+        ptr += sizeof(uint32_t);
+    }
+    *(uint16_t*)ptr = _capabilities;
+    return buffer;
+}
+
+Tins::RSNInformation Tins::RSNInformation::wpa2_psk() {
+    RSNInformation info;
+    info.group_suite(RSNInformation::CCMP);
+    info.add_pairwise_cypher(RSNInformation::CCMP);
+    info.add_akm_cypher(RSNInformation::PSK);
+    return info;
 }

@@ -39,6 +39,11 @@ namespace Tins {
     public:
 
         /**
+         * \brief Broadcast hardware address.
+         */
+        static const uint8_t *BROADCAST;
+
+        /**
          * \brief Enum for the different types of 802.11 frames.
          *
          */
@@ -504,7 +509,7 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::IEEE802_11; }
     protected:
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
-    private:
+    protected:
         /**
          * Struct that represents the 802.11 header
          */
@@ -551,6 +556,7 @@ namespace Tins {
             } __attribute__((__packed__)) seq_control;
 
         } __attribute__((__packed__));
+        private:
 
         IEEE802_11(const ieee80211_header *header_ptr);
 
@@ -608,7 +614,7 @@ namespace Tins {
 
     protected:
 
-        ManagementFrame();
+        ManagementFrame(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
         ManagementFrame(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) throw (std::runtime_error);
 
         struct CapabilityInformation {
@@ -670,6 +676,76 @@ namespace Tins {
 
     };
 
+        /**
+     * \brief Class that models the RSN information structure.
+     */
+    class RSNInformation {
+    public:
+        /**
+         * \brief Enum that represents the different cypher suites.
+         */
+        enum CypherSuites {
+            WEP_40  = 0x01ac0f00,
+            TKIP    = 0x02ac0f00,
+            CCMP    = 0x04ac0f00,
+            WEP_104 = 0x05ac0f00
+        };
+
+        /**
+         * \brief Enum that represents the different akm suites.
+         */
+        enum AKMSuites {
+            PMKSA = 0x01ac0f00,
+            PSK   = 0x02ac0f00
+        };
+
+        /**
+         * \brief Creates an instance of RSNInformation.
+         *
+         * By default, the version is set to 1.
+         */
+        RSNInformation();
+
+        /**
+         * \brief Helper function to create a WPA2-PSK RSNInformation
+         * \return An instance RSNInformation which contains information
+         * for a WPA2-PSK AP.
+         */
+        static RSNInformation wpa2_psk();
+
+        /**
+         * \brief Adds a pairwise cypher suite.
+         * \param cypher The pairwise cypher suite to be added.
+         */
+        void add_pairwise_cypher(CypherSuites cypher);
+
+        /**
+         * \brief Adds a akm suite.
+         * \param akm The akm suite to be added.
+         */
+        void add_akm_cypher(AKMSuites akm);
+
+        /**
+         * \brief Sets the group suite cypher.
+         * \param group The group suite cypher to be set.
+         */
+        void group_suite(CypherSuites group);
+
+        /**
+         * \brief Serializes this object.
+         * \param size Output parameter which will contain the size of
+         * the allocated buffer.
+         * \return The result of the serialization. This pointer should
+         * be free'd using operator delete[].
+         */
+        uint8_t *serialize(uint32_t &size) const;
+    private:
+        uint16_t _version, _capabilities;
+        CypherSuites _group_suite;
+        std::list<AKMSuites> _akm_cyphers;
+        std::list<CypherSuites> _pairwise_cyphers;
+    };
+
     /**
      * \brief Class representing a Beacon in the IEEE 802.11 Protocol.
      *
@@ -680,9 +756,10 @@ namespace Tins {
 
         /**
          * \brief Default constructor for the beacon frame.
-         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        IEEE802_11_Beacon();
+        IEEE802_11_Beacon(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Beacon.
@@ -965,6 +1042,12 @@ namespace Tins {
          * \param new_channel The new channel to be set.
          */
         void channel(uint8_t new_channel);
+
+        /**
+         * \brief Helper method to set the RSN information option.
+         *
+         */
+        void rsn_information(const RSNInformation& info);
 
         /**
          * \brief Returns the frame's header length.
