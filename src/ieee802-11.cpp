@@ -22,7 +22,7 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
-#include <iostream> //borrame
+#include <algorithm> 
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -70,11 +70,12 @@ Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE
 }
 
 Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
-    if(total_sz < sizeof(_header))
+    if(total_sz < sizeof(_header.control))
         throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
+    uint32_t sz = std::min(sizeof(_header), total_sz);
+    std::memcpy(&_header, buffer, sz);
+    buffer += sz;
+    total_sz -= sz;
 
     // subclass specific parsing missing too.
 }
@@ -241,12 +242,16 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
 }
 
 Tins::PDU *Tins::IEEE802_11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
-    if(total_sz < sizeof(ieee80211_header)) 
+    // We only need the control field, the length of the PDU will depend on the flags set.
+    if(total_sz < sizeof(ieee80211_header::control)) 
         throw std::runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
     const ieee80211_header *hdr = (const ieee80211_header*)buffer;
     PDU *ret = 0;
-    if(hdr->control.type == 0 && hdr->control.subtype == 8)
+    if(hdr->control.type == 0 && hdr->control.subtype == 8) {
+        if(total_sz < sizeof(_header))
+            throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
         ret = new IEEE802_11_Beacon(buffer, total_sz);
+    }
     else
         ret = new IEEE802_11(buffer, total_sz);
     return ret;
