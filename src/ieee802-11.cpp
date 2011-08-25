@@ -23,6 +23,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <algorithm> 
+#include <utility>
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -263,7 +264,7 @@ Tins::PDU *Tins::IEEE802_11::from_bytes(const uint8_t *buffer, uint32_t total_sz
  */
 
 Tins::ManagementFrame::ManagementFrame(const uint8_t *buffer, uint32_t total_sz) : IEEE802_11(buffer, total_sz) {
-    
+
 }
 
 Tins::ManagementFrame::ManagementFrame(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) : IEEE802_11(dst_hw_addr, src_hw_addr) {
@@ -354,7 +355,7 @@ bool Tins::IEEE802_11_Beacon::rsn_information(RSNInformation *rsn) {
     buffer += sizeof(uint16_t);
     rsn->group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
     buffer += sizeof(uint32_t);
-    
+
     bytes_left -= (sizeof(uint16_t) << 1) + sizeof(uint32_t);
     if(bytes_left < sizeof(uint16_t))
         return false;
@@ -482,4 +483,89 @@ Tins::RSNInformation Tins::RSNInformation::wpa2_psk() {
     info.add_pairwise_cypher(RSNInformation::CCMP);
     info.add_akm_cypher(RSNInformation::PSK);
     return info;
+}
+
+Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request() {
+    this->subtype(IEEE802_11::ASSOC_REQ);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request(const std::string& iface,
+                                           const uint8_t* dst_hw_addr,
+                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+    this->subtype(IEEE802_11::ASSOC_REQ);
+    memset(&_body, 0, sizeof(_body));
+}
+
+void Tins::IEEE802_11_Assoc_Request::listen_interval(uint16_t new_listen_interval) {
+    this->_body.listen_interval = new_listen_interval;
+}
+
+void Tins::IEEE802_11_Assoc_Request::ssid(const std::string &new_ssid) {
+    add_tagged_option(IEEE802_11::SSID, new_ssid.size(), (const uint8_t*)new_ssid.c_str());
+}
+
+void Tins::IEEE802_11_Assoc_Request::supported_rates(const std::list<float> &new_rates) {
+    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
+    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
+        uint8_t result = 0x80, left = *it / 0.5;
+        if(*it - left > 0)
+            left++;
+        *(ptr++) = (result | left);
+    }
+    add_tagged_option(SUPPORTED_RATES, new_rates.size(), buffer);
+    delete[] buffer;
+}
+
+void Tins::IEEE802_11_Assoc_Request::extended_supported_rates(const std::list<float> &new_rates) {
+    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
+    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
+        uint8_t result = 0x80, left = *it / 0.5;
+        if(*it - left > 0)
+            left++;
+        *(ptr++) = (result | left);
+    }
+    add_tagged_option(EXT_SUPPORTED_RATES, new_rates.size(), buffer);
+    delete[] buffer;
+}
+
+void Tins::IEEE802_11_Assoc_Request::power_capabilities(uint8_t min_power, uint8_t max_power) {
+    uint8_t buffer[2];
+    buffer[0] = min_power;
+    buffer[1] = max_power;
+    add_tagged_option(POWER_CAPABILITY, 2, buffer);
+}
+
+void Tins::IEEE802_11_Assoc_Request::supported_channels(const std::list<pair<uint8_t, uint8_t> > &new_channels) {
+
+    uint8_t* buffer = new uint8_t[new_channels.size() * 2];
+    uint8_t* ptr = buffer;
+    for(std::list<pair<uint8_t, uint8_t> >::const_iterator it = new_channels.begin(); it != new_channels.end(); ++it) {
+        *(ptr++) = it->first;
+        *(ptr++) = it->second;
+    }
+    add_tagged_option(SUPPORTED_CHANNELS, new_channels.size() * 2, buffer);
+
+}
+
+void Tins::IEEE802_11_Assoc_Request::rsn_information(const RSNInformation& info) {
+    uint32_t size;
+    uint8_t *buffer = info.serialize(size);
+    add_tagged_option(RSN, size, buffer);
+    delete[] buffer;
+}
+
+void Tins::IEEE802_11_Assoc_Request::qos_capabilities(uint8_t new_qos_capabilities) {
+    add_tagged_option(QOS_CAPABILITY, 1, &new_qos_capabilities);
+}
+
+uint32_t Tins::IEEE802_11_Assoc_Request::header_size() const {
+    return IEEE802_11::header_size() + sizeof(AssocReqBody);
+}
+
+uint32_t Tins::IEEE802_11_Assoc_Request::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(AssocReqBody);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
 }

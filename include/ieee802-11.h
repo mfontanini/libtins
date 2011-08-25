@@ -25,6 +25,7 @@
 #include <list>
 #include <stdint.h>
 #include <stdexcept>
+#include <utility>
 
 #include "pdu.h"
 #include "utils.h"
@@ -1192,6 +1193,128 @@ namespace Tins {
 
 
         DisassocBody _body;
+    };
+
+    /**
+     * \brief Class representing an Association Request frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class IEEE802_11_Assoc_Request : public ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the Association Request frame.
+         *
+         */
+        IEEE802_11_Assoc_Request();
+
+        /**
+         * \brief Constructor for creating a 802.11 Association Request.
+         *
+         * Constructor that builds a 802.11 Association Request taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        IEEE802_11_Assoc_Request(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the listen interval.
+         *
+         * \return The listen interval in an uint16_t.
+         */
+        inline uint16_t listen_interval() const { return this->_body.listen_interval; }
+
+        /**
+         * \brief Setter for the listen interval.
+         *
+         * \param new_listen_interval uint16_t with the new listen interval.
+         */
+        void listen_interval(uint16_t new_listen_interval);
+
+        /**
+         * \brief Helper method to set the essid.
+         *
+         * \param new_ssid The ssid to be set.
+         */
+        void ssid(const std::string &new_ssid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the power capabilities.
+         *
+         * \param min_power uint8_t indicating the minimum transmiting power capability.
+         * \param max_power uint8_t indicating the maximum transmiting power capability.
+         */
+        void power_capabilities(uint8_t min_power, uint8_t max_power);
+
+        /**
+         * \brief Helper method to set the supported channels.
+         *
+         * \param new_channels A list of channels to be set.
+         */
+        void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
+
+        /**
+         * \brief Helper method to set the RSN information option.
+         *
+         * \param info The RSNInformation structure to be set.
+         */
+        void rsn_information(const RSNInformation& info);
+
+        /**
+         * \brief Helper method to set the QoS capabilities.
+         *
+         * \param new_qos_capabilities uint8_t with the capabilities.
+         */
+        void qos_capabilities(uint8_t new_qos_capabilities);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+    private:
+        struct AssocReqBody {
+            CapabilityInformation capability;
+            uint16_t listen_interval;
+        };
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+        AssocReqBody _body;
     };
 
 }
