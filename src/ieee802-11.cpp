@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
+#include <iostream> //borrame
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -68,12 +69,11 @@ Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE
 
 Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
     if(total_sz < sizeof(_header))
-        throw std::runtime_error("Not enough size for an RadioTap header in the buffer.");
+        throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
 
-    // Tagged arguments missing.
     // subclass specific parsing missing too.
 }
 
@@ -81,6 +81,21 @@ Tins::IEEE802_11::~IEEE802_11() {
     while(_options.size()) {
         delete[] _options.front().value;
         _options.pop_front();
+    }
+}
+
+void Tins::IEEE802_11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
+    uint8_t opcode, length;
+    while(total_sz >= 2) {
+        opcode = buffer[0];
+        length = buffer[1];
+        buffer += 2;
+        total_sz -= 2;
+        if(length > total_sz)
+            return; //malformed
+        add_tagged_option((TaggedOption)opcode, length, buffer);
+        buffer += length;
+        total_sz -= length;
     }
 }
 
@@ -93,6 +108,13 @@ void Tins::IEEE802_11::add_tagged_option(TaggedOption opt, uint8_t len, const ui
     uint32_t opt_size = len + (sizeof(uint8_t) << 1);
     _options.push_back(IEEE802_11_Option((uint8_t)opt, len, val));
     _options_size += opt_size;
+}
+
+const Tins::IEEE802_11::IEEE802_11_Option *Tins::IEEE802_11::lookup_option(TaggedOption opt) const {
+    for(std::list<IEEE802_11_Option>::const_iterator it = _options.begin(); it != _options.end(); ++it)
+        if(it->option == (uint8_t)opt)
+            return &(*it);
+    return 0;
 }
 
 void Tins::IEEE802_11::protocol(uint8_t new_proto) {
@@ -216,18 +238,32 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     }
 }
 
+Tins::PDU *Tins::IEEE802_11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
+    if(total_sz < sizeof(ieee80211_header)) 
+        throw std::runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
+    const ieee80211_header *hdr = (const ieee80211_header*)buffer;
+    PDU *ret = 0;
+    if(hdr->control.type == 0 && hdr->control.subtype == 8)
+        ret = new IEEE802_11_Beacon(buffer, total_sz);
+    return ret;
+}
+
 
 /*
  * ManagementFrame
  */
 
-Tins::ManagementFrame::ManagementFrame(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : IEEE802_11(dst_hw_addr, src_hw_addr) {
+Tins::ManagementFrame::ManagementFrame(const uint8_t *buffer, uint32_t total_sz) : IEEE802_11(buffer, total_sz) {
+    
+}
+
+Tins::ManagementFrame::ManagementFrame(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) : IEEE802_11(dst_hw_addr, src_hw_addr) {
     this->type(IEEE802_11::MANAGEMENT);
 }
 
-Tins::ManagementFrame::ManagementFrame(const std::string& iface,
-                                       const uint8_t* dst_hw_addr,
-                                       const uint8_t* src_hw_addr) throw (std::runtime_error) : IEEE802_11(iface, dst_hw_addr, src_hw_addr) {
+Tins::ManagementFrame::ManagementFrame(const std::string &iface,
+                                       const uint8_t *dst_hw_addr,
+                                       const uint8_t *src_hw_addr) throw (std::runtime_error) : IEEE802_11(iface, dst_hw_addr, src_hw_addr) {
     this->type(IEEE802_11::MANAGEMENT);
 }
 
@@ -246,6 +282,17 @@ Tins::IEEE802_11_Beacon::IEEE802_11_Beacon(const std::string& iface,
                                            const uint8_t* src_hw_addr) throw (std::runtime_error) : ManagementFrame(iface, dst_hw_addr, src_hw_addr){
     this->subtype(IEEE802_11::BEACON);
     memset(&_body, 0, sizeof(_body));
+}
+
+Tins::IEEE802_11_Beacon::IEEE802_11_Beacon(const uint8_t *buffer, uint32_t total_sz) : ManagementFrame(buffer, total_sz) {
+    buffer += sizeof(ieee80211_header);
+    total_sz -= sizeof(ieee80211_header);
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for a IEEE 802.11 beacon header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
 }
 
 void Tins::IEEE802_11_Beacon::timestamp(uint64_t new_timestamp) {
@@ -281,6 +328,13 @@ void Tins::IEEE802_11_Beacon::rsn_information(const RSNInformation& info) {
     uint8_t *buffer = info.serialize(size);
     add_tagged_option(RSN, size, buffer);
     delete[] buffer;
+}
+
+std::string Tins::IEEE802_11_Beacon::essid() const {
+    const IEEE802_11::IEEE802_11_Option *option = lookup_option(SSID);
+    if(option)
+        cout << "Length of option: " << (int)option->length << "\n";
+    return (option) ? string((const char*)option->value, option->length) : 0;
 }
 
 uint32_t Tins::IEEE802_11_Beacon::header_size() const {

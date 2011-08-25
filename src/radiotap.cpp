@@ -106,6 +106,8 @@ Tins::RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
         buffer += sizeof(_rx_flags);
         total_sz -= sizeof(_rx_flags);
     }
+    if(total_sz)
+        inner_pdu(IEEE802_11::from_bytes(buffer, total_sz));
 }
 
 void Tins::RadioTap::version(uint8_t new_version) {

@@ -503,12 +503,28 @@ namespace Tins {
         void add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val);
 
         /**
+         * \brief Looks up a tagged option in the option list.
+         * \param opt The option identifier.
+         * \return The option found, or 0 if no such option has been set.
+         */
+        const IEEE802_11_Option *lookup_option(TaggedOption opt) const;
+
+        /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::IEEE802_11; }
+        
+        /**
+         * \brief Allocates an IEEE802_11 PDU from a buffer.
+         * \param buffer The buffer from which to take the PDU data.
+         * \param total_sz The total size of the buffer.
+         * \return The allocated PDU.
+         */
+        static PDU *from_bytes(const uint8_t *buffer, uint32_t total_sz);
     protected:
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
+        void parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz);
     protected:
         /**
          * Struct that represents the 802.11 header
@@ -559,7 +575,7 @@ namespace Tins {
         private:
 
         IEEE802_11(const ieee80211_header *header_ptr);
-
+        
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
 
@@ -613,9 +629,15 @@ namespace Tins {
         };
 
     protected:
-
-        ManagementFrame(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
-        ManagementFrame(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) throw (std::runtime_error);
+        /**
+         * \brief Constructor which creates a ManagementFrame object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        ManagementFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0);
+        ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
+        ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
 
         struct CapabilityInformation {
             unsigned int _ess:1;
@@ -773,6 +795,15 @@ namespace Tins {
          */
         IEEE802_11_Beacon(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
+        /**
+         * \brief Constructor which creates a IEEE802_11_Beacon object from a buffer and adds 
+         * all identifiable PDUs found in the buffer as children of this one.
+         * 
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        IEEE802_11_Beacon(const uint8_t *buffer, uint32_t total_sz);
+        
         /**
          * \brief Getter for the timestamp field.
          *
@@ -1045,9 +1076,17 @@ namespace Tins {
 
         /**
          * \brief Helper method to set the RSN information option.
-         *
+         * \param info The RSNInformation structure to be set.
          */
         void rsn_information(const RSNInformation& info);
+
+        /**
+         * \brief Helper method to search for the ESSID of this beacon.
+         * 
+         * This method returns the essid of this beacon, or an empty 
+         * string if no essid has been set.
+         */
+        std::string essid() const;
 
         /**
          * \brief Returns the frame's header length.
@@ -1117,18 +1156,15 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-
     private:
-
         struct DisassocBody {
             uint16_t reason_code;
         };
 
-        DisassocBody _body;
-
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+        
 
-
+        DisassocBody _body;
     };
 
 }
