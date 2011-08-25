@@ -514,7 +514,7 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::IEEE802_11; }
-        
+
         /**
          * \brief Allocates an IEEE802_11 PDU from a buffer.
          * \param buffer The buffer from which to take the PDU data.
@@ -575,7 +575,7 @@ namespace Tins {
         private:
 
         IEEE802_11(const ieee80211_header *header_ptr);
-        
+
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
 
@@ -628,17 +628,6 @@ namespace Tins {
             PEER_STA_NOT_SUPPORT_CIPHER = 45
         };
 
-    protected:
-        /**
-         * \brief Constructor which creates a ManagementFrame object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        ManagementFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0);
-        ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
-        ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
-
         struct CapabilityInformation {
             unsigned int _ess:1;
             unsigned int _ibss:1;
@@ -657,41 +646,242 @@ namespace Tins {
             unsigned int _delayed_block_ack:1;
             unsigned int _immediate_block_ack:1;
 
+            /**
+             * \brief Getter for the ess flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool ess() const { return this->_ess; }
+
+            /**
+             * \brief Getter for the ibss flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool ibss() const { return this->_ibss; }
+
+            /**
+             * \brief Getter for the cf_poll flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool cf_poll() const { return this->_cf_poll; }
+
+            /**
+             * \brief Getter for the cf_poll_req flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool cf_poll_req() const { return this->_cf_poll_req; }
+
+            /**
+             * \brief Getter for the privacy flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool privacy() const { return this->_privacy; }
+
+            /**
+             * \brief Getter for the short_preamble flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool short_preamble() const { return this->_short_preamble; }
+
+            /**
+             * \brief Getter for the pbcc flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool pbcc() const { return this->_pbcc; }
+
+            /**
+             * \brief Getter for the channel_agility flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool channel_agility() const { return this->_channel_agility; }
+
+            /**
+             * \brief Getter for the spectrum_mgmt flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool spectrum_mgmt() const { return this->_spectrum_mgmt; }
+
+            /**
+             * \brief Getter for the qos flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool qos() const { return this->_qos; }
+
+            /**
+             * \brief Getter for the sst flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool sst() const { return this->_sst; }
+
+            /**
+             * \brief Getter for the apsd flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool apsd() const { return this->_apsd; }
+
+            /**
+             * \brief Getter for the reserved flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool reserved() const { return this->_reserved; }
+
+            /**
+             * \brief Getter for the dsss_ofdm flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool dsss_ofdm() const { return this->_dsss_ofdm; }
+
+            /**
+             * \brief Getter for the delayed_block_ack flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool delayed_block_ack() const { return this->_delayed_block_ack; }
+
+            /**
+             * \brief Getter for the immediate_block_ack flag.
+             *
+             * \return Bool indicating the flag's value.
+             */
             inline bool immediate_block_ack() const { return this->_immediate_block_ack; }
 
+            /**
+             * \brief Setter for the ess flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void ess(bool new_value) { this->_ess = new_value; }
+
+            /**
+             * \brief Setter for the ibss flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void ibss(bool new_value) { this->_ibss = new_value; }
+
+            /**
+             * \brief Setter for the cf_poll flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void cf_poll(bool new_value) { this->_cf_poll = new_value; }
+
+            /**
+             * \brief Setter for the cf_poll_req flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void cf_poll_req(bool new_value) { this->_cf_poll_req = new_value; }
+
+            /**
+             * \brief Setter for the privacy flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void privacy(bool new_value) { this->_privacy = new_value; }
+
+            /**
+             * \brief Setter for the short_preamble flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void short_preamble(bool new_value) { this->_short_preamble = new_value; }
+
+            /**
+             * \brief Setter for the pbcc flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void pbcc(bool new_value) { this->_pbcc = new_value; }
+
+            /**
+             * \brief Setter for the channel_agility flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void channel_agility(bool new_value) { this->_channel_agility = new_value; }
+
+            /**
+             * \brief Setter for the spectrum_mgmt flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void spectrum_mgmt(bool new_value) { this->_spectrum_mgmt = new_value; }
+
+            /**
+             * \brief Setter for the qos flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void qos(bool new_value) { this->_qos = new_value; }
+
+            /**
+             * \brief Setter for the sst flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void sst(bool new_value) { this->_sst = new_value; }
+
+            /**
+             * \brief Setter for the apsd flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void apsd(bool new_value) { this->_apsd = new_value; }
+
+            /**
+             * \brief Setter for the reserved flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void reserved(bool new_value) { this->_reserved = new_value; }
+
+            /**
+             * \brief Setter for the dsss_ofdm flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void dsss_ofdm(bool new_value) { this->_dsss_ofdm = new_value; }
+
+            /**
+             * \brief Setter for the delayed_block_ack flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void delayed_block_ack(bool new_value) { this->_delayed_block_ack = new_value; }
+
+            /**
+             * \brief Setter for the immediate_block_ack flag.
+             *
+             * \param new_value bool indicating the flag's new value.
+             */
             void immediate_block_ack(bool new_value) { this->_immediate_block_ack = new_value; }
 
         } __attribute__((__packed__));
+
+    protected:
+        /**
+         * \brief Constructor which creates a ManagementFrame object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        ManagementFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0);
+        ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
+        ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
 
     private:
 
@@ -834,14 +1024,14 @@ namespace Tins {
         IEEE802_11_Beacon(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
-         * \brief Constructor which creates a IEEE802_11_Beacon object from a buffer and adds 
+         * \brief Constructor which creates a IEEE802_11_Beacon object from a buffer and adds
          * all identifiable PDUs found in the buffer as children of this one.
-         * 
+         *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         IEEE802_11_Beacon(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Getter for the timestamp field.
          *
@@ -857,228 +1047,18 @@ namespace Tins {
         inline uint16_t interval() const { return Utils::net_to_host_s(this->_body.interval); }
 
         /**
-         * \brief Getter for the ess flag.
+         * \brief Getter for the Capabilities Information.
          *
-         * \return Bool indicating the flag's value.
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline bool ess() const { return this->_body.capability.ess(); }
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
 
         /**
-         * \brief Getter for the ibss flag.
+         * \brief Getter for the Capabilities Information.
          *
-         * \return Bool indicating the flag's value.
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline bool ibss() const { return this->_body.capability.ibss(); }
-
-        /**
-         * \brief Getter for the cf_poll flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool cf_poll() const { return this->_body.capability.cf_poll(); }
-
-        /**
-         * \brief Getter for the cf_poll_req flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool cf_poll_req() const { return this->_body.capability.cf_poll_req(); }
-
-        /**
-         * \brief Getter for the privacy flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool privacy() const { return this->_body.capability.privacy(); }
-
-        /**
-         * \brief Getter for the short_preamble flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool short_preamble() const { return this->_body.capability.short_preamble(); }
-
-        /**
-         * \brief Getter for the pbcc flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool pbcc() const { return this->_body.capability.pbcc(); }
-
-        /**
-         * \brief Getter for the channel_agility flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool channel_agility() const { return this->_body.capability.channel_agility(); }
-
-        /**
-         * \brief Getter for the spectrum_mgmt flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool spectrum_mgmt() const { return this->_body.capability.spectrum_mgmt(); }
-
-        /**
-         * \brief Getter for the qos flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool qos() const { return this->_body.capability.qos(); }
-
-        /**
-         * \brief Getter for the sst flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool sst() const { return this->_body.capability.sst(); }
-
-        /**
-         * \brief Getter for the apsd flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool apsd() const { return this->_body.capability.apsd(); }
-
-        /**
-         * \brief Getter for the reserved flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool reserved() const { return this->_body.capability.reserved(); }
-
-        /**
-         * \brief Getter for the dsss_ofdm flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool dsss_ofdm() const { return this->_body.capability.dsss_ofdm(); }
-
-        /**
-         * \brief Getter for the delayed_block_ack flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool delayed_block_ack() const { return this->_body.capability.delayed_block_ack(); }
-
-        /**
-         * \brief Getter for the immediate_block_ack flag.
-         *
-         * \return Bool indicating the flag's value.
-         */
-        inline bool immediate_block_ack() const { return this->_body.capability.immediate_block_ack(); }
-
-        /**
-         * \brief Setter for the ess flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void ess(bool new_value) { this->_body.capability.ess(new_value); }
-
-        /**
-         * \brief Setter for the ibss flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void ibss(bool new_value) { this->_body.capability.ibss(new_value); }
-
-        /**
-         * \brief Setter for the cf_poll flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void cf_poll(bool new_value) { this->_body.capability.cf_poll(new_value); }
-
-        /**
-         * \brief Setter for the cf_poll_req flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void cf_poll_req(bool new_value) { this->_body.capability.cf_poll_req(new_value); }
-
-        /**
-         * \brief Setter for the privacy flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void privacy(bool new_value) { this->_body.capability.privacy(new_value); }
-
-        /**
-         * \brief Setter for the short_preamble flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void short_preamble(bool new_value) { this->_body.capability.short_preamble(new_value); }
-
-        /**
-         * \brief Setter for the pbcc flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void pbcc(bool new_value) { this->_body.capability.pbcc(new_value); }
-
-        /**
-         * \brief Setter for the channel_agility flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void channel_agility(bool new_value) { this->_body.capability.channel_agility(new_value); }
-
-        /**
-         * \brief Setter for the spectrum_mgmt flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void spectrum_mgmt(bool new_value) { this->_body.capability.spectrum_mgmt(new_value); }
-
-        /**
-         * \brief Setter for the qos flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void qos(bool new_value) { this->_body.capability.qos(new_value); }
-
-        /**
-         * \brief Setter for the sst flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void sst(bool new_value) { this->_body.capability.sst(new_value); }
-
-        /**
-         * \brief Setter for the apsd flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void apsd(bool new_value) { this->_body.capability.apsd(new_value); }
-
-        /**
-         * \brief Setter for the reserved flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void reserved(bool new_value) { this->_body.capability.reserved(new_value); }
-
-        /**
-         * \brief Setter for the dsss_ofdm flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void dsss_ofdm(bool new_value) { this->_body.capability.dsss_ofdm(new_value); }
-
-        /**
-         * \brief Setter for the delayed_block_ack flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void delayed_block_ack(bool new_value) { this->_body.capability.delayed_block_ack(new_value); }
-
-        /**
-         * \brief Setter for the immediate_block_ack flag.
-         *
-         * \param new_value bool indicating the flag's new value.
-         */
-        void immediate_block_ack(bool new_value) { this->_body.capability.immediate_block_ack(new_value); }
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
 
         /**
          * \brief Setter for the timestamp field.
@@ -1120,8 +1100,8 @@ namespace Tins {
 
         /**
          * \brief Helper method to search for the ESSID of this beacon.
-         * 
-         * This method returns the essid of this beacon, or an empty 
+         *
+         * This method returns the essid of this beacon, or an empty
          * string if no essid has been set.
          */
         std::string essid() const;
@@ -1209,7 +1189,7 @@ namespace Tins {
         };
 
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
-        
+
 
         DisassocBody _body;
     };
