@@ -20,7 +20,6 @@
  */
 
 
-#include <iostream> //borrame
 #include <stdexcept>
 #include "sniffer.h"
 #include "ethernetII.h"
@@ -71,7 +70,6 @@ Tins::PDU *Tins::Sniffer::next_packet(const string &filter) {
         set_filter(filter);
     pcap_pkthdr header;
     PDU *ret = 0;
-    std::cout << "Wired: " << wired << "\n";
     while(!ret) {
         const u_char *content = pcap_next(handle, &header);
         try {
@@ -81,7 +79,6 @@ Tins::PDU *Tins::Sniffer::next_packet(const string &filter) {
                 ret = new RadioTap((const uint8_t*)content, header.caplen);
         }
         catch(...) {
-            std::cout << "Except!\n";
             ret = 0;
         }
     }

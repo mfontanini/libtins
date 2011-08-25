@@ -22,7 +22,6 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
-#include <iostream> //borrame
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -332,8 +331,6 @@ void Tins::IEEE802_11_Beacon::rsn_information(const RSNInformation& info) {
 
 std::string Tins::IEEE802_11_Beacon::essid() const {
     const IEEE802_11::IEEE802_11_Option *option = lookup_option(SSID);
-    if(option)
-        cout << "Length of option: " << (int)option->length << "\n";
     return (option) ? string((const char*)option->value, option->length) : 0;
 }
 
