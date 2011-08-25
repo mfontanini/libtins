@@ -945,6 +945,44 @@ namespace Tins {
         void group_suite(CypherSuites group);
 
         /**
+         * \brief Sets the version.
+         * \param ver The version to be set.
+         */
+        void version(uint16_t ver);
+        
+        /**
+         * \brief Sets the capabilities field.
+         * \param cap The capabilities to be set.
+         */
+        void capabilities(uint16_t cap);
+
+        /* Getters */
+        
+        /**
+         * \brief Getter for the group suite field.
+         * \return The group suite field.
+         */
+        inline CypherSuites group_suite() const { return _group_suite; }
+        
+        /**
+         * \brief Getter for the version field.
+         * \return The version field.
+         */
+        inline uint16_t version() const { return _version; }
+        
+        /**
+         * \brief Getter for the pairwise cypher suite list.
+         * \return A list of pairwise cypher suites.
+         */
+        inline const std::list<CypherSuites> &pairwise_cyphers() const { return _pairwise_cyphers; }
+        
+        /**
+         * \brief Getter for the akm suite list.
+         * \return A list of akm suites.
+         */
+        inline const std::list<AKMSuites> &akm_cyphers() const { return _akm_cyphers; }
+
+        /**
          * \brief Serializes this object.
          * \param size Output parameter which will contain the size of
          * the allocated buffer.
@@ -1068,7 +1106,16 @@ namespace Tins {
          * string if no essid has been set.
          */
         std::string essid() const;
-
+        
+        /**
+         * \brief Helper method to search for the RSN information of this beacon.
+         * 
+         * This method fills the RSN information structure of this beacon.
+         * \param rsn A pointer in which the RSN information will be stored.
+         * \return True if the RSNInformation option has been set.
+         */
+        bool rsn_information(RSNInformation *rsn);
+        
         /**
          * \brief Returns the frame's header length.
          *
