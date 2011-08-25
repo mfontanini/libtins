@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
+#include <iostream> //borrame
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -29,6 +30,8 @@
 #endif
 #include "ieee802-11.h"
 #include "rawpdu.h"
+#include "radiotap.h"
+#include "sniffer.h"
 #include "utils.h"
 
 using namespace std;
@@ -244,6 +247,8 @@ Tins::PDU *Tins::IEEE802_11::from_bytes(const uint8_t *buffer, uint32_t total_sz
     PDU *ret = 0;
     if(hdr->control.type == 0 && hdr->control.subtype == 8)
         ret = new IEEE802_11_Beacon(buffer, total_sz);
+    else
+        ret = new IEEE802_11(buffer, total_sz);
     return ret;
 }
 
@@ -329,9 +334,50 @@ void Tins::IEEE802_11_Beacon::rsn_information(const RSNInformation& info) {
     delete[] buffer;
 }
 
-std::string Tins::IEEE802_11_Beacon::essid() const {
+string Tins::IEEE802_11_Beacon::essid() const {
     const IEEE802_11::IEEE802_11_Option *option = lookup_option(SSID);
     return (option) ? string((const char*)option->value, option->length) : 0;
+}
+
+bool Tins::IEEE802_11_Beacon::rsn_information(RSNInformation *rsn) {
+    const IEEE802_11::IEEE802_11_Option *option = lookup_option(RSN);
+    if(!option || option->length < (sizeof(uint16_t) << 1) + sizeof(uint32_t))
+        return false;
+    const uint8_t *buffer = option->value;
+    uint32_t bytes_left = option->length;
+    rsn->version(*(uint16_t*)buffer);
+    buffer += sizeof(uint16_t);
+    rsn->group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
+    buffer += sizeof(uint32_t);
+    
+    bytes_left -= (sizeof(uint16_t) << 1) + sizeof(uint32_t);
+    if(bytes_left < sizeof(uint16_t))
+        return false;
+    uint16_t count = *(uint16_t*)buffer;
+    buffer += sizeof(uint16_t);
+    if(count * sizeof(uint32_t) > bytes_left)
+        return false;
+    bytes_left -= count * sizeof(uint32_t);
+    while(count--) {
+        rsn->add_pairwise_cypher((RSNInformation::CypherSuites)*(uint32_t*)buffer);
+        buffer += sizeof(uint32_t);
+    }
+    if(bytes_left < sizeof(uint16_t))
+        return false;
+    count = *(uint16_t*)buffer;
+    buffer += sizeof(uint16_t);
+    bytes_left -= sizeof(uint16_t);
+    if(count * sizeof(uint32_t) > bytes_left)
+        return false;
+    bytes_left -= count * sizeof(uint32_t);
+    while(count--) {
+        rsn->add_akm_cypher((RSNInformation::AKMSuites)*(uint32_t*)buffer);
+        buffer += sizeof(uint32_t);
+    }
+    if(bytes_left < sizeof(uint16_t))
+        return false;
+    rsn->capabilities(*(uint16_t*)buffer);
+    return true;
 }
 
 uint32_t Tins::IEEE802_11_Beacon::header_size() const {
@@ -389,6 +435,14 @@ void Tins::RSNInformation::add_akm_cypher(AKMSuites akm) {
 
 void Tins::RSNInformation::group_suite(CypherSuites group) {
     _group_suite = group;
+}
+
+void Tins::RSNInformation::version(uint16_t ver) {
+    _version = ver;
+}
+
+void Tins::RSNInformation::capabilities(uint16_t cap) {
+    _capabilities = cap;
 }
 
 uint8_t *Tins::RSNInformation::serialize(uint32_t &size) const {
