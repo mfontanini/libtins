@@ -500,6 +500,17 @@ Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request(const std::string& ifac
     memset(&_body, 0, sizeof(_body));
 }
 
+Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request(const uint8_t *buffer, uint32_t total_sz) : ManagementFrame(buffer, total_sz) {
+    buffer += sizeof(ieee80211_header);
+    total_sz -= sizeof(ieee80211_header);
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 association header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
 void Tins::IEEE802_11_Assoc_Request::listen_interval(uint16_t new_listen_interval) {
     this->_body.listen_interval = new_listen_interval;
 }

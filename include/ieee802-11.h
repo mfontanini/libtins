@@ -1222,6 +1222,15 @@ namespace Tins {
         IEEE802_11_Assoc_Request(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
+         * \brief Constructor which creates a IEEE802_11_Assoc_Request object from a 
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        IEEE802_11_Assoc_Request(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
