@@ -197,7 +197,7 @@ bool Tins::RadioTap::send(PacketSender* sender) {
     
     Tins::IEEE802_11 *wlan = dynamic_cast<Tins::IEEE802_11*>(inner_pdu());
     if(wlan)
-        memcpy(&(addr.sll_addr), wlan->dst_addr(), 6);
+        memcpy(&(addr.sll_addr), wlan->addr1(), 6);
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }

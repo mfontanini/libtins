@@ -303,25 +303,25 @@ namespace Tins {
         inline uint16_t duration_id() const { return Utils::net_to_host_s(this->_header.duration_id); }
 
         /**
-         * \brief Getter for the destination's address.
+         * \brief Getter for the first address.
          *
-         * \return The destination's address as a constant uint8_t pointer.
+         * \return The first address as a constant uint8_t pointer.
          */
-        inline const uint8_t* dst_addr() const { return this->_header.dst_addr; }
+        inline const uint8_t* addr1() const { return this->_header.addr1; }
 
         /**
-         * \brief Getter for the source's address.
+         * \brief Getter for the second address.
          *
-         * \return The source's address as a constant uint8_t pointer.
+         * \return The second address as a constant uint8_t pointer.
          */
-        inline const uint8_t* src_addr() const { return this->_header.src_addr; }
+        inline const uint8_t* addr2() const { return this->_header.addr2; }
 
         /**
-         * \brief Getter for the filtering's address.
+         * \brief Getter for the third address.
          *
-         * \return The filtering's address as a constant uint8_t pointer.
+         * \return The third address as a constant uint8_t pointer.
          */
-        inline const uint8_t* filter_addr() const { return this->_header.filter_addr; }
+        inline const uint8_t* addr3() const { return this->_header.addr3; }
 
         /**
          * \brief Getter for the fragment number.
@@ -338,11 +338,11 @@ namespace Tins {
         inline uint16_t seq_num() const { return Utils::net_to_host_s(this->_header.seq_control.seq_number); }
 
         /**
-         * \brief Getter for the optional address.
+         * \brief Getter for the fourth address.
          *
-         * \return The optional address as a constant uint8_t pointer.
+         * \return The fourth address as a constant uint8_t pointer.
          */
-        inline const uint8_t* opt_addr() const { return this->_opt_addr; }
+        inline const uint8_t* addr4() const { return this->_addr4; }
 
         /**
          * \brief Getter for the interface.
@@ -429,25 +429,25 @@ namespace Tins {
         void duration_id(uint16_t new_duration_id);
 
         /**
-         * \brief Setter for the destination's address.
+         * \brief Setter for the first address.
          *
-         * \param new_dst_addr const uint8_t array of 6 bytes containing the new destination's address.
+         * \param new_addr1 const uint8_t array of 6 bytes containing the new first's address.
          */
-        void dst_addr(const uint8_t* new_dst_addr);
+        void addr1(const uint8_t* new_addr1);
 
         /**
-         * \brief Setter for the source's address.
+         * \brief Setter for the second address.
          *
-         * \param new_src_addr const uint8_t array of 6 bytes containing the new source's address.
+         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
          */
-        void src_addr(const uint8_t* new_src_addr);
+        void addr2(const uint8_t* new_addr2);
 
         /**
-         * \brief Setter for the filtering's address.
+         * \brief Setter for the third address.
          *
-         * \param new_filter_addr const uint8_t array of 6 bytes containing the new filtering's address.
+         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
          */
-        void filter_addr(const uint8_t* new_filter_addr);
+        void addr3(const uint8_t* new_addr3);
 
         /**
          * \brief Setter for the fragment number.
@@ -464,11 +464,11 @@ namespace Tins {
         void seq_num(uint16_t new_seq_num);
 
         /**
-         * \brief Setter for the optional address.
+         * \brief Setter for the fourth address.
          *
-         * \param new_opt_addr const uint8_t array of 6 bytes containing the new optional address.
+         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
          */
-        void opt_addr(const uint8_t* new_opt_addr);
+        void addr4(const uint8_t* new_addr4);
 
         /**
          * \brief Setter for the interface.
@@ -564,9 +564,9 @@ namespace Tins {
             #endif
             } __attribute__((__packed__)) control;
             uint16_t duration_id;
-            uint8_t dst_addr[6];
-            uint8_t src_addr[6];
-            uint8_t filter_addr[6];
+            uint8_t addr1[6];
+            uint8_t addr2[6];
+            uint8_t addr3[6];
             struct {
             #if __BYTE_ORDER == __LITTLE_ENDIAN
                 unsigned int seq_number:12;
@@ -586,7 +586,7 @@ namespace Tins {
 
 
         ieee80211_header _header;
-        uint8_t _opt_addr[6];
+        uint8_t _addr4[6];
         uint32_t _iface_index, _options_size;
         std::list<IEEE802_11_Option> _options;
     };
@@ -1225,6 +1225,15 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
         IEEE802_11_Assoc_Request(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a IEEE802_11_Assoc_Request object from a 
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        IEEE802_11_Assoc_Request(const uint8_t *buffer, uint32_t total_sz);
 
         /**
          * \brief Getter for the Capabilities Information.

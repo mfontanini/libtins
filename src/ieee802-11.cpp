@@ -22,8 +22,8 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
+#include <algorithm> 
 #include <utility>
-#include <iostream> //borrame
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -34,6 +34,7 @@
 #include "radiotap.h"
 #include "sniffer.h"
 #include "utils.h"
+#include "snap.h"
 
 using namespace std;
 
@@ -42,17 +43,17 @@ const uint8_t *Tins::IEEE802_11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\x
 Tins::IEEE802_11::IEEE802_11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
-        this->dst_addr(dst_hw_addr);
+        this->addr1(dst_hw_addr);
     if(src_hw_addr)
-        this->src_addr(src_hw_addr);
+        this->addr2(src_hw_addr);
 }
 
 Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
-        this->dst_addr(dst_hw_addr);
+        this->addr1(dst_hw_addr);
     if(src_hw_addr)
-        this->src_addr(src_hw_addr);
+        this->addr2(src_hw_addr);
     this->iface(iface);
 }
 
@@ -60,9 +61,9 @@ Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_add
 Tins::IEEE802_11::IEEE802_11(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
-        this->dst_addr(dst_hw_addr);
+        this->addr1(dst_hw_addr);
     if(src_hw_addr)
-        this->src_addr(src_hw_addr);
+        this->addr2(src_hw_addr);
     this->iface(iface_index);
 }
 
@@ -71,13 +72,16 @@ Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE
 }
 
 Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
-    if(total_sz < sizeof(_header))
+    if(total_sz < sizeof(_header.control))
         throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
-
-    // subclass specific parsing missing too.
+    uint32_t sz = std::min(sizeof(_header), total_sz);
+    std::memcpy(&_header, buffer, sz);
+    buffer += sz;
+    total_sz -= sz;
+    if(type() == 0 && subtype() < 4) {
+        // It's a data packet
+        inner_pdu(new Tins::SNAP(buffer, total_sz));
+    }
 }
 
 Tins::IEEE802_11::~IEEE802_11() {
@@ -164,16 +168,16 @@ void Tins::IEEE802_11::duration_id(uint16_t new_duration_id) {
     this->_header.duration_id = Utils::net_to_host_s(new_duration_id);
 }
 
-void Tins::IEEE802_11::dst_addr(const uint8_t* new_dst_addr) {
-    memcpy(this->_header.dst_addr, new_dst_addr, 6);
+void Tins::IEEE802_11::addr1(const uint8_t* new_addr1) {
+    memcpy(this->_header.addr1, new_addr1, 6);
 }
 
-void Tins::IEEE802_11::src_addr(const uint8_t* new_src_addr) {
-    memcpy(this->_header.src_addr, new_src_addr, 6);
+void Tins::IEEE802_11::addr2(const uint8_t* new_addr2) {
+    memcpy(this->_header.addr2, new_addr2, 6);
 }
 
-void Tins::IEEE802_11::filter_addr(const uint8_t* new_filter_addr) {
-    memcpy(this->_header.filter_addr, new_filter_addr, 6);
+void Tins::IEEE802_11::addr3(const uint8_t* new_addr3) {
+    memcpy(this->_header.addr3, new_addr3, 6);
 }
 
 void Tins::IEEE802_11::frag_num(uint8_t new_frag_num) {
@@ -184,8 +188,8 @@ void Tins::IEEE802_11::seq_num(uint16_t new_seq_num) {
     this->_header.seq_control.seq_number = Utils::net_to_host_s(new_seq_num);
 }
 
-void Tins::IEEE802_11::opt_addr(const uint8_t* new_opt_addr) {
-    memcpy(this->_opt_addr, new_opt_addr, 6);
+void Tins::IEEE802_11::addr4(const uint8_t* new_addr4) {
+    memcpy(this->_addr4, new_addr4, 6);
 }
 
 void Tins::IEEE802_11::iface(uint32_t new_iface_index) {
@@ -214,7 +218,7 @@ bool Tins::IEEE802_11::send(PacketSender* sender) {
     addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
     addr.sll_halen = 6;
     addr.sll_ifindex = this->_iface_index;
-    memcpy(&(addr.sll_addr), this->_header.dst_addr, 6);
+    memcpy(&(addr.sll_addr), this->_header.addr1, 6);
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
@@ -225,7 +229,7 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     memcpy(buffer, &this->_header, sizeof(ieee80211_header));
     buffer += sizeof(ieee80211_header);
     if (this->to_ds() && this->from_ds()) {
-        memcpy(buffer, this->_opt_addr, 6);
+        memcpy(buffer, this->_addr4, 6);
         buffer += 6;
         total_sz -= 6;
     }
@@ -242,12 +246,16 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
 }
 
 Tins::PDU *Tins::IEEE802_11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
-    if(total_sz < sizeof(ieee80211_header))
+    // We only need the control field, the length of the PDU will depend on the flags set.
+    if(total_sz < sizeof(ieee80211_header::control)) 
         throw std::runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
     const ieee80211_header *hdr = (const ieee80211_header*)buffer;
     PDU *ret = 0;
-    if(hdr->control.type == 0 && hdr->control.subtype == 8)
+    if(hdr->control.type == 0 && hdr->control.subtype == 8) {
+        if(total_sz < sizeof(_header))
+            throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
         ret = new IEEE802_11_Beacon(buffer, total_sz);
+    }
     else
         ret = new IEEE802_11(buffer, total_sz);
     return ret;
@@ -490,6 +498,17 @@ Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request(const std::string& ifac
                                            const uint8_t* src_hw_addr) throw (std::runtime_error) : ManagementFrame(iface, dst_hw_addr, src_hw_addr){
     this->subtype(IEEE802_11::ASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
+}
+
+Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request(const uint8_t *buffer, uint32_t total_sz) : ManagementFrame(buffer, total_sz) {
+    buffer += sizeof(ieee80211_header);
+    total_sz -= sizeof(ieee80211_header);
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 association header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
 }
 
 void Tins::IEEE802_11_Assoc_Request::listen_interval(uint16_t new_listen_interval) {
