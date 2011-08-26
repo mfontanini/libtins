@@ -42,6 +42,14 @@ namespace Tins {
         SNAP(PDU *child = 0);
         
         /**
+         * \brief Constructor which creates a SNAP object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        SNAP(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
          * \brief Returns the SNAP frame's header length.
          *
          * \return The header's size.

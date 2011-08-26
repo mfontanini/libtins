@@ -21,17 +21,36 @@
 
 #include <cstring>
 #include <cassert>
+#include <stdexcept>
 #ifndef WIN32
     #include <net/ethernet.h>
 #endif
 #include "snap.h"
 #include "utils.h"
+#include "arp.h"
+#include "ip.h"
 
 
 Tins::SNAP::SNAP(PDU *child) : PDU(0xff, child) {
     std::memset(&_snap, 0, sizeof(_snap));
     _snap.dsap = _snap.ssap = 0xaa;
     _snap.id = 3;
+}
+
+Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
+    if(total_sz < sizeof(_snap))
+        throw std::runtime_error("Not enough size for a SNAP header in the buffer.");
+    std::memcpy(&_snap, buffer, sizeof(_snap));
+    buffer += sizeof(_snap);
+    total_sz -= sizeof(_snap);
+    switch(Utils::net_to_host_s(_snap.eth_type)) {
+        case ETHERTYPE_IP:
+            inner_pdu(new Tins::IP(buffer, total_sz));
+            break;
+        case ETHERTYPE_ARP:
+            inner_pdu(new Tins::ARP(buffer, total_sz));
+            break;
+    };
 }
 
 uint32_t Tins::SNAP::header_size() const {

@@ -32,6 +32,7 @@
 #include "radiotap.h"
 #include "sniffer.h"
 #include "utils.h"
+#include "snap.h"
 
 using namespace std;
 
@@ -74,7 +75,10 @@ Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
-
+    if(type() == 0 && subtype() < 4) {
+        // It's a data packet
+        inner_pdu(new Tins::SNAP(buffer, total_sz));
+    }
     // subclass specific parsing missing too.
 }
 
