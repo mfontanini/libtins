@@ -136,7 +136,12 @@ namespace Tins {
             DATA_NULL = 4,
             CF_ACK = 5,
             CF_POLL = 6,
-            CF_ACK_POLL = 7
+            CF_ACK_POLL = 7,
+            QOS_DATA_DATA = 8,
+            QOS_DATA_CF_ACK = 9,
+            QOS_DATA_CF_POLL = 10,
+            QOS_DATA_CF_ACK_POLL = 11,
+            QOS_DATA_NULL = 12
         };
 
         /**
@@ -949,7 +954,7 @@ namespace Tins {
          * \param ver The version to be set.
          */
         void version(uint16_t ver);
-        
+
         /**
          * \brief Sets the capabilities field.
          * \param cap The capabilities to be set.
@@ -957,25 +962,25 @@ namespace Tins {
         void capabilities(uint16_t cap);
 
         /* Getters */
-        
+
         /**
          * \brief Getter for the group suite field.
          * \return The group suite field.
          */
         inline CypherSuites group_suite() const { return _group_suite; }
-        
+
         /**
          * \brief Getter for the version field.
          * \return The version field.
          */
         inline uint16_t version() const { return _version; }
-        
+
         /**
          * \brief Getter for the pairwise cypher suite list.
          * \return A list of pairwise cypher suites.
          */
         inline const std::list<CypherSuites> &pairwise_cyphers() const { return _pairwise_cyphers; }
-        
+
         /**
          * \brief Getter for the akm suite list.
          * \return A list of akm suites.
@@ -1106,16 +1111,16 @@ namespace Tins {
          * string if no essid has been set.
          */
         std::string essid() const;
-        
+
         /**
          * \brief Helper method to search for the RSN information of this beacon.
-         * 
+         *
          * This method fills the RSN information structure of this beacon.
          * \param rsn A pointer in which the RSN information will be stored.
          * \return True if the RSNInformation option has been set.
          */
         bool rsn_information(RSNInformation *rsn);
-        
+
         /**
          * \brief Returns the frame's header length.
          *
@@ -1315,6 +1320,85 @@ namespace Tins {
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         AssocReqBody _body;
+    };
+
+    class IEEE802_11_QoS_Data : public IEEE802_11 {
+
+    public:
+
+        /**
+         * \brief Constructor for creating a 802.11 QoS Data PDU
+         *
+         * Constructor that builds a 802.11 QoS Data PDU taking the destination's and source's MAC.
+         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
+         */
+        IEEE802_11_QoS_Data(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+
+        /**
+         * \brief Constructor for creating a 802.11 QoS Data PDU
+         *
+         * Constructor that builds a 802.11 QoS Data PDU taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
+         */
+        IEEE802_11_QoS_Data(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor for creating an 802.11 QoS Data PDU
+         *
+         * Constructor that builds an 802.11 QoS Data PDU taking the interface index,
+         * destination's and source's MAC.
+         *
+         * \param iface_index const uint32_t with the interface's index from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
+         */
+        IEEE802_11_QoS_Data(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+
+        /**
+         * \brief Constructor which creates an 802.11 QoS Data object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        IEEE802_11_QoS_Data(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Getter for the qos_control field.
+         *
+         * \return The value of the qos_control field in an uint16_t.
+         */
+        inline uint16_t qos_control() const { return this->_qos_control; }
+
+        /**
+         * \brief Setter for the qos_control field.
+         *
+         * \param new_qos_control uint16_t with the value to the the qos_control field to.
+         */
+        void qos_control(uint16_t new_qos_control);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+    private:
+
+        uint16_t _qos_control;
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
     };
 
 }

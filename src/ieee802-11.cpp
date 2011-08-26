@@ -564,3 +564,44 @@ uint32_t Tins::IEEE802_11_Assoc_Request::write_fixed_parameters(uint8_t *buffer,
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
+
+Tins::IEEE802_11_QoS_Data::IEEE802_11_QoS_Data(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : IEEE802_11(dst_hw_addr, src_hw_addr, child) {
+    this->type(IEEE802_11::DATA);
+    this->subtype(IEEE802_11::QOS_DATA_DATA);
+    this->_qos_control = 0;
+}
+
+Tins::IEEE802_11_QoS_Data::IEEE802_11_QoS_Data(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : IEEE802_11(iface, dst_hw_addr, src_hw_addr, child) {
+    this->type(IEEE802_11::DATA);
+    this->subtype(IEEE802_11::QOS_DATA_DATA);
+    this->_qos_control = 0;
+}
+
+Tins::IEEE802_11_QoS_Data::IEEE802_11_QoS_Data(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : IEEE802_11(iface_index, dst_hw_addr, src_hw_addr, child) {
+    this->type(IEEE802_11::DATA);
+    this->subtype(IEEE802_11::QOS_DATA_DATA);
+    this->_qos_control = 0;
+}
+
+Tins::IEEE802_11_QoS_Data::IEEE802_11_QoS_Data(const uint8_t *buffer, uint32_t total_sz) : IEEE802_11(buffer, total_sz) {
+    buffer += sizeof(ieee80211_header);
+    total_sz -= sizeof(ieee80211_header);
+    assert(total_sz >= sizeof(this->_qos_control));
+    this->_qos_control = *(uint16_t*)buffer;
+
+}
+
+void Tins::IEEE802_11_QoS_Data::qos_control(uint16_t new_qos_control) {
+    this->_qos_control = new_qos_control;
+}
+
+uint32_t Tins::IEEE802_11_QoS_Data::header_size() const {
+    return IEEE802_11::header_size() + sizeof(this->_qos_control);
+}
+
+uint32_t Tins::IEEE802_11_QoS_Data::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_qos_control);
+    assert(sz <= total_sz);
+    *(uint16_t*)buffer = this->_qos_control;
+    return sz;
+}
