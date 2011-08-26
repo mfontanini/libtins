@@ -22,7 +22,6 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
-#include <iostream> //borrame
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -41,17 +40,17 @@ const uint8_t *Tins::IEEE802_11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\x
 Tins::IEEE802_11::IEEE802_11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
-        this->dst_addr(dst_hw_addr);
+        this->addr1(dst_hw_addr);
     if(src_hw_addr)
-        this->src_addr(src_hw_addr);
+        this->addr2(src_hw_addr);
 }
 
 Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
-        this->dst_addr(dst_hw_addr);
+        this->addr1(dst_hw_addr);
     if(src_hw_addr)
-        this->src_addr(src_hw_addr);
+        this->addr2(src_hw_addr);
     this->iface(iface);
 }
 
@@ -59,9 +58,9 @@ Tins::IEEE802_11::IEEE802_11(const std::string& iface, const uint8_t* dst_hw_add
 Tins::IEEE802_11::IEEE802_11(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
-        this->dst_addr(dst_hw_addr);
+        this->addr1(dst_hw_addr);
     if(src_hw_addr)
-        this->src_addr(src_hw_addr);
+        this->addr2(src_hw_addr);
     this->iface(iface_index);
 }
 
@@ -163,16 +162,16 @@ void Tins::IEEE802_11::duration_id(uint16_t new_duration_id) {
     this->_header.duration_id = Utils::net_to_host_s(new_duration_id);
 }
 
-void Tins::IEEE802_11::dst_addr(const uint8_t* new_dst_addr) {
-    memcpy(this->_header.dst_addr, new_dst_addr, 6);
+void Tins::IEEE802_11::addr1(const uint8_t* new_addr1) {
+    memcpy(this->_header.addr1, new_addr1, 6);
 }
 
-void Tins::IEEE802_11::src_addr(const uint8_t* new_src_addr) {
-    memcpy(this->_header.src_addr, new_src_addr, 6);
+void Tins::IEEE802_11::addr2(const uint8_t* new_addr2) {
+    memcpy(this->_header.addr2, new_addr2, 6);
 }
 
-void Tins::IEEE802_11::filter_addr(const uint8_t* new_filter_addr) {
-    memcpy(this->_header.filter_addr, new_filter_addr, 6);
+void Tins::IEEE802_11::addr3(const uint8_t* new_addr3) {
+    memcpy(this->_header.addr3, new_addr3, 6);
 }
 
 void Tins::IEEE802_11::frag_num(uint8_t new_frag_num) {
@@ -183,8 +182,8 @@ void Tins::IEEE802_11::seq_num(uint16_t new_seq_num) {
     this->_header.seq_control.seq_number = Utils::net_to_host_s(new_seq_num);
 }
 
-void Tins::IEEE802_11::opt_addr(const uint8_t* new_opt_addr) {
-    memcpy(this->_opt_addr, new_opt_addr, 6);
+void Tins::IEEE802_11::addr4(const uint8_t* new_addr4) {
+    memcpy(this->_addr4, new_addr4, 6);
 }
 
 void Tins::IEEE802_11::iface(uint32_t new_iface_index) {
@@ -213,7 +212,7 @@ bool Tins::IEEE802_11::send(PacketSender* sender) {
     addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
     addr.sll_halen = 6;
     addr.sll_ifindex = this->_iface_index;
-    memcpy(&(addr.sll_addr), this->_header.dst_addr, 6);
+    memcpy(&(addr.sll_addr), this->_header.addr1, 6);
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
@@ -224,7 +223,7 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     memcpy(buffer, &this->_header, sizeof(ieee80211_header));
     buffer += sizeof(ieee80211_header);
     if (this->to_ds() && this->from_ds()) {
-        memcpy(buffer, this->_opt_addr, 6);
+        memcpy(buffer, this->_addr4, 6);
         buffer += 6;
         total_sz -= 6;
     }
