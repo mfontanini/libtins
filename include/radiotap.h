@@ -33,6 +33,59 @@ namespace Tins {
     class RadioTap : public PDU {
     public:
         /**
+         * \brief Enumeration of the different channel type flags.
+         * 
+         * These channel type flags can be OR'd and set using the
+         * RadioTap::channel() method.
+         */
+        enum ChannelType {
+            TURBO   = 0x10,
+            CCK     = 0x20,
+            OFDM    = 0x40,
+            TWO_GZ  = 0x80,
+            FIVE_GZ = 0x100,
+            PASSIVE = 0x200,
+            DYN_CCK_OFDM = 0x400,
+            GFSK    = 0x800
+        };
+        
+        /**
+         * \brief Flags used in the present field.
+         * 
+         * \sa RadioTap::present()
+         */
+        enum PresentFlags {
+            TSTF                = 1,
+            FLAGS               = 2,
+            RATE                = 4,
+            CHANNEL             = 8,
+            FHSS                = 16,
+            DBM_SIGNAL          = 32,
+            DBM_NOISE           = 64,
+            LOCK_QUALITY        = 128,
+            TX_ATTENUATION      = 256,
+            DB_TX_ATTENUATION   = 512,
+            DBM_TX_ATTENUATION  = 1024,
+            ANTENNA             = 2048,
+            DB_SIGNAL           = 4096,
+            DB_NOISE            = 8192,
+            RX_FLAGS            = 16382
+        };
+        
+        /**
+         * \brief Flags used in the RadioTap::flags() method.
+         */
+        enum FrameFlags {
+            CFP           = 1,
+            PREAMBLE      = 2,
+            WEP           = 4,
+            FRAGMENTATION = 8,
+            FCS           = 16,
+            PADDING       = 32,
+            FAILED_FCS    = 64
+        };
+    
+        /**
          * \brief Creates an instance of RadioTap.
          * \param iface The name of the interface in which to send this PDU.
          */
@@ -87,7 +140,7 @@ namespace Tins {
          * \brief Setter for the flags field.
          * \param new_flags The new flags.
          */
-        void flags(uint8_t new_flags);
+        void flags(FrameFlags new_flags);
         
         /**
          * \brief Setter for the rate field.
@@ -150,7 +203,7 @@ namespace Tins {
          * \brief Getter for the flags field.
          * \return The flags field.
          */
-        inline uint8_t flags() const { return _flags; }
+        inline FrameFlags flags() const { return (FrameFlags)_flags; }
         
         /**
          * \brief Getter for the rate field.
@@ -188,6 +241,16 @@ namespace Tins {
          */
         inline uint16_t rx_flags() const { return _rx_flags; }
         
+        /**
+         * \brief Getter for the present bit fields.
+         * 
+         * Use this method and masks created from the values taken from 
+         * the PresentFlags enum to find out which fields are set. If any 
+         * getter is used for a non-initialized field, the return value 
+         * will be undefined. It is only safe to use the getter of a field 
+         * if its corresponding bit flag is set in the present field.
+         */
+        PresentFlags present() const { return (PresentFlags)*(uint32_t*)(&_radio.it_len + 1); }
         
         /**
          * \brief Returns the RadioTap frame's header length.
@@ -210,10 +273,10 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::RADIOTAP; }
     private:
         struct radiotap_hdr {
-            u_int8_t it_version;	
-            u_int8_t it_pad;
-            u_int16_t it_len;
-            u_int32_t tsft:1,
+            uint8_t it_version;	
+            uint8_t it_pad;
+            uint16_t it_len;
+            uint32_t tsft:1,
                 flags:1,
                 rate:1,
                 channel:1,
@@ -235,6 +298,7 @@ namespace Tins {
         } __attribute__((__packed__));
         
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        
         
         radiotap_hdr _radio;
         uint32_t _iface_index, _options_size;
