@@ -591,6 +591,113 @@ namespace Tins {
         std::list<IEEE802_11_Option> _options;
     };
 
+    /**
+     * \brief Class that models the RSN information structure.
+     */
+    class RSNInformation {
+    public:
+        /**
+         * \brief Enum that represents the different cypher suites.
+         */
+        enum CypherSuites {
+            WEP_40  = 0x01ac0f00,
+            TKIP    = 0x02ac0f00,
+            CCMP    = 0x04ac0f00,
+            WEP_104 = 0x05ac0f00
+        };
+
+        /**
+         * \brief Enum that represents the different akm suites.
+         */
+        enum AKMSuites {
+            PMKSA = 0x01ac0f00,
+            PSK   = 0x02ac0f00
+        };
+
+        /**
+         * \brief Creates an instance of RSNInformation.
+         *
+         * By default, the version is set to 1.
+         */
+        RSNInformation();
+
+        /**
+         * \brief Helper function to create a WPA2-PSK RSNInformation
+         * \return An instance RSNInformation which contains information
+         * for a WPA2-PSK AP.
+         */
+        static RSNInformation wpa2_psk();
+
+        /**
+         * \brief Adds a pairwise cypher suite.
+         * \param cypher The pairwise cypher suite to be added.
+         */
+        void add_pairwise_cypher(CypherSuites cypher);
+
+        /**
+         * \brief Adds a akm suite.
+         * \param akm The akm suite to be added.
+         */
+        void add_akm_cypher(AKMSuites akm);
+
+        /**
+         * \brief Sets the group suite cypher.
+         * \param group The group suite cypher to be set.
+         */
+        void group_suite(CypherSuites group);
+
+        /**
+         * \brief Sets the version.
+         * \param ver The version to be set.
+         */
+        void version(uint16_t ver);
+
+        /**
+         * \brief Sets the capabilities field.
+         * \param cap The capabilities to be set.
+         */
+        void capabilities(uint16_t cap);
+
+        /* Getters */
+
+        /**
+         * \brief Getter for the group suite field.
+         * \return The group suite field.
+         */
+        inline CypherSuites group_suite() const { return _group_suite; }
+
+        /**
+         * \brief Getter for the version field.
+         * \return The version field.
+         */
+        inline uint16_t version() const { return _version; }
+
+        /**
+         * \brief Getter for the pairwise cypher suite list.
+         * \return A list of pairwise cypher suites.
+         */
+        inline const std::list<CypherSuites> &pairwise_cyphers() const { return _pairwise_cyphers; }
+
+        /**
+         * \brief Getter for the akm suite list.
+         * \return A list of akm suites.
+         */
+        inline const std::list<AKMSuites> &akm_cyphers() const { return _akm_cyphers; }
+
+        /**
+         * \brief Serializes this object.
+         * \param size Output parameter which will contain the size of
+         * the allocated buffer.
+         * \return The result of the serialization. This pointer should
+         * be free'd using operator delete[].
+         */
+        uint8_t *serialize(uint32_t &size) const;
+    private:
+        uint16_t _version, _capabilities;
+        CypherSuites _group_suite;
+        std::list<AKMSuites> _akm_cyphers;
+        std::list<CypherSuites> _pairwise_cyphers;
+    };
 
     /**
      * \brief Abstract class that englobes all Management frames in the 802.11 protocol.
@@ -889,118 +996,23 @@ namespace Tins {
         ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
         ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
 
+        void ssid(const std::string &new_ssid);
+        void rates(const std::list<float> &new_rates);
+        void channel(uint8_t new_channel);
+        void rsn_information(const RSNInformation& info);
+        void supported_rates(const std::list<float> &new_rates);
+        void extended_supported_rates(const std::list<float> &new_rates);
+        void qos_capabilities(uint8_t new_qos_capabilities);
+        void power_capabilities(uint8_t min_power, uint8_t max_power);
+        void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
+        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
+
+
     private:
 
 
     };
 
-        /**
-     * \brief Class that models the RSN information structure.
-     */
-    class RSNInformation {
-    public:
-        /**
-         * \brief Enum that represents the different cypher suites.
-         */
-        enum CypherSuites {
-            WEP_40  = 0x01ac0f00,
-            TKIP    = 0x02ac0f00,
-            CCMP    = 0x04ac0f00,
-            WEP_104 = 0x05ac0f00
-        };
-
-        /**
-         * \brief Enum that represents the different akm suites.
-         */
-        enum AKMSuites {
-            PMKSA = 0x01ac0f00,
-            PSK   = 0x02ac0f00
-        };
-
-        /**
-         * \brief Creates an instance of RSNInformation.
-         *
-         * By default, the version is set to 1.
-         */
-        RSNInformation();
-
-        /**
-         * \brief Helper function to create a WPA2-PSK RSNInformation
-         * \return An instance RSNInformation which contains information
-         * for a WPA2-PSK AP.
-         */
-        static RSNInformation wpa2_psk();
-
-        /**
-         * \brief Adds a pairwise cypher suite.
-         * \param cypher The pairwise cypher suite to be added.
-         */
-        void add_pairwise_cypher(CypherSuites cypher);
-
-        /**
-         * \brief Adds a akm suite.
-         * \param akm The akm suite to be added.
-         */
-        void add_akm_cypher(AKMSuites akm);
-
-        /**
-         * \brief Sets the group suite cypher.
-         * \param group The group suite cypher to be set.
-         */
-        void group_suite(CypherSuites group);
-
-        /**
-         * \brief Sets the version.
-         * \param ver The version to be set.
-         */
-        void version(uint16_t ver);
-
-        /**
-         * \brief Sets the capabilities field.
-         * \param cap The capabilities to be set.
-         */
-        void capabilities(uint16_t cap);
-
-        /* Getters */
-
-        /**
-         * \brief Getter for the group suite field.
-         * \return The group suite field.
-         */
-        inline CypherSuites group_suite() const { return _group_suite; }
-
-        /**
-         * \brief Getter for the version field.
-         * \return The version field.
-         */
-        inline uint16_t version() const { return _version; }
-
-        /**
-         * \brief Getter for the pairwise cypher suite list.
-         * \return A list of pairwise cypher suites.
-         */
-        inline const std::list<CypherSuites> &pairwise_cyphers() const { return _pairwise_cyphers; }
-
-        /**
-         * \brief Getter for the akm suite list.
-         * \return A list of akm suites.
-         */
-        inline const std::list<AKMSuites> &akm_cyphers() const { return _akm_cyphers; }
-
-        /**
-         * \brief Serializes this object.
-         * \param size Output parameter which will contain the size of
-         * the allocated buffer.
-         * \return The result of the serialization. This pointer should
-         * be free'd using operator delete[].
-         */
-        uint8_t *serialize(uint32_t &size) const;
-    private:
-        uint16_t _version, _capabilities;
-        CypherSuites _group_suite;
-        std::list<AKMSuites> _akm_cyphers;
-        std::list<CypherSuites> _pairwise_cyphers;
-    };
 
     /**
      * \brief Class representing a Beacon in the IEEE 802.11 Protocol.
@@ -1227,7 +1239,7 @@ namespace Tins {
         IEEE802_11_Assoc_Request(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
-         * \brief Constructor which creates a IEEE802_11_Assoc_Request object from a 
+         * \brief Constructor which creates a IEEE802_11_Assoc_Request object from a
          * buffer and adds all identifiable PDUs found in the buffer as children of this one.
          *
          * \param buffer The buffer from which this PDU will be constructed.
@@ -1329,6 +1341,126 @@ namespace Tins {
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         AssocReqBody _body;
+    };
+
+    /**
+     * \brief Class representing an Association Response frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class IEEE802_11_Assoc_Response : public ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the Association Response frame.
+         *
+         */
+        IEEE802_11_Assoc_Response();
+
+        /**
+         * \brief Constructor for creating a 802.11 Association Response.
+         *
+         * Constructor that builds a 802.11 Association Response taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        IEEE802_11_Assoc_Response(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a IEEE802_11_Assoc_Response object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        IEEE802_11_Assoc_Response(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the status code.
+         *
+         * \return The status code in an uint16_t.
+         */
+        inline uint16_t status_code() const { return this->_body.status_code; }
+
+        /**
+         * \brief Getter for the AID field.
+         *
+         * \return The AID field value in an uint16_t.
+         */
+        inline uint16_t aid() const { return this->_body.aid; }
+
+        /**
+         * \brief Setter for the status code.
+         *
+         * \param new_status_code uint16_t with the new status code.
+         */
+        void status_code(uint16_t new_status_code);
+
+        /**
+         * \brief Setter for the AID field.
+         *
+         * \param new_aid uint16_t with the new AID value.
+         */
+        void aid(uint16_t new_aid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the EDCA Parameter Set.
+         *
+         * \param ac_be uint32_t with the value of the ac_be field.
+         * \param ac_bk uint32_t with the value of the ac_bk field.
+         * \param ac_vi uint32_t with the value of the ac_vi field.
+         * \param ac_vo uint32_t with the value of the ac_vo field.
+         */
+        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+    private:
+        struct AssocRespBody {
+            CapabilityInformation capability;
+            uint16_t status_code;
+            uint16_t aid;
+        };
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+        AssocRespBody _body;
     };
 
     class IEEE802_11_QoS_Data : public IEEE802_11 {

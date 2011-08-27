@@ -22,7 +22,7 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
-#include <algorithm> 
+#include <algorithm>
 #include <utility>
 #ifndef WIN32
     #include <net/ethernet.h>
@@ -74,7 +74,7 @@ Tins::IEEE802_11::IEEE802_11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE
 Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
     if(total_sz < sizeof(_header.control))
         throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
-    uint32_t sz = std::min(sizeof(_header), total_sz);
+    uint32_t sz = std::min((uint32_t)sizeof(_header), total_sz);
     std::memcpy(&_header, buffer, sz);
     buffer += sz;
     total_sz -= sz;
@@ -247,7 +247,7 @@ void Tins::IEEE802_11::write_serialization(uint8_t *buffer, uint32_t total_sz, c
 
 Tins::PDU *Tins::IEEE802_11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     // We only need the control field, the length of the PDU will depend on the flags set.
-    if(total_sz < sizeof(ieee80211_header::control)) 
+    if(total_sz < sizeof(ieee80211_header::control))
         throw std::runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
     const ieee80211_header *hdr = (const ieee80211_header*)buffer;
     PDU *ret = 0;
@@ -280,6 +280,90 @@ Tins::ManagementFrame::ManagementFrame(const std::string &iface,
     this->type(IEEE802_11::MANAGEMENT);
 }
 
+void Tins::ManagementFrame::ssid(const std::string &new_ssid) {
+    add_tagged_option(IEEE802_11::SSID, new_ssid.size(), (const uint8_t*)new_ssid.c_str());
+}
+
+void Tins::ManagementFrame::rates(const std::list<float> &new_rates) {
+    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
+    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
+        uint8_t result = 0x80, left = *it / 0.5;
+        if(*it - left > 0)
+            left++;
+        *(ptr++) = (result | left);
+    }
+    add_tagged_option(SUPPORTED_RATES, new_rates.size(), buffer);
+    delete[] buffer;
+}
+
+void Tins::ManagementFrame::channel(uint8_t new_channel) {
+    add_tagged_option(DS_SET, 1, &new_channel);
+}
+
+void Tins::ManagementFrame::rsn_information(const RSNInformation& info) {
+    uint32_t size;
+    uint8_t *buffer = info.serialize(size);
+    add_tagged_option(RSN, size, buffer);
+    delete[] buffer;
+}
+
+void Tins::ManagementFrame::supported_rates(const std::list<float> &new_rates) {
+    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
+    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
+        uint8_t result = 0x80, left = *it / 0.5;
+        if(*it - left > 0)
+            left++;
+        *(ptr++) = (result | left);
+    }
+    add_tagged_option(SUPPORTED_RATES, new_rates.size(), buffer);
+    delete[] buffer;
+}
+
+void Tins::ManagementFrame::extended_supported_rates(const std::list<float> &new_rates) {
+    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
+    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
+        uint8_t result = 0x80, left = *it / 0.5;
+        if(*it - left > 0)
+            left++;
+        *(ptr++) = (result | left);
+    }
+    add_tagged_option(EXT_SUPPORTED_RATES, new_rates.size(), buffer);
+    delete[] buffer;
+}
+
+void Tins::ManagementFrame::qos_capabilities(uint8_t new_qos_capabilities) {
+    add_tagged_option(QOS_CAPABILITY, 1, &new_qos_capabilities);
+}
+
+void Tins::ManagementFrame::power_capabilities(uint8_t min_power, uint8_t max_power) {
+    uint8_t buffer[2];
+    buffer[0] = min_power;
+    buffer[1] = max_power;
+    add_tagged_option(POWER_CAPABILITY, 2, buffer);
+}
+
+void Tins::ManagementFrame::supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels) {
+    uint8_t* buffer = new uint8_t[new_channels.size() * 2];
+    uint8_t* ptr = buffer;
+    for(std::list<pair<uint8_t, uint8_t> >::const_iterator it = new_channels.begin(); it != new_channels.end(); ++it) {
+        *(ptr++) = it->first;
+        *(ptr++) = it->second;
+    }
+    add_tagged_option(SUPPORTED_CHANNELS, new_channels.size() * 2, buffer);
+    delete[] buffer;
+}
+
+void Tins::ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
+    uint8_t* buffer = new uint8_t[18];
+    buffer[0] = 0;
+    uint32_t* ptr = (uint32_t*)(buffer + 1);
+    *(ptr++) = ac_be;
+    *(ptr++) = ac_bk;
+    *(ptr++) = ac_vi;
+    *(ptr++) = ac_vo;
+    add_tagged_option(EDCA, 18, buffer);
+    delete[] buffer;
+}
 
 /*
  * Beacon
@@ -317,30 +401,19 @@ void Tins::IEEE802_11_Beacon::interval(uint16_t new_interval) {
 }
 
 void Tins::IEEE802_11_Beacon::essid(const std::string &new_essid) {
-    add_tagged_option(IEEE802_11::SSID, new_essid.size(), (const uint8_t*)new_essid.c_str());
+    ManagementFrame::ssid(new_essid);
 }
 
 void Tins::IEEE802_11_Beacon::rates(const std::list<float> &new_rates) {
-    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
-    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
-        uint8_t result = 0x80, left = *it / 0.5;
-        if(*it - left > 0)
-            left++;
-        *(ptr++) = (result | left);
-    }
-    add_tagged_option(SUPPORTED_RATES, new_rates.size(), buffer);
-    delete[] buffer;
+    ManagementFrame::rates(new_rates);
 }
 
 void Tins::IEEE802_11_Beacon::channel(uint8_t new_channel) {
-    add_tagged_option(DS_SET, 1, &new_channel);
+    ManagementFrame::channel(new_channel);
 }
 
 void Tins::IEEE802_11_Beacon::rsn_information(const RSNInformation& info) {
-    uint32_t size;
-    uint8_t *buffer = info.serialize(size);
-    add_tagged_option(RSN, size, buffer);
-    delete[] buffer;
+    ManagementFrame::rsn_information(info);
 }
 
 string Tins::IEEE802_11_Beacon::essid() const {
@@ -488,7 +561,7 @@ Tins::RSNInformation Tins::RSNInformation::wpa2_psk() {
     return info;
 }
 
-Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request() {
+Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request() : ManagementFrame() {
     this->subtype(IEEE802_11::ASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
 }
@@ -516,61 +589,31 @@ void Tins::IEEE802_11_Assoc_Request::listen_interval(uint16_t new_listen_interva
 }
 
 void Tins::IEEE802_11_Assoc_Request::ssid(const std::string &new_ssid) {
-    add_tagged_option(IEEE802_11::SSID, new_ssid.size(), (const uint8_t*)new_ssid.c_str());
+    ManagementFrame::ssid(new_ssid);
 }
 
 void Tins::IEEE802_11_Assoc_Request::supported_rates(const std::list<float> &new_rates) {
-    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
-    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
-        uint8_t result = 0x80, left = *it / 0.5;
-        if(*it - left > 0)
-            left++;
-        *(ptr++) = (result | left);
-    }
-    add_tagged_option(SUPPORTED_RATES, new_rates.size(), buffer);
-    delete[] buffer;
+    ManagementFrame::supported_rates(new_rates);
 }
 
 void Tins::IEEE802_11_Assoc_Request::extended_supported_rates(const std::list<float> &new_rates) {
-    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
-    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
-        uint8_t result = 0x80, left = *it / 0.5;
-        if(*it - left > 0)
-            left++;
-        *(ptr++) = (result | left);
-    }
-    add_tagged_option(EXT_SUPPORTED_RATES, new_rates.size(), buffer);
-    delete[] buffer;
+    ManagementFrame::extended_supported_rates(new_rates);
 }
 
 void Tins::IEEE802_11_Assoc_Request::power_capabilities(uint8_t min_power, uint8_t max_power) {
-    uint8_t buffer[2];
-    buffer[0] = min_power;
-    buffer[1] = max_power;
-    add_tagged_option(POWER_CAPABILITY, 2, buffer);
+    ManagementFrame::power_capabilities(min_power, max_power);
 }
 
 void Tins::IEEE802_11_Assoc_Request::supported_channels(const std::list<pair<uint8_t, uint8_t> > &new_channels) {
-
-    uint8_t* buffer = new uint8_t[new_channels.size() * 2];
-    uint8_t* ptr = buffer;
-    for(std::list<pair<uint8_t, uint8_t> >::const_iterator it = new_channels.begin(); it != new_channels.end(); ++it) {
-        *(ptr++) = it->first;
-        *(ptr++) = it->second;
-    }
-    add_tagged_option(SUPPORTED_CHANNELS, new_channels.size() * 2, buffer);
-
+    ManagementFrame::supported_channels(new_channels);
 }
 
 void Tins::IEEE802_11_Assoc_Request::rsn_information(const RSNInformation& info) {
-    uint32_t size;
-    uint8_t *buffer = info.serialize(size);
-    add_tagged_option(RSN, size, buffer);
-    delete[] buffer;
+    ManagementFrame::rsn_information(info);
 }
 
 void Tins::IEEE802_11_Assoc_Request::qos_capabilities(uint8_t new_qos_capabilities) {
-    add_tagged_option(QOS_CAPABILITY, 1, &new_qos_capabilities);
+    ManagementFrame::qos_capabilities(new_qos_capabilities);
 }
 
 uint32_t Tins::IEEE802_11_Assoc_Request::header_size() const {
@@ -579,6 +622,60 @@ uint32_t Tins::IEEE802_11_Assoc_Request::header_size() const {
 
 uint32_t Tins::IEEE802_11_Assoc_Request::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(AssocReqBody);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
+Tins::IEEE802_11_Assoc_Response::IEEE802_11_Assoc_Response() : ManagementFrame() {
+    this->subtype(IEEE802_11::ASSOC_RESP);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::IEEE802_11_Assoc_Response::IEEE802_11_Assoc_Response(const std::string& iface,
+                                                           const uint8_t* dst_hw_addr,
+                                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+    this->subtype(IEEE802_11::ASSOC_RESP);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::IEEE802_11_Assoc_Response::IEEE802_11_Assoc_Response(const uint8_t *buffer, uint32_t total_sz) : ManagementFrame(buffer, total_sz) {
+    buffer += sizeof(ieee80211_header);
+    total_sz -= sizeof(ieee80211_header);
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 association response header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Tins::IEEE802_11_Assoc_Response::status_code(uint16_t new_status_code) {
+    this->_body.status_code = new_status_code;
+}
+
+void Tins::IEEE802_11_Assoc_Response::aid(uint16_t new_aid) {
+    this->_body.aid = new_aid;
+}
+
+void Tins::IEEE802_11_Assoc_Response::supported_rates(const std::list<float> &new_rates) {
+    ManagementFrame::supported_rates(new_rates);
+}
+
+void Tins::IEEE802_11_Assoc_Response::extended_supported_rates(const std::list<float> &new_rates) {
+    ManagementFrame::extended_supported_rates(new_rates);
+}
+
+void Tins::IEEE802_11_Assoc_Response::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
+    ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
+}
+
+uint32_t Tins::IEEE802_11_Assoc_Response::header_size() const {
+    return IEEE802_11::header_size() + sizeof(AssocRespBody);
+}
+
+uint32_t Tins::IEEE802_11_Assoc_Response::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(AssocRespBody);
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
