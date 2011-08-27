@@ -72,14 +72,16 @@ Tins::PDU *Tins::Sniffer::next_packet(const string &filter) {
     PDU *ret = 0;
     while(!ret) {
         const u_char *content = pcap_next(handle, &header);
-        try {
-            if(wired)
-                ret = new EthernetII((const uint8_t*)content, header.caplen);
-            else
-                ret = new RadioTap((const uint8_t*)content, header.caplen);
-        }
-        catch(...) {
-            ret = 0;
+        if(content) {
+            try {
+                if(wired)
+                    ret = new EthernetII((const uint8_t*)content, header.caplen);
+                else
+                    ret = new RadioTap((const uint8_t*)content, header.caplen);
+            }
+            catch(...) {
+                ret = 0;
+            }
         }
     }
     return ret;
