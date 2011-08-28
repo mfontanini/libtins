@@ -68,6 +68,9 @@ void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
             case PDU::ARP:
                 type = ETHERTYPE_ARP;
                 break;
+            case PDU::EAPOL:
+                type = 0x888e;
+                break;
             default:
                 type = 0;
         }

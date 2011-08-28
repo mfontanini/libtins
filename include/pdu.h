@@ -60,7 +60,8 @@ namespace Tins {
             TCP,
             UDP,
             ICMP,
-            DHCP
+            DHCP,
+            EAPOL
         };
 
         /** \brief PDU constructor
