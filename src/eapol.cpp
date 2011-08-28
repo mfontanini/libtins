@@ -1,14 +1,32 @@
 #include <cstring>
 #include <cassert>
+#include <stdexcept>
 #include "eapol.h"
-#include "utils.h"
 
 
-Tins::EAPOL::EAPOL(uint8_t packet_type, uint8_t type) : PDU(0xff) {
+Tins::EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) : PDU(0xff) {
     std::memset(&_header, 0, sizeof(_header));
     _header.version = 1;
     _header.packet_type = packet_type;
-    _header.type = type;
+    _header.type = (uint8_t)type;
+}
+
+Tins::EAPOL::EAPOL(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
+    if(total_sz < sizeof(_header))
+        throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
+    std::memcpy(&_header, buffer, sizeof(_header));
+}
+
+Tins::EAPOL *Tins::EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
+    if(total_sz < sizeof(eapolhdr))
+        throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
+    const eapolhdr *ptr = (const eapolhdr*)buffer;
+    switch(ptr->type) {
+        case RC4:
+            return new RC4EAPOL(buffer, total_sz);
+            break;
+    }
+    return 0;
 }
 
 void Tins::EAPOL::version(uint8_t new_version) {
@@ -38,8 +56,25 @@ void Tins::EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const 
 
 /* RC4EAPOL */
 
-Tins::RC4EAPOL::RC4EAPOL() : EAPOL(0x03, 0x01), _key(0), _key_size(0) {
+Tins::RC4EAPOL::RC4EAPOL() : EAPOL(0x03, RC4), _key(0), _key_size(0) {
     std::memset(&_header, 0, sizeof(_header));
+}
+
+Tins::RC4EAPOL::RC4EAPOL(const uint8_t *buffer, uint32_t total_sz) : EAPOL(buffer, total_sz) {
+    buffer += sizeof(eapolhdr);
+    total_sz -= sizeof(eapolhdr);
+    if(total_sz < sizeof(_header))
+        throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
+    std::memcpy(&_header, buffer, sizeof(_header));
+    buffer += sizeof(_header);
+    total_sz -= sizeof(_header);
+    if(total_sz == key_length()) {
+        _key = new uint8_t[total_sz];
+        _key_size = total_sz;
+        std::memcpy(_key, buffer, total_sz);
+    }
+    else 
+        _key = 0;
 }
 
 Tins::RC4EAPOL::~RC4EAPOL() {

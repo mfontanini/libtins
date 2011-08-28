@@ -3,6 +3,7 @@
 
 
 #include "pdu.h"
+#include "utils.h"
 
 
 namespace Tins {
@@ -10,11 +11,30 @@ namespace Tins {
      * \brief Class that represents the EAP encapsulation over LAN.
      */
     class EAPOL : public PDU {
+    public:
+        enum EAPOLTYPE {
+            RC4 = 1
+        };
     protected:
         /**
          * \brief Protected constructor that sets the packet_type and type fields.
          */
-        EAPOL(uint8_t packet_type, uint8_t type);
+        EAPOL(uint8_t packet_type, EAPOLTYPE type);
+        
+        /**
+         * \brief Constructor which creates an EAPOL object from a buffer.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        EAPOL(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Static method to instantiate the correct EAPOL subclass 
+         * based on a raw buffer.
+         * \param buffer The buffer from which the data will be taken.
+         * \param total_sz The total size of the buffer.
+         */
+        static EAPOL *from_bytes(const uint8_t *buffer, uint32_t total_sz);
         
         /* Getters */
         
@@ -34,7 +54,7 @@ namespace Tins {
          * \brief Getter for the length field.
          * \return The length field.
          */
-        uint16_t length() const { return _header.length; }
+        uint16_t length() const { return Utils::net_to_host_s(_header.length); }
         
         /**
          * \brief Getter for the type field.
@@ -113,6 +133,13 @@ namespace Tins {
         RC4EAPOL();
         
         /**
+         * \brief Constructor which creates an RC4EAPOL object from a buffer.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        RC4EAPOL(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
          * \brief RC4EAPOL destructor
          * 
          * Memory allocated for the key field is freed(if any).
@@ -125,7 +152,7 @@ namespace Tins {
          * \brief Getter for the key length field.
          * \return The key length field.
          */
-        uint16_t key_length() const { return _header.key_length; }
+        uint16_t key_length() const { return Utils::net_to_host_s(_header.key_length); }
         
         /**
          * \brief Getter for the replay counter field.
