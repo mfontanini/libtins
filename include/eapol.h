@@ -15,18 +15,6 @@ namespace Tins {
         enum EAPOLTYPE {
             RC4 = 1
         };
-    protected:
-        /**
-         * \brief Protected constructor that sets the packet_type and type fields.
-         */
-        EAPOL(uint8_t packet_type, EAPOLTYPE type);
-        
-        /**
-         * \brief Constructor which creates an EAPOL object from a buffer.
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        EAPOL(const uint8_t *buffer, uint32_t total_sz);
         
         /**
          * \brief Static method to instantiate the correct EAPOL subclass 
@@ -94,6 +82,18 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::EAPOL; }
     protected:
+        /**
+         * \brief Protected constructor that sets the packet_type and type fields.
+         */
+        EAPOL(uint8_t packet_type, EAPOLTYPE type);
+        
+        /**
+         * \brief Constructor which creates an EAPOL object from a buffer.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        EAPOL(const uint8_t *buffer, uint32_t total_sz);
+        
         struct eapolhdr {
             uint8_t version, packet_type;
             uint16_t length;
@@ -123,7 +123,7 @@ namespace Tins {
     
     
     /**
-     * 
+     * \brief Class that represents the RC4 EAPOL PDU.
      */
     class RC4EAPOL : public EAPOL {
     public:
@@ -261,6 +261,35 @@ namespace Tins {
         uint8_t *_key;
         uint32_t _key_size;
         rc4hdr _header;
+    };
+    
+    
+    /**
+     * \brief Class that represents the RSN EAPOL PDU.
+     */
+    class RSNEAPOL : public EAPOL {
+    public:
+    
+    private:
+        struct rsnhdr {
+            uint16_t key_mic:1,
+                secure:1,
+                error:1,
+                request:1,
+                encrypted:1,
+                reserved:3, 
+                key_descriptor:3,
+                key_type:1,
+                key_index:2,
+                install:1,
+                key_ack:1;             
+            uint16_t key_length;
+            uint64_t replay_counter;
+            uint8_t nonce[32], key_iv[16];
+            uint64_t rsc, id;
+            uint8_t mic[16];
+            uint16_t wpa_length;
+        } __attribute__((__packed__));
     };
 };
 
