@@ -29,6 +29,7 @@
 #include "utils.h"
 #include "arp.h"
 #include "ip.h"
+#include "eapol.h"
 
 
 Tins::SNAP::SNAP(PDU *child) : PDU(0xff, child) {
@@ -49,6 +50,9 @@ Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
             break;
         case ETHERTYPE_ARP:
             inner_pdu(new Tins::ARP(buffer, total_sz));
+            break;
+        case 0x888e:
+            inner_pdu(Tins::EAPOL::from_bytes(buffer, total_sz));
             break;
     };
 }

@@ -26,6 +26,10 @@ Tins::EAPOL *Tins::EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
         case RC4:
             return new RC4EAPOL(buffer, total_sz);
             break;
+        case RSN:
+        case EAPOL_WPA:
+            return new RSNEAPOL(buffer, total_sz);
+            break;
     }
     return 0;
 }
@@ -61,7 +65,7 @@ Tins::RC4EAPOL::RC4EAPOL() : EAPOL(0x03, RC4), _key(0), _key_size(0) {
     std::memset(&_header, 0, sizeof(_header));
 }
 
-Tins::RC4EAPOL::RC4EAPOL(const uint8_t *buffer, uint32_t total_sz) : EAPOL(buffer, total_sz) {
+Tins::RC4EAPOL::RC4EAPOL(const uint8_t *buffer, uint32_t total_sz) : EAPOL(buffer, total_sz), _key_size(0) {
     buffer += sizeof(eapolhdr);
     total_sz -= sizeof(eapolhdr);
     if(total_sz < sizeof(_header))
@@ -134,6 +138,23 @@ void Tins::RC4EAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
 
 Tins::RSNEAPOL::RSNEAPOL() : EAPOL(0x03, RSN), _key(0), _key_size(0) {
     std::memset(&_header, 0, sizeof(_header));
+}
+
+Tins::RSNEAPOL::RSNEAPOL(const uint8_t *buffer, uint32_t total_sz) : EAPOL(0x03, RSN), _key_size(0) {
+    buffer += sizeof(eapolhdr);
+    total_sz -= sizeof(eapolhdr);
+    if(total_sz < sizeof(_header))
+        throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
+    std::memcpy(&_header, buffer, sizeof(_header));
+    buffer += sizeof(_header);
+    total_sz -= sizeof(_header);
+    if(total_sz == wpa_length()) {
+        _key = new uint8_t[total_sz];
+        _key_size = total_sz;
+        std::memcpy(_key, buffer, total_sz);
+    }
+    else 
+        _key = 0;
 }
 
 Tins::RSNEAPOL::~RSNEAPOL() {

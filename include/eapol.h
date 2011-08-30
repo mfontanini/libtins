@@ -22,6 +22,7 @@ namespace Tins {
         enum EAPOLTYPE {
             RC4 = 1,
             RSN,
+            EAPOL_WPA = 254
         };
         
         /**
@@ -281,6 +282,13 @@ namespace Tins {
          * \brief Creates an instance of RSNEAPOL.
          */
         RSNEAPOL();
+        
+        /**
+         * \brief Constructor which creates an RSNEAPOL object from a buffer.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        RSNEAPOL(const uint8_t *buffer, uint32_t total_sz);
         
         /**
          * \brief Destructor.

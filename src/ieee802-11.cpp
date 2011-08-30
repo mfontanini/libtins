@@ -78,7 +78,7 @@ Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
     std::memcpy(&_header, buffer, sz);
     buffer += sz;
     total_sz -= sz;
-    if(type() == 0 && subtype() < 4) {
+    if(type() == 2 && subtype() < 4) {
         // It's a data packet
         inner_pdu(new Tins::SNAP(buffer, total_sz));
     }
@@ -704,7 +704,10 @@ Tins::IEEE802_11_QoS_Data::IEEE802_11_QoS_Data(const uint8_t *buffer, uint32_t t
     total_sz -= sizeof(ieee80211_header);
     assert(total_sz >= sizeof(this->_qos_control));
     this->_qos_control = *(uint16_t*)buffer;
-
+    total_sz -= sizeof(uint16_t);
+    buffer += sizeof(uint16_t);
+    if(total_sz)
+        inner_pdu(new Tins::SNAP(buffer, total_sz));
 }
 
 void Tins::IEEE802_11_QoS_Data::qos_control(uint16_t new_qos_control) {
