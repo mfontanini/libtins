@@ -2,6 +2,7 @@
 #include <cassert>
 #include <stdexcept>
 #include "eapol.h"
+#include "ieee802-11.h"
 
 
 Tins::EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) : PDU(0xff) {
@@ -82,11 +83,11 @@ Tins::RC4EAPOL::~RC4EAPOL() {
 }
 
 void Tins::RC4EAPOL::key_length(uint16_t new_key_length) {
-    _header.key_length = new_key_length;
+    _header.key_length = Utils::net_to_host_s(new_key_length);
 }
         
 void Tins::RC4EAPOL::replay_counter(uint16_t new_replay_counter) {
-    _header.replay_counter = new_replay_counter;
+    _header.replay_counter = Utils::net_to_host_s(new_replay_counter);
 }
 
 void Tins::RC4EAPOL::key_iv(const uint8_t *new_key_iv) {
@@ -125,5 +126,83 @@ void Tins::RC4EAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
     buffer += sizeof(_header);
     if(_key)
         std::memcpy(buffer, _key, _key_size);
+}
+
+
+/* RSNEAPOL */
+
+
+Tins::RSNEAPOL::RSNEAPOL() : EAPOL(0x03, RSN), _key(0), _key_size(0) {
+    std::memset(&_header, 0, sizeof(_header));
+}
+
+Tins::RSNEAPOL::~RSNEAPOL() {
+    delete[] _key;
+}
+
+void Tins::RSNEAPOL::RSNEAPOL::nonce(const uint8_t *new_nonce) {
+    std::memcpy(_header.nonce, new_nonce, sizeof(_header.nonce));
+}
+
+void Tins::RSNEAPOL::rsc(uint64_t new_rsc) {
+    _header.rsc = Utils::net_to_host_ll(new_rsc);
+}
+
+void Tins::RSNEAPOL::id(uint64_t new_id) {
+    _header.id = Utils::net_to_host_ll(new_id);
+}
+
+void Tins::RSNEAPOL::mic(const uint8_t *new_mic) {
+    std::memcpy(_header.mic, new_mic, sizeof(_header.mic));
+}
+
+void Tins::RSNEAPOL::wpa_length(uint16_t new_wpa_length) {
+    _header.wpa_length = Utils::net_to_host_s(new_wpa_length);
+}
+
+void Tins::RSNEAPOL::key(const uint8_t *new_key, uint32_t sz) {
+    delete[] _key;
+    _key = new uint8_t[sz];
+    _key_size = sz;
+    _header.key_type = 0;
+    std::memcpy(_key, new_key, sz);
+}
+
+void Tins::RSNEAPOL::rsn_information(const RSNInformation &rsn) {
+    _key = rsn.serialize(_key_size);
+    _header.key_type = 1;
+}
+
+uint32_t Tins::RSNEAPOL::header_size() const {
+    uint32_t padding(0);
+    if(_header.key_type && _key_size)
+        padding = 2;
+    return sizeof(eapolhdr) + sizeof(_header) + _key_size + padding;
+}
+
+void Tins::RSNEAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = header_size() - sizeof(eapolhdr);
+    assert(total_sz >= sz);
+    if(_key) {
+        if(!_header.key_type) {
+            _header.key_length = Utils::net_to_host_s(32);
+            wpa_length(_key_size);
+        }
+        else if(_key_size) {
+            _header.key_length = 0;
+            wpa_length(_key_size + 2);
+        }
+        else
+            wpa_length(0);
+    }
+    std::memcpy(buffer, &_header, sizeof(_header));
+    buffer += sizeof(_header);
+    if(_key) {
+        if(_header.key_type && _key_size) {
+            *(buffer++) = IEEE802_11::RSN;
+            *(buffer++) = _key_size;
+        }
+        std::memcpy(buffer, _key, _key_size);
+    }
 }
 
