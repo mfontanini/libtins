@@ -124,7 +124,25 @@ namespace Tins {
          * operator delete[].
          */
         uint8_t *serialize(uint32_t &sz);
-
+        
+        /**
+         * \brief Find and returns the first PDU that matches the given flag.
+         * 
+         * This method searches for the first PDU which has the same type flag as 
+         * the given one. If the first PDU matches that flag, it is returned. 
+         * If no PDU matches, 0 is returned.
+         * \param flag The flag which being searched.
+         */
+        template<class T> T *find_inner_pdu(PDUType type) {
+            PDU *pdu = this;
+            while(pdu) {
+                if(pdu->pdu_type() == type)
+                    return static_cast<T*>(pdu);
+                pdu = pdu->inner_pdu();
+            }
+            return 0;
+        }
+        
         /** \brief Send the stack of PDUs through a PacketSender.
          *
          * This method will be called only for the PDU on the bottom of the stack,
