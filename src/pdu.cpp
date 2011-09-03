@@ -80,6 +80,19 @@ Tins::PDU *Tins::PDU::clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz) {
     return child;
 }
 
+Tins::PDU *Tins::PDU::clone_packet() const {
+    PDU *ret = clone_pdu();
+    if(ret) {
+        PDU *ptr = 0, *last = ret;
+        while(last && last->inner_pdu()) {
+            ptr = last->inner_pdu()->clone_pdu();
+            last->inner_pdu(ptr);
+            last = ptr;
+        }
+    }
+    return ret;
+}
+
 /* Static methods */
 uint32_t Tins::PDU::do_checksum(uint8_t *start, uint8_t *end) {
     uint32_t checksum(0);

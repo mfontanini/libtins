@@ -77,6 +77,11 @@ namespace Tins {
         };
 
         /**
+         * \brief Default constructor.
+         */
+        IP();
+        
+        /**
          * \brief Constructor for building the IP PDU taking strings as ip addresses.
          *
          * Constructor that builds an IP using strings as addresses. They
@@ -86,7 +91,7 @@ namespace Tins {
          * \param ip_src string containing the source hostname(optional).
          * \param child pointer to a PDU which will be set as the inner_pdu for the packet being constructed(optional).
          */
-        IP(const std::string &ip_dst = "", const std::string &ip_src = "", PDU *child = 0);
+        IP(const std::string &ip_dst, const std::string &ip_src = "", PDU *child = 0);
 
         /**
          * \brief Constructor for building the IP PDU taking integer as ip addresses.
@@ -98,7 +103,12 @@ namespace Tins {
          * \param ip_src The source ip address(optional).
          * \param child pointer to a PDU which will be set as the inner_pdu for the packet being constructed(optional).
          */
-        IP(uint32_t ip_dst = 0, uint32_t ip_src = 0, PDU *child = 0);
+        IP(uint32_t ip_dst, uint32_t ip_src = 0, PDU *child = 0);
+
+        /**
+         * \brief Copy constructor.
+         */
+        IP(const IP &other);
 
         /**
          * \brief Constructor which creates an IP object from a buffer and adds all identifiable
@@ -115,6 +125,11 @@ namespace Tins {
          * if options exist.
          */
         ~IP();
+
+        /**
+         * \brief Copy assignment operator.
+         */
+        IP &operator= (const IP &other);
 
         /* Getters */
 
@@ -349,6 +364,13 @@ namespace Tins {
          * \sa PDU::clone_packet
          */
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         static const uint8_t DEFAULT_TTL;
 
@@ -398,7 +420,8 @@ namespace Tins {
          * \param ptr The ip header pointer.
          */
         IP(const iphdr *ptr);
-
+        
+        void copy_fields(const IP *other);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 

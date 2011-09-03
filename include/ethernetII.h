@@ -74,6 +74,16 @@ namespace Tins {
          */
         EthernetII(const uint8_t *buffer, uint32_t total_sz);
         
+        /**
+         * \brief Copy constructor.
+         */
+        EthernetII(const EthernetII &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        EthernetII &operator= (const EthernetII &other);
+        
         /* Getters */
         /**
          * \brief Getter for the destination's mac address.
@@ -176,6 +186,13 @@ namespace Tins {
          * \sa PDU::clone_packet
          */
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         /**
          * Struct that represents the Ethernet II header
@@ -192,6 +209,7 @@ namespace Tins {
          */
         EthernetII(const ethhdr *eth_ptr);
 
+        void copy_fields(const EthernetII *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
 

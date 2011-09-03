@@ -95,12 +95,15 @@ namespace Tins {
          */
         uint32_t size() const;
 
-        /** \brief This PDU's type flag identifier.
-         *
+        /** 
+         * \brief Getter for this PDU's type flag identifier.
+         * \return The type flag identifier.
          */
         inline uint32_t flag() const { return _flag; }
 
-        /** \brief The child PDU.
+        /** 
+         * \brief Getter for the inner PDU.
+         * \return The current inner PDU. Might be 0.
          */
         inline PDU *inner_pdu() const { return _inner_pdu; }
 
@@ -108,7 +111,8 @@ namespace Tins {
          */
         void flag(uint32_t new_flag);
 
-        /** \brief Sets the child PDU.
+        /** 
+         * \brief Sets the child PDU.
          *
          * \param next_pdu The new child PDU.
          * When setting a new inner_pdu, the instance takesownership of
@@ -142,6 +146,28 @@ namespace Tins {
             }
             return 0;
         }
+        
+        /**
+         * \brief Clones this packet.
+         * 
+         * This method clones this PDU and clones every inner PDU, 
+         * therefore obtaining a clone of the whole inner PDU chain. 
+         * The pointer returned must be deleted by the user.
+         * \return A pointer to a clone of this packet.
+         */
+        PDU *clone_packet() const;
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * This method does not clone the inner PDUs. \sa PDU::clone_packet
+         * \return A pointer to a copy of this PDU.
+         */
+        virtual PDU *clone_pdu() const { 
+            /* Should be pure virtual. It's this way to avoid compiling issues.
+             * Once every pdu has implemented it, make it pure virtual. */
+            return 0; 
+        } 
         
         /** \brief Send the stack of PDUs through a PacketSender.
          *

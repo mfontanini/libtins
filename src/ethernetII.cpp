@@ -73,6 +73,15 @@ Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
     inner_pdu(next);
 }
 
+Tins::EthernetII::EthernetII(const EthernetII &other) : PDU(ETHERTYPE_IP) {
+    *this = other;
+}
+
+Tins::EthernetII &Tins::EthernetII::operator= (const EthernetII &other) {
+    copy_fields(&other);
+    return *this;
+}
+
 Tins::EthernetII::EthernetII(const ethhdr *eth_ptr) : PDU(ETHERTYPE_IP) {
     memcpy(&_eth, eth_ptr, sizeof(ethhdr));
 }
@@ -175,4 +184,15 @@ Tins::PDU *Tins::EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz)
     cloned = new EthernetII(eth_ptr);
     cloned->inner_pdu(child);
     return cloned;
+}
+
+void Tins::EthernetII::copy_fields(const EthernetII *other) {
+    memcpy(&_eth, &other->_eth, sizeof(_eth));
+    _iface_index = other->_iface_index;
+}
+
+Tins::PDU *Tins::EthernetII::clone_pdu() const {
+    EthernetII *new_pdu = new EthernetII(_iface_index);
+    new_pdu->copy_fields(this);
+    return new_pdu;
 }

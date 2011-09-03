@@ -46,6 +46,21 @@ Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(IPPRO
 
 }
 
+Tins::IP::IP(const IP &other) : PDU(IPPROTO_IP) {
+    *this = other;
+}
+
+Tins::IP::IP() : PDU(IPPROTO_IP) {
+    init_ip_fields();
+}
+
+Tins::IP &Tins::IP::operator= (const IP &other) {
+    copy_fields(&other);
+    if(other.inner_pdu())
+        inner_pdu(other.inner_pdu()->clone_packet());
+    return *this;
+}
+
 Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_IP) {
     if(total_sz < sizeof(iphdr))
         throw std::runtime_error("Not enough size for an IP header in the buffer.");
@@ -329,4 +344,23 @@ Tins::PDU *Tins::IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     cloned = new IP(ip_ptr);
     cloned->inner_pdu(child);
     return cloned;
+}
+
+void Tins::IP::copy_fields(const IP *other) {
+    memcpy(&_ip, &other->_ip, sizeof(_ip));
+    for(vector<IpOption>::const_iterator it = other->_ip_options.begin(); it != other->_ip_options.end(); ++it) {
+        IpOption new_opt;
+        if(it->optional_data) {
+            new_opt.optional_data = new uint8_t[it->optional_data_size];
+            memcpy(new_opt.optional_data, it->optional_data, it->optional_data_size);
+        }
+        new_opt.optional_data_size = it->optional_data_size;
+        _ip_options.push_back(new_opt);
+    }
+}
+
+Tins::PDU *Tins::IP::clone_pdu() const {
+    IP *new_pdu = new IP();
+    new_pdu->copy_fields(this);
+    return new_pdu;
 }
