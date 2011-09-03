@@ -118,11 +118,18 @@ namespace Tins {
         EAPOL(uint8_t packet_type, EAPOLTYPE type);
         
         /**
+         * \brief Copy constructor.
+         */
+        EAPOL(const EAPOL &other);
+        
+        /**
          * \brief Constructor which creates an EAPOL object from a buffer.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         EAPOL(const uint8_t *buffer, uint32_t total_sz);
+        
+        void copy_eapol_fields(const EAPOL *other);
         
         struct eapolhdr {
             uint8_t version, packet_type;
@@ -168,6 +175,16 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         RC4EAPOL(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Copy constructor.
+         */
+        RC4EAPOL(const RC4EAPOL &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        RC4EAPOL &operator= (const RC4EAPOL &other);
         
         /**
          * \brief RC4EAPOL destructor
@@ -275,6 +292,13 @@ namespace Tins {
          * \sa PDU::header_size
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct rc4hdr {
             uint16_t key_length;
@@ -285,6 +309,7 @@ namespace Tins {
             uint8_t key_sign[16];
         } __attribute__((__packed__));
         
+        void copy_fields(const RC4EAPOL *other);
         void write_body(uint8_t *buffer, uint32_t total_sz);
         
         
@@ -310,6 +335,16 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         RSNEAPOL(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Copy constructor.
+         */
+        RSNEAPOL(const RSNEAPOL &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        RSNEAPOL &operator= (const RSNEAPOL &other);
         
         /**
          * \brief Destructor.
@@ -455,6 +490,13 @@ namespace Tins {
          * \sa RSNInformation.
          */
         void rsn_information(const RSNInformation &rsn);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct rsnhdr {
             uint16_t key_mic:1,
@@ -476,6 +518,8 @@ namespace Tins {
             uint16_t wpa_length;
         } __attribute__((__packed__));
         
+        
+        void copy_fields(const RSNEAPOL *other);
         void write_body(uint8_t *buffer, uint32_t total_sz);
         
         

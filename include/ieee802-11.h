@@ -36,9 +36,7 @@ namespace Tins {
      * \brief Class representing an 802.11 frame.
      */
     class IEEE802_11 : public PDU {
-
     public:
-
         /**
          * \brief Broadcast hardware address.
          */
@@ -217,6 +215,11 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         IEEE802_11(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Copy constructor.
+         */
+        IEEE802_11(const IEEE802_11 &other);
 
         /**
          * \brief IEEE802_11 destructor.
@@ -225,6 +228,11 @@ namespace Tins {
          */
         ~IEEE802_11();
 
+        /**
+         * \brief Copy assignment operator.
+         */
+        IEEE802_11 &operator= (const IEEE802_11 &other);
+        
         /**
          * \brief Getter for the protocol version.
          *
@@ -531,6 +539,7 @@ namespace Tins {
     protected:
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
         void parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz);
+        void copy_80211_fields(const IEEE802_11 *other);
     protected:
         /**
          * Struct that represents the 802.11 header
@@ -995,6 +1004,7 @@ namespace Tins {
         ManagementFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0);
         ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
         ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
+        ManagementFrame(const ManagementFrame &other);
 
         void ssid(const std::string &new_ssid);
         void rates(const std::list<float> &new_rates);
@@ -1050,6 +1060,16 @@ namespace Tins {
          */
         IEEE802_11_Beacon(const uint8_t *buffer, uint32_t total_sz);
 
+        /**
+         * \brief Copy constructor.
+         */
+        IEEE802_11_Beacon(const IEEE802_11_Beacon &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        IEEE802_11_Beacon &operator= (const IEEE802_11_Beacon &other);
+        
         /**
          * \brief Getter for the timestamp field.
          *
@@ -1148,10 +1168,11 @@ namespace Tins {
             CapabilityInformation capability;
         } __attribute__((__packed__));
 
-        BeaconBody _body;
-
+        void copy_fields(const IEEE802_11_Beacon *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
-
+        
+        
+        BeaconBody _body;
     };
 
     /**
@@ -1181,6 +1202,16 @@ namespace Tins {
         IEEE802_11_Disassoc(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
+         * \brief Copy constructor.
+         */
+        IEEE802_11_Disassoc(const IEEE802_11_Disassoc &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        IEEE802_11_Disassoc &operator= (const IEEE802_11_Disassoc &other);
+        
+        /**
          * \brief Getter for the reason code.
          *
          * \return uint16_t with the reason code.
@@ -1206,6 +1237,7 @@ namespace Tins {
             uint16_t reason_code;
         };
 
+        void copy_fields(const IEEE802_11_Disassoc *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
 
@@ -1246,6 +1278,16 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         IEEE802_11_Assoc_Request(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Copy constructor.
+         */
+        IEEE802_11_Assoc_Request(const IEEE802_11_Assoc_Request &other);
+
+        /**
+         * \brief Copy assignment operator.
+         */
+        IEEE802_11_Assoc_Request &operator= (const IEEE802_11_Assoc_Request &other);
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -1338,6 +1380,7 @@ namespace Tins {
             uint16_t listen_interval;
         };
 
+        void copy_fields(const IEEE802_11_Assoc_Request *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         AssocReqBody _body;
@@ -1377,6 +1420,16 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         IEEE802_11_Assoc_Response(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Copy constructor.
+         */
+        IEEE802_11_Assoc_Response(const IEEE802_11_Assoc_Response &other);
+
+        /**
+         * \brief Copy assignment operator
+         */
+        IEEE802_11_Assoc_Response &operator= (const IEEE802_11_Assoc_Response &other);
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -1458,6 +1511,7 @@ namespace Tins {
             uint16_t aid;
         };
 
+        void copy_fields(const IEEE802_11_Assoc_Response *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         AssocRespBody _body;
@@ -1513,6 +1567,16 @@ namespace Tins {
         IEEE802_11_QoS_Data(const uint8_t *buffer, uint32_t total_sz);
 
         /**
+         * \brief Copy constructor.
+         */
+        IEEE802_11_QoS_Data(const IEEE802_11_QoS_Data &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        IEEE802_11_QoS_Data &operator= (const IEEE802_11_QoS_Data &other);
+
+        /**
          * \brief Getter for the qos_control field.
          *
          * \return The value of the qos_control field in an uint16_t.
@@ -1533,13 +1597,12 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-
     private:
-
-        uint16_t _qos_control;
-
+        void copy_fields(const IEEE802_11_QoS_Data *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
+        
+        uint16_t _qos_control;
     };
 
 }

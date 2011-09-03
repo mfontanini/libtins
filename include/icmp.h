@@ -56,6 +56,16 @@ namespace Tins {
          * \param flag The type flag which will be set.
          */
         ICMP(Flags flag = ECHO_REQUEST);
+        
+        /**
+         * \brief Copy constructor.
+         */
+        ICMP(const ICMP &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        ICMP &operator= (const ICMP &other);
 
         /**
          * \brief Constructor which creates an ICMP object from a buffer and adds all identifiable
@@ -282,6 +292,13 @@ namespace Tins {
          * \sa PDU::clone_packet
          */
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         static uint16_t global_id, global_seq;
 
@@ -308,6 +325,8 @@ namespace Tins {
          */
         ICMP(const icmphdr *ptr);
 
+        void copy_fields(const ICMP *other);
+        
         /** \brief Serialices this ICMP PDU.
          * \param buffer The buffer in which the PDU will be serialized.
          * \param total_sz The size available in the buffer.

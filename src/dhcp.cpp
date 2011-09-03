@@ -63,6 +63,16 @@ Tins::DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) : BootP(buffer, total
     }
 }
 
+Tins::DHCP::DHCP(const DHCP &other) : BootP(other) {
+    copy_fields(&other);
+}
+
+Tins::DHCP &Tins::DHCP::operator= (const DHCP &other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
+}
+
 Tins::DHCP::~DHCP() {
     while(_options.size()) {
         delete[] _options.front().value;
@@ -71,8 +81,12 @@ Tins::DHCP::~DHCP() {
 }
 
 Tins::DHCP::DHCPOption::DHCPOption(uint8_t opt, uint8_t len, const uint8_t *val) : option(opt), length(len) {
-    value = new uint8_t[len];
-    std::memcpy(value, val, len);
+    if(len) {
+        value = new uint8_t[len];    
+        std::memcpy(value, val, len);
+    }
+    else
+        value = 0;
 }
 
 bool Tins::DHCP::add_option(Options opt, uint8_t len, const uint8_t *val) {
@@ -149,7 +163,8 @@ void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
         for(std::list<DHCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
             *(ptr++) = it->option;
             *(ptr++) = it->length;
-            std::memcpy(ptr, it->value, it->length);
+            if(it->length)
+                std::memcpy(ptr, it->value, it->length);
             ptr += it->length;
         }
         // End of options
@@ -160,3 +175,15 @@ void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     delete[] result;
 }
 
+void Tins::DHCP::copy_fields(const DHCP *other) {
+    BootP::copy_bootp_fields(other);
+    _size = other->_size;
+    for(std::list<DHCPOption>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
+        _options.push_back(DHCPOption(it->option, it->length, it->value));
+}
+
+Tins::PDU *Tins::DHCP::clone_pdu() const {
+    DHCP *new_pdu = new DHCP();
+    new_pdu->copy_fields(this);
+    return new_pdu;
+}

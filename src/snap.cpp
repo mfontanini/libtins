@@ -57,6 +57,16 @@ Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
     };
 }
 
+Tins::SNAP::SNAP(const SNAP &other) : PDU(other) {
+    copy_fields(&other);
+}
+
+Tins::SNAP &Tins::SNAP::operator= (const SNAP &other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
+}
+
 uint32_t Tins::SNAP::header_size() const {
     return sizeof(_snap);
 }
@@ -83,3 +93,12 @@ void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     std::memcpy(buffer, &_snap, sizeof(_snap));
 }
 
+void Tins::SNAP::copy_fields(const SNAP *other) {
+    std::memcpy(&_snap, &other->_snap, sizeof(_snap));
+}
+
+Tins::PDU *Tins::SNAP::clone_pdu() const {
+    SNAP *new_pdu = new SNAP();
+    new_pdu->copy_fields(this);
+    return new_pdu;
+}

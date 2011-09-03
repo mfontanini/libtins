@@ -60,6 +60,7 @@ namespace Tins {
             TCP,
             UDP,
             ICMP,
+            BOOTP,
             DHCP,
             EAPOL
         };
@@ -214,6 +215,18 @@ namespace Tins {
          */
         virtual PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz) { return 0; }
     protected:
+        /**
+         * \brief Copy consstructor.
+         */
+        PDU(const PDU &other);
+        
+        /**
+         * \brief Copy other PDU's inner PDU(if any).
+         * \param pdu The PDU from which to copy the inner PDU.
+         */
+        void copy_inner_pdu(const PDU &pdu);
+        
+        
         /** \brief Serializes this PDU and propagates this action to child PDUs.
          *
          * \param buffer The buffer in which to store this PDU's serialization.

@@ -46,6 +46,16 @@ Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_UDP) {
         inner_pdu(new RawPDU(buffer + sizeof(udphdr), total_sz));
 }
 
+Tins::UDP::UDP(const UDP &other) : PDU(other) {
+    copy_fields(&other);
+}
+
+Tins::UDP &Tins::UDP::operator= (const UDP& other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
+}
+
 void Tins::UDP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
     inner_pdu(new RawPDU(new_payload, new_payload_size));
 }
@@ -82,3 +92,12 @@ void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     _udp.check = 0;
 }
 
+void Tins::UDP::copy_fields(const UDP *other) {
+    std::memcpy(&_udp, &other->_udp, sizeof(_udp));
+}
+
+Tins::PDU *Tins::UDP::clone_pdu() const {
+    UDP *new_pdu = new UDP();
+    new_pdu->copy_fields(this);
+    return new_pdu;
+}

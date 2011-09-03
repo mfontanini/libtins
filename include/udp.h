@@ -52,7 +52,17 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         UDP(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Copy constructor.
+         */
+        UDP(const UDP &other);
 
+        /**
+         * \brief Copy assignment operator.
+         */
+        UDP &operator= (const UDP& other);
+        
         /** 
          * \brief Getter for the destination port.
          * \return The datagram's destination port.
@@ -113,6 +123,13 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::UDP; }
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct udphdr {
             uint16_t sport;
@@ -121,6 +138,7 @@ namespace Tins {
             uint16_t check;
         } __attribute__((packed));
 
+        void copy_fields(const UDP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         udphdr _udp;

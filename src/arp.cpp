@@ -55,6 +55,16 @@ Tins::ARP::ARP(const uint8_t *buffer, uint32_t total_sz) : PDU(0x0608) {
         inner_pdu(new RawPDU(buffer + sizeof(arphdr), total_sz));
 }
 
+Tins::ARP::ARP(const ARP &other) : PDU(other) {
+    copy_fields(&other);
+}
+
+Tins::ARP &Tins::ARP::operator= (const ARP &other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
+}
+
 Tins::ARP::ARP(const arphdr *arp_ptr) : PDU(Utils::net_to_host_s(0x0806)) {
     memcpy(&_arp, arp_ptr, sizeof(arphdr));
 }
@@ -206,4 +216,14 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
     EthernetII* eth = new EthernetII(iface, hw_tgt, hw_snd, arp);
     return eth;
+}
+
+Tins::PDU *Tins::ARP::clone_pdu() const {
+    ARP *new_pdu = new ARP();
+    new_pdu->copy_fields(this);
+    return new_pdu;
+}
+
+void Tins::ARP::copy_fields(const ARP *other) {
+    std::memcpy(&_arp, &other->_arp, sizeof(_arp));
 }

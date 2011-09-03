@@ -82,7 +82,7 @@ namespace Tins {
              * \param olength The option's data length.
              * \param odata The option's data(if any).
              */
-            TCPOption(uint8_t okind, uint8_t olength, uint8_t *odata) :
+            TCPOption(uint8_t okind = 0, uint8_t olength = 0, uint8_t *odata = 0) :
                       kind(okind), length(olength), data(odata) { }
 
             /**
@@ -114,6 +114,16 @@ namespace Tins {
          */
         TCP(const uint8_t *buffer, uint32_t total_sz);
 
+        /**
+         * \brief Copy constructor.
+         */
+        TCP(const TCP &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        TCP &operator= (const TCP &other);
+        
         /**
          * \brief TCP destructor.
          *
@@ -313,6 +323,12 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::TCP; }
 
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct tcphdr {
             uint16_t sport;
@@ -351,6 +367,7 @@ namespace Tins {
 
         static const uint16_t DEFAULT_WINDOW;
 
+        void copy_fields(const TCP *other);
         /** \brief Serialices this TCP PDU.
          * \param buffer The buffer in which the PDU will be serialized.
          * \param total_sz The size available in the buffer.

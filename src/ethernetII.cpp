@@ -73,12 +73,13 @@ Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
     inner_pdu(next);
 }
 
-Tins::EthernetII::EthernetII(const EthernetII &other) : PDU(ETHERTYPE_IP) {
-    *this = other;
+Tins::EthernetII::EthernetII(const EthernetII &other) : PDU(other) {
+    copy_fields(&other);
 }
 
 Tins::EthernetII &Tins::EthernetII::operator= (const EthernetII &other) {
     copy_fields(&other);
+    copy_inner_pdu(other);
     return *this;
 }
 

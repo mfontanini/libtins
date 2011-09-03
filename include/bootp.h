@@ -63,6 +63,16 @@ namespace Tins {
          */
         BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size = 64);
         
+        /**
+         * \brief Copy constructor.
+         */
+        BootP(const BootP &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        BootP &operator= (const BootP &other);
+        
         /** \brief BootP destructor.
          * 
          * This frees the memory allocated to hold the vend field.
@@ -232,7 +242,21 @@ namespace Tins {
          * \param size The size of the new vend field.
          */
         void vend(uint8_t *new_vend, uint32_t size);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::BOOTP; }
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     protected:
+        void copy_bootp_fields(const BootP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     private:
         /**
@@ -254,7 +278,6 @@ namespace Tins {
             uint8_t sname[64];
             uint8_t file[128];
         } __attribute__((__packed__));
-        
         
         bootphdr _bootp;
         uint8_t *_vend;

@@ -48,6 +48,16 @@ Tins::ICMP::ICMP(Flags flag) : PDU(IPPROTO_ICMP) {
     };
 }
 
+Tins::ICMP::ICMP(const ICMP &other) : PDU(other) {
+    copy_fields(&other);
+}
+
+Tins::ICMP &Tins::ICMP::operator= (const ICMP &other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
+}
+
 Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_ICMP) {
     if(total_sz < sizeof(icmphdr))
         throw std::runtime_error("Not enough size for an ICMP header in the buffer.");
@@ -198,4 +208,14 @@ Tins::PDU *Tins::ICMP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     cloned = new ICMP(icmp_ptr);
     cloned->inner_pdu(child);
     return cloned;
+}
+
+void Tins::ICMP::copy_fields(const ICMP *other) {
+    std::memcpy(&_icmp, &other->_icmp, sizeof(_icmp));
+}
+
+Tins::PDU *Tins::ICMP::clone_pdu() const {
+    ICMP *new_pdu = new ICMP();
+    new_pdu->copy_fields(this);
+    return new_pdu;
 }

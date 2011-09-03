@@ -39,6 +39,10 @@ Tins::EAPOL::EAPOL(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
     std::memcpy(&_header, buffer, sizeof(_header));
 }
 
+Tins::EAPOL::EAPOL(const EAPOL &other) : PDU(other) {
+    copy_eapol_fields(&other);
+}
+
 Tins::EAPOL *Tins::EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz < sizeof(eapolhdr))
         throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
@@ -80,6 +84,11 @@ void Tins::EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const 
     write_body(buffer + sizeof(_header), total_sz - sizeof(_header));
 }
 
+void Tins::EAPOL::copy_eapol_fields(const EAPOL *other) {
+    std::memcpy(&_header, &other->_header, sizeof(_header));
+    
+}
+
 /* RC4EAPOL */
 
 Tins::RC4EAPOL::RC4EAPOL() : EAPOL(0x03, RC4), _key(0), _key_size(0) {
@@ -101,6 +110,16 @@ Tins::RC4EAPOL::RC4EAPOL(const uint8_t *buffer, uint32_t total_sz) : EAPOL(buffe
     }
     else 
         _key = 0;
+}
+
+Tins::RC4EAPOL::RC4EAPOL(const RC4EAPOL &other) : EAPOL(other) {
+    copy_fields(&other);
+}
+
+Tins::RC4EAPOL &Tins::RC4EAPOL::operator= (const RC4EAPOL &other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
 }
 
 Tins::RC4EAPOL::~RC4EAPOL() {
@@ -153,6 +172,23 @@ void Tins::RC4EAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
         std::memcpy(buffer, _key, _key_size);
 }
 
+Tins::PDU *Tins::RC4EAPOL::clone_pdu() const {
+    RC4EAPOL *new_pdu = new RC4EAPOL();
+    new_pdu->copy_fields(this);
+    return new_pdu;
+}
+
+void Tins::RC4EAPOL::copy_fields(const RC4EAPOL *other) {
+    copy_eapol_fields(other);
+    std::memcpy(&_header, &other->_header, sizeof(_header));
+    _key_size = other->_key_size;
+    if(_key_size) {
+        _key = new uint8_t[_key_size];
+        std::memcpy(_key, other->_key, _key_size);
+    }
+    else
+        _key = 0;
+}
 
 /* RSNEAPOL */
 
@@ -176,6 +212,16 @@ Tins::RSNEAPOL::RSNEAPOL(const uint8_t *buffer, uint32_t total_sz) : EAPOL(0x03,
     }
     else 
         _key = 0;
+}
+
+Tins::RSNEAPOL::RSNEAPOL(const RSNEAPOL &other) : EAPOL(other) {
+    copy_fields(&other);
+}
+
+Tins::RSNEAPOL &Tins::RSNEAPOL::operator= (const RSNEAPOL &other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
 }
 
 Tins::RSNEAPOL::~RSNEAPOL() {
@@ -248,3 +294,20 @@ void Tins::RSNEAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
     }
 }
 
+void Tins::RSNEAPOL::copy_fields(const RSNEAPOL *other) {
+    copy_eapol_fields(other);
+    std::memcpy(&_header, &other->_header, sizeof(_header));
+    _key_size = other->_key_size;
+    if(_key_size) {
+        _key = new uint8_t[_key_size];
+        std::memcpy(_key, other->_key, _key_size);
+    }
+    else
+        _key = 0;
+}
+
+Tins::PDU *Tins::RSNEAPOL::clone_pdu() const {
+    RSNEAPOL *new_pdu = new RSNEAPOL();
+    new_pdu->copy_fields(this);
+    return new_pdu;
+}

@@ -84,11 +84,21 @@ Tins::IEEE802_11::IEEE802_11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
     }
 }
 
+Tins::IEEE802_11::IEEE802_11(const IEEE802_11 &other) : PDU(other) {
+    copy_80211_fields(&other);
+}
+
 Tins::IEEE802_11::~IEEE802_11() {
     while(_options.size()) {
         delete[] _options.front().value;
         _options.pop_front();
     }
+}
+
+Tins::IEEE802_11 &Tins::IEEE802_11::operator= (const IEEE802_11 &other) {
+    copy_80211_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
 }
 
 void Tins::IEEE802_11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
@@ -261,6 +271,14 @@ Tins::PDU *Tins::IEEE802_11::from_bytes(const uint8_t *buffer, uint32_t total_sz
     return ret;
 }
 
+void Tins::IEEE802_11::copy_80211_fields(const IEEE802_11 *other) {
+    std::memcpy(&_header, &other->_header, sizeof(_header));
+    std::memcpy(_addr4, other->_addr4, sizeof(_header));
+    _iface_index = other->_iface_index;
+    _options_size = other->_options_size;
+    for(std::list<IEEE802_11_Option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
+        _options.push_back(IEEE802_11_Option(it->option, it->length, it->value));
+}
 
 /*
  * ManagementFrame
@@ -278,6 +296,10 @@ Tins::ManagementFrame::ManagementFrame(const std::string &iface,
                                        const uint8_t *dst_hw_addr,
                                        const uint8_t *src_hw_addr) throw (std::runtime_error) : IEEE802_11(iface, dst_hw_addr, src_hw_addr) {
     this->type(IEEE802_11::MANAGEMENT);
+}
+
+Tins::ManagementFrame::ManagementFrame(const ManagementFrame &other) : IEEE802_11(other) {
+    
 }
 
 void Tins::ManagementFrame::ssid(const std::string &new_ssid) {
@@ -392,6 +414,21 @@ Tins::IEEE802_11_Beacon::IEEE802_11_Beacon(const uint8_t *buffer, uint32_t total
     parse_tagged_parameters(buffer, total_sz);
 }
 
+Tins::IEEE802_11_Beacon::IEEE802_11_Beacon(const IEEE802_11_Beacon &other) : ManagementFrame(other) {
+    
+}
+
+Tins::IEEE802_11_Beacon &Tins::IEEE802_11_Beacon::operator= (const IEEE802_11_Beacon &other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
+}
+
+void Tins::IEEE802_11_Beacon::copy_fields(const IEEE802_11_Beacon *other) {
+    copy_80211_fields(other);
+    std::memcpy(&_body, &other->_body, sizeof(_body));
+}
+
 void Tins::IEEE802_11_Beacon::timestamp(uint64_t new_timestamp) {
     this->_body.timestamp = new_timestamp;
 }
@@ -473,6 +510,8 @@ uint32_t Tins::IEEE802_11_Beacon::write_fixed_parameters(uint8_t *buffer, uint32
     return sz;
 }
 
+/* 802.11 diassoc */
+
 Tins::IEEE802_11_Disassoc::IEEE802_11_Disassoc() : ManagementFrame() {
     this->subtype(IEEE802_11::DISASSOC);
     memset(&_body, 0, sizeof(_body));
@@ -483,6 +522,21 @@ Tins::IEEE802_11_Disassoc::IEEE802_11_Disassoc(const std::string& iface,
                                            const uint8_t* src_hw_addr) throw (std::runtime_error) : ManagementFrame(iface, dst_hw_addr, src_hw_addr){
     this->subtype(IEEE802_11::DISASSOC);
     memset(&_body, 0, sizeof(_body));
+}
+
+Tins::IEEE802_11_Disassoc::IEEE802_11_Disassoc(const IEEE802_11_Disassoc &other) : ManagementFrame(other) {
+    copy_fields(&other);
+}
+
+Tins::IEEE802_11_Disassoc &Tins::IEEE802_11_Disassoc::operator= (const IEEE802_11_Disassoc &other) {
+    copy_inner_pdu(other);
+    copy_fields(&other);
+    return *this;
+}
+
+void Tins::IEEE802_11_Disassoc::copy_fields(const IEEE802_11_Disassoc *other) {
+    copy_80211_fields(other);
+    std::memcpy(&_body, &other->_body, sizeof(_body));
 }
 
 void Tins::IEEE802_11_Disassoc::reason_code(uint16_t new_reason_code) {
@@ -561,6 +615,8 @@ Tins::RSNInformation Tins::RSNInformation::wpa2_psk() {
     return info;
 }
 
+/* Assoc request. */
+
 Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request() : ManagementFrame() {
     this->subtype(IEEE802_11::ASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
@@ -582,6 +638,21 @@ Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request(const uint8_t *buffer, 
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
     parse_tagged_parameters(buffer, total_sz);
+}
+
+Tins::IEEE802_11_Assoc_Request::IEEE802_11_Assoc_Request(const IEEE802_11_Assoc_Request &other) : ManagementFrame(other) {
+    copy_fields(&other);
+}
+
+Tins::IEEE802_11_Assoc_Request &Tins::IEEE802_11_Assoc_Request::operator= (const IEEE802_11_Assoc_Request &other) {
+    copy_inner_pdu(other);
+    copy_fields(&other);
+    return *this;
+}
+
+void Tins::IEEE802_11_Assoc_Request::copy_fields(const IEEE802_11_Assoc_Request *other) {
+    copy_80211_fields(other);
+    std::memcpy(&_body, &other->_body, sizeof(_body));
 }
 
 void Tins::IEEE802_11_Assoc_Request::listen_interval(uint16_t new_listen_interval) {
@@ -627,6 +698,8 @@ uint32_t Tins::IEEE802_11_Assoc_Request::write_fixed_parameters(uint8_t *buffer,
     return sz;
 }
 
+/* Assoc response. */
+
 Tins::IEEE802_11_Assoc_Response::IEEE802_11_Assoc_Response() : ManagementFrame() {
     this->subtype(IEEE802_11::ASSOC_RESP);
     memset(&_body, 0, sizeof(_body));
@@ -648,6 +721,21 @@ Tins::IEEE802_11_Assoc_Response::IEEE802_11_Assoc_Response(const uint8_t *buffer
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
     parse_tagged_parameters(buffer, total_sz);
+}
+
+Tins::IEEE802_11_Assoc_Response::IEEE802_11_Assoc_Response(const IEEE802_11_Assoc_Response &other) : ManagementFrame(other) {
+    copy_fields(&other);
+}
+
+Tins::IEEE802_11_Assoc_Response &Tins::IEEE802_11_Assoc_Response::operator= (const IEEE802_11_Assoc_Response &other) {
+    copy_inner_pdu(other);
+    copy_fields(&other);
+    return *this;
+}
+
+void Tins::IEEE802_11_Assoc_Response::copy_fields(const IEEE802_11_Assoc_Response *other) {
+    copy_80211_fields(other);
+    std::memcpy(&_body, &other->_body, sizeof(_body));
 }
 
 void Tins::IEEE802_11_Assoc_Response::status_code(uint16_t new_status_code) {
@@ -681,6 +769,8 @@ uint32_t Tins::IEEE802_11_Assoc_Response::write_fixed_parameters(uint8_t *buffer
     return sz;
 }
 
+/* QoS data. */
+
 Tins::IEEE802_11_QoS_Data::IEEE802_11_QoS_Data(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : IEEE802_11(dst_hw_addr, src_hw_addr, child) {
     this->type(IEEE802_11::DATA);
     this->subtype(IEEE802_11::QOS_DATA_DATA);
@@ -708,6 +798,21 @@ Tins::IEEE802_11_QoS_Data::IEEE802_11_QoS_Data(const uint8_t *buffer, uint32_t t
     buffer += sizeof(uint16_t);
     if(total_sz)
         inner_pdu(new Tins::SNAP(buffer, total_sz));
+}
+
+Tins::IEEE802_11_QoS_Data::IEEE802_11_QoS_Data(const IEEE802_11_QoS_Data &other) : IEEE802_11(other) {
+    copy_fields(&other);
+}
+
+Tins::IEEE802_11_QoS_Data &Tins::IEEE802_11_QoS_Data::operator= (const IEEE802_11_QoS_Data &other) {
+    copy_inner_pdu(other);
+    copy_fields(&other);
+    return *this;
+}
+
+void Tins::IEEE802_11_QoS_Data::copy_fields(const IEEE802_11_QoS_Data *other) {
+    copy_80211_fields(other);
+    _qos_control = other->_qos_control;
 }
 
 void Tins::IEEE802_11_QoS_Data::qos_control(uint16_t new_qos_control) {

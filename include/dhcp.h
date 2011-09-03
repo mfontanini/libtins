@@ -172,7 +172,17 @@ namespace Tins {
          * Subclasses might use 0 to provide their own interpretation of this field.
          */
         DHCP(const uint8_t *buffer, uint32_t total_sz);
-         
+        
+        /**
+         * \brief Copy constructor.
+         */
+        DHCP(const DHCP &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        DHCP &operator= (const DHCP &other);
+        
         /**
          * \brief DHCP destructor
          * 
@@ -265,9 +275,17 @@ namespace Tins {
          * \sa PDU::header_size
          */ 
         uint32_t header_size() const;
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         static const uint32_t MAX_DHCP_SIZE;
-        
+
+        void copy_fields(const DHCP *other);        
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         uint8_t *serialize_list(const std::list<uint32_t> &int_list, uint32_t &sz);

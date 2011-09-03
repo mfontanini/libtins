@@ -29,8 +29,18 @@ Tins::PDU::PDU(uint32_t flag, PDU *next_pdu) : _flag(flag), _inner_pdu(next_pdu)
 
 }
 
+Tins::PDU::PDU(const PDU &other) : _inner_pdu(0) {
+    _flag = other.flag();
+    copy_inner_pdu(other);
+}
+
 Tins::PDU::~PDU() {
     delete _inner_pdu;
+}
+
+void Tins::PDU::copy_inner_pdu(const PDU &pdu) {
+    if(pdu.inner_pdu())
+        inner_pdu(pdu.inner_pdu()->clone_pdu());
 }
 
 uint32_t Tins::PDU::size() const {

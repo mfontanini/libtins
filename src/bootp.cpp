@@ -24,6 +24,16 @@ Tins::BootP::BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field
     // Maybe RawPDU on what is left on the buffer?...
 }
 
+Tins::BootP::BootP(const BootP &other) : PDU(other) {
+    copy_bootp_fields(&other);
+}
+
+Tins::BootP &Tins::BootP::operator= (const BootP &other) {
+    copy_bootp_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
+}
+
 Tins::BootP::~BootP() {
     delete[] _vend;
 }
@@ -99,4 +109,19 @@ void Tins::BootP::write_serialization(uint8_t *buffer, uint32_t total_sz, const 
     assert(total_sz >= sizeof(bootphdr) + _vend_size);
     std::memcpy(buffer, &_bootp, sizeof(bootphdr));
     std::memcpy(buffer + sizeof(bootphdr), _vend, _vend_size);
+}
+
+void Tins::BootP::copy_bootp_fields(const BootP *other) {
+    std::memcpy(&_bootp, &other->_bootp, sizeof(_bootp));
+    _vend_size = other->_vend_size;
+    if(_vend_size) {
+        _vend = new uint8_t[_vend_size];
+        std::memcpy(_vend, other->_vend, _vend_size);
+    }
+}
+
+Tins::PDU *Tins::BootP::clone_pdu() const {
+    BootP *new_pdu = new BootP();
+    new_pdu->copy_bootp_fields(this);
+    return new_pdu;
 }

@@ -46,8 +46,8 @@ Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(IPPRO
 
 }
 
-Tins::IP::IP(const IP &other) : PDU(IPPROTO_IP) {
-    *this = other;
+Tins::IP::IP(const IP &other) : PDU(other) {
+    copy_fields(&other);
 }
 
 Tins::IP::IP() : PDU(IPPROTO_IP) {
@@ -56,8 +56,7 @@ Tins::IP::IP() : PDU(IPPROTO_IP) {
 
 Tins::IP &Tins::IP::operator= (const IP &other) {
     copy_fields(&other);
-    if(other.inner_pdu())
-        inner_pdu(other.inner_pdu()->clone_packet());
+    copy_inner_pdu(other);
     return *this;
 }
 
@@ -354,9 +353,13 @@ void Tins::IP::copy_fields(const IP *other) {
             new_opt.optional_data = new uint8_t[it->optional_data_size];
             memcpy(new_opt.optional_data, it->optional_data, it->optional_data_size);
         }
+        else
+            new_opt.optional_data = 0;
         new_opt.optional_data_size = it->optional_data_size;
         _ip_options.push_back(new_opt);
     }
+    _options_size = other->_options_size;
+    _padded_options_size = other->_padded_options_size;
 }
 
 Tins::PDU *Tins::IP::clone_pdu() const {

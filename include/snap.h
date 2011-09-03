@@ -50,6 +50,16 @@ namespace Tins {
         SNAP(const uint8_t *buffer, uint32_t total_sz);
         
         /**
+         * \brief Copy constructor.
+         */
+        SNAP(const SNAP &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        SNAP &operator= (const SNAP &other);
+        
+        /**
          * \brief Returns the SNAP frame's header length.
          *
          * \return The header's size.
@@ -62,6 +72,13 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::SNAP; }
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct snaphdr {
             uint8_t dsap;
@@ -74,6 +91,7 @@ namespace Tins {
             uint16_t eth_type;
         } __attribute__((__packed__));
         
+        void copy_fields(const SNAP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         snaphdr _snap;

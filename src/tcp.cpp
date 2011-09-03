@@ -42,6 +42,16 @@ Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _options_size
     this->check(0);
 }
 
+Tins::TCP::TCP(const TCP &other) : PDU(other) {
+    copy_fields(&other);
+}
+
+Tins::TCP &Tins::TCP::operator= (const TCP &other) {
+    copy_fields(&other);
+    copy_inner_pdu(other);
+    return *this;
+}
+
 Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_TCP) {
     if(total_sz < sizeof(tcphdr))
         throw std::runtime_error("Not enough size for an TCP header in the buffer.");
@@ -253,3 +263,24 @@ uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
         return buffer + length + (sizeof(uint8_t) << 1);
     }
 }
+
+void Tins::TCP::copy_fields(const TCP *other) {
+    std::memcpy(&_tcp, &other->_tcp, sizeof(_tcp));
+    for(std::list<TCPOption>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it) {
+        TCPOption opt(it->kind, it->length);
+        if(it->data) {
+            opt.data = new uint8_t[it->length];
+            std::memcpy(opt.data, it->data, it->length);
+        }
+        _options.push_back(opt);
+    }
+    _options_size = other->_options_size;
+    _total_options_size = other->_total_options_size;
+}
+
+Tins::PDU *Tins::TCP::clone_pdu() const {
+    TCP *new_pdu = new TCP();
+    new_pdu->copy_fields(this);
+    return new_pdu;
+}
+
