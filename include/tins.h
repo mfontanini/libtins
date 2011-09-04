@@ -28,7 +28,7 @@
 #include "eapol.h"
 #include "ethernetII.h"
 #include "icmp.h"
-#include "ieee802-11.h"
+#include "dot11.h"
 #include "ip.h"
 #include "packetsender.h"
 #include "pdu.h"

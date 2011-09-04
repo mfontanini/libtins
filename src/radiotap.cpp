@@ -26,7 +26,7 @@
     #include <netpacket/packet.h>
 #endif
 #include "radiotap.h"
-#include "ieee802-11.h"
+#include "dot11.h"
 #include "utils.h"
 
 
@@ -108,7 +108,7 @@ Tins::RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
         total_sz -= sizeof(_rx_flags);
     }
     if(total_sz)
-        inner_pdu(IEEE802_11::from_bytes(buffer, total_sz));
+        inner_pdu(Dot11::from_bytes(buffer, total_sz));
 }
 
 void Tins::RadioTap::version(uint8_t new_version) {
@@ -196,7 +196,7 @@ bool Tins::RadioTap::send(PacketSender* sender) {
     addr.sll_halen = 6;
     addr.sll_ifindex = _iface_index;
     
-    Tins::IEEE802_11 *wlan = dynamic_cast<Tins::IEEE802_11*>(inner_pdu());
+    Tins::Dot11 *wlan = dynamic_cast<Tins::Dot11*>(inner_pdu());
     if(wlan)
         memcpy(&(addr.sll_addr), wlan->addr1(), 6);
 

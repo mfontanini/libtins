@@ -23,7 +23,7 @@
 #include <cassert>
 #include <stdexcept>
 #include "eapol.h"
-#include "ieee802-11.h"
+#include "dot11.h"
 
 
 Tins::EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) : PDU(0xff) {
@@ -287,7 +287,7 @@ void Tins::RSNEAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
     buffer += sizeof(_header);
     if(_key) {
         if(_header.key_type && _key_size) {
-            *(buffer++) = IEEE802_11::RSN;
+            *(buffer++) = Dot11::RSN;
             *(buffer++) = _key_size;
         }
         std::memcpy(buffer, _key, _key_size);

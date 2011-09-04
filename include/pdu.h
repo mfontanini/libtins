@@ -52,7 +52,7 @@ namespace Tins {
         enum PDUType {
             RAW,
             ETHERNET_II,
-            IEEE802_11,
+            DOT11,
             SNAP,
             RADIOTAP,
             IP,

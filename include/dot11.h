@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __IEEE802_11_h
-#define __IEEE802_11_h
+#ifndef __DOT_11
+#define __DOT_11
 
 #include <list>
 #include <stdint.h>
@@ -35,7 +35,7 @@ namespace Tins {
     /**
      * \brief Class representing an 802.11 frame.
      */
-    class IEEE802_11 : public PDU {
+    class Dot11 : public PDU {
     public:
         /**
          * \brief Broadcast hardware address.
@@ -145,7 +145,7 @@ namespace Tins {
         /**
          * \brief IEEE 802.11 options struct.
          */
-        struct IEEE802_11_Option {
+        struct Dot11_Option {
             /**
              * \brief The option number.
              */
@@ -160,7 +160,7 @@ namespace Tins {
             uint8_t *value;
 
             /**
-             * \brief Creates an instance of IEEE802_11_Option.
+             * \brief Creates an instance of Dot11_Option.
              *
              * The option's value is copied, therefore the user should
              * manually free any memory pointed by the "val" parameter.
@@ -168,7 +168,7 @@ namespace Tins {
              * \param len The length of the option's value in bytes.
              * \param val The option's value.
              */
-            IEEE802_11_Option(uint8_t opt, uint8_t len, const uint8_t *val);
+            Dot11_Option(uint8_t opt, uint8_t len, const uint8_t *val);
         };
 
         /**
@@ -180,7 +180,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        IEEE802_11(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        Dot11(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 PDU
@@ -193,7 +193,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        IEEE802_11(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 PDU
@@ -206,7 +206,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        IEEE802_11(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        Dot11(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 object from a buffer and adds all identifiable
@@ -214,24 +214,24 @@ namespace Tins {
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        IEEE802_11(const uint8_t *buffer, uint32_t total_sz);
+        Dot11(const uint8_t *buffer, uint32_t total_sz);
         
         /**
          * \brief Copy constructor.
          */
-        IEEE802_11(const IEEE802_11 &other);
+        Dot11(const Dot11 &other);
 
         /**
-         * \brief IEEE802_11 destructor.
+         * \brief Dot11 destructor.
          *
          * Releases the memory allocated for tagged options.
          */
-        ~IEEE802_11();
+        ~Dot11();
 
         /**
          * \brief Copy assignment operator.
          */
-        IEEE802_11 &operator= (const IEEE802_11 &other);
+        Dot11 &operator= (const Dot11 &other);
         
         /**
          * \brief Getter for the protocol version.
@@ -507,7 +507,7 @@ namespace Tins {
         bool send(PacketSender* sender);
 
         /**
-         * \brief Adds a new option to this IEEE802_11 PDU.
+         * \brief Adds a new option to this Dot11 PDU.
          *
          * This copies the value buffer.
          * \param opt The option identifier.
@@ -521,16 +521,16 @@ namespace Tins {
          * \param opt The option identifier.
          * \return The option found, or 0 if no such option has been set.
          */
-        const IEEE802_11_Option *lookup_option(TaggedOption opt) const;
+        const Dot11_Option *lookup_option(TaggedOption opt) const;
 
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::IEEE802_11; }
+        PDUType pdu_type() const { return PDU::DOT11; }
 
         /**
-         * \brief Allocates an IEEE802_11 PDU from a buffer.
+         * \brief Allocates an Dot11 PDU from a buffer.
          * \param buffer The buffer from which to take the PDU data.
          * \param total_sz The total size of the buffer.
          * \return The allocated PDU.
@@ -539,7 +539,7 @@ namespace Tins {
     protected:
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
         void parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz);
-        void copy_80211_fields(const IEEE802_11 *other);
+        void copy_80211_fields(const Dot11 *other);
     protected:
         /**
          * Struct that represents the 802.11 header
@@ -589,7 +589,7 @@ namespace Tins {
         } __attribute__((__packed__));
         private:
 
-        IEEE802_11(const ieee80211_header *header_ptr);
+        Dot11(const ieee80211_header *header_ptr);
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
@@ -597,7 +597,7 @@ namespace Tins {
         ieee80211_header _header;
         uint8_t _addr4[6];
         uint32_t _iface_index, _options_size;
-        std::list<IEEE802_11_Option> _options;
+        std::list<Dot11_Option> _options;
     };
 
     /**
@@ -711,7 +711,7 @@ namespace Tins {
     /**
      * \brief Abstract class that englobes all Management frames in the 802.11 protocol.
      */
-    class ManagementFrame : public IEEE802_11 {
+    class Dot11ManagementFrame : public Dot11 {
 
     public:
 
@@ -996,15 +996,15 @@ namespace Tins {
 
     protected:
         /**
-         * \brief Constructor which creates a ManagementFrame object from a buffer and adds all identifiable
+         * \brief Constructor which creates a Dot11ManagementFrame object from a buffer and adds all identifiable
          * PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        ManagementFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0);
-        ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
-        ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
-        ManagementFrame(const ManagementFrame &other);
+        Dot11ManagementFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0);
+        Dot11ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
+        Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
+        Dot11ManagementFrame(const Dot11ManagementFrame &other);
 
         void ssid(const std::string &new_ssid);
         void rates(const std::list<float> &new_rates);
@@ -1028,7 +1028,7 @@ namespace Tins {
      * \brief Class representing a Beacon in the IEEE 802.11 Protocol.
      *
      */
-    class IEEE802_11_Beacon : public ManagementFrame {
+    class Dot11Beacon : public Dot11ManagementFrame {
 
     public:
 
@@ -1037,7 +1037,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        IEEE802_11_Beacon(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11Beacon(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Beacon.
@@ -1049,26 +1049,26 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        IEEE802_11_Beacon(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11Beacon(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
-         * \brief Constructor which creates a IEEE802_11_Beacon object from a buffer and adds
+         * \brief Constructor which creates a Dot11Beacon object from a buffer and adds
          * all identifiable PDUs found in the buffer as children of this one.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        IEEE802_11_Beacon(const uint8_t *buffer, uint32_t total_sz);
+        Dot11Beacon(const uint8_t *buffer, uint32_t total_sz);
 
         /**
          * \brief Copy constructor.
          */
-        IEEE802_11_Beacon(const IEEE802_11_Beacon &other);
+        Dot11Beacon(const Dot11Beacon &other);
         
         /**
          * \brief Copy assignment operator.
          */
-        IEEE802_11_Beacon &operator= (const IEEE802_11_Beacon &other);
+        Dot11Beacon &operator= (const Dot11Beacon &other);
         
         /**
          * \brief Getter for the timestamp field.
@@ -1168,7 +1168,7 @@ namespace Tins {
             CapabilityInformation capability;
         } __attribute__((__packed__));
 
-        void copy_fields(const IEEE802_11_Beacon *other);
+        void copy_fields(const Dot11Beacon *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
         
         
@@ -1179,7 +1179,7 @@ namespace Tins {
      * \brief Class representing a Disassociation frame in the IEEE 802.11 Protocol.
      *
      */
-    class IEEE802_11_Disassoc : public ManagementFrame {
+    class Dot11Disassoc : public Dot11ManagementFrame {
 
     public:
 
@@ -1187,7 +1187,7 @@ namespace Tins {
          * \brief Default constructor for the Disassociation frame.
          *
          */
-        IEEE802_11_Disassoc();
+        Dot11Disassoc();
 
         /**
          * \brief Constructor for creating a 802.11 Disassociation.
@@ -1199,17 +1199,17 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        IEEE802_11_Disassoc(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11Disassoc(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
          * \brief Copy constructor.
          */
-        IEEE802_11_Disassoc(const IEEE802_11_Disassoc &other);
+        Dot11Disassoc(const Dot11Disassoc &other);
         
         /**
          * \brief Copy assignment operator.
          */
-        IEEE802_11_Disassoc &operator= (const IEEE802_11_Disassoc &other);
+        Dot11Disassoc &operator= (const Dot11Disassoc &other);
         
         /**
          * \brief Getter for the reason code.
@@ -1237,7 +1237,7 @@ namespace Tins {
             uint16_t reason_code;
         };
 
-        void copy_fields(const IEEE802_11_Disassoc *other);
+        void copy_fields(const Dot11Disassoc *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
 
@@ -1248,7 +1248,7 @@ namespace Tins {
      * \brief Class representing an Association Request frame in the IEEE 802.11 Protocol.
      *
      */
-    class IEEE802_11_Assoc_Request : public ManagementFrame {
+    class Dot11AssocRequest : public Dot11ManagementFrame {
 
     public:
 
@@ -1256,7 +1256,7 @@ namespace Tins {
          * \brief Default constructor for the Association Request frame.
          *
          */
-        IEEE802_11_Assoc_Request();
+        Dot11AssocRequest();
 
         /**
          * \brief Constructor for creating a 802.11 Association Request.
@@ -1268,26 +1268,26 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        IEEE802_11_Assoc_Request(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11AssocRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
-         * \brief Constructor which creates a IEEE802_11_Assoc_Request object from a
+         * \brief Constructor which creates a Dot11AssocRequest object from a
          * buffer and adds all identifiable PDUs found in the buffer as children of this one.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        IEEE802_11_Assoc_Request(const uint8_t *buffer, uint32_t total_sz);
+        Dot11AssocRequest(const uint8_t *buffer, uint32_t total_sz);
 
         /**
          * \brief Copy constructor.
          */
-        IEEE802_11_Assoc_Request(const IEEE802_11_Assoc_Request &other);
+        Dot11AssocRequest(const Dot11AssocRequest &other);
 
         /**
          * \brief Copy assignment operator.
          */
-        IEEE802_11_Assoc_Request &operator= (const IEEE802_11_Assoc_Request &other);
+        Dot11AssocRequest &operator= (const Dot11AssocRequest &other);
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -1380,7 +1380,7 @@ namespace Tins {
             uint16_t listen_interval;
         };
 
-        void copy_fields(const IEEE802_11_Assoc_Request *other);
+        void copy_fields(const Dot11AssocRequest *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         AssocReqBody _body;
@@ -1390,7 +1390,7 @@ namespace Tins {
      * \brief Class representing an Association Response frame in the IEEE 802.11 Protocol.
      *
      */
-    class IEEE802_11_Assoc_Response : public ManagementFrame {
+    class Dot11AssocResponse : public Dot11ManagementFrame {
 
     public:
 
@@ -1398,7 +1398,7 @@ namespace Tins {
          * \brief Default constructor for the Association Response frame.
          *
          */
-        IEEE802_11_Assoc_Response();
+        Dot11AssocResponse();
 
         /**
          * \brief Constructor for creating a 802.11 Association Response.
@@ -1410,26 +1410,26 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        IEEE802_11_Assoc_Response(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11AssocResponse(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
-         * \brief Constructor which creates a IEEE802_11_Assoc_Response object from a
+         * \brief Constructor which creates a Dot11AssocResponse object from a
          * buffer and adds all identifiable PDUs found in the buffer as children of this one.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        IEEE802_11_Assoc_Response(const uint8_t *buffer, uint32_t total_sz);
+        Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz);
 
         /**
          * \brief Copy constructor.
          */
-        IEEE802_11_Assoc_Response(const IEEE802_11_Assoc_Response &other);
+        Dot11AssocResponse(const Dot11AssocResponse &other);
 
         /**
          * \brief Copy assignment operator
          */
-        IEEE802_11_Assoc_Response &operator= (const IEEE802_11_Assoc_Response &other);
+        Dot11AssocResponse &operator= (const Dot11AssocResponse &other);
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -1511,13 +1511,13 @@ namespace Tins {
             uint16_t aid;
         };
 
-        void copy_fields(const IEEE802_11_Assoc_Response *other);
+        void copy_fields(const Dot11AssocResponse *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         AssocRespBody _body;
     };
 
-    class IEEE802_11_QoS_Data : public IEEE802_11 {
+    class Dot11QoSData : public Dot11 {
 
     public:
 
@@ -1530,7 +1530,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        IEEE802_11_QoS_Data(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        Dot11QoSData(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 QoS Data PDU
@@ -1543,7 +1543,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        IEEE802_11_QoS_Data(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 QoS Data PDU
@@ -1556,7 +1556,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        IEEE802_11_QoS_Data(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        Dot11QoSData(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 QoS Data object from a buffer and adds all identifiable
@@ -1564,17 +1564,17 @@ namespace Tins {
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        IEEE802_11_QoS_Data(const uint8_t *buffer, uint32_t total_sz);
+        Dot11QoSData(const uint8_t *buffer, uint32_t total_sz);
 
         /**
          * \brief Copy constructor.
          */
-        IEEE802_11_QoS_Data(const IEEE802_11_QoS_Data &other);
+        Dot11QoSData(const Dot11QoSData &other);
         
         /**
          * \brief Copy assignment operator.
          */
-        IEEE802_11_QoS_Data &operator= (const IEEE802_11_QoS_Data &other);
+        Dot11QoSData &operator= (const Dot11QoSData &other);
 
         /**
          * \brief Getter for the qos_control field.
@@ -1598,7 +1598,7 @@ namespace Tins {
          */
         uint32_t header_size() const;
     private:
-        void copy_fields(const IEEE802_11_QoS_Data *other);
+        void copy_fields(const Dot11QoSData *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         
