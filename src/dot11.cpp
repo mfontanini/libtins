@@ -40,30 +40,24 @@ using namespace std;
 
 const uint8_t *Tins::Dot11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
 
-Tins::Dot11::Dot11(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
+Tins::Dot11::Dot11(const uint8_t* dst_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
         this->addr1(dst_hw_addr);
-    if(src_hw_addr)
-        this->addr2(src_hw_addr);
 }
 
-Tins::Dot11::Dot11(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child), _options_size(0) {
+Tins::Dot11::Dot11(const std::string& iface, const uint8_t* dst_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
         this->addr1(dst_hw_addr);
-    if(src_hw_addr)
-        this->addr2(src_hw_addr);
     this->iface(iface);
 }
 
 
-Tins::Dot11::Dot11(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
+Tins::Dot11::Dot11(uint32_t iface_index, const uint8_t* dst_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr)
         this->addr1(dst_hw_addr);
-    if(src_hw_addr)
-        this->addr2(src_hw_addr);
     this->iface(iface_index);
 }
 
@@ -182,26 +176,6 @@ void Tins::Dot11::addr1(const uint8_t* new_addr1) {
     memcpy(this->_header.addr1, new_addr1, 6);
 }
 
-void Tins::Dot11::addr2(const uint8_t* new_addr2) {
-    memcpy(this->_header.addr2, new_addr2, 6);
-}
-
-void Tins::Dot11::addr3(const uint8_t* new_addr3) {
-    memcpy(this->_header.addr3, new_addr3, 6);
-}
-
-void Tins::Dot11::frag_num(uint8_t new_frag_num) {
-    this->_header.seq_control.frag_number = new_frag_num;
-}
-
-void Tins::Dot11::seq_num(uint16_t new_seq_num) {
-    this->_header.seq_control.seq_number = Utils::net_to_host_s(new_seq_num);
-}
-
-void Tins::Dot11::addr4(const uint8_t* new_addr4) {
-    memcpy(this->_addr4, new_addr4, 6);
-}
-
 void Tins::Dot11::iface(uint32_t new_iface_index) {
     this->_iface_index = new_iface_index;
 }
@@ -214,8 +188,6 @@ void Tins::Dot11::iface(const std::string& new_iface) throw (std::runtime_error)
 
 uint32_t Tins::Dot11::header_size() const {
     uint32_t sz = sizeof(ieee80211_header) + _options_size;
-    if (this->to_ds() && this->from_ds())
-        sz += 6;
     return sz;
 }
 
@@ -238,11 +210,11 @@ void Tins::Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const 
     assert(total_sz >= my_sz);
     memcpy(buffer, &this->_header, sizeof(ieee80211_header));
     buffer += sizeof(ieee80211_header);
-    if (this->to_ds() && this->from_ds()) {
-        memcpy(buffer, this->_addr4, 6);
-        buffer += 6;
-        total_sz -= 6;
-    }
+    total_sz -= sizeof(ieee80211_header);
+
+    uint32_t written = this->write_ext_header(buffer, total_sz);
+    buffer += written;
+    total_sz -= written;
 
     uint32_t child_len = write_fixed_parameters(buffer, total_sz - sizeof(ieee80211_header) - _options_size);
     buffer += child_len;
@@ -273,7 +245,6 @@ Tins::PDU *Tins::Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
 
 void Tins::Dot11::copy_80211_fields(const Dot11 *other) {
     std::memcpy(&_header, &other->_header, sizeof(_header));
-    std::memcpy(_addr4, other->_addr4, sizeof(_header));
     _iface_index = other->_iface_index;
     _options_size = other->_options_size;
     for(std::list<Dot11_Option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
@@ -288,18 +259,65 @@ Tins::Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t
 
 }
 
-Tins::Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) : Dot11(dst_hw_addr, src_hw_addr) {
+Tins::Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) : Dot11(dst_hw_addr) {
     this->type(Dot11::MANAGEMENT);
+    this->addr2(src_hw_addr);
 }
 
 Tins::Dot11ManagementFrame::Dot11ManagementFrame(const std::string &iface,
                                        const uint8_t *dst_hw_addr,
-                                       const uint8_t *src_hw_addr) throw (std::runtime_error) : Dot11(iface, dst_hw_addr, src_hw_addr) {
+                                       const uint8_t *src_hw_addr) throw (std::runtime_error) : Dot11(iface, dst_hw_addr) {
     this->type(Dot11::MANAGEMENT);
+    this->addr2(src_hw_addr);
 }
 
 Tins::Dot11ManagementFrame::Dot11ManagementFrame(const Dot11ManagementFrame &other) : Dot11(other) {
-    
+
+}
+
+void Tins::Dot11ManagementFrame::copy_ext_header(const Dot11ManagementFrame* other) {
+    Dot11::copy_80211_fields(other);
+    std::memcpy(&this->_ext_header, &other->_ext_header, sizeof(this->_ext_header));
+    std::memcpy(this->_addr4, other->_addr4, 6);
+}
+
+uint32_t Tins::Dot11ManagementFrame::header_size() const {
+    uint32_t sz = Dot11::header_size() + sizeof(_ext_header);
+    if (this->from_ds() && this->to_ds())
+        sz += 6;
+    return sz;
+}
+
+void Tins::Dot11ManagementFrame::addr2(const uint8_t* new_addr2) {
+    memcpy(this->_ext_header.addr2, new_addr2, 6);
+}
+
+void Tins::Dot11ManagementFrame::addr3(const uint8_t* new_addr3) {
+    memcpy(this->_ext_header.addr3, new_addr3, 6);
+}
+
+void Tins::Dot11ManagementFrame::frag_num(uint8_t new_frag_num) {
+    this->_ext_header.seq_control.frag_number = new_frag_num;
+}
+
+void Tins::Dot11ManagementFrame::seq_num(uint16_t new_seq_num) {
+    this->_ext_header.seq_control.seq_number = Utils::net_to_host_s(new_seq_num);
+}
+
+void Tins::Dot11ManagementFrame::addr4(const uint8_t* new_addr4) {
+    memcpy(this->_addr4, new_addr4, 6);
+}
+
+uint32_t Tins::Dot11ManagementFrame::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t written = sizeof(this->_ext_header);
+    memcpy(buffer, &this->_ext_header, sizeof(this->_ext_header));
+    buffer += sizeof(this->_ext_header);
+    if (this->from_ds() && this->to_ds()) {
+        written += 6;
+        memcpy(buffer, this->_addr4, 6);
+    }
+    return written;
+
 }
 
 void Tins::Dot11ManagementFrame::ssid(const std::string &new_ssid) {
@@ -388,6 +406,82 @@ void Tins::Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_
 }
 
 /*
+ * Dot11DataFrame
+ */
+
+Tins::Dot11DataFrame::Dot11DataFrame(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
+
+}
+
+Tins::Dot11DataFrame::Dot11DataFrame(uint32_t iface_index, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(iface_index, dst_hw_addr, child) {
+    this->type(Dot11::DATA);
+    this->addr2(src_hw_addr);
+}
+
+Tins::Dot11DataFrame::Dot11DataFrame(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(dst_hw_addr, child) {
+    this->type(Dot11::DATA);
+    this->addr2(src_hw_addr);
+}
+
+
+Tins::Dot11DataFrame::Dot11DataFrame(const std::string &iface,
+                                     const uint8_t *dst_hw_addr,
+                                     const uint8_t *src_hw_addr,
+                                     PDU* child) throw (std::runtime_error) : Dot11(iface, dst_hw_addr, child) {
+    this->type(Dot11::DATA);
+    this->addr2(src_hw_addr);
+}
+
+Tins::Dot11DataFrame::Dot11DataFrame(const Dot11DataFrame &other) : Dot11(other) {
+
+}
+
+void Tins::Dot11DataFrame::copy_ext_header(const Dot11DataFrame* other) {
+    Dot11::copy_80211_fields(other);
+    std::memcpy(&this->_ext_header, &other->_ext_header, sizeof(this->_ext_header));
+    std::memcpy(this->_addr4, other->_addr4, 6);
+}
+
+uint32_t Tins::Dot11DataFrame::header_size() const {
+    uint32_t sz = Dot11::header_size() + sizeof(_ext_header);
+    if (this->from_ds() && this->to_ds())
+        sz += 6;
+    return sz;
+}
+
+void Tins::Dot11DataFrame::addr2(const uint8_t* new_addr2) {
+    memcpy(this->_ext_header.addr2, new_addr2, 6);
+}
+
+void Tins::Dot11DataFrame::addr3(const uint8_t* new_addr3) {
+    memcpy(this->_ext_header.addr3, new_addr3, 6);
+}
+
+void Tins::Dot11DataFrame::frag_num(uint8_t new_frag_num) {
+    this->_ext_header.seq_control.frag_number = new_frag_num;
+}
+
+void Tins::Dot11DataFrame::seq_num(uint16_t new_seq_num) {
+    this->_ext_header.seq_control.seq_number = Utils::net_to_host_s(new_seq_num);
+}
+
+void Tins::Dot11DataFrame::addr4(const uint8_t* new_addr4) {
+    memcpy(this->_addr4, new_addr4, 6);
+}
+
+uint32_t Tins::Dot11DataFrame::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t written = sizeof(this->_ext_header);
+    memcpy(buffer, &this->_ext_header, sizeof(this->_ext_header));
+    buffer += sizeof(this->_ext_header);
+    if (this->from_ds() && this->to_ds()) {
+        written += 6;
+        memcpy(buffer, this->_addr4, 6);
+    }
+    return written;
+
+}
+
+/*
  * Beacon
  */
 
@@ -415,7 +509,7 @@ Tins::Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) : Dot11
 }
 
 Tins::Dot11Beacon::Dot11Beacon(const Dot11Beacon &other) : Dot11ManagementFrame(other) {
-    
+
 }
 
 Tins::Dot11Beacon &Tins::Dot11Beacon::operator= (const Dot11Beacon &other) {
@@ -425,7 +519,7 @@ Tins::Dot11Beacon &Tins::Dot11Beacon::operator= (const Dot11Beacon &other) {
 }
 
 void Tins::Dot11Beacon::copy_fields(const Dot11Beacon *other) {
-    copy_80211_fields(other);
+    Dot11ManagementFrame::copy_ext_header(other);
     std::memcpy(&_body, &other->_body, sizeof(_body));
 }
 
@@ -500,7 +594,7 @@ bool Tins::Dot11Beacon::rsn_information(RSNInformation *rsn) {
 }
 
 uint32_t Tins::Dot11Beacon::header_size() const {
-    return Dot11::header_size() + sizeof(BeaconBody);
+    return Dot11ManagementFrame::header_size() + sizeof(BeaconBody);
 }
 
 uint32_t Tins::Dot11Beacon::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
@@ -535,7 +629,7 @@ Tins::Dot11Disassoc &Tins::Dot11Disassoc::operator= (const Dot11Disassoc &other)
 }
 
 void Tins::Dot11Disassoc::copy_fields(const Dot11Disassoc *other) {
-    copy_80211_fields(other);
+    Dot11ManagementFrame::copy_ext_header(other);
     std::memcpy(&_body, &other->_body, sizeof(_body));
 }
 
@@ -544,7 +638,7 @@ void Tins::Dot11Disassoc::reason_code(uint16_t new_reason_code) {
 }
 
 uint32_t Tins::Dot11Disassoc::header_size() const {
-    return Dot11::header_size() + sizeof(DisassocBody);
+    return Dot11ManagementFrame::header_size() + sizeof(DisassocBody);
 }
 
 uint32_t Tins::Dot11Disassoc::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
@@ -651,7 +745,7 @@ Tins::Dot11AssocRequest &Tins::Dot11AssocRequest::operator= (const Dot11AssocReq
 }
 
 void Tins::Dot11AssocRequest::copy_fields(const Dot11AssocRequest *other) {
-    copy_80211_fields(other);
+    Dot11ManagementFrame::copy_ext_header(other);
     std::memcpy(&_body, &other->_body, sizeof(_body));
 }
 
@@ -688,7 +782,7 @@ void Tins::Dot11AssocRequest::qos_capabilities(uint8_t new_qos_capabilities) {
 }
 
 uint32_t Tins::Dot11AssocRequest::header_size() const {
-    return Dot11::header_size() + sizeof(AssocReqBody);
+    return Dot11ManagementFrame::header_size() + sizeof(AssocReqBody);
 }
 
 uint32_t Tins::Dot11AssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
@@ -734,7 +828,7 @@ Tins::Dot11AssocResponse &Tins::Dot11AssocResponse::operator= (const Dot11AssocR
 }
 
 void Tins::Dot11AssocResponse::copy_fields(const Dot11AssocResponse *other) {
-    copy_80211_fields(other);
+    Dot11ManagementFrame::copy_ext_header(other);
     std::memcpy(&_body, &other->_body, sizeof(_body));
 }
 
@@ -759,7 +853,7 @@ void Tins::Dot11AssocResponse::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk
 }
 
 uint32_t Tins::Dot11AssocResponse::header_size() const {
-    return Dot11::header_size() + sizeof(AssocRespBody);
+    return Dot11ManagementFrame::header_size() + sizeof(AssocRespBody);
 }
 
 uint32_t Tins::Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
@@ -771,25 +865,17 @@ uint32_t Tins::Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint3
 
 /* QoS data. */
 
-Tins::Dot11QoSData::Dot11QoSData(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11(dst_hw_addr, src_hw_addr, child) {
-    this->type(Dot11::DATA);
+Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : Dot11DataFrame(iface, dst_hw_addr, src_hw_addr, child) {
     this->subtype(Dot11::QOS_DATA_DATA);
     this->_qos_control = 0;
 }
 
-Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : Dot11(iface, dst_hw_addr, src_hw_addr, child) {
-    this->type(Dot11::DATA);
+Tins::Dot11QoSData::Dot11QoSData(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11DataFrame(iface_index, dst_hw_addr, src_hw_addr, child) {
     this->subtype(Dot11::QOS_DATA_DATA);
     this->_qos_control = 0;
 }
 
-Tins::Dot11QoSData::Dot11QoSData(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11(iface_index, dst_hw_addr, src_hw_addr, child) {
-    this->type(Dot11::DATA);
-    this->subtype(Dot11::QOS_DATA_DATA);
-    this->_qos_control = 0;
-}
-
-Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
+Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot11DataFrame(buffer, total_sz) {
     buffer += sizeof(ieee80211_header);
     total_sz -= sizeof(ieee80211_header);
     assert(total_sz >= sizeof(this->_qos_control));
@@ -800,7 +886,7 @@ Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot
         inner_pdu(new Tins::SNAP(buffer, total_sz));
 }
 
-Tins::Dot11QoSData::Dot11QoSData(const Dot11QoSData &other) : Dot11(other) {
+Tins::Dot11QoSData::Dot11QoSData(const Dot11QoSData &other) : Dot11DataFrame(other) {
     copy_fields(&other);
 }
 
@@ -811,7 +897,7 @@ Tins::Dot11QoSData &Tins::Dot11QoSData::operator= (const Dot11QoSData &other) {
 }
 
 void Tins::Dot11QoSData::copy_fields(const Dot11QoSData *other) {
-    copy_80211_fields(other);
+    Dot11DataFrame::copy_ext_header(other);
     _qos_control = other->_qos_control;
 }
 
