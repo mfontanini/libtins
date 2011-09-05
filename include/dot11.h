@@ -177,10 +177,9 @@ namespace Tins {
          * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
          *
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        Dot11(const uint8_t* dst_hw_addr = 0, PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 PDU
@@ -190,10 +189,9 @@ namespace Tins {
          *
          * \param iface string containing the interface's name from where to send the packet.
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11(const std::string& iface, const uint8_t* dst_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 PDU
@@ -203,10 +201,9 @@ namespace Tins {
          *
          * \param iface_index const uint32_t with the interface's index from where to send the packet.
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        Dot11(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 object from a buffer and adds all identifiable
@@ -215,7 +212,7 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Copy constructor.
          */
@@ -232,7 +229,7 @@ namespace Tins {
          * \brief Copy assignment operator.
          */
         Dot11 &operator= (const Dot11 &other);
-        
+
         /**
          * \brief Getter for the protocol version.
          *
@@ -316,41 +313,6 @@ namespace Tins {
          * \return The first address as a constant uint8_t pointer.
          */
         inline const uint8_t* addr1() const { return this->_header.addr1; }
-
-        /**
-         * \brief Getter for the second address.
-         *
-         * \return The second address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr2() const { return this->_header.addr2; }
-
-        /**
-         * \brief Getter for the third address.
-         *
-         * \return The third address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr3() const { return this->_header.addr3; }
-
-        /**
-         * \brief Getter for the fragment number.
-         *
-         * \return The fragment number as an uint8_t.
-         */
-        inline uint8_t frag_num() const { return this->_header.seq_control.frag_number; }
-
-        /**
-         * \brief Getter for the sequence number.
-         *
-         * \return The sequence number as an uint16_t.
-         */
-        inline uint16_t seq_num() const { return Utils::net_to_host_s(this->_header.seq_control.seq_number); }
-
-        /**
-         * \brief Getter for the fourth address.
-         *
-         * \return The fourth address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr4() const { return this->_addr4; }
 
         /**
          * \brief Getter for the interface.
@@ -444,41 +406,6 @@ namespace Tins {
         void addr1(const uint8_t* new_addr1);
 
         /**
-         * \brief Setter for the second address.
-         *
-         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
-         */
-        void addr2(const uint8_t* new_addr2);
-
-        /**
-         * \brief Setter for the third address.
-         *
-         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
-         */
-        void addr3(const uint8_t* new_addr3);
-
-        /**
-         * \brief Setter for the fragment number.
-         *
-         * \param new_frag_num uint8_t with the new fragment number.
-         */
-        void frag_num(uint8_t new_frag_num);
-
-        /**
-         * \brief Setter for the sequence number.
-         *
-         * \param new_seq_num uint16_t with the new sequence number.
-         */
-        void seq_num(uint16_t new_seq_num);
-
-        /**
-         * \brief Setter for the fourth address.
-         *
-         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
-         */
-        void addr4(const uint8_t* new_addr4);
-
-        /**
          * \brief Setter for the interface.
          *
          * \param new_iface_index uint32_t containing the new interface index.
@@ -537,6 +464,7 @@ namespace Tins {
          */
         static PDU *from_bytes(const uint8_t *buffer, uint32_t total_sz);
     protected:
+        virtual uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz) { return 0; }
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
         void parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz);
         void copy_80211_fields(const Dot11 *other);
@@ -574,17 +502,6 @@ namespace Tins {
             } __attribute__((__packed__)) control;
             uint16_t duration_id;
             uint8_t addr1[6];
-            uint8_t addr2[6];
-            uint8_t addr3[6];
-            struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int seq_number:12;
-                unsigned int frag_number:4;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int frag_number:4;
-                unsigned int seq_number:12;
-            #endif
-            } __attribute__((__packed__)) seq_control;
 
         } __attribute__((__packed__));
         private:
@@ -595,7 +512,6 @@ namespace Tins {
 
 
         ieee80211_header _header;
-        uint8_t _addr4[6];
         uint32_t _iface_index, _options_size;
         std::list<Dot11_Option> _options;
     };
@@ -994,7 +910,99 @@ namespace Tins {
 
         } __attribute__((__packed__));
 
+        /**
+         * \brief Getter for the second address.
+         *
+         * \return The second address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr2() const { return this->_ext_header.addr2; }
+
+        /**
+         * \brief Getter for the third address.
+         *
+         * \return The third address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr3() const { return this->_ext_header.addr3; }
+
+        /**
+         * \brief Getter for the fragment number.
+         *
+         * \return The fragment number as an uint8_t.
+         */
+        inline uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
+
+        /**
+         * \brief Getter for the sequence number.
+         *
+         * \return The sequence number as an uint16_t.
+         */
+        inline uint16_t seq_num() const { return Utils::net_to_host_s(this->_ext_header.seq_control.seq_number); }
+
+        /**
+         * \brief Getter for the fourth address.
+         *
+         * \return The fourth address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr4() const { return this->_addr4; }
+
+        /**
+         * \brief Setter for the second address.
+         *
+         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
+         */
+        void addr2(const uint8_t* new_addr2);
+
+        /**
+         * \brief Setter for the third address.
+         *
+         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
+         */
+        void addr3(const uint8_t* new_addr3);
+
+        /**
+         * \brief Setter for the fragment number.
+         *
+         * \param new_frag_num uint8_t with the new fragment number.
+         */
+        void frag_num(uint8_t new_frag_num);
+
+        /**
+         * \brief Setter for the sequence number.
+         *
+         * \param new_seq_num uint16_t with the new sequence number.
+         */
+        void seq_num(uint16_t new_seq_num);
+
+        /**
+         * \brief Setter for the fourth address.
+         *
+         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
+         */
+        void addr4(const uint8_t* new_addr4);
+
+        /**
+         * \brief Returns the 802.11 frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
     protected:
+        struct ExtendedHeader {
+            uint8_t addr2[6];
+            uint8_t addr3[6];
+            struct {
+            #if __BYTE_ORDER == __LITTLE_ENDIAN
+                unsigned int seq_number:12;
+                unsigned int frag_number:4;
+            #elif __BYTE_ORDER == __BIG_ENDIAN
+                unsigned int frag_number:4;
+                unsigned int seq_number:12;
+            #endif
+            } __attribute__((__packed__)) seq_control;
+        } __attribute__((__packed__));
+
         /**
          * \brief Constructor which creates a Dot11ManagementFrame object from a buffer and adds all identifiable
          * PDUs found in the buffer as children of this one.
@@ -1017,12 +1025,131 @@ namespace Tins {
         void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
         void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
 
+        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+        void copy_ext_header(const Dot11ManagementFrame *other);
 
     private:
-
+        ExtendedHeader _ext_header;
+        uint8_t _addr4[6];
 
     };
 
+    class Dot11DataFrame : public Dot11 {
+
+    public:
+        /**
+         * \brief Getter for the second address.
+         *
+         * \return The second address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr2() const { return this->_ext_header.addr2; }
+
+        /**
+         * \brief Getter for the third address.
+         *
+         * \return The third address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr3() const { return this->_ext_header.addr3; }
+
+        /**
+         * \brief Getter for the fragment number.
+         *
+         * \return The fragment number as an uint8_t.
+         */
+        inline uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
+
+        /**
+         * \brief Getter for the sequence number.
+         *
+         * \return The sequence number as an uint16_t.
+         */
+        inline uint16_t seq_num() const { return Utils::net_to_host_s(this->_ext_header.seq_control.seq_number); }
+
+        /**
+         * \brief Getter for the fourth address.
+         *
+         * \return The fourth address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr4() const { return this->_addr4; }
+
+        /**
+         * \brief Setter for the second address.
+         *
+         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
+         */
+        void addr2(const uint8_t* new_addr2);
+
+        /**
+         * \brief Setter for the third address.
+         *
+         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
+         */
+        void addr3(const uint8_t* new_addr3);
+
+        /**
+         * \brief Setter for the fragment number.
+         *
+         * \param new_frag_num uint8_t with the new fragment number.
+         */
+        void frag_num(uint8_t new_frag_num);
+
+        /**
+         * \brief Setter for the sequence number.
+         *
+         * \param new_seq_num uint16_t with the new sequence number.
+         */
+        void seq_num(uint16_t new_seq_num);
+
+        /**
+         * \brief Setter for the fourth address.
+         *
+         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
+         */
+        void addr4(const uint8_t* new_addr4);
+
+        /**
+         * \brief Returns the 802.11 frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+    protected:
+        struct ExtendedHeader {
+            uint8_t addr2[6];
+            uint8_t addr3[6];
+            struct {
+            #if __BYTE_ORDER == __LITTLE_ENDIAN
+                unsigned int seq_number:12;
+                unsigned int frag_number:4;
+            #elif __BYTE_ORDER == __BIG_ENDIAN
+                unsigned int frag_number:4;
+                unsigned int seq_number:12;
+            #endif
+            } __attribute__((__packed__)) seq_control;
+        } __attribute__((__packed__));
+
+        /**
+         * \brief Constructor which creates a Dot11DataFrame object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11DataFrame(uint32_t iface_index, const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
+        Dot11DataFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
+        Dot11DataFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child = 0) throw (std::runtime_error);
+        Dot11DataFrame(const uint8_t *buffer, uint32_t total_sz);
+        Dot11DataFrame(const Dot11DataFrame &other);
+
+        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+        void copy_ext_header(const Dot11DataFrame *other);
+
+    private:
+        ExtendedHeader _ext_header;
+        uint8_t _addr4[6];
+
+    };
 
     /**
      * \brief Class representing a Beacon in the IEEE 802.11 Protocol.
@@ -1064,12 +1191,12 @@ namespace Tins {
          * \brief Copy constructor.
          */
         Dot11Beacon(const Dot11Beacon &other);
-        
+
         /**
          * \brief Copy assignment operator.
          */
         Dot11Beacon &operator= (const Dot11Beacon &other);
-        
+
         /**
          * \brief Getter for the timestamp field.
          *
@@ -1170,8 +1297,8 @@ namespace Tins {
 
         void copy_fields(const Dot11Beacon *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
-        
-        
+
+
         BeaconBody _body;
     };
 
@@ -1205,12 +1332,12 @@ namespace Tins {
          * \brief Copy constructor.
          */
         Dot11Disassoc(const Dot11Disassoc &other);
-        
+
         /**
          * \brief Copy assignment operator.
          */
         Dot11Disassoc &operator= (const Dot11Disassoc &other);
-        
+
         /**
          * \brief Getter for the reason code.
          *
@@ -1517,7 +1644,7 @@ namespace Tins {
         AssocRespBody _body;
     };
 
-    class Dot11QoSData : public Dot11 {
+    class Dot11QoSData : public Dot11DataFrame {
 
     public:
 
@@ -1570,7 +1697,7 @@ namespace Tins {
          * \brief Copy constructor.
          */
         Dot11QoSData(const Dot11QoSData &other);
-        
+
         /**
          * \brief Copy assignment operator.
          */
@@ -1601,7 +1728,7 @@ namespace Tins {
         void copy_fields(const Dot11QoSData *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
-        
+
         uint16_t _qos_control;
     };
 
