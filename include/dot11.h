@@ -114,6 +114,7 @@ namespace Tins {
          *
          */
         enum ControlSubtypes {
+            BLOCK_ACK_REQ = 8,
             BLOCK_ACK = 9,
             PS = 10,
             RTS = 11,
@@ -988,7 +989,6 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-
     protected:
         struct ExtendedHeader {
             uint8_t addr2[6];
@@ -1028,7 +1028,6 @@ namespace Tins {
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
-
     private:
         ExtendedHeader _ext_header;
         uint8_t _addr4[6];
@@ -1036,8 +1035,18 @@ namespace Tins {
     };
 
     class Dot11DataFrame : public Dot11 {
-
     public:
+        /**
+         * \brief Constructor which creates a Dot11DataFrame object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11DataFrame(uint32_t iface_index, const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
+        Dot11DataFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
+        Dot11DataFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child = 0) throw (std::runtime_error);
+        Dot11DataFrame(const uint8_t *buffer, uint32_t total_sz);
+        Dot11DataFrame(const Dot11DataFrame &other);
         /**
          * \brief Getter for the second address.
          *
@@ -1116,6 +1125,11 @@ namespace Tins {
          */
         uint32_t header_size() const;
 
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_DATA; }
     protected:
         struct ExtendedHeader {
             uint8_t addr2[6];
@@ -1130,18 +1144,6 @@ namespace Tins {
             #endif
             } __attribute__((__packed__)) seq_control;
         } __attribute__((__packed__));
-
-        /**
-         * \brief Constructor which creates a Dot11DataFrame object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        Dot11DataFrame(uint32_t iface_index, const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
-        Dot11DataFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
-        Dot11DataFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child = 0) throw (std::runtime_error);
-        Dot11DataFrame(const uint8_t *buffer, uint32_t total_sz);
-        Dot11DataFrame(const Dot11DataFrame &other);
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11DataFrame *other);
@@ -1297,7 +1299,6 @@ namespace Tins {
 
         void copy_fields(const Dot11Beacon *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
-
 
         BeaconBody _body;
     };
@@ -1724,6 +1725,12 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_QOS_DATA; }
     private:
         void copy_fields(const Dot11QoSData *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
@@ -1778,6 +1785,12 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11Control(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_CONTROL; }
     };
 
     /**
@@ -1853,7 +1866,7 @@ namespace Tins {
         /**
          * \brief Getter for the control ta additional fields size.
          */
-        uint32_t controlta_size() const { return sizeof(_taddr); }
+        uint32_t controlta_size() const { return sizeof(_taddr) + sizeof(ieee80211_header); }
         
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
@@ -1907,6 +1920,12 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11RTS(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_RTS; }
     };
     
     class Dot11PSPoll : public Dot11ControlTA {
@@ -2094,6 +2113,12 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11Ack(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_ACK; }
     };
     
     /**
@@ -2268,10 +2293,16 @@ namespace Tins {
          * \param bit The new bitmap field to be set.
          */
         void bitmap(const uint8_t *bit);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_BLOCK_ACK; }
     private:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     
-        uint8_t _bitmap[128];
+        uint8_t _bitmap[8];
     };
 };
 
