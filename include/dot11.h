@@ -1757,7 +1757,7 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11Control(const std::string& iface, const uint8_t* dst_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 control frame PDU
@@ -1769,7 +1769,7 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(uint32_t iface_index, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
+        Dot11Control(uint32_t iface_index, const uint8_t* dst_addr = 0, PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 control frame object from a buffer and 
@@ -1854,8 +1854,9 @@ namespace Tins {
          * \brief Getter for the control ta additional fields size.
          */
         uint32_t controlta_size() const { return sizeof(_taddr); }
-    private:
+        
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+    private:
     
         uint8_t _taddr[6];
     };
@@ -1932,7 +1933,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
+        Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 PS-Poll frame PDU
@@ -1980,7 +1981,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
+        Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 CF-End frame PDU
@@ -2026,7 +2027,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11EndCFAck(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
+        Dot11EndCFAck(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 End-CF-Ack frame PDU
@@ -2071,7 +2072,7 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Ack(const std::string& iface, const uint8_t* dst_addr = 0, PDU* child = 0);
+        Dot11Ack(const std::string& iface, const uint8_t* dst_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 Ack frame PDU
@@ -2120,7 +2121,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAckRequest(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
+        Dot11BlockAckRequest(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 Block Ack request frame PDU
@@ -2140,7 +2141,7 @@ namespace Tins {
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz);
+        Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz);
         
         /* Getter */
         
@@ -2148,13 +2149,13 @@ namespace Tins {
          * \brief Getter for the bar control field.
          * \return The bar control field.
          */
-        uint16_t bar_control() const { return _bar_control; }
+        uint16_t bar_control() const { return *(const uint16_t*)&_bar_control; }
         
         /**
          * \brief Getter for the start sequence field.
          * \return The bar start sequence.
          */
-        uint16_t start_sequence() const { return _start_sequence; }
+        uint16_t start_sequence() const { return *(const uint16_t*)&_start_sequence; }
         
         /**
          * \brief Returns the 802.11 frame's header length.
@@ -2182,6 +2183,8 @@ namespace Tins {
          * \brief Getter for the control ta additional fields size.
          */
         uint32_t blockack_request_size() const { return controlta_size() + sizeof(_bar_control) + sizeof(_start_sequence); }
+        
+        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
         struct BarControl {
             uint16_t reserved:12,
@@ -2194,7 +2197,6 @@ namespace Tins {
         } __attribute__((__packed__));
         
         void init_block_ack();
-        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         
         BarControl _bar_control;
         StartSequence _start_sequence;
@@ -2225,7 +2227,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
+        Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
 
         /**
          * \brief Constructor for creating an 802.11 Block Ack frame PDU
@@ -2265,7 +2267,7 @@ namespace Tins {
          * \brief Setter for the bitmap field.
          * \param bit The new bitmap field to be set.
          */
-        void bitmap(const uint8_t bit);
+        void bitmap(const uint8_t *bit);
     private:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     

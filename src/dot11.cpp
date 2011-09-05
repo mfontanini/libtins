@@ -921,35 +921,35 @@ Tins::Dot11Control::Dot11Control(const uint8_t* dst_addr, PDU* child) : Dot11(ds
     type(CONTROL);
 }
 
-Tins::Dot11ControlTA::Dot11ControlTA(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11(iface, dst_addr, child) {
+Tins::Dot11Control::Dot11Control(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11(iface, dst_addr, child) {
     type(CONTROL);
 }
 
-Tins::Dot11ControlTA::Dot11ControlTA(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11(iface_index, dst_addr, child) {
+Tins::Dot11Control::Dot11Control(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11(iface_index, dst_addr, child) {
     type(CONTROL);
 }
 
-Tins::Dot11ControlTA::Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
+Tins::Dot11Control::Dot11Control(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
 
 }
 
 /* Dot11ControlTA */
-Tins::Dot11ControlTA::Dot11ControlTA(const uint8_t* dst_addr, const uint8_t *target_addres, PDU* child) : Dot11Control(dst_addr, child) {
-    if(target_addr)
+Tins::Dot11ControlTA::Dot11ControlTA(const uint8_t* dst_addr, const uint8_t *target_address, PDU* child) : Dot11Control(dst_addr, child) {
+    if(target_address)
         target_addr(target_address);
     else
         std::memset(_taddr, 0, sizeof(_taddr));
 }
 
-Tins::Dot11ControlTA::Dot11ControlTA(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child){
-    if(target_addr)
+Tins::Dot11ControlTA::Dot11ControlTA(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_address, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child){
+    if(target_address)
         target_addr(target_address);
     else
         std::memset(_taddr, 0, sizeof(_taddr));
 }
 
-Tins::Dot11ControlTA::Dot11ControlTA(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11Control(iface_index, dst_addr, child) {
-    if(target_addr)
+Tins::Dot11ControlTA::Dot11ControlTA(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_address, PDU* child) : Dot11Control(iface_index, dst_addr, child) {
+    if(target_address)
         target_addr(target_address);
     else
         std::memset(_taddr, 0, sizeof(_taddr));
@@ -986,7 +986,7 @@ Tins::Dot11RTS::Dot11RTS(const std::string& iface, const uint8_t* dst_addr, cons
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
     subtype(RTS);
 }
 
@@ -995,6 +995,7 @@ Tins::Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz) : Dot11Contro
 }
 
 /* Dot11PSPoll */
+
 Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
     subtype(PS);
 }
@@ -1003,7 +1004,7 @@ Tins::Dot11PSPoll::Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
     subtype(PS);
 }
 
@@ -1021,7 +1022,7 @@ Tins::Dot11CFEnd::Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr, 
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
     subtype(CF_END);
 }
 
@@ -1039,7 +1040,7 @@ Tins::Dot11EndCFAck::Dot11EndCFAck(const std::string& iface, const uint8_t* dst_
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
     subtype(CF_END_ACK);
 }
 
@@ -1049,19 +1050,19 @@ Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz) : D
 
 /* Dot11Ack */
 
-Tins::Dot11Ack::Dot11Ack(const uint8_t* dst_addr , PDU* child) :  Dot11(dst_addr, target_addr, child) {
+Tins::Dot11Ack::Dot11Ack(const uint8_t* dst_addr, PDU* child) :  Dot11Control(dst_addr, child) {
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(const std::string& iface, onst uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11(iface, dst_addr, child) { 
+Tins::Dot11Ack::Dot11Ack(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child) { 
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, const uint8_t* dst_hw_addr, PDU* child) : Dot11(iface_index, dst_addr, child) { 
+Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11Control(iface_index, dst_addr, child) { 
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) { 
+Tins::Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) { 
     
 }
 
@@ -1075,7 +1076,7 @@ Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const std::string& iface, const
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
     init_block_ack();
 }
 
@@ -1099,9 +1100,9 @@ void Tins::Dot11BlockAckRequest::init_block_ack() {
 uint32_t Tins::Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
     uint32_t parent_size = Dot11ControlTA::write_ext_header(buffer, total_sz);
     buffer += parent_size;
-    std::memcpy(buffer, _bar_control, sizeof(_bar_control));
+    std::memcpy(buffer, &_bar_control, sizeof(_bar_control));
     buffer += sizeof(_bar_control);
-    std::memcpy(buffer, _start_sequence, sizeof(_start_sequence));
+    std::memcpy(buffer, &_start_sequence, sizeof(_start_sequence));
     return parent_size + sizeof(_start_sequence);
 }
 
@@ -1126,7 +1127,7 @@ Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t *target_addr, PDU* child) : Dot11BlockAckRequest(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11BlockAckRequest(iface_index, dst_addr, target_addr, child) { 
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
@@ -1139,7 +1140,7 @@ Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : D
     std::memcpy(&_bitmap, buffer, sizeof(_bitmap));
 }
 
-void Tins::Dot11BlockAck::bitmap(const uint8_t bit) {
+void Tins::Dot11BlockAck::bitmap(const uint8_t *bit) {
     std::memcpy(_bitmap, bit, sizeof(_bitmap));
 }
 
@@ -1151,5 +1152,5 @@ uint32_t Tins::Dot11BlockAck::write_ext_header(uint8_t *buffer, uint32_t total_s
 }
 
 uint32_t Tins::Dot11BlockAck::header_size() const {
-    return Dot11BlockAckRequest::header_size() + sizeof(_bitmap));
+    return Dot11BlockAckRequest::header_size() + sizeof(_bitmap);
 }
