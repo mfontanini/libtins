@@ -241,7 +241,7 @@ Tins::PDU *Tins::Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     else if(hdr->control.type == DATA){
         if(hdr->control.subtype <= 4)
             ret = new Dot11DataFrame(buffer, total_sz);
-        else 
+        else
             ret = new Dot11QoSData(buffer, total_sz);
     }
     else if(hdr->control.type == CONTROL){
@@ -888,6 +888,166 @@ uint32_t Tins::Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint3
     return sz;
 }
 
+/* ReAssoc Request */
+
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest() : Dot11ManagementFrame() {
+    this->subtype(Dot11::REASSOC_REQ);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const std::string& iface,
+                                               const uint8_t* dst_hw_addr,
+                                               const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::REASSOC_REQ);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+    uint32_t sz = Dot11ManagementFrame::header_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 association header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const Dot11ReAssocRequest &other) : Dot11ManagementFrame(other) {
+    copy_fields(&other);
+}
+
+Tins::Dot11ReAssocRequest &Tins::Dot11ReAssocRequest::operator= (const Dot11ReAssocRequest &other) {
+    copy_inner_pdu(other);
+    copy_fields(&other);
+    return *this;
+}
+
+void Tins::Dot11ReAssocRequest::copy_fields(const Dot11ReAssocRequest *other) {
+    Dot11ManagementFrame::copy_ext_header(other);
+    std::memcpy(&_body, &other->_body, sizeof(_body));
+}
+
+void Tins::Dot11ReAssocRequest::listen_interval(uint16_t new_listen_interval) {
+    this->_body.listen_interval = new_listen_interval;
+}
+
+void Tins::Dot11ReAssocRequest::current_ap(const uint8_t* new_current_ap) {
+    memcpy(this->_body.current_ap, new_current_ap, 6);
+}
+
+void Tins::Dot11ReAssocRequest::ssid(const std::string &new_ssid) {
+    Dot11ManagementFrame::ssid(new_ssid);
+}
+
+void Tins::Dot11ReAssocRequest::supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocRequest::extended_supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::extended_supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocRequest::power_capabilities(uint8_t min_power, uint8_t max_power) {
+    Dot11ManagementFrame::power_capabilities(min_power, max_power);
+}
+
+void Tins::Dot11ReAssocRequest::supported_channels(const std::list<pair<uint8_t, uint8_t> > &new_channels) {
+    Dot11ManagementFrame::supported_channels(new_channels);
+}
+
+void Tins::Dot11ReAssocRequest::rsn_information(const RSNInformation& info) {
+    Dot11ManagementFrame::rsn_information(info);
+}
+
+void Tins::Dot11ReAssocRequest::qos_capabilities(uint8_t new_qos_capabilities) {
+    Dot11ManagementFrame::qos_capabilities(new_qos_capabilities);
+}
+
+uint32_t Tins::Dot11ReAssocRequest::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+}
+
+uint32_t Tins::Dot11ReAssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
+/* ReAssociation Response */
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse() : Dot11ManagementFrame() {
+    this->subtype(Dot11::REASSOC_RESP);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const std::string& iface,
+                                                 const uint8_t* dst_hw_addr,
+                                                 const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::REASSOC_RESP);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+    uint32_t sz = Dot11ManagementFrame::header_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 reassociation response header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const Dot11ReAssocResponse &other) : Dot11ManagementFrame(other) {
+    copy_fields(&other);
+}
+
+Tins::Dot11ReAssocResponse &Tins::Dot11ReAssocResponse::operator= (const Dot11ReAssocResponse &other) {
+    copy_inner_pdu(other);
+    copy_fields(&other);
+    return *this;
+}
+
+void Tins::Dot11ReAssocResponse::copy_fields(const Dot11ReAssocResponse *other) {
+    Dot11ManagementFrame::copy_ext_header(other);
+    std::memcpy(&_body, &other->_body, sizeof(_body));
+}
+
+void Tins::Dot11ReAssocResponse::status_code(uint16_t new_status_code) {
+    this->_body.status_code = new_status_code;
+}
+
+void Tins::Dot11ReAssocResponse::aid(uint16_t new_aid) {
+    this->_body.aid = new_aid;
+}
+
+void Tins::Dot11ReAssocResponse::supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocResponse::extended_supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::extended_supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocResponse::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
+    Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
+}
+
+uint32_t Tins::Dot11ReAssocResponse::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+}
+
+uint32_t Tins::Dot11ReAssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
 /* QoS data. */
 
 Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : Dot11DataFrame(iface, dst_hw_addr, src_hw_addr, child) {
@@ -1008,16 +1168,16 @@ Tins::Dot11RTS::Dot11RTS(const uint8_t* dst_addr , const uint8_t* target_addr, P
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11RTS::Dot11RTS(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
-    
+Tins::Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+
 }
 
 /* Dot11PSPoll */
@@ -1026,16 +1186,16 @@ Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t* dst_addr , const uint8_t* target_a
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11PSPoll::Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
-    
+Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+
 }
 
 /* Dot11CFEnd */
@@ -1044,16 +1204,16 @@ Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t* dst_addr , const uint8_t* target_add
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11CFEnd::Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
-    
+Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+
 }
 
 /* Dot11EndCFAck */
@@ -1062,16 +1222,16 @@ Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t* dst_addr , const uint8_t* targ
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11EndCFAck::Dot11EndCFAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
-    
+Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+
 }
 
 /* Dot11Ack */
@@ -1080,16 +1240,16 @@ Tins::Dot11Ack::Dot11Ack(const uint8_t* dst_addr, PDU* child) :  Dot11Control(ds
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child) { 
+Tins::Dot11Ack::Dot11Ack(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child) {
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11Control(iface_index, dst_addr, child) { 
+Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11Control(iface_index, dst_addr, child) {
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) { 
-    
+Tins::Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) {
+
 }
 
 /* Dot11BlockAck */
@@ -1098,15 +1258,15 @@ Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t* dst_addr , const
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
     uint32_t padding = controlta_size();
     buffer += padding;
     total_sz -= padding;
@@ -1135,7 +1295,7 @@ uint32_t Tins::Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t 
 void Tins::Dot11BlockAckRequest::bar_control(uint16_t bar) {
     std::memcpy(&_bar_control, &bar, sizeof(bar));
 }
-        
+
 void Tins::Dot11BlockAckRequest::start_sequence(uint16_t seq) {
     std::memcpy(&_start_sequence, &seq, sizeof(seq));
 }
@@ -1150,17 +1310,17 @@ Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t* dst_addr , const uint8_t* targ
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11BlockAckRequest(iface, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11BlockAckRequest(iface, dst_addr, target_addr, child) {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11BlockAckRequest(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11BlockAckRequest(iface_index, dst_addr, target_addr, child) {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11BlockAckRequest(buffer, total_sz) { 
+Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11BlockAckRequest(buffer, total_sz) {
     uint32_t padding = blockack_request_size();
     buffer += padding;
     total_sz -= padding;
