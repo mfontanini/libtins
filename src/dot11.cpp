@@ -432,6 +432,18 @@ void Tins::Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_
     delete[] buffer;
 }
 
+void Tins::Dot11ManagementFrame::request_information(const std::list<uint8_t> elements) {
+    uint16_t sz = elements.size();
+    list<uint8_t>::const_iterator it = elements.begin();
+    uint8_t* buffer = new uint8_t[sz];
+    for (uint16_t i = 0; i < sz; i++) {
+        buffer[i] = *it;
+        it++;
+    }
+    add_tagged_option(REQUEST, sz, buffer);
+    delete[] buffer;
+}
+
 /*
  * Dot11DataFrame
  */
@@ -1046,6 +1058,38 @@ uint32_t Tins::Dot11ReAssocResponse::write_fixed_parameters(uint8_t *buffer, uin
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
+}
+
+/* Probe Request */
+
+Tins::Dot11ProbeRequest::Dot11ProbeRequest() : Dot11ManagementFrame() {
+    this->subtype(Dot11::PROBE_REQ);
+}
+
+Tins::Dot11ProbeRequest::Dot11ProbeRequest(const std::string& iface,
+                                           const uint8_t* dst_hw_addr,
+                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::PROBE_REQ);
+}
+
+Tins::Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Tins::Dot11ProbeRequest::ssid(const std::string &new_ssid) {
+    Dot11ManagementFrame::ssid(new_ssid);
+}
+
+void Tins::Dot11ProbeRequest::supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::supported_rates(new_rates);
+}
+
+void Tins::Dot11ProbeRequest::request_information(const std::list<uint8_t> elements) {
+    Dot11ManagementFrame::request_information(elements);
+}
+
+void Tins::Dot11ProbeRequest::extended_supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::extended_supported_rates(new_rates);
 }
 
 /* QoS data. */

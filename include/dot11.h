@@ -1025,6 +1025,7 @@ namespace Tins {
         void power_capabilities(uint8_t min_power, uint8_t max_power);
         void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
         void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
+        void request_information(const std::list<uint8_t> elements);
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
@@ -1944,6 +1945,71 @@ namespace Tins {
 
     };
 
+    /**
+     * \brief Class representing an Probe Request frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ProbeRequest : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the Probe Request frame.
+         *
+         */
+        Dot11ProbeRequest();
+
+        /**
+         * \brief Constructor for creating a 802.11 Probe Request.
+         *
+         * Constructor that builds a 802.11 Probe Request taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ProbeRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11ProbeRequest object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Helper method to set the essid.
+         *
+         * \param new_ssid The ssid to be set.
+         */
+        void ssid(const std::string &new_ssid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the Request Information element.
+         *
+         * \param elements A list of elements.
+         */
+        void request_information(const std::list<uint8_t> elements);
+
+    };
+
     class Dot11QoSData : public Dot11DataFrame {
 
     public:
@@ -2474,7 +2540,7 @@ namespace Tins {
          * \return The bar control field.
          */
         uint16_t bar_control() const { return _bar_control.tid; }
-        
+
         /**
          * \brief Getter for the start sequence field.
          * \return The bar start sequence.
