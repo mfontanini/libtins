@@ -53,6 +53,13 @@ namespace Tins {
             RAW,
             ETHERNET_II,
             DOT11,
+            DOT11_DATA,
+            DOT11_QOS_DATA,
+            DOT11_BEACON,
+            DOT11_CONTROL,
+            DOT11_ACK,
+            DOT11_BLOCK_ACK,
+            DOT11_RTS,
             SNAP,
             RADIOTAP,
             IP,
@@ -168,7 +175,7 @@ namespace Tins {
             /* Should be pure virtual. It's this way to avoid compiling issues.
              * Once every pdu has implemented it, make it pure virtual. */
             return 0; 
-        } 
+        }
         
         /** \brief Send the stack of PDUs through a PacketSender.
          *
