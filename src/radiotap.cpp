@@ -30,14 +30,16 @@
 #include "utils.h"
 
 
-Tins::RadioTap::RadioTap(const std::string &iface) throw (std::runtime_error) : PDU(0xff), _options_size(0) {
+Tins::RadioTap::RadioTap(const std::string &iface, PDU *child) throw (std::runtime_error) : PDU(0xff, child), _options_size(0) {
     if(!Utils::interface_id(iface, _iface_index))
         throw std::runtime_error("Invalid interface name!");
     std::memset(&_radio, 0, sizeof(_radio));
+    init();
 }
 
-Tins::RadioTap::RadioTap(uint32_t iface_index) : PDU(0xff), _iface_index(iface_index) {
+Tins::RadioTap::RadioTap(uint32_t iface_index, PDU *child) : PDU(0xff, child), _iface_index(iface_index) {
     std::memset(&_radio, 0, sizeof(_radio));
+    init();
 }
 
 Tins::RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
@@ -109,6 +111,15 @@ Tins::RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
     }
     if(total_sz)
         inner_pdu(Dot11::from_bytes(buffer, total_sz));
+}
+
+void Tins::RadioTap::init() {
+    channel(Utils::channel_to_mhz(1), 0xa0);
+    flags(FCS);
+    tsft(0);
+    dbm_signal(0xce);
+    rx_flag(0);
+    antenna(0);
 }
 
 void Tins::RadioTap::version(uint8_t new_version) {

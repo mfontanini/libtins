@@ -29,6 +29,11 @@ namespace Tins {
     
     /** 
      * \brief Class that represents the IEEE 802.11 radio tap header.
+     * 
+     * By default, RadioTap PDUs set the necesary fields to send an 802.11
+     * PDU as its inner pdu, avoiding packet drops. As a consequence, 
+     * the FCS-at-end flag is on, the channel is set to 1, TSFT is set to 0,
+     * dbm_signal is set to 0xce, and the rx_flag and antenna fields to 0.
      */
     class RadioTap : public PDU {
     public:
@@ -88,14 +93,16 @@ namespace Tins {
         /**
          * \brief Creates an instance of RadioTap.
          * \param iface The name of the interface in which to send this PDU.
+         * \param child The child PDU.(optional)
          */
-        RadioTap(const std::string &iface) throw (std::runtime_error);
+        RadioTap(const std::string &iface, PDU *child = 0) throw (std::runtime_error);
         
         /**
          * \brief Creates an instance of RadioTap.
          * \param iface_index The index of the interface in which to send this PDU.
+         * \param child The child PDU.(optional)
          */
-        RadioTap(uint32_t iface_index);
+        RadioTap(uint32_t iface_index, PDU *child = 0);
         
         /**
          * \brief Constructor which creates a RadioTap object from a buffer and adds all
@@ -297,6 +304,7 @@ namespace Tins {
                 ext:1;
         } __attribute__((__packed__));
         
+        void init();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         
