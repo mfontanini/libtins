@@ -23,7 +23,9 @@ clean:
 	rm $(OBJECTS) $(EXECUTABLE)
 
 install:
-	rm -r /usr/include/tins
-	mkdir /usr/include/tins
-	cp include/*.h /usr/include/tins/
-	cp $(EXECUTABLE) /usr/lib/
+	install include/* /usr/include/tins/
+	install $(EXECUTABLE) /usr/lib/
+
+uninstall:
+	rm -r /usr/include/tins/
+	rm /usr/lib/$(EXECUTABLE)
