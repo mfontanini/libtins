@@ -976,6 +976,77 @@ uint32_t Tins::Dot11ReAssocRequest::write_fixed_parameters(uint8_t *buffer, uint
     return sz;
 }
 
+/* ReAssociation Response */
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse() : Dot11ManagementFrame() {
+    this->subtype(Dot11::REASSOC_RESP);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const std::string& iface,
+                                                 const uint8_t* dst_hw_addr,
+                                                 const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::REASSOC_RESP);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+    uint32_t sz = Dot11ManagementFrame::header_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 reassociation response header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const Dot11ReAssocResponse &other) : Dot11ManagementFrame(other) {
+    copy_fields(&other);
+}
+
+Tins::Dot11ReAssocResponse &Tins::Dot11ReAssocResponse::operator= (const Dot11ReAssocResponse &other) {
+    copy_inner_pdu(other);
+    copy_fields(&other);
+    return *this;
+}
+
+void Tins::Dot11ReAssocResponse::copy_fields(const Dot11ReAssocResponse *other) {
+    Dot11ManagementFrame::copy_ext_header(other);
+    std::memcpy(&_body, &other->_body, sizeof(_body));
+}
+
+void Tins::Dot11ReAssocResponse::status_code(uint16_t new_status_code) {
+    this->_body.status_code = new_status_code;
+}
+
+void Tins::Dot11ReAssocResponse::aid(uint16_t new_aid) {
+    this->_body.aid = new_aid;
+}
+
+void Tins::Dot11ReAssocResponse::supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocResponse::extended_supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::extended_supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocResponse::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
+    Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
+}
+
+uint32_t Tins::Dot11ReAssocResponse::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+}
+
+uint32_t Tins::Dot11ReAssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
 
 /* QoS data. */
 

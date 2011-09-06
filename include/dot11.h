@@ -1645,6 +1645,10 @@ namespace Tins {
         AssocRespBody _body;
     };
 
+    /**
+     * \brief Class representing an ReAssociation Request frame in the IEEE 802.11 Protocol.
+     *
+     */
     class Dot11ReAssocRequest : public Dot11ManagementFrame {
 
     public:
@@ -1801,6 +1805,142 @@ namespace Tins {
         uint32_t write_fixed_parameters(uint8_t* buffer, uint32_t total_sz);
 
         ReAssocReqBody _body;
+
+    };
+
+    /**
+     * \brief Class representing an ReAssociation Response frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ReAssocResponse : public Dot11ManagementFrame {
+
+    public:
+        /**
+         * \brief Default constructor for the Association Response frame.
+         *
+         */
+        Dot11ReAssocResponse();
+
+        /**
+         * \brief Constructor for creating a 802.11 ReAssociation Response.
+         *
+         * Constructor that builds a 802.11 ReAssociation Response taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ReAssocResponse(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11ReAssocResponse object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Copy constructor.
+         */
+        Dot11ReAssocResponse(const Dot11ReAssocResponse &other);
+
+        /**
+         * \brief Copy assignment operator
+         */
+        Dot11ReAssocResponse &operator= (const Dot11ReAssocResponse &other);
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the status code.
+         *
+         * \return The status code in an uint16_t.
+         */
+        inline uint16_t status_code() const { return this->_body.status_code; }
+
+        /**
+         * \brief Getter for the AID field.
+         *
+         * \return The AID field value in an uint16_t.
+         */
+        inline uint16_t aid() const { return this->_body.aid; }
+
+        /**
+         * \brief Setter for the status code.
+         *
+         * \param new_status_code uint16_t with the new status code.
+         */
+        void status_code(uint16_t new_status_code);
+
+        /**
+         * \brief Setter for the AID field.
+         *
+         * \param new_aid uint16_t with the new AID value.
+         */
+        void aid(uint16_t new_aid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the EDCA Parameter Set.
+         *
+         * \param ac_be uint32_t with the value of the ac_be field.
+         * \param ac_bk uint32_t with the value of the ac_bk field.
+         * \param ac_vi uint32_t with the value of the ac_vi field.
+         * \param ac_vo uint32_t with the value of the ac_vo field.
+         */
+        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+
+    protected:
+
+    private:
+
+        struct ReAssocRespBody {
+            CapabilityInformation capability;
+            uint16_t status_code;
+            uint16_t aid;
+        };
+
+        void copy_fields(const Dot11ReAssocResponse *other);
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+        ReAssocRespBody _body;
 
     };
 
