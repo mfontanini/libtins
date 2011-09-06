@@ -1062,16 +1062,16 @@ Tins::Dot11RTS::Dot11RTS(const uint8_t* dst_addr , const uint8_t* target_addr, P
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11RTS::Dot11RTS(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
-    
+Tins::Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+
 }
 
 Tins::PDU *Tins::Dot11RTS::clone_pdu() const {
@@ -1086,16 +1086,16 @@ Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t* dst_addr , const uint8_t* target_a
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11PSPoll::Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
-    
+Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+
 }
 
 Tins::PDU *Tins::Dot11PSPoll::clone_pdu() const {
@@ -1110,16 +1110,16 @@ Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t* dst_addr , const uint8_t* target_add
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11CFEnd::Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
-    
+Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+
 }
 
 Tins::PDU *Tins::Dot11CFEnd::clone_pdu() const {
@@ -1134,16 +1134,16 @@ Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t* dst_addr , const uint8_t* targ
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11EndCFAck::Dot11EndCFAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
-    
+Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+
 }
 
 Tins::PDU *Tins::Dot11EndCFAck::clone_pdu() const {
@@ -1158,16 +1158,16 @@ Tins::Dot11Ack::Dot11Ack(const uint8_t* dst_addr, PDU* child) :  Dot11Control(ds
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child) { 
+Tins::Dot11Ack::Dot11Ack(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child) {
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11Control(iface_index, dst_addr, child) { 
+Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11Control(iface_index, dst_addr, child) {
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) { 
-    
+Tins::Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) {
+
 }
 
 Tins::PDU *Tins::Dot11Ack::clone_pdu() const {
@@ -1182,15 +1182,15 @@ Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t* dst_addr , const
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
     uint32_t padding = controlta_size();
     buffer += padding;
     total_sz -= padding;
@@ -1219,7 +1219,7 @@ uint32_t Tins::Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t 
 void Tins::Dot11BlockAckRequest::bar_control(uint16_t bar) {
     std::memcpy(&_bar_control, &bar, sizeof(bar));
 }
-        
+
 void Tins::Dot11BlockAckRequest::start_sequence(uint16_t seq) {
     std::memcpy(&_start_sequence, &seq, sizeof(seq));
 }
@@ -1250,7 +1250,7 @@ Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11BlockAckRequest(buffer, total_sz) { 
+Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11BlockAckRequest(buffer, total_sz) {
     uint32_t padding = blockack_request_size();
     buffer += padding;
     total_sz -= padding;

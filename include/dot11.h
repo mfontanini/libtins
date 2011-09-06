@@ -1028,6 +1028,7 @@ namespace Tins {
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
+
     private:
         ExtendedHeader _ext_header;
         uint8_t _addr4[6];
@@ -1825,13 +1826,13 @@ namespace Tins {
         Dot11Control(uint32_t iface_index, const uint8_t* dst_addr = 0, PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 control frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 control frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         Dot11Control(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -1883,24 +1884,24 @@ namespace Tins {
         Dot11ControlTA(uint32_t iface_index, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 control frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 control frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Getter for the target address field.
          */
         inline const uint8_t* target_addr() const { return _taddr; }
-        
+
         /**
          * \brief Setter for the target address field.
          * \param addr The new target address.
          */
         void target_addr(const uint8_t *addr);
-        
+
         /**
          * \brief Returns the 802.11 frame's header length.
          *
@@ -1913,13 +1914,13 @@ namespace Tins {
          * \brief Getter for the control ta additional fields size.
          */
         uint32_t controlta_size() const { return sizeof(_taddr) + sizeof(ieee80211_header); }
-        
+
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
-    
+
         uint8_t _taddr[6];
     };
-    
+
     class Dot11RTS : public Dot11ControlTA {
     public:
         /**
@@ -1960,7 +1961,7 @@ namespace Tins {
         Dot11RTS(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 RTS frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 RTS frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -1980,7 +1981,7 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::DOT11_RTS; }
     };
-    
+
     class Dot11PSPoll : public Dot11ControlTA {
     public:
         /**
@@ -2021,7 +2022,7 @@ namespace Tins {
         Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
 
         /**
-         * \brief Constructor which creates an 802.11 PS-Poll frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 PS-Poll frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2035,7 +2036,7 @@ namespace Tins {
          */
         PDU *clone_pdu() const;
     };
-    
+
     class Dot11CFEnd : public Dot11ControlTA {
     public:
         /**
@@ -2076,7 +2077,7 @@ namespace Tins {
         Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
 
         /**
-         * \brief Constructor which creates an 802.11 CF-End frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 CF-End frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2090,7 +2091,7 @@ namespace Tins {
          */
         PDU *clone_pdu() const;
     };
-    
+
     class Dot11EndCFAck : public Dot11ControlTA {
     public:
         /**
@@ -2128,7 +2129,7 @@ namespace Tins {
         Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
 
         /**
-         * \brief Constructor which creates an 802.11 End-CF-Ack frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 End-CF-Ack frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2142,7 +2143,7 @@ namespace Tins {
          */
         PDU *clone_pdu() const;
     };
-    
+
     class Dot11Ack : public Dot11Control {
     public:
         /**
@@ -2181,13 +2182,13 @@ namespace Tins {
         Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* child);
 
         /**
-         * \brief Constructor which creates an 802.11 Ack frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 Ack frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         Dot11Ack(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -2200,8 +2201,9 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
+
     };
-    
+
     /**
      * \brief Class that represents an 802.11 Block Ack Request PDU.
      */
@@ -2242,27 +2244,26 @@ namespace Tins {
         Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
 
         /**
-         * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /* Getter */
-        
+
         /**
          * \brief Getter for the bar control field.
          * \return The bar control field.
          */
-        uint16_t bar_control() const { return *(const uint16_t*)&_bar_control; }
+        uint16_t bar_control() const { return _bar_control.tid; }
         
         /**
          * \brief Getter for the start sequence field.
          * \return The bar start sequence.
          */
-        uint16_t start_sequence() const { return *(const uint16_t*)&_start_sequence; }
-        
+        uint16_t start_sequence() const { return (_start_sequence.frag << 12) | (_start_sequence.seq); }
         /**
          * \brief Returns the 802.11 frame's header length.
          *
@@ -2270,15 +2271,15 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /* Setter */
-        
+
         /**
          * \brief Setter for the bar control field.
          * \param bar The new bar control field.
          */
         void bar_control(uint16_t bar);
-        
+
         /**
          * \brief Setter for the start sequence field.
          * \param bar The new start sequence field.
@@ -2296,25 +2297,25 @@ namespace Tins {
          * \brief Getter for the control ta additional fields size.
          */
         uint32_t blockack_request_size() const { return controlta_size() + sizeof(_bar_control) + sizeof(_start_sequence); }
-        
+
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
         struct BarControl {
             uint16_t reserved:12,
                 tid:4;
         } __attribute__((__packed__));
-        
+
         struct StartSequence {
             uint16_t frag:4,
                 seq:12;
         } __attribute__((__packed__));
-        
+
         void init_block_ack();
-        
+
         BarControl _bar_control;
         StartSequence _start_sequence;
     };
-    
+
     /**
      * \brief Class that represents an 802.11 block ack frame.
      */
@@ -2355,13 +2356,13 @@ namespace Tins {
         Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
 
         /**
-         * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and 
+         * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Returns the 802.11 frame's header length.
          *
@@ -2369,19 +2370,19 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Getter for the bitmap field.
          * \return The bitmap field.
          */
         const uint8_t *bitmap() const { return _bitmap; }
-        
+
         /**
          * \brief Setter for the bitmap field.
          * \param bit The new bitmap field to be set.
          */
         void bitmap(const uint8_t *bit);
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type

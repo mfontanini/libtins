@@ -1,11 +1,11 @@
 CXX=@CXX@
-CFLAGS=-c -Wall @CFLAGS@ -DTINS_VERSION=@PACKAGE_VERSION@
-LDFLAGS=-lpcap
+CFLAGS=-c -Wall -fPIC @CFLAGS@ -DTINS_VERSION=@PACKAGE_VERSION@
+LDFLAGS=-lpcap -shared -Wl,-soname,libtins.so
 SOURCES=$(wildcard src/*.cpp)
 
 OBJECTS=$(SOURCES:.cpp=.o)
-INCLUDE = -Iinclude/
-EXECUTABLE=client
+INCLUDE=-Iinclude/
+EXECUTABLE=libtins.so
 
 all: $(SOURCES) $(EXECUTABLE)
 
@@ -21,3 +21,11 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm $(OBJECTS) $(EXECUTABLE)
+
+install:
+	install include/* /usr/include/tins/
+	install $(EXECUTABLE) /usr/lib/
+
+uninstall:
+	rm -r /usr/include/tins/
+	rm /usr/lib/$(EXECUTABLE)
