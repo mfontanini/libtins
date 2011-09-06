@@ -105,23 +105,22 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_IP) {
         this->_ip_options.push_back(opt_to_add);
         this->_options_size += 1 + opt_to_add.optional_data_size;
     }
-
     total_sz -= head_len() * sizeof(uint32_t);
-    if (total_sz == 0)
-        return;
-    switch(_ip.protocol) {
-        case IPPROTO_TCP:
-            inner_pdu(new Tins::TCP(buffer, total_sz));
-            break;
-        case IPPROTO_UDP:
-            inner_pdu(new Tins::UDP(buffer, total_sz));
-            break;
-        case IPPROTO_ICMP:
-            inner_pdu(new Tins::ICMP(buffer, total_sz));
-            break;
-        default:
-            inner_pdu(new Tins::RawPDU(buffer, total_sz));
-            break;
+    if (total_sz) {
+        switch(_ip.protocol) {
+            case IPPROTO_TCP:
+                inner_pdu(new Tins::TCP(buffer, total_sz));
+                break;
+            case IPPROTO_UDP:
+                inner_pdu(new Tins::UDP(buffer, total_sz));
+                break;
+            case IPPROTO_ICMP:
+                inner_pdu(new Tins::ICMP(buffer, total_sz));
+                break;
+            default:
+                inner_pdu(new Tins::RawPDU(buffer, total_sz));
+                break;
+        }
     }
 }
 
