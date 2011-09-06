@@ -2174,13 +2174,13 @@ namespace Tins {
          * \brief Getter for the bar control field.
          * \return The bar control field.
          */
-        uint16_t bar_control() const { return *(const uint16_t*)&_bar_control; }
+        uint16_t bar_control() const { return _bar_control.tid; }
         
         /**
          * \brief Getter for the start sequence field.
          * \return The bar start sequence.
          */
-        uint16_t start_sequence() const { return *(const uint16_t*)&_start_sequence; }
+        uint16_t start_sequence() const { return (_start_sequence.frag << 12) | (_start_sequence.seq); }
         
         /**
          * \brief Returns the 802.11 frame's header length.
