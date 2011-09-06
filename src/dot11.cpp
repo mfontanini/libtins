@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
+#include <iostream>
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -42,8 +43,10 @@ const uint8_t *Tins::Dot11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xf
 
 Tins::Dot11::Dot11(const uint8_t* dst_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
-    if(dst_hw_addr)
+    if(dst_hw_addr) {
+        
         this->addr1(dst_hw_addr);
+    }
 }
 
 Tins::Dot11::Dot11(const std::string& iface, const uint8_t* dst_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child), _options_size(0) {
@@ -72,10 +75,6 @@ Tins::Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP)
     std::memcpy(&_header, buffer, sz);
     buffer += sz;
     total_sz -= sz;
-    if(type() == 2 && subtype() < 4) {
-        // It's a data packet
-        inner_pdu(new Tins::SNAP(buffer, total_sz));
-    }
 }
 
 Tins::Dot11::Dot11(const Dot11 &other) : PDU(other) {
@@ -169,7 +168,7 @@ void Tins::Dot11::order(bool new_value) {
 }
 
 void Tins::Dot11::duration_id(uint16_t new_duration_id) {
-    this->_header.duration_id = Utils::net_to_host_s(new_duration_id);
+    this->_header.duration_id = new_duration_id;
 }
 
 void Tins::Dot11::addr1(const uint8_t* new_addr1) {
@@ -208,17 +207,17 @@ bool Tins::Dot11::send(PacketSender* sender) {
 void Tins::Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t my_sz = header_size();
     assert(total_sz >= my_sz);
-    memcpy(buffer, &this->_header, sizeof(ieee80211_header));
-    buffer += sizeof(ieee80211_header);
-    total_sz -= sizeof(ieee80211_header);
+    memcpy(buffer, &_header, sizeof(_header));
+    buffer += sizeof(_header);
+    total_sz -= sizeof(_header);
 
     uint32_t written = this->write_ext_header(buffer, total_sz);
     buffer += written;
     total_sz -= written;
 
-    uint32_t child_len = write_fixed_parameters(buffer, total_sz - sizeof(ieee80211_header) - _options_size);
+    uint32_t child_len = write_fixed_parameters(buffer, total_sz - _options_size);
     buffer += child_len;
-    assert(total_sz > child_len + _options_size);
+    assert(total_sz >= child_len + _options_size);
     for(std::list<Dot11_Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option;
         *(buffer++) = it->length;
@@ -233,10 +232,32 @@ Tins::PDU *Tins::Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
         throw std::runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
     const ieee80211_header *hdr = (const ieee80211_header*)buffer;
     PDU *ret = 0;
-    if(hdr->control.type == 0 && hdr->control.subtype == 8) {
+    if(hdr->control.type == MANAGEMENT && hdr->control.subtype == 8) {
         if(total_sz < sizeof(_header))
             throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
         ret = new Dot11Beacon(buffer, total_sz);
+    }
+    else if(hdr->control.type == DATA){
+        if(hdr->control.subtype <= 4)
+            ret = new Dot11Data(buffer, total_sz);
+        else 
+            ret = new Dot11QoSData(buffer, total_sz);
+    }
+    else if(hdr->control.type == CONTROL){
+        if(hdr->control.subtype == ACK)
+            ret = new Dot11Ack(buffer, total_sz);
+        else if(hdr->control.subtype == CF_END)
+            ret = new Dot11CFEnd(buffer, total_sz);
+        else if(hdr->control.subtype == CF_END_ACK)
+            ret = new Dot11EndCFAck(buffer, total_sz);
+        else if(hdr->control.subtype == PS)
+            ret = new Dot11PSPoll(buffer, total_sz);
+        else if(hdr->control.subtype == RTS)
+            ret = new Dot11RTS(buffer, total_sz);
+        else if(hdr->control.subtype == BLOCK_ACK)
+            ret = new Dot11BlockAck(buffer, total_sz);
+        else if(hdr->control.subtype == BLOCK_ACK_REQ)
+            ret = new Dot11BlockAckRequest(buffer, total_sz);
     }
     else
         ret = new Dot11(buffer, total_sz);
@@ -251,34 +272,44 @@ void Tins::Dot11::copy_80211_fields(const Dot11 *other) {
         _options.push_back(Dot11_Option(it->option, it->length, it->value));
 }
 
-/*
- * Dot11ManagementFrame
- */
+/* Dot11ManagementFrame */
 
 Tins::Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
-
+    buffer += sizeof(ieee80211_header);
+    total_sz -= sizeof(ieee80211_header);
+    if(total_sz < sizeof(_ext_header))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
+    std::memcpy(&_ext_header, buffer, sizeof(_ext_header));
+    if(from_ds() && to_ds())
+        std::memcpy(_addr4, buffer + sizeof(_ext_header), sizeof(_addr4));
 }
 
 Tins::Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) : Dot11(dst_hw_addr) {
     this->type(Dot11::MANAGEMENT);
-    this->addr2(src_hw_addr);
+    if(src_hw_addr)
+        addr2(src_hw_addr);
+    else
+        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
 }
 
 Tins::Dot11ManagementFrame::Dot11ManagementFrame(const std::string &iface,
-                                       const uint8_t *dst_hw_addr,
-                                       const uint8_t *src_hw_addr) throw (std::runtime_error) : Dot11(iface, dst_hw_addr) {
+                                                 const uint8_t *dst_hw_addr,
+                                                 const uint8_t *src_hw_addr) throw (std::runtime_error) : Dot11(iface, dst_hw_addr) {
     this->type(Dot11::MANAGEMENT);
-    this->addr2(src_hw_addr);
+    if(src_hw_addr)
+        addr2(src_hw_addr);
+    else
+        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
 }
 
 Tins::Dot11ManagementFrame::Dot11ManagementFrame(const Dot11ManagementFrame &other) : Dot11(other) {
-
+    copy_ext_header(&other);
 }
 
 void Tins::Dot11ManagementFrame::copy_ext_header(const Dot11ManagementFrame* other) {
     Dot11::copy_80211_fields(other);
-    std::memcpy(&this->_ext_header, &other->_ext_header, sizeof(this->_ext_header));
-    std::memcpy(this->_addr4, other->_addr4, 6);
+    std::memcpy(&_ext_header, &other->_ext_header, sizeof(_ext_header));
+    std::memcpy(_addr4, other->_addr4, 6);
 }
 
 uint32_t Tins::Dot11ManagementFrame::header_size() const {
@@ -301,7 +332,7 @@ void Tins::Dot11ManagementFrame::frag_num(uint8_t new_frag_num) {
 }
 
 void Tins::Dot11ManagementFrame::seq_num(uint16_t new_seq_num) {
-    this->_ext_header.seq_control.seq_number = Utils::net_to_host_s(new_seq_num);
+    this->_ext_header.seq_control.seq_number = new_seq_num;
 }
 
 void Tins::Dot11ManagementFrame::addr4(const uint8_t* new_addr4) {
@@ -309,15 +340,14 @@ void Tins::Dot11ManagementFrame::addr4(const uint8_t* new_addr4) {
 }
 
 uint32_t Tins::Dot11ManagementFrame::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t written = sizeof(this->_ext_header);
-    memcpy(buffer, &this->_ext_header, sizeof(this->_ext_header));
-    buffer += sizeof(this->_ext_header);
-    if (this->from_ds() && this->to_ds()) {
+    uint32_t written = sizeof(_ext_header);
+    memcpy(buffer, &_ext_header, sizeof(this->_ext_header));
+    buffer += sizeof(_ext_header);
+    if (from_ds() && to_ds()) {
         written += 6;
-        memcpy(buffer, this->_addr4, 6);
+        memcpy(buffer, _addr4, 6);
     }
     return written;
-
 }
 
 void Tins::Dot11ManagementFrame::ssid(const std::string &new_ssid) {
@@ -405,85 +435,7 @@ void Tins::Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_
     delete[] buffer;
 }
 
-/*
- * Dot11DataFrame
- */
-
-Tins::Dot11DataFrame::Dot11DataFrame(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
-
-}
-
-Tins::Dot11DataFrame::Dot11DataFrame(uint32_t iface_index, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(iface_index, dst_hw_addr, child) {
-    this->type(Dot11::DATA);
-    this->addr2(src_hw_addr);
-}
-
-Tins::Dot11DataFrame::Dot11DataFrame(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(dst_hw_addr, child) {
-    this->type(Dot11::DATA);
-    this->addr2(src_hw_addr);
-}
-
-
-Tins::Dot11DataFrame::Dot11DataFrame(const std::string &iface,
-                                     const uint8_t *dst_hw_addr,
-                                     const uint8_t *src_hw_addr,
-                                     PDU* child) throw (std::runtime_error) : Dot11(iface, dst_hw_addr, child) {
-    this->type(Dot11::DATA);
-    this->addr2(src_hw_addr);
-}
-
-Tins::Dot11DataFrame::Dot11DataFrame(const Dot11DataFrame &other) : Dot11(other) {
-
-}
-
-void Tins::Dot11DataFrame::copy_ext_header(const Dot11DataFrame* other) {
-    Dot11::copy_80211_fields(other);
-    std::memcpy(&this->_ext_header, &other->_ext_header, sizeof(this->_ext_header));
-    std::memcpy(this->_addr4, other->_addr4, 6);
-}
-
-uint32_t Tins::Dot11DataFrame::header_size() const {
-    uint32_t sz = Dot11::header_size() + sizeof(_ext_header);
-    if (this->from_ds() && this->to_ds())
-        sz += 6;
-    return sz;
-}
-
-void Tins::Dot11DataFrame::addr2(const uint8_t* new_addr2) {
-    memcpy(this->_ext_header.addr2, new_addr2, 6);
-}
-
-void Tins::Dot11DataFrame::addr3(const uint8_t* new_addr3) {
-    memcpy(this->_ext_header.addr3, new_addr3, 6);
-}
-
-void Tins::Dot11DataFrame::frag_num(uint8_t new_frag_num) {
-    this->_ext_header.seq_control.frag_number = new_frag_num;
-}
-
-void Tins::Dot11DataFrame::seq_num(uint16_t new_seq_num) {
-    this->_ext_header.seq_control.seq_number = Utils::net_to_host_s(new_seq_num);
-}
-
-void Tins::Dot11DataFrame::addr4(const uint8_t* new_addr4) {
-    memcpy(this->_addr4, new_addr4, 6);
-}
-
-uint32_t Tins::Dot11DataFrame::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t written = sizeof(this->_ext_header);
-    memcpy(buffer, &this->_ext_header, sizeof(this->_ext_header));
-    buffer += sizeof(this->_ext_header);
-    if (this->from_ds() && this->to_ds()) {
-        written += 6;
-        memcpy(buffer, this->_addr4, 6);
-    }
-    return written;
-
-}
-
-/*
- * Beacon
- */
+/* Dot11Beacon */
 
 Tins::Dot11Beacon::Dot11Beacon(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame() {
     this->subtype(Dot11::BEACON);
@@ -498,8 +450,9 @@ Tins::Dot11Beacon::Dot11Beacon(const std::string& iface,
 }
 
 Tins::Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
-    buffer += sizeof(ieee80211_header);
-    total_sz -= sizeof(ieee80211_header);
+    uint32_t sz = Dot11ManagementFrame::header_size();
+    buffer += sz;
+    total_sz -= sz;
     if(total_sz < sizeof(_body))
         throw std::runtime_error("Not enough size for a IEEE 802.11 beacon header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
@@ -509,7 +462,7 @@ Tins::Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) : Dot11
 }
 
 Tins::Dot11Beacon::Dot11Beacon(const Dot11Beacon &other) : Dot11ManagementFrame(other) {
-
+    copy_fields(&other);
 }
 
 Tins::Dot11Beacon &Tins::Dot11Beacon::operator= (const Dot11Beacon &other) {
@@ -594,14 +547,20 @@ bool Tins::Dot11Beacon::rsn_information(RSNInformation *rsn) {
 }
 
 uint32_t Tins::Dot11Beacon::header_size() const {
-    return Dot11ManagementFrame::header_size() + sizeof(BeaconBody);
+    return Dot11ManagementFrame::header_size() + sizeof(_body);
 }
 
 uint32_t Tins::Dot11Beacon::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(BeaconBody);
+    uint32_t sz = sizeof(_body);
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
+}
+
+Tins::PDU *Tins::Dot11Beacon::clone_pdu() const {
+    Dot11Beacon *new_pdu = new Dot11Beacon();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
 }
 
 /* 802.11 diassoc */
@@ -648,9 +607,14 @@ uint32_t Tins::Dot11Disassoc::write_fixed_parameters(uint8_t *buffer, uint32_t t
     return sz;
 }
 
-/*
- * RSNInformation class
- */
+Tins::PDU *Tins::Dot11Disassoc::clone_pdu() const {
+    Dot11Disassoc *new_pdu = new Dot11Disassoc();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
+/* RSNInformation */
+
 Tins::RSNInformation::RSNInformation() : _version(1), _capabilities(0) {
 
 }
@@ -724,8 +688,9 @@ Tins::Dot11AssocRequest::Dot11AssocRequest(const std::string& iface,
 }
 
 Tins::Dot11AssocRequest::Dot11AssocRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
-    buffer += sizeof(ieee80211_header);
-    total_sz -= sizeof(ieee80211_header);
+    uint32_t sz = Dot11ManagementFrame::header_size();
+    buffer += sz;
+    total_sz -= sz;
     if(total_sz < sizeof(_body))
         throw std::runtime_error("Not enough size for an IEEE 802.11 association header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
@@ -790,6 +755,12 @@ uint32_t Tins::Dot11AssocRequest::write_fixed_parameters(uint8_t *buffer, uint32
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
+}
+
+Tins::PDU *Tins::Dot11AssocRequest::clone_pdu() const {
+    Dot11AssocRequest *new_pdu = new Dot11AssocRequest();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
 }
 
 /* Assoc response. */
@@ -863,21 +834,123 @@ uint32_t Tins::Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint3
     return sz;
 }
 
+Tins::PDU *Tins::Dot11AssocResponse::clone_pdu() const {
+    Dot11AssocResponse *new_pdu = new Dot11AssocResponse();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
+/* Dot11Data */
+
+Tins::Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
+    uint32_t sz = Dot11::header_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_ext_header))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
+    std::memcpy(&_ext_header, buffer, sizeof(_ext_header));
+    buffer += sizeof(_ext_header);
+    total_sz -= sizeof(_ext_header);
+    if(from_ds() && to_ds()) {
+        if(total_sz < sizeof(_addr4))
+            throw std::runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
+        std::memcpy(&_addr4, buffer, sizeof(_addr4)); 
+        buffer += sizeof(_addr4);
+        total_sz -= sizeof(_addr4);
+    }
+    inner_pdu(new Tins::SNAP(buffer, total_sz));
+}
+
+Tins::Dot11Data::Dot11Data(uint32_t iface_index, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(iface_index, dst_hw_addr, child) {
+    this->type(Dot11::DATA);
+    this->addr2(src_hw_addr);
+}
+
+Tins::Dot11Data::Dot11Data(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(dst_hw_addr, child) {
+    this->type(Dot11::DATA);
+    this->addr2(src_hw_addr);
+}
+
+
+Tins::Dot11Data::Dot11Data(const std::string &iface,
+                                     const uint8_t *dst_hw_addr,
+                                     const uint8_t *src_hw_addr,
+                                     PDU* child) throw (std::runtime_error) : Dot11(iface, dst_hw_addr, child) {
+    this->type(Dot11::DATA);
+    this->addr2(src_hw_addr);
+}
+
+void Tins::Dot11Data::copy_ext_header(const Dot11Data* other) {
+    Dot11::copy_80211_fields(other);
+    std::memcpy(&this->_ext_header, &other->_ext_header, sizeof(this->_ext_header));
+    std::memcpy(this->_addr4, other->_addr4, 6);
+}
+
+uint32_t Tins::Dot11Data::header_size() const {
+    uint32_t sz = Dot11::header_size() + sizeof(_ext_header);
+    if (this->from_ds() && this->to_ds())
+        sz += 6;
+    return sz;
+}
+
+void Tins::Dot11Data::addr2(const uint8_t* new_addr2) {
+    memcpy(this->_ext_header.addr2, new_addr2, 6);
+}
+
+void Tins::Dot11Data::addr3(const uint8_t* new_addr3) {
+    memcpy(this->_ext_header.addr3, new_addr3, 6);
+}
+
+void Tins::Dot11Data::frag_num(uint8_t new_frag_num) {
+    this->_ext_header.seq_control.frag_number = new_frag_num;
+}
+
+void Tins::Dot11Data::seq_num(uint16_t new_seq_num) {
+    this->_ext_header.seq_control.seq_number = new_seq_num;
+}
+
+void Tins::Dot11Data::addr4(const uint8_t* new_addr4) {
+    memcpy(this->_addr4, new_addr4, 6);
+}
+
+uint32_t Tins::Dot11Data::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t written = sizeof(this->_ext_header);
+    memcpy(buffer, &this->_ext_header, sizeof(this->_ext_header));
+    buffer += sizeof(this->_ext_header);
+    if (this->from_ds() && this->to_ds()) {
+        written += 6;
+        memcpy(buffer, this->_addr4, 6);
+    }
+    return written;
+
+}
+
+Tins::PDU *Tins::Dot11Data::clone_pdu() const {
+    Dot11Data *new_pdu = new Dot11Data();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
 /* QoS data. */
 
-Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : Dot11DataFrame(iface, dst_hw_addr, src_hw_addr, child) {
+Tins::Dot11QoSData::Dot11QoSData(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11Data(dst_hw_addr, src_hw_addr, child) {
+    
+}
+
+Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : Dot11Data(iface, dst_hw_addr, src_hw_addr, child) {
     this->subtype(Dot11::QOS_DATA_DATA);
     this->_qos_control = 0;
 }
 
-Tins::Dot11QoSData::Dot11QoSData(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11DataFrame(iface_index, dst_hw_addr, src_hw_addr, child) {
+Tins::Dot11QoSData::Dot11QoSData(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11Data(iface_index, dst_hw_addr, src_hw_addr, child) {
     this->subtype(Dot11::QOS_DATA_DATA);
     this->_qos_control = 0;
 }
 
-Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot11DataFrame(buffer, total_sz) {
-    buffer += sizeof(ieee80211_header);
-    total_sz -= sizeof(ieee80211_header);
+Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot11Data(buffer, total_sz) {
+    uint32_t sz = Dot11Data::header_size();
+    buffer += sz;
+    total_sz -= sz;
     assert(total_sz >= sizeof(this->_qos_control));
     this->_qos_control = *(uint16_t*)buffer;
     total_sz -= sizeof(uint16_t);
@@ -886,7 +959,7 @@ Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot
         inner_pdu(new Tins::SNAP(buffer, total_sz));
 }
 
-Tins::Dot11QoSData::Dot11QoSData(const Dot11QoSData &other) : Dot11DataFrame(other) {
+Tins::Dot11QoSData::Dot11QoSData(const Dot11QoSData &other) : Dot11Data(other) {
     copy_fields(&other);
 }
 
@@ -897,7 +970,7 @@ Tins::Dot11QoSData &Tins::Dot11QoSData::operator= (const Dot11QoSData &other) {
 }
 
 void Tins::Dot11QoSData::copy_fields(const Dot11QoSData *other) {
-    Dot11DataFrame::copy_ext_header(other);
+    Dot11Data::copy_ext_header(other);
     _qos_control = other->_qos_control;
 }
 
@@ -916,7 +989,14 @@ uint32_t Tins::Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t to
     return sz;
 }
 
+Tins::PDU *Tins::Dot11QoSData::clone_pdu() const {
+    Dot11QoSData *new_pdu = new Dot11QoSData();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
 /* Dot11Control */
+
 Tins::Dot11Control::Dot11Control(const uint8_t* dst_addr, PDU* child) : Dot11(dst_addr, child) {
     type(CONTROL);
 }
@@ -994,6 +1074,12 @@ Tins::Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz) : Dot11Contro
     
 }
 
+Tins::PDU *Tins::Dot11RTS::clone_pdu() const {
+    Dot11RTS *new_pdu = new Dot11RTS();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
 /* Dot11PSPoll */
 
 Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
@@ -1010,6 +1096,12 @@ Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, co
 
 Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) { 
     
+}
+
+Tins::PDU *Tins::Dot11PSPoll::clone_pdu() const {
+    Dot11PSPoll *new_pdu = new Dot11PSPoll();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
 }
 
 /* Dot11CFEnd */
@@ -1030,6 +1122,12 @@ Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz) : Dot11Co
     
 }
 
+Tins::PDU *Tins::Dot11CFEnd::clone_pdu() const {
+    Dot11CFEnd *new_pdu = new Dot11CFEnd();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
 /* Dot11EndCFAck */
 
 Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
@@ -1048,6 +1146,12 @@ Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz) : D
     
 }
 
+Tins::PDU *Tins::Dot11EndCFAck::clone_pdu() const {
+    Dot11EndCFAck *new_pdu = new Dot11EndCFAck();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
 /* Dot11Ack */
 
 Tins::Dot11Ack::Dot11Ack(const uint8_t* dst_addr, PDU* child) :  Dot11Control(dst_addr, child) {
@@ -1064,6 +1168,12 @@ Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* chi
 
 Tins::Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) { 
     
+}
+
+Tins::PDU *Tins::Dot11Ack::clone_pdu() const {
+    Dot11Ack *ack = new Dot11Ack();
+    ack->copy_80211_fields(this);
+    return ack;
 }
 
 /* Dot11BlockAck */
@@ -1092,7 +1202,7 @@ Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t
 }
 
 void Tins::Dot11BlockAckRequest::init_block_ack() {
-    subtype(BLOCK_ACK);
+    subtype(BLOCK_ACK_REQ);
     std::memset(&_bar_control, 0, sizeof(_bar_control));
     std::memset(&_start_sequence, 0, sizeof(_start_sequence));
 }
@@ -1118,16 +1228,25 @@ uint32_t Tins::Dot11BlockAckRequest::header_size() const {
     return Dot11ControlTA::header_size() + sizeof(_start_sequence) + sizeof(_start_sequence);
 }
 
+Tins::PDU *Tins::Dot11BlockAckRequest::clone_pdu() const {
+    Dot11BlockAckRequest *new_pdu = new Dot11BlockAckRequest();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
 /* Dot11BlockAck */
 Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11BlockAckRequest(dst_addr, target_addr, child) {
+    subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
 Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11BlockAckRequest(iface, dst_addr, target_addr, child) { 
+    subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
 Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11BlockAckRequest(iface_index, dst_addr, target_addr, child) { 
+    subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
@@ -1153,4 +1272,10 @@ uint32_t Tins::Dot11BlockAck::write_ext_header(uint8_t *buffer, uint32_t total_s
 
 uint32_t Tins::Dot11BlockAck::header_size() const {
     return Dot11BlockAckRequest::header_size() + sizeof(_bitmap);
+}
+
+Tins::PDU *Tins::Dot11BlockAck::clone_pdu() const {
+    Dot11BlockAck *new_pdu = new Dot11BlockAck();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
 }

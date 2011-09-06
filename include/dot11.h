@@ -114,6 +114,7 @@ namespace Tins {
          *
          */
         enum ControlSubtypes {
+            BLOCK_ACK_REQ = 8,
             BLOCK_ACK = 9,
             PS = 10,
             RTS = 11,
@@ -306,7 +307,7 @@ namespace Tins {
          *
          * \return The value of the duration/id field in an uint16_t.
          */
-        inline uint16_t duration_id() const { return Utils::net_to_host_s(this->_header.duration_id); }
+        inline uint16_t duration_id() const { return this->_header.duration_id; }
 
         /**
          * \brief Getter for the first address.
@@ -937,7 +938,7 @@ namespace Tins {
          *
          * \return The sequence number as an uint16_t.
          */
-        inline uint16_t seq_num() const { return Utils::net_to_host_s(this->_ext_header.seq_control.seq_number); }
+        inline uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
 
         /**
          * \brief Getter for the fourth address.
@@ -988,18 +989,17 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-
     protected:
         struct ExtendedHeader {
             uint8_t addr2[6];
             uint8_t addr3[6];
             struct {
             #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int seq_number:12;
                 unsigned int frag_number:4;
+                unsigned int seq_number:12;
             #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int frag_number:4;
                 unsigned int seq_number:12;
+                unsigned int frag_number:4;
             #endif
             } __attribute__((__packed__)) seq_control;
         } __attribute__((__packed__));
@@ -1028,124 +1028,6 @@ namespace Tins {
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
-
-    private:
-        ExtendedHeader _ext_header;
-        uint8_t _addr4[6];
-
-    };
-
-    class Dot11DataFrame : public Dot11 {
-
-    public:
-        /**
-         * \brief Getter for the second address.
-         *
-         * \return The second address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr2() const { return this->_ext_header.addr2; }
-
-        /**
-         * \brief Getter for the third address.
-         *
-         * \return The third address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr3() const { return this->_ext_header.addr3; }
-
-        /**
-         * \brief Getter for the fragment number.
-         *
-         * \return The fragment number as an uint8_t.
-         */
-        inline uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
-
-        /**
-         * \brief Getter for the sequence number.
-         *
-         * \return The sequence number as an uint16_t.
-         */
-        inline uint16_t seq_num() const { return Utils::net_to_host_s(this->_ext_header.seq_control.seq_number); }
-
-        /**
-         * \brief Getter for the fourth address.
-         *
-         * \return The fourth address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr4() const { return this->_addr4; }
-
-        /**
-         * \brief Setter for the second address.
-         *
-         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
-         */
-        void addr2(const uint8_t* new_addr2);
-
-        /**
-         * \brief Setter for the third address.
-         *
-         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
-         */
-        void addr3(const uint8_t* new_addr3);
-
-        /**
-         * \brief Setter for the fragment number.
-         *
-         * \param new_frag_num uint8_t with the new fragment number.
-         */
-        void frag_num(uint8_t new_frag_num);
-
-        /**
-         * \brief Setter for the sequence number.
-         *
-         * \param new_seq_num uint16_t with the new sequence number.
-         */
-        void seq_num(uint16_t new_seq_num);
-
-        /**
-         * \brief Setter for the fourth address.
-         *
-         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
-         */
-        void addr4(const uint8_t* new_addr4);
-
-        /**
-         * \brief Returns the 802.11 frame's header length.
-         *
-         * \return An uint32_t with the header's size.
-         * \sa PDU::header_size()
-         */
-        uint32_t header_size() const;
-
-    protected:
-        struct ExtendedHeader {
-            uint8_t addr2[6];
-            uint8_t addr3[6];
-            struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int seq_number:12;
-                unsigned int frag_number:4;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int frag_number:4;
-                unsigned int seq_number:12;
-            #endif
-            } __attribute__((__packed__)) seq_control;
-        } __attribute__((__packed__));
-
-        /**
-         * \brief Constructor which creates a Dot11DataFrame object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        Dot11DataFrame(uint32_t iface_index, const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
-        Dot11DataFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
-        Dot11DataFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child = 0) throw (std::runtime_error);
-        Dot11DataFrame(const uint8_t *buffer, uint32_t total_sz);
-        Dot11DataFrame(const Dot11DataFrame &other);
-
-        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
-        void copy_ext_header(const Dot11DataFrame *other);
-
     private:
         ExtendedHeader _ext_header;
         uint8_t _addr4[6];
@@ -1208,7 +1090,7 @@ namespace Tins {
         /**
          * \brief Getter for the interval field.
          *
-         * \return Timestamp value in an uint64_t.
+         * \return Timestamp value in an uint16_t.
          */
         inline uint16_t interval() const { return Utils::net_to_host_s(this->_body.interval); }
 
@@ -1288,6 +1170,19 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_BEACON; }
     private:
         struct BeaconBody {
             uint64_t timestamp;
@@ -1297,7 +1192,6 @@ namespace Tins {
 
         void copy_fields(const Dot11Beacon *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
-
 
         BeaconBody _body;
     };
@@ -1359,6 +1253,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct DisassocBody {
             uint16_t reason_code;
@@ -1501,6 +1402,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct AssocReqBody {
             CapabilityInformation capability;
@@ -1631,6 +1539,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct AssocRespBody {
             CapabilityInformation capability;
@@ -1644,7 +1559,132 @@ namespace Tins {
         AssocRespBody _body;
     };
 
-    class Dot11QoSData : public Dot11DataFrame {
+    class Dot11Data : public Dot11 {
+    public:
+        /**
+         * \brief Constructor which creates a Dot11Data object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11Data(uint32_t iface_index, const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
+        Dot11Data(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
+        Dot11Data(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child = 0) throw (std::runtime_error);
+        Dot11Data(const uint8_t *buffer, uint32_t total_sz);
+        /**
+         * \brief Getter for the second address.
+         *
+         * \return The second address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr2() const { return this->_ext_header.addr2; }
+
+        /**
+         * \brief Getter for the third address.
+         *
+         * \return The third address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr3() const { return this->_ext_header.addr3; }
+
+        /**
+         * \brief Getter for the fragment number.
+         *
+         * \return The fragment number as an uint8_t.
+         */
+        inline uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
+
+        /**
+         * \brief Getter for the sequence number.
+         *
+         * \return The sequence number as an uint16_t.
+         */
+        inline uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
+
+        /**
+         * \brief Getter for the fourth address.
+         *
+         * \return The fourth address as a constant uint8_t pointer.
+         */
+        inline const uint8_t* addr4() const { return this->_addr4; }
+
+        /**
+         * \brief Setter for the second address.
+         *
+         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
+         */
+        void addr2(const uint8_t* new_addr2);
+
+        /**
+         * \brief Setter for the third address.
+         *
+         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
+         */
+        void addr3(const uint8_t* new_addr3);
+
+        /**
+         * \brief Setter for the fragment number.
+         *
+         * \param new_frag_num uint8_t with the new fragment number.
+         */
+        void frag_num(uint8_t new_frag_num);
+
+        /**
+         * \brief Setter for the sequence number.
+         *
+         * \param new_seq_num uint16_t with the new sequence number.
+         */
+        void seq_num(uint16_t new_seq_num);
+
+        /**
+         * \brief Setter for the fourth address.
+         *
+         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
+         */
+        void addr4(const uint8_t* new_addr4);
+
+        /**
+         * \brief Returns the 802.11 frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_DATA; }
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+    protected:
+        struct ExtendedHeader {
+            uint8_t addr2[6];
+            uint8_t addr3[6];
+            struct {
+            #if __BYTE_ORDER == __LITTLE_ENDIAN
+                unsigned int seq_number:12;
+                unsigned int frag_number:4;
+            #elif __BYTE_ORDER == __BIG_ENDIAN
+                unsigned int frag_number:4;
+                unsigned int seq_number:12;
+            #endif
+            } __attribute__((__packed__)) seq_control;
+        } __attribute__((__packed__));
+
+        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+        void copy_ext_header(const Dot11Data *other);
+
+    private:
+        ExtendedHeader _ext_header;
+        uint8_t _addr4[6];
+    };
+
+    class Dot11QoSData : public Dot11Data {
 
     public:
 
@@ -1724,6 +1764,19 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_QOS_DATA; }
     private:
         void copy_fields(const Dot11QoSData *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
@@ -1778,6 +1831,12 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11Control(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_CONTROL; }
     };
 
     /**
@@ -1853,7 +1912,7 @@ namespace Tins {
         /**
          * \brief Getter for the control ta additional fields size.
          */
-        uint32_t controlta_size() const { return sizeof(_taddr); }
+        uint32_t controlta_size() const { return sizeof(_taddr) + sizeof(ieee80211_header); }
         
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
@@ -1907,6 +1966,19 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11RTS(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_RTS; }
     };
     
     class Dot11PSPoll : public Dot11ControlTA {
@@ -1955,6 +2027,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     };
     
     class Dot11CFEnd : public Dot11ControlTA {
@@ -2003,6 +2082,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     };
     
     class Dot11EndCFAck : public Dot11ControlTA {
@@ -2048,6 +2134,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     };
     
     class Dot11Ack : public Dot11Control {
@@ -2094,6 +2187,19 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11Ack(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_ACK; }
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     };
     
     /**
@@ -2178,6 +2284,13 @@ namespace Tins {
          * \param bar The new start sequence field.
          */
         void start_sequence(uint16_t seq);
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     protected:
         /**
          * \brief Getter for the control ta additional fields size.
@@ -2268,10 +2381,23 @@ namespace Tins {
          * \param bit The new bitmap field to be set.
          */
         void bitmap(const uint8_t *bit);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_BLOCK_ACK; }
+        
+        /**
+         * \brief Clones this PDU.
+         * 
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     
-        uint8_t _bitmap[128];
+        uint8_t _bitmap[8];
     };
 };
 
