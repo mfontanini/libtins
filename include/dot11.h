@@ -62,7 +62,7 @@ namespace Tins {
             DS_SET,
             CF_SET,
             TIM,
-            BSS,
+            IBSS_SET,
             COUNTRY,
             HOPPING_PATTERN_PARAMS,
             HOPPING_PATTERN_TABLE,
@@ -1026,6 +1026,19 @@ namespace Tins {
         void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
         void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
         void request_information(const std::list<uint8_t> elements);
+        void fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index);
+        void ds_parameter_set(uint8_t current_channel);
+        void cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining);
+        void ibss_parameter_set(uint16_t atim_window);
+        void ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const std::vector<std::pair<uint8_t, uint8_t> >& channel_map);
+        void country(const std::vector<uint8_t*>& countries, const std::vector<uint8_t>& first_channels, const std::vector<uint8_t>& number_channels, const std::vector<uint8_t>& max_power);
+        void fh_parameters(uint8_t prime_radix, uint8_t number_channels);
+        void fh_pattern_table(uint8_t flag, uint8_t number_of_sets, uint8_t modulus, uint8_t offset, const std::vector<uint8_t>& random_table);
+        void power_constraint(uint8_t local_power_constraint);
+        void channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count);
+        void quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset);
+        void tpc_report(uint8_t transmit_power, uint8_t link_margin);
+
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
@@ -2007,6 +2020,76 @@ namespace Tins {
          * \param elements A list of elements.
          */
         void request_information(const std::list<uint8_t> elements);
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu()
+         */
+        PDU* clone_pdu() const;
+
+    };
+
+    /**
+     * \brief Class representing an Probe Response frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ProbeResponse : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Getter for the timestamp field.
+         *
+         * \return Timestamp value in an uint64_t.
+         */
+        inline uint64_t timestamp() const { return this->_body.timestamp; }
+
+        /**
+         * \brief Getter for the interval field.
+         *
+         * \return Timestamp value in an uint16_t.
+         */
+        inline uint16_t interval() const { return Utils::net_to_host_s(this->_body.interval); }
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+
+        /**
+         * \brief Setter for the timestamp field.
+         *
+         * \param new_timestamp uint64_t with the timestamp to set.
+         */
+        void timestamp(uint64_t new_timestamp);
+
+        /**
+         * \brief Setter for the interval field.
+         *
+         * \param new_interval uint16_t with the interval to set.
+         */
+        void interval(uint16_t new_interval);
+
+    protected:
+
+    private:
+        struct ProbeResp {
+            uint64_t timestamp;
+            uint16_t interval;
+            CapabilityInformation capability;
+        };
+
+        ProbeResp _body;
 
     };
 
