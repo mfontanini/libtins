@@ -368,6 +368,8 @@ namespace Tins {
         static const uint16_t DEFAULT_WINDOW;
 
         void copy_fields(const TCP *other);
+        
+        void cleanup();
         /** \brief Serialices this TCP PDU.
          * \param buffer The buffer in which the PDU will be serialized.
          * \param total_sz The size available in the buffer.
