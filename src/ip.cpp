@@ -301,7 +301,7 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     memset(buffer + sizeof(iphdr) + this->_options_size, 0, this->_padded_options_size - this->_options_size);
 
     if (parent && !_ip.check) {
-        uint32_t checksum = PDU::do_checksum(buffer, buffer + sizeof(iphdr) + _padded_options_size);
+        uint32_t checksum = Utils::do_checksum(buffer, buffer + sizeof(iphdr) + _padded_options_size);
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
         ((iphdr*)buffer)->check = Utils::net_to_host_s(~checksum);

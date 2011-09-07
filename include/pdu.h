@@ -260,27 +260,6 @@ namespace Tins {
          * \param parent The PDU that's one level below this one on the stack. Might be 0.
          */
         virtual void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) = 0;
-
-        /** \brief Does the 16 bits sum of all 2 bytes elements between start and end.
-         *
-         * This is the checksum used by IP, UDP and TCP. If there's and odd number of
-         * bytes, the last one is padded and added to the checksum. The checksum is performed
-         * using network endiannes.
-         * \param start The pointer to the start of the buffer.
-         * \param end The pointer to the end of the buffer(excluding the last element).
-         * \return Returns the checksum between start and end(non inclusive).
-         */
-        static uint32_t do_checksum(uint8_t *start, uint8_t *end);
-
-        /** \brief Performs the pseudo header checksum used in TCP and UDP PDUs.
-         *
-         * \param source_ip The source ip address.
-         * \param dest_ip The destination ip address.
-         * \param len The length to be included in the pseudo header.
-         * \param flag The flag to use in the protocol field of the pseudo header.
-         * \return The pseudo header checksum.
-         */
-        static uint32_t pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, uint32_t len, uint32_t flag);
     private:
         uint32_t _flag;
         PDU *_inner_pdu;
