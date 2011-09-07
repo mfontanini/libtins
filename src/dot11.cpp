@@ -863,12 +863,18 @@ Tins::Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz) : Dot11(buf
 
 Tins::Dot11Data::Dot11Data(uint32_t iface_index, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(iface_index, dst_hw_addr, child) {
     this->type(Dot11::DATA);
-    this->addr2(src_hw_addr);
+    if(src_hw_addr)
+        this->addr2(src_hw_addr);
+    else
+        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
 }
 
 Tins::Dot11Data::Dot11Data(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(dst_hw_addr, child) {
     this->type(Dot11::DATA);
-    this->addr2(src_hw_addr);
+    if(src_hw_addr)
+        this->addr2(src_hw_addr);
+    else
+        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2)); 
 }
 
 
@@ -877,7 +883,10 @@ Tins::Dot11Data::Dot11Data(const std::string &iface,
                                      const uint8_t *src_hw_addr,
                                      PDU* child) throw (std::runtime_error) : Dot11(iface, dst_hw_addr, child) {
     this->type(Dot11::DATA);
-    this->addr2(src_hw_addr);
+    if(src_hw_addr)
+        this->addr2(src_hw_addr);
+    else
+        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
 }
 
 void Tins::Dot11Data::copy_ext_header(const Dot11Data* other) {
