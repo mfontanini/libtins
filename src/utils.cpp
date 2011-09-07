@@ -252,6 +252,31 @@ uint16_t Tins::Utils::channel_to_mhz(uint16_t channel) {
     return 2407 + (channel * 5);
 }
 
+uint32_t Tins::Utils::do_checksum(uint8_t *start, uint8_t *end) {
+    uint32_t checksum(0);
+    uint16_t *ptr = (uint16_t*)start, *last = (uint16_t*)end, padding(0);
+    if(((end - start) & 1) == 1) {
+        last = (uint16_t*)end - 1;
+        padding = *(end - 1) << 8;
+    }
+    while(ptr < last)
+        checksum += Utils::net_to_host_s(*(ptr++));
+    return checksum + padding;
+}
+
+uint32_t Tins::Utils::pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, uint32_t len, uint32_t flag) {
+    uint32_t checksum(0);
+    source_ip = Utils::net_to_host_l(source_ip);
+    dest_ip = Utils::net_to_host_l(dest_ip);
+    uint16_t *ptr = (uint16_t*)&source_ip;
+
+    checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
+    ptr = (uint16_t*)&dest_ip;
+    checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
+    checksum += flag + len;
+    return checksum;
+}
+
 uint32_t Tins::Utils::crc32(uint8_t* data, uint32_t data_size) {
     uint32_t i, crc = 0;
     static uint32_t crc_table[] = {

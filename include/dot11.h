@@ -307,7 +307,7 @@ namespace Tins {
          *
          * \return The value of the duration/id field in an uint16_t.
          */
-        inline uint16_t duration_id() const { return Utils::net_to_host_s(this->_header.duration_id); }
+        inline uint16_t duration_id() const { return this->_header.duration_id; }
 
         /**
          * \brief Getter for the first address.
@@ -938,7 +938,7 @@ namespace Tins {
          *
          * \return The sequence number as an uint16_t.
          */
-        inline uint16_t seq_num() const { return Utils::net_to_host_s(this->_ext_header.seq_control.seq_number); }
+        inline uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
 
         /**
          * \brief Getter for the fourth address.
@@ -995,11 +995,11 @@ namespace Tins {
             uint8_t addr3[6];
             struct {
             #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int seq_number:12;
                 unsigned int frag_number:4;
+                unsigned int seq_number:12;
             #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int frag_number:4;
                 unsigned int seq_number:12;
+                unsigned int frag_number:4;
             #endif
             } __attribute__((__packed__)) seq_control;
         } __attribute__((__packed__));
@@ -1042,125 +1042,6 @@ namespace Tins {
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
-    private:
-        ExtendedHeader _ext_header;
-        uint8_t _addr4[6];
-
-    };
-
-    class Dot11DataFrame : public Dot11 {
-    public:
-        /**
-         * \brief Constructor which creates a Dot11DataFrame object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        Dot11DataFrame(uint32_t iface_index, const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
-        Dot11DataFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
-        Dot11DataFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child = 0) throw (std::runtime_error);
-        Dot11DataFrame(const uint8_t *buffer, uint32_t total_sz);
-        Dot11DataFrame(const Dot11DataFrame &other);
-        /**
-         * \brief Getter for the second address.
-         *
-         * \return The second address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr2() const { return this->_ext_header.addr2; }
-
-        /**
-         * \brief Getter for the third address.
-         *
-         * \return The third address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr3() const { return this->_ext_header.addr3; }
-
-        /**
-         * \brief Getter for the fragment number.
-         *
-         * \return The fragment number as an uint8_t.
-         */
-        inline uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
-
-        /**
-         * \brief Getter for the sequence number.
-         *
-         * \return The sequence number as an uint16_t.
-         */
-        inline uint16_t seq_num() const { return Utils::net_to_host_s(this->_ext_header.seq_control.seq_number); }
-
-        /**
-         * \brief Getter for the fourth address.
-         *
-         * \return The fourth address as a constant uint8_t pointer.
-         */
-        inline const uint8_t* addr4() const { return this->_addr4; }
-
-        /**
-         * \brief Setter for the second address.
-         *
-         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
-         */
-        void addr2(const uint8_t* new_addr2);
-
-        /**
-         * \brief Setter for the third address.
-         *
-         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
-         */
-        void addr3(const uint8_t* new_addr3);
-
-        /**
-         * \brief Setter for the fragment number.
-         *
-         * \param new_frag_num uint8_t with the new fragment number.
-         */
-        void frag_num(uint8_t new_frag_num);
-
-        /**
-         * \brief Setter for the sequence number.
-         *
-         * \param new_seq_num uint16_t with the new sequence number.
-         */
-        void seq_num(uint16_t new_seq_num);
-
-        /**
-         * \brief Setter for the fourth address.
-         *
-         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
-         */
-        void addr4(const uint8_t* new_addr4);
-
-        /**
-         * \brief Returns the 802.11 frame's header length.
-         *
-         * \return An uint32_t with the header's size.
-         * \sa PDU::header_size()
-         */
-        uint32_t header_size() const;
-
-        /**
-         * \brief Getter for the PDU's type.
-         * \sa PDU::pdu_type
-         */
-        PDUType pdu_type() const { return PDU::DOT11_DATA; }
-    protected:
-        struct ExtendedHeader {
-            uint8_t addr2[6];
-            uint8_t addr3[6];
-            struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int seq_number:12;
-                unsigned int frag_number:4;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int frag_number:4;
-                unsigned int seq_number:12;
-            #endif
-            } __attribute__((__packed__)) seq_control;
-        } __attribute__((__packed__));
-
-        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
-        void copy_ext_header(const Dot11DataFrame *other);
 
     private:
         ExtendedHeader _ext_header;
@@ -1224,7 +1105,7 @@ namespace Tins {
         /**
          * \brief Getter for the interval field.
          *
-         * \return Timestamp value in an uint64_t.
+         * \return Timestamp value in an uint16_t.
          */
         inline uint16_t interval() const { return Utils::net_to_host_s(this->_body.interval); }
 
@@ -1304,6 +1185,19 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_BEACON; }
     private:
         struct BeaconBody {
             uint64_t timestamp;
@@ -1374,6 +1268,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct DisassocBody {
             uint16_t reason_code;
@@ -1516,6 +1417,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct AssocReqBody {
             CapabilityInformation capability;
@@ -1646,6 +1554,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct AssocRespBody {
             CapabilityInformation capability;
@@ -1659,303 +1574,129 @@ namespace Tins {
         AssocRespBody _body;
     };
 
-    /**
-     * \brief Class representing an ReAssociation Request frame in the IEEE 802.11 Protocol.
-     *
-     */
-    class Dot11ReAssocRequest : public Dot11ManagementFrame {
-
+    class Dot11Data : public Dot11 {
     public:
         /**
-         * \brief Default constructor for the ReAssociation Request frame.
-         *
-         */
-        Dot11ReAssocRequest();
-
-        /**
-         * \brief Constructor for creating a 802.11 ReAssociation Request.
-         *
-         * Constructor that builds a 802.11 ReAssociation Request taking the interface name,
-         * destination's and source's MAC.
-         *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11ReAssocRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
-
-        /**
-         * \brief Constructor which creates a Dot11ReAssocRequest object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
-         *
+         * \brief Constructor which creates a Dot11Data object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_sz);
-
+        Dot11Data(uint32_t iface_index, const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
+        Dot11Data(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
+        Dot11Data(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child = 0) throw (std::runtime_error);
+        Dot11Data(const uint8_t *buffer, uint32_t total_sz);
         /**
-         * \brief Copy constructor.
-         */
-        Dot11ReAssocRequest(const Dot11ReAssocRequest &other);
-
-        /**
-         * \brief Copy assignment operator.
-         */
-        Dot11ReAssocRequest &operator= (const Dot11ReAssocRequest &other);
-
-        /**
-         * \brief Getter for the Capabilities Information.
+         * \brief Getter for the second address.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return The second address as a constant uint8_t pointer.
          */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        inline const uint8_t* addr2() const { return this->_ext_header.addr2; }
 
         /**
-         * \brief Getter for the Capabilities Information.
+         * \brief Getter for the third address.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return The third address as a constant uint8_t pointer.
          */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+        inline const uint8_t* addr3() const { return this->_ext_header.addr3; }
 
         /**
-         * \brief Getter for the listen interval.
+         * \brief Getter for the fragment number.
          *
-         * \return The listen interval in an uint16_t.
+         * \return The fragment number as an uint8_t.
          */
-        inline uint16_t listen_interval() const { return this->_body.listen_interval; }
+        inline uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
 
         /**
-         * \brief Getter for the current AP field.
+         * \brief Getter for the sequence number.
          *
-         * \return The current AP value in an uint8_t*.
+         * \return The sequence number as an uint16_t.
          */
-        inline const uint8_t* current_ap() const {return this->_body.current_ap; }
+        inline uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
 
         /**
-         * \brief Setter for the listen interval.
+         * \brief Getter for the fourth address.
          *
-         * \param new_listen_interval uint16_t with the new listen interval.
+         * \return The fourth address as a constant uint8_t pointer.
          */
-        void listen_interval(uint16_t new_listen_interval);
+        inline const uint8_t* addr4() const { return this->_addr4; }
 
         /**
-         * \brief Setter for the current AP field.
+         * \brief Setter for the second address.
          *
-         * \param new_current_ap uint8_t array of 6 bytes with the new current_ap
+         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
          */
-        void current_ap(const uint8_t* new_current_ap);
+        void addr2(const uint8_t* new_addr2);
 
         /**
-         * \brief Helper method to set the essid.
+         * \brief Setter for the third address.
          *
-         * \param new_ssid The ssid to be set.
+         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
          */
-        void ssid(const std::string &new_ssid);
+        void addr3(const uint8_t* new_addr3);
 
         /**
-         * \brief Helper method to set the supported rates.
+         * \brief Setter for the fragment number.
          *
-         * \param new_rates A list of rates to be set.
+         * \param new_frag_num uint8_t with the new fragment number.
          */
-        void supported_rates(const std::list<float> &new_rates);
+        void frag_num(uint8_t new_frag_num);
 
         /**
-         * \brief Helper method to set the extended supported rates.
+         * \brief Setter for the sequence number.
          *
-         * \param new_rates A list of rates to be set.
+         * \param new_seq_num uint16_t with the new sequence number.
          */
-        void extended_supported_rates(const std::list<float> &new_rates);
+        void seq_num(uint16_t new_seq_num);
 
         /**
-         * \brief Helper method to set the power capabilities.
+         * \brief Setter for the fourth address.
          *
-         * \param min_power uint8_t indicating the minimum transmiting power capability.
-         * \param max_power uint8_t indicating the maximum transmiting power capability.
+         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
          */
-        void power_capabilities(uint8_t min_power, uint8_t max_power);
+        void addr4(const uint8_t* new_addr4);
 
         /**
-         * \brief Helper method to set the supported channels.
-         *
-         * \param new_channels A list of channels to be set.
-         */
-        void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
-
-        /**
-         * \brief Helper method to set the RSN information option.
-         *
-         * \param info The RSNInformation structure to be set.
-         */
-        void rsn_information(const RSNInformation& info);
-
-        /**
-         * \brief Helper method to set the QoS capabilities.
-         *
-         * \param new_qos_capabilities uint8_t with the capabilities.
-         */
-        void qos_capabilities(uint8_t new_qos_capabilities);
-
-        /**
-         * \brief Returns the frame's header length.
+         * \brief Returns the 802.11 frame's header length.
          *
          * \return An uint32_t with the header's size.
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
 
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_DATA; }
 
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     protected:
+        struct ExtendedHeader {
+            uint8_t addr2[6];
+            uint8_t addr3[6];
+            struct {
+            #if __BYTE_ORDER == __LITTLE_ENDIAN
+                unsigned int seq_number:12;
+                unsigned int frag_number:4;
+            #elif __BYTE_ORDER == __BIG_ENDIAN
+                unsigned int frag_number:4;
+                unsigned int seq_number:12;
+            #endif
+            } __attribute__((__packed__)) seq_control;
+        } __attribute__((__packed__));
 
-
+        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+        void copy_ext_header(const Dot11Data *other);
 
     private:
-        struct ReAssocReqBody {
-            CapabilityInformation capability;
-            uint16_t listen_interval;
-            uint8_t current_ap[6];
-        };
-
-        void copy_fields(const Dot11ReAssocRequest* other);
-        uint32_t write_fixed_parameters(uint8_t* buffer, uint32_t total_sz);
-
-        ReAssocReqBody _body;
-
-    };
-
-    /**
-     * \brief Class representing an ReAssociation Response frame in the IEEE 802.11 Protocol.
-     *
-     */
-    class Dot11ReAssocResponse : public Dot11ManagementFrame {
-
-    public:
-        /**
-         * \brief Default constructor for the Association Response frame.
-         *
-         */
-        Dot11ReAssocResponse();
-
-        /**
-         * \brief Constructor for creating a 802.11 ReAssociation Response.
-         *
-         * Constructor that builds a 802.11 ReAssociation Response taking the interface name,
-         * destination's and source's MAC.
-         *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11ReAssocResponse(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
-
-        /**
-         * \brief Constructor which creates a Dot11ReAssocResponse object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
-         *
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Copy constructor.
-         */
-        Dot11ReAssocResponse(const Dot11ReAssocResponse &other);
-
-        /**
-         * \brief Copy assignment operator
-         */
-        Dot11ReAssocResponse &operator= (const Dot11ReAssocResponse &other);
-
-        /**
-         * \brief Getter for the Capabilities Information.
-         *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
-         */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
-
-        /**
-         * \brief Getter for the Capabilities Information.
-         *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
-         */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
-
-        /**
-         * \brief Getter for the status code.
-         *
-         * \return The status code in an uint16_t.
-         */
-        inline uint16_t status_code() const { return this->_body.status_code; }
-
-        /**
-         * \brief Getter for the AID field.
-         *
-         * \return The AID field value in an uint16_t.
-         */
-        inline uint16_t aid() const { return this->_body.aid; }
-
-        /**
-         * \brief Setter for the status code.
-         *
-         * \param new_status_code uint16_t with the new status code.
-         */
-        void status_code(uint16_t new_status_code);
-
-        /**
-         * \brief Setter for the AID field.
-         *
-         * \param new_aid uint16_t with the new AID value.
-         */
-        void aid(uint16_t new_aid);
-
-        /**
-         * \brief Helper method to set the supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the EDCA Parameter Set.
-         *
-         * \param ac_be uint32_t with the value of the ac_be field.
-         * \param ac_bk uint32_t with the value of the ac_bk field.
-         * \param ac_vi uint32_t with the value of the ac_vi field.
-         * \param ac_vo uint32_t with the value of the ac_vo field.
-         */
-        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
-
-        /**
-         * \brief Returns the frame's header length.
-         *
-         * \return An uint32_t with the header's size.
-         * \sa PDU::header_size()
-         */
-        uint32_t header_size() const;
-
-
-    protected:
-
-    private:
-
-        struct ReAssocRespBody {
-            CapabilityInformation capability;
-            uint16_t status_code;
-            uint16_t aid;
-        };
-
-        void copy_fields(const Dot11ReAssocResponse *other);
-        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
-
-        ReAssocRespBody _body;
-
+        ExtendedHeader _ext_header;
+        uint8_t _addr4[6];
     };
 
     /**
@@ -2093,7 +1834,7 @@ namespace Tins {
 
     };
 
-    class Dot11QoSData : public Dot11DataFrame {
+    class Dot11QoSData : public Dot11Data {
 
     public:
 
@@ -2173,6 +1914,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
 
         /**
          * \brief Getter for the PDU's type.
@@ -2370,6 +2118,13 @@ namespace Tins {
         Dot11RTS(const uint8_t *buffer, uint32_t total_sz);
 
         /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+
+        /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
@@ -2422,6 +2177,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     };
 
     class Dot11CFEnd : public Dot11ControlTA {
@@ -2470,6 +2232,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     };
 
     class Dot11EndCFAck : public Dot11ControlTA {
@@ -2515,6 +2284,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     };
 
     class Dot11Ack : public Dot11Control {
@@ -2567,6 +2343,14 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_ACK; }
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+
     };
 
     /**
@@ -2650,6 +2434,13 @@ namespace Tins {
          * \param bar The new start sequence field.
          */
         void start_sequence(uint16_t seq);
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     protected:
         /**
          * \brief Getter for the control ta additional fields size.
@@ -2746,6 +2537,13 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_BLOCK_ACK; }
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 

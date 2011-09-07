@@ -20,7 +20,6 @@
  */
 
 
-#include <stdexcept>
 #include "sniffer.h"
 #include "ethernetII.h"
 #include "radiotap.h"
@@ -41,7 +40,7 @@ struct LoopData {
 /** \endcond */
 
 
-Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size) {
+Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size, const string &filter) throw(std::runtime_error) {
     char error[PCAP_ERRBUF_SIZE];
     if (pcap_lookupnet(device.c_str(), &ip, &mask, error) == -1) {
         ip = 0;
@@ -52,6 +51,8 @@ Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size) {
         throw runtime_error(error);
     wired = (pcap_datalink (handle) != DLT_IEEE802_11_RADIO); //better plx
     actual_filter.bf_insns = 0;
+    if(filter.size() && !set_filter(filter))
+        throw runtime_error("Invalid filter");
 }
 
 Tins::Sniffer::~Sniffer() {
@@ -65,9 +66,7 @@ bool Tins::Sniffer::compile_set_filter(const string &filter, bpf_program &prog) 
     return (pcap_compile(handle, &prog, filter.c_str(), 0, ip) != -1 && pcap_setfilter(handle, &prog) != -1);
 }
 
-Tins::PDU *Tins::Sniffer::next_packet(const string &filter) {
-    if(filter.size())
-        set_filter(filter);
+Tins::PDU *Tins::Sniffer::next_packet() {
     pcap_pkthdr header;
     PDU *ret = 0;
     while(!ret) {
@@ -91,9 +90,7 @@ void Tins::Sniffer::stop_sniff() {
     pcap_breakloop(handle);
 }
 
-void Tins::Sniffer::sniff_loop(AbstractSnifferHandler *cback_handler, const string &filter, uint32_t max_packets) {
-    if(filter.size())
-        set_filter(filter);
+void Tins::Sniffer::sniff_loop(AbstractSnifferHandler *cback_handler, uint32_t max_packets) {
     LoopData data(handle, cback_handler, wired);
     pcap_loop(handle, max_packets, Sniffer::callback_handler, (u_char*)&data);
 }
