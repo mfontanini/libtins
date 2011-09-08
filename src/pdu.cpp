@@ -34,6 +34,12 @@ Tins::PDU::PDU(const PDU &other) : _inner_pdu(0) {
     copy_inner_pdu(other);
 }
 
+Tins::PDU &Tins::PDU::operator=(const PDU &other) {
+    _flag = other.flag();
+    copy_inner_pdu(other);
+    return *this;
+}
+
 Tins::PDU::~PDU() {
     delete _inner_pdu;
 }

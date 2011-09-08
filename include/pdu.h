@@ -52,16 +52,26 @@ namespace Tins {
         enum PDUType {
             RAW,
             ETHERNET_II,
-            DOT11,
-            DOT11_DATA,
-            DOT11_QOS_DATA,
-            DOT11_BEACON,
-            DOT11_CONTROL,
-            DOT11_ACK,
-            DOT11_BLOCK_ACK,
-            DOT11_RTS,
-            SNAP,
             RADIOTAP,
+            DOT11,
+            DOT11_ACK,
+            DOT11_ASSOC_REQ,
+            DOT11_ASSOC_RESP,
+            DOT11_BEACON,
+            DOT11_BLOCK_ACK,
+            DOT11_CFEND,
+            DOT11_DATA,
+            DOT11_CONTROL,
+            DOT11_DEAUTH,
+            DOT11_DIASSOC,
+            DOT11_ENDCFACK,
+            DOT11_MANAGEMENT,
+            DOT11_PROBE_REQ,
+            DOT11_PROBE_RESP,
+            DOT11_PS_POLL,
+            DOT11_RTS,
+            DOT11_QOS_DATA,
+            SNAP,
             IP,
             ARP,
             TCP,
@@ -205,6 +215,18 @@ namespace Tins {
          * \param total_sz The size of the buffer.
          */
         virtual bool matches_response(uint8_t *ptr, uint32_t total_sz) { return false; }
+        
+        /** 
+         * \brief Check wether this PDU matches the specified flag.
+         * 
+         * This method should be reimplemented in PDU classes which have
+         * subclasses, and try to match the given PDU to each of its parent
+         * classes' flag.
+         * \param flag The flag to match.
+         */
+        virtual bool matches_flag(PDUType flag) {
+           return flag == pdu_type(); 
+        }
 
         /**
          * \brief Getter for the PDU's type.
@@ -223,9 +245,14 @@ namespace Tins {
         virtual PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz) { return 0; }
     protected:
         /**
-         * \brief Copy consstructor.
+         * \brief Copy constructor.
          */
         PDU(const PDU &other);
+        
+        /**
+         * \brief Copy assignment operator.
+         */
+        PDU &operator=(const PDU &other);
         
         /**
          * \brief Copy other PDU's inner PDU(if any).

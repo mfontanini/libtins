@@ -60,16 +60,6 @@ namespace Tins {
          */
         ARP(const uint8_t *buffer, uint32_t total_sz);
         
-        /**
-         * \brief Copy constructor.
-         */
-        ARP(const ARP &other);
-
-        /**
-         * \brief Copy asignment operator.
-         */
-        ARP &operator= (const ARP &other);
-        
         /* Getters */
         /**
          * \brief Getter for the sender's hardware address.
