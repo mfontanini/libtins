@@ -459,6 +459,15 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::DOT11; }
 
         /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11; 
+        }
+
+        /**
          * \brief Allocates an Dot11 PDU from a buffer.
          * \param buffer The buffer from which to take the PDU data.
          * \param total_sz The total size of the buffer.
@@ -989,6 +998,22 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Getter for the PDU's type.
+         *
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_MANAGEMENT; }
+        
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_MANAGEMENT || Dot11::matches_flag(flag); 
+        }
     protected:
         struct ExtendedHeader {
             uint8_t addr2[6];
@@ -1369,6 +1394,15 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+        
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_BEACON || Dot11ManagementFrame::matches_flag(flag); 
+        }
 
         /**
          * \brief Clones this PDU.
@@ -1452,6 +1486,21 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_DIASSOC; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_DIASSOC || Dot11ManagementFrame::matches_flag(flag); 
+        }
 
         /**
          * \brief Clones this PDU.
@@ -1593,6 +1642,21 @@ namespace Tins {
         uint32_t header_size() const;
 
         /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_ASSOC_REQ; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_ASSOC_REQ || Dot11ManagementFrame::matches_flag(flag); 
+        }
+
+        /**
          * \brief Clones this PDU.
          *
          * \sa PDU::clone_pdu
@@ -1721,6 +1785,21 @@ namespace Tins {
         uint32_t header_size() const;
 
         /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_ASSOC_RESP; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_ASSOC_RESP || Dot11ManagementFrame::matches_flag(flag); 
+        }
+
+        /**
          * \brief Clones this PDU.
          *
          * \sa PDU::clone_pdu
@@ -1802,6 +1881,21 @@ namespace Tins {
          * \param elements A list of elements.
          */
         void request_information(const std::list<uint8_t> elements);
+
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_PROBE_REQ; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_PROBE_REQ || Dot11ManagementFrame::matches_flag(flag); 
+        }
 
         /**
          * \brief Clones this PDU.
@@ -2066,6 +2160,20 @@ namespace Tins {
          */
         PDU* clone_pdu() const;
 
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_PROBE_RESP; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_PROBE_RESP || Dot11ManagementFrame::matches_flag(flag); 
+        }
     protected:
 
     private:
@@ -2174,6 +2282,15 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_DATA; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_DATA || Dot11::matches_flag(flag); 
+        }
 
         /**
          * \brief Clones this PDU.
@@ -2297,6 +2414,15 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_QOS_DATA; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_QOS_DATA || Dot11Data::matches_flag(flag); 
+        }
     private:
         void copy_fields(const Dot11QoSData *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
@@ -2357,6 +2483,15 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_CONTROL; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_CONTROL || Dot11::matches_flag(flag); 
+        }
     };
 
     /**
@@ -2499,6 +2634,15 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_RTS; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_RTS || Dot11Control::matches_flag(flag); 
+        }
     };
 
     class Dot11PSPoll : public Dot11ControlTA {
@@ -2554,6 +2698,21 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_PS_POLL; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_PS_POLL || Dot11Control::matches_flag(flag); 
+        }
     };
 
     class Dot11CFEnd : public Dot11ControlTA {
@@ -2609,6 +2768,21 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
+        
+         /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_CF_END; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_CF_END || Dot11Control::matches_flag(flag); 
+        }
     };
 
     class Dot11EndCFAck : public Dot11ControlTA {
@@ -2661,6 +2835,21 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
+        
+         /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_END_CF_ACK; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_END_CF_ACK || Dot11Control::matches_flag(flag); 
+        }
     };
 
     class Dot11Ack : public Dot11Control {
@@ -2707,6 +2896,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11Ack(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
 
         /**
          * \brief Getter for the PDU's type.
@@ -2715,12 +2911,13 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::DOT11_ACK; }
 
         /**
-         * \brief Clones this PDU.
-         *
-         * \sa PDU::clone_pdu
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
          */
-        PDU *clone_pdu() const;
-
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_ACK || Dot11Control::matches_flag(flag); 
+        }
     };
 
     /**
@@ -2811,12 +3008,22 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
-    protected:
+        
         /**
-         * \brief Getter for the control ta additional fields size.
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
          */
-        uint32_t blockack_request_size() const { return controlta_size() + sizeof(_bar_control) + sizeof(_start_sequence); }
+        PDUType pdu_type() const { return PDU::DOT11_BLOCK_ACK_REQ; }
 
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_BLOCK_ACK_REQ || Dot11Control::matches_flag(flag); 
+        }
+    protected:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
         struct BarControl {
@@ -2838,7 +3045,7 @@ namespace Tins {
     /**
      * \brief Class that represents an 802.11 block ack frame.
      */
-    class Dot11BlockAck : public Dot11BlockAckRequest {
+    class Dot11BlockAck : public Dot11ControlTA {
     public:
         /**
          * \brief Constructor for creating a 802.11 Block Ack frame PDU.
@@ -2882,6 +3089,19 @@ namespace Tins {
          */
         Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz);
 
+        /* Getters */
+
+        /**
+         * \brief Getter for the bar control field.
+         * \return The bar control field.
+         */
+        uint16_t bar_control() const { return _bar_control.tid; }
+
+        /**
+         * \brief Getter for the start sequence field.
+         * \return The bar start sequence.
+         */
+        uint16_t start_sequence() const { return (_start_sequence.frag << 12) | (_start_sequence.seq); }
         /**
          * \brief Returns the 802.11 frame's header length.
          *
@@ -2889,6 +3109,20 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
+
+        /* Setters */
+
+        /**
+         * \brief Setter for the bar control field.
+         * \param bar The new bar control field.
+         */
+        void bar_control(uint16_t bar);
+
+        /**
+         * \brief Setter for the start sequence field.
+         * \param bar The new start sequence field.
+         */
+        void start_sequence(uint16_t seq);
 
         /**
          * \brief Getter for the bitmap field.
@@ -2909,14 +3143,37 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::DOT11_BLOCK_ACK; }
 
         /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_BLOCK_ACK || Dot11Control::matches_flag(flag); 
+        }
+
+        /**
          * \brief Clones this PDU.
          *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
     private:
-        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+        struct BarControl {
+            uint16_t reserved:12,
+                tid:4;
+        } __attribute__((__packed__));
 
+        struct StartSequence {
+            uint16_t frag:4,
+                seq:12;
+        } __attribute__((__packed__));
+
+        void init_block_ack();
+        uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+        
+
+        BarControl _bar_control;
+        StartSequence _start_sequence;
         uint8_t _bitmap[8];
     };
 };

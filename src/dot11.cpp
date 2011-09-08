@@ -1472,7 +1472,7 @@ uint32_t Tins::Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t 
     std::memcpy(buffer, &_bar_control, sizeof(_bar_control));
     buffer += sizeof(_bar_control);
     std::memcpy(buffer, &_start_sequence, sizeof(_start_sequence));
-    return parent_size + sizeof(_start_sequence);
+    return parent_size + sizeof(_start_sequence) + sizeof(_bar_control);
 }
 
 void Tins::Dot11BlockAckRequest::bar_control(uint16_t bar) {
@@ -1494,28 +1494,40 @@ Tins::PDU *Tins::Dot11BlockAckRequest::clone_pdu() const {
 }
 
 /* Dot11BlockAck */
-Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11BlockAckRequest(dst_addr, target_addr, child) {
+Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11BlockAckRequest(iface, dst_addr, target_addr, child) {
+Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11BlockAckRequest(iface_index, dst_addr, target_addr, child) {
+Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11BlockAckRequest(buffer, total_sz) {
-    uint32_t padding = blockack_request_size();
+Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+    uint32_t padding = controlta_size();
     buffer += padding;
     total_sz -= padding;
-    if(total_sz < sizeof(_bitmap))
+    if(total_sz < sizeof(_bitmap) + sizeof(_bar_control) + sizeof(_start_sequence))
         throw std::runtime_error("Not enough size for an IEEE 802.11 Block Ack frame in the buffer.");
+    std::memcpy(&_bar_control, buffer, sizeof(_bar_control));
+    buffer += sizeof(_bar_control);
+    std::memcpy(&_start_sequence, buffer, sizeof(_start_sequence));
+    buffer += sizeof(_start_sequence);
     std::memcpy(&_bitmap, buffer, sizeof(_bitmap));
+}
+
+void Tins::Dot11BlockAck::bar_control(uint16_t bar) {
+    std::memcpy(&_bar_control, &bar, sizeof(bar));
+}
+
+void Tins::Dot11BlockAck::start_sequence(uint16_t seq) {
+    std::memcpy(&_start_sequence, &seq, sizeof(seq));
 }
 
 void Tins::Dot11BlockAck::bitmap(const uint8_t *bit) {
@@ -1523,14 +1535,18 @@ void Tins::Dot11BlockAck::bitmap(const uint8_t *bit) {
 }
 
 uint32_t Tins::Dot11BlockAck::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t parent_size = Dot11BlockAckRequest::write_ext_header(buffer, total_sz);
+    uint32_t parent_size = Dot11ControlTA::write_ext_header(buffer, total_sz);
     buffer += parent_size;
+    std::memcpy(buffer, &_bar_control, sizeof(_bar_control));
+    buffer += sizeof(_bar_control);
+    std::memcpy(buffer, &_start_sequence, sizeof(_start_sequence));
+    buffer += sizeof(_start_sequence);
     std::memcpy(buffer, _bitmap, sizeof(_bitmap));
-    return parent_size + sizeof(_bitmap);
+    return parent_size + sizeof(_bitmap) + sizeof(_bar_control) + sizeof(_start_sequence);
 }
 
 uint32_t Tins::Dot11BlockAck::header_size() const {
-    return Dot11BlockAckRequest::header_size() + sizeof(_bitmap);
+    return Dot11ControlTA::header_size() + sizeof(_start_sequence) + sizeof(_start_sequence) + sizeof(_bitmap);
 }
 
 Tins::PDU *Tins::Dot11BlockAck::clone_pdu() const {
