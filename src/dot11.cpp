@@ -44,7 +44,7 @@ const uint8_t *Tins::Dot11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xf
 Tins::Dot11::Dot11(const uint8_t* dst_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
     if(dst_hw_addr) {
-        
+
         this->addr1(dst_hw_addr);
     }
 }
@@ -240,7 +240,7 @@ Tins::PDU *Tins::Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     else if(hdr->control.type == DATA){
         if(hdr->control.subtype <= 4)
             ret = new Dot11Data(buffer, total_sz);
-        else 
+        else
             ret = new Dot11QoSData(buffer, total_sz);
     }
     else if(hdr->control.type == CONTROL){
@@ -424,7 +424,7 @@ void Tins::Dot11ManagementFrame::supported_channels(const std::list<std::pair<ui
 }
 
 void Tins::Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
-    uint8_t* buffer = new uint8_t[18];
+    uint8_t buffer[18];
     buffer[0] = 0;
     uint32_t* ptr = (uint32_t*)(buffer + 1);
     *(ptr++) = ac_be;
@@ -432,7 +432,164 @@ void Tins::Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_
     *(ptr++) = ac_vi;
     *(ptr++) = ac_vo;
     add_tagged_option(EDCA, 18, buffer);
+}
+
+void Tins::Dot11ManagementFrame::request_information(const std::list<uint8_t> elements) {
+    uint16_t sz = elements.size();
+    list<uint8_t>::const_iterator it = elements.begin();
+    uint8_t* buffer = new uint8_t[sz];
+    for (uint16_t i = 0; i < sz; i++) {
+        buffer[i] = *it;
+        it++;
+    }
+    add_tagged_option(REQUEST, sz, buffer);
     delete[] buffer;
+}
+
+void Tins::Dot11ManagementFrame::fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index) {
+    uint8_t buffer[5];
+    uint16_t* ptr_buffer = (uint16_t*)buffer;
+    ptr_buffer[0] = dwell_time;
+    buffer[2] = hop_set;
+    buffer[3] = hop_pattern;
+    buffer[4] = hop_index;
+    add_tagged_option(FH_SET, 5, buffer);
+
+}
+
+void Tins::Dot11ManagementFrame::ds_parameter_set(uint8_t current_channel) {
+    add_tagged_option(DS_SET, 1, &current_channel);
+}
+
+void Tins::Dot11ManagementFrame::cf_parameter_set(uint8_t cfp_count,
+                                                  uint8_t cfp_period,
+                                                  uint16_t cfp_max_duration,
+                                                  uint16_t cfp_dur_remaining) {
+    uint8_t buffer[6];
+    uint16_t* ptr_buffer = (uint16_t*)buffer;
+    buffer[0] = cfp_count;
+    buffer[1] = cfp_period;
+    ptr_buffer[1] = cfp_max_duration;
+    ptr_buffer[2] = cfp_dur_remaining;
+    add_tagged_option(CF_SET, 6, buffer);
+
+}
+
+void Tins::Dot11ManagementFrame::ibss_parameter_set(uint16_t atim_window) {
+    add_tagged_option(IBSS_SET, 2, (uint8_t*)&atim_window);
+}
+
+void Tins::Dot11ManagementFrame::country(const std::vector<uint8_t*>& countries,
+                                         const std::vector<uint8_t>& first_channels,
+                                         const std::vector<uint8_t>& number_channels,
+                                         const std::vector<uint8_t>& max_power) {
+
+    /* Check that the lists have the same number of elements */
+    if ((countries.size() != first_channels.size()) ||
+        (countries.size() != number_channels.size()) ||
+        (countries.size() != max_power.size()))
+        throw runtime_error("Lists should be of equal length!");
+
+    uint8_t sz = 6 * countries.size();
+    if (sz & 1) // If size is odd, pad it
+        sz++;
+    uint8_t* buffer = new uint8_t[sz];
+    uint8_t* ptr_buffer = buffer;
+    for (uint8_t i = 0; i < countries.size(); i++) {
+        memcpy(ptr_buffer, countries[i], 3);
+        ptr_buffer += 3;
+        *ptr_buffer = first_channels[i];
+        ptr_buffer++;
+        *ptr_buffer = number_channels[i];
+        ptr_buffer++;
+        *ptr_buffer = max_power[i];
+        ptr_buffer++;
+    }
+    add_tagged_option(COUNTRY, sz, buffer);
+    delete[] buffer;
+
+}
+
+void Tins::Dot11ManagementFrame::fh_parameters(uint8_t prime_radix, uint8_t number_channels) {
+    uint8_t buffer[2];
+    buffer[0] = prime_radix;
+    buffer[1] = number_channels;
+    add_tagged_option(HOPPING_PATTERN_PARAMS, 2, buffer);
+}
+
+void Tins::Dot11ManagementFrame::fh_pattern_table(uint8_t flag,
+                                                  uint8_t number_of_sets,
+                                                  uint8_t modulus,
+                                                  uint8_t offset,
+                                                  const vector<uint8_t>& random_table) {
+
+    uint8_t sz = 4 + random_table.size();
+    uint8_t* buffer = new uint8_t[sz];
+    buffer[0] = flag;
+    buffer[1] = number_of_sets;
+    buffer[2] = modulus;
+    buffer[3] = offset;
+    uint8_t* ptr_buffer = &buffer[4];
+    for (vector<uint8_t>::const_iterator it = random_table.begin(); it != random_table.end(); it++)
+        *(ptr_buffer++) = *it;
+    add_tagged_option(HOPPING_PATTERN_TABLE, sz, buffer);
+    delete[] buffer;
+}
+
+void Tins::Dot11ManagementFrame::power_constraint(uint8_t local_power_constraint) {
+    add_tagged_option(POWER_CONSTRAINT, 1, &local_power_constraint);
+}
+
+void Tins::Dot11ManagementFrame::channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count) {
+
+    uint8_t buffer[3];
+    buffer[0] = switch_mode;
+    buffer[1] = new_channel;
+    buffer[2] = switch_count;
+    add_tagged_option(CHANNEL_SWITCH, 3, buffer);
+
+}
+
+void Tins::Dot11ManagementFrame::quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset) {
+
+    uint8_t buffer[6];
+    uint16_t* ptr_buffer = (uint16_t*)buffer;
+
+    buffer[0] = quiet_count;
+    buffer[1] = quiet_period;
+    ptr_buffer[1] = quiet_duration;
+    ptr_buffer[2] = quiet_offset;
+    add_tagged_option(QUIET, 6, buffer);
+
+}
+
+void Tins::Dot11ManagementFrame::ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const vector<pair<uint8_t, uint8_t> >& channel_map) {
+
+    uint8_t sz = 7 + 2 * channel_map.size();
+    uint8_t* buffer = new uint8_t[sz];
+    uint8_t* ptr_buffer = buffer;
+
+    memcpy(ptr_buffer, dfs_owner, 6);
+    ptr_buffer += 6;
+    *(ptr_buffer++) = recovery_interval;
+    for (vector<pair<uint8_t, uint8_t> >::const_iterator it = channel_map.begin(); it != channel_map.end(); it++) {
+        *(ptr_buffer++) = it->first;
+        *(ptr_buffer++) = it->second;
+    }
+
+    add_tagged_option(IBSS_DFS, sz, buffer);
+
+    delete[] buffer;
+
+}
+
+void Tins::Dot11ManagementFrame::tpc_report(uint8_t transmit_power, uint8_t link_margin) {
+
+    uint8_t buffer[2];
+    buffer[0] = transmit_power;
+    buffer[1] = link_margin;
+    add_tagged_option(TPC_REPORT, 2, buffer);
+
 }
 
 /* Dot11Beacon */
@@ -854,7 +1011,7 @@ Tins::Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz) : Dot11(buf
     if(from_ds() && to_ds()) {
         if(total_sz < sizeof(_addr4))
             throw std::runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
-        std::memcpy(&_addr4, buffer, sizeof(_addr4)); 
+        std::memcpy(&_addr4, buffer, sizeof(_addr4));
         buffer += sizeof(_addr4);
         total_sz -= sizeof(_addr4);
     }
@@ -874,7 +1031,7 @@ Tins::Dot11Data::Dot11Data(const uint8_t *dst_hw_addr, const uint8_t *src_hw_add
     if(src_hw_addr)
         this->addr2(src_hw_addr);
     else
-        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2)); 
+        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
 }
 
 
@@ -943,8 +1100,48 @@ Tins::PDU *Tins::Dot11Data::clone_pdu() const {
 /* QoS data. */
 
 Tins::Dot11QoSData::Dot11QoSData(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11Data(dst_hw_addr, src_hw_addr, child) {
-    
+
 }
+
+/* Probe Request */
+
+Tins::Dot11ProbeRequest::Dot11ProbeRequest() : Dot11ManagementFrame() {
+    this->subtype(Dot11::PROBE_REQ);
+}
+
+Tins::Dot11ProbeRequest::Dot11ProbeRequest(const std::string& iface,
+                                           const uint8_t* dst_hw_addr,
+                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::PROBE_REQ);
+}
+
+Tins::Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Tins::Dot11ProbeRequest::ssid(const std::string &new_ssid) {
+    Dot11ManagementFrame::ssid(new_ssid);
+}
+
+void Tins::Dot11ProbeRequest::supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::supported_rates(new_rates);
+}
+
+void Tins::Dot11ProbeRequest::request_information(const std::list<uint8_t> elements) {
+    Dot11ManagementFrame::request_information(elements);
+}
+
+void Tins::Dot11ProbeRequest::extended_supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::extended_supported_rates(new_rates);
+}
+
+Tins::PDU* Tins::Dot11ProbeRequest::clone_pdu() const {
+    Dot11ProbeRequest* new_pdu = new Dot11ProbeRequest();
+    new_pdu->copy_80211_fields(this);
+    return new_pdu;
+}
+
+/* QoS data. */
 
 Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : Dot11Data(iface, dst_hw_addr, src_hw_addr, child) {
     this->subtype(Dot11::QOS_DATA_DATA);
@@ -1249,12 +1446,12 @@ Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t* dst_addr , const uint8_t* targ
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11BlockAckRequest(iface, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11BlockAckRequest(iface, dst_addr, target_addr, child) {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11BlockAckRequest(iface_index, dst_addr, target_addr, child) { 
+Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11BlockAckRequest(iface_index, dst_addr, target_addr, child) {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }

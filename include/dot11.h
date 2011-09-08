@@ -62,7 +62,7 @@ namespace Tins {
             DS_SET,
             CF_SET,
             TIM,
-            BSS,
+            IBSS_SET,
             COUNTRY,
             HOPPING_PATTERN_PARAMS,
             HOPPING_PATTERN_TABLE,
@@ -1025,6 +1025,20 @@ namespace Tins {
         void power_capabilities(uint8_t min_power, uint8_t max_power);
         void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
         void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
+        void request_information(const std::list<uint8_t> elements);
+        void fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index);
+        void ds_parameter_set(uint8_t current_channel);
+        void cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining);
+        void ibss_parameter_set(uint16_t atim_window);
+        void ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const std::vector<std::pair<uint8_t, uint8_t> >& channel_map);
+        void country(const std::vector<uint8_t*>& countries, const std::vector<uint8_t>& first_channels, const std::vector<uint8_t>& number_channels, const std::vector<uint8_t>& max_power);
+        void fh_parameters(uint8_t prime_radix, uint8_t number_channels);
+        void fh_pattern_table(uint8_t flag, uint8_t number_of_sets, uint8_t modulus, uint8_t offset, const std::vector<uint8_t>& random_table);
+        void power_constraint(uint8_t local_power_constraint);
+        void channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count);
+        void quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset);
+        void tpc_report(uint8_t transmit_power, uint8_t link_margin);
+
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
@@ -1171,14 +1185,14 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -1254,10 +1268,10 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -1403,10 +1417,10 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -1540,10 +1554,10 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -1655,10 +1669,10 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_DATA; }
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -1683,6 +1697,141 @@ namespace Tins {
     private:
         ExtendedHeader _ext_header;
         uint8_t _addr4[6];
+    };
+
+    /**
+     * \brief Class representing an Probe Request frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ProbeRequest : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the Probe Request frame.
+         *
+         */
+        Dot11ProbeRequest();
+
+        /**
+         * \brief Constructor for creating a 802.11 Probe Request.
+         *
+         * Constructor that builds a 802.11 Probe Request taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ProbeRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11ProbeRequest object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Helper method to set the essid.
+         *
+         * \param new_ssid The ssid to be set.
+         */
+        void ssid(const std::string &new_ssid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the Request Information element.
+         *
+         * \param elements A list of elements.
+         */
+        void request_information(const std::list<uint8_t> elements);
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu()
+         */
+        PDU* clone_pdu() const;
+
+    };
+
+    /**
+     * \brief Class representing an Probe Response frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ProbeResponse : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Getter for the timestamp field.
+         *
+         * \return Timestamp value in an uint64_t.
+         */
+        inline uint64_t timestamp() const { return this->_body.timestamp; }
+
+        /**
+         * \brief Getter for the interval field.
+         *
+         * \return Timestamp value in an uint16_t.
+         */
+        inline uint16_t interval() const { return Utils::net_to_host_s(this->_body.interval); }
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+
+        /**
+         * \brief Setter for the timestamp field.
+         *
+         * \param new_timestamp uint64_t with the timestamp to set.
+         */
+        void timestamp(uint64_t new_timestamp);
+
+        /**
+         * \brief Setter for the interval field.
+         *
+         * \param new_interval uint16_t with the interval to set.
+         */
+        void interval(uint16_t new_interval);
+
+    protected:
+
+    private:
+        struct ProbeResp {
+            uint64_t timestamp;
+            uint16_t interval;
+            CapabilityInformation capability;
+        };
+
+        ProbeResp _body;
+
     };
 
     class Dot11QoSData : public Dot11Data {
@@ -1765,14 +1914,14 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -1967,14 +2116,14 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11RTS(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -2028,10 +2177,10 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -2083,10 +2232,10 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -2135,10 +2284,10 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -2194,10 +2343,10 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_ACK; }
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -2258,7 +2407,7 @@ namespace Tins {
          * \return The bar control field.
          */
         uint16_t bar_control() const { return _bar_control.tid; }
-        
+
         /**
          * \brief Getter for the start sequence field.
          * \return The bar start sequence.
@@ -2285,10 +2434,10 @@ namespace Tins {
          * \param bar The new start sequence field.
          */
         void start_sequence(uint16_t seq);
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -2388,16 +2537,16 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_BLOCK_ACK; }
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
     private:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
-    
+
         uint8_t _bitmap[8];
     };
 };
