@@ -49,11 +49,11 @@ Tins::EAPOL *Tins::EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     const eapolhdr *ptr = (const eapolhdr*)buffer;
     switch(ptr->type) {
         case RC4:
-            return new RC4EAPOL(buffer, total_sz);
+            return new Tins::RC4EAPOL(buffer, total_sz);
             break;
         case RSN:
         case EAPOL_WPA:
-            return new RSNEAPOL(buffer, total_sz);
+            return new Tins::RSNEAPOL(buffer, total_sz);
             break;
     }
     return 0;

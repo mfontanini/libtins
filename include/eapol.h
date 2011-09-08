@@ -294,6 +294,21 @@ namespace Tins {
         uint32_t header_size() const;
         
         /**
+         * \brief Getter for the PDU's type.
+         * \return Returns the PDUType corresponding to the PDU.
+         */
+        PDUType pdu_type() const { return PDU::RC4EAPOL; }
+        
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::RC4EAPOL || EAPOL::matches_flag(flag);
+        }
+        
+        /**
          * \brief Clones this PDU.
          * 
          * \sa PDU::clone_pdu
@@ -490,6 +505,21 @@ namespace Tins {
          * \sa RSNInformation.
          */
         void rsn_information(const RSNInformation &rsn);
+        
+        /**
+         * \brief Getter for the PDU's type.
+         * \return Returns the PDUType corresponding to the PDU.
+         */
+        PDUType pdu_type() const { return PDU::RSNEAPOL; }
+        
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::RSNEAPOL || EAPOL::matches_flag(flag);
+        }
         
         /**
          * \brief Clones this PDU.

@@ -81,7 +81,9 @@ namespace Tins {
             ICMP,
             BOOTP,
             DHCP,
-            EAPOL
+            EAPOL,
+            RC4EAPOL,
+            RSNEAPOL
         };
 
         /** \brief PDU constructor
