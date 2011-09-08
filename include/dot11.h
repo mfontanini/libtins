@@ -464,7 +464,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11; 
+           return flag == PDU::DOT11;
         }
 
         /**
@@ -998,21 +998,21 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Getter for the PDU's type.
          *
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::DOT11_MANAGEMENT; }
-        
+
         /**
          * \brief Check wether this PDU matches the specified flag.
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_MANAGEMENT || Dot11::matches_flag(flag); 
+           return flag == PDU::DOT11_MANAGEMENT || Dot11::matches_flag(flag);
         }
     protected:
         struct ExtendedHeader {
@@ -1238,8 +1238,7 @@ namespace Tins {
          * \brief partial_virtual_bitmap uint8_t array with the value fo the Partial Virtual Bitmap field.
          * \brief partial_virtual_bitmap_sz uint8_t with the size of the partial_virtual_bitmap array.
          */
-         void tim(uint8_t dtim_count, uint8_t dtim_period, uint8_t bitmap_control, uint8_t* partial_virtual_bitmap, uint8_t partial_virtual_bitmap_sz);
-
+        void tim(uint8_t dtim_count, uint8_t dtim_period, uint8_t bitmap_control, uint8_t* partial_virtual_bitmap, uint8_t partial_virtual_bitmap_sz);
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
@@ -1498,6 +1497,13 @@ namespace Tins {
         void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
 
         /**
+          * \brief Helper method to set the QoS capability tagged option.
+          *
+          * \brief qos_info uint8_t with the QoS info byte.
+          */
+        void qos_capabilities(uint8_t qos_info);
+
+        /**
          * \brief Helper method to search for the ESSID of this beacon.
          *
          * This method returns the essid of this beacon, or an empty
@@ -1521,14 +1527,14 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Check wether this PDU matches the specified flag.
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_BEACON || Dot11ManagementFrame::matches_flag(flag); 
+           return flag == PDU::DOT11_BEACON || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -1626,7 +1632,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_DIASSOC || Dot11ManagementFrame::matches_flag(flag); 
+           return flag == PDU::DOT11_DIASSOC || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -1780,7 +1786,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_ASSOC_REQ || Dot11ManagementFrame::matches_flag(flag); 
+           return flag == PDU::DOT11_ASSOC_REQ || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -1923,7 +1929,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_ASSOC_RESP || Dot11ManagementFrame::matches_flag(flag); 
+           return flag == PDU::DOT11_ASSOC_RESP || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -1943,6 +1949,177 @@ namespace Tins {
 
         AssocRespBody _body;
     };
+
+    /**
+     * \brief Class representing an ReAssociation Request frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ReAssocRequest : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the ReAssociation Request frame.
+         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ReAssocRequest(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+
+        /**
+         * \brief Constructor for creating a 802.11 ReAssociation Request.
+         *
+         * Constructor that builds a 802.11 Association Request taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ReAssocRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11AssocRequest object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the listen interval.
+         *
+         * \return The listen interval in an uint16_t.
+         */
+        inline uint16_t listen_interval() const { return this->_body.listen_interval; }
+
+        /**
+         * \brief Getter for the current ap field.
+         *
+         * \return The current ap in an array of 6 uint8_t.
+         */
+        inline const uint8_t* current_ap() const { return this->_body.current_ap; }
+
+        /**
+         * \brief Setter for the listen interval.
+         *
+         * \param new_listen_interval uint16_t with the new listen interval.
+         */
+        void listen_interval(uint16_t new_listen_interval);
+
+        /**
+         * \brief Setter for the current ap.
+         *
+         * \param new_current_ap uint8_t array of 6 bytes with the new current ap.
+         */
+        void current_ap(uint8_t* new_current_ap);
+
+        /**
+         * \brief Helper method to set the essid.
+         *
+         * \param new_ssid The ssid to be set.
+         */
+        void ssid(const std::string &new_ssid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the power capabilities.
+         *
+         * \param min_power uint8_t indicating the minimum transmiting power capability.
+         * \param max_power uint8_t indicating the maximum transmiting power capability.
+         */
+        void power_capabilities(uint8_t min_power, uint8_t max_power);
+
+        /**
+         * \brief Helper method to set the supported channels.
+         *
+         * \param new_channels A list of channels to be set.
+         */
+        void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
+
+        /**
+         * \brief Helper method to set the RSN information option.
+         *
+         * \param info The RSNInformation structure to be set.
+         */
+        void rsn_information(const RSNInformation& info);
+
+        /**
+         * \brief Helper method to set the QoS capabilities.
+         *
+         * \param new_qos_capabilities uint8_t with the capabilities.
+         */
+        void qos_capabilities(uint8_t new_qos_capabilities);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_REASSOC_REQ; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_REASSOC_REQ || Dot11ManagementFrame::matches_flag(flag);
+        }
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+    private:
+        struct ReAssocReqBody {
+            CapabilityInformation capability;
+            uint16_t listen_interval;
+            uint8_t current_ap[6];
+        };
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+        ReAssocReqBody _body;
+    };
+
 
     /**
      * \brief Class representing an Probe Request frame in the IEEE 802.11 Protocol.
@@ -2021,7 +2198,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_PROBE_REQ || Dot11ManagementFrame::matches_flag(flag); 
+           return flag == PDU::DOT11_PROBE_REQ || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -2299,7 +2476,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_PROBE_RESP || Dot11ManagementFrame::matches_flag(flag); 
+           return flag == PDU::DOT11_PROBE_RESP || Dot11ManagementFrame::matches_flag(flag);
         }
     protected:
 
@@ -2416,7 +2593,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_DATA || Dot11::matches_flag(flag); 
+           return flag == PDU::DOT11_DATA || Dot11::matches_flag(flag);
         }
 
         /**
@@ -2548,7 +2725,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_QOS_DATA || Dot11Data::matches_flag(flag); 
+           return flag == PDU::DOT11_QOS_DATA || Dot11Data::matches_flag(flag);
         }
     private:
         void copy_fields(const Dot11QoSData *other);
@@ -2617,7 +2794,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_CONTROL || Dot11::matches_flag(flag); 
+           return flag == PDU::DOT11_CONTROL || Dot11::matches_flag(flag);
         }
     };
 
@@ -2768,7 +2945,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_RTS || Dot11Control::matches_flag(flag); 
+           return flag == PDU::DOT11_RTS || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -2825,7 +3002,7 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -2838,7 +3015,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_PS_POLL || Dot11Control::matches_flag(flag); 
+           return flag == PDU::DOT11_PS_POLL || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -2895,7 +3072,7 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
-        
+
          /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -2908,7 +3085,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_CF_END || Dot11Control::matches_flag(flag); 
+           return flag == PDU::DOT11_CF_END || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -2962,7 +3139,7 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
-        
+
          /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -2975,7 +3152,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_END_CF_ACK || Dot11Control::matches_flag(flag); 
+           return flag == PDU::DOT11_END_CF_ACK || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -3023,7 +3200,7 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11Ack(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Clones this PDU.
          *
@@ -3043,7 +3220,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_ACK || Dot11Control::matches_flag(flag); 
+           return flag == PDU::DOT11_ACK || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -3135,7 +3312,7 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
@@ -3148,7 +3325,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_BLOCK_ACK_REQ || Dot11Control::matches_flag(flag); 
+           return flag == PDU::DOT11_BLOCK_ACK_REQ || Dot11Control::matches_flag(flag);
         }
     protected:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
@@ -3275,7 +3452,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_BLOCK_ACK || Dot11Control::matches_flag(flag); 
+           return flag == PDU::DOT11_BLOCK_ACK || Dot11Control::matches_flag(flag);
         }
 
         /**
@@ -3297,7 +3474,7 @@ namespace Tins {
 
         void init_block_ack();
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
-        
+
 
         BarControl _bar_control;
         StartSequence _start_sequence;

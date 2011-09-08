@@ -744,6 +744,9 @@ void Tins::Dot11Beacon::edca_parameter_set(uint32_t ac_be,
     Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
 }
 
+void Tins::Dot11Beacon::qos_capabilities(uint8_t qos_info) {
+    Dot11ManagementFrame::qos_capabilities(qos_info);
+}
 
 string Tins::Dot11Beacon::essid() const {
     const Dot11::Dot11_Option *option = lookup_option(SSID);
@@ -995,6 +998,87 @@ uint32_t Tins::Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint3
 
 Tins::PDU *Tins::Dot11AssocResponse::clone_pdu() const {
     Dot11AssocResponse *new_pdu = new Dot11AssocResponse();
+    new_pdu->copy_80211_fields(this);
+    new_pdu->copy_ext_header(this);
+    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
+    return new_pdu;
+}
+
+/* ReAssoc request. */
+
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::REASSOC_REQ);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const std::string& iface,
+                                           const uint8_t* dst_hw_addr,
+                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+    this->subtype(Dot11::REASSOC_REQ);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+    uint32_t sz = Dot11ManagementFrame::header_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 reassociation request header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Tins::Dot11ReAssocRequest::listen_interval(uint16_t new_listen_interval) {
+    this->_body.listen_interval = new_listen_interval;
+}
+
+void Tins::Dot11ReAssocRequest::current_ap(uint8_t* new_current_ap) {
+    memcpy(this->_body.current_ap, new_current_ap, 6);
+}
+
+void Tins::Dot11ReAssocRequest::ssid(const std::string &new_ssid) {
+    Dot11ManagementFrame::ssid(new_ssid);
+}
+
+void Tins::Dot11ReAssocRequest::supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocRequest::extended_supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::extended_supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocRequest::power_capabilities(uint8_t min_power, uint8_t max_power) {
+    Dot11ManagementFrame::power_capabilities(min_power, max_power);
+}
+
+void Tins::Dot11ReAssocRequest::supported_channels(const std::list<pair<uint8_t, uint8_t> > &new_channels) {
+    Dot11ManagementFrame::supported_channels(new_channels);
+}
+
+void Tins::Dot11ReAssocRequest::rsn_information(const RSNInformation& info) {
+    Dot11ManagementFrame::rsn_information(info);
+}
+
+void Tins::Dot11ReAssocRequest::qos_capabilities(uint8_t new_qos_capabilities) {
+    Dot11ManagementFrame::qos_capabilities(new_qos_capabilities);
+}
+
+uint32_t Tins::Dot11ReAssocRequest::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+}
+
+uint32_t Tins::Dot11ReAssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
+Tins::PDU *Tins::Dot11ReAssocRequest::clone_pdu() const {
+    Dot11ReAssocRequest *new_pdu = new Dot11ReAssocRequest();
     new_pdu->copy_80211_fields(this);
     new_pdu->copy_ext_header(this);
     std::memcpy(&new_pdu->_body, &_body, sizeof(_body));

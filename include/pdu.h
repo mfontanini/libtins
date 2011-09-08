@@ -35,10 +35,10 @@ namespace Tins {
     /** \brief Base class for protocol data units.
      *
      * Every PDU implementation must inherit this one. PDUs can be serialized,
-     * therefore allowing a PacketSender to send them through the corresponding 
-     * sockets. PDUs are created upwards: upper layers will be children of the 
-     * lower ones. Each PDU must provide its flag identifier. This will be most 
-     * likely added to its parent's data, hence it should be a valid identifier. 
+     * therefore allowing a PacketSender to send them through the corresponding
+     * sockets. PDUs are created upwards: upper layers will be children of the
+     * lower ones. Each PDU must provide its flag identifier. This will be most
+     * likely added to its parent's data, hence it should be a valid identifier.
      * For example, IP should provide IPPROTO_IP.
      */
     class PDU {
@@ -71,6 +71,7 @@ namespace Tins {
             DOT11_PROBE_RESP,
             DOT11_PS_POLL,
             DOT11_RTS,
+            DOT11_REASSOC_REQ,
             DOT11_QOS_DATA,
             SNAP,
             IP,
@@ -114,13 +115,13 @@ namespace Tins {
          */
         uint32_t size() const;
 
-        /** 
+        /**
          * \brief Getter for this PDU's type flag identifier.
          * \return The type flag identifier.
          */
         inline uint32_t flag() const { return _flag; }
 
-        /** 
+        /**
          * \brief Getter for the inner PDU.
          * \return The current inner PDU. Might be 0.
          */
@@ -130,7 +131,7 @@ namespace Tins {
          */
         void flag(uint32_t new_flag);
 
-        /** 
+        /**
          * \brief Sets the child PDU.
          *
          * \param next_pdu The new child PDU.
@@ -147,12 +148,12 @@ namespace Tins {
          * operator delete[].
          */
         uint8_t *serialize(uint32_t &sz);
-        
+
         /**
          * \brief Find and returns the first PDU that matches the given flag.
-         * 
-         * This method searches for the first PDU which has the same type flag as 
-         * the given one. If the first PDU matches that flag, it is returned. 
+         *
+         * This method searches for the first PDU which has the same type flag as
+         * the given one. If the first PDU matches that flag, it is returned.
          * If no PDU matches, 0 is returned.
          * \param flag The flag which being searched.
          */
@@ -165,29 +166,29 @@ namespace Tins {
             }
             return 0;
         }
-        
+
         /**
          * \brief Clones this packet.
-         * 
-         * This method clones this PDU and clones every inner PDU, 
-         * therefore obtaining a clone of the whole inner PDU chain. 
+         *
+         * This method clones this PDU and clones every inner PDU,
+         * therefore obtaining a clone of the whole inner PDU chain.
          * The pointer returned must be deleted by the user.
          * \return A pointer to a clone of this packet.
          */
         PDU *clone_packet() const;
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * This method does not clone the inner PDUs. \sa PDU::clone_packet
          * \return A pointer to a copy of this PDU.
          */
-        virtual PDU *clone_pdu() const { 
+        virtual PDU *clone_pdu() const {
             /* Should be pure virtual. It's this way to avoid compiling issues.
              * Once every pdu has implemented it, make it pure virtual. */
-            return 0; 
+            return 0;
         }
-        
+
         /** \brief Send the stack of PDUs through a PacketSender.
          *
          * This method will be called only for the PDU on the bottom of the stack,
@@ -216,17 +217,17 @@ namespace Tins {
          * \param total_sz The size of the buffer.
          */
         virtual bool matches_response(uint8_t *ptr, uint32_t total_sz) { return false; }
-        
-        /** 
+
+        /**
          * \brief Check wether this PDU matches the specified flag.
-         * 
+         *
          * This method should be reimplemented in PDU classes which have
          * subclasses, and try to match the given PDU to each of its parent
          * classes' flag.
          * \param flag The flag to match.
          */
         virtual bool matches_flag(PDUType flag) {
-           return flag == pdu_type(); 
+           return flag == pdu_type();
         }
 
         /**
@@ -249,19 +250,19 @@ namespace Tins {
          * \brief Copy constructor.
          */
         PDU(const PDU &other);
-        
+
         /**
          * \brief Copy assignment operator.
          */
         PDU &operator=(const PDU &other);
-        
+
         /**
          * \brief Copy other PDU's inner PDU(if any).
          * \param pdu The PDU from which to copy the inner PDU.
          */
         void copy_inner_pdu(const PDU &pdu);
-        
-        
+
+
         /** \brief Serializes this PDU and propagates this action to child PDUs.
          *
          * \param buffer The buffer in which to store this PDU's serialization.
