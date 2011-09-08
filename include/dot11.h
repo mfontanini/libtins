@@ -1013,31 +1013,196 @@ namespace Tins {
         Dot11ManagementFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0);
         Dot11ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
         Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
-        Dot11ManagementFrame(const Dot11ManagementFrame &other);
+        Dot11ManagementFrame(const Dot11ManagementFrame& other);
 
+        /**
+         * \brief Helper method to set the ssid.
+         *
+         * \param new_ssid The ssid to be set.
+         */
         void ssid(const std::string &new_ssid);
-        void rates(const std::list<float> &new_rates);
-        void channel(uint8_t new_channel);
+
+        /**
+         * \brief Helper method to set the RSN information option.
+         *
+         * \param info The RSNInformation structure to be set.
+         */
         void rsn_information(const RSNInformation& info);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
         void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
         void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the QoS capabilities.
+         *
+         * \param new_qos_capabilities uint8_t with the capabilities.
+         */
         void qos_capabilities(uint8_t new_qos_capabilities);
+
+        /**
+         * \brief Helper method to set the power capabilities.
+         *
+         * \param min_power uint8_t indicating the minimum transmiting power capability.
+         * \param max_power uint8_t indicating the maximum transmiting power capability.
+         */
         void power_capabilities(uint8_t min_power, uint8_t max_power);
+
+        /**
+         * \brief Helper method to set the supported channels.
+         *
+         * \param new_channels A list of channels to be set.
+         */
         void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
+
+        /**
+         * \brief Helper method to set the EDCA Parameter Set.
+         *
+         * \param ac_be uint32_t with the value of the ac_be field.
+         * \param ac_bk uint32_t with the value of the ac_bk field.
+         * \param ac_vi uint32_t with the value of the ac_vi field.
+         * \param ac_vo uint32_t with the value of the ac_vo field.
+         */
         void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
+
+        /**
+         * \brief Helper method to set the Request Information element.
+         *
+         * \param elements A list of elements.
+         */
         void request_information(const std::list<uint8_t> elements);
+
+        /**
+         * \brief Helper method to set the FH parameter.
+         *
+         * \param dwell_time uint16_t with the dwell_time value.
+         * \param hop_set uint8_t with the value of the set_hop.
+         * \param hop_pattern uint8_t with the value of the hop_pattern field.
+         * \param hop_index uint8_t with the value of the hop_index field.
+         */
         void fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index);
+
+        /**
+         * \brief Helper method to set the DS parameter.
+         *
+         * \param current_channel uint8_t with the value of the current_channel field.
+         */
         void ds_parameter_set(uint8_t current_channel);
+
+        /**
+         * \brief Helper method to set the CF parameter.
+         *
+         * \param cfp_count uint8_t with the value of the cfp count field.
+         * \param cfp_period uint8_t with the value of the cfp period field.
+         * \param cfp_max_duration uint16_t with the value of the cfp max duration field.
+         * \param cfp_dur_remaining uint16_t with the value of the DurRemaining field.
+         */
         void cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining);
+
+        /**
+         * \brief Helper method to set the IBSS parameter.
+         *
+         * \param atim_window uint16_t with the value of the ATIM window field.
+         */
         void ibss_parameter_set(uint16_t atim_window);
+
+        /**
+         * \brief Helper method to set the IBSS DFS tagged option.
+         *
+         * \param dfs_owner uint8_t array of 6 bytes with the dfs owner.
+         * \param recovery_interval uint8_t with the value of the recovery interval field.
+         * \param channel_map Reference to a constant vector of pair of uint8_t with the map of channels.
+         */
         void ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const std::vector<std::pair<uint8_t, uint8_t> >& channel_map);
+
+        /**
+         * \brief Helper method to set the country tagged option.
+         *
+         * \param countries Reference to a vector of uint8_t arrays of 3 bytes. Containing the list of countries.
+         * \param first_channels Reference to a vector of uint8_t. Containing the first channels for each country.
+         * \param num_channels Reference to a vector of uint8_t. Containing the number of channels for each country.
+         * \param max_power Reference to a vector of uint8_t. Containing the max power for each country.
+         */
         void country(const std::vector<uint8_t*>& countries, const std::vector<uint8_t>& first_channels, const std::vector<uint8_t>& number_channels, const std::vector<uint8_t>& max_power);
+
+        /**
+         * \brief Helper method to set the FH parameters.
+         *
+         * \param prime_radix uint8_t with the value of the prime radix field.
+         * \param number_channels uint8_t with the value of the number channels field.
+         */
         void fh_parameters(uint8_t prime_radix, uint8_t number_channels);
+
+        /**
+         * \brief Helper method to set the FH pattern table.
+         *
+         * \param flag uint8_t with the value of the flag field.
+         * \param number_of_sets uint8_t with the value of the number of sets field.
+         * \param modulus uint8_t with the value of the modulus field.
+         * \param offset uint8_t with the value of the offset field.
+         * \param random_table reference to vector of uint8_t witht the elements of the table.
+         */
         void fh_pattern_table(uint8_t flag, uint8_t number_of_sets, uint8_t modulus, uint8_t offset, const std::vector<uint8_t>& random_table);
+
+        /**
+         * \brief Helper method to set the Power Constraint tagged option.
+         *
+         * \param local_power_constraint uint8_t with the value of the local power constraint field.
+         */
         void power_constraint(uint8_t local_power_constraint);
+
+        /**
+         * \brief Helper method to set the Channel Switch tagged option.
+         *
+         * \param switch_mode uint8_t with the value of the switch mode field.
+         * \param new_channel uint8_t with the value of the new channel field.
+         * \param switch_count uint8_t with the value of the switch count field.
+         */
         void channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count);
+
+        /**
+         * \brief Helper method to set the Quiet tagged option.
+         *
+         * \param quiet_count uint8_t with the value of the quiet count field.
+         * \param quiet_period uint8_t with the value of the quiet period field.
+         * \param quiet_duration uint16_t with the value of the quiet duration field.
+         * \param quiet_offset uint16_t with the value of the quiet offset field.
+         */
         void quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset);
+
+        /**
+         * \brief Helper method to set the TPC Report tagged option.
+         *
+         * \param transmit_power uint8_t with the value of the transmit power field.
+         * \param link_margin uint8_t with the value of the link margin field.
+         */
         void tpc_report(uint8_t transmit_power, uint8_t link_margin);
+
+        /**
+         * \brief Helper method to set the ERP Information tagged option.
+         *
+         * \param value with the value to set as argument of the tagged option.
+         */
+        void erp_information(uint8_t value);
+
+        /**
+         * \brief Helper method to set the BSS Load tagged option.
+         *
+         * \param station_count uint16_t with the value of the station count field.
+         * \param channel_utilization uint8_t with the value of the channel utilization field.
+         * \param available_capacity uint16_t with the value of the available capacity field.
+         */
+        void bss_load(uint16_t station_count, uint8_t channel_utilization, uint16_t avaliable_capacity);
 
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
@@ -1086,16 +1251,6 @@ namespace Tins {
         Dot11Beacon(const uint8_t *buffer, uint32_t total_sz);
 
         /**
-         * \brief Copy constructor.
-         */
-        Dot11Beacon(const Dot11Beacon &other);
-
-        /**
-         * \brief Copy assignment operator.
-         */
-        Dot11Beacon &operator= (const Dot11Beacon &other);
-
-        /**
          * \brief Getter for the timestamp field.
          *
          * \return Timestamp value in an uint64_t.
@@ -1107,7 +1262,7 @@ namespace Tins {
          *
          * \return Timestamp value in an uint16_t.
          */
-        inline uint16_t interval() const { return Utils::net_to_host_s(this->_body.interval); }
+        inline uint16_t interval() const { return this->_body.interval; }
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -1147,16 +1302,45 @@ namespace Tins {
          * \brief Helper method to set the supported rates.
          * \param new_rates A list of rates to be set.
          */
-        void rates(const std::list<float> &new_rates);
+        void supported_rates(const std::list<float> &new_rates);
 
         /**
-         * \brief Helper method to set the current channel.
-         * \param new_channel The new channel to be set.
+         * \brief Helper method to set the FH parameter.
+         *
+         * \param dwell_time uint16_t with the dwell_time value.
+         * \param hop_set uint8_t with the value of the set_hop.
+         * \param hop_pattern uint8_t with the value of the hop_pattern field.
+         * \param hop_index uint8_t with the value of the hop_index field.
          */
-        void channel(uint8_t new_channel);
+        void fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index);
+
+        /**
+         * \brief Helper method to set the DS parameter.
+         *
+         * \param current_channel uint8_t with the value of the current_channel field.
+         */
+        void ds_parameter_set(uint8_t current_channel);
+
+        /**
+         * \brief Helper method to set the CF parameter.
+         *
+         * \param cfp_count uint8_t with the value of the cfp count field.
+         * \param cfp_period uint8_t with the value of the cfp period field.
+         * \param cfp_max_duration uint16_t with the value of the cfp max duration field.
+         * \param cfp_dur_remaining uint16_t with the value of the DurRemaining field.
+         */
+        void cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining);
+
+        /**
+         * \brief Helper method to set the IBSS parameter.
+         *
+         * \param atim_window uint16_t with the value of the ATIM window field.
+         */
+        void ibss_parameter_set(uint16_t atim_window);
 
         /**
          * \brief Helper method to set the RSN information option.
+         *
          * \param info The RSNInformation structure to be set.
          */
         void rsn_information(const RSNInformation& info);
@@ -1205,7 +1389,6 @@ namespace Tins {
             CapabilityInformation capability;
         } __attribute__((__packed__));
 
-        void copy_fields(const Dot11Beacon *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         BeaconBody _body;
@@ -1222,8 +1405,10 @@ namespace Tins {
         /**
          * \brief Default constructor for the Disassociation frame.
          *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Disassoc();
+        Dot11Disassoc(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Disassociation.
@@ -1238,14 +1423,13 @@ namespace Tins {
         Dot11Disassoc(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
 
         /**
-         * \brief Copy constructor.
+         * \brief Constructor which creates a Dot11Disassoc object from a buffer and adds
+         * all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
          */
-        Dot11Disassoc(const Dot11Disassoc &other);
-
-        /**
-         * \brief Copy assignment operator.
-         */
-        Dot11Disassoc &operator= (const Dot11Disassoc &other);
+        Dot11Disassoc(const uint8_t *buffer, uint32_t total_sz);
 
         /**
          * \brief Getter for the reason code.
@@ -1280,9 +1464,7 @@ namespace Tins {
             uint16_t reason_code;
         };
 
-        void copy_fields(const Dot11Disassoc *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
-
 
         DisassocBody _body;
     };
@@ -1298,8 +1480,10 @@ namespace Tins {
         /**
          * \brief Default constructor for the Association Request frame.
          *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocRequest();
+        Dot11AssocRequest(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Association Request.
@@ -1321,16 +1505,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11AssocRequest(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Copy constructor.
-         */
-        Dot11AssocRequest(const Dot11AssocRequest &other);
-
-        /**
-         * \brief Copy assignment operator.
-         */
-        Dot11AssocRequest &operator= (const Dot11AssocRequest &other);
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -1430,7 +1604,6 @@ namespace Tins {
             uint16_t listen_interval;
         };
 
-        void copy_fields(const Dot11AssocRequest *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         AssocReqBody _body;
@@ -1447,8 +1620,10 @@ namespace Tins {
         /**
          * \brief Default constructor for the Association Response frame.
          *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocResponse();
+        Dot11AssocResponse(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Association Response.
@@ -1470,16 +1645,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Copy constructor.
-         */
-        Dot11AssocResponse(const Dot11AssocResponse &other);
-
-        /**
-         * \brief Copy assignment operator
-         */
-        Dot11AssocResponse &operator= (const Dot11AssocResponse &other);
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -1568,10 +1733,350 @@ namespace Tins {
             uint16_t aid;
         };
 
-        void copy_fields(const Dot11AssocResponse *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
         AssocRespBody _body;
+    };
+
+    /**
+     * \brief Class representing an Probe Request frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ProbeRequest : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the Probe Request frame.
+         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ProbeRequest(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+
+        /**
+         * \brief Constructor for creating a 802.11 Probe Request.
+         *
+         * Constructor that builds a 802.11 Probe Request taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ProbeRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11ProbeRequest object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Helper method to set the essid.
+         *
+         * \param new_ssid The ssid to be set.
+         */
+        void ssid(const std::string &new_ssid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the Request Information element.
+         *
+         * \param elements A list of elements.
+         */
+        void request_information(const std::list<uint8_t> elements);
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu()
+         */
+        PDU* clone_pdu() const;
+
+    };
+
+    /**
+     * \brief Class representing an Probe Response frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ProbeResponse : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the Probe Response frame.
+         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ProbeResponse(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+
+        /**
+         * \brief Constructor for creating a 802.11 Probe Response.
+         *
+         * Constructor that builds a 802.11 Probe Response taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ProbeResponse(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11ProbeResponse object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Getter for the timestamp field.
+         *
+         * \return Timestamp value in an uint64_t.
+         */
+        inline uint64_t timestamp() const { return this->_body.timestamp; }
+
+        /**
+         * \brief Getter for the interval field.
+         *
+         * \return Timestamp value in an uint16_t.
+         */
+        inline uint16_t interval() const { return this->_body.interval; }
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+
+        /**
+         * \brief Setter for the timestamp field.
+         *
+         * \param new_timestamp uint64_t with the timestamp to set.
+         */
+        void timestamp(uint64_t new_timestamp);
+
+        /**
+         * \brief Setter for the interval field.
+         *
+         * \param new_interval uint16_t with the interval to set.
+         */
+        void interval(uint16_t new_interval);
+
+        /**
+         * \brief Helper method to set the ssid.
+         *
+         * \param new_ssid The ssid to be set.
+         */
+        void ssid(const std::string &new_ssid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the FH parameter.
+         *
+         * \param dwell_time uint16_t with the dwell_time value.
+         * \param hop_set uint8_t with the value of the set_hop.
+         * \param hop_pattern uint8_t with the value of the hop_pattern field.
+         * \param hop_index uint8_t with the value of the hop_index field.
+         */
+        void fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index);
+
+        /**
+         * \brief Helper method to set the DS parameter.
+         *
+         * \param current_channel uint8_t with the value of the current_channel field.
+         */
+        void ds_parameter_set(uint8_t current_channel);
+
+        /**
+         * \brief Helper method to set the CF parameter.
+         *
+         * \param cfp_count uint8_t with the value of the cfp count field.
+         * \param cfp_period uint8_t with the value of the cfp period field.
+         * \param cfp_max_duration uint16_t with the value of the cfp max duration field.
+         * \param cfp_dur_remaining uint16_t with the value of the DurRemaining field.
+         */
+        void cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining);
+
+        /**
+         * \brief Helper method to set the IBSS parameter.
+         *
+         * \param atim_window uint16_t with the value of the ATIM window field.
+         */
+        void ibss_parameter_set(uint16_t atim_window);
+
+        /**
+         * \brief Helper method to set the country tagged option.
+         *
+         * \param countries Reference to a vector of uint8_t arrays of 3 bytes. Containing the list of countries.
+         * \param first_channels Reference to a vector of uint8_t. Containing the first channels for each country.
+         * \param num_channels Reference to a vector of uint8_t. Containing the number of channels for each country.
+         * \param max_power Reference to a vector of uint8_t. Containing the max power for each country.
+         */
+        void country(const std::vector<uint8_t*>& countries, const std::vector<uint8_t>& first_channels, const std::vector<uint8_t>& number_channels, const std::vector<uint8_t>& max_power);
+
+        /**
+         * \brief Helper method to set the FH parameters.
+         *
+         * \param prime_radix uint8_t with the value of the prime radix field.
+         * \param number_channels uint8_t with the value of the number channels field.
+         */
+        void fh_parameters(uint8_t prime_radix, uint8_t number_channels);
+
+        /**
+         * \brief Helper method to set the FH pattern table.
+         *
+         * \param flag uint8_t with the value of the flag field.
+         * \param number_of_sets uint8_t with the value of the number of sets field.
+         * \param modulus uint8_t with the value of the modulus field.
+         * \param offset uint8_t with the value of the offset field.
+         * \param random_table reference to vector of uint8_t witht the elements of the table.
+         */
+        void fh_pattern_table(uint8_t flag, uint8_t number_of_sets, uint8_t modulus, uint8_t offset, const std::vector<uint8_t>& random_table);
+
+        /**
+         * \brief Helper method to set the Power Constraint tagged option.
+         *
+         * \param local_power_constraint uint8_t with the value of the local power constraint field.
+         */
+        void power_constraint(uint8_t local_power_constraint);
+
+        /**
+         * \brief Helper method to set the Channel Switch tagged option.
+         *
+         * \param switch_mode uint8_t with the value of the switch mode field.
+         * \param new_channel uint8_t with the value of the new channel field.
+         * \param switch_count uint8_t with the value of the switch count field.
+         */
+        void channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count);
+
+        /**
+         * \brief Helper method to set the Quiet tagged option.
+         *
+         * \param quiet_count uint8_t with the value of the quiet count field.
+         * \param quiet_period uint8_t with the value of the quiet period field.
+         * \param quiet_duration uint16_t with the value of the quiet duration field.
+         * \param quiet_offset uint16_t with the value of the quiet offset field.
+         */
+        void quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset);
+
+        /**
+         * \brief Helper method to set the IBSS DFS tagged option.
+         *
+         * \param dfs_owner uint8_t array of 6 bytes with the dfs owner.
+         * \param recovery_interval uint8_t with the value of the recovery interval field.
+         * \param channel_map Reference to a constant vector of pair of uint8_t with the map of channels.
+         */
+        void ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const std::vector<std::pair<uint8_t, uint8_t> >& channel_map);
+
+        /**
+         * \brief Helper method to set the TPC Report tagged option.
+         *
+         * \param transmit_power uint8_t with the value of the transmit power field.
+         * \param link_margin uint8_t with the value of the link margin field.
+         */
+        void tpc_report(uint8_t transmit_power, uint8_t link_margin);
+
+        /**
+         * \brief Helper method to set the ERP Information tagged option.
+         *
+         * \param value with the value to set as argument of the tagged option.
+         */
+        void erp_information(uint8_t value);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the RSN information option.
+         *
+         * \param info The RSNInformation structure to be set.
+         */
+        void rsn_information(const RSNInformation& info);
+
+        /**
+         * \brief Helper method to set the BSS Load tagged option.
+         *
+         * \param station_count uint16_t with the value of the station count field.
+         * \param channel_utilization uint8_t with the value of the channel utilization field.
+         * \param available_capacity uint16_t with the value of the available capacity field.
+         */
+        void bss_load(uint16_t station_count, uint8_t channel_utilization, uint16_t avaliable_capacity);
+
+        /**
+         * \brief Helper method to set the EDCA Parameter Set.
+         *
+         * \param ac_be uint32_t with the value of the ac_be field.
+         * \param ac_bk uint32_t with the value of the ac_bk field.
+         * \param ac_vi uint32_t with the value of the ac_vi field.
+         * \param ac_vo uint32_t with the value of the ac_vo field.
+         */
+        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu()
+         */
+        PDU* clone_pdu() const;
+
+    protected:
+
+    private:
+        struct ProbeResp {
+            uint64_t timestamp;
+            uint16_t interval;
+            CapabilityInformation capability;
+        };
+
+        ProbeResp _body;
+
     };
 
     class Dot11Data : public Dot11 {
@@ -1697,141 +2202,6 @@ namespace Tins {
     private:
         ExtendedHeader _ext_header;
         uint8_t _addr4[6];
-    };
-
-    /**
-     * \brief Class representing an Probe Request frame in the IEEE 802.11 Protocol.
-     *
-     */
-    class Dot11ProbeRequest : public Dot11ManagementFrame {
-
-    public:
-
-        /**
-         * \brief Default constructor for the Probe Request frame.
-         *
-         */
-        Dot11ProbeRequest();
-
-        /**
-         * \brief Constructor for creating a 802.11 Probe Request.
-         *
-         * Constructor that builds a 802.11 Probe Request taking the interface name,
-         * destination's and source's MAC.
-         *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11ProbeRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
-
-        /**
-         * \brief Constructor which creates a Dot11ProbeRequest object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
-         *
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Helper method to set the essid.
-         *
-         * \param new_ssid The ssid to be set.
-         */
-        void ssid(const std::string &new_ssid);
-
-        /**
-         * \brief Helper method to set the supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the Request Information element.
-         *
-         * \param elements A list of elements.
-         */
-        void request_information(const std::list<uint8_t> elements);
-
-        /**
-         * \brief Clones this PDU.
-         *
-         * \sa PDU::clone_pdu()
-         */
-        PDU* clone_pdu() const;
-
-    };
-
-    /**
-     * \brief Class representing an Probe Response frame in the IEEE 802.11 Protocol.
-     *
-     */
-    class Dot11ProbeResponse : public Dot11ManagementFrame {
-
-    public:
-
-        /**
-         * \brief Getter for the timestamp field.
-         *
-         * \return Timestamp value in an uint64_t.
-         */
-        inline uint64_t timestamp() const { return this->_body.timestamp; }
-
-        /**
-         * \brief Getter for the interval field.
-         *
-         * \return Timestamp value in an uint16_t.
-         */
-        inline uint16_t interval() const { return Utils::net_to_host_s(this->_body.interval); }
-
-        /**
-         * \brief Getter for the Capabilities Information.
-         *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
-         */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
-
-        /**
-         * \brief Getter for the Capabilities Information.
-         *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
-         */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
-
-        /**
-         * \brief Setter for the timestamp field.
-         *
-         * \param new_timestamp uint64_t with the timestamp to set.
-         */
-        void timestamp(uint64_t new_timestamp);
-
-        /**
-         * \brief Setter for the interval field.
-         *
-         * \param new_interval uint16_t with the interval to set.
-         */
-        void interval(uint16_t new_interval);
-
-    protected:
-
-    private:
-        struct ProbeResp {
-            uint64_t timestamp;
-            uint16_t interval;
-            CapabilityInformation capability;
-        };
-
-        ProbeResp _body;
-
     };
 
     class Dot11QoSData : public Dot11Data {
