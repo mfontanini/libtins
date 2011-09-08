@@ -47,8 +47,8 @@ Tins::TCP::TCP(const TCP &other) : PDU(other) {
 }
 
 Tins::TCP &Tins::TCP::operator= (const TCP &other) {
+    PDU::operator=(other);
     copy_fields(&other);
-    copy_inner_pdu(other);
     return *this;
 }
 

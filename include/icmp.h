@@ -56,16 +56,6 @@ namespace Tins {
          * \param flag The type flag which will be set.
          */
         ICMP(Flags flag = ECHO_REQUEST);
-        
-        /**
-         * \brief Copy constructor.
-         */
-        ICMP(const ICMP &other);
-        
-        /**
-         * \brief Copy assignment operator.
-         */
-        ICMP &operator= (const ICMP &other);
 
         /**
          * \brief Constructor which creates an ICMP object from a buffer and adds all identifiable
