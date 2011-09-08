@@ -591,6 +591,21 @@ void Tins::Dot11ManagementFrame::bss_load(uint16_t station_count, uint8_t channe
     add_tagged_option(BSS_LOAD, 5, buffer);
 }
 
+void Tins::Dot11ManagementFrame::tim(uint8_t dtim_count,
+                                     uint8_t dtim_period,
+                                     uint8_t bitmap_control,
+                                     uint8_t* partial_virtual_bitmap,
+                                     uint8_t partial_virtual_bitmap_sz) {
+
+    uint8_t sz = 3 + partial_virtual_bitmap_sz;
+    uint8_t* buffer = new uint8_t[sz];
+    buffer[0] = dtim_count;
+    buffer[1] = dtim_period;
+    buffer[2] = bitmap_control;
+    memcpy(buffer + 3, partial_virtual_bitmap, partial_virtual_bitmap_sz);
+    add_tagged_option(TIM, sz, buffer);
+}
+
 /* Dot11Beacon */
 
 Tins::Dot11Beacon::Dot11Beacon(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame() {
@@ -637,10 +652,6 @@ void Tins::Dot11Beacon::ds_parameter_set(uint8_t current_channel) {
     Dot11ManagementFrame::ds_parameter_set(current_channel);
 }
 
-void Tins::Dot11Beacon::rsn_information(const RSNInformation& info) {
-    Dot11ManagementFrame::rsn_information(info);
-}
-
 void Tins::Dot11Beacon::fh_parameter_set(uint16_t dwell_time,
                                          uint8_t hop_set,
                                          uint8_t hop_pattern,
@@ -658,6 +669,81 @@ void Tins::Dot11Beacon::cf_parameter_set(uint8_t cfp_count,
 void Tins::Dot11Beacon::ibss_parameter_set(uint16_t atim_window) {
     Dot11ManagementFrame::ibss_parameter_set(atim_window);
 }
+
+void Tins::Dot11Beacon::tim(uint8_t dtim_count,
+                            uint8_t dtim_period,
+                            uint8_t bitmap_control,
+                            uint8_t* partial_virtual_bitmap,
+                            uint8_t partial_virtual_bitmap_sz) {
+    Dot11ManagementFrame::tim(dtim_count, dtim_period, bitmap_control, partial_virtual_bitmap, partial_virtual_bitmap_sz);
+}
+
+void Tins::Dot11Beacon::country(const std::vector<uint8_t*>& countries,
+                                const std::vector<uint8_t>& first_channels,
+                                const std::vector<uint8_t>& number_channels,
+                                const std::vector<uint8_t>& max_power) {
+    Dot11ManagementFrame::country(countries, first_channels, number_channels, max_power);
+}
+
+void Tins::Dot11Beacon::fh_parameters(uint8_t prime_radix, uint8_t number_channels) {
+    Dot11ManagementFrame::fh_parameters(prime_radix, number_channels);
+}
+
+void Tins::Dot11Beacon::fh_pattern_table(uint8_t flag,
+                                         uint8_t number_of_sets,
+                                         uint8_t modulus,
+                                         uint8_t offset,
+                                         const std::vector<uint8_t>& random_table) {
+    Dot11ManagementFrame::fh_pattern_table(flag, number_of_sets, modulus, offset, random_table);
+}
+
+void Tins::Dot11Beacon::power_constraint(uint8_t local_power_constraint) {
+    Dot11ManagementFrame::power_constraint(local_power_constraint);
+}
+
+void Tins::Dot11Beacon::channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count) {
+    Dot11ManagementFrame::channel_switch(switch_mode, new_channel, switch_count);
+}
+
+void Tins::Dot11Beacon::quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset) {
+    Dot11ManagementFrame::quiet(quiet_count, quiet_period, quiet_duration, quiet_offset);
+}
+
+void Tins::Dot11Beacon::ibss_dfs(const uint8_t* dfs_owner,
+                                 uint8_t recovery_interval,
+                                 const std::vector<std::pair<uint8_t, uint8_t> >& channel_map) {
+    Dot11ManagementFrame::ibss_dfs(dfs_owner, recovery_interval, channel_map);
+}
+
+void Tins::Dot11Beacon::tpc_report(uint8_t transmit_power, uint8_t link_margin) {
+    Dot11ManagementFrame::tpc_report(transmit_power, link_margin);
+}
+
+void Tins::Dot11Beacon::erp_information(uint8_t value) {
+    Dot11ManagementFrame::erp_information(value);
+}
+
+void Tins::Dot11Beacon::extended_supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::extended_supported_rates(new_rates);
+}
+
+void Tins::Dot11Beacon::rsn_information(const RSNInformation& info) {
+    Dot11ManagementFrame::rsn_information(info);
+}
+
+void Tins::Dot11Beacon::bss_load(uint16_t station_count,
+                                 uint8_t channel_utilization,
+                                 uint16_t available_capacity) {
+    Dot11ManagementFrame::bss_load(station_count, channel_utilization, available_capacity);
+}
+
+void Tins::Dot11Beacon::edca_parameter_set(uint32_t ac_be,
+                                           uint32_t ac_bk,
+                                           uint32_t ac_vi,
+                                           uint32_t ac_vo) {
+    Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
+}
+
 
 string Tins::Dot11Beacon::essid() const {
     const Dot11::Dot11_Option *option = lookup_option(SSID);
