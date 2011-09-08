@@ -1229,6 +1229,17 @@ namespace Tins {
          */
         void bss_load(uint16_t station_count, uint8_t channel_utilization, uint16_t avaliable_capacity);
 
+        /**
+         * \brief Helper method to set the TIM tagged option.
+         *
+         * \brief dtim_count uint8_t with the value of the DTIM count field.
+         * \brief dtim_period uint8_t with the value of the DTIM period field.
+         * \brief bitmap_control uint8_t with the value of the Bitmap Control field.
+         * \brief partial_virtual_bitmap uint8_t array with the value fo the Partial Virtual Bitmap field.
+         * \brief partial_virtual_bitmap_sz uint8_t with the size of the partial_virtual_bitmap array.
+         */
+         void tim(uint8_t dtim_count, uint8_t dtim_period, uint8_t bitmap_control, uint8_t* partial_virtual_bitmap, uint8_t partial_virtual_bitmap_sz);
+
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11ManagementFrame *other);
@@ -1364,11 +1375,127 @@ namespace Tins {
         void ibss_parameter_set(uint16_t atim_window);
 
         /**
+         * \brief Helper method to set the TIM tagged option.
+         *
+         * \brief dtim_count uint8_t with the value of the DTIM count field.
+         * \brief dtim_period uint8_t with the value of the DTIM period field.
+         * \brief bitmap_control uint8_t with the value of the Bitmap Control field.
+         * \brief partial_virtual_bitmap uint8_t array with the value fo the Partial Virtual Bitmap field.
+         * \brief partial_virtual_bitmap_sz uint8_t with the size of the partial_virtual_bitmap array.
+         */
+         void tim(uint8_t dtim_count, uint8_t dtim_period, uint8_t bitmap_control, uint8_t* partial_virtual_bitmap, uint8_t partial_virtual_bitmap_sz);
+
+         /**
+         * \brief Helper method to set the country tagged option.
+         *
+         * \param countries Reference to a vector of uint8_t arrays of 3 bytes. Containing the list of countries.
+         * \param first_channels Reference to a vector of uint8_t. Containing the first channels for each country.
+         * \param num_channels Reference to a vector of uint8_t. Containing the number of channels for each country.
+         * \param max_power Reference to a vector of uint8_t. Containing the max power for each country.
+         */
+        void country(const std::vector<uint8_t*>& countries, const std::vector<uint8_t>& first_channels, const std::vector<uint8_t>& number_channels, const std::vector<uint8_t>& max_power);
+
+        /**
+         * \brief Helper method to set the FH parameters.
+         *
+         * \param prime_radix uint8_t with the value of the prime radix field.
+         * \param number_channels uint8_t with the value of the number channels field.
+         */
+        void fh_parameters(uint8_t prime_radix, uint8_t number_channels);
+
+        /**
+         * \brief Helper method to set the FH pattern table.
+         *
+         * \param flag uint8_t with the value of the flag field.
+         * \param number_of_sets uint8_t with the value of the number of sets field.
+         * \param modulus uint8_t with the value of the modulus field.
+         * \param offset uint8_t with the value of the offset field.
+         * \param random_table reference to vector of uint8_t witht the elements of the table.
+         */
+        void fh_pattern_table(uint8_t flag, uint8_t number_of_sets, uint8_t modulus, uint8_t offset, const std::vector<uint8_t>& random_table);
+
+        /**
+         * \brief Helper method to set the Power Constraint tagged option.
+         *
+         * \param local_power_constraint uint8_t with the value of the local power constraint field.
+         */
+        void power_constraint(uint8_t local_power_constraint);
+
+        /**
+         * \brief Helper method to set the Channel Switch tagged option.
+         *
+         * \param switch_mode uint8_t with the value of the switch mode field.
+         * \param new_channel uint8_t with the value of the new channel field.
+         * \param switch_count uint8_t with the value of the switch count field.
+         */
+        void channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count);
+
+        /**
+         * \brief Helper method to set the Quiet tagged option.
+         *
+         * \param quiet_count uint8_t with the value of the quiet count field.
+         * \param quiet_period uint8_t with the value of the quiet period field.
+         * \param quiet_duration uint16_t with the value of the quiet duration field.
+         * \param quiet_offset uint16_t with the value of the quiet offset field.
+         */
+        void quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset);
+
+        /**
+         * \brief Helper method to set the IBSS DFS tagged option.
+         *
+         * \param dfs_owner uint8_t array of 6 bytes with the dfs owner.
+         * \param recovery_interval uint8_t with the value of the recovery interval field.
+         * \param channel_map Reference to a constant vector of pair of uint8_t with the map of channels.
+         */
+        void ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const std::vector<std::pair<uint8_t, uint8_t> >& channel_map);
+
+        /**
+         * \brief Helper method to set the TPC Report tagged option.
+         *
+         * \param transmit_power uint8_t with the value of the transmit power field.
+         * \param link_margin uint8_t with the value of the link margin field.
+         */
+        void tpc_report(uint8_t transmit_power, uint8_t link_margin);
+
+        /**
+         * \brief Helper method to set the ERP Information tagged option.
+         *
+         * \param value with the value to set as argument of the tagged option.
+         */
+        void erp_information(uint8_t value);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
          * \brief Helper method to set the RSN information option.
          *
          * \param info The RSNInformation structure to be set.
          */
         void rsn_information(const RSNInformation& info);
+
+        /**
+         * \brief Helper method to set the BSS Load tagged option.
+         *
+         * \param station_count uint16_t with the value of the station count field.
+         * \param channel_utilization uint8_t with the value of the channel utilization field.
+         * \param available_capacity uint16_t with the value of the available capacity field.
+         */
+        void bss_load(uint16_t station_count, uint8_t channel_utilization, uint16_t avaliable_capacity);
+
+        /**
+         * \brief Helper method to set the EDCA Parameter Set.
+         *
+         * \param ac_be uint32_t with the value of the ac_be field.
+         * \param ac_bk uint32_t with the value of the ac_bk field.
+         * \param ac_vi uint32_t with the value of the ac_vi field.
+         * \param ac_vo uint32_t with the value of the ac_vo field.
+         */
+        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
 
         /**
          * \brief Helper method to search for the ESSID of this beacon.
