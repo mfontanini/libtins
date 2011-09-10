@@ -61,66 +61,83 @@ Tins::IP &Tins::IP::operator= (const IP &other) {
 }
 
 Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_IP) {
+    static const char *msg("Not enough size for an IP header in the buffer.");
     if(total_sz < sizeof(iphdr))
-        throw std::runtime_error("Not enough size for an IP header in the buffer.");
+        throw std::runtime_error(msg);
     std::memcpy(&_ip, buffer, sizeof(iphdr));
 
     /* Options... */
     /* Establish beginning and ending of the options */
     const uint8_t* ptr_buffer = buffer + sizeof(iphdr);
+    if(total_sz < head_len() * sizeof(uint32_t))
+        throw std::runtime_error(msg);
     buffer += head_len() * sizeof(uint32_t);
     this->_options_size = 0;
     this->_padded_options_size = head_len() * sizeof(uint32_t) - sizeof(iphdr);
     /* While the end of the options is not reached read an option */
-    while (ptr_buffer < buffer && (*ptr_buffer != 0)) {
-        IpOption opt_to_add;
-        opt_to_add.optional_data = NULL;
-        opt_to_add.optional_data_size = 0;
-        memcpy(&opt_to_add.type, ptr_buffer, 1);
-        ptr_buffer++;
-        switch (opt_to_add.type.number) {
-            /* Multibyte options with length as second byte */
-            case IPOPT_SEC:
-            case IPOPT_LSSR:
-            case IPOPT_TIMESTAMP:
-            case IPOPT_EXTSEC:
-            case IPOPT_RR:
-            case IPOPT_SID:
-            case IPOPT_SSRR:
-            case IPOPT_MTUPROBE:
-            case IPOPT_MTUREPLY:
-            case IPOPT_EIP:
-            case IPOPT_TR:
-            case IPOPT_ADDEXT:
-            case IPOPT_RTRALT:
-            case IPOPT_SDB:
-            case IPOPT_DPS:
-            case IPOPT_UMP:
-            case IPOPT_QS:
-                opt_to_add.optional_data_size = *ptr_buffer - 1;
-                opt_to_add.optional_data = new uint8_t[opt_to_add.optional_data_size];
-                memcpy(opt_to_add.optional_data, ptr_buffer, opt_to_add.optional_data_size);
-                ptr_buffer += opt_to_add.optional_data_size;
+    try {
+        while (total_sz && ptr_buffer < buffer && (*ptr_buffer != 0)) {
+            IpOption opt_to_add;
+            opt_to_add.optional_data = 0;
+            opt_to_add.optional_data_size = 0;
+            memcpy(&opt_to_add.type, ptr_buffer, sizeof(uint8_t));
+            ptr_buffer++;
+            switch (opt_to_add.type.number) {
+                /* Multibyte options with length as second byte */
+                case IPOPT_SEC:
+                case IPOPT_LSSR:
+                case IPOPT_TIMESTAMP:
+                case IPOPT_EXTSEC:
+                case IPOPT_RR:
+                case IPOPT_SID:
+                case IPOPT_SSRR:
+                case IPOPT_MTUPROBE:
+                case IPOPT_MTUREPLY:
+                case IPOPT_EIP:
+                case IPOPT_TR:
+                case IPOPT_ADDEXT:
+                case IPOPT_RTRALT:
+                case IPOPT_SDB:
+                case IPOPT_DPS:
+                case IPOPT_UMP:
+                case IPOPT_QS:
+                    if(!total_sz || *ptr_buffer == 0)
+                        throw std::runtime_error(msg);
+                    opt_to_add.optional_data_size = *ptr_buffer - 1;
+                    if(opt_to_add.optional_data_size > 0) {
+                        if(total_sz < opt_to_add.optional_data_size)
+                            throw std::runtime_error(msg);
+                        opt_to_add.optional_data = new uint8_t[opt_to_add.optional_data_size];
+                        memcpy(opt_to_add.optional_data, ptr_buffer, opt_to_add.optional_data_size);
+                    }
+                    else
+                        opt_to_add.optional_data = 0;
+                    ptr_buffer += opt_to_add.optional_data_size;
+            }
+            this->_ip_options.push_back(opt_to_add);
+            this->_options_size += 1 + opt_to_add.optional_data_size;
         }
-        this->_ip_options.push_back(opt_to_add);
-        this->_options_size += 1 + opt_to_add.optional_data_size;
+        total_sz -= head_len() * sizeof(uint32_t);
+        if (total_sz) {
+            switch(_ip.protocol) {
+                case IPPROTO_TCP:
+                    inner_pdu(new Tins::TCP(buffer, total_sz));
+                    break;
+                case IPPROTO_UDP:
+                    inner_pdu(new Tins::UDP(buffer, total_sz));
+                    break;
+                case IPPROTO_ICMP:
+                    inner_pdu(new Tins::ICMP(buffer, total_sz));
+                    break;
+                default:
+                    inner_pdu(new Tins::RawPDU(buffer, total_sz));
+                    break;
+            }
+        }
     }
-    total_sz -= head_len() * sizeof(uint32_t);
-    if (total_sz) {
-        switch(_ip.protocol) {
-            case IPPROTO_TCP:
-                inner_pdu(new Tins::TCP(buffer, total_sz));
-                break;
-            case IPPROTO_UDP:
-                inner_pdu(new Tins::UDP(buffer, total_sz));
-                break;
-            case IPPROTO_ICMP:
-                inner_pdu(new Tins::ICMP(buffer, total_sz));
-                break;
-            default:
-                inner_pdu(new Tins::RawPDU(buffer, total_sz));
-                break;
-        }
+    catch(runtime_error &) {
+        cleanup();
+        throw;
     }
 }
 
@@ -136,9 +153,12 @@ Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src, PDU *child) : PDU(IPPROTO_IP, chi
 }
 
 Tins::IP::~IP() {
+    cleanup();
+}
+
+void Tins::IP::cleanup() {
     for (vector<IpOption>::iterator it = this->_ip_options.begin(); it != this->_ip_options.end(); it++) {
-        if (it->optional_data)
-            delete[] it->optional_data;
+        delete[] it->optional_data;
     }
 }
 
@@ -237,7 +257,6 @@ void Tins::IP::set_option(uint8_t copied,
 }
 
 uint8_t* Tins::IP::IpOption::write(uint8_t* buffer) {
-
     memcpy(buffer, &type, 1);
     buffer += 1;
     if (optional_data) {

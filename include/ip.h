@@ -424,6 +424,7 @@ namespace Tins {
         void copy_fields(const IP *other);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        void cleanup();
 
         iphdr _ip;
         std::vector<IpOption> _ip_options;

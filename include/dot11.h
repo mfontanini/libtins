@@ -1241,8 +1241,10 @@ namespace Tins {
         void tim(uint8_t dtim_count, uint8_t dtim_period, uint8_t bitmap_control, uint8_t* partial_virtual_bitmap, uint8_t partial_virtual_bitmap_sz);
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+        
         void copy_ext_header(const Dot11ManagementFrame *other);
-
+        
+        uint32_t management_frame_size() { return sizeof(_ext_header) + (from_ds() && to_ds()) ? sizeof(_addr4) : 0; }
     private:
         ExtendedHeader _ext_header;
         uint8_t _addr4[6];
@@ -2619,7 +2621,8 @@ namespace Tins {
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11Data *other);
-
+        
+        uint32_t data_frame_size() { return sizeof(_ext_header) + (from_ds() && to_ds()) ? sizeof(_addr4) : 0; }
     private:
         ExtendedHeader _ext_header;
         uint8_t _addr4[6];

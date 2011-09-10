@@ -621,7 +621,7 @@ Tins::Dot11Beacon::Dot11Beacon(const std::string& iface,
 }
 
 Tins::Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = Dot11ManagementFrame::header_size();
+    uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
@@ -828,7 +828,7 @@ Tins::Dot11Disassoc::Dot11Disassoc(const std::string& iface,
 }
 
 Tins::Dot11Disassoc::Dot11Disassoc(const uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = Dot11ManagementFrame::header_size();
+    uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
@@ -877,7 +877,7 @@ Tins::Dot11AssocRequest::Dot11AssocRequest(const std::string& iface,
 }
 
 Tins::Dot11AssocRequest::Dot11AssocRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = Dot11ManagementFrame::header_size();
+    uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
@@ -954,7 +954,7 @@ Tins::Dot11AssocResponse::Dot11AssocResponse(const std::string& iface,
 }
 
 Tins::Dot11AssocResponse::Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = Dot11ManagementFrame::header_size();
+    uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
@@ -1019,7 +1019,7 @@ Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const std::string& iface,
 }
 
 Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = Dot11ManagementFrame::header_size();
+    uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
@@ -1139,7 +1139,7 @@ Tins::Dot11ProbeResponse::Dot11ProbeResponse(const std::string& iface,
 }
 
 Tins::Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = Dot11ManagementFrame::header_size();
+    uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
@@ -1278,7 +1278,8 @@ Tins::Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz) : Dot11(buf
         buffer += sizeof(_addr4);
         total_sz -= sizeof(_addr4);
     }
-    inner_pdu(new Tins::SNAP(buffer, total_sz));
+    if(total_sz)
+        inner_pdu(new Tins::SNAP(buffer, total_sz));
 }
 
 Tins::Dot11Data::Dot11Data(uint32_t iface_index, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(iface_index, dst_hw_addr, child) {
@@ -1376,11 +1377,12 @@ Tins::Dot11QoSData::Dot11QoSData(uint32_t iface_index, const uint8_t* dst_hw_add
     this->_qos_control = 0;
 }
 
-Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot11Data(buffer, total_sz) {
-    uint32_t sz = Dot11Data::header_size();
+Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot11Data(buffer, std::min(data_frame_size(), total_sz)) {
+    uint32_t sz = data_frame_size();
     buffer += sz;
     total_sz -= sz;
-    assert(total_sz >= sizeof(this->_qos_control));
+    if(total_sz < sizeof(this->_qos_control))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
     this->_qos_control = *(uint16_t*)buffer;
     total_sz -= sizeof(uint16_t);
     buffer += sizeof(uint16_t);
