@@ -1,6 +1,6 @@
 CXX=@CXX@
 CFLAGS=-c -Wall -fPIC @CFLAGS@ -DTINS_VERSION=@PACKAGE_VERSION@
-LDFLAGS=-lpcap -shared -Wl,-soname,libtins.so
+LDFLAGS=-lpcap -shared -Wl,-soname,libtins.so -Wl,-z,defs
 SOURCES=$(wildcard src/*.cpp)
 
 OBJECTS=$(SOURCES:.cpp=.o)
