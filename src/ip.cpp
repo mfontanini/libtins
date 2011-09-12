@@ -23,7 +23,8 @@
 #include <cstring>
 #include <cassert>
 #ifndef WIN32
-    #include <netinet/in.h>
+    #include <netdb.h>
+    #include <sys/socket.h>
 #endif
 #include "ip.h"
 #include "tcp.h"
@@ -31,13 +32,14 @@
 #include "icmp.h"
 #include "rawpdu.h"
 #include "utils.h"
+#include "constants.h"
 
 
 using namespace std;
 
 const uint8_t Tins::IP::DEFAULT_TTL = 128;
 
-Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(IPPROTO_IP, child) {
+Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(Constants::IP::PROTO_IP, child) {
     init_ip_fields();
     if(ip_dst.size())
         _ip.daddr = Utils::resolve_ip(ip_dst);
@@ -60,7 +62,7 @@ Tins::IP &Tins::IP::operator= (const IP &other) {
     return *this;
 }
 
-Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_IP) {
+Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROTO_IP) {
     static const char *msg("Not enough size for an IP header in the buffer.");
     if(total_sz < sizeof(iphdr))
         throw std::runtime_error(msg);
@@ -141,12 +143,12 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_IP) {
     }
 }
 
-Tins::IP::IP(const iphdr *ptr) : PDU(IPPROTO_IP) {
+Tins::IP::IP(const iphdr *ptr) : PDU(Constants::IP::PROTO_IP) {
     std::memcpy(&_ip, ptr, sizeof(iphdr));
     /* Options... */
 }
 
-Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src, PDU *child) : PDU(IPPROTO_IP, child) {
+Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src, PDU *child) : PDU(Constants::IP::PROTO_IP, child) {
     init_ip_fields();
     _ip.daddr = ip_dst;
     _ip.saddr = ip_src;
@@ -311,23 +313,21 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     this->tot_len(total_sz);
     this->head_len (my_sz / sizeof(uint32_t));
 
-    memcpy(buffer, &_ip, sizeof(iphdr));
+    memcpy(buffer, &_ip, sizeof(_ip));
 
-    uint8_t* ptr_buffer = buffer + sizeof(iphdr);
-    for (uint32_t i = 0; i < _ip_options.size(); ++i)
+    uint8_t* ptr_buffer = buffer + sizeof(_ip);
+    for(uint32_t i = 0; i < _ip_options.size(); ++i)
         ptr_buffer = _ip_options[i].write(ptr_buffer);
 
-    memset(buffer + sizeof(iphdr) + this->_options_size, 0, this->_padded_options_size - this->_options_size);
+    memset(buffer + sizeof(_ip) + _options_size, 0, _padded_options_size - _options_size);
 
-    if (parent && !_ip.check) {
-        uint32_t checksum = Utils::do_checksum(buffer, buffer + sizeof(iphdr) + _padded_options_size);
+    if(parent && !_ip.check) {
+        uint32_t checksum = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
         ((iphdr*)buffer)->check = Utils::net_to_host_s(~checksum);
         this->check(0);
     }
-
-
 }
 
 bool Tins::IP::matches_response(uint8_t *ptr, uint32_t total_sz) {

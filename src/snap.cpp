@@ -26,6 +26,7 @@
     #include <net/ethernet.h>
 #endif
 #include "snap.h"
+#include "constants.h"
 #include "utils.h"
 #include "arp.h"
 #include "ip.h"
@@ -45,13 +46,13 @@ Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
     buffer += sizeof(_snap);
     total_sz -= sizeof(_snap);
     switch(Utils::net_to_host_s(_snap.eth_type)) {
-        case ETHERTYPE_IP:
+        case Tins::Constants::Ethernet::IP:
             inner_pdu(new Tins::IP(buffer, total_sz));
             break;
-        case ETHERTYPE_ARP:
+        case Tins::Constants::Ethernet::ARP:
             inner_pdu(new Tins::ARP(buffer, total_sz));
             break;
-        case 0x888e:
+        case Tins::Constants::Ethernet::EAPOL:
             inner_pdu(Tins::EAPOL::from_bytes(buffer, total_sz));
             break;
     };
@@ -77,13 +78,13 @@ void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
         uint16_t type = ETHERTYPE_IP;
         switch (inner_pdu()->pdu_type()) {
             case PDU::IP:
-                type = ETHERTYPE_IP;
+                type = Tins::Constants::Ethernet::IP;
                 break;
             case PDU::ARP:
-                type = ETHERTYPE_ARP;
+                type = Tins::Constants::Ethernet::ARP;
                 break;
             case PDU::EAPOL:
-                type = 0x888e;
+                type = Tins::Constants::Ethernet::EAPOL;
                 break;
             default:
                 type = 0;

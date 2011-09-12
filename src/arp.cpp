@@ -22,11 +22,12 @@
 #include <string>
 #include <cstring>
 #include <cassert>
-#include <netinet/in.h>
 #include "arp.h"
+#include "ip.h"
 #include "ethernetII.h"
 #include "rawpdu.h"
 #include "utils.h"
+#include "constants.h"
 
 
 using namespace std;
@@ -34,10 +35,10 @@ using namespace std;
 
 Tins::ARP::ARP(uint32_t target_ip, uint32_t sender_ip, const uint8_t *target_hw, const uint8_t *sender_hw) : PDU(0x0608) {
     memset(&_arp, 0, sizeof(arphdr));
-    hw_addr_format(1);
-    prot_addr_format(0x0800);
-    hw_addr_length(6);
-    prot_addr_length(4);
+    hw_addr_format((uint16_t)Tins::Constants::ARP::ETHER);
+    prot_addr_format((uint16_t)Tins::Constants::Ethernet::IP);
+    hw_addr_length(EthernetII::ADDR_SIZE);
+    prot_addr_length(IP::ADDR_SIZE);
     sender_ip_addr(sender_ip);
     target_ip_addr(target_ip);
     if(sender_hw)
@@ -46,7 +47,7 @@ Tins::ARP::ARP(uint32_t target_ip, uint32_t sender_ip, const uint8_t *target_hw,
         target_hw_addr(target_hw);
 }
 
-Tins::ARP::ARP(const uint8_t *buffer, uint32_t total_sz) : PDU(0x0608) {
+Tins::ARP::ARP(const uint8_t *buffer, uint32_t total_sz) : PDU(Utils::net_to_host_s(Constants::Ethernet::ARP)) {
     if(total_sz < sizeof(arphdr))
         throw std::runtime_error("Not enough size for an ARP header in the buffer.");
     memcpy(&_arp, buffer, sizeof(arphdr));
@@ -55,7 +56,7 @@ Tins::ARP::ARP(const uint8_t *buffer, uint32_t total_sz) : PDU(0x0608) {
         inner_pdu(new RawPDU(buffer + sizeof(arphdr), total_sz));
 }
 
-Tins::ARP::ARP(const arphdr *arp_ptr) : PDU(Utils::net_to_host_s(0x0806)) {
+Tins::ARP::ARP(const arphdr *arp_ptr) : PDU(Utils::net_to_host_s(Constants::Ethernet::ARP)) {
     memcpy(&_arp, arp_ptr, sizeof(arphdr));
 }
 

@@ -38,6 +38,11 @@ namespace Tins {
      */
     class IP : public PDU {
     public:
+        /** 
+         * \brief IP address size.
+         */
+        static const uint32_t ADDR_SIZE = 4;
+    
         /**
          * \brief Enum indicating the option's class.
          *

@@ -36,9 +36,15 @@ namespace Tins {
 
     public:
 
-        /** \brief Represents the ethernetII broadcast address.
+        /** 
+         * \brief Represents the ethernetII broadcast address.
          */
         static const uint8_t* BROADCAST;
+        
+        /**
+         * \brief Ethernet II hardware address size.
+         */
+        static const uint32_t ADDR_SIZE = 6;
 
         /**
          * \brief Constructor for creating an ethernet PDU
@@ -198,8 +204,8 @@ namespace Tins {
          * Struct that represents the Ethernet II header
          */
         struct ethhdr {
-            uint8_t dst_mac[6];
-            uint8_t src_mac[6];
+            uint8_t dst_mac[ADDR_SIZE];
+            uint8_t src_mac[ADDR_SIZE];
             uint16_t payload_type;
         } __attribute__((__packed__));
 

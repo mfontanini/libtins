@@ -22,24 +22,21 @@
 #include <stdexcept>
 #include <cstring>
 #include <cassert>
-#ifndef WIN32
-    #include <netinet/in.h>
-#endif
 #include "tcp.h"
 #include "ip.h"
+#include "constants.h"
 #include "rawpdu.h"
 #include "utils.h"
 
 
 const uint16_t Tins::TCP::DEFAULT_WINDOW = 32678;
 
-Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(IPPROTO_TCP), _options_size(0), _total_options_size(0) {
+Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(Constants::IP::PROTO_TCP), _options_size(0), _total_options_size(0) {
     std::memset(&_tcp, 0, sizeof(tcphdr));
     this->dport(dport);
     this->sport(sport);
-    this->data_offset(sizeof(tcphdr) / sizeof(uint32_t));
-    this->window(DEFAULT_WINDOW);
-    this->check(0);
+    data_offset(sizeof(tcphdr) / sizeof(uint32_t));
+    window(DEFAULT_WINDOW);
 }
 
 Tins::TCP::TCP(const TCP &other) : PDU(other) {
@@ -52,7 +49,7 @@ Tins::TCP &Tins::TCP::operator= (const TCP &other) {
     return *this;
 }
 
-Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_TCP) {
+Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROTO_TCP) {
     if(total_sz < sizeof(tcphdr))
         throw std::runtime_error("Not enough size for an TCP header in the buffer.");
     std::memcpy(&_tcp, buffer, sizeof(tcphdr));
@@ -252,7 +249,7 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
     memcpy(tcp_start, &_tcp, sizeof(tcphdr));
     if(!_tcp.check && ip_packet) {
-        uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(), ip_packet->dst_addr(), size(), IPPROTO_TCP) +
+        uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(), ip_packet->dst_addr(), size(), Constants::IP::PROTO_TCP) +
                             Utils::do_checksum(tcp_start, tcp_start + total_sz);
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
