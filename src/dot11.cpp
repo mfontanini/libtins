@@ -606,6 +606,10 @@ void Tins::Dot11ManagementFrame::tim(uint8_t dtim_count,
     add_tagged_option(TIM, sz, buffer);
 }
 
+void Tins::Dot11ManagementFrame::challenge_text(uint8_t* ch_text, uint8_t ch_text_sz) {
+    add_tagged_option(CHALLENGE_TEXT, ch_text_sz, ch_text);
+}
+
 /* Dot11Beacon */
 
 Tins::Dot11Beacon::Dot11Beacon(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame() {
@@ -1085,6 +1089,71 @@ Tins::PDU *Tins::Dot11ReAssocRequest::clone_pdu() const {
     return new_pdu;
 }
 
+/* ReAssoc response. */
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::REASSOC_RESP);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const std::string& iface,
+                                                 const uint8_t* dst_hw_addr,
+                                                 const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::REASSOC_RESP);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+    uint32_t sz = management_frame_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 reassociation response header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Tins::Dot11ReAssocResponse::status_code(uint16_t new_status_code) {
+    this->_body.status_code = new_status_code;
+}
+
+void Tins::Dot11ReAssocResponse::aid(uint16_t new_aid) {
+    this->_body.aid = new_aid;
+}
+
+void Tins::Dot11ReAssocResponse::supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocResponse::extended_supported_rates(const std::list<float> &new_rates) {
+    Dot11ManagementFrame::extended_supported_rates(new_rates);
+}
+
+void Tins::Dot11ReAssocResponse::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
+    Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
+}
+
+uint32_t Tins::Dot11ReAssocResponse::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+}
+
+uint32_t Tins::Dot11ReAssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
+Tins::PDU *Tins::Dot11ReAssocResponse::clone_pdu() const {
+    Dot11ReAssocResponse *new_pdu = new Dot11ReAssocResponse();
+    new_pdu->copy_80211_fields(this);
+    new_pdu->copy_ext_header(this);
+    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
+    return new_pdu;
+}
+
 /* Probe Request */
 
 Tins::Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
@@ -1254,6 +1323,123 @@ uint32_t Tins::Dot11ProbeResponse::header_size() const {
 
 Tins::PDU* Tins::Dot11ProbeResponse::clone_pdu() const {
     Dot11ProbeResponse* new_pdu = new Dot11ProbeResponse();
+    new_pdu->copy_80211_fields(this);
+    new_pdu->copy_ext_header(this);
+    memcpy(&new_pdu->_body, &this->_body, sizeof(this->_body));
+    return new_pdu;
+}
+
+uint32_t Tins::Dot11ProbeResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
+/* Auth */
+
+Tins::Dot11Authentication::Dot11Authentication(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::AUTH);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11Authentication::Dot11Authentication(const std::string& iface,
+                                               const uint8_t* dst_hw_addr,
+                                               const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::AUTH);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+    uint32_t sz = management_frame_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for an IEEE 802.11 authentication header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Tins::Dot11Authentication::auth_algorithm(uint16_t new_auth_algorithm) {
+    this->_body.auth_algorithm = new_auth_algorithm;
+}
+
+void Tins::Dot11Authentication::auth_seq_number(uint16_t new_auth_seq_number) {
+    this->_body.auth_seq_number = new_auth_seq_number;
+}
+
+void Tins::Dot11Authentication::status_code(uint16_t new_status_code) {
+    this->_body.status_code = new_status_code;
+}
+
+void Tins::Dot11Authentication::challenge_text(uint8_t* ch_text, uint8_t ch_text_sz) {
+    Dot11ManagementFrame::challenge_text(ch_text, ch_text_sz);
+}
+
+uint32_t Tins::Dot11Authentication::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+}
+
+Tins::PDU* Tins::Dot11Authentication::clone_pdu() const {
+    Dot11Authentication *new_pdu = new Dot11Authentication();
+    new_pdu->copy_80211_fields(this);
+    new_pdu->copy_ext_header(this);
+    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
+    return new_pdu;
+}
+
+uint32_t Tins::Dot11Authentication::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
+/* Deauth */
+
+Tins::Dot11Deauthentication::Dot11Deauthentication(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+    this->subtype(Dot11::DEAUTH);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11Deauthentication::Dot11Deauthentication(const std::string& iface,
+                                                   const uint8_t* dst_hw_addr,
+                                                   const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+    this->subtype(Dot11::DEAUTH);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Tins::Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = management_frame_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw std::runtime_error("Not enough size for a IEEE 802.11 deauthentication header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Tins::Dot11Deauthentication::reason_code(uint16_t new_reason_code) {
+    this->_body.reason_code = new_reason_code;
+}
+
+uint32_t Tins::Dot11Deauthentication::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+}
+
+uint32_t Tins::Dot11Deauthentication::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
+Tins::PDU *Tins::Dot11Deauthentication::clone_pdu() const {
+    Dot11Deauthentication *new_pdu = new Dot11Deauthentication();
     new_pdu->copy_80211_fields(this);
     new_pdu->copy_ext_header(this);
     memcpy(&new_pdu->_body, &this->_body, sizeof(this->_body));

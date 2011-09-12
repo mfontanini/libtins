@@ -1240,10 +1240,18 @@ namespace Tins {
          */
         void tim(uint8_t dtim_count, uint8_t dtim_period, uint8_t bitmap_control, uint8_t* partial_virtual_bitmap, uint8_t partial_virtual_bitmap_sz);
 
+        /**
+         * \brief Helper method to set the Challenge Text tagged option.
+         *
+         * \brief ch_text uint8_t array with the challenge_text.
+         * \brief ch_text_sz uint8_t with the ch_text's length.
+         */
+        void challenge_text(uint8_t* ch_text, uint8_t ch_text_sz);
+
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
-        
+
         void copy_ext_header(const Dot11ManagementFrame *other);
-        
+
         uint32_t management_frame_size() { return sizeof(_ext_header) + (from_ds() && to_ds()) ? sizeof(_addr4) : 0; }
     private:
         ExtendedHeader _ext_header;
@@ -2122,6 +2130,368 @@ namespace Tins {
         ReAssocReqBody _body;
     };
 
+    /**
+     * \brief Class representing an ReAssociation Response frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11ReAssocResponse : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the ReAssociation Response frame.
+         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ReAssocResponse(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+
+        /**
+         * \brief Constructor for creating a 802.11 Association Response.
+         *
+         * Constructor that builds a 802.11 ReAssociation Response taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11ReAssocResponse(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11ReAssocResponse object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the Capabilities Information.
+         *
+         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         */
+        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+
+        /**
+         * \brief Getter for the status code.
+         *
+         * \return The status code in an uint16_t.
+         */
+        inline uint16_t status_code() const { return this->_body.status_code; }
+
+        /**
+         * \brief Getter for the AID field.
+         *
+         * \return The AID field value in an uint16_t.
+         */
+        inline uint16_t aid() const { return this->_body.aid; }
+
+        /**
+         * \brief Setter for the status code.
+         *
+         * \param new_status_code uint16_t with the new status code.
+         */
+        void status_code(uint16_t new_status_code);
+
+        /**
+         * \brief Setter for the AID field.
+         *
+         * \param new_aid uint16_t with the new AID value.
+         */
+        void aid(uint16_t new_aid);
+
+        /**
+         * \brief Helper method to set the supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the extended supported rates.
+         *
+         * \param new_rates A list of rates to be set.
+         */
+        void extended_supported_rates(const std::list<float> &new_rates);
+
+        /**
+         * \brief Helper method to set the EDCA Parameter Set.
+         *
+         * \param ac_be uint32_t with the value of the ac_be field.
+         * \param ac_bk uint32_t with the value of the ac_bk field.
+         * \param ac_vi uint32_t with the value of the ac_vi field.
+         * \param ac_vo uint32_t with the value of the ac_vo field.
+         */
+        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_ASSOC_RESP; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_ASSOC_RESP || Dot11ManagementFrame::matches_flag(flag);
+        }
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+    private:
+        struct ReAssocRespBody {
+            CapabilityInformation capability;
+            uint16_t status_code;
+            uint16_t aid;
+        };
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+        ReAssocRespBody _body;
+    };
+
+    /**
+     * \brief Class representing an Authentication Request frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11Authentication : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the Authentication frame.
+         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11Authentication(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+
+        /**
+         * \brief Constructor for creating a 802.11 Authentication.
+         *
+         * Constructor that builds a 802.11 Dot11Authentication taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11Authentication(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11Authentication object from a
+         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11Authentication(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Getter for the Authetication Algorithm Number.
+         *
+         * \return The authentication algorithm number in an uint16_t.
+         */
+        inline uint16_t auth_algorithm() const {return this->_body.auth_algorithm; }
+
+        /**
+         * \brief Getter for the Authetication Sequence Number.
+         *
+         * \return The authentication sequence number in an uint16_t.
+         */
+        inline uint16_t auth_seq_number() const {return this->_body.auth_seq_number; }
+
+        /**
+         * \brief Getter for the status code.
+         *
+         * \return The status code in an uint16_t.
+         */
+        inline uint16_t status_code() const { return this->_body.status_code; }
+
+        /**
+         * \brief Setter for the Authetication Algorithm Number.
+         *
+         * \param new_auth_algorithm uint16_t with the new value for the Authetication Algorithm Number field.
+         */
+        void auth_algorithm(uint16_t new_auth_algorithm);
+
+        /**
+         * \brief Setter for the Authetication Sequence Number.
+         *
+         * \param new_auth_seq_number uint16_t with the new value for the Authetication Sequence Number field.
+         */
+        void auth_seq_number(uint16_t new_auth_seq_number);
+
+        /**
+         * \brief Setter for the status code.
+         *
+         * \param new_status_code uint16_t with the new status code.
+         */
+        void status_code(uint16_t new_status_code);
+
+        /**
+         * \brief Helper method to set the Challenge Text tagged option.
+         *
+         * \brief ch_text uint8_t array with the challenge_text.
+         * \brief ch_text_sz uint8_t with the ch_text's length.
+         */
+        void challenge_text(uint8_t* ch_text, uint8_t ch_text_sz);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_AUTH; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_AUTH || Dot11ManagementFrame::matches_flag(flag);
+        }
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+    private:
+        struct AuthBody {
+            uint16_t auth_algorithm;
+            uint16_t auth_seq_number;
+            uint16_t status_code;
+        };
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+        AuthBody _body;
+
+    };
+
+    /**
+     * \brief Class representing a Deauthentication frame in the IEEE 802.11 Protocol.
+     *
+     */
+    class Dot11Deauthentication : public Dot11ManagementFrame {
+
+    public:
+
+        /**
+         * \brief Default constructor for the Deauthentication frame.
+         *
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11Deauthentication(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+
+        /**
+         * \brief Constructor for creating a 802.11 Deauthentication.
+         *
+         * Constructor that builds a 802.11 Deauthentication taking the interface name,
+         * destination's and source's MAC.
+         *
+         * \param iface string containing the interface's name from where to send the packet.
+         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         */
+        Dot11Deauthentication(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+
+        /**
+         * \brief Constructor which creates a Dot11Deauthentication object from a buffer and adds
+         * all identifiable PDUs found in the buffer as children of this one.
+         *
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz);
+
+        /**
+         * \brief Getter for the reason code.
+         *
+         * \return uint16_t with the reason code.
+         */
+        inline uint16_t reason_code() const { return this->_body.reason_code; }
+
+        /**
+         * \brief Setter for the reason code.
+         *
+         * \param new_reason_code uint16_t with the new reason code.
+         */
+        void reason_code(uint16_t new_reason_code);
+
+        /**
+         * \brief Returns the frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+        /**
+         * \brief Getter for the PDU's type.
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_DEAUTH; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_DEAUTH || Dot11ManagementFrame::matches_flag(flag);
+        }
+
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
+    private:
+        struct DeauthBody {
+            uint16_t reason_code;
+        };
+
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+        DeauthBody _body;
+    };
 
     /**
      * \brief Class representing an Probe Request frame in the IEEE 802.11 Protocol.
@@ -2491,6 +2861,8 @@ namespace Tins {
 
         ProbeResp _body;
 
+        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
     };
 
     class Dot11Data : public Dot11 {
@@ -2621,7 +2993,7 @@ namespace Tins {
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
         void copy_ext_header(const Dot11Data *other);
-        
+
         uint32_t data_frame_size() { return sizeof(_ext_header) + (from_ds() && to_ds()) ? sizeof(_addr4) : 0; }
     private:
         ExtendedHeader _ext_header;
