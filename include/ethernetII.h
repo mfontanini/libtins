@@ -26,6 +26,7 @@
 #include <stdexcept>
 
 #include "pdu.h"
+#include "utils.h"
 
 namespace Tins {
 
@@ -36,11 +37,11 @@ namespace Tins {
 
     public:
 
-        /** 
+        /**
          * \brief Represents the ethernetII broadcast address.
          */
         static const uint8_t* BROADCAST;
-        
+
         /**
          * \brief Ethernet II hardware address size.
          */
@@ -79,17 +80,7 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         EthernetII(const uint8_t *buffer, uint32_t total_sz);
-        
-        /**
-         * \brief Copy constructor.
-         */
-        EthernetII(const EthernetII &other);
-        
-        /**
-         * \brief Copy assignment operator.
-         */
-        EthernetII &operator= (const EthernetII &other);
-        
+
         /* Getters */
         /**
          * \brief Getter for the destination's mac address.
@@ -116,10 +107,10 @@ namespace Tins {
          * \brief Getter for the payload_type
          * \return The payload type.
          */
-        uint16_t payload_type() const;
+        inline uint16_t payload_type() const { return Utils::net_to_host_s(_eth.payload_type); };
 
         /* Setters */
-        
+
         /**
          * \brief Setter for the destination's MAC.
          *
@@ -147,6 +138,13 @@ namespace Tins {
          * \param new_iface string reference containing the new interface name.
          */
         void iface(const std::string& new_iface) throw (std::runtime_error);
+
+        /**
+         * \brief Setter for the payload type.
+         *
+         * \param new_payload_type uint16_t with the new value of the payload type field.
+         */
+        void payload_type(uint16_t new_payload_type);
 
         /* Virtual methods */
         /**
@@ -192,10 +190,10 @@ namespace Tins {
          * \sa PDU::clone_packet
          */
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -211,7 +209,7 @@ namespace Tins {
 
         void copy_fields(const EthernetII *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-        
+
 
         ethhdr _eth;
         uint32_t _iface_index;

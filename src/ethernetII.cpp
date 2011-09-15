@@ -77,20 +77,6 @@ Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
     }
 }
 
-Tins::EthernetII::EthernetII(const EthernetII &other) : PDU(other) {
-    copy_fields(&other);
-}
-
-Tins::EthernetII &Tins::EthernetII::operator= (const EthernetII &other) {
-    copy_fields(&other);
-    copy_inner_pdu(other);
-    return *this;
-}
-
-uint16_t Tins::EthernetII::payload_type() const {
-    return Utils::net_to_host_s(_eth.payload_type);
-}
-
 void Tins::EthernetII::dst_addr(const uint8_t* new_dst_mac) {
     memcpy(_eth.dst_mac, new_dst_mac, sizeof(_eth.dst_mac));
 }
@@ -107,6 +93,10 @@ void Tins::EthernetII::iface(const std::string& new_iface) throw (std::runtime_e
     if (!Tins::Utils::interface_id(new_iface, this->_iface_index)) {
         throw std::runtime_error("Invalid interface name!");
     }
+}
+
+void Tins::EthernetII::payload_type(uint16_t new_payload_type) {
+    this->_eth.payload_type = Utils::net_to_host_s(new_payload_type);
 }
 
 uint32_t Tins::EthernetII::header_size() const {
