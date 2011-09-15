@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 #ifndef WIN32
     #include <netdb.h>
     #include <sys/socket.h>
@@ -141,11 +142,6 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROT
         cleanup();
         throw;
     }
-}
-
-Tins::IP::IP(const iphdr *ptr) : PDU(Constants::IP::PROTO_IP) {
-    std::memcpy(&_ip, ptr, sizeof(iphdr));
-    /* Options... */
 }
 
 Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src, PDU *child) : PDU(Constants::IP::PROTO_IP, child) {
@@ -350,15 +346,10 @@ Tins::PDU *Tins::IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
         return 0;
     PDU *child = 0, *cloned;
     if(total_sz > sz) {
-        if(inner_pdu()) {
-            child = inner_pdu()->clone_packet(ptr + sz, total_sz - sz);
-            if(!child)
-                return 0;
-        }
-        else
-            child = new RawPDU(ptr + sz, total_sz - sz);
+        if((child = PDU::clone_inner_pdu(ptr + sizeof(_ip), total_sz - sizeof(_ip))) == 0)
+            return 0;
     }
-    cloned = new IP(ip_ptr);
+    cloned = new IP(ptr, std::min(total_sz, (uint32_t)(Utils::net_to_host_s(ip_ptr->tot_len) * sizeof(uint32_t))));
     cloned->inner_pdu(child);
     return cloned;
 }

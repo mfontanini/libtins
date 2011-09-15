@@ -419,12 +419,6 @@ namespace Tins {
             uint8_t* write(uint8_t* buffer);
 
         } __attribute__((__packed__));
-
-        /** \brief Creates an instance of IP from an iphdr pointer.
-         *
-         * \param ptr The ip header pointer.
-         */
-        IP(const iphdr *ptr);
         
         void copy_fields(const IP *other);
         void init_ip_fields();

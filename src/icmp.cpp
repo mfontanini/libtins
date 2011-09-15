@@ -57,10 +57,6 @@ Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_ICMP) {
         inner_pdu(new RawPDU(buffer + sizeof(icmphdr), total_sz));
 }
 
-Tins::ICMP::ICMP(const icmphdr *ptr) : PDU(IPPROTO_ICMP) {
-    std::memcpy(&_icmp, ptr, sizeof(icmphdr));
-}
-
 void Tins::ICMP::code(uint8_t new_code) {
     _icmp.code = new_code;
 }
@@ -190,13 +186,12 @@ bool Tins::ICMP::matches_response(uint8_t *ptr, uint32_t total_sz) {
 Tins::PDU *Tins::ICMP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(icmphdr))
         return 0;
-    const icmphdr *icmp_ptr = (icmphdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(icmphdr)) {
         if((child = PDU::clone_inner_pdu(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr))) == 0)
             return 0;
     }
-    cloned = new ICMP(icmp_ptr);
+    cloned = new ICMP(ptr, std::min(total_sz, (uint32_t)sizeof(_icmp)));
     cloned->inner_pdu(child);
     return cloned;
 }

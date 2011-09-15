@@ -209,12 +209,6 @@ namespace Tins {
             uint16_t payload_type;
         } __attribute__((__packed__));
 
-        /** \brief Creates an instance of EthernetII using an ethhdr pointer.
-         *
-         * \param eth_ptr The pointer to the ethhdr.
-         */
-        EthernetII(const ethhdr *eth_ptr);
-
         void copy_fields(const EthernetII *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         

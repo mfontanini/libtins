@@ -61,16 +61,20 @@ Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
         throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
     memcpy(&_eth, buffer, sizeof(ethhdr));
     PDU *next = 0;
-    switch(payload_type()) {
-        case ETHERTYPE_IP:
-            next = new Tins::IP(buffer + sizeof(ethhdr), total_sz - sizeof(ethhdr));
-            break;
-        case ETHERTYPE_ARP:
-            next = new Tins::ARP(buffer + sizeof(ethhdr), total_sz - sizeof(ethhdr));
-            break;
-        // Other protos plz
+    buffer += sizeof(ethhdr);
+    total_sz -= sizeof(ethhdr);
+    if(total_sz) {
+        switch(payload_type()) {
+            case ETHERTYPE_IP:
+                next = new Tins::IP(buffer, total_sz);
+                break;
+            case ETHERTYPE_ARP:
+                next = new Tins::ARP(buffer, total_sz);
+                break;
+            // Other protos plz
+        }
+        inner_pdu(next);
     }
-    inner_pdu(next);
 }
 
 Tins::EthernetII::EthernetII(const EthernetII &other) : PDU(other) {
@@ -81,10 +85,6 @@ Tins::EthernetII &Tins::EthernetII::operator= (const EthernetII &other) {
     copy_fields(&other);
     copy_inner_pdu(other);
     return *this;
-}
-
-Tins::EthernetII::EthernetII(const ethhdr *eth_ptr) : PDU(ETHERTYPE_IP) {
-    memcpy(&_eth, eth_ptr, sizeof(ethhdr));
 }
 
 uint16_t Tins::EthernetII::payload_type() const {
@@ -133,7 +133,7 @@ bool Tins::EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
     ethhdr *eth_ptr = (ethhdr*)ptr;
     if(!memcmp(eth_ptr->dst_mac, _eth.src_mac, ADDR_SIZE)) {
         // chequear broadcast en destino original...
-        return true;
+        return (inner_pdu()) ? inner_pdu()->matches_response(ptr + sizeof(_eth), total_sz - sizeof(_eth)) : true;
     }
     return false;
 }
@@ -176,13 +176,12 @@ Tins::PDU *Tins::EthernetII::recv_response(PacketSender *sender) {
 Tins::PDU *Tins::EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(_eth))
         return 0;
-    const ethhdr *eth_ptr = (ethhdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(_eth)) {
         if((child = PDU::clone_inner_pdu(ptr + sizeof(_eth), total_sz - sizeof(_eth))) == 0)
             return 0;
     }
-    cloned = new EthernetII(eth_ptr);
+    cloned = new EthernetII(ptr, std::min(total_sz, (uint32_t)sizeof(_eth)));
     cloned->inner_pdu(child);
     return cloned;
 }

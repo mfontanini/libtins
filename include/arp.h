@@ -334,13 +334,7 @@ namespace Tins {
             uint8_t ar_tha[6];	/* target hardware address	*/
             uint32_t ar_tip;	/* target IP address		*/
         } __attribute__((__packed__));
-
-        /** \brief Creates an instance of ARP using an arphdr pointer.
-         *
-         * \param arp_ptr The pointer to the arphdr.
-         */
-        ARP(const arphdr *arp_ptr);
-
+        
         void copy_fields(const ARP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 

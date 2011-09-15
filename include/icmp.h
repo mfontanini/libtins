@@ -309,12 +309,6 @@ namespace Tins {
             } un;
         } __attribute__((__packed__));
 
-        /** \brief Creates an instance of ICMP from a icmphdr pointer.
-         *
-         * \param ptr The icmphdr to clone.
-         */
-        ICMP(const icmphdr *ptr);
-
         void copy_fields(const ICMP *other);
         
         /** \brief Serialices this ICMP PDU.

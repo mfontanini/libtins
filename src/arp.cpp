@@ -22,6 +22,7 @@
 #include <string>
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 #include "arp.h"
 #include "ip.h"
 #include "ethernetII.h"
@@ -54,10 +55,6 @@ Tins::ARP::ARP(const uint8_t *buffer, uint32_t total_sz) : PDU(Utils::net_to_hos
     total_sz -= sizeof(arphdr);
     if(total_sz)
         inner_pdu(new RawPDU(buffer + sizeof(arphdr), total_sz));
-}
-
-Tins::ARP::ARP(const arphdr *arp_ptr) : PDU(Utils::net_to_host_s(Constants::Ethernet::ARP)) {
-    memcpy(&_arp, arp_ptr, sizeof(arphdr));
 }
 
 void Tins::ARP::sender_hw_addr(const uint8_t* new_snd_hw_addr) {
@@ -144,13 +141,12 @@ bool Tins::ARP::matches_response(uint8_t *ptr, uint32_t total_sz) {
 Tins::PDU *Tins::ARP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(arphdr))
         return 0;
-    const arphdr *arp_ptr = (arphdr*)ptr;
     PDU *child = 0, *cloned;
     if(total_sz > sizeof(arphdr)) {
         if((child = PDU::clone_inner_pdu(ptr + sizeof(arphdr), total_sz - sizeof(arphdr))) == 0)
             return 0;
     }
-    cloned = new ARP(arp_ptr);
+    cloned = new ARP(ptr, std::min(total_sz, (uint32_t)sizeof(_arp)));
     cloned->inner_pdu(child);
     return cloned;
 }
