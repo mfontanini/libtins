@@ -122,7 +122,7 @@ namespace Tins {
          *
          * \return Returns the ARP opcode in an uint16_t.
          */
-        inline uint16_t opcode() { return this->_arp.ar_op; }
+        inline uint16_t opcode() { return Utils::net_to_host_s(this->_arp.ar_op); }
 
         /** \brief Getter for the header size.
          * \return Returns the ARP header size.
