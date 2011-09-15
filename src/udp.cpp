@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include <cassert>
 #include <cstring>
-#include "utils.h"
 #include "udp.h"
 #include "constants.h"
 #include "ip.h"

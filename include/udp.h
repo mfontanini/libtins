@@ -24,6 +24,7 @@
 
 
 #include "pdu.h"
+#include "utils.h"
 
 namespace Tins {
 
@@ -67,19 +68,19 @@ namespace Tins {
          * \brief Getter for the destination port.
          * \return The datagram's destination port.
          */
-        inline uint16_t dport() const { return _udp.dport; }
+        inline uint16_t dport() const { return Utils::net_to_host_s(_udp.dport); }
 
         /** 
          * \brief Getter for the source port.
          * \return The datagram's source port.
          */
-        inline uint16_t sport() const { return _udp.sport; }
+        inline uint16_t sport() const { return Utils::net_to_host_s(_udp.sport); }
         
         /**
          * \brief Getter for the length of the datagram.
          * \return The length of the datagram.
          */
-        inline uint16_t length() const { return _udp.len; }
+        inline uint16_t length() const { return Utils::net_to_host_s(_udp.len); }
 
         /** 
          * \brief Set the destination port.
