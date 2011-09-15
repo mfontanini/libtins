@@ -33,6 +33,34 @@ TEST_F(ARPTest, DefaultContructor) {
     EXPECT_EQ(arp.pdu_type(), PDU::ARP);
 }
 
+TEST_F(ARPTest, CopyContructor) {
+    ARP arp1(0x1234, 0xa3f1, hw_addr1, hw_addr2);
+    ARP arp2(arp1);
+    EXPECT_EQ(arp1.opcode(), arp2.opcode());
+    ASSERT_EQ(arp1.hw_addr_length(), arp2.hw_addr_length());
+    EXPECT_EQ(arp1.hw_addr_format(), arp2.hw_addr_format());
+    ASSERT_EQ(arp1.prot_addr_length(), arp2.prot_addr_length());
+    EXPECT_EQ(arp1.prot_addr_format(), arp2.prot_addr_format());
+    EXPECT_EQ(arp1.sender_ip_addr(), arp2.sender_ip_addr());
+    EXPECT_EQ(arp1.target_ip_addr(), arp2.target_ip_addr());
+    EXPECT_TRUE(memcmp(arp1.sender_hw_addr(), arp2.sender_hw_addr(), arp2.hw_addr_length()) == 0);
+    EXPECT_TRUE(memcmp(arp1.target_hw_addr(), arp2.target_hw_addr(), arp2.hw_addr_length()) == 0);
+}
+
+TEST_F(ARPTest, CopyAssignmentOperator) {
+    ARP arp1(0x1234, 0xa3f1, hw_addr1, hw_addr2);
+    ARP arp2 = arp1;
+    EXPECT_EQ(arp1.opcode(), arp2.opcode());
+    ASSERT_EQ(arp1.hw_addr_length(), arp2.hw_addr_length());
+    EXPECT_EQ(arp1.hw_addr_format(), arp2.hw_addr_format());
+    ASSERT_EQ(arp1.prot_addr_length(), arp2.prot_addr_length());
+    EXPECT_EQ(arp1.prot_addr_format(), arp2.prot_addr_format());
+    EXPECT_EQ(arp1.sender_ip_addr(), arp2.sender_ip_addr());
+    EXPECT_EQ(arp1.target_ip_addr(), arp2.target_ip_addr());
+    EXPECT_TRUE(memcmp(arp1.sender_hw_addr(), arp2.sender_hw_addr(), arp2.hw_addr_length()) == 0);
+    EXPECT_TRUE(memcmp(arp1.target_hw_addr(), arp2.target_hw_addr(), arp2.hw_addr_length()) == 0);
+}
+
 TEST_F(ARPTest, CompleteContructor) {
     ARP arp(0x1234, 0xa3f1, hw_addr1, hw_addr2);
     EXPECT_TRUE(memcmp(arp.target_hw_addr(), hw_addr1, sizeof(hw_addr1)) == 0);
@@ -120,6 +148,23 @@ TEST_F(ARPTest, Serialize) {
     ASSERT_EQ(size, size2);
     EXPECT_TRUE(memcmp(buffer, buffer2, size) == 0);
     delete[] buffer;
+}
+
+TEST_F(ARPTest, ClonePDU) {
+    ARP arp1(0x1234, 0xa3f1, hw_addr1, hw_addr2);
+    ARP *arp2 = static_cast<ARP*>(arp1.clone_pdu());
+    ASSERT_TRUE(arp2);
+    
+    EXPECT_EQ(arp1.opcode(), arp2->opcode());
+    ASSERT_EQ(arp1.hw_addr_length(), arp2->hw_addr_length());
+    EXPECT_EQ(arp1.hw_addr_format(), arp2->hw_addr_format());
+    ASSERT_EQ(arp1.prot_addr_length(), arp2->prot_addr_length());
+    EXPECT_EQ(arp1.prot_addr_format(), arp2->prot_addr_format());
+    EXPECT_EQ(arp1.sender_ip_addr(), arp2->sender_ip_addr());
+    EXPECT_EQ(arp1.target_ip_addr(), arp2->target_ip_addr());
+    EXPECT_TRUE(memcmp(arp1.sender_hw_addr(), arp2->sender_hw_addr(), arp2->hw_addr_length()) == 0);
+    EXPECT_TRUE(memcmp(arp1.target_hw_addr(), arp2->target_hw_addr(), arp2->hw_addr_length()) == 0);
+    delete arp2;
 }
 
 TEST_F(ARPTest, ConstructorFromBuffer) {
