@@ -66,23 +66,27 @@ void Tins::ICMP::type(Flags new_type) {
 }
 
 void Tins::ICMP::check(uint16_t new_check) {
-    this->_icmp.check = Utils::net_to_host_s(new_check);
+    _icmp.check = Utils::net_to_host_s(new_check);
 }
 
 void Tins::ICMP::id(uint16_t new_id) {
-    this->_icmp.un.echo.id = Utils::net_to_host_s(new_id);
+    _icmp.un.echo.id = Utils::net_to_host_s(new_id);
 }
 
 void Tins::ICMP::sequence(uint16_t new_seq) {
-    this->_icmp.un.echo.id = Utils::net_to_host_s(new_seq);
+    _icmp.un.echo.sequence = Utils::net_to_host_s(new_seq);
 }
 
 void Tins::ICMP::gateway(uint32_t new_gw) {
-    this->_icmp.un.gateway = Utils::net_to_host_l(new_gw);
+    _icmp.un.gateway = Utils::net_to_host_l(new_gw);
 }
 
 void Tins::ICMP::mtu(uint16_t new_mtu) {
-    this->_icmp.un.frag.mtu = Utils::net_to_host_s(new_mtu);
+    _icmp.un.frag.mtu = Utils::net_to_host_s(new_mtu);
+}
+
+void Tins::ICMP::pointer(uint8_t new_pointer) {
+    _icmp.un.pointer = new_pointer;
 }
 
 uint32_t Tins::ICMP::header_size() const {
@@ -90,9 +94,9 @@ uint32_t Tins::ICMP::header_size() const {
 }
 
 void Tins::ICMP::set_echo_request(uint16_t id, uint16_t seq) {
-    this->type(ECHO_REQUEST);
+    type(ECHO_REQUEST);
     this->id(id);
-    this->sequence(seq);
+    sequence(seq);
 }
 
 void Tins::ICMP::set_echo_request() {
@@ -104,9 +108,9 @@ void Tins::ICMP::set_echo_request() {
 }
 
 void Tins::ICMP::set_echo_reply(uint16_t id, uint16_t seq) {
-    this->type(ECHO_REPLY);
+    type(ECHO_REPLY);
     this->id(id);
-    this->sequence(seq);
+    sequence(seq);
 }
 
 void Tins::ICMP::set_echo_reply() {
@@ -118,46 +122,46 @@ void Tins::ICMP::set_echo_reply() {
 }
 
 void Tins::ICMP::set_info_request(uint16_t id, uint16_t seq) {
-    this->type(INFO_REQUEST);
-    this->code(0);
+    type(INFO_REQUEST);
+    code(0);
     this->id(id);
-    this->sequence(seq);
+    sequence(seq);
 }
 
 void Tins::ICMP::set_info_reply(uint16_t id, uint16_t seq) {
-    this->type(INFO_REPLY);
-    this->code(0);
+    type(INFO_REPLY);
+    code(0);
     this->id(id);
-    this->sequence(seq);
+    sequence(seq);
 }
 
 void Tins::ICMP::set_dest_unreachable() {
-    this->type(DEST_UNREACHABLE);
+    type(DEST_UNREACHABLE);
 }
 
 void Tins::ICMP::set_time_exceeded(bool ttl_exceeded) {
-    this->type(TIME_EXCEEDED);
-    this->code((ttl_exceeded) ? 0 : 1);
+    type(TIME_EXCEEDED);
+    code((ttl_exceeded) ? 0 : 1);
 }
 
 void Tins::ICMP::set_param_problem(bool set_pointer, uint8_t bad_octet) {
-    this->type(PARAM_PROBLEM);
+    type(PARAM_PROBLEM);
     if(set_pointer) {
-        this->code(0);
-        this->id(bad_octet);
+        code(0);
+        pointer(bad_octet);
     }
     else
-        this->code(1);
+        code(1);
 }
 
 void Tins::ICMP::set_source_quench() {
-    this->type(SOURCE_QUENCH);
+    type(SOURCE_QUENCH);
 }
 
 void Tins::ICMP::set_redirect(uint8_t icode, uint32_t address) {
-    this->type(REDIRECT);
-    this->code(icode);
-    this->gateway(address);
+    type(REDIRECT);
+    code(icode);
+    gateway(address);
 }
 
 void Tins::ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {

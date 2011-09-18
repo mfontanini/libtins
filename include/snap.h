@@ -25,18 +25,22 @@
 
 #include <stdint.h>
 #include "pdu.h"
+#include "utils.h"
 
 namespace Tins {
 
     /**
      * \brief Class representing a SNAP frame.
      * 
+     * Note that this PDU contains the 802.3 LLC structure + SNAP frame.
      * So far only unnumbered information structure is supported.
      */
     class SNAP : public PDU {
     public:
         /**
          * \brief Creates an instance of SNAP
+         * This constructor sets the dsap and ssap fields to 0xaa, and
+         * the id field to 3.
          * \param child The child PDU.(optional)
          */
         SNAP(PDU *child = 0);
@@ -58,6 +62,70 @@ namespace Tins {
          * \brief Copy assignment operator.
          */
         SNAP &operator= (const SNAP &other);
+        
+        /* Setters */
+        
+        /**
+         * \brief Setter for the id field.
+         * \param new_id The new id to be set.
+         */
+        void id(uint8_t new_id);
+        
+        /**
+         * \brief Setter for the poll field.
+         * \param new_poll The new poll to be set.
+         */
+        void poll(uint8_t new_poll);
+        
+        /**
+         * \brief Setter for the org code field.
+         * \param new_org The new org code to be set.
+         */
+        void org_code(uint32_t new_org);
+        
+        /**
+         * \brief Setter for the eth type field.
+         * \param new_eth The new eth type to be set.
+         */
+        void eth_type(uint32_t new_eth);
+        
+        /* Getters */
+        
+        /**
+         * \brief Getter for the dsap field.
+         * \return The dsap field.
+         */
+        inline uint8_t dsap() const { return _snap.dsap; }
+        
+        /**
+         * \brief Getter for the ssap field.
+         * \return The ssap field.
+         */
+        inline uint8_t ssap() const { return _snap.ssap; }
+        
+        /**
+         * \brief Getter for the id field.
+         * \return The id field.
+         */
+        inline uint8_t id() const { return _snap.id; }
+        
+        /**
+         * \brief Getter for the poll field.
+         * \return The poll field.
+         */
+        inline uint8_t poll() const { return _snap.poll; }
+        
+        /**
+         * \brief Getter for the org code field.
+         * \return The org code field.
+         */
+        inline uint32_t org_code() const { return _snap.org_code; }
+        
+        /**
+         * \brief Getter for the eth type field.
+         * \return The eth field.
+         */
+        inline uint16_t eth_type() const { return Utils::net_to_host_s(_snap.eth_type); }
         
         /**
          * \brief Returns the SNAP frame's header length.

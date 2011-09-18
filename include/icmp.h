@@ -52,7 +52,7 @@ namespace Tins {
         /**
          * \brief Creates an instance of ICMP.
          *
-         * If no flag is specified, then ECHO_REPLY will be used.
+         * If no flag is specified, then ECHO_REQUEST will be used.
          * \param flag The type flag which will be set.
          */
         ICMP(Flags flag = ECHO_REQUEST);
@@ -112,6 +112,13 @@ namespace Tins {
          * \param new_mtu uint16_t with the new sequence.
          */
         void mtu(uint16_t new_mtu);
+        
+        /**
+         * \brief Setter for the pointer field.
+         *
+         * \param new_pointer uint8_t with the new pointer.
+         */
+        void pointer(uint8_t new_pointer);
 
         /**
          * \brief Sets echo request flag for this PDU.
@@ -242,6 +249,13 @@ namespace Tins {
          uint32_t gateway() const { return Utils::net_to_host_l(this->_icmp.un.gateway); }
 
          /**
+          * \brief Getter for the pointer field.
+          *
+          * \return Returns the pointer value.
+          */
+        uint8_t pointer() const { return this->_icmp.un.pointer; }
+        
+        /**
           * \brief Getter for the mtu field.
           *
           * \return Returns the mtu value in an uint16_t.
@@ -306,6 +320,7 @@ namespace Tins {
                     uint16_t __unused;
                     uint16_t mtu;
                 } frag;
+                uint8_t pointer;
             } un;
         } __attribute__((__packed__));
 

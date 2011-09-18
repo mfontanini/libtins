@@ -27,7 +27,6 @@
 #endif
 #include "snap.h"
 #include "constants.h"
-#include "utils.h"
 #include "arp.h"
 #include "ip.h"
 #include "eapol.h"
@@ -66,6 +65,22 @@ Tins::SNAP &Tins::SNAP::operator= (const SNAP &other) {
     copy_fields(&other);
     copy_inner_pdu(other);
     return *this;
+}
+
+void Tins::SNAP::id(uint8_t new_id) {
+    _snap.id = new_id;
+}
+
+void Tins::SNAP::poll(uint8_t new_poll) {
+    _snap.poll = new_poll;
+}
+
+void Tins::SNAP::org_code(uint32_t new_org) {
+    _snap.org_code = new_org;
+}
+
+void Tins::SNAP::eth_type(uint32_t new_eth) {
+    _snap.eth_type = Utils::net_to_host_s(new_eth);
 }
 
 uint32_t Tins::SNAP::header_size() const {

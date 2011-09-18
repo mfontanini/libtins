@@ -119,6 +119,7 @@ TEST_F(UDPTest, Serialize) {
     ASSERT_EQ(size, size2);
     EXPECT_TRUE(memcmp(buffer, buffer2, size) == 0);
     delete[] buffer;
+    delete[] buffer2;
 }
 
 TEST_F(UDPTest, ConstructorFromBuffer) {
@@ -127,6 +128,10 @@ TEST_F(UDPTest, ConstructorFromBuffer) {
     uint8_t *buffer = udp1.serialize(size);
     
     EXPECT_EQ(size, sizeof(expected_packet));
+    EXPECT_EQ(udp1.dport(), 0x47f1);
+    EXPECT_EQ(udp1.sport(), 0xf51a);
+    EXPECT_EQ(udp1.length(), 0x453);
+    
     UDP udp2(buffer, size);
     EXPECT_EQ(udp1.dport(), udp2.dport());
     EXPECT_EQ(udp1.sport(), udp2.sport());

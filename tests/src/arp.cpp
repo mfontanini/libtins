@@ -148,6 +148,7 @@ TEST_F(ARPTest, Serialize) {
     ASSERT_EQ(size, size2);
     EXPECT_TRUE(memcmp(buffer, buffer2, size) == 0);
     delete[] buffer;
+    delete[] buffer2;
 }
 
 TEST_F(ARPTest, ClonePDU) {
@@ -182,4 +183,6 @@ TEST_F(ARPTest, ConstructorFromBuffer) {
     EXPECT_EQ(arp1.target_ip_addr(), arp2.target_ip_addr());
     EXPECT_TRUE(memcmp(arp1.sender_hw_addr(), arp2.sender_hw_addr(), arp2.hw_addr_length()) == 0);
     EXPECT_TRUE(memcmp(arp1.target_hw_addr(), arp2.target_hw_addr(), arp2.hw_addr_length()) == 0);
+    
+    delete[] buffer;
 }
