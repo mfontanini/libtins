@@ -45,7 +45,7 @@ namespace Tins {
         /**
          * \brief Ethernet II hardware address size.
          */
-        static const uint32_t ADDR_SIZE = 6;
+        static const unsigned ADDR_SIZE = 6;
 
         /**
          * \brief Constructor for creating an ethernet PDU
@@ -216,5 +216,6 @@ namespace Tins {
     };
 
 };
+
 
 #endif

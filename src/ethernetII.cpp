@@ -33,7 +33,7 @@
 #include "utils.h"
 
 const uint8_t* Tins::EthernetII::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
-//const uint32_t Tins::EthernetII::ADDR_SIZE = 6;
+const uint32_t Tins::EthernetII::ADDR_SIZE;
 
 Tins::EthernetII::EthernetII(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
     memset(&_eth, 0, sizeof(ethhdr));
