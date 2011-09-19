@@ -2,7 +2,6 @@
 #include <cstring>
 #include <cassert>
 #include "bootp.h"
-#include "utils.h"
 
 
 Tins::BootP::BootP() : PDU(255), _vend_size(64) {
@@ -71,30 +70,30 @@ void Tins::BootP::padding(uint16_t new_padding) {
 }
 
 void Tins::BootP::ciaddr(uint32_t new_ciaddr) {
-    _bootp.ciaddr = Utils::net_to_host_l(new_ciaddr);
+    _bootp.ciaddr = new_ciaddr;
 }
 
 void Tins::BootP::yiaddr(uint32_t new_yiaddr) {
-    _bootp.yiaddr = Utils::net_to_host_l(new_yiaddr);
+    _bootp.yiaddr = new_yiaddr;
 }
 
 void Tins::BootP::siaddr(uint32_t new_siaddr) {
-    _bootp.siaddr = Utils::net_to_host_l(new_siaddr);
+    _bootp.siaddr = new_siaddr;
 }
 
 void Tins::BootP::giaddr(uint32_t new_giaddr) {
-    _bootp.giaddr = Utils::net_to_host_l(new_giaddr);
+    _bootp.giaddr = new_giaddr;
 }
 
-void Tins::BootP::chaddr(uint8_t *new_chaddr) {
+void Tins::BootP::chaddr(const uint8_t *new_chaddr) {
     std::memcpy(_bootp.chaddr, new_chaddr, _bootp.hlen);
 }
 
-void Tins::BootP::sname(uint8_t *new_sname) {
+void Tins::BootP::sname(const uint8_t *new_sname) {
     std::memcpy(_bootp.sname, new_sname, sizeof(_bootp.sname));
 }
 
-void Tins::BootP::file(uint8_t *new_file) {
+void Tins::BootP::file(const uint8_t *new_file) {
     std::memcpy(_bootp.file, new_file, sizeof(_bootp.file));
 }
 

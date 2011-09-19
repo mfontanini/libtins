@@ -23,10 +23,9 @@
 #define __BOOTP_H
 
 #include <stdint.h>
-
 #include <stdint.h>
-
 #include "pdu.h"
+#include "utils.h"
 
 
 namespace Tins {
@@ -104,17 +103,17 @@ namespace Tins {
         /** \brief Getter for the xid field.
          * \return The xid field for this BootP PDU.
          */
-        uint32_t xid() const { return _bootp.xid; }
+        uint32_t xid() const { return Utils::net_to_host_l(_bootp.xid); }
         
         /** \brief Getter for the secs field.
          * \return The secs field for this BootP PDU.
          */
-        uint16_t secs() const { return _bootp.secs; }
+        uint16_t secs() const { return Utils::net_to_host_s(_bootp.secs); }
         
         /** \brief Getter for the padding field.
          * \return The padding field for this BootP PDU.
          */
-        uint16_t padding() const { return _bootp.padding; }
+        uint16_t padding() const { return Utils::net_to_host_s(_bootp.padding); }
         
         /** \brief Getter for the ciaddr field.
          * \return The ciaddr field for this BootP PDU.
@@ -223,19 +222,20 @@ namespace Tins {
         void giaddr(uint32_t new_giaddr);
         
         /** \brief Setter for the chaddr field.
+         * The new_chaddr pointer must be at least BOOTP::hlen() bytes long.
          * \param new_chaddr The chaddr to be set.
          */
-        void chaddr(uint8_t *new_chaddr);
+        void chaddr(const uint8_t *new_chaddr);
         
         /** \brief Setter for the sname field.
          * \param new_sname The sname to be set.
          */
-        void sname(uint8_t *new_sname);
+        void sname(const uint8_t *new_sname);
         
         /** \brief Setter for the file field.
          * \param new_file The file to be set.
          */
-        void file(uint8_t *new_file);
+        void file(const uint8_t *new_file);
         
         /** \brief Setter for the vend field.
          * \param new_vend The vend to be set.

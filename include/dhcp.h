@@ -41,14 +41,14 @@ namespace Tins {
          * \brief DHCP flags.
          */
         enum Flags {
-            DHCPDISCOVER = 1,
-            DHCPOFFER    = 2,
-            DHCPREQUEST	 = 3,
-            DHCPDECLINE  = 4,
-            DHCPACK      = 5,
-            DHCPNAK      = 6,
-            DHCPRELEASE	 = 7,
-            DHCPINFORM   = 8
+            DISCOVER = 1,
+            OFFER    = 2,
+            REQUEST	 = 3,
+            DECLINE  = 4,
+            ACK      = 5,
+            NAK      = 6,
+            RELEASE	 = 7,
+            INFORM   = 8
         };
         
         /** 
@@ -201,6 +201,13 @@ namespace Tins {
          * \return True if the option was added successfully.
          */
         bool add_option(Options opt, uint8_t len, const uint8_t *val);
+    
+        /**
+         * \brief Searchs for an option that matchs the given flag.
+         * \param opt_flag The flag to be searched.
+         * \return A pointer to the option, or 0 if it was not found.
+         */
+        const DHCPOption *search_option(Options opt) const;
         
         /** 
          * \brief Adds a type option the the option list.
@@ -209,12 +216,26 @@ namespace Tins {
          */
         bool add_type_option(Flags type);
         
+        /**
+         * \brief Searchs for a type option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_type_option(uint8_t *value);
+        
         /** 
          * \brief Adds a server identifier option.
          * \param ip The ip of the server.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
         bool add_server_identifier(uint32_t ip);
+        
+        /**
+         * \brief Searchs for a server identifier option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_server_identifier(uint32_t *value);
         
         /** 
          * \brief Adds an IP address lease time option.
@@ -224,11 +245,25 @@ namespace Tins {
         bool add_lease_time(uint32_t time);
         
         /**
+         * \brief Searchs for a lease time option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_lease_time(uint32_t *value);
+        
+        /**
          * \brief Adds a subnet mask option.
          * \param mask The subnet mask.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
         bool add_subnet_mask(uint32_t mask);
+        
+        /**
+         * \brief Searchs for a subnet mask option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_subnet_mask(uint32_t *value);
         
         /** 
          * \brief Adds a routers option.
@@ -237,12 +272,26 @@ namespace Tins {
          */
         bool add_routers_option(const std::list<uint32_t> &routers);
         
+        /**
+         * \brief Searchs for a routers option.
+         * \param routers A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_routers_option(std::list<uint32_t> *routers);
+        
         /** 
          * \brief Adds a domain name servers option.
          * \param dns A list of ip addresses in integer notation.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
-        bool add_dns_options(const std::list<uint32_t> &dns);
+        bool add_dns_option(const std::list<uint32_t> &dns);
+        
+        /**
+         * \brief Searchs for a dns option.
+         * \param dns A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_dns_option(std::list<uint32_t> *dns);
         
         /** 
          * \brief Adds a broadcast address option.
@@ -251,12 +300,26 @@ namespace Tins {
          */
         bool add_broadcast_option(uint32_t addr);
         
+        /**
+         * \brief Searchs for a broadcast option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_broadcast_option(uint32_t *value);
+        
         /** 
          * \brief Adds a domain name option.
          * \param name The domain name.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
         bool add_domain_name(const std::string &name);
+        
+        /**
+         * \brief Searchs for a domain name option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_domain_name(std::string *value);
         
         /** \brief Getter for the options list.
          * \return The option list.
@@ -287,6 +350,19 @@ namespace Tins {
 
         void copy_fields(const DHCP *other);        
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        
+        template<class T> bool generic_search(Options opt, T *value) {
+            const DHCPOption *option = search_option(opt);
+            if(option && option->length == sizeof(T)) {
+                *value = *(T*)option->value;
+                return true;
+            }
+            return false;
+        }
+        
+        bool generic_search(Options opt, std::list<uint32_t> *container);
+        
+        bool generic_search(Options opt, std::string *str);
         
         uint8_t *serialize_list(const std::list<uint32_t> &int_list, uint32_t &sz);
         
