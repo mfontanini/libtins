@@ -66,10 +66,23 @@ namespace Tins {
          */
 
         enum Options {
-            EOL   = 0,
-            NOP   = 1,
-            MSS   = 2,
-            TSOPT = 8
+            EOL     = 0,
+            NOP     = 1,
+            MSS     = 2,
+            WSCALE  = 3,
+            SACK_OK = 4,
+            SACK    = 5,
+            TSOPT   = 8,
+            ALTCHK  = 14
+        };
+        
+        /**
+         * \brief Alternate checksum enum.
+         */
+        enum AltChecksums {
+            CHK_TCP,
+            CHK_8FLETCHER,
+            CHK_16FLETCHER
         };
         
         /**
@@ -82,8 +95,8 @@ namespace Tins {
              * \param olength The option's data length.
              * \param odata The option's data(if any).
              */
-            TCPOption(uint8_t okind = 0, uint8_t olength = 0, uint8_t *odata = 0) :
-                      kind(okind), length(olength), data(odata) { }
+            TCPOption(uint8_t opt = 0, uint8_t olength = 0, uint8_t *ovalue = 0) :
+                      option(opt), length(olength), value(ovalue) { }
 
             /**
              * \brief Writes the option into a buffer.
@@ -92,8 +105,8 @@ namespace Tins {
              */
             uint8_t *write(uint8_t *buffer);
             
-            uint8_t kind, length;
-            uint8_t *data;
+            uint8_t option, length;
+            uint8_t *value;
         };
 
         /**
@@ -275,19 +288,87 @@ namespace Tins {
         void payload(uint8_t *new_payload, uint32_t new_payload_size);
 
         /**
-         * \brief Set the maximum segment size.
+         * \brief Add a maximum segment size option.
          *
          * \param value The new maximum segment size.
          */
-        void set_mss(uint16_t value);
+        void add_mss_option(uint16_t value);
 
         /**
-         * \brief Set the timestamp.
+         * \brief Searchs for a maximum segment size option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_mss_option(uint16_t *value);
+
+        /**
+         * \brief Add a window scale option.
+         *
+         * \param value The new window scale.
+         */
+        void add_winscale_option(uint8_t value);
+        
+        /**
+         * \brief Searchs for a window scale option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_winscale_option(uint8_t *value);
+
+        /**
+         * \brief Add a sack permitted option.
+         */
+        void add_sack_permitted_option();
+        
+        /**
+         * \brief Searchs for a sack permitted option.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_sack_permitted_option();
+        
+        /**
+         * \brief Add a sack option.
+         *
+         * \param value The new window scale.
+         */
+        void add_sack_option(const std::list<uint32_t> &edges);
+        
+        /**
+         * \brief Searchs for a sack option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_sack_option(std::list<uint32_t> *edges);
+
+        /**
+         * \brief Add a timestamp option.
          *
          * \param value The current value of the timestamp clock.
          * \param reply The echo reply field.
          */
-        void set_timestamp(uint32_t value, uint32_t reply);
+        void add_timestamp_option(uint32_t value, uint32_t reply);
+
+        /**
+         * \brief Searchs for a timestamp option.
+         * \param value A pointer in which the option's value will be stored.
+         * \param reply A pointer in which the option's reply value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_timestamp_option(uint32_t *value, uint32_t *reply);
+
+        /**
+         * \brief Add a alternate checksum option.
+         *
+         * \param value The new alternate checksum scale.
+         */
+        void add_altchecksum_option(AltChecksums value);
+        
+        /**
+         * \brief Searchs for a alternate checksum option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_altchecksum_option(uint8_t *value);
 
         /**
          * \brief Set a TCP flag value.
@@ -322,6 +403,13 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::TCP; }
+
+        /**
+         * \brief Searchs for an option that matchs the given flag.
+         * \param opt_flag The flag to be searched.
+         * \return A pointer to the option, or 0 if it was not found.
+         */
+        const TCPOption *search_option(Options opt) const;
 
         /**
          * \brief Clones this PDU.
@@ -368,6 +456,15 @@ namespace Tins {
         static const uint16_t DEFAULT_WINDOW;
 
         void copy_fields(const TCP *other);
+        
+        template<class T> bool generic_search(Options opt, T *value) {
+            const TCPOption *option = search_option(opt);
+            if(option && option->length == sizeof(T)) {
+                *value = *(T*)option->value;
+                return true;
+            }
+            return false;
+        }
         
         void cleanup();
         /** \brief Serialices this TCP PDU.

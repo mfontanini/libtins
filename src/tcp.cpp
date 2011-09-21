@@ -65,19 +65,17 @@ Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PR
             uint8_t args[2] = {0};
             while(index < header_end) {
                 for(unsigned i(0); i < 2 && args[0] != NOP; ++i) {
-                    args[i] = buffer[index++];
                     if(index == header_end)
-                        throw std::runtime_error("Not enought size for a TCP header in the buffer.");
+                        throw std::runtime_error("Not enough size for a TCP header in the buffer.");
+                    args[i] = buffer[index++];
                 }
                 // We don't want to store NOPs and EOLs
                 if(args[0] != NOP && args[0] != EOL)  {
                     args[1] -= (sizeof(uint8_t) << 1);
-                    if(args[1]) {
-                        // Not enough size for this option
-                        if(header_end - index < args[1])
-                            throw std::runtime_error("Not enought size for a TCP header in the buffer.");
-                        add_option((Options)args[0], args[1], buffer + index);
-                    }
+                    // Not enough size for this option
+                    if(header_end - index < args[1])
+                        throw std::runtime_error("Not enough size for a TCP header in the buffer.");
+                    add_option((Options)args[0], args[1], buffer + index);
                     index += args[1];
                 }
                 else if(args[0] == EOL)
@@ -103,7 +101,7 @@ Tins::TCP::~TCP() {
 
 void Tins::TCP::cleanup() {
     for(std::list<TCPOption>::iterator it = _options.begin(); it != _options.end(); ++it)
-        delete[] it->data;
+        delete[] it->value;
     _options.clear();
 }
 
@@ -143,14 +141,78 @@ void Tins::TCP::data_offset(uint8_t new_doff) {
     this->_tcp.doff = new_doff;
 }
 
-void Tins::TCP::set_mss(uint16_t value) {
+void Tins::TCP::add_mss_option(uint16_t value) {
     value = Utils::net_to_host_s(value);
     add_option(MSS, 2, (uint8_t*)&value);
 }
 
-void Tins::TCP::set_timestamp(uint32_t value, uint32_t reply) {
+bool Tins::TCP::search_mss_option(uint16_t *value) {
+    if(!generic_search(MSS, value))
+        return false;
+    *value = Utils::net_to_host_s(*value);
+    return true;
+}
+
+void Tins::TCP::add_winscale_option(uint8_t value) {
+    add_option(WSCALE, 1, &value);
+}
+
+bool Tins::TCP::search_winscale_option(uint8_t *value) {
+    return generic_search(WSCALE, value);
+}
+
+void Tins::TCP::add_sack_permitted_option() {
+    add_option(SACK_OK, 0, 0);
+}
+
+bool Tins::TCP::search_sack_permitted_option() {
+    return search_option(SACK_OK);
+}
+
+void Tins::TCP::add_sack_option(const std::list<uint32_t> &edges) {
+    uint32_t *value = 0;
+    if(edges.size()) {
+        value = new uint32_t[edges.size()];
+        uint32_t *ptr = value;
+        for(std::list<uint32_t>::const_iterator it = edges.begin(); it != edges.end(); ++it)
+            *(ptr++) = Utils::net_to_host_l(*it);
+    }
+    add_option(SACK, (uint8_t)(sizeof(uint32_t) * edges.size()), (const uint8_t*)value);
+    delete[] value;
+}
+
+bool Tins::TCP::search_sack_option(std::list<uint32_t> *edges) {
+    const TCPOption *option = search_option(SACK);
+    if(!option || (option->length % sizeof(uint32_t)) != 0)
+        return false;
+    const uint32_t *ptr = (const uint32_t*)option->value;
+    const uint32_t *end = ptr + (option->length / sizeof(uint32_t));
+    while(ptr < end)
+        edges->push_back(Utils::net_to_host_l(*(ptr++)));
+    return true;
+}
+
+void Tins::TCP::add_timestamp_option(uint32_t value, uint32_t reply) {
     uint64_t buffer = ((uint64_t)Utils::net_to_host_l(reply) << 32) | Utils::net_to_host_l(value);
     add_option(TSOPT, 8, (uint8_t*)&buffer);
+}
+
+bool Tins::TCP::search_timestamp_option(uint32_t *value, uint32_t *reply) {
+    const TCPOption *option = search_option(TSOPT);
+    if(!option || option->length != (sizeof(uint32_t) << 1))
+        return false;
+    const uint32_t *ptr = (const uint32_t*)option->value;
+    *value = Utils::net_to_host_l(*(ptr++));
+    *reply = Utils::net_to_host_l(*(ptr));
+    return true;
+}
+
+void Tins::TCP::add_altchecksum_option(AltChecksums value) {
+    add_option(ALTCHK, 1, (const uint8_t*)&value);
+}
+
+bool Tins::TCP::search_altchecksum_option(uint8_t *value) {
+    return generic_search(ALTCHK, value);
 }
 
 uint8_t Tins::TCP::get_flag(Flags tcp_flag) {
@@ -239,8 +301,8 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
         buffer = it->write(buffer);
 
     if(_options_size < _total_options_size) {
-        uint8_t padding = _total_options_size;
-        while(padding < _options_size) {
+        uint8_t padding = _options_size;
+        while(padding < _total_options_size) {
             *(buffer++) = 1;
             padding++;
         }
@@ -258,19 +320,27 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     _tcp.check = 0;
 }
 
+const Tins::TCP::TCPOption *Tins::TCP::search_option(Options opt) const {
+    for(std::list<TCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+        if(it->option == opt)
+            return &(*it);
+    }
+    return 0;
+}
+
 
 /* TCPOptions */
 
 uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
-    if(kind == 1) {
-        *buffer = kind;
+    if(option == 1) {
+        *buffer = option;
         return buffer + 1;
     }
     else {
-        buffer[0] = kind;
+        buffer[0] = option;
         buffer[1] = length + (sizeof(uint8_t) << 1);
-        if(data)
-            memcpy(buffer + 2, data, length);
+        if(value)
+            memcpy(buffer + 2, value, length);
         return buffer + buffer[1];
     }
 }
@@ -278,10 +348,10 @@ uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
 void Tins::TCP::copy_fields(const TCP *other) {
     std::memcpy(&_tcp, &other->_tcp, sizeof(_tcp));
     for(std::list<TCPOption>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it) {
-        TCPOption opt(it->kind, it->length);
-        if(it->data) {
-            opt.data = new uint8_t[it->length];
-            std::memcpy(opt.data, it->data, it->length);
+        TCPOption opt(it->option, it->length);
+        if(it->value) {
+            opt.value = new uint8_t[it->length];
+            std::memcpy(opt.value, it->value, it->length);
         }
         _options.push_back(opt);
     }
