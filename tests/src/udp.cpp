@@ -138,4 +138,6 @@ TEST_F(UDPTest, ConstructorFromBuffer) {
     EXPECT_EQ(udp1.length(), udp2.length());
     EXPECT_EQ(udp1.size(), udp2.size());
     EXPECT_EQ(udp1.header_size(), udp2.header_size());
+    
+    delete[] buffer;
 }
