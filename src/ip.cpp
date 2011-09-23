@@ -43,9 +43,9 @@ const uint8_t Tins::IP::DEFAULT_TTL = 128;
 Tins::IP::IP(const string &ip_dst, const string &ip_src, PDU *child) : PDU(Constants::IP::PROTO_IP, child) {
     init_ip_fields();
     if(ip_dst.size())
-        _ip.daddr = Utils::resolve_ip(ip_dst);
+        this->dst_addr(ip_dst);
     if(ip_src.size())
-        _ip.saddr = Utils::resolve_ip(ip_src);
+        this->src_addr(ip_src);
 
 }
 
@@ -146,8 +146,8 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROT
 
 Tins::IP::IP(uint32_t ip_dst, uint32_t ip_src, PDU *child) : PDU(Constants::IP::PROTO_IP, child) {
     init_ip_fields();
-    _ip.daddr = ip_dst;
-    _ip.saddr = ip_src;
+    this->dst_addr(ip_dst);
+    this->src_addr(ip_src);
 }
 
 Tins::IP::~IP() {
@@ -200,19 +200,19 @@ void Tins::IP::check(uint16_t new_check) {
 }
 
 void Tins::IP::src_addr(const string &ip) {
-    _ip.saddr = Utils::resolve_ip(ip);
+    _ip.saddr = Utils::net_to_host_l(Utils::resolve_ip(ip));
 }
 
 void Tins::IP::src_addr(uint32_t ip) {
-    _ip.saddr = ip;
+    _ip.saddr = Utils::net_to_host_l(ip);
 }
 
 void Tins::IP::dst_addr(const string &ip) {
-    _ip.daddr = Utils::resolve_ip(ip);
+    _ip.daddr = Utils::net_to_host_l(Utils::resolve_ip(ip));
 }
 
 void Tins::IP::dst_addr(uint32_t ip) {
-    _ip.daddr = ip;
+    _ip.daddr = Utils::net_to_host_l(ip);
 }
 
 void Tins::IP::head_len(uint8_t new_head_len) {

@@ -22,6 +22,7 @@
 #ifndef __UTILS_H
 #define __UTILS_H
 
+#include <stdexcept>
 
 #ifndef WIN32
     #include <ifaddrs.h>
@@ -43,7 +44,7 @@ namespace Tins {
          *
          * \param ip A dotted ip notation string
          */
-        uint32_t ip_to_int(const std::string &ip);
+        uint32_t ip_to_int(const std::string &ip) throw (std::runtime_error);
 
         /** \brief Convert an integer ip to a dotted-ip-notation string.
          *
@@ -76,7 +77,7 @@ namespace Tins {
          *
          * \param to_resolve The domain name/ip address to resolve.
          */
-        uint32_t resolve_ip(const std::string &to_resolve);
+        uint32_t resolve_ip(const std::string &to_resolve) throw (std::runtime_error);
 
         /** \brief Resolves the hardware address for a given ip.
          *
@@ -168,15 +169,15 @@ namespace Tins {
          * \param data The input buffer.
          * \param data_size The size of the input buffer.
          */
-        uint32_t crc32(uint8_t* data, uint32_t data_size);
-        
+        uint32_t crc32(const uint8_t* data, uint32_t data_size);
+
         /**
          * \brief Converts a channel number to its mhz representation.
          * \param channel The channel number.
          * \return The channel's mhz representation.
          */
         uint16_t channel_to_mhz(uint16_t channel);
-        
+
         /** \brief Does the 16 bits sum of all 2 bytes elements between start and end.
          *
          * This is the checksum used by IP, UDP and TCP. If there's and odd number of
@@ -186,8 +187,8 @@ namespace Tins {
          * \param end The pointer to the end of the buffer(excluding the last element).
          * \return Returns the checksum between start and end(non inclusive).
          */
-        uint32_t do_checksum(uint8_t *start, uint8_t *end);
-        
+        uint32_t do_checksum(const uint8_t *start, const uint8_t *end);
+
         /** \brief Performs the pseudo header checksum used in TCP and UDP PDUs.
          *
          * \param source_ip The source ip address.
@@ -197,7 +198,7 @@ namespace Tins {
          * \return The pseudo header checksum.
          */
         uint32_t pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, uint32_t len, uint32_t flag);
-        
+
         /** \brief Generic function to iterate through interface and collect
          * data.
          *

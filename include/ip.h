@@ -38,11 +38,11 @@ namespace Tins {
      */
     class IP : public PDU {
     public:
-        /** 
+        /**
          * \brief IP address size.
          */
         static const uint32_t ADDR_SIZE = 4;
-    
+
         /**
          * \brief Enum indicating the option's class.
          *
@@ -85,7 +85,7 @@ namespace Tins {
          * \brief Default constructor.
          */
         IP();
-        
+
         /**
          * \brief Constructor for building the IP PDU taking strings as ip addresses.
          *
@@ -199,12 +199,12 @@ namespace Tins {
          *
          * \return The source address for this IP PDU.
          */
-        inline uint32_t src_addr() const { return _ip.saddr; }
+        inline uint32_t src_addr() const { return Utils::net_to_host_l(_ip.saddr); }
 
         /** \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
-        inline uint32_t dst_addr() const  { return _ip.daddr; }
+        inline uint32_t dst_addr() const  { return Utils::net_to_host_l(_ip.daddr); }
 
         /* Setters */
 
@@ -369,10 +369,10 @@ namespace Tins {
          * \sa PDU::clone_packet
          */
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
-        
+
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -419,7 +419,7 @@ namespace Tins {
             uint8_t* write(uint8_t* buffer);
 
         } __attribute__((__packed__));
-        
+
         void copy_fields(const IP *other);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

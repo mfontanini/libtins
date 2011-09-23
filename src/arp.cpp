@@ -62,11 +62,11 @@ void Tins::ARP::sender_hw_addr(const uint8_t* new_snd_hw_addr) {
 }
 
 void Tins::ARP::sender_ip_addr(uint32_t new_snd_ip_addr) {
-    this->_arp.ar_sip = new_snd_ip_addr;
+    this->_arp.ar_sip = Utils::net_to_host_l(new_snd_ip_addr);
 }
 
 void Tins::ARP::sender_ip_addr(const string& new_snd_ip_addr) {
-    this->_arp.ar_sip = Utils::ip_to_int(new_snd_ip_addr);
+    this->_arp.ar_sip = Utils::net_to_host_l(Utils::resolve_ip(new_snd_ip_addr));
 }
 
 void Tins::ARP::target_hw_addr(const uint8_t* new_tgt_hw_addr) {
@@ -74,11 +74,11 @@ void Tins::ARP::target_hw_addr(const uint8_t* new_tgt_hw_addr) {
 }
 
 void Tins::ARP::target_ip_addr(uint32_t new_tgt_ip_addr) {
-    this->_arp.ar_tip = new_tgt_ip_addr;
+    this->_arp.ar_tip = Utils::net_to_host_l(new_tgt_ip_addr);
 }
 
 void Tins::ARP::target_ip_addr(const std::string& new_tgt_ip_addr) {
-    this->_arp.ar_tip = Utils::ip_to_int(new_tgt_ip_addr);
+    this->_arp.ar_tip = Utils::net_to_host_l(Utils::resolve_ip(new_tgt_ip_addr));
 }
 
 void Tins::ARP::hw_addr_format(uint16_t new_hw_addr_fmt) {

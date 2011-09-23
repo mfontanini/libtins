@@ -103,10 +103,10 @@ void skip_line(istream &input) {
 
 /** \endcond */
 
-uint32_t Tins::Utils::ip_to_int(const string &ip) {
+uint32_t Tins::Utils::ip_to_int(const string &ip) throw (std::runtime_error) {
     uint32_t result(0), i(0), end, bytes_found(0);
     while(i < ip.size() && bytes_found < 4) {
-        uint8_t this_byte(0);
+        uint16_t this_byte(0);
         end = i + 3;
         while(i < ip.size() && i < end && ip[i] != '.') {
             if(ip[i] < '0' || ip[i] > '9')
@@ -114,20 +114,22 @@ uint32_t Tins::Utils::ip_to_int(const string &ip) {
             this_byte = (this_byte * 10)  + (ip[i] - '0');
             i++;
         }
-        result = (result << 8) | this_byte;
+        if (this_byte > 0xFF) {
+            throw std::runtime_error("Byte greater than 255");
+        }
+        result = (result << 8) | (this_byte & 0xFF);
         bytes_found++;
         if(bytes_found < 4 && i < ip.size() && ip[i] == '.')
             i++;
     }
     if(bytes_found < 4 || (i < ip.size() && bytes_found == 4))
         throw std::runtime_error("Invalid ip address");
-    return net_to_host_l(result);
+    return result;
 }
 
 string Tins::Utils::ip_to_string(uint32_t ip) {
     ostringstream oss;
     int mask(24);
-    ip = net_to_host_l(ip);
     while(mask >=0) {
         oss << ((ip >> mask) & 0xff);
         if(mask)
@@ -178,11 +180,11 @@ string Tins::Utils::hwaddr_to_string(const uint8_t *array) {
     return oss.str();
 }
 
-uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
+uint32_t Tins::Utils::resolve_ip(const string &to_resolve) throw (std::runtime_error) {
     struct hostent *data = gethostbyname(to_resolve.c_str());
     if(!data)
-        return 0;
-    return ((struct in_addr**)data->h_addr_list)[0]->s_addr;
+        throw std::runtime_error("Could not resolve IP");
+    return Utils::net_to_host_l(((struct in_addr**)data->h_addr_list)[0]->s_addr);
 }
 
 bool Tins::Utils::resolve_hwaddr(const string &iface, uint32_t ip, uint8_t *buffer, PacketSender *sender) {
@@ -210,6 +212,7 @@ string Tins::Utils::interface_from_ip(uint32_t ip) {
     string iface;
     string destination, mask;
     uint32_t destination_int, mask_int;
+    ip = Utils::net_to_host_l(ip);
     skip_line(input);
     while(!match) {
         input >> iface >> destination;
@@ -233,7 +236,7 @@ set<string> Tins::Utils::network_interfaces() {
 bool Tins::Utils::interface_ip(const string &iface, uint32_t &ip) {
     IPv4Collector collector(iface.c_str());
     generic_iface_loop(collector);
-    ip = collector.ip;
+    ip = Utils::net_to_host_l(collector.ip);
     return collector.found;
 }
 
@@ -252,7 +255,7 @@ uint16_t Tins::Utils::channel_to_mhz(uint16_t channel) {
     return 2407 + (channel * 5);
 }
 
-uint32_t Tins::Utils::do_checksum(uint8_t *start, uint8_t *end) {
+uint32_t Tins::Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
     uint32_t checksum(0);
     uint16_t *ptr = (uint16_t*)start, *last = (uint16_t*)end, padding(0);
     if(((end - start) & 1) == 1) {
@@ -277,7 +280,7 @@ uint32_t Tins::Utils::pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip
     return checksum;
 }
 
-uint32_t Tins::Utils::crc32(uint8_t* data, uint32_t data_size) {
+uint32_t Tins::Utils::crc32(const uint8_t* data, uint32_t data_size) {
     uint32_t i, crc = 0;
     static uint32_t crc_table[] = {
         0x4DBDF21C, 0x500AE278, 0x76D3D2D4, 0x6B64C2B0,

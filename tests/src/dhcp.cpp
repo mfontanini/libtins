@@ -3,7 +3,7 @@
 #include <string>
 #include <stdint.h>
 #include <list>
-#include <string> 
+#include <string>
 #include "dhcp.h"
 #include "utils.h"
 #include "ethernetII.h"
@@ -15,7 +15,7 @@ class DHCPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
     static const uint8_t chaddr[], sname[], file[];
-    
+
     void test_equals(const DHCP &dhcp1, const DHCP &dhcp2);
     void test_option(const DHCP &dhcp, DHCP::Options opt, uint32_t len = 0, uint8_t *value = 0);
 };
@@ -34,25 +34,25 @@ const uint8_t DHCPTest::file[] = "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\x
                                   "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xeb\x19\x18"
                                   "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xfb\x19\x18";
 
-const uint8_t DHCPTest::expected_packet[] = {'\x01', '\x01', '\x06', '\x1f', '?', '\xab', '#', '\xde', 
-'\x9f', '\x1a', '\x00', '\x00', '\xc0', '\xa8', '\x00', 'f', '\xf3', '\x16', '"', 'b', '\xa7', ' ', 
-'\x0b', '\x9a', '{', '+', '7', '\xfe', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
-'\x00', '\x00', '\x00', '\x00', '\x00', 'c', '\x82', 'S', 'c', '6', '\x04', '\xc0', '\xa8', '\x04', '\x02', 
+const uint8_t DHCPTest::expected_packet[] = {'\x01', '\x01', '\x06', '\x1f', '?', '\xab', '#', '\xde',
+'\x9f', '\x1a', '\x00', '\x00', '\xc0', '\xa8', '\x00', 'f', '\xf3', '\x16', '"', 'b', '\xa7', ' ',
+'\x0b', '\x9a', '{', '+', '7', '\xfe', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
+'\x00', '\x00', '\x00', '\x00', '\x00', 'c', '\x82', 'S', 'c', '6', '\x04', '\xc0', '\xa8', '\x04', '\x02',
 '\x01', '\x04', '\xff', '\xff', ' ', '\x0b', '5', '\x01', '\x04'};
 
 TEST_F(DHCPTest, DefaultConstructor) {
@@ -192,7 +192,7 @@ TEST_F(DHCPTest, RoutersOption) {
     routers.push_back(Utils::ip_to_int("192.168.0.253"));
     routers.push_back(Utils::ip_to_int("10.123.45.67"));
     dhcp.add_routers_option(routers);
-    
+
     list<uint32_t> routers2;
     ASSERT_TRUE(dhcp.search_routers_option(&routers2));
     ASSERT_EQ(routers.size(), routers2.size());
@@ -209,7 +209,7 @@ TEST_F(DHCPTest, DNSOption) {
     dns.push_back(Utils::ip_to_int("192.168.0.253"));
     dns.push_back(Utils::ip_to_int("10.123.45.67"));
     dhcp.add_dns_option(dns);
-    
+
     list<uint32_t> dns2;
     ASSERT_TRUE(dhcp.search_dns_option(&dns2));
     ASSERT_EQ(dns.size(), dns2.size());
@@ -267,7 +267,7 @@ void DHCPTest::test_equals(const DHCP &dhcp1, const DHCP &dhcp2) {
 TEST_F(DHCPTest, ConstructorFromBuffer) {
     DHCP dhcp1(expected_packet, sizeof(expected_packet));
     uint32_t ip;
-    
+
     EXPECT_EQ(dhcp1.opcode(), DHCP::DISCOVER);
     EXPECT_EQ(dhcp1.htype(), 1);
     ASSERT_EQ(dhcp1.hlen(), EthernetII::ADDR_SIZE);
@@ -280,11 +280,11 @@ TEST_F(DHCPTest, ConstructorFromBuffer) {
     EXPECT_EQ(dhcp1.giaddr(), Utils::ip_to_int("123.43.55.254"));
     EXPECT_EQ(dhcp1.siaddr(), Utils::ip_to_int("167.32.11.154"));
     ASSERT_TRUE(dhcp1.search_server_identifier(&ip));
-    EXPECT_EQ(ip, Utils::ip_to_int("192.168.4.2"));
-    
+    EXPECT_EQ(ip, Utils::net_to_host_l(Utils::ip_to_int("192.168.4.2")));
+
     uint32_t size;
     uint8_t *buffer = dhcp1.serialize(size);
-    
+
     DHCP dhcp2(buffer, size);
     test_equals(dhcp1, dhcp2);
     delete[] buffer;

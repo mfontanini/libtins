@@ -59,7 +59,7 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         ARP(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /* Getters */
         /**
          * \brief Getter for the sender's hardware address.
@@ -73,7 +73,7 @@ namespace Tins {
          *
          * \return Returns the sender's IP address in an uint32_t.
          */
-        inline const uint32_t sender_ip_addr() { return this->_arp.ar_sip; }
+        inline const uint32_t sender_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_sip); }
 
         /**
          * \brief Getter for the target's hardware address.
@@ -87,7 +87,7 @@ namespace Tins {
          *
          * \return Returns the target's IP address in an uint32_t.
          */
-        inline const uint32_t target_ip_addr() { return this->_arp.ar_tip; }
+        inline const uint32_t target_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_tip); }
 
         /**
          * \brief Getter for the hardware address format.
@@ -317,7 +317,7 @@ namespace Tins {
 
         /**
          * \brief Clones this PDU.
-         * 
+         *
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const;
@@ -334,7 +334,7 @@ namespace Tins {
             uint8_t ar_tha[6];	/* target hardware address	*/
             uint32_t ar_tip;	/* target IP address		*/
         } __attribute__((__packed__));
-        
+
         void copy_fields(const ARP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
