@@ -75,7 +75,7 @@ Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PR
                     // Not enough size for this option
                     if(header_end - index < args[1])
                         throw std::runtime_error("Not enough size for a TCP header in the buffer.");
-                    add_option((Options)args[0], args[1], buffer + index);
+                    add_option((Option)args[0], args[1], buffer + index);
                     index += args[1];
                 }
                 else if(args[0] == EOL)
@@ -276,7 +276,7 @@ void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
     };
 }
 
-void Tins::TCP::add_option(Options tcp_option, uint8_t length, const uint8_t *data) {
+void Tins::TCP::add_option(Option tcp_option, uint8_t length, const uint8_t *data) {
     uint8_t *new_data = 0, padding;
     if(length) {
         new_data = new uint8_t[length];
@@ -320,14 +320,13 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     _tcp.check = 0;
 }
 
-const Tins::TCP::TCPOption *Tins::TCP::search_option(Options opt) const {
+const Tins::TCP::TCPOption *Tins::TCP::search_option(Option opt) const {
     for(std::list<TCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         if(it->option == opt)
             return &(*it);
     }
     return 0;
 }
-
 
 /* TCPOptions */
 

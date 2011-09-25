@@ -65,7 +65,7 @@ namespace Tins {
          * This enum identifies valid options supported by TCP PDU.
          */
 
-        enum Options {
+        enum Option {
             EOL     = 0,
             NOP     = 1,
             MSS     = 2,
@@ -385,7 +385,7 @@ namespace Tins {
          * \param length The length of this option(optional).
          * \param data Pointer to this option's data(optional).
          */
-        void add_option(Options tcp_option, uint8_t length = 0, const uint8_t *data = 0);
+        void add_option(Option tcp_option, uint8_t length = 0, const uint8_t *data = 0);
 
         /**
          * \brief Returns the header size.
@@ -409,7 +409,7 @@ namespace Tins {
          * \param opt_flag The flag to be searched.
          * \return A pointer to the option, or 0 if it was not found.
          */
-        const TCPOption *search_option(Options opt) const;
+        const TCPOption *search_option(Option opt) const;
 
         /**
          * \brief Clones this PDU.
@@ -457,7 +457,7 @@ namespace Tins {
 
         void copy_fields(const TCP *other);
         
-        template<class T> bool generic_search(Options opt, T *value) {
+        template<class T> bool generic_search(Option opt, T *value) {
             const TCPOption *option = search_option(opt);
             if(option && option->length == sizeof(T)) {
                 *value = *(T*)option->value;
