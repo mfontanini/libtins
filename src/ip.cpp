@@ -80,30 +80,30 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROT
     /* While the end of the options is not reached read an option */
     try {
         while (total_sz && ptr_buffer < buffer && (*ptr_buffer != 0)) {
-            IpOption opt_to_add;
+            IPOption opt_to_add;
             opt_to_add.optional_data = 0;
             opt_to_add.optional_data_size = 0;
             memcpy(&opt_to_add.type, ptr_buffer, sizeof(uint8_t));
             ptr_buffer++;
             switch (opt_to_add.type.number) {
                 /* Multibyte options with length as second byte */
-                case IPOPT_SEC:
-                case IPOPT_LSSR:
-                case IPOPT_TIMESTAMP:
-                case IPOPT_EXTSEC:
-                case IPOPT_RR:
-                case IPOPT_SID:
-                case IPOPT_SSRR:
-                case IPOPT_MTUPROBE:
-                case IPOPT_MTUREPLY:
-                case IPOPT_EIP:
-                case IPOPT_TR:
-                case IPOPT_ADDEXT:
-                case IPOPT_RTRALT:
-                case IPOPT_SDB:
-                case IPOPT_DPS:
-                case IPOPT_UMP:
-                case IPOPT_QS:
+                case SEC:
+                case LSSR:
+                case TIMESTAMP:
+                case EXTSEC:
+                case RR:
+                case SID:
+                case SSRR:
+                case MTUPROBE:
+                case MTUREPLY:
+                case EIP:
+                case TR:
+                case ADDEXT:
+                case RTRALT:
+                case SDB:
+                case DPS:
+                case UMP:
+                case QS:
                     if(!total_sz || *ptr_buffer == 0)
                         throw std::runtime_error(msg);
                     opt_to_add.optional_data_size = *ptr_buffer - 1;
@@ -155,7 +155,7 @@ Tins::IP::~IP() {
 }
 
 void Tins::IP::cleanup() {
-    for (vector<IpOption>::iterator it = this->_ip_options.begin(); it != this->_ip_options.end(); it++) {
+    for (list<IPOption>::iterator it = _ip_options.begin(); it != _ip_options.end(); it++) {
         delete[] it->optional_data;
     }
 }
@@ -216,28 +216,31 @@ void Tins::IP::dst_addr(uint32_t ip) {
 }
 
 void Tins::IP::head_len(uint8_t new_head_len) {
-    this->_ip.ihl = new_head_len;
+    _ip.ihl = new_head_len;
 }
 
-void Tins::IP::set_option_eol() {
-    this->set_option(0, IP::CONTROL, IP::IPOPT_END);
+void Tins::IP::version(uint8_t ver) {
+    _ip.version = ver;
 }
 
-void Tins::IP::set_option_noop() {
-    this->set_option(0, IP::CONTROL, IP::IPOPT_NOOP);
+void Tins::IP::set_eol_option() {
+    this->set_option(0, IP::CONTROL, IP::END);
 }
 
-void Tins::IP::set_option_sec(uint8_t* data, uint32_t data_len) {
-    assert(data_len == 10);
-    this->set_option(1, IP::CONTROL, IP::IPOPT_SEC, data, data_len);
+void Tins::IP::set_noop_option() {
+    this->set_option(0, IP::CONTROL, IP::NOOP);
+}
+
+void Tins::IP::set_sec_option(const uint8_t* data, uint32_t data_len) {
+    this->set_option(1, IP::CONTROL, IP::SEC, data, data_len);
 }
 
 void Tins::IP::set_option(uint8_t copied,
                 OptionClass op_class,
-                OptionNumber number,
-                uint8_t* data,
+                Option number,
+                const uint8_t* data,
                 uint32_t data_size) {
-    IpOption option;
+    IPOption option;
     option.type.copied = copied;
     option.type.op_class = op_class;
     option.type.number = number;
@@ -254,7 +257,15 @@ void Tins::IP::set_option(uint8_t copied,
     _padded_options_size = padding? (_options_size - padding + 4) : _options_size;
 }
 
-uint8_t* Tins::IP::IpOption::write(uint8_t* buffer) {
+const Tins::IP::IPOption *Tins::IP::search_option(OptionClass opt_class, Option opt_number) const {
+    for(std::list<IPOption>::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
+        if(it->type.op_class == opt_class && it->type.number == opt_number)
+            return &(*it);
+    }
+    return 0;
+}
+
+uint8_t* Tins::IP::IPOption::write(uint8_t* buffer) {
     memcpy(buffer, &type, 1);
     buffer += 1;
     if (optional_data) {
@@ -312,8 +323,8 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     memcpy(buffer, &_ip, sizeof(_ip));
 
     uint8_t* ptr_buffer = buffer + sizeof(_ip);
-    for(uint32_t i = 0; i < _ip_options.size(); ++i)
-        ptr_buffer = _ip_options[i].write(ptr_buffer);
+    for(list<IPOption>::iterator it = _ip_options.begin(); it != _ip_options.end(); ++it)
+        ptr_buffer = it->write(ptr_buffer);
 
     memset(buffer + sizeof(_ip) + _options_size, 0, _padded_options_size - _options_size);
 
@@ -356,8 +367,8 @@ Tins::PDU *Tins::IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
 
 void Tins::IP::copy_fields(const IP *other) {
     memcpy(&_ip, &other->_ip, sizeof(_ip));
-    for(vector<IpOption>::const_iterator it = other->_ip_options.begin(); it != other->_ip_options.end(); ++it) {
-        IpOption new_opt;
+    for(list<IPOption>::const_iterator it = other->_ip_options.begin(); it != other->_ip_options.end(); ++it) {
+        IPOption new_opt;
         if(it->optional_data) {
             new_opt.optional_data = new uint8_t[it->optional_data_size];
             memcpy(new_opt.optional_data, it->optional_data, it->optional_data_size);

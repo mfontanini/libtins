@@ -27,7 +27,7 @@
 #endif
 #include <string>
 #include <utility>
-#include <vector>
+#include <list>
 #include "pdu.h"
 #include "utils.h"
 
@@ -35,6 +35,10 @@ namespace Tins {
 
     /**
      * \brief Class that represents an IP PDU.
+     * 
+     * By default, IP PDUs are initialized, setting TTL to IP::DEFAULT_TTL,
+     * id field to 1 and version to 4. Taking this into account, users
+     * should set destination and source port and would be enough to send one.
      */
     class IP : public PDU {
     public:
@@ -57,32 +61,54 @@ namespace Tins {
         /**
          * \brief Enum indicating the option's id number.
          *
-         * Enum OptionNumber indicates the possible IP Options.
+         * Enum Option indicates the possible IP Options.
          */
-        enum OptionNumber {
-            IPOPT_END = 0,
-            IPOPT_NOOP = 1,
-            IPOPT_SEC = 2,
-            IPOPT_LSSR = 3,
-            IPOPT_TIMESTAMP = 4,
-            IPOPT_EXTSEC = 5,
-            IPOPT_RR = 7,
-            IPOPT_SID = 8,
-            IPOPT_SSRR = 9,
-            IPOPT_MTUPROBE = 11,
-            IPOPT_MTUREPLY = 12,
-            IPOPT_EIP = 17,
-            IPOPT_TR = 18,
-            IPOPT_ADDEXT = 19,
-            IPOPT_RTRALT = 20,
-            IPOPT_SDB = 21,
-            IPOPT_DPS = 23,
-            IPOPT_UMP = 24,
-            IPOPT_QS = 25
+        enum Option {
+            END = 0,
+            NOOP = 1,
+            SEC = 2,
+            LSSR = 3,
+            TIMESTAMP = 4,
+            EXTSEC = 5,
+            RR = 7,
+            SID = 8,
+            SSRR = 9,
+            MTUPROBE = 11,
+            MTUREPLY = 12,
+            EIP = 17,
+            TR = 18,
+            ADDEXT = 19,
+            RTRALT = 20,
+            SDB = 21,
+            DPS = 23,
+            UMP = 24,
+            QS = 25
         };
+        
+        /**
+         * \brief This class represents an IP option. 
+         */
+        struct IPOption {
+            struct {
+            #if __BYTE_ORDER == __LITTLE_ENDIAN
+                unsigned int number:5;
+                unsigned int op_class:2;
+                unsigned int copied:1;
+            #elif __BYTE_ORDER == __BIG_ENDIAN
+                unsigned int copied:1;
+                unsigned int op_class:2;
+                unsigned int number:5;
+            #endif
+            } type;
+            uint8_t* optional_data;
+            uint32_t optional_data_size;
+
+            uint8_t* write(uint8_t* buffer);
+        } __attribute__((__packed__));
 
         /**
          * \brief Default constructor.
+         * Sets the source and destination port to 0.
          */
         IP();
 
@@ -205,6 +231,11 @@ namespace Tins {
          * \return The destination address for this IP PDU.
          */
         inline uint32_t dst_addr() const  { return Utils::net_to_host_l(_ip.daddr); }
+        
+        /** \brief Getter for the version field.
+         * \return The version for this IP PDU.
+         */
+        inline uint8_t version() const  { return _ip.version; }
 
         /* Setters */
 
@@ -291,6 +322,14 @@ namespace Tins {
          * \param ip The ip address in integer notation.
          */
         void dst_addr(uint32_t ip);
+        
+        /**
+         * \brief Setter for the version field.
+         *
+         * \param ver The version field to be set.
+         */
+        void version(uint8_t ver);
+
 
         /**
          * \brief Sets an IP option.
@@ -301,17 +340,25 @@ namespace Tins {
          * \param data The data of this options.
          * \param data_size The data size.
          */
-        void set_option(uint8_t copied, OptionClass op_class, OptionNumber number, uint8_t* data = 0, uint32_t data_size = 0);
+        void set_option(uint8_t copied, OptionClass op_class, Option number, const uint8_t* data = 0, uint32_t data_size = 0);
+
+        /**
+         * \brief Searchs for an option that matchs the given flag.
+         * \param opt_class The option class to be searched.
+         * \param opt_number The option number to be searched.
+         * \return A pointer to the option, or 0 if it was not found.
+         */
+        const IPOption *search_option(OptionClass opt_class, Option opt_number) const;
 
         /**
          * \brief Sets the End of List option.
          */
-        void set_option_eol();
+        void set_eol_option();
 
         /**
          * \brief Sets the NOP option.
          */
-        void set_option_noop();
+        void set_noop_option();
 
         /**
          * \brief Sets the security option.
@@ -319,7 +366,7 @@ namespace Tins {
          * \param data The data for this option
          * \param data_len The length of the data.
          */
-        void set_option_sec(uint8_t* data, uint32_t data_len);
+        void set_sec_option(const uint8_t* data, uint32_t data_len);
         /* Add more option setters */
 
         /* Virtual methods */
@@ -401,32 +448,13 @@ namespace Tins {
             /*The options start here. */
         } __attribute__((__packed__));
 
-        struct IpOption {
-            struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int number:5;
-                unsigned int op_class:2;
-                unsigned int copied:1;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int copied:1;
-                unsigned int op_class:2;
-                unsigned int number:5;
-            #endif
-            } type;
-            uint8_t* optional_data;
-            uint32_t optional_data_size;
-
-            uint8_t* write(uint8_t* buffer);
-
-        } __attribute__((__packed__));
-
         void copy_fields(const IP *other);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         void cleanup();
 
         iphdr _ip;
-        std::vector<IpOption> _ip_options;
+        std::list<IPOption> _ip_options;
         uint32_t _options_size, _padded_options_size;
     };
 };
