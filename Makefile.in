@@ -23,7 +23,8 @@ clean:
 	rm $(OBJECTS) $(EXECUTABLE)
 
 install:
-	install include/* /usr/include/tins/
+	install -d /usr/include/tins/
+	install -t /usr/include/tins/ include/*
 	install $(EXECUTABLE) /usr/lib/
 
 uninstall:
