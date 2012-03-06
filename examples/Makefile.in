@@ -1,0 +1,26 @@
+CXX=@CXX@
+CFLAGS=-c -Wall @CFLAGS@
+LDFLAGS=-lpcap -ltins -lpthread
+SOURCES=arpspoofing.cpp portscan.cpp
+
+OBJECTS=$(SOURCES:.cpp=.o)
+INCLUDE=
+EXECUTABLES=arpspoof portscan
+
+all: $(SOURCES) $(EXECUTABLES)
+
+compile: $(OBJECTS)
+
+recompile: clean all
+
+arpspoof: arpspoofing.o
+	$(CXX) arpspoofing.o $(LDFLAGS) -o arpspoof
+
+portscan: portscan.o
+	$(CXX) portscan.o $(LDFLAGS) -o portscan
+
+.cpp.o:
+	$(CXX) $(CFLAGS) $(INCLUDE) $< -o $@
+
+clean:
+	rm $(OBJECTS) $(EXECUTABLE)

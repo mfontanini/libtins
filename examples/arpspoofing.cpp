@@ -24,9 +24,9 @@
 #include <string>
 #include <stdint.h>
 #include <cstdlib>
-#include "arp.h"
-#include "utils.h"
-#include "ethernetII.h"
+#include <tins/arp.h>
+#include <tins/utils.h>
+#include <tins/ethernetII.h>
 
 using namespace std;
 using namespace Tins;

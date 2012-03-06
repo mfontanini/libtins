@@ -23,12 +23,12 @@
 #include <string>
 #include <cstdlib>
 #include <pthread.h>
-#include "ip.h"
-#include "tcp.h"
-#include "ethernetII.h"
-#include "sniffer.h"
-#include "utils.h"
-#include "packetsender.h"
+#include <tins/ip.h>
+#include <tins/tcp.h>
+#include <tins/ethernetII.h>
+#include <tins/sniffer.h>
+#include <tins/utils.h>
+#include <tins/packetsender.h>
 
 
 using namespace std;
@@ -40,19 +40,14 @@ using namespace Tins;
  */
 struct ScanHandler {
     bool operator() (PDU *pdu) {
-        // Down-cast the inner PDU to IP.
-        IP *ip = dynamic_cast<IP*>(pdu->inner_pdu());
-        if(ip) {
-            // Down-cast IP's inner PDU to TCP.
-            TCP *tcp = dynamic_cast<TCP*>(ip->inner_pdu());
-            if(tcp) {
-                // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
-                if(tcp->get_flag(TCP::RST))
-                    cout << "Port: " << tcp->sport() << " closed\n";
-                // Is SYN flag on? Then port is open!
-                else if(tcp->get_flag(TCP::SYN))
-                    cout << "Port: " << tcp->sport() << " open\n";
-            }
+        TCP *tcp = (pdu->find_inner_pdu<TCP>(PDU::TCP));
+        if(tcp) {
+            // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
+            if(tcp->get_flag(TCP::RST))
+                cout << "Port: " << tcp->sport() << " closed\n";
+            // Is SYN flag on? Then port is open!
+            else if(tcp->get_flag(TCP::SYN))
+                cout << "Port: " << tcp->sport() << " open\n";
         }
         return true;
     }
@@ -91,8 +86,9 @@ void *thread_proc(void *param) {
     // The required subclass of AbstractSnifferHandler which will serve as
     // a proxy to our handler.
     AbstractSnifferHandler *my_handler = new SnifferHandler<ScanHandler>(&handler);
+    sniffer->set_filter("tcp and ip src " + *data + " and tcp[tcpflags] & (tcp-rst|tcp-syn) != 0");
     // Sniff loop. Only sniff TCP PDUs comming from the given IP and have either RST or SYN flag on.
-    sniffer->sniff_loop(my_handler, "tcp and ip src " + *data + " and tcp[tcpflags] & (tcp-rst|tcp-syn) != 0");
+    sniffer->sniff_loop(my_handler);
     delete my_handler;
     return 0;
 }

@@ -269,8 +269,6 @@ uint32_t Tins::Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
 
 uint32_t Tins::Utils::pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, uint32_t len, uint32_t flag) {
     uint32_t checksum(0);
-    source_ip = Utils::net_to_host_l(source_ip);
-    dest_ip = Utils::net_to_host_l(dest_ip);
     uint16_t *ptr = (uint16_t*)&source_ip;
 
     checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
