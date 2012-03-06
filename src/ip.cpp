@@ -261,7 +261,7 @@ void Tins::IP::set_option(uint8_t copied,
 
 const Tins::IP::IPOption *Tins::IP::search_option(OptionClass opt_class, Option opt_number) const {
     for(std::list<IPOption>::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
-        if(it->type.op_class == opt_class && it->type.number == opt_number)
+        if(it->type.op_class == (uint8_t)opt_class && it->type.number == (uint8_t)opt_number)
             return &(*it);
     }
     return 0;
