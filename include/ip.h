@@ -89,6 +89,7 @@ namespace Tins {
          * \brief This class represents an IP option. 
          */
         struct IPOption {
+            friend class IP;
             struct {
             #if __BYTE_ORDER == __LITTLE_ENDIAN
                 unsigned int number:5;
@@ -100,10 +101,20 @@ namespace Tins {
                 unsigned int number:5;
             #endif
             } type;
-            uint8_t* optional_data;
-            uint32_t optional_data_size;
-
+            
             uint8_t* write(uint8_t* buffer);
+            
+            /**
+             * \brief Getter for IP options' data pointer.
+             */
+            const uint8_t* data_ptr() const;
+            
+            /**
+             * \brief Getter for the data size field
+             */
+            uint8_t data_size() const;
+        private:
+            uint8_t* optional_data, optional_data_size;
         } __attribute__((__packed__));
 
         /**

@@ -40,13 +40,12 @@
 using namespace std;
 
 const uint8_t *Tins::Dot11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
+const uint32_t Tins::Dot11::ADDR_SIZE;
 
 Tins::Dot11::Dot11(const uint8_t* dst_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
     memset(&this->_header, 0, sizeof(ieee80211_header));
-    if(dst_hw_addr) {
-
+    if(dst_hw_addr)
         this->addr1(dst_hw_addr);
-    }
 }
 
 Tins::Dot11::Dot11(const std::string& iface, const uint8_t* dst_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child), _options_size(0) {
@@ -109,19 +108,19 @@ void Tins::Dot11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_
     }
 }
 
-Tins::Dot11::Dot11_Option::Dot11_Option(uint8_t opt, uint8_t len, const uint8_t *val) : option(opt), length(len) {
+Tins::Dot11::Dot11Option::Dot11Option(uint8_t opt, uint8_t len, const uint8_t *val) : option(opt), length(len) {
     value = new uint8_t[len];
     std::memcpy(value, val, len);
 }
 
 void Tins::Dot11::add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val) {
     uint32_t opt_size = len + (sizeof(uint8_t) << 1);
-    _options.push_back(Dot11_Option((uint8_t)opt, len, val));
+    _options.push_back(Dot11Option((uint8_t)opt, len, val));
     _options_size += opt_size;
 }
 
-const Tins::Dot11::Dot11_Option *Tins::Dot11::lookup_option(TaggedOption opt) const {
-    for(std::list<Dot11_Option>::const_iterator it = _options.begin(); it != _options.end(); ++it)
+const Tins::Dot11::Dot11Option *Tins::Dot11::search_option(TaggedOption opt) const {
+    for(std::list<Dot11Option>::const_iterator it = _options.begin(); it != _options.end(); ++it)
         if(it->option == (uint8_t)opt)
             return &(*it);
     return 0;
@@ -218,7 +217,7 @@ void Tins::Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const 
     uint32_t child_len = write_fixed_parameters(buffer, total_sz - _options_size);
     buffer += child_len;
     assert(total_sz >= child_len + _options_size);
-    for(std::list<Dot11_Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+    for(std::list<Dot11Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option;
         *(buffer++) = it->length;
         std::memcpy(buffer, it->value, it->length);
@@ -268,8 +267,8 @@ void Tins::Dot11::copy_80211_fields(const Dot11 *other) {
     std::memcpy(&_header, &other->_header, sizeof(_header));
     _iface_index = other->_iface_index;
     _options_size = other->_options_size;
-    for(std::list<Dot11_Option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
-        _options.push_back(Dot11_Option(it->option, it->length, it->value));
+    for(std::list<Dot11Option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
+        _options.push_back(Dot11Option(it->option, it->length, it->value));
 }
 
 /* Dot11ManagementFrame */
@@ -753,12 +752,12 @@ void Tins::Dot11Beacon::qos_capabilities(uint8_t qos_info) {
 }
 
 string Tins::Dot11Beacon::essid() const {
-    const Dot11::Dot11_Option *option = lookup_option(SSID);
+    const Dot11::Dot11Option *option = search_option(SSID);
     return (option) ? string((const char*)option->value, option->length) : 0;
 }
 
 bool Tins::Dot11Beacon::rsn_information(RSNInformation *rsn) {
-    const Dot11::Dot11_Option *option = lookup_option(RSN);
+    const Dot11::Dot11Option *option = search_option(RSN);
     if(!option || option->length < (sizeof(uint16_t) << 1) + sizeof(uint32_t))
         return false;
     const uint8_t *buffer = option->value;

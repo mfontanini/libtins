@@ -41,6 +41,11 @@ namespace Tins {
          * \brief Broadcast hardware address.
          */
         static const uint8_t *BROADCAST;
+        
+        /**
+         * \brief Dot11 address size.
+         */
+        static const uint32_t ADDR_SIZE = 6;
 
         /**
          * \brief Enum for the different types of 802.11 frames.
@@ -147,22 +152,12 @@ namespace Tins {
         /**
          * \brief IEEE 802.11 options struct.
          */
-        struct Dot11_Option {
+        struct Dot11Option {
+            friend class Dot11;
+            friend class Dot11Beacon;
+            friend class Dot11ManagementFrame;
             /**
-             * \brief The option number.
-             */
-            uint8_t option;
-            /**
-             * \brief The value's length in bytes.
-             */
-            uint8_t length;
-            /**
-             * \brief The option's value.
-             */
-            uint8_t *value;
-
-            /**
-             * \brief Creates an instance of Dot11_Option.
+             * \brief Creates an instance of Dot11Option.
              *
              * The option's value is copied, therefore the user should
              * manually free any memory pointed by the "val" parameter.
@@ -170,7 +165,31 @@ namespace Tins {
              * \param len The length of the option's value in bytes.
              * \param val The option's value.
              */
-            Dot11_Option(uint8_t opt, uint8_t len, const uint8_t *val);
+            Dot11Option(uint8_t opt, uint8_t len, const uint8_t *val);
+            
+            /**
+             * \brief Getter for Dot11 options' data pointer.
+             */
+            const uint8_t* data_ptr() const { return value; }
+            
+            /**
+             * \brief Getter for the data size field
+             */
+            uint8_t data_size() const { return length; }
+            
+            /**
+             * \brief The option number.
+             */
+            uint8_t option;
+            private:
+                /**
+                 * \brief The value's length in bytes.
+                 */
+                uint8_t length;
+                /**
+                 * \brief The option's value.
+                 */
+                uint8_t *value;
         };
 
         /**
@@ -450,7 +469,7 @@ namespace Tins {
          * \param opt The option identifier.
          * \return The option found, or 0 if no such option has been set.
          */
-        const Dot11_Option *lookup_option(TaggedOption opt) const;
+        const Dot11Option *search_option(TaggedOption opt) const;
 
         /**
          * \brief Getter for the PDU's type.
@@ -512,7 +531,7 @@ namespace Tins {
             #endif
             } __attribute__((__packed__)) control;
             uint16_t duration_id;
-            uint8_t addr1[6];
+            uint8_t addr1[ADDR_SIZE];
 
         } __attribute__((__packed__));
         private:
@@ -524,7 +543,7 @@ namespace Tins {
 
         ieee80211_header _header;
         uint32_t _iface_index, _options_size;
-        std::list<Dot11_Option> _options;
+        std::list<Dot11Option> _options;
     };
 
     /**

@@ -246,8 +246,10 @@ void Tins::IP::set_option(uint8_t copied,
     option.type.number = number;
     uint8_t* buffer(0);
     if (data_size) {
-        buffer = new uint8_t[data_size];
-        memcpy(buffer, data, data_size);
+        buffer = new uint8_t[data_size + 1];
+        buffer[0] = data_size;
+        memcpy(buffer + 1, data, data_size);
+        data_size++;
     }
     option.optional_data = buffer;
     option.optional_data_size = data_size;
@@ -273,6 +275,14 @@ uint8_t* Tins::IP::IPOption::write(uint8_t* buffer) {
         buffer += optional_data_size;
     }
     return buffer;
+}
+
+const uint8_t* Tins::IP::IPOption::data_ptr() const {
+    return optional_data ? optional_data + 1 : 0;
+}
+
+uint8_t Tins::IP::IPOption::data_size() const {
+    return optional_data_size ? optional_data_size - 1 : 0;
 }
 
 /* Virtual method overriding. */
@@ -318,7 +328,7 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
         this->flag(new_flag);
     }
     this->tot_len(total_sz);
-    this->head_len (my_sz / sizeof(uint32_t));
+    this->head_len(my_sz / sizeof(uint32_t));
 
     memcpy(buffer, &_ip, sizeof(_ip));
 
