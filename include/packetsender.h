@@ -63,7 +63,7 @@ namespace Tins {
          * 
          * \param recv_timeout The timeout which will be used when receiving responses.
          */
-        PacketSender(uint32_t recv_timeout = DEFAULT_TIMEOUT);
+        PacketSender(uint32_t recv_timeout = DEFAULT_TIMEOUT, uint32_t usec = 0);
         
         /** \brief PacketSender destructor.
          * 
@@ -174,7 +174,7 @@ namespace Tins {
 
         std::vector<int> _sockets;
         SocketTypeMap _types;
-        uint32_t _timeout;
+        uint32_t _timeout, _timeout_usec;
     };
 };
 
