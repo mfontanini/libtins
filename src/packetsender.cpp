@@ -38,7 +38,8 @@
 const int Tins::PacketSender::INVALID_RAW_SOCKET = -1;
 const uint32_t Tins::PacketSender::DEFAULT_TIMEOUT = 2;
 
-Tins::PacketSender::PacketSender(uint32_t recv_timeout) : _sockets(SOCKETS_END, INVALID_RAW_SOCKET), _timeout(recv_timeout) {
+Tins::PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) : 
+    _sockets(SOCKETS_END, INVALID_RAW_SOCKET), _timeout(recv_timeout), _timeout_usec(usec) {
     _types[IP_SOCKET] = IPPROTO_RAW;
     _types[ICMP_SOCKET] = IPPROTO_ICMP;
 }
@@ -143,7 +144,7 @@ Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockad
     uint8_t buffer[2048];
     time_t end_time = time(0) + _timeout;
     timeout.tv_sec  = _timeout;
-    timeout.tv_usec = 0;
+    timeout.tv_usec = _timeout_usec;
     while(true) {
         FD_ZERO(&readfds);
         FD_SET(sock, &readfds);
