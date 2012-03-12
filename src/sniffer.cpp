@@ -40,13 +40,13 @@ struct LoopData {
 /** \endcond */
 
 
-Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size, const string &filter) throw(std::runtime_error) {
+Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size, unsigned timeout, const string &filter) throw(std::runtime_error) {
     char error[PCAP_ERRBUF_SIZE];
     if (pcap_lookupnet(device.c_str(), &ip, &mask, error) == -1) {
         ip = 0;
         mask = 0;
     }
-    handle = pcap_open_live(device.c_str(), max_packet_size, 0, 0, error);
+    handle = pcap_open_live(device.c_str(), max_packet_size, 0, timeout, error);
     if(!handle)
         throw runtime_error(error);
     wired = (pcap_datalink (handle) != DLT_IEEE802_11_RADIO); //better plx

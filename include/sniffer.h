@@ -66,9 +66,10 @@ namespace Tins {
          * \brief Creates an instance of sniffer.
          * \param device The device which will be sniffed.
          * \param max_packet_size The maximum packet size to be read.
+         * \param timeout The time in seconds to wait for a packet.
          * \param filter A capture filter to compile and use for sniffing sessions.(optional);
          */
-        Sniffer(const std::string &device, unsigned max_packet_size, const std::string &filter = "") throw(std::runtime_error);
+        Sniffer(const std::string &device, unsigned max_packet_size, unsigned timeout = 0, const std::string &filter = "") throw(std::runtime_error);
         
         /**
          * \brief Sniffer destructor.
