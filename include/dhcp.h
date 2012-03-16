@@ -330,7 +330,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::UDP; }
+        PDUType pdu_type() const { return PDU::DHCP; }
         
         /** 
          * \brief Getter for the header size.

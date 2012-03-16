@@ -27,14 +27,14 @@
 #include "ip.h"
 #include "rawpdu.h"
 
-Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) : PDU(Constants::IP::PROTO_TCP, child) {
+Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) : PDU(Constants::IP::PROTO_UDP, child) {
     this->dport(dport);
     this->sport(sport);
     _udp.check = 0;
     _udp.len = 0;
 }
 
-Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROTO_TCP) {
+Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROTO_UDP) {
     if(total_sz < sizeof(udphdr))
         throw std::runtime_error("Not enough size for an UDP header in the buffer.");
     std::memcpy(&_udp, buffer, sizeof(udphdr));
@@ -80,7 +80,7 @@ void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
         length(sizeof(udphdr) + inner_pdu()->size());
     std::memcpy(buffer, &_udp, sizeof(udphdr));
     if(!_udp.check && ip_packet) {
-        uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(), ip_packet->dst_addr(), size(), Constants::IP::PROTO_TCP) +
+        uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(), ip_packet->dst_addr(), size(), Constants::IP::PROTO_UDP) +
                             Utils::do_checksum(buffer, buffer + total_sz);
         while (checksum >> 16)
             checksum = (checksum & 0xffff)+(checksum >> 16);
