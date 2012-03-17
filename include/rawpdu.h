@@ -64,7 +64,7 @@ namespace Tins {
          * 
          * \return The RawPDU's payload.
          */
-        const uint8_t *payload() const { return _payload; }
+        uint8_t *payload() { return _payload; }
         
         /** \brief Returns the header size.
          *
