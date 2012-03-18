@@ -207,6 +207,8 @@ bool Tins::Utils::resolve_hwaddr(const string &iface, uint32_t ip, uint8_t *buff
 }
 
 string Tins::Utils::interface_from_ip(uint32_t ip) {
+    if(ip == 0x7f000001)
+        return "lo";
     ifstream input("/proc/net/route");
     bool match(false);
     string iface;
