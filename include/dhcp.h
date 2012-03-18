@@ -251,6 +251,20 @@ namespace Tins {
          */
         bool search_lease_time(uint32_t *value);
         
+        /** 
+         * \brief Adds a lease renewal time option.
+         * \param time The lease renew time.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_renewal_time(uint32_t time);
+        
+        /**
+         * \brief Searchs for a lease renewal time option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_renewal_time(uint32_t *value);
+        
         /**
          * \brief Adds a subnet mask option.
          * \param mask The subnet mask.

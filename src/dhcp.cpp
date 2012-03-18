@@ -142,6 +142,19 @@ bool Tins::DHCP::search_lease_time(uint32_t *value) {
     return false;
 }
 
+bool Tins::DHCP::add_renewal_time(uint32_t time) {
+    time = Utils::net_to_host_l(time);
+    return add_option(DHCP_RENEWAL_TIME, sizeof(uint32_t), (const uint8_t*)&time);
+}
+        
+bool Tins::DHCP::search_renewal_time(uint32_t *value) {
+    if(generic_search(DHCP_RENEWAL_TIME, value)) {
+        *value = Utils::net_to_host_l(*value);
+        return true;
+    }
+    return false;
+}
+
 bool Tins::DHCP::add_subnet_mask(uint32_t mask) {
     return add_option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask);
 }
