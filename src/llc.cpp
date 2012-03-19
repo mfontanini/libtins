@@ -59,6 +59,7 @@ LLC::LLC(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
 	std::memcpy(&_header, buffer, sizeof(_header));
 	buffer += sizeof(_header);
 	total_sz -= sizeof(_header);
+	information_field_length = 0;
 	if ((buffer[0] & 0x03) == LLC::UNNUMBERED) {
 		type(LLC::UNNUMBERED);
 		std::memcpy(&control_field.unnumbered, buffer, sizeof(un_control_field));
@@ -69,7 +70,7 @@ LLC::LLC(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
 	else {
 		type((Format)(buffer[0] & 0x03));
 		control_field_length = 2;
-		std::memcpy(&control_field.info, buffer, sizeof(un_control_field));
+		std::memcpy(&control_field.info, buffer, sizeof(info_control_field));
 		buffer += 2;
 		total_sz -= 2;
 	}
@@ -99,7 +100,7 @@ void LLC::dsap(uint8_t new_dsap) {
 	_header.dsap = new_dsap;
 }
 
-void LLC::command(bool value) {
+void LLC::response(bool value) {
 	if (value) {
 		_header.ssap |= 0x01;
 	}

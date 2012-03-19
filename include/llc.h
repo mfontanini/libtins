@@ -123,10 +123,10 @@ namespace Tins {
 		void dsap(uint8_t new_dsap);
 
 		/**
-		 * \brief Setter for the command bit.
+		 * \brief Setter for the response bit.
 		 * \param value The value to be set.
 		 */
-		void command(bool value);
+		void response(bool value);
 
 		/**
 		 * \brief Setter for the ssap field.
@@ -200,10 +200,10 @@ namespace Tins {
 		inline uint8_t dsap() {return _header.dsap; }
 
 		/**
-		 * \brief Getter for the command bit.
-		 * \return Wheter the command bit is set or not.
+		 * \brief Getter for the response bit.
+		 * \return Whether the response bit is set or not.
 		 */
-		inline bool command() {return _header.ssap & 0x01; }
+		inline bool response() {return (_header.ssap & 0x01); }
 
 		/**
 		 * \brief Getter for the ssap field.

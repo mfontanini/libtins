@@ -35,11 +35,11 @@ TEST_F(LLCTest, DefaultConstructor) {
 
 TEST_F(LLCTest, ParamsConstructor) {
 	LLC llc(0xAD, 0x16);
-	EXPECT_EQ(llc.dsap(), 0xAD);
-	EXPECT_EQ(llc.ssap(), 0x16);
-	EXPECT_EQ(llc.type(), LLC::INFORMATION);
-	EXPECT_EQ(llc.header_size(), 4);
-    EXPECT_EQ(llc.pdu_type(), PDU::LLC);
+	EXPECT_EQ(0xAD, llc.dsap());
+	EXPECT_EQ(0x16, llc.ssap());
+	EXPECT_EQ(LLC::INFORMATION, llc.type());
+	EXPECT_EQ(4, llc.header_size());
+    EXPECT_EQ(PDU::LLC, llc.pdu_type());
 }
 
 TEST_F(LLCTest, Group) {
@@ -58,12 +58,12 @@ TEST_F(LLCTest, Dsap) {
 	EXPECT_EQ(llc.dsap(), 0x01);
 }
 
-TEST_F(LLCTest, Command) {
+TEST_F(LLCTest, Response) {
 	LLC llc;
-	llc.command(true);
-	EXPECT_TRUE(llc.command());
-	llc.command(false);
-	EXPECT_FALSE(llc.command());
+	llc.response(true);
+	EXPECT_TRUE(llc.response());
+	llc.response(false);
+	EXPECT_FALSE(llc.response());
 }
 
 TEST_F(LLCTest, Ssap) {
@@ -112,12 +112,12 @@ TEST_F(LLCTest, ReceiveSeqNumber) {
 	llc.type(LLC::INFORMATION);
 	llc.receive_seq_number(18);
 	EXPECT_EQ(18, llc.receive_seq_number());
-	llc.send_seq_number(127);
+	llc.receive_seq_number(127);
 	EXPECT_EQ(127, llc.receive_seq_number());
 	llc.type(LLC::SUPERVISORY);
 	llc.receive_seq_number(19);
 	EXPECT_EQ(19, llc.receive_seq_number());
-	llc.send_seq_number(127);
+	llc.receive_seq_number(127);
 	EXPECT_EQ(127, llc.receive_seq_number());
 	llc.type(LLC::UNNUMBERED);
 	EXPECT_EQ(0, llc.receive_seq_number());
@@ -171,32 +171,32 @@ TEST_F(LLCTest, ModifierFunction) {
 
 TEST_F(LLCTest, ConstructorFromBuffer) {
 	LLC llc(LLCTest::from_buffer_info, 4);
-	EXPECT_EQ(llc.type(), LLC::INFORMATION);
-	EXPECT_EQ(llc.header_size(), 4);
-	EXPECT_EQ(llc.dsap(), 0xFE);
-	EXPECT_EQ(llc.ssap(), 0x48);
+	EXPECT_EQ(LLC::INFORMATION, llc.type());
+	EXPECT_EQ(4, llc.header_size());
+	EXPECT_EQ(0xFE, llc.dsap());
+	EXPECT_EQ(0x48, llc.ssap());
 	EXPECT_FALSE(llc.group());
-	EXPECT_TRUE(llc.command());
+	EXPECT_FALSE(llc.response());
 	EXPECT_TRUE(llc.poll_final());
-	EXPECT_EQ(llc.send_seq_number(), 30);
-	EXPECT_EQ(llc.receive_seq_number(), 29);
+	EXPECT_EQ(30, llc.send_seq_number());
+	EXPECT_EQ(29, llc.receive_seq_number());
 
-	LLC llc_super(LLCTest::from_buffer_super, 4);
-	EXPECT_EQ(llc_super.header_size(), 4);
-	EXPECT_EQ(llc_super.dsap(), 0x4B);
-	EXPECT_EQ(llc_super.ssap(), 0x19);
+	LLC llc_super(4, LLCTest::from_buffer_super);
+	EXPECT_EQ(4, llc_super.header_size());
+	EXPECT_EQ(0x4B, llc_super.dsap());
+	EXPECT_EQ(0x19, llc_super.ssap());
 	EXPECT_TRUE(llc_super.group());
-	EXPECT_FALSE(llc_super.command());
+	EXPECT_TRUE(llc_super.response());
 	EXPECT_FALSE(llc_super.poll_final());
-	EXPECT_EQ(llc_super.receive_seq_number(), 29);
-	EXPECT_EQ(llc_super.supervisory_function(), LLC::RECEIVE_NOT_READY);
+	EXPECT_EQ(29, llc_super.receive_seq_number());
+	EXPECT_EQ(LLC::RECEIVE_NOT_READY, llc_super.supervisory_function());
 
 	LLC llc_unnum(LLCTest::from_buffer_unnumbered, 3);
 	EXPECT_EQ(llc_unnum.header_size(), 3);
 	EXPECT_EQ(llc_unnum.dsap(), 0xaa);
 	EXPECT_EQ(llc_unnum.ssap(), 0x17);
 	EXPECT_FALSE(llc_unnum.group());
-	EXPECT_FALSE(llc_unnum.command());
+	EXPECT_TRUE(llc_unnum.response());
 	EXPECT_FALSE(llc_unnum.poll_final());
 	EXPECT_EQ(llc_unnum.modifier_function(), LLC::SABME);
 }
