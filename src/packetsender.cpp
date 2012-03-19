@@ -22,6 +22,7 @@
 #ifndef WIN32
     #include <sys/socket.h>
     #include <sys/select.h>
+    #include <sys/time.h>
     #include <arpa/inet.h>
     #include <unistd.h>
     #include <linux/if_ether.h>
@@ -139,12 +140,12 @@ bool Tins::PacketSender::send_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t 
 
 Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockaddr* link_addr, socklen_t addrlen) {
     fd_set readfds;
-    struct timeval timeout;
+    struct timeval timeout,  end_time;
     int read;
     uint8_t buffer[2048];
-    time_t end_time = time(0) + _timeout;
     timeout.tv_sec  = _timeout;
-    timeout.tv_usec = _timeout_usec;
+    end_time.tv_sec = time(0) + _timeout;    
+    end_time.tv_usec = timeout.tv_usec = _timeout_usec;
     while(true) {
         FD_ZERO(&readfds);
         FD_SET(sock, &readfds);
@@ -155,10 +156,12 @@ Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockad
             if(pdu->matches_response(buffer, size))
                 return pdu->clone_packet(buffer, size);
         }
-        time_t this_time = time(0);
-        if(end_time <= this_time)
+        struct timeval this_time;
+        gettimeofday(&this_time, 0);
+        if(end_time.tv_sec <= this_time.tv_sec && end_time.tv_usec <= this_time.tv_usec)
             return 0;
-        timeout.tv_sec = end_time - this_time;
+        timeout.tv_sec = end_time.tv_sec - this_time.tv_sec;
+        timeout.tv_usec = end_time.tv_usec;
     }
     return 0;
 }
