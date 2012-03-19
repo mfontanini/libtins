@@ -22,7 +22,8 @@
 #ifndef __IEEE8022_H
 #define __IEEE8022_H
 
-
+#include <list>
+#include <utility>
 #include <stdint.h>
 #include "pdu.h"
 #include "utils.h"
@@ -30,10 +31,9 @@
 namespace Tins {
 
     /**
-     * \brief Class representing a SNAP frame.
+     * \brief Class representing a LLC frame.
      *
-     * Note that this PDU contains the 802.3 LLC structure + SNAP frame.
-     * So far only unnumbered information structure is supported.
+     * This PDU follows the standard LLC frame described in the IEEE 802.2 specs.
      */
     class LLC : public PDU {
     public:
@@ -95,12 +95,12 @@ namespace Tins {
         /**
          * \brief Copy constructor.
          */
-    	LLC(const SNAP &other);
+    	LLC(const LLC &other);
 
         /**
          * \brief Copy assignment operator.
          */
-    	LLC &operator= (const SNAP &other);
+    	LLC &operator= (const LLC &other);
 
         /* Setters */
 
@@ -149,10 +149,10 @@ namespace Tins {
 		void receive_seq_number(uint8_t seq_number);
 
 		/**
-		 * \brief Setter for the poll flag.
+		 * \brief Setter for the poll/final flag.
 		 * \param value Bool indicating the value of the flag.
 		 */
-		void poll(bool value);
+		void poll_final(bool value);
 
 		/**
 		 * \brief Setter for the supervisory function.
@@ -181,10 +181,93 @@ namespace Tins {
 
         /* Getters */
 
+		/**
+		 * \brief Getter for the group destination bit.
+		 * \return Whether the group bit is set or not.
+		 */
+		inline bool group() {return _header.dsap & 0x01; }
 
+		/**
+		 * \brief Getter for the dsap field.
+		 * \return The dsap field value
+		 */
+		inline uint8_t dsap() {return _header.dsap; }
+
+		/**
+		 * \brief Getter for the command bit.
+		 * \return Wheter the command bit is set or not.
+		 */
+		inline bool command() {return _header.ssap & 0x01; }
+
+		/**
+		 * \brief Getter for the ssap field.
+		 * \return The ssap field.
+		 */
+		inline uint8_t ssap() {return _header.ssap; }
+
+		/**
+		 * \brief Getter for the LLC frame format type.
+		 * \return The LLC frame format.
+		 */
+		inline uint8_t type() {return control_field & 0x03; }
+
+		/**
+		 * \brief Getter for sender send sequence number.
+		 *
+		 * \return The sender send sequence number if format is INFORMATION else 0.
+		 */
+		inline uint8_t send_seq_number() {
+			return (type() == INFORMATION) ? (control_field & 0x00FE) >> 1 : 0;
+		}
+
+		/**
+		 * \brief Getter for sender receive sequence number.
+		 *
+		 * \return 	The sender receive sequence number if format is
+		 * 			INFORMATION or SUPERVISORY else 0.
+		 */
+		inline uint8_t receive_seq_number() {
+			if (type() == INFORMATION || type() == SUPERVISORY)
+				return (control_field & 0xFE00) >> 9;
+			else
+				return 0;
+		}
+
+		/**
+		 * \brief Getter for the poll/final flag.
+		 * \return Whether the poll/final flag is set.
+		 */
+		inline bool poll_final() {
+			if (type() == UNNUMBERED)
+				return control_field & 0x10;
+			else
+				return control_field & 0x0100;
+		}
+
+		/**
+		 * \brief Getter for the supervisory function.
+		 *
+		 * \return The supervisory function if format is SUPERVISORY else 0.
+		 */
+		inline uint8_t supervisory_function() {
+			if (type() == SUPERVISORY)
+				return control_field & 0x0C;
+			return 0;
+		}
+
+		/**
+		 * \brief Getter for the modifier function field.
+		 *
+		 * \return The modifier function if format is UNNUMBERED else 0.
+		 */
+		inline uint8_t modifier_function() {
+			if (type() == UNNUMBERED)
+				return control_field & 0xEC;
+			return 0;
+		}
 
         /**
-         * \brief Returns the SNAP frame's header length.
+         * \brief Returns the LLC frame's header length.
          *
          * \return The header's size.
          * \sa PDU::header_size()
@@ -195,7 +278,12 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::SNAP; }
+        PDUType pdu_type() const { return PDU::LLC; }
+
+        /**
+		 * \brief Delete all the information fields added.
+		 */
+		void clear_information_fields();
 
         /**
          * \brief Clones this PDU.
@@ -212,11 +300,11 @@ namespace Tins {
         void copy_fields(const LLC *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
-        llchdr _snap;
+        llchdr _header;
         uint8_t control_field_length;
         uint16_t control_field;
         uint8_t information_field_length;
-        uint8_t* information_field;
+        std::list<std::pair<uint8_t,uint8_t*> > information_fields;
     };
 
 };
