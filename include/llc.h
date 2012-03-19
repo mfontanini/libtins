@@ -58,31 +58,37 @@ namespace Tins {
          */
         enum ModifierFunctions {
         	UI = 0x00,
-        	XID = 0xAC,
-        	TEST = 0xE0,
-        	SABME = 0x6C,
-        	DISC = 0x40,
-        	UA = 0x60,
-        	DM = 0x0C,
-        	FRMR = 0x84
+        	XID = 0x1D,
+        	TEST = 0x07,
+        	SABME = 0x1E,
+        	DISC = 0x02,
+        	UA = 0x06,
+        	DM = 0x18,
+        	FRMR = 0x11
         };
 
         /**
          * \brief LLC Supervisory functions
          */
         enum SupervisoryFunctions {
-        	RECEIVE_READY = 0x00,
-        	REJECT = 0x08,
-        	RECEIVE_NOT_READY = 0x04
+        	RECEIVE_READY = 0,
+        	REJECT = 2,
+        	RECEIVE_NOT_READY = 1
         };
 
         /**
          * \brief Creates an instance of LLC
-         * This constructor sets the dsap and ssap fields to 0xaa, and
-         * the id field to 3.
          * \param child The child PDU.(optional)
          */
     	LLC(PDU *child = 0);
+
+    	/**
+    	 * \brief Creates an instance of LLC, setting the dsap and ssap.
+    	 * The control field is set all to 0.
+    	 * @param dsap The dsap value to be set.
+    	 * @param ssap The ssap value to be set.
+    	 */
+    	LLC(uint8_t dsap, uint8_t ssap, PDU* child = 0);
 
         /**
          * \brief Constructor which creates a LLC object from a buffer and adds all identifiable
@@ -117,10 +123,10 @@ namespace Tins {
 		void dsap(uint8_t new_dsap);
 
 		/**
-		 * \brief Setter for the command bit.
+		 * \brief Setter for the response bit.
 		 * \param value The value to be set.
 		 */
-		void command(bool value);
+		void response(bool value);
 
 		/**
 		 * \brief Setter for the ssap field.
@@ -194,10 +200,10 @@ namespace Tins {
 		inline uint8_t dsap() {return _header.dsap; }
 
 		/**
-		 * \brief Getter for the command bit.
-		 * \return Wheter the command bit is set or not.
+		 * \brief Getter for the response bit.
+		 * \return Whether the response bit is set or not.
 		 */
-		inline bool command() {return _header.ssap & 0x01; }
+		inline bool response() {return (_header.ssap & 0x01); }
 
 		/**
 		 * \brief Getter for the ssap field.
@@ -209,7 +215,7 @@ namespace Tins {
 		 * \brief Getter for the LLC frame format type.
 		 * \return The LLC frame format.
 		 */
-		inline uint8_t type() {return control_field & 0x03; }
+		inline uint8_t type() {return _type; }
 
 		/**
 		 * \brief Getter for sender send sequence number.
@@ -217,7 +223,7 @@ namespace Tins {
 		 * \return The sender send sequence number if format is INFORMATION else 0.
 		 */
 		inline uint8_t send_seq_number() {
-			return (type() == INFORMATION) ? (control_field & 0x00FE) >> 1 : 0;
+			return (type() == INFORMATION) ? (control_field.info.send_seq_num) : 0;
 		}
 
 		/**
@@ -227,10 +233,14 @@ namespace Tins {
 		 * 			INFORMATION or SUPERVISORY else 0.
 		 */
 		inline uint8_t receive_seq_number() {
-			if (type() == INFORMATION || type() == SUPERVISORY)
-				return (control_field & 0xFE00) >> 9;
-			else
-				return 0;
+			switch (type()) {
+				case INFORMATION:
+					return control_field.info.recv_seq_num;
+				case SUPERVISORY:
+					return control_field.super.recv_seq_num;
+				case UNNUMBERED:
+					return 0;
+			}
 		}
 
 		/**
@@ -238,10 +248,14 @@ namespace Tins {
 		 * \return Whether the poll/final flag is set.
 		 */
 		inline bool poll_final() {
-			if (type() == UNNUMBERED)
-				return control_field & 0x10;
-			else
-				return control_field & 0x0100;
+			switch (type()) {
+				case UNNUMBERED:
+					return control_field.unnumbered.poll_final_bit;
+				case INFORMATION:
+					return control_field.info.poll_final_bit;
+				case SUPERVISORY:
+					return control_field.super.poll_final_bit;
+			}
 		}
 
 		/**
@@ -251,7 +265,7 @@ namespace Tins {
 		 */
 		inline uint8_t supervisory_function() {
 			if (type() == SUPERVISORY)
-				return control_field & 0x0C;
+				return control_field.super.supervisory_func;
 			return 0;
 		}
 
@@ -262,7 +276,7 @@ namespace Tins {
 		 */
 		inline uint8_t modifier_function() {
 			if (type() == UNNUMBERED)
-				return control_field & 0xEC;
+				return (control_field.unnumbered.mod_func1 << 3) + control_field.unnumbered.mod_func2;
 			return 0;
 		}
 
@@ -297,12 +311,40 @@ namespace Tins {
             uint8_t ssap;
         } __attribute__((__packed__));
 
+        struct info_control_field {
+        	uint16_t
+        				type_bit:1,
+        				send_seq_num:7,
+        				poll_final_bit:1,
+        				recv_seq_num:7;
+        } __attribute__((__packed__));
+
+        struct super_control_field {
+        	uint16_t	type_bit:2,
+        				supervisory_func:2,
+        				unused:4,
+        				poll_final_bit:1,
+        				recv_seq_num:7;
+        } __attribute__((__packed__));
+
+        struct un_control_field {
+        	uint8_t		type_bits:2,
+        				mod_func1:2,
+        				poll_final_bit:1,
+        				mod_func2:3;
+        } __attribute__((__packed__));
+
         void copy_fields(const LLC *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         llchdr _header;
         uint8_t control_field_length;
-        uint16_t control_field;
+        union {
+        	info_control_field info;
+        	super_control_field super;
+        	un_control_field unnumbered;
+        } control_field;
+        Format _type;
         uint8_t information_field_length;
         std::list<std::pair<uint8_t,uint8_t*> > information_fields;
     };

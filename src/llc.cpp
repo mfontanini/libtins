@@ -38,10 +38,18 @@ using Tins::LLC;
 const uint8_t LLC::GLOBAL_DSAP_ADDR = 0xFF;
 const uint8_t LLC::NULL_ADDR = 0x00;
 
-LLC::LLC(PDU *child) : PDU(0xff, child) {
+LLC::LLC(PDU *child) : PDU(0xff, child), _type(LLC::INFORMATION) {
 	memset(&_header, 0, sizeof(llchdr));
 	control_field_length = 2;
-	control_field = 0;
+	memset(&control_field, 0, sizeof(control_field));
+	information_field_length = 0;
+}
+
+LLC::LLC(uint8_t dsap, uint8_t ssap, PDU *child) : PDU(0xff, child), _type(LLC::INFORMATION) {
+	_header.dsap = dsap;
+	_header.ssap = ssap;
+	control_field_length = 2;
+	memset(&control_field, 0, sizeof(control_field));
 	information_field_length = 0;
 }
 
@@ -51,16 +59,18 @@ LLC::LLC(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
 	std::memcpy(&_header, buffer, sizeof(_header));
 	buffer += sizeof(_header);
 	total_sz -= sizeof(_header);
+	information_field_length = 0;
 	if ((buffer[0] & 0x03) == LLC::UNNUMBERED) {
-		control_field_length = 1;
-		control_field = buffer[0];
+		type(LLC::UNNUMBERED);
+		std::memcpy(&control_field.unnumbered, buffer, sizeof(un_control_field));
 		buffer++;
 		total_sz -= 1;
 		//TODO: Create information fields if corresponding.
 	}
 	else {
+		type((Format)(buffer[0] & 0x03));
 		control_field_length = 2;
-		control_field = Utils::net_to_host_s(((uint16_t*)buffer)[0]);
+		std::memcpy(&control_field.info, buffer, sizeof(info_control_field));
 		buffer += 2;
 		total_sz -= 2;
 	}
@@ -90,7 +100,7 @@ void LLC::dsap(uint8_t new_dsap) {
 	_header.dsap = new_dsap;
 }
 
-void LLC::command(bool value) {
+void LLC::response(bool value) {
 	if (value) {
 		_header.ssap |= 0x01;
 	}
@@ -104,20 +114,19 @@ void LLC::ssap(uint8_t new_ssap) {
 }
 
 void LLC::type(LLC::Format type) {
+	_type = type;
 	switch (type) {
 		case LLC::INFORMATION:
 			control_field_length = 2;
-			control_field &= 0xFFFE;
+			control_field.info.type_bit = 0;
 			break;
 		case LLC::SUPERVISORY:
 			control_field_length = 2;
-			control_field &= 0xFFFD;
-			control_field |= type;
+			control_field.super.type_bit = 1;
 			break;
 		case LLC::UNNUMBERED:
 			control_field_length = 1;
-			control_field &= 0xFD;
-			control_field |= type;
+			control_field.unnumbered.type_bits = 3;
 			break;
 	}
 }
@@ -125,48 +134,48 @@ void LLC::type(LLC::Format type) {
 void LLC::send_seq_number(uint8_t seq_number) {
 	if (type() != LLC::INFORMATION)
 		return;
-	control_field &= 0xFF01;
-	control_field |= seq_number;
+	control_field.info.send_seq_num = seq_number;
 }
 
 void LLC::receive_seq_number(uint8_t seq_number) {
-	if (type() == LLC::UNNUMBERED)
-		return;
-	uint16_t to_mask = seq_number <<= 9;
-	control_field &= 0x01FF;
-	control_field |= to_mask;
+	switch (type()) {
+		case LLC::UNNUMBERED:
+			return;
+		case LLC::INFORMATION:
+			control_field.info.recv_seq_num = seq_number;
+			break;
+		case LLC::SUPERVISORY:
+			control_field.super.recv_seq_num = seq_number;
+			break;
+	}
 }
 
 void LLC::poll_final(bool value) {
-	uint16_t mask = 0;
 	switch (type()) {
 		case LLC::UNNUMBERED:
-			mask = 0xFFEF;
+			control_field.unnumbered.poll_final_bit = value;
 			break;
 		case LLC::INFORMATION:
+			control_field.info.poll_final_bit = value;
+			return;
 		case LLC::SUPERVISORY:
-			mask = 0xFEFF;
+			control_field.super.poll_final_bit = value;
 			break;
 	}
-	if (value)
-		control_field |= ~mask;
-	else
-		control_field &= mask;
 
 }
 
 void LLC::supervisory_function(LLC::SupervisoryFunctions new_func) {
 	if (type() != LLC::SUPERVISORY)
 		return;
-	control_field &= 0xFFF3;
-	control_field |= new_func;
+	control_field.super.supervisory_func = new_func;
 }
 
 void LLC::modifier_function(LLC::ModifierFunctions mod_func) {
 	if (type() != LLC::UNNUMBERED)
 		return;
-	control_field &= 0xEC;
-	control_field |= mod_func;
+	control_field.unnumbered.mod_func1 = mod_func >> 3;
+	control_field.unnumbered.mod_func2 = mod_func & 0x07;
 }
 
 void LLC::add_xid_information(uint8_t xid_id, uint8_t llc_type_class, uint8_t receive_window) {
@@ -214,14 +223,21 @@ void LLC::write_serialization(uint8_t *buffer, uint32_t total_sz, const Tins::PD
 	assert(total_sz >= header_size());
 	std::memcpy(buffer, &_header, sizeof(_header));
 	buffer += sizeof(_header);
-	if (control_field_length == 1) {
-		*buffer = (uint8_t)control_field;
-		buffer++;
+	switch (type()) {
+		case LLC::UNNUMBERED:
+			std::memcpy(buffer, &(control_field.unnumbered), sizeof(un_control_field));
+			buffer += sizeof(un_control_field);
+			break;
+		case LLC::INFORMATION:
+			std::memcpy(buffer, &(control_field.info), sizeof(info_control_field));
+			buffer += sizeof(info_control_field);
+			break;
+		case LLC::SUPERVISORY:
+			std::memcpy(buffer, &(control_field.super), sizeof(super_control_field));
+			buffer += sizeof(super_control_field);
+			break;
 	}
-	else {
-		*((uint16_t*)buffer) = Utils::net_to_host_s(control_field);
-		buffer += 2;
-	}
+
 	for (list<pair<uint8_t, uint8_t*> >::iterator it = information_fields.begin(); it != information_fields.end(); it++) {
 		std::memcpy(buffer, it->second, it->first);
 		buffer += it->first;
