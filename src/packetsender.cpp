@@ -22,16 +22,15 @@
 #ifndef WIN32
     #include <sys/socket.h>
     #include <sys/select.h>
-    #include <sys/time.h>
     #include <arpa/inet.h>
     #include <unistd.h>
     #include <linux/if_ether.h>
     #include <linux/if_packet.h>
     #include <netdb.h>
 #endif
-#include <assert.h>
+#include <cassert>
 #include <errno.h>
-#include <string.h>
+#include <cstring>
 #include <ctime>
 #include "packetsender.h"
 
@@ -156,14 +155,38 @@ Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockad
             if(pdu->matches_response(buffer, size))
                 return pdu->clone_packet(buffer, size);
         }
-        struct timeval this_time;
+        struct timeval this_time, diff;
         gettimeofday(&this_time, 0);
-        if(end_time.tv_sec <= this_time.tv_sec && end_time.tv_usec <= this_time.tv_usec)
+        if(timeval_subtract(&diff, &this_time, &end_time)) {
             return 0;
-        timeout.tv_sec = end_time.tv_sec - this_time.tv_sec;
-        timeout.tv_usec = end_time.tv_usec;
+        }
+        timeout.tv_sec = diff.tv_sec;
+        timeout.tv_usec = diff.tv_usec;
     }
     return 0;
+}
+
+int Tins::PacketSender::timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y) {
+    /* Perform the carry for the later subtraction by updating y. */
+    if (x->tv_usec < y->tv_usec) {
+        int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
+        y->tv_usec -= 1000000 * nsec;
+        y->tv_sec += nsec;
+    }
+    
+    if (x->tv_usec - y->tv_usec > 1000000) {
+        int nsec = (x->tv_usec - y->tv_usec) / 1000000;
+        y->tv_usec += 1000000 * nsec;
+        y->tv_sec -= nsec;
+    }
+
+    /* Compute the time remaining to wait.
+    tv_usec is certainly positive. */
+    result->tv_sec = x->tv_sec - y->tv_sec;
+    result->tv_usec = x->tv_usec - y->tv_usec;
+
+    /* Return 1 if result is negative. */
+    return x->tv_sec < y->tv_sec;
 }
 
 int Tins::PacketSender::find_type(SocketType type) {

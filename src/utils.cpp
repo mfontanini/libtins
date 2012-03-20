@@ -23,7 +23,6 @@
 #include <sstream>
 #include <fstream>
 #include <stdexcept>
-#include <iostream> //borrame
 #include <cassert>
 #include <cstring>
 #ifndef WIN32
@@ -33,6 +32,8 @@
 #endif
 #include "utils.h"
 #include "pdu.h"
+#include "ip.h"
+#include "icmp.h"
 #include "arp.h"
 
 
@@ -185,6 +186,17 @@ uint32_t Tins::Utils::resolve_ip(const string &to_resolve) throw (std::runtime_e
     if(!data)
         throw std::runtime_error("Could not resolve IP");
     return Utils::net_to_host_l(((struct in_addr**)data->h_addr_list)[0]->s_addr);
+}
+
+Tins::PDU *Tins::Utils::ping_address(uint32_t ip, PacketSender *sender, uint32_t ip_src) {
+    ICMP *icmp = new ICMP(ICMP::ECHO_REQUEST);
+    if(!ip_src) {
+        std::string iface(Utils::interface_from_ip(ip));
+        if(!iface.size() || !Utils::interface_ip(iface, ip_src))
+            return 0;
+    }
+    IP ip_packet(ip, ip_src, icmp);
+    return sender->send_recv(&ip_packet);
 }
 
 bool Tins::Utils::resolve_hwaddr(const string &iface, uint32_t ip, uint8_t *buffer, PacketSender *sender) {

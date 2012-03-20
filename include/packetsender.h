@@ -29,6 +29,7 @@
 
 #ifndef WIN32
     #include <netinet/in.h>
+    #include <sys/time.h>
 #endif
 
 #include "pdu.h"
@@ -169,6 +170,7 @@ namespace Tins {
         typedef std::map<SocketType, int> SocketTypeMap;
 
         int find_type(SocketType type);
+        int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y);
         
         PDU *recv_match_loop(int sock, PDU *pdu, struct sockaddr* link_addr, socklen_t addrlen);
 

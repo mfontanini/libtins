@@ -78,6 +78,23 @@ namespace Tins {
          * \param to_resolve The domain name/ip address to resolve.
          */
         uint32_t resolve_ip(const std::string &to_resolve) throw (std::runtime_error);
+        
+        /**
+         * \brief Pings an ip address.
+         * 
+         * This function pings an IP address and returns the ICMP response.
+         * If no response is received, 0 is returned
+         * 
+         * \param ip The IP address to ping.
+         * \param sender The PacketSender that will send the ping request.
+         * \param ip_src The source IP address that will be used in the packet.
+         * If 0, or no parameter is provided, then that IP address is looked
+         * up using Utils::interface_ip.
+         * 
+         * \return PDU * containing either 0 if no response was received,
+         * or the ICMP response otherwise.
+         */
+        PDU *ping_address(uint32_t ip, PacketSender *sender, uint32_t ip_src = 0);
 
         /** \brief Resolves the hardware address for a given ip.
          *
