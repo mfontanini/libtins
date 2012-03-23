@@ -148,16 +148,18 @@ Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockad
     while(true) {
         FD_ZERO(&readfds);
         FD_SET(sock, &readfds);
-        if((read = select(sock + 1, &readfds, 0, 0, &timeout)) == -1)
+        if((read = select(sock + 1, &readfds, 0, 0, &timeout)) == -1) {
             return 0;
+        }
         if(FD_ISSET(sock, &readfds)) {
             ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);
-            if(pdu->matches_response(buffer, size))
+            if(pdu->matches_response(buffer, size)) {
                 return pdu->clone_packet(buffer, size);
+            }
         }
         struct timeval this_time, diff;
         gettimeofday(&this_time, 0);
-        if(timeval_subtract(&diff, &this_time, &end_time)) {
+        if(timeval_subtract(&diff, &end_time, &this_time)) {
             return 0;
         }
         timeout.tv_sec = diff.tv_sec;
