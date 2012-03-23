@@ -265,6 +265,20 @@ namespace Tins {
          */
         bool search_renewal_time(uint32_t *value);
         
+        /** 
+         * \brief Adds a rebind time option.
+         * \param time The lease rebind time.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_rebind_time(uint32_t time);
+        
+        /**
+         * \brief Searchs for a rebind time option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_rebind_time(uint32_t *value);
+        
         /**
          * \brief Adds a subnet mask option.
          * \param mask The subnet mask.
@@ -322,6 +336,20 @@ namespace Tins {
         bool search_broadcast_option(uint32_t *value);
         
         /** 
+         * \brief Adds a requested address option.
+         * \param addr The requested address.
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_requested_ip_option(uint32_t addr);
+        
+        /**
+         * \brief Searchs for a requested option.
+         * \param value A pointer in which the option's value will be stored.
+         * \return True if the option was found, false otherwise.
+         */
+        bool search_requested_ip_option(uint32_t *value);
+        
+        /** 
          * \brief Adds a domain name option.
          * \param name The domain name.
          * \return True if the option was added successfully. \sa DHCP::add_option
@@ -375,8 +403,8 @@ namespace Tins {
         }
         
         bool generic_search(Options opt, std::list<uint32_t> *container);
-        
         bool generic_search(Options opt, std::string *str);
+        bool generic_search(Options opt, uint32_t *value);
         
         uint8_t *serialize_list(const std::list<uint32_t> &int_list, uint32_t &sz);
         

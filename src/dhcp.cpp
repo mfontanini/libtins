@@ -127,11 +127,7 @@ bool Tins::DHCP::add_server_identifier(uint32_t ip) {
 }
 
 bool Tins::DHCP::search_server_identifier(uint32_t *value) {
-    if(generic_search(DHCP_SERVER_IDENTIFIER, value)) {
-        *value = Utils::net_to_host_l(*value);
-        return true;
-    }
-    return false;
+    return generic_search(DHCP_SERVER_IDENTIFIER, value);
 }
 
 bool Tins::DHCP::add_lease_time(uint32_t time) {
@@ -140,11 +136,7 @@ bool Tins::DHCP::add_lease_time(uint32_t time) {
 }
 
 bool Tins::DHCP::search_lease_time(uint32_t *value) {
-    if(generic_search(DHCP_LEASE_TIME, value)) {
-        *value = Utils::net_to_host_l(*value);
-        return true;
-    }
-    return false;
+    return generic_search(DHCP_LEASE_TIME, value);
 }
 
 bool Tins::DHCP::add_renewal_time(uint32_t time) {
@@ -153,14 +145,11 @@ bool Tins::DHCP::add_renewal_time(uint32_t time) {
 }
         
 bool Tins::DHCP::search_renewal_time(uint32_t *value) {
-    if(generic_search(DHCP_RENEWAL_TIME, value)) {
-        *value = Utils::net_to_host_l(*value);
-        return true;
-    }
-    return false;
+    return generic_search(DHCP_RENEWAL_TIME, value);
 }
 
 bool Tins::DHCP::add_subnet_mask(uint32_t mask) {
+    mask = Utils::net_to_host_l(mask);
     return add_option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask);
 }
 
@@ -193,11 +182,21 @@ bool Tins::DHCP::search_dns_option(std::list<uint32_t> *dns) {
 }
 
 bool Tins::DHCP::add_broadcast_option(uint32_t addr) {
-    return add_option(BROADCAST_ADDRESS, 4, (uint8_t*)&addr);
+    addr = Utils::net_to_host_l(addr);
+    return add_option(BROADCAST_ADDRESS, sizeof(uint32_t), (uint8_t*)&addr);
 }
 
 bool Tins::DHCP::search_broadcast_option(uint32_t *value) {
     return generic_search(BROADCAST_ADDRESS, value);
+}
+
+bool Tins::DHCP::add_requested_ip_option(uint32_t addr) {
+    addr = Utils::net_to_host_l(addr);
+    return add_option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), (uint8_t*)&addr);
+}
+
+bool Tins::DHCP::search_requested_ip_option(uint32_t *value) {
+    return generic_search(DHCP_REQUESTED_ADDRESS, value);
 }
 
 bool Tins::DHCP::add_domain_name(const string &name) {
@@ -206,6 +205,15 @@ bool Tins::DHCP::add_domain_name(const string &name) {
 
 bool Tins::DHCP::search_domain_name(std::string *value) {
     return generic_search(DOMAIN_NAME, value);
+}
+
+bool Tins::DHCP::add_rebind_time(uint32_t time) {
+    time = Utils::net_to_host_l(time);
+    return add_option(DHCP_REBINDING_TIME, sizeof(uint32_t), (uint8_t*)&time);
+}
+        
+bool Tins::DHCP::search_rebind_time(uint32_t *value) {
+    return generic_search(DHCP_REBINDING_TIME, value);
 }
 
 uint8_t *Tins::DHCP::serialize_list(const list<uint32_t> &int_list, uint32_t &sz) {
@@ -278,4 +286,12 @@ bool Tins::DHCP::generic_search(Options opt, std::string *str) {
         return false;
     *str = string((const char*)option->value, option->length);
     return true;
+}
+
+bool Tins::DHCP::generic_search(Options opt, uint32_t *value) {
+    if(generic_search<uint32_t>(opt, value)) {
+        *value = Utils::net_to_host_l(*value);
+        return true;
+    }
+    return false;
 }
