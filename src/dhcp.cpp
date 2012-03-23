@@ -122,11 +122,16 @@ bool Tins::DHCP::search_type_option(uint8_t *value) {
 }
 
 bool Tins::DHCP::add_server_identifier(uint32_t ip) {
+    ip = Utils::net_to_host_l(ip);
     return add_option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), (const uint8_t*)&ip);
 }
 
 bool Tins::DHCP::search_server_identifier(uint32_t *value) {
-    return generic_search(DHCP_SERVER_IDENTIFIER, value);
+    if(generic_search(DHCP_SERVER_IDENTIFIER, value)) {
+        *value = Utils::net_to_host_l(*value);
+        return true;
+    }
+    return false;
 }
 
 bool Tins::DHCP::add_lease_time(uint32_t time) {
@@ -207,7 +212,7 @@ uint8_t *Tins::DHCP::serialize_list(const list<uint32_t> &int_list, uint32_t &sz
     uint8_t *buffer = new uint8_t[int_list.size() * sizeof(uint32_t)];
     uint32_t *ptr = (uint32_t*)buffer;
     for(list<uint32_t>::const_iterator it = int_list.begin(); it != int_list.end(); ++it)
-        *(ptr++) = *it;
+        *(ptr++) = Utils::net_to_host_l(*it);
     sz = sizeof(uint32_t) * int_list.size();
     return buffer;
 }
