@@ -49,6 +49,7 @@ struct InterfaceCollector {
     }
 };
 
+/** \cond */
 struct IPv4Collector {
     uint32_t ip;
     bool found;
@@ -64,6 +65,7 @@ struct IPv4Collector {
     }
 };
 
+/** \cond */
 struct HWAddressCollector {
     uint8_t *result;
     bool found;
@@ -74,6 +76,30 @@ struct HWAddressCollector {
     void operator() (struct ifaddrs *addr) {
         if(!found && addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface)) {
             memcpy(result, ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr, 6);
+            found = true;
+        }
+    }
+};
+
+/** \cond */
+struct InterfaceInfoCollector {
+    Tins::Utils::InterfaceInfo *info;
+    const char *iface;
+    bool found;
+
+    InterfaceInfoCollector(Tins::Utils::InterfaceInfo *res, const char *interface) : 
+      info(res), iface(interface), found(false) { }
+
+    void operator() (struct ifaddrs *addr) {
+        if(addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface))
+            memcpy(info->hw_addr, ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr, sizeof(info->hw_addr));
+        else if(addr->ifa_addr->sa_family == AF_INET && !strcmp(addr->ifa_name, iface)) {
+            info->ip_addr = ((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr;
+            info->netmask = ((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr;
+            if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
+                info->bcast_addr = ((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr;
+            else
+                info->bcast_addr = 0;
             found = true;
         }
     }
@@ -281,6 +307,15 @@ bool Tins::Utils::interface_ip(const string &iface, uint32_t &ip) {
 bool Tins::Utils::interface_hwaddr(const string &iface, uint8_t *buffer) {
     HWAddressCollector collector(buffer, iface.c_str());
     generic_iface_loop(collector);
+    return collector.found;
+}
+
+bool Tins::Utils::interface_info(const string &iface, InterfaceInfo &info) {
+    InterfaceInfoCollector collector(&info, iface.c_str());
+    generic_iface_loop(collector);
+    info.ip_addr = net_to_host_l(info.ip_addr);
+    info.netmask = net_to_host_l(info.netmask);
+    info.bcast_addr = net_to_host_l(info.bcast_addr);
     return collector.found;
 }
 

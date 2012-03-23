@@ -40,6 +40,14 @@ namespace Tins {
      * conversions, interface listing, etc.
      */
     namespace Utils {
+        /**
+         * \brief Struct that represents an interface's information.
+         */
+        struct InterfaceInfo {
+            uint32_t ip_addr, netmask, bcast_addr;
+            uint8_t hw_addr[6];
+        };
+        
         /** \brief Convert a dotted-ip-notation string to an integer.
          *
          * \param ip A dotted ip notation string
@@ -121,8 +129,23 @@ namespace Tins {
          * If the lookup fails, false will be returned, true otherwise.
          * \param iface The interface from which to extract the ip address.
          * \param ip The ip address found will be returned in this param.
+         * 
+         * \return bool indicating wether the operation was successfull.
          */
         bool interface_ip(const std::string &iface, uint32_t &ip);
+        
+        /**
+         * \brief Lookup the ip/hw/netmask/broadcast address of the 
+         * given interface.
+         *
+         * If the lookup fails, false will be returned, true otherwise.
+         * \param iface The interface from which to extract the ip address.
+         * \param info The InterfaceInfo in which the information will
+         * be stored.
+         * 
+         * \return bool indicating wether the operation was successfull.
+         */
+        bool interface_info(const std::string &iface, InterfaceInfo &info);
 
         /**
          * \brief Lookup the hardware address of the given interface.
@@ -131,6 +154,8 @@ namespace Tins {
          * \param iface The interface from which to extract the hardware address.
          * \param buffer The hw address will be stored in this buffer. It must
          * be at least 6 bytes long.
+         * 
+         * \return bool indicating wether the operation was successfull.
          */
         bool interface_hwaddr(const std::string &iface, uint8_t *buffer);
 
@@ -140,6 +165,8 @@ namespace Tins {
          * If the lookup fails, false will be returned, true otherwise.
          * \param iface The interface from which to extract the identifier.
          * \param id The interface id will be returned in this parameter.
+         * 
+         * \return bool indicating wether the operation was successfull.
          */
         bool interface_id(const std::string &iface, uint32_t &id);
 
