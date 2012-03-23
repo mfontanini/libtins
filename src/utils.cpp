@@ -241,6 +241,29 @@ string Tins::Utils::interface_from_ip(uint32_t ip) {
     return "";
 }
 
+bool Tins::Utils::gateway_from_ip(uint32_t ip, uint32_t &gw_addr) {
+    ifstream input("/proc/net/route");
+    bool match(false);
+    string iface;
+    string destination, mask;
+    uint32_t destination_int, mask_int;
+    ip = Utils::net_to_host_l(ip);
+    skip_line(input);
+    while(!match) {
+        input >> iface >> destination;
+        for(unsigned i(0); i < 6; ++i)
+            input >> mask;
+        from_hex(destination, destination_int);
+        from_hex(mask, mask_int);
+        if((ip & mask_int) == destination_int) {
+            gw_addr = destination_int;
+            return true;
+        }
+        skip_line(input);
+    }
+    return false;
+}
+
 set<string> Tins::Utils::network_interfaces() {
     InterfaceCollector collector;
     generic_iface_loop(collector);

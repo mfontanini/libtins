@@ -152,6 +152,20 @@ namespace Tins {
          * \return The interface's name.
          */
         std::string interface_from_ip(uint32_t ip);
+        
+        /**
+         * \brief Finds the gateway's IP address for the given IP 
+         * address.
+         * 
+         * \param ip The IP address for which the default gateway will
+         * be searched.
+         * \param gw_addr This parameter will contain the gateway's IP
+         * address in case it is found.
+         * 
+         * \return bool indicating wether the lookup was successfull.
+         */
+        bool gateway_from_ip(uint32_t ip, uint32_t &gw_addr) ;
+        
 
         /** \brief Convert 16 bit integer into network byte order.
          *
