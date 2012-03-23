@@ -245,18 +245,19 @@ bool Tins::Utils::gateway_from_ip(uint32_t ip, uint32_t &gw_addr) {
     ifstream input("/proc/net/route");
     bool match(false);
     string iface;
-    string destination, mask;
+    string destination, mask, gw;
     uint32_t destination_int, mask_int;
     ip = Utils::net_to_host_l(ip);
     skip_line(input);
     while(!match) {
-        input >> iface >> destination;
-        for(unsigned i(0); i < 6; ++i)
+        input >> iface >> destination >> gw;
+        for(unsigned i(0); i < 5; ++i)
             input >> mask;
         from_hex(destination, destination_int);
         from_hex(mask, mask_int);
         if((ip & mask_int) == destination_int) {
-            gw_addr = destination_int;
+            from_hex(gw, gw_addr);
+            gw_addr = net_to_host_l(gw_addr);
             return true;
         }
         skip_line(input);
