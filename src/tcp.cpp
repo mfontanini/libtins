@@ -71,17 +71,23 @@ Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PR
                 }
                 // We don't want to store NOPs and EOLs
                 if(args[0] != NOP && args[0] != EOL)  {
-                    args[1] -= (sizeof(uint8_t) << 1);
                     // Not enough size for this option
+                    args[1] -= (sizeof(uint8_t) << 1);
                     if(header_end - index < args[1])
-                        throw std::runtime_error("Not enough size for a TCP header in the buffer.");
-                    add_option((Option)args[0], args[1], buffer + index);
+                        throw std::runtime_error("Not enough size for a TCP header in the buffer.");                        
+                    if(args[1])
+                        add_option((Option)args[0], args[1], buffer + index);
+                    else
+                        add_option((Option)args[0], args[1], 0);
                     index += args[1];
                 }
                 else if(args[0] == EOL)
                     index = header_end;
-                else // Skip the NOP
+                else {
+                    add_option((Option)args[0], 0, 0);
+                    // Skip the NOP
                     args[0] = 0;
+                }
             }
             buffer += index;
             total_sz -= index;
@@ -278,12 +284,18 @@ void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
 
 void Tins::TCP::add_option(Option tcp_option, uint8_t length, const uint8_t *data) {
     uint8_t *new_data = 0, padding;
-    if(length) {
+    if(data && length) {
         new_data = new uint8_t[length];
         memcpy(new_data, data, length);
     }
     _options.push_back(TCPOption(tcp_option, length, new_data));
-    _options_size += length + (sizeof(uint8_t) << 1);
+    
+    _options_size += sizeof(uint8_t);
+    if(length)
+        _options_size += sizeof(uint8_t);
+    if(data)
+        _options_size += length;
+        
     padding = _options_size & 3;
     _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
 }
