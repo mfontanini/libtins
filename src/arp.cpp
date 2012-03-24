@@ -57,6 +57,10 @@ Tins::ARP::ARP(const uint8_t *buffer, uint32_t total_sz) : PDU(Utils::net_to_hos
         inner_pdu(new RawPDU(buffer + sizeof(arphdr), total_sz));
 }
 
+Tins::ARP::ARP(const ARP &other) : PDU(other) {
+    copy_fields(&other);
+}
+
 void Tins::ARP::sender_hw_addr(const uint8_t* new_snd_hw_addr) {
     memcpy(this->_arp.ar_sha, new_snd_hw_addr, 6); //Should this use hardware address' length?
 }
@@ -208,6 +212,7 @@ Tins::PDU* Tins::ARP::make_arp_reply(const string& iface,
 Tins::PDU *Tins::ARP::clone_pdu() const {
     ARP *new_pdu = new ARP();
     new_pdu->copy_fields(this);
+    new_pdu->copy_inner_pdu(*this);
     return new_pdu;
 }
 

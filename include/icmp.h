@@ -66,6 +66,13 @@ namespace Tins {
         ICMP(const uint8_t *buffer, uint32_t total_sz);
         
         /**
+         * \brief Copy constructor
+         * 
+         * \param other The object which will be copied.
+         */
+        ICMP(const ICMP &other);
+        
+        /**
          * \brief Sets the code field.
          *
          * \param new_code The code which will be stored in the ICMP struct.

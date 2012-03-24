@@ -59,6 +59,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         ARP(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief Copy constructor
+         * 
+         * \param other The object which will be copied.
+         */
+        ARP(const ARP &other);
 
         /* Getters */
         /**

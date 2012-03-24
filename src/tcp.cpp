@@ -373,6 +373,7 @@ void Tins::TCP::copy_fields(const TCP *other) {
 Tins::PDU *Tins::TCP::clone_pdu() const {
     TCP *new_pdu = new TCP();
     new_pdu->copy_fields(this);
+    new_pdu->copy_inner_pdu(*this);
     return new_pdu;
 }
 

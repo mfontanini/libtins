@@ -56,6 +56,10 @@ Tins::EthernetII::EthernetII(uint32_t iface_index, const uint8_t* dst_hw_addr, c
     this->_eth.payload_type = 0;
 }
 
+Tins::EthernetII::EthernetII(const EthernetII &other) : PDU(other) {
+    copy_fields(&other);
+}
+
 Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP) {
     if(total_sz < sizeof(ethhdr))
         throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
@@ -184,5 +188,6 @@ void Tins::EthernetII::copy_fields(const EthernetII *other) {
 Tins::PDU *Tins::EthernetII::clone_pdu() const {
     EthernetII *new_pdu = new EthernetII(_iface_index);
     new_pdu->copy_fields(this);
+    new_pdu->copy_inner_pdu(*this);
     return new_pdu;
 }

@@ -96,5 +96,6 @@ void Tins::UDP::copy_fields(const UDP *other) {
 Tins::PDU *Tins::UDP::clone_pdu() const {
     UDP *new_pdu = new UDP();
     new_pdu->copy_fields(this);
+    new_pdu->copy_inner_pdu(*this);
     return new_pdu;
 }

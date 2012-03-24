@@ -395,5 +395,6 @@ void Tins::IP::copy_fields(const IP *other) {
 Tins::PDU *Tins::IP::clone_pdu() const {
     IP *new_pdu = new IP();
     new_pdu->copy_fields(this);
+    new_pdu->copy_inner_pdu(*this);
     return new_pdu;
 }

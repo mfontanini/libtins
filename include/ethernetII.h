@@ -80,6 +80,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         EthernetII(const uint8_t *buffer, uint32_t total_sz);
+        
+        /**
+         * \brief EthernetII copy constructor.
+         * 
+         * \param other The packet which will be copied.
+         */
+        EthernetII(const EthernetII &other);
 
         /* Getters */
         /**
