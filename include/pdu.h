@@ -87,7 +87,8 @@ namespace Tins {
             DHCP,
             EAPOL,
             RC4EAPOL,
-            RSNEAPOL
+            RSNEAPOL,
+            DNS
         };
 
         /** \brief PDU constructor
