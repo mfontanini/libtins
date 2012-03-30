@@ -19,11 +19,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <cstring>
 #include <iostream> //borrame
+#include <utility>
 #include <cassert>
 #include "dns.h"
-#include "utils.h"
 
 using std::string;
 using std::list;
@@ -130,15 +129,14 @@ Tins::DNS::ResourceRecord *Tins::DNS::make_record(const std::string &name, Query
     parse_domain_name(name, nm);
     uint16_t index = find_domain_name(nm);
     ResourceRecord *res;
+    ip = Utils::net_to_host_l(ip);
     if(index)
-        res = new OffsetedResourceRecord(Utils::net_to_host_s(index));
+        res = new OffsetedResourceRecord<4>(Utils::net_to_host_s(index), (uint8_t*)&ip);
     else
-        res = new NamedResourceRecord(nm);
+        res = new NamedResourceRecord<4>(nm, (uint8_t*)&ip);
     res->info.type = Utils::net_to_host_s(type);
     res->info.qclass = Utils::net_to_host_s(qclass);
     res->info.ttl = Utils::net_to_host_l(ttl);
-    res->info.dlen = Utils::net_to_host_s(sizeof(uint32_t));
-    res->info.data = Utils::net_to_host_l(ip);
     extra_size += res->size();
     return res;
 }
@@ -159,10 +157,8 @@ uint32_t Tins::DNS::find_domain_name(const std::string &dname) {
 
 bool Tins::DNS::find_domain_name(const std::string &dname, const std::list<ResourceRecord*> &lst, uint16_t &out) {
     list<ResourceRecord*>::const_iterator it(lst.begin());
-    NamedResourceRecord *named;
     while(it != lst.end()) {
-        named = dynamic_cast<NamedResourceRecord*>(*it);
-        if(named && named->name == dname)
+        if((*it)->matches(dname))
             break;
         out += (*it)->size();
         ++it;
@@ -170,7 +166,7 @@ bool Tins::DNS::find_domain_name(const std::string &dname, const std::list<Resou
     return it != lst.end();
 }
 
-void Tins::DNS::parse_domain_name(const std::string &dn, std::string &out) {
+void Tins::DNS::parse_domain_name(const std::string &dn, std::string &out) const {
     size_t last_index(0), index;
     while((index = dn.find('.', last_index+1)) != string::npos) {
         out.push_back(index - last_index);
@@ -179,6 +175,22 @@ void Tins::DNS::parse_domain_name(const std::string &dn, std::string &out) {
     }
     out.push_back(dn.size() - last_index);
     out.append(dn.begin() + last_index, dn.end());
+}
+
+void Tins::DNS::unparse_domain_name(const std::string &dn, std::string &out) const {
+    if(dn.size()) {
+        uint32_t index(1), len(dn[0]);
+        while(index + len < dn.size() && len) {
+            out.append(dn.begin() + index, dn.begin() + index + len);
+            out.push_back('.');
+            index += len;
+            if(index < dn.size() - 1)
+                len = dn[index];
+            index++;
+        }
+        if(index < dn.size())
+            out.append(dn.begin() + index, dn.end());
+    }
 }
 
 void Tins::DNS::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
@@ -204,19 +216,111 @@ uint8_t *Tins::DNS::serialize_list(const std::list<ResourceRecord*> &lst, uint8_
     return buffer;
 }
 
-uint32_t Tins::DNS::ResourceRecord::write(uint8_t *buffer) const {
-    uint32_t sz(do_write(buffer));
-    buffer += sz;
-    std::memcpy(buffer, &info, sizeof(info));
-    return sz + sizeof(info);
+void Tins::DNS::build_suffix_map(uint32_t index, const uint8_t *data, uint32_t sz) {
+    uint32_t i(0), suff_sz(data[0]);
+    while(i + suff_sz + 1 < sz && suff_sz) {
+        i++;
+        suffixes.insert(std::make_pair(index + i - 1, string(data + i, data + i + suff_sz)));
+        i += suff_sz;
+        if(i < sz)
+            suff_sz = data[i];
+    }
 }
 
-uint32_t Tins::DNS::OffsetedResourceRecord::do_write(uint8_t *buffer) const {
-    std::memcpy(buffer, &offset, sizeof(offset));
-    return sizeof(offset);
+uint32_t Tins::DNS::build_suffix_map(uint32_t index, const list<ResourceRecord*> &lst) {
+    const string *str;
+    for(list<ResourceRecord*>::const_iterator it(lst.begin()); it != lst.end(); ++it) {
+        str = (*it)->dname_pointer();
+        if(str) {
+            build_suffix_map(index, (uint8_t*)str->c_str(), str->size());
+            index += str->size() + 1;
+        }
+        else
+            index += sizeof(uint16_t);
+        index += sizeof(ResourceRecord::Info);
+        uint32_t sz((*it)->data_size());
+        if(sz > 4)
+           build_suffix_map(index, (*it)->data_pointer(), sz);
+        index += sz;
+    }
+    return index;
 }
 
-uint32_t Tins::DNS::NamedResourceRecord::do_write(uint8_t *buffer) const {
-    std::memcpy(buffer, name.c_str(), name.size() + 1);
-    return name.size() + 1;
+
+uint32_t Tins::DNS::build_suffix_map(uint32_t index, const list<Query> &lst) {
+    for(list<Query>::const_iterator it(lst.begin()); it != lst.end(); ++it) {
+        build_suffix_map(index, (uint8_t*)it->name.c_str(), it->name.size());
+        index += it->name.size() + 1 + (sizeof(uint16_t) << 1);
+    }
+    return index;
 }
+
+void Tins::DNS::build_suffix_map() {
+    uint32_t index(sizeof(dnshdr));
+    index = build_suffix_map(index, queries);
+    index = build_suffix_map(index, ans);
+    index = build_suffix_map(index, arity);
+    build_suffix_map(index, addit);
+}
+
+void Tins::DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
+    uint32_t i(0);
+    while(i < sz) {
+        if(i)
+            out.push_back('.');
+        
+        if(ptr[i] & 0xc0) {
+            uint16_t index = Utils::net_to_host_s(*((uint16_t*)ptr));
+            SuffixMap::iterator it(suffixes.find(index));
+            if(it == suffixes.end())
+                std::cout << "Could not find " << ptr + i << "\n";
+            else
+                out += it->second;
+            i += 2;
+        }
+        else {
+            uint8_t suff_sz(ptr[i]);
+            i++;
+            if(i + suff_sz < sz)
+                out.append(ptr + i, ptr + i + suff_sz);
+            i += suff_sz;
+        }
+    }
+}
+
+void Tins::DNS::convert_resources(const std::list<ResourceRecord*> &lst, std::list<Resource> &res) {
+    if(!suffixes.size())
+        build_suffix_map();
+    const string *str_ptr;
+    const uint8_t *ptr;
+    uint32_t sz;
+    for(list<ResourceRecord*>::const_iterator it(lst.begin()); it != lst.end(); ++it) {
+        string dname, addr;
+        if((str_ptr = (*it)->dname_pointer()))
+            compose_name(reinterpret_cast<const uint8_t*>(str_ptr->c_str()), str_ptr->size(), dname);
+        ptr = (*it)->data_pointer();
+        sz = (*it)->data_size();
+        if(sz == 4)
+            addr = Utils::ip_to_string(*(uint32_t*)ptr);
+        else 
+            compose_name(ptr, sz, addr);
+        res.push_back(Resource(dname, addr, (*it)->info.type, (*it)->info.qclass, (*it)->info.ttl));
+    }
+}
+
+list<Tins::DNS::Query> Tins::DNS::dns_queries() const { 
+    list<Query> output;
+    for(std::list<Query>::const_iterator it(queries.begin()); it != queries.end(); ++it) {
+        string dn;
+        unparse_domain_name(it->name, dn);
+        output.push_back(Query(dn, it->type, it->qclass));
+    }
+    return output;
+}
+
+list<Tins::DNS::Resource> Tins::DNS::dns_answers() {
+    list<Resource> res;
+    convert_resources(ans, res);
+    return res;
+}
+

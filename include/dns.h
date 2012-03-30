@@ -24,8 +24,11 @@
 
 #include <stdint.h>
 #include <list>
+#include <cstring>
 #include <string>
+#include <map>
 #include "pdu.h"
+#include "utils.h"
 
 namespace Tins {
     class DNS : public PDU {
@@ -97,6 +100,30 @@ namespace Tins {
             CH = 3,
             HS = 4,
             ANY = 255
+        };
+        
+        /**
+         * \brief Struct that represent DNS queries.
+         */
+        struct Query {
+            std::string name;
+            uint16_t type, qclass;
+            
+            Query(const std::string &nm, uint16_t t, uint16_t c) :
+                name(nm), type(t), qclass(c) {}
+        };
+        
+        /**
+         * \brief Struct that represent DNS resource records.
+         */
+        struct Resource {
+            std::string dname, addr;
+            uint16_t type, qclass;
+            uint32_t ttl;
+            
+            Resource(const std::string &nm, const std::string &ad, 
+                     uint16_t t, uint16_t c, uint32_t tt) :
+                dname(nm), addr(ad), type(t), qclass(c), ttl(tt) {}
         };
         
         /**
@@ -201,28 +228,28 @@ namespace Tins {
          * 
          * \return uint16_t containing the value of the questions field.
          */
-        uint16_t questions() { return dns.questions; }
+        uint16_t questions() { return Utils::net_to_host_s(dns.questions); }
         
         /**
          * \brief Setter for the answers field.
          * 
          * \return uint16_t containing the value of the answers field.
          */
-        uint16_t answers() { return dns.answers; }
+        uint16_t answers() { return Utils::net_to_host_s(dns.answers); }
         
         /**
          * \brief Setter for the authority field.
          * 
          * \return uint16_t containing the value of the authority field.
          */
-        uint16_t authority() { return dns.authority; }
+        uint16_t authority() { return Utils::net_to_host_s(dns.authority); }
         
         /**
          * \brief Setter for the additional field.
          * 
          * \return uint16_t containing the value of the additional field.
          */
-        uint16_t additional() { return dns.additional; }
+        uint16_t additional() { return Utils::net_to_host_s(dns.additional); }
 
         /**
          * \brief Getter for the PDU's type.
@@ -365,6 +392,21 @@ namespace Tins {
          */
         void add_additional(const std::string &name, QueryType type, QueryClass qclass,
                         uint32_t ttl, uint32_t ip);
+                        
+        
+        /**
+         * \brief Getter for this PDU's DNS queries.
+         * \return std::list<Query> containing the queries in this
+         * record.
+         */
+        std::list<Query> dns_queries() const;
+        
+        /**
+         * \brief Getter for this PDU's DNS answers
+         * \return std::list<Resource> containing the answers in this
+         * record.
+         */
+        std::list<Resource> dns_answers();
     private:
         struct dnshdr {
             uint16_t id;
@@ -383,58 +425,104 @@ namespace Tins {
                      authority, additional;
         } __attribute__((packed));
         
-        struct Query {
-            std::string name;
-            uint16_t type, qclass;
-            
-            Query(const std::string &nm, uint16_t t, uint16_t c) :
-                name(nm), type(t), qclass(c) {}
-        };
-        
         struct ResourceRecord {
-            struct {
+            struct Info {
                 uint16_t type, qclass;
                 uint32_t ttl;
-                uint16_t dlen;
-                uint32_t data;
             } __attribute__((packed)) info;
             
             virtual ~ResourceRecord() {}
-            uint32_t write(uint8_t *buffer) const;
+            virtual uint32_t write(uint8_t *buffer) const = 0;
             virtual uint32_t do_write(uint8_t *buffer) const = 0;
             virtual uint32_t size() const = 0;
+            virtual bool matches(const std::string &dname) { return false; }
+            virtual uint32_t data_size() const = 0;
+            virtual const uint8_t *data_pointer() const = 0;
+            virtual const std::string *dname_pointer() const { return 0; }
         };
         
-        struct OffsetedResourceRecord : public ResourceRecord {
+        template<unsigned S> struct SizedResourceRecord : public ResourceRecord {
+            uint8_t data[S];
+            
+            SizedResourceRecord(uint8_t *d) {
+                std::memcpy(data, d, S);
+            }
+            
+            uint32_t write(uint8_t *buffer) const {
+                uint32_t sz(do_write(buffer));
+                buffer += sz;
+                std::memcpy(buffer, &info, sizeof(info));
+                buffer += sizeof(info);
+                *((uint16_t*)buffer) = Utils::net_to_host_s(S);
+                buffer += sizeof(uint16_t);
+                std::memcpy(buffer, data, S);
+                return sz + sizeof(info) + sizeof(uint16_t) + S;
+            }
+            
+            uint32_t data_size() const {
+                return S;
+            }
+            
+            const uint8_t *data_pointer() const {
+                return data;
+            }
+        };
+        
+        template<unsigned S> struct OffsetedResourceRecord : public SizedResourceRecord<S> {
             uint16_t offset;
             
-            OffsetedResourceRecord(uint16_t off) : offset(off | 0xc0) {}
+            OffsetedResourceRecord(uint16_t off, uint8_t *data) : SizedResourceRecord<S>(data), offset(off | 0xc0) {}
             
-            uint32_t do_write(uint8_t *buffer) const;
-            uint32_t size() const { return sizeof(info) + sizeof(offset); }
+            uint32_t do_write(uint8_t *buffer) const {
+                std::memcpy(buffer, &offset, sizeof(offset));
+                return sizeof(offset);
+            }
+            uint32_t size() const { return sizeof(ResourceRecord::info) + sizeof(offset) + S + sizeof(uint16_t); }
         };
         
-        struct NamedResourceRecord : public ResourceRecord {
+        template<unsigned S> struct NamedResourceRecord : public SizedResourceRecord<S> {
             std::string name;
             
-            NamedResourceRecord(const std::string &nm) : name(nm) {}
+            NamedResourceRecord(const std::string &nm,  uint8_t *data) : SizedResourceRecord<S>(data), name(nm) {}
             
-            uint32_t do_write(uint8_t *buffer) const;
-            uint32_t size() const { return sizeof(info) + name.size() + 1; }
+            uint32_t do_write(uint8_t *buffer) const {
+                std::memcpy(buffer, name.c_str(), name.size() + 1);
+                return name.size() + 1;
+            }
+            
+            uint32_t size() const { return sizeof(ResourceRecord::info) + name.size() + 1 + S + sizeof(uint16_t); }
+            
+            bool matches(const std::string &dname) { 
+                return dname == name; 
+            }
+            
+            const std::string *dname_pointer() const {
+                return &name;
+            }
         };
+        
+        typedef std::map<uint16_t, std::string> SuffixMap;
         
         uint32_t find_domain_name(const std::string &dname);
         bool find_domain_name(const std::string &dname, const std::list<ResourceRecord*> &lst, uint16_t &out);
-        void parse_domain_name(const std::string &dn, std::string &out);
+        void parse_domain_name(const std::string &dn, std::string &out) const;
+        void unparse_domain_name(const std::string &dn, std::string &out) const;
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         void free_list(std::list<ResourceRecord*> &lst);
         uint8_t *serialize_list(const std::list<ResourceRecord*> &lst, uint8_t *buffer) const;
+        void compose_name(const uint8_t *ptr, uint32_t sz, std::string &out);
+        void convert_resources(const std::list<ResourceRecord*> &lst, std::list<Resource> &res);
         ResourceRecord *make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip);
+        void build_suffix_map(uint32_t index, const uint8_t *data, uint32_t sz);
+        uint32_t build_suffix_map(uint32_t index, const std::list<ResourceRecord*> &lst);
+        uint32_t build_suffix_map(uint32_t index, const std::list<Query> &lst);
+        void build_suffix_map();
         
         dnshdr dns;
         uint32_t extra_size;
         std::list<Query> queries;
         std::list<ResourceRecord*> ans, arity, addit;
+        SuffixMap suffixes;
     };
 };
 
