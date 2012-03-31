@@ -53,7 +53,7 @@ namespace Tins {
         ARP(uint32_t target_ip = 0, uint32_t sender_ip = 0, const uint8_t *target_hw = 0, const uint8_t *sender_hw = 0);
 
         /**
-         * \brief Constructor which creates an TCP object from a buffer and adds all identifiable
+         * \brief Constructor which creates an ARP object from a buffer and adds all identifiable
          * PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
