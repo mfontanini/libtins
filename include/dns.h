@@ -145,6 +145,13 @@ namespace Tins {
         DNS(const uint8_t *buffer, uint32_t total_sz);
         
         /**
+         * \brief Copy constructor.
+         * 
+         * \param other The DNS object to be copied.
+         */
+        DNS(const DNS &other);
+        
+        /**
          * \brief Destructor.
          */
         ~DNS();
@@ -369,6 +376,13 @@ namespace Tins {
         void add_query(const std::string &name, QueryType type, QueryClass qclass);
         
         /**
+         * \brief Add a query to perform.
+         * 
+         * \param query The query to be added.
+         */
+        void add_query(const Query &query);
+        
+        /**
          * \brief Add a query response.
          * 
          * \param name The resolved name.
@@ -379,6 +393,31 @@ namespace Tins {
          */
         void add_answer(const std::string &name, QueryType type, QueryClass qclass,
                         uint32_t ttl, uint32_t ip);
+                        
+        /**
+         * \brief Add a query response.
+         * 
+         * \param name The resolved name.
+         * \param type The type of this answer.
+         * \param qclass The class of this answer.
+         * \param ttl The time-to-live of this answer.
+         * \param dname The domain of the resolved name.
+         */
+        void add_answer(const std::string &name, QueryType type, QueryClass qclass,
+                        uint32_t ttl, const std::string &dname);
+                        
+        /**
+         * \brief Add a query response.
+         * 
+         * \param name The resolved name.
+         * \param type The type of this answer.
+         * \param qclass The class of this answer.
+         * \param ttl The time-to-live of this answer.
+         * \param data The data of this option.
+         * \param sz The size of the data.
+         */
+        void add_answer(const std::string &name, QueryType type, QueryClass qclass,
+                        uint32_t ttl, const uint8_t *data, uint32_t sz);
         
         /**
          * \brief Add an authority record.
@@ -387,10 +426,11 @@ namespace Tins {
          * \param type The type of this record.
          * \param qclass The class of this record.
          * \param ttl The time-to-live of this record.
-         * \param ip The ip address of the resolved name.
+         * \param data The data of this option.
+         * \param sz The size of the data.
          */
         void add_authority(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, uint32_t ip);
+                        uint32_t ttl, const uint8_t *data, uint32_t sz);
         
         /**
          * \brief Add an additional record.
@@ -418,6 +458,13 @@ namespace Tins {
          * record.
          */
         std::list<Resource> dns_answers();
+        
+        /**
+         * \brief Clones this PDU.
+         *
+         * \sa PDU::clone_pdu
+         */
+        PDU *clone_pdu() const;
     private:
         struct dnshdr {
             uint16_t id;
@@ -445,22 +492,17 @@ namespace Tins {
             uint8_t *data;
             uint16_t data_sz;
             
-            ResourceRecord(uint8_t *d = 0, uint16_t len = 0) : data_sz(len) {
-                if(d)
+            ResourceRecord(const uint8_t *d = 0, uint16_t len = 0) : data_sz(len) {
+                if(d && len) {
+                    data = new uint8_t[len];
                     std::memcpy(data, d, data_sz);
+                }
             }
             
             virtual ~ResourceRecord() {}
-            uint32_t write(uint8_t *buffer) const {
-                uint32_t sz(do_write(buffer));
-                buffer += sz;
-                std::memcpy(buffer, &info, sizeof(info));
-                buffer += sizeof(info);
-                *((uint16_t*)buffer) = Utils::net_to_host_s(data_sz);
-                buffer += sizeof(uint16_t);
-                std::memcpy(buffer, data, data_sz);
-                return sz + sizeof(info) + sizeof(uint16_t) + data_sz;
-            }
+            virtual ResourceRecord *clone() const = 0;
+            void copy_fields(ResourceRecord *other) const;
+            uint32_t write(uint8_t *buffer) const;
             virtual uint32_t do_write(uint8_t *buffer) const = 0;
             virtual uint32_t size() const = 0;
             virtual bool matches(const std::string &dname) { return false; }
@@ -476,19 +518,20 @@ namespace Tins {
         struct OffsetedResourceRecord : public ResourceRecord {
             uint16_t offset;
             
-            OffsetedResourceRecord(uint16_t off, uint8_t *data = 0, uint16_t len = 0) : ResourceRecord(data,len), offset(off | 0xc0) {}
+            OffsetedResourceRecord(uint16_t off, const uint8_t *data = 0, uint16_t len = 0) : ResourceRecord(data,len), offset(off | 0xc0) {}
             
             uint32_t do_write(uint8_t *buffer) const {
                 std::memcpy(buffer, &offset, sizeof(offset));
                 return sizeof(offset);
             }
             uint32_t size() const { return sizeof(ResourceRecord::info) + sizeof(offset) + data_sz + sizeof(uint16_t); }
+            ResourceRecord *clone() const;
         };
         
         struct NamedResourceRecord : public ResourceRecord {
             std::string name;
             
-            NamedResourceRecord(const std::string &nm,  uint8_t *data = 0, uint16_t len = 0) : ResourceRecord(data,len), name(nm) {}
+            NamedResourceRecord(const std::string &nm,  const uint8_t *data = 0, uint16_t len = 0) : ResourceRecord(data,len), name(nm) {}
             
             uint32_t do_write(uint8_t *buffer) const {
                 std::memcpy(buffer, name.c_str(), name.size() + 1);
@@ -504,9 +547,11 @@ namespace Tins {
             const std::string *dname_pointer() const {
                 return &name;
             }
+            ResourceRecord *clone() const;
         };
         
         typedef std::map<uint16_t, std::string> SuffixMap;
+        typedef std::map<uint16_t, uint16_t> SuffixIndices;
         
         const uint8_t *build_resource_list(std::list<ResourceRecord*> &lst, const uint8_t *ptr, uint32_t &sz, uint16_t nrecs);
         uint32_t find_domain_name(const std::string &dname);
@@ -519,17 +564,24 @@ namespace Tins {
         void compose_name(const uint8_t *ptr, uint32_t sz, std::string &out);
         void convert_resources(const std::list<ResourceRecord*> &lst, std::list<Resource> &res);
         ResourceRecord *make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip);
+        ResourceRecord *make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const std::string &dname);
+        ResourceRecord *make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const uint8_t *ptr, uint32_t len);
         void add_suffix(uint32_t index, const uint8_t *data, uint32_t sz);
         uint32_t build_suffix_map(uint32_t index, const std::list<ResourceRecord*> &lst);
         uint32_t build_suffix_map(uint32_t index, const std::list<Query> &lst);
         void build_suffix_map();
+        void copy_list(const std::list<ResourceRecord*> &from, std::list<ResourceRecord*> &to) const;
+        
+        void copy_fields(const DNS *other);
         
         dnshdr dns;
         uint32_t extra_size;
         std::list<Query> queries;
         std::list<ResourceRecord*> ans, arity, addit;
         SuffixMap suffixes;
+        SuffixIndices suffix_indices;
     };
 };
 
 #endif // __DNS_H
+
