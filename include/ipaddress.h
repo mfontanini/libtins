@@ -1,0 +1,49 @@
+/*
+ * libtins is a net packet wrapper library for crafting and
+ * interpreting sniffed packets.
+ *
+ * Copyright (C) 2011 Nasel
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+#ifndef TINS_IPADDRESS_H
+#define TINS_IPADDRESS_H
+
+#include <string>
+#include <iostream>
+#include <stdint.h>
+#include "utils.h"
+
+namespace Tins {
+    class IPv4Address {
+    public:
+        IPv4Address(uint32_t ip = 0) : ip_addr(ip) {}
+        IPv4Address(const std::string &ip) : ip_addr(Utils::ip_to_int(ip)) {}
+        
+        operator uint32_t() const { return Utils::net_to_host_l(ip_addr); }
+        operator std::string() const { return Utils::ip_to_string(ip_addr); } 
+        
+        friend std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
+            return output << (std::string)addr;
+        }
+    private:
+        uint32_t ip_addr;
+    };
+    
+};
+
+
+#endif // TINS_IPADDRESS_H

@@ -3,6 +3,7 @@
 #include <string>
 #include <stdint.h>
 #include "ip.h"
+#include "ipaddress.h"
 #include "utils.h"
 
 using namespace std;
@@ -32,8 +33,8 @@ TEST_F(IPTest, DefaultConstructor) {
 
 TEST_F(IPTest, IPIntConstructor) {
     IP ip(0x23abcdef, 0xff1443ab);
-    EXPECT_EQ(ip.dst_addr(), 0x23abcdef);
-    EXPECT_EQ(ip.src_addr(), 0xff1443ab);
+    EXPECT_EQ(ip.dst_addr(), IPv4Address(0x23abcdef));
+    EXPECT_EQ(ip.src_addr(), IPv4Address(0xff1443ab));
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
 }
@@ -41,8 +42,8 @@ TEST_F(IPTest, IPIntConstructor) {
 TEST_F(IPTest, IPStringConstructor) {
     string ip1 = "154.33.200.55", ip2 = "192.10.11.52";
     IP ip(ip1, ip2);
-    EXPECT_EQ(ip.dst_addr(), Utils::ip_to_int(ip1));
-    EXPECT_EQ(ip.src_addr(), Utils::ip_to_int(ip2));
+    EXPECT_EQ(ip.dst_addr(), IPv4Address(ip1));
+    EXPECT_EQ(ip.src_addr(), IPv4Address(ip2));
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
 }
@@ -99,26 +100,26 @@ TEST_F(IPTest, SrcIPString) {
     IP ip;
     string string_ip("192.155.32.10");
     ip.src_addr(string_ip);
-    EXPECT_EQ(ip.src_addr(), Utils::ip_to_int(string_ip));
+    EXPECT_EQ(ip.src_addr(), IPv4Address(string_ip));
 }
 
 TEST_F(IPTest, DstIPString) {
     IP ip;
     string string_ip("192.155.32.10");
     ip.dst_addr(string_ip);
-    EXPECT_EQ(ip.dst_addr(), Utils::ip_to_int(string_ip));
+    EXPECT_EQ(ip.dst_addr(), IPv4Address(string_ip));
 }
 
 TEST_F(IPTest, SrcIPInt) {
     IP ip;
     ip.src_addr(0x7f137ab3);
-    EXPECT_EQ(ip.src_addr(), 0x7f137ab3);
+    EXPECT_EQ(ip.src_addr(), IPv4Address(0x7f137ab3));
 }
 
 TEST_F(IPTest, DstIPInt) {
     IP ip;
     ip.dst_addr(0x7f137ab3);
-    EXPECT_EQ(ip.dst_addr(), 0x7f137ab3);
+    EXPECT_EQ(ip.dst_addr(), IPv4Address(0x7f137ab3));
 }
 
 TEST_F(IPTest, Version) {
@@ -151,8 +152,8 @@ TEST_F(IPTest, ConstructorFromBuffer) {
     IP ip1(expected_packet, sizeof(expected_packet));
     const uint8_t opt_sec[] = { 't', 'j', 'g', '\xab', 'w', '\xab', 'h', 'e', 'l' };
     
-    EXPECT_EQ(ip1.dst_addr(), Utils::ip_to_int("192.168.9.43"));
-    EXPECT_EQ(ip1.src_addr(), Utils::ip_to_int("84.52.254.5"));
+    EXPECT_EQ(ip1.dst_addr(), IPv4Address ("192.168.9.43"));
+    EXPECT_EQ(ip1.src_addr(), IPv4Address("84.52.254.5"));
     EXPECT_EQ(ip1.id(), 0x7a);
     EXPECT_EQ(ip1.tos(), 0x7f);
     EXPECT_EQ(ip1.frag_off(), 0x43);

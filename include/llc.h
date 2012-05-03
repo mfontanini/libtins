@@ -240,6 +240,8 @@ namespace Tins {
 					return control_field.super.recv_seq_num;
 				case UNNUMBERED:
 					return 0;
+                default:
+                    return 0;
 			}
 		}
 
@@ -255,6 +257,8 @@ namespace Tins {
 					return control_field.info.poll_final_bit;
 				case SUPERVISORY:
 					return control_field.super.poll_final_bit;
+                default:
+                    return false;
 			}
 		}
 

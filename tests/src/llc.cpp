@@ -181,7 +181,7 @@ TEST_F(LLCTest, ConstructorFromBuffer) {
 	EXPECT_EQ(30, llc.send_seq_number());
 	EXPECT_EQ(29, llc.receive_seq_number());
 
-	LLC llc_super(4, LLCTest::from_buffer_super);
+	LLC llc_super(LLCTest::from_buffer_super, sizeof(LLCTest::from_buffer_super));
 	EXPECT_EQ(4, llc_super.header_size());
 	EXPECT_EQ(0x4B, llc_super.dsap());
 	EXPECT_EQ(0x19, llc_super.ssap());
@@ -191,7 +191,7 @@ TEST_F(LLCTest, ConstructorFromBuffer) {
 	EXPECT_EQ(29, llc_super.receive_seq_number());
 	EXPECT_EQ(LLC::RECEIVE_NOT_READY, llc_super.supervisory_function());
 
-	LLC llc_unnum(LLCTest::from_buffer_unnumbered, 3);
+	LLC llc_unnum(LLCTest::from_buffer_unnumbered, sizeof(LLCTest::from_buffer_unnumbered));
 	EXPECT_EQ(llc_unnum.header_size(), 3);
 	EXPECT_EQ(llc_unnum.dsap(), 0xaa);
 	EXPECT_EQ(llc_unnum.ssap(), 0x17);

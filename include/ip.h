@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __IP_H
-#define __IP_H
+#ifndef TINS_IP_H
+#define TINS_IP_H
 
 #ifndef WIN32
     #include <endian.h>
@@ -29,6 +29,7 @@
 #include <utility>
 #include <list>
 #include "pdu.h"
+#include "ipaddress.h"
 #include "utils.h"
 
 namespace Tins {
@@ -124,18 +125,6 @@ namespace Tins {
         IP();
 
         /**
-         * \brief Constructor for building the IP PDU taking strings as ip addresses.
-         *
-         * Constructor that builds an IP using strings as addresses. They
-         * can be hostnames or IPs.
-         *
-         * \param ip_dst string containing the destination hostname(optional).
-         * \param ip_src string containing the source hostname(optional).
-         * \param child pointer to a PDU which will be set as the inner_pdu for the packet being constructed(optional).
-         */
-        IP(const std::string &ip_dst, const std::string &ip_src = "", PDU *child = 0);
-
-        /**
          * \brief Constructor for building the IP PDU taking integer as ip addresses.
          *
          * Constructor that builds an IP using strings as addresses. They
@@ -145,7 +134,7 @@ namespace Tins {
          * \param ip_src The source ip address(optional).
          * \param child pointer to a PDU which will be set as the inner_pdu for the packet being constructed(optional).
          */
-        IP(uint32_t ip_dst, uint32_t ip_src = 0, PDU *child = 0);
+        IP(IPv4Address ip_dst, IPv4Address ip_src = 0, PDU *child = 0);
 
         /**
          * \brief Copy constructor.
@@ -236,12 +225,12 @@ namespace Tins {
          *
          * \return The source address for this IP PDU.
          */
-        inline uint32_t src_addr() const { return Utils::net_to_host_l(_ip.saddr); }
+        inline IPv4Address src_addr() const { return Utils::net_to_host_l(_ip.saddr); }
 
         /** \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
-        inline uint32_t dst_addr() const  { return Utils::net_to_host_l(_ip.daddr); }
+        inline IPv4Address dst_addr() const  { return Utils::net_to_host_l(_ip.daddr); }
         
         /** \brief Getter for the version field.
          * \return The version for this IP PDU.
@@ -309,30 +298,16 @@ namespace Tins {
         /**
          * \brief Setter for the source address field.
          *
-         * \param ip The ip address in dotted string notation.
-         */
-        void src_addr(const std::string &ip);
-
-        /**
-         * \brief Setter for the source address field.
-         *
          * \param ip The ip address in integer notation.
          */
-        void src_addr(uint32_t ip);
-
-        /**
-         * \brief Setter for the destination address field.
-         *
-         * \param ip The ip address in dotted string notation.
-         */
-        void dst_addr(const std::string &ip);
+        void src_addr(IPv4Address ip);
 
         /**
          * \brief Setter for the destination address field.
          *
          * \param ip The ip address in integer notation.
          */
-        void dst_addr(uint32_t ip);
+        void dst_addr(IPv4Address ip);
         
         /**
          * \brief Setter for the version field.
@@ -340,7 +315,6 @@ namespace Tins {
          * \param ver The version field to be set.
          */
         void version(uint8_t ver);
-
 
         /**
          * \brief Sets an IP option.
@@ -470,4 +444,4 @@ namespace Tins {
     };
 };
 
-#endif
+#endif // TINS_IP_H

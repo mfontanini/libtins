@@ -274,7 +274,7 @@ bool Tins::DHCP::generic_search(Options opt, std::list<uint32_t> *container) {
     if((len % sizeof(uint32_t)) != 0)
         return false;
     while(len) {
-        container->push_back(*(ptr++));
+        container->push_back(Utils::net_to_host_l(*(ptr++)));
         len -= sizeof(uint32_t);
     }
     return true;

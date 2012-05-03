@@ -26,6 +26,7 @@
 
 #include <string>
 #include "pdu.h"
+#include "ipaddress.h"
 #include "utils.h"
 
 namespace Tins {
@@ -50,7 +51,8 @@ namespace Tins {
          * ARP requests and replies can be constructed easily using
          * ARP::make_arp_request/reply static functions.
          */
-        ARP(uint32_t target_ip = 0, uint32_t sender_ip = 0, const uint8_t *target_hw = 0, const uint8_t *sender_hw = 0);
+        ARP(IPv4Address target_ip = 0, IPv4Address sender_ip = 0, 
+          const uint8_t *target_hw = 0, const uint8_t *sender_hw = 0);
 
         /**
          * \brief Constructor which creates an ARP object from a buffer and adds all identifiable
@@ -80,7 +82,7 @@ namespace Tins {
          *
          * \return Returns the sender's IP address in an uint32_t.
          */
-        inline const uint32_t sender_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_sip); }
+        inline const IPv4Address sender_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_sip); }
 
         /**
          * \brief Getter for the target's hardware address.
@@ -94,7 +96,7 @@ namespace Tins {
          *
          * \return Returns the target's IP address in an uint32_t.
          */
-        inline const uint32_t target_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_tip); }
+        inline const IPv4Address target_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_tip); }
 
         /**
          * \brief Getter for the hardware address format.
@@ -148,16 +150,9 @@ namespace Tins {
         /**
          * \brief Setter for the sender's IP address.
          *
-         * \param new_snd_ip_addr uint32_t containing the new sender's IP address.
+         * \param new_snd_ip_addr IPv4Address containing the new sender's IP address.
          */
-        void sender_ip_addr(uint32_t new_snd_ip_addr);
-
-        /**
-         * \brief Setter for the sender's IP address.
-         *
-         * \param new_snd_ip_addr string containing the new sender's IP address or hostname.
-         */
-        void sender_ip_addr(const std::string& new_snd_ip_addr);
+        void sender_ip_addr(IPv4Address new_snd_ip_addr);
 
         /**
          * \brief Setter for the target's hardware address.
@@ -169,16 +164,9 @@ namespace Tins {
         /**
          * \brief Setter for the target's IP address.
          *
-         * \param new_tgt_ip_addr uint32_t containing the new target's IP address.
+         * \param new_tgt_ip_addr IPv4Address containing the new target's IP address.
          */
-        void target_ip_addr(uint32_t new_tgt_ip_addr);
-
-        /**
-         * \brief Setter for the target's IP address.
-         *
-         * \param new_tgt_ip_addr string containing the new target's IP address or hostname.
-         */
-        void target_ip_addr(const std::string& new_tgt_ip_addr);
+        void target_ip_addr(IPv4Address new_tgt_ip_addr);
 
         /**
          * \brief Setter for the hardware address format.
@@ -222,47 +210,19 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::ARP; }
 
         /**
-         * \brief Creates an ARP Request within a Layer 2 PDU using strings for target and sender.
-         *
-         * Creates an ARP Request PDU and embeds it within a Layer 2 PDU ready to be
-         * sent. The target and sender's protocol address are given using strings.
-         *
-         * \param iface string with the interface from where to send the ARP.
-         * \param target string with the target's IP or hostname.
-         * \param sender string with the sender's IP or hostname.
-         * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
-         * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Request.
-         */
-        static PDU* make_arp_request(const std::string& iface, const std::string &target, const std::string &sender, const uint8_t* hw_snd = 0);
-
-        /**
          * \brief Creates an ARP Request within a Layer 2 PDU using uint32_t for target and sender.
          *
          * Creates an ARP Request PDU and embeds it within a Layer 2 PDU ready to be
          * sent. The target and sender's protocol address are given using uint32_t.
          *
          * \param iface string with the interface from where to send the ARP.
-         * \param target uint32_t with the target's IP.
-         * \param sender uint32_t with the sender's IP.
+         * \param target IPv4Address with the target's IP.
+         * \param sender IPv4Address with the sender's IP.
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Request.
          */
-        static PDU* make_arp_request(const std::string& iface, uint32_t target, uint32_t sender, const uint8_t* hw_snd = 0);
-
-        /**
-         * \brief Creates an ARP Reply within a Layer 2 PDU using strings for target and sender.
-         *
-         * Creates an ARP Reply PDU and embeds it within a Layer 2 PDU ready to be
-         * sent. The target and sender's protocol address are given using strings.
-         *
-         * \param iface string with the interface from where to send the ARP.
-         * \param target string with the target's IP or hostname.
-         * \param sender string with the sender's IP or hostname.
-         * \param hw_tgt uint8_t array of 6 bytes containing the target's hardware address.
-         * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
-         * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Replay.
-         */
-        static PDU* make_arp_reply(const std::string& iface, const std::string &target, const std::string &sender, const uint8_t* hw_tgt, const uint8_t* hw_snd);
+        static PDU* make_arp_request(const std::string& iface, IPv4Address target, 
+          IPv4Address sender, const uint8_t* hw_snd = 0);
 
         /**
          * \brief Creates an ARP Reply within a Layer 2 PDU using uint32_t for target and sender.
@@ -271,13 +231,14 @@ namespace Tins {
          * sent. The target and sender's protocol address are given using uint32_t.
          *
          * \param iface string with the interface from where to send the ARP.
-         * \param target uint32_t with the target's IP.
-         * \param sender uint32_t with the sender's IP.
+         * \param target IPv4Address with the target's IP.
+         * \param sender IPv4Address with the sender's IP.
          * \param hw_tgt uint8_t array of 6 bytes containing the target's hardware address.
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Replay.
          */
-        static PDU* make_arp_reply(const std::string& iface, uint32_t target, uint32_t sender, const uint8_t* hw_tgt, const uint8_t* hw_snd);
+        static PDU* make_arp_reply(const std::string& iface, IPv4Address target, 
+          IPv4Address sender, const uint8_t* hw_tgt, const uint8_t* hw_snd);
 
         /**
          * \brief Converts the current ARP PDU to an ARP Request.
