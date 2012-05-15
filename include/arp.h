@@ -82,7 +82,7 @@ namespace Tins {
          *
          * \return Returns the sender's IP address in an uint32_t.
          */
-        inline const IPv4Address sender_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_sip); }
+        inline IPv4Address sender_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_sip); }
 
         /**
          * \brief Getter for the target's hardware address.
@@ -96,7 +96,7 @@ namespace Tins {
          *
          * \return Returns the target's IP address in an uint32_t.
          */
-        inline const IPv4Address target_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_tip); }
+        inline IPv4Address target_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_tip); }
 
         /**
          * \brief Getter for the hardware address format.

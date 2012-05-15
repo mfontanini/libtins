@@ -25,16 +25,18 @@
 #include <string>
 #include <iostream>
 #include <stdint.h>
-#include "utils.h"
 
 namespace Tins {
     class IPv4Address {
     public:
-        IPv4Address(uint32_t ip = 0) : ip_addr(ip) {}
-        IPv4Address(const std::string &ip) : ip_addr(Utils::ip_to_int(ip)) {}
+        IPv4Address(uint32_t ip = 0);
+        IPv4Address(const std::string &ip);
         
-        operator uint32_t() const { return Utils::net_to_host_l(ip_addr); }
-        operator std::string() const { return Utils::ip_to_string(ip_addr); } 
+        IPv4Address &operator=(uint32_t ip);
+        IPv4Address &operator=(const std::string &ip);
+        
+        operator uint32_t() const;
+        operator std::string() const;
         
         friend std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
             return output << (std::string)addr;
@@ -42,7 +44,6 @@ namespace Tins {
     private:
         uint32_t ip_addr;
     };
-    
 };
 
 

@@ -31,6 +31,7 @@
 #include <set>
 #include <stdint.h>
 #include "packetsender.h"
+#include "ipaddress.h"
 
 namespace Tins {
     /** \brief Network utils namespace.
@@ -44,7 +45,7 @@ namespace Tins {
          * \brief Struct that represents an interface's information.
          */
         struct InterfaceInfo {
-            uint32_t ip_addr, netmask, bcast_addr;
+            IPv4Address ip_addr, netmask, bcast_addr;
             uint8_t hw_addr[6];
         };
         
@@ -102,7 +103,7 @@ namespace Tins {
          * \return PDU * containing either 0 if no response was received,
          * or the ICMP response otherwise.
          */
-        PDU *ping_address(uint32_t ip, PacketSender *sender, uint32_t ip_src = 0);
+        PDU *ping_address(uint32_t ip, PacketSender *sender, IPv4Address ip_src = 0);
 
         /** \brief Resolves the hardware address for a given ip.
          *
@@ -113,7 +114,8 @@ namespace Tins {
          * \return Returns true if the hardware address was resolved successfully,
          * false otherwise.
          */
-        bool resolve_hwaddr(const std::string &iface, uint32_t ip, uint8_t *buffer, PacketSender *sender);
+        bool resolve_hwaddr(const std::string &iface, IPv4Address ip, 
+          uint8_t *buffer, PacketSender *sender);
 
         /** \brief List all network interfaces.
          *
@@ -132,7 +134,7 @@ namespace Tins {
          * 
          * \return bool indicating wether the operation was successfull.
          */
-        bool interface_ip(const std::string &iface, uint32_t &ip);
+        bool interface_ip(const std::string &iface, IPv4Address &ip);
         
         /**
          * \brief Lookup the ip/hw/netmask/broadcast address of the 
@@ -178,7 +180,7 @@ namespace Tins {
          * \param ip The ip of the interface we are looking for.
          * \return The interface's name.
          */
-        std::string interface_from_ip(uint32_t ip);
+        std::string interface_from_ip(IPv4Address ip);
         
         /**
          * \brief Finds the gateway's IP address for the given IP 
@@ -191,7 +193,7 @@ namespace Tins {
          * 
          * \return bool indicating wether the lookup was successfull.
          */
-        bool gateway_from_ip(uint32_t ip, uint32_t &gw_addr) ;
+        bool gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) ;
         
 
         /** \brief Convert 16 bit integer into network byte order.

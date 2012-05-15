@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "arp.h"
 #include "utils.h"
+#include "ipaddress.h"
 
 
 using namespace std;
@@ -16,13 +17,14 @@ public:
     static const uint8_t hw_addr2[];
     static const string ip_addr1;
     static const uint8_t expected_packet[];
+    static const IPv4Address addr1, addr2;
 };
 
 const uint8_t ARPTest::empty_addr[] = {'\x00', '\x00', '\x00', '\x00', '\x00', '\x00'};
 const uint8_t ARPTest::hw_addr1[] = {'\x13', '\xda', '\xde', '\xf1', '\x01', '\x85'};
 const uint8_t ARPTest::hw_addr2[] = {'\x7a', '\x1f', '\xf4', '\x39', '\xab', '\x0d'};
-const string ARPTest::ip_addr1("192.168.0.154");
 const uint8_t ARPTest::expected_packet[] = {'\x00', '\x01', '\x08', '\x00', '\x06', '\x04', '\x00', '\x02', '\x03', '\xde', '\xf5', '\x12', '\t', '\xfa', '\xc0', '\xa8', '-', '\xe7', '\xf5', '\x12', '\xda', 'g', '\xbd', '\r', ' ', '\x9b', 'Q', '\xfe'};
+const IPv4Address ARPTest::addr1(0x1234), ARPTest::addr2(0xa3f1);
 
 TEST_F(ARPTest, DefaultContructor) {
     ARP arp;
@@ -34,7 +36,7 @@ TEST_F(ARPTest, DefaultContructor) {
 }
 
 TEST_F(ARPTest, CopyContructor) {
-    ARP arp1(0x1234, 0xa3f1, hw_addr1, hw_addr2);
+    ARP arp1(addr1, addr2, hw_addr1, hw_addr2);
     ARP arp2(arp1);
     EXPECT_EQ(arp1.opcode(), arp2.opcode());
     ASSERT_EQ(arp1.hw_addr_length(), arp2.hw_addr_length());
@@ -48,7 +50,7 @@ TEST_F(ARPTest, CopyContructor) {
 }
 
 TEST_F(ARPTest, CopyAssignmentOperator) {
-    ARP arp1(0x1234, 0xa3f1, hw_addr1, hw_addr2);
+    ARP arp1(addr1, addr2, hw_addr1, hw_addr2);
     ARP arp2 = arp1;
     EXPECT_EQ(arp1.opcode(), arp2.opcode());
     ASSERT_EQ(arp1.hw_addr_length(), arp2.hw_addr_length());
@@ -62,35 +64,23 @@ TEST_F(ARPTest, CopyAssignmentOperator) {
 }
 
 TEST_F(ARPTest, CompleteContructor) {
-    ARP arp(0x1234, 0xa3f1, hw_addr1, hw_addr2);
+    ARP arp(addr1, addr2, hw_addr1, hw_addr2);
     EXPECT_TRUE(memcmp(arp.target_hw_addr(), hw_addr1, sizeof(hw_addr1)) == 0);
     EXPECT_TRUE(memcmp(arp.sender_hw_addr(), hw_addr2, sizeof(hw_addr2)) == 0);
-    EXPECT_EQ(arp.target_ip_addr(), 0x1234);
-    EXPECT_EQ(arp.sender_ip_addr(), 0xa3f1);
-}
-
-TEST_F(ARPTest, SenderIPAddrString) {
-    ARP arp;
-    arp.sender_ip_addr(ip_addr1);
-    EXPECT_EQ(arp.sender_ip_addr(), Utils::ip_to_int(ip_addr1));
+    EXPECT_EQ(arp.target_ip_addr(), addr1);
+    EXPECT_EQ(arp.sender_ip_addr(), addr2);
 }
 
 TEST_F(ARPTest, SenderIPAddrInt) {
     ARP arp;
-    arp.sender_ip_addr(Utils::ip_to_int(ip_addr1));
-    EXPECT_EQ(arp.sender_ip_addr(), Utils::ip_to_int(ip_addr1));
-}
-
-TEST_F(ARPTest, TargetIPAddrString) {
-    ARP arp;
-    arp.target_ip_addr(ip_addr1);
-    EXPECT_EQ(arp.target_ip_addr(), Utils::ip_to_int(ip_addr1));
+    arp.sender_ip_addr(addr1);
+    EXPECT_EQ(arp.sender_ip_addr(), addr1);
 }
 
 TEST_F(ARPTest, TargetIPAddrInt) {
     ARP arp;
-    arp.target_ip_addr(Utils::ip_to_int(ip_addr1));
-    EXPECT_EQ(arp.target_ip_addr(), Utils::ip_to_int(ip_addr1));
+    arp.target_ip_addr(addr1);
+    EXPECT_EQ(arp.target_ip_addr(), addr1);
 }
 
 TEST_F(ARPTest, TargetHWAddr) {

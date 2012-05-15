@@ -214,7 +214,7 @@ uint32_t Tins::Utils::resolve_ip(const string &to_resolve) throw (std::runtime_e
     return Utils::net_to_host_l(((struct in_addr**)data->h_addr_list)[0]->s_addr);
 }
 
-Tins::PDU *Tins::Utils::ping_address(uint32_t ip, PacketSender *sender, uint32_t ip_src) {
+Tins::PDU *Tins::Utils::ping_address(uint32_t ip, PacketSender *sender, IPv4Address ip_src) {
     ICMP *icmp = new ICMP(ICMP::ECHO_REQUEST);
     if(!ip_src) {
         std::string iface(Utils::interface_from_ip(ip));
@@ -225,8 +225,9 @@ Tins::PDU *Tins::Utils::ping_address(uint32_t ip, PacketSender *sender, uint32_t
     return sender->send_recv(&ip_packet);
 }
 
-bool Tins::Utils::resolve_hwaddr(const string &iface, uint32_t ip, uint8_t *buffer, PacketSender *sender) {
-    uint32_t my_ip;
+bool Tins::Utils::resolve_hwaddr(const string &iface, IPv4Address ip, 
+  uint8_t *buffer, PacketSender *sender) {
+    IPv4Address my_ip;
     uint8_t my_hw[6];
     if(!interface_ip(iface, my_ip) || !interface_hwaddr(iface, my_hw))
         return false;
@@ -244,15 +245,14 @@ bool Tins::Utils::resolve_hwaddr(const string &iface, uint32_t ip, uint8_t *buff
         return false;
 }
 
-string Tins::Utils::interface_from_ip(uint32_t ip) {
+string Tins::Utils::interface_from_ip(IPv4Address ip) {
     if(ip == 0x7f000001)
         return "lo";
     ifstream input("/proc/net/route");
     bool match(false);
     string iface;
     string destination, mask;
-    uint32_t destination_int, mask_int;
-    ip = Utils::net_to_host_l(ip);
+    uint32_t destination_int, mask_int, ip_int = ip;
     skip_line(input);
     while(!match) {
         input >> iface >> destination;
@@ -260,14 +260,14 @@ string Tins::Utils::interface_from_ip(uint32_t ip) {
             input >> mask;
         from_hex(destination, destination_int);
         from_hex(mask, mask_int);
-        if((ip & mask_int) == destination_int)
+        if((ip_int & mask_int) == destination_int)
             return iface;
         skip_line(input);
     }
     return "";
 }
 
-bool Tins::Utils::gateway_from_ip(uint32_t ip, uint32_t &gw_addr) {
+bool Tins::Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
     ifstream input("/proc/net/route");
     bool match(false);
     string iface;
@@ -282,8 +282,9 @@ bool Tins::Utils::gateway_from_ip(uint32_t ip, uint32_t &gw_addr) {
         from_hex(destination, destination_int);
         from_hex(mask, mask_int);
         if((ip & mask_int) == destination_int) {
-            from_hex(gw, gw_addr);
-            gw_addr = net_to_host_l(gw_addr);
+            uint32_t tmp_ip;
+            from_hex(gw, tmp_ip);
+            gw_addr = net_to_host_l(tmp_ip);
             return true;
         }
         skip_line(input);
@@ -297,7 +298,7 @@ set<string> Tins::Utils::network_interfaces() {
     return collector.ifaces;
 }
 
-bool Tins::Utils::interface_ip(const string &iface, uint32_t &ip) {
+bool Tins::Utils::interface_ip(const string &iface, IPv4Address &ip) {
     IPv4Collector collector(iface.c_str());
     generic_iface_loop(collector);
     ip = Utils::net_to_host_l(collector.ip);

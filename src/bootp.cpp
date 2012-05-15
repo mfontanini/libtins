@@ -69,20 +69,20 @@ void Tins::BootP::padding(uint16_t new_padding) {
     _bootp.padding = Utils::net_to_host_s(new_padding);
 }
 
-void Tins::BootP::ciaddr(uint32_t new_ciaddr) {
-    _bootp.ciaddr = Utils::net_to_host_l(new_ciaddr);
+void Tins::BootP::ciaddr(IPv4Address new_ciaddr) {
+    _bootp.ciaddr = new_ciaddr;
 }
 
-void Tins::BootP::yiaddr(uint32_t new_yiaddr) {
-    _bootp.yiaddr = Utils::net_to_host_l(new_yiaddr);
+void Tins::BootP::yiaddr(IPv4Address new_yiaddr) {
+    _bootp.yiaddr = new_yiaddr;
 }
 
-void Tins::BootP::siaddr(uint32_t new_siaddr) {
-    _bootp.siaddr = Utils::net_to_host_l(new_siaddr);
+void Tins::BootP::siaddr(IPv4Address new_siaddr) {
+    _bootp.siaddr = new_siaddr;
 }
 
-void Tins::BootP::giaddr(uint32_t new_giaddr) {
-    _bootp.giaddr = Utils::net_to_host_l(new_giaddr);
+void Tins::BootP::giaddr(IPv4Address new_giaddr) {
+    _bootp.giaddr = new_giaddr;
 }
 
 void Tins::BootP::chaddr(const uint8_t *new_chaddr) {

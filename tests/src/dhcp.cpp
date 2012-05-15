@@ -7,6 +7,7 @@
 #include "dhcp.h"
 #include "utils.h"
 #include "ethernetII.h"
+#include "ipaddress.h"
 
 using namespace std;
 using namespace Tins;
@@ -15,6 +16,7 @@ class DHCPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
     static const uint8_t chaddr[], sname[], file[];
+    static const IPv4Address addr;
 
     void test_equals(const DHCP &dhcp1, const DHCP &dhcp2);
     void test_option(const DHCP &dhcp, DHCP::Options opt, uint32_t len = 0, uint8_t *value = 0);
@@ -33,6 +35,7 @@ const uint8_t DHCPTest::file[] = "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\x
                                   "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xcb\x19\x18"
                                   "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xeb\x19\x18"
                                   "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xfb\x19\x18";
+const IPv4Address DHCPTest::addr("192.168.8.1");
 
 const uint8_t DHCPTest::expected_packet[] = {'\x01', '\x01', '\x06', '\x1f', '?', '\xab', '#', '\xde',
 '\x9f', '\x1a', '\x00', '\x00', '\xc0', '\xa8', '\x00', 'f', '\xf3', '\x16', '"', 'b', '\xa7', ' ',
@@ -105,26 +108,26 @@ TEST_F(DHCPTest, Padding) {
 
 TEST_F(DHCPTest, Ciaddr) {
     DHCP dhcp;
-    dhcp.ciaddr(0x71bd167c);
-    EXPECT_EQ(dhcp.ciaddr(), 0x71bd167c);
+    dhcp.ciaddr(addr);
+    EXPECT_EQ(dhcp.ciaddr(), addr);
 }
 
 TEST_F(DHCPTest, Yiaddr) {
     DHCP dhcp;
-    dhcp.yiaddr(0x71bd167c);
-    EXPECT_EQ(dhcp.yiaddr(), 0x71bd167c);
+    dhcp.yiaddr(addr);
+    EXPECT_EQ(dhcp.yiaddr(), addr);
 }
 
 TEST_F(DHCPTest, Siaddr) {
     DHCP dhcp;
-    dhcp.siaddr(0x71bd167c);
-    EXPECT_EQ(dhcp.siaddr(), 0x71bd167c);
+    dhcp.siaddr(addr);
+    EXPECT_EQ(dhcp.siaddr(), addr);
 }
 
 TEST_F(DHCPTest, Giaddr) {
     DHCP dhcp;
-    dhcp.giaddr(0x71bd167c);
-    EXPECT_EQ(dhcp.giaddr(), 0x71bd167c);
+    dhcp.giaddr(addr);
+    EXPECT_EQ(dhcp.giaddr(), addr);
 }
 
 TEST_F(DHCPTest, Chaddr) {

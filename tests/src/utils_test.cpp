@@ -1,10 +1,8 @@
-
 #include <iostream>
-
 #include <stdexcept>
-
-#include "utils.h"
 #include <gtest/gtest.h>
+#include "utils.h"
+#include "ipaddress.h"
 
 using namespace Tins;
 
@@ -103,7 +101,6 @@ TEST_F(UtilsTest, HwaddrToString) {
 }
 
 TEST_F(UtilsTest, ResolveIp) {
-
     uint32_t localhost_ip = Utils::ip_to_int("127.0.0.1");
 
     EXPECT_EQ(Utils::resolve_ip("localhost"), localhost_ip);
@@ -112,9 +109,8 @@ TEST_F(UtilsTest, ResolveIp) {
 }
 
 TEST_F(UtilsTest, InterfaceIp) {
-
-    uint32_t ip;
-    uint32_t localhost_ip = Utils::ip_to_int("127.0.0.1");
+    IPv4Address ip;
+    IPv4Address localhost_ip = Utils::ip_to_int("127.0.0.1");
 
 #ifndef WIN32
     ASSERT_TRUE(Utils::interface_ip("lo", ip));
@@ -125,7 +121,6 @@ TEST_F(UtilsTest, InterfaceIp) {
 }
 
 TEST_F(UtilsTest, NetToHostS) {
-
     uint16_t a = 0x01FE;
     uint16_t b = Utils::net_to_host_s(a);
 
@@ -135,7 +130,6 @@ TEST_F(UtilsTest, NetToHostS) {
 }
 
 TEST_F(UtilsTest, NetToHostL) {
-
     uint32_t a = 0x0102CDFE;
     uint32_t b = Utils::net_to_host_l(a);
 
@@ -145,7 +139,6 @@ TEST_F(UtilsTest, NetToHostL) {
 }
 
 TEST_F(UtilsTest, NetToHostLL) {
-
     uint64_t a = 0x0102030489ABCDFE;
     uint64_t b = Utils::net_to_host_ll(a);
 
