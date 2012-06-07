@@ -21,7 +21,6 @@
 
 #include <stdexcept>
 #include <sstream>
-#include <fstream>
 #include <stdexcept>
 #include <cassert>
 #include <cstring>
@@ -105,7 +104,7 @@ struct InterfaceInfoCollector {
     }
 };
 
-bool from_hex(const string &str, uint32_t &result) {
+bool Tins::Utils::Internals::from_hex(const string &str, uint32_t &result) {
     unsigned i(0);
     result = 0;
     while(i < str.size()) {
@@ -122,7 +121,7 @@ bool from_hex(const string &str, uint32_t &result) {
     return true;
 }
 
-void skip_line(istream &input) {
+void Tins::Utils::Internals::skip_line(istream &input) {
     int c = 0;
     while(c != '\n' && input)
          c = input.get();
@@ -248,46 +247,27 @@ bool Tins::Utils::resolve_hwaddr(const string &iface, IPv4Address ip,
 string Tins::Utils::interface_from_ip(IPv4Address ip) {
     if(ip == 0x7f000001)
         return "lo";
-    ifstream input("/proc/net/route");
-    bool match(false);
-    string iface;
-    string destination, mask;
-    uint32_t destination_int, mask_int, ip_int = ip;
-    skip_line(input);
-    while(!match) {
-        input >> iface >> destination;
-        for(unsigned i(0); i < 6; ++i)
-            input >> mask;
-        from_hex(destination, destination_int);
-        from_hex(mask, mask_int);
-        if((ip_int & mask_int) == destination_int)
-            return iface;
-        skip_line(input);
+    std::vector<RouteEntry> entries;
+    uint32_t ip_int = ip;
+    route_entries(std::back_inserter(entries));
+    for(std::vector<RouteEntry>::const_iterator it(entries.begin()); it != entries.end(); ++it) {
+        std::cout << std::hex << ip_int << " " << (uint32_t)it->mask << " " << (uint32_t)it->destination << "\n";
+        if((ip_int & it->mask) == it->destination)
+            return it->interface;
     }
     return "";
 }
 
 bool Tins::Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
-    ifstream input("/proc/net/route");
-    bool match(false);
-    string iface;
-    string destination, mask, gw;
-    uint32_t destination_int, mask_int;
-    ip = Utils::net_to_host_l(ip);
-    skip_line(input);
-    while(!match) {
-        input >> iface >> destination >> gw;
-        for(unsigned i(0); i < 5; ++i)
-            input >> mask;
-        from_hex(destination, destination_int);
-        from_hex(mask, mask_int);
-        if((ip & mask_int) == destination_int) {
-            uint32_t tmp_ip;
-            from_hex(gw, tmp_ip);
-            gw_addr = net_to_host_l(tmp_ip);
+    std::vector<RouteEntry> entries;
+    uint32_t ip_int = ip;
+    route_entries(std::back_inserter(entries));
+    for(std::vector<RouteEntry>::const_iterator it(entries.begin()); it != entries.end(); ++it) {
+        std::cout << std::hex << ip_int << " " << (uint32_t)it->mask << " " << (uint32_t)it->destination << "\n";
+        if((ip_int & it->mask) == it->destination) {
+            gw_addr = it->gateway;
             return true;
         }
-        skip_line(input);
     }
     return false;
 }

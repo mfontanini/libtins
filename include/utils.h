@@ -29,6 +29,7 @@
 #endif
 #include <string>
 #include <set>
+#include <fstream>
 #include <stdint.h>
 #include "packetsender.h"
 #include "ipaddress.h"
@@ -47,6 +48,14 @@ namespace Tins {
         struct InterfaceInfo {
             IPv4Address ip_addr, netmask, bcast_addr;
             uint8_t hw_addr[6];
+        };
+        
+        /**
+         * \brief Struct that represents an entry in /proc/net/route
+         */
+        struct RouteEntry {
+            std::string interface;
+            IPv4Address destination, gateway, mask;
         };
         
         /** \brief Convert a dotted-ip-notation string to an integer.
@@ -193,7 +202,16 @@ namespace Tins {
          * 
          * \return bool indicating wether the lookup was successfull.
          */
-        bool gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) ;
+        bool gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr);
+        
+        
+        /**
+         * \brief Retrieves entries int the routing table.
+         * 
+         * \brief output ForwardIterator in which entries will be stored.
+         */
+        template<class ForwardIterator>
+        void route_entries(ForwardIterator output);
         
 
         /** \brief Convert 16 bit integer into network byte order.
@@ -275,7 +293,35 @@ namespace Tins {
             if(ifaddrs)
                 freeifaddrs(ifaddrs);
         }
-    };
-};
+        
+        namespace Internals {
+            void skip_line(std::istream &input);
+            bool from_hex(const std::string &str, uint32_t &result);
+        }
+    }
+}
+
+template<class ForwardIterator>
+void Tins::Utils::route_entries(ForwardIterator output) {
+    using namespace Utils::Internals;
+    std::ifstream input("/proc/net/route");
+    std::string destination, mask, gw;
+    uint32_t dummy;
+    skip_line(input);
+    RouteEntry entry;
+    while(input >> entry.interface >> destination >> gw) {
+        for(unsigned i(0); i < 5; ++i)
+            input >> mask;
+        from_hex(destination, dummy);
+        entry.destination = net_to_host_l(dummy);
+        from_hex(mask, dummy);
+        entry.mask = net_to_host_l(dummy);
+        from_hex(gw, dummy);
+        entry.gateway = net_to_host_l(dummy);
+        skip_line(input);
+        *output = entry;
+        ++output;
+    }
+}
 
 #endif
