@@ -251,7 +251,6 @@ string Tins::Utils::interface_from_ip(IPv4Address ip) {
     uint32_t ip_int = ip;
     route_entries(std::back_inserter(entries));
     for(std::vector<RouteEntry>::const_iterator it(entries.begin()); it != entries.end(); ++it) {
-        std::cout << std::hex << ip_int << " " << (uint32_t)it->mask << " " << (uint32_t)it->destination << "\n";
         if((ip_int & it->mask) == it->destination)
             return it->interface;
     }
