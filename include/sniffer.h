@@ -112,6 +112,8 @@ namespace Tins {
          */
         void stop_sniff();
     private:
+        Sniffer(const Sniffer&);
+        Sniffer &operator=(const Sniffer&);
         bool compile_set_filter(const std::string &filter, bpf_program &prog);
         
         static void callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
