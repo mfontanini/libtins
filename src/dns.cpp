@@ -370,8 +370,16 @@ uint32_t Tins::DNS::build_suffix_map(uint32_t index, const list<ResourceRecord*>
             index += sizeof(uint16_t);
         index += sizeof(ResourceRecord::Info) + sizeof(uint16_t);
         uint32_t sz((*it)->data_size());
-        if(sz > 4)
-           add_suffix(index, (*it)->data_pointer(), sz);
+        const uint8_t *ptr = (*it)->data_pointer();
+        uint32_t data_sz = sz;
+        if((*it)->info.type == Utils::net_to_host_s(MX)) {
+            std::cout << "Skippin while building\n";
+            ptr += 2;
+            data_sz -= 2;
+            index += 2;
+        }
+        if(data_sz > 4)
+            add_suffix(index, ptr, data_sz);
         index += sz;
     }
     return index;
@@ -450,8 +458,14 @@ void Tins::DNS::convert_resources(const std::list<ResourceRecord*> &lst, std::li
         sz = (*it)->data_size();
         if(sz == 4)
             addr = Utils::ip_to_string(*(uint32_t*)ptr);
-        else
+        else {
+            if((*it)->info.type ==  Utils::net_to_host_s(MX)) {
+                std::cout << "Skippin'\n";
+                ptr += 2;
+                sz -= 2;
+            }
             compose_name(ptr, sz, addr);
+        }
         res.push_back(
             Resource(dname, addr, Utils::net_to_host_s((*it)->info.type), 
             Utils::net_to_host_s((*it)->info.qclass), Utils::net_to_host_l((*it)->info.ttl))
