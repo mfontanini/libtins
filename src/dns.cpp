@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <iostream> //borrame
 #include <utility>
 #include <stdexcept>
 #include <cassert>
@@ -104,10 +103,10 @@ const uint8_t *Tins::DNS::build_resource_list(list<ResourceRecord*> &lst, const 
         if(ptr + res->data_sz > ptr_end)
             throw std::runtime_error("Not enough size for resource data");
         res->data = new uint8_t[res->data_sz];
-        if(res->data_sz == 4)
-            *(uint32_t*)res->data = Utils::net_to_host_l(*(uint32_t*)ptr);
-        else {
+        if(contains_dname(res->info.type))
             std::memcpy(res->data, ptr, res->data_sz);
+        else {
+            *(uint32_t*)res->data = Utils::net_to_host_l(*(uint32_t*)ptr);
         }
         
         ptr += res->data_sz;
@@ -178,6 +177,11 @@ void Tins::DNS::checking_disabled(uint8_t new_cd) {
 
 void Tins::DNS::rcode(uint8_t new_rcode) {
     dns.rcode = new_rcode;
+}
+
+bool Tins::DNS::contains_dname(uint16_t type) {
+    return type == Utils::net_to_host_s(MX) || type == Utils::net_to_host_s(CNAME) ||
+          type == Utils::net_to_host_s(PTR) || type == Utils::net_to_host_s(NS);
 }
 
 void Tins::DNS::add_query(const string &name, QueryType type, QueryClass qclass) {
@@ -371,15 +375,13 @@ uint32_t Tins::DNS::build_suffix_map(uint32_t index, const list<ResourceRecord*>
         index += sizeof(ResourceRecord::Info) + sizeof(uint16_t);
         uint32_t sz((*it)->data_size());
         const uint8_t *ptr = (*it)->data_pointer();
-        uint32_t data_sz = sz;
         if((*it)->info.type == Utils::net_to_host_s(MX)) {
-            std::cout << "Skippin while building\n";
             ptr += 2;
-            data_sz -= 2;
+            sz -= 2;
             index += 2;
         }
-        if(data_sz > 4)
-            add_suffix(index, ptr, data_sz);
+        if(contains_dname((*it)->info.type))
+            add_suffix(index, ptr, sz);
         index += sz;
     }
     return index;
@@ -460,7 +462,6 @@ void Tins::DNS::convert_resources(const std::list<ResourceRecord*> &lst, std::li
             addr = Utils::ip_to_string(*(uint32_t*)ptr);
         else {
             if((*it)->info.type ==  Utils::net_to_host_s(MX)) {
-                std::cout << "Skippin'\n";
                 ptr += 2;
                 sz -= 2;
             }

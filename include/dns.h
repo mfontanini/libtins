@@ -571,6 +571,7 @@ namespace Tins {
         uint32_t build_suffix_map(uint32_t index, const std::list<Query> &lst);
         void build_suffix_map();
         void copy_list(const std::list<ResourceRecord*> &from, std::list<ResourceRecord*> &to) const;
+        bool contains_dname(uint16_t type);
         
         void copy_fields(const DNS *other);
         
