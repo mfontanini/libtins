@@ -413,7 +413,9 @@ void Tins::DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) 
             index &= 0x3fff;
             SuffixMap::iterator it(suffixes.find(index));
             SuffixIndices::iterator suff_it(suffix_indices.find(index));
-            assert(it != suffixes.end() && suff_it == suffix_indices.end());
+            //assert(it != suffixes.end() && suff_it == suffix_indices.end());
+            if(it == suffixes.end() || suff_it == suffix_indices.end())
+                throw std::runtime_error("Malformed DNS packet");
             bool first(true);
             do {
                 if(it != suffixes.end()) {
