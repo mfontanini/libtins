@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <cstring>
 #include <string>
+#include <algorithm>
 #include <stdint.h>
 #include "tcp.h"
 #include "utils.h"
@@ -172,7 +173,7 @@ void TCPTest::test_equals(const TCP &tcp1, const TCP &tcp2) {
 }
 
 // This is not working, but i don't want to fix it right now.
-/*TEST_F(TCPTest, ConstructorFromBuffer) {
+TEST_F(TCPTest, ConstructorFromBuffer) {
     TCP tcp1(expected_packet, sizeof(expected_packet));
     uint32_t value32, ovalue32;
     uint16_t value16;
@@ -210,5 +211,13 @@ void TCPTest::test_equals(const TCP &tcp1, const TCP &tcp2) {
     TCP tcp2(buffer, size);
     test_equals(tcp1, tcp2);
     delete[] buffer;
-}*/
+}
 
+TEST_F(TCPTest, Serialize) {
+    TCP tcp1(expected_packet, sizeof(expected_packet));
+    uint32_t size;
+    uint8_t *buffer = tcp1.serialize(size);
+    ASSERT_EQ(size, sizeof(expected_packet));
+    ASSERT_TRUE(std::equal(buffer, buffer + size, expected_packet));
+    delete[] buffer;
+}

@@ -20,6 +20,7 @@
  */
 
 #include <stdexcept>
+#include <iostream> //borrame
 #include <cstring>
 #include <cassert>
 #include "tcp.h"
@@ -64,10 +65,13 @@ Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PR
         if(total_sz >= header_end) {
             uint8_t args[2] = {0};
             while(index < header_end) {
-                for(unsigned i(0); i < 2 && args[0] != NOP; ++i) {
+                for(unsigned i(0); i < 2; ++i) {
                     if(index == header_end)
                         throw std::runtime_error("Not enough size for a TCP header in the buffer.");
                     args[i] = buffer[index++];
+                    // NOP and EOL contain no length field
+                    if(args[0] == NOP || args[0] == EOL)
+                        break;
                 }
                 // We don't want to store NOPs and EOLs
                 if(args[0] != NOP && args[0] != EOL)  {
@@ -81,13 +85,16 @@ Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PR
                         add_option((Option)args[0], args[1], 0);
                     index += args[1];
                 }
-                else if(args[0] == EOL)
-                    index = header_end;
+                else
+                    add_option((Option)args[0], 0, 0);
+                /*else if(args[0] == EOL)
+                    //index = header_end;
+                    add_option(EOL, 0, 0);
                 else {
                     add_option((Option)args[0], 0, 0);
                     // Skip the NOP
                     args[0] = 0;
-                }
+                }*/
             }
             buffer += index;
             total_sz -= index;
@@ -291,11 +298,13 @@ void Tins::TCP::add_option(Option tcp_option, uint8_t length, const uint8_t *dat
     _options.push_back(TCPOption(tcp_option, length, new_data));
     
     _options_size += sizeof(uint8_t);
-    if(length)
+    // SACK_OK contains length but not data....
+    if(length || tcp_option == SACK_OK)
         _options_size += sizeof(uint8_t);
+        
     if(data)
         _options_size += length;
-        
+    
     padding = _options_size & 3;
     _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
 }
@@ -343,7 +352,7 @@ const Tins::TCP::TCPOption *Tins::TCP::search_option(Option opt) const {
 /* TCPOptions */
 
 uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
-    if(option == 1) {
+    if(option == 0 || option == 1) {
         *buffer = option;
         return buffer + 1;
     }
