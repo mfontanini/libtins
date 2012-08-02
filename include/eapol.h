@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __EAPOL_H
-#define __EAPOL_H
+#ifndef TINS_EAPOL_H
+#define TINS_EAPOL_H
 
 
 #include "pdu.h"
@@ -559,4 +559,4 @@ namespace Tins {
     };
 };
 
-#endif
+#endif // TINS_EAPOL_H

@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __DOT_11
-#define __DOT_11
+#ifndef TINS_DOT_11
+#define TINS_DOT_11
 
 #include <list>
 #include <stdint.h>
@@ -3878,4 +3878,4 @@ namespace Tins {
 
 
 
-#endif
+#endif // TINS_DOT_11

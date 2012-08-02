@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __DHCP_H
-#define __DHCP_H
+#ifndef TINS_DHCP_H
+#define TINS_DHCP_H
 
 
 #include <list>
@@ -413,4 +413,4 @@ namespace Tins {
     };
 };
 
-#endif
+#endif // TINS_DHCP_H

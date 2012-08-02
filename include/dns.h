@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __DNS_H
-#define __DNS_H
+#ifndef TINS_DNS_H
+#define TINS_DNS_H
 
 #include <stdint.h>
 #include <list>
@@ -584,5 +584,5 @@ namespace Tins {
     };
 };
 
-#endif // __DNS_H
+#endif // TINS_DNS_H
 

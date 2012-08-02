@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __RADIOTAP_H
-#define __RADIOTAP_H
+#ifndef TINS_RADIOTAP_H
+#define TINS_RADIOTAP_H
 
 #include <stdexcept>
 #include "pdu.h"
@@ -319,4 +319,5 @@ namespace Tins {
         uint16_t _rx_flags;
     };
 };
-#endif
+
+#endif // TINS_RADIOTAP_H

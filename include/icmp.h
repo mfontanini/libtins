@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __ICMP_H
-#define __ICMP_H
+#ifndef TINS_ICMP_H
+#define TINS_ICMP_H
 
 
 #include "pdu.h"
@@ -344,4 +344,4 @@ namespace Tins {
     };
 };
 
-#endif
+#endif // TINS_ICMP_H

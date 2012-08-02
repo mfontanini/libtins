@@ -20,8 +20,8 @@
  */
 
 
-#ifndef __SNIFFER_H
-#define __SNIFFER_H
+#ifndef TINS_SNIFFER_H
+#define TINS_SNIFFER_H
 
 
 #include <pcap.h>
@@ -152,4 +152,4 @@ namespace Tins {
     };
 };
     
-#endif
+#endif // TINS_SNIFFER_H

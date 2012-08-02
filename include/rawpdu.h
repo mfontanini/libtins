@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __RAWPDU_H
-#define __RAWPDU_H
+#ifndef TINS_RAWPDU_H
+#define TINS_RAWPDU_H
 
 
 #include "pdu.h"
@@ -87,4 +87,4 @@ namespace Tins {
 };
 
 
-#endif
+#endif // TINS_RAWPDU_H

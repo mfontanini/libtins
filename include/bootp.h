@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __BOOTP_H
-#define __BOOTP_H
+#ifndef TINS_BOOTP_H
+#define TINS_BOOTP_H
 
 #include <stdint.h>
 #include <stdint.h>
@@ -318,4 +318,4 @@ namespace Tins {
     };
 };
 
-#endif
+#endif // TINS_BOOTP_H

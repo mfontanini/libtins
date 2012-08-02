@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __IEEE8022_H
-#define __IEEE8022_H
+#ifndef TINS_IEEE8022_H
+#define TINS_IEEE8022_H
 
 
 #include <stdint.h>
@@ -167,4 +167,4 @@ namespace Tins {
     
 };
 
-#endif
+#endif // TINS_IEEE8022_H

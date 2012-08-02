@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __ETHERNET_II_H
-#define __ETHERNET_II_H
+#ifndef TINS_ETHERNET_II_H
+#define TINS_ETHERNET_II_H
 
 #include <stdint.h>
 #include <stdexcept>
@@ -225,4 +225,4 @@ namespace Tins {
 };
 
 
-#endif
+#endif // TINS_ETHERNET_II_H

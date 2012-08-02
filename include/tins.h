@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __TINS_H
-#define __TINS_H
+#ifndef TINS_TINS_H
+#define TINS_TINS_H
 
 #include "arp.h"
 #include "bootp.h"
@@ -39,5 +39,6 @@
 #include "tcp.h"
 #include "udp.h"
 #include "utils.h"
+#include "dns.h"
 
-#endif
+#endif // TINS_TINS_H

@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __TCP_H
-#define __TCP_H
+#ifndef TINS_TCP_H
+#define TINS_TCP_H
 
 
 #include <list>
@@ -465,4 +465,4 @@ namespace Tins {
     };
 };
 
-#endif
+#endif // TINS_TCP_H

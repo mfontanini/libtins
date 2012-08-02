@@ -19,8 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __PACKET_SENDER_H
-#define __PACKET_SENDER_H
+#ifndef TINS_PACKET_SENDER_H
+#define TINS_PACKET_SENDER_H
 
 
 #include <vector>
@@ -180,4 +180,4 @@ namespace Tins {
     };
 };
 
-#endif
+#endif // TINS_PACKET_SENDER_H

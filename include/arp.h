@@ -20,8 +20,8 @@
  */
 
 
-#ifndef __ARP_H
-#define __ARP_H
+#ifndef TINS_ARP_H
+#define TINS_ARP_H
 
 
 #include <string>
@@ -309,4 +309,4 @@ namespace Tins {
         arphdr _arp;
     };
 };
-#endif
+#endif //TINS_ARP_H
