@@ -36,6 +36,12 @@ TEST_F(TCPTest, CopyConstructor) {
     test_equals(tcp1, tcp2);
 }
 
+TEST_F(TCPTest, CopyAssignmentOperator) {
+    TCP tcp1(0x6d1f, 0x78f2);
+    TCP tcp2 = tcp1;
+    test_equals(tcp1, tcp2);
+}
+
 TEST_F(TCPTest, CompleteConstructor) {
     TCP tcp(0x6d1f, 0x78f2);
     EXPECT_EQ(tcp.dport(), 0x6d1f);

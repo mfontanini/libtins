@@ -24,6 +24,7 @@
 
 
 #include <list>
+#include <vector>
 #include <stdint.h>
 #ifndef WIN32
     #include <endian.h>
@@ -95,8 +96,10 @@ namespace Tins {
              * \param olength The option's data length.
              * \param odata The option's data(if any).
              */
-            TCPOption(uint8_t opt = 0, uint8_t olength = 0, uint8_t *ovalue = 0) :
-                      option(opt), length(olength), value(ovalue) { }
+            TCPOption(uint8_t opt = 0, uint8_t length = 0, const uint8_t *value = 0) 
+            : option(opt), value(value, (value) ? (value + length) : 0) { 
+                
+            }
 
             /**
              * \brief Writes the option into a buffer.
@@ -105,8 +108,8 @@ namespace Tins {
              */
             uint8_t *write(uint8_t *buffer);
             
-            uint8_t option, length;
-            uint8_t *value;
+            uint8_t option;
+            std::vector<uint8_t> value;
         };
 
         /**
@@ -120,29 +123,13 @@ namespace Tins {
         TCP(uint16_t dport = 0, uint16_t sport = 0);
 
         /**
-         * \brief Constructor which creates an TCP object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructor which creates an TCP object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children
+         * of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         TCP(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Copy constructor.
-         */
-        TCP(const TCP &other);
-        
-        /**
-         * \brief Copy assignment operator.
-         */
-        TCP &operator= (const TCP &other);
-        
-        /**
-         * \brief TCP destructor.
-         *
-         * Destructs the TCP instance. Does not free the payload.
-         * */
-        ~TCP();
 
         /**
          * \brief Getter for the destination port field.
@@ -459,14 +446,12 @@ namespace Tins {
         
         template<class T> bool generic_search(Option opt, T *value) {
             const TCPOption *option = search_option(opt);
-            if(option && option->length == sizeof(T)) {
-                *value = *(T*)option->value;
+            if(option && option->value.size() == sizeof(T)) {
+                *value = *(const T*)(&option->value[0]);
                 return true;
             }
             return false;
         }
-        
-        void cleanup();
         /** \brief Serialices this TCP PDU.
          * \param buffer The buffer in which the PDU will be serialized.
          * \param total_sz The size available in the buffer.

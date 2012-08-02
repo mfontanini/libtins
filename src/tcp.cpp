@@ -20,7 +20,6 @@
  */
 
 #include <stdexcept>
-#include <iostream> //borrame
 #include <cstring>
 #include <cassert>
 #include "tcp.h"
@@ -40,82 +39,48 @@ Tins::TCP::TCP(uint16_t dport, uint16_t sport) : PDU(Constants::IP::PROTO_TCP), 
     window(DEFAULT_WINDOW);
 }
 
-Tins::TCP::TCP(const TCP &other) : PDU(other) {
-    copy_fields(&other);
-}
-
-Tins::TCP &Tins::TCP::operator= (const TCP &other) {
-    PDU::operator=(other);
-    copy_fields(&other);
-    return *this;
-}
-
 Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROTO_TCP) {
     if(total_sz < sizeof(tcphdr))
         throw std::runtime_error("Not enough size for an TCP header in the buffer.");
     std::memcpy(&_tcp, buffer, sizeof(tcphdr));
-    try {
-        buffer += sizeof(tcphdr);
-        total_sz -= sizeof(tcphdr);
-        
-        _total_options_size = 0;
-        _options_size = 0;
-        
-        uint32_t index = 0, header_end = (data_offset() * sizeof(uint32_t)) - sizeof(tcphdr);
-        if(total_sz >= header_end) {
-            uint8_t args[2] = {0};
-            while(index < header_end) {
-                for(unsigned i(0); i < 2; ++i) {
-                    if(index == header_end)
-                        throw std::runtime_error("Not enough size for a TCP header in the buffer.");
-                    args[i] = buffer[index++];
-                    // NOP and EOL contain no length field
-                    if(args[0] == NOP || args[0] == EOL)
-                        break;
-                }
-                // We don't want to store NOPs and EOLs
-                if(args[0] != NOP && args[0] != EOL)  {
-                    // Not enough size for this option
-                    args[1] -= (sizeof(uint8_t) << 1);
-                    if(header_end - index < args[1])
-                        throw std::runtime_error("Not enough size for a TCP header in the buffer.");                        
-                    if(args[1])
-                        add_option((Option)args[0], args[1], buffer + index);
-                    else
-                        add_option((Option)args[0], args[1], 0);
-                    index += args[1];
-                }
-                else
-                    add_option((Option)args[0], 0, 0);
-                /*else if(args[0] == EOL)
-                    //index = header_end;
-                    add_option(EOL, 0, 0);
-                else {
-                    add_option((Option)args[0], 0, 0);
-                    // Skip the NOP
-                    args[0] = 0;
-                }*/
+    buffer += sizeof(tcphdr);
+    total_sz -= sizeof(tcphdr);
+    
+    _total_options_size = 0;
+    _options_size = 0;
+    
+    uint32_t index = 0, header_end = (data_offset() * sizeof(uint32_t)) - sizeof(tcphdr);
+    if(total_sz >= header_end) {
+        uint8_t args[2] = {0};
+        while(index < header_end) {
+            for(unsigned i(0); i < 2; ++i) {
+                if(index == header_end)
+                    throw std::runtime_error("Not enough size for a TCP header in the buffer.");
+                args[i] = buffer[index++];
+                // NOP and EOL contain no length field
+                if(args[0] == NOP || args[0] == EOL)
+                    break;
             }
-            buffer += index;
-            total_sz -= index;
+            // We don't want to store NOPs and EOLs
+            if(args[0] != NOP && args[0] != EOL)  {
+                // Not enough size for this option
+                args[1] -= (sizeof(uint8_t) << 1);
+                if(header_end - index < args[1])
+                    throw std::runtime_error("Not enough size for a TCP header in the buffer.");                        
+                if(args[1])
+                    add_option((Option)args[0], args[1], buffer + index);
+                else
+                    add_option((Option)args[0], args[1], 0);
+                index += args[1];
+            }
+            else
+                add_option((Option)args[0], 0, 0);
         }
-    }
-    catch(std::runtime_error &err) {
-        cleanup();
-        throw;
+        buffer += index;
+        total_sz -= index;
     }
     if(total_sz)
         inner_pdu(new RawPDU(buffer, total_sz));
-}
-
-Tins::TCP::~TCP() {
-    cleanup();
-}
-
-void Tins::TCP::cleanup() {
-    for(std::list<TCPOption>::iterator it = _options.begin(); it != _options.end(); ++it)
-        delete[] it->value;
-    _options.clear();
 }
 
 void Tins::TCP::dport(uint16_t new_dport) {
@@ -196,10 +161,10 @@ void Tins::TCP::add_sack_option(const std::list<uint32_t> &edges) {
 
 bool Tins::TCP::search_sack_option(std::list<uint32_t> *edges) {
     const TCPOption *option = search_option(SACK);
-    if(!option || (option->length % sizeof(uint32_t)) != 0)
+    if(!option || (option->value.size() % sizeof(uint32_t)) != 0)
         return false;
-    const uint32_t *ptr = (const uint32_t*)option->value;
-    const uint32_t *end = ptr + (option->length / sizeof(uint32_t));
+    const uint32_t *ptr = (const uint32_t*)&option->value[0];
+    const uint32_t *end = ptr + (option->value.size() / sizeof(uint32_t));
     while(ptr < end)
         edges->push_back(Utils::net_to_host_l(*(ptr++)));
     return true;
@@ -212,9 +177,9 @@ void Tins::TCP::add_timestamp_option(uint32_t value, uint32_t reply) {
 
 bool Tins::TCP::search_timestamp_option(uint32_t *value, uint32_t *reply) {
     const TCPOption *option = search_option(TSOPT);
-    if(!option || option->length != (sizeof(uint32_t) << 1))
+    if(!option || option->value.size() != (sizeof(uint32_t) << 1))
         return false;
-    const uint32_t *ptr = (const uint32_t*)option->value;
+    const uint32_t *ptr = (const uint32_t*)&option->value[0];
     *value = Utils::net_to_host_l(*(ptr++));
     *reply = Utils::net_to_host_l(*(ptr));
     return true;
@@ -290,12 +255,8 @@ void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
 }
 
 void Tins::TCP::add_option(Option tcp_option, uint8_t length, const uint8_t *data) {
-    uint8_t *new_data = 0, padding;
-    if(data && length) {
-        new_data = new uint8_t[length];
-        memcpy(new_data, data, length);
-    }
-    _options.push_back(TCPOption(tcp_option, length, new_data));
+    uint8_t padding;
+    _options.push_back(TCPOption(tcp_option, length, data));
     
     _options_size += sizeof(uint8_t);
     // SACK_OK contains length but not data....
@@ -358,23 +319,16 @@ uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
     }
     else {
         buffer[0] = option;
-        buffer[1] = length + (sizeof(uint8_t) << 1);
-        if(value)
-            memcpy(buffer + 2, value, length);
+        buffer[1] = value.size() + (sizeof(uint8_t) << 1);
+        if(!value.empty())
+            std::copy(value.begin(), value.end(), buffer + 2);
         return buffer + buffer[1];
     }
 }
 
 void Tins::TCP::copy_fields(const TCP *other) {
     std::memcpy(&_tcp, &other->_tcp, sizeof(_tcp));
-    for(std::list<TCPOption>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it) {
-        TCPOption opt(it->option, it->length);
-        if(it->value) {
-            opt.value = new uint8_t[it->length];
-            std::memcpy(opt.value, it->value, it->length);
-        }
-        _options.push_back(opt);
-    }
+    _options = other->_options;
     _options_size = other->_options_size;
     _total_options_size = other->_total_options_size;
 }
