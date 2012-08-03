@@ -33,6 +33,27 @@ TEST_F(ICMPTest, DefaultConstructor) {
     EXPECT_EQ(icmp.mtu(), 0);
 }
 
+TEST_F(ICMPTest, CopyConstructor) {
+    ICMP icmp1(expected_packets[0], sizeof(expected_packets[0]));
+    ICMP icmp2(icmp1);
+    test_equals(icmp1, icmp2);
+}
+
+TEST_F(ICMPTest, CopyAssignmentOperator) {
+    ICMP icmp1(expected_packets[0], sizeof(expected_packets[0]));
+    ICMP icmp2;
+    icmp2 = icmp1;
+    test_equals(icmp1, icmp2);
+}
+
+TEST_F(ICMPTest, NestedCopy) {
+    ICMP *nested = new ICMP(expected_packets[0], sizeof(expected_packets[0]));
+    ICMP icmp1(expected_packets[0], sizeof(expected_packets[0]));
+    icmp1.inner_pdu(nested);
+    ICMP icmp2(icmp1);
+    test_equals(icmp1, icmp2);
+}
+
 TEST_F(ICMPTest, FlagConstructor) {
     ICMP icmp(ICMP::ECHO_REPLY);
     EXPECT_EQ(icmp.type(), ICMP::ECHO_REPLY);
@@ -168,15 +189,7 @@ void ICMPTest::test_equals(const ICMP &icmp1, const ICMP &icmp2) {
     EXPECT_EQ(icmp1.sequence(), icmp2.sequence());
     EXPECT_EQ(icmp1.pointer(), icmp2.pointer());
     EXPECT_EQ(icmp1.mtu(), icmp2.mtu());
-}
-
-TEST_F(ICMPTest, ClonePDU) {
-    ICMP icmp1;
-    icmp1.set_echo_request(0x34ab, 0x12f7);
-    
-    ICMP *icmp2 = static_cast<ICMP*>(icmp1.clone_pdu());
-    test_equals(icmp1, *icmp2);
-    delete icmp2;
+    EXPECT_EQ((bool)icmp1.inner_pdu(), (bool)icmp2.inner_pdu());
 }
 
 TEST_F(ICMPTest, Serialize) {

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <cstring>
 #include <string>
+#include <iostream>
 #include <stdint.h>
 #include "arp.h"
 #include "utils.h"
@@ -38,6 +39,7 @@ void ARPTest::test_equals(const ARP &arp1, const ARP &arp2) {
     EXPECT_EQ(arp1.target_ip_addr(), arp2.target_ip_addr());
     EXPECT_TRUE(memcmp(arp1.sender_hw_addr(), arp2.sender_hw_addr(), arp2.hw_addr_length()) == 0);
     EXPECT_TRUE(memcmp(arp1.target_hw_addr(), arp2.target_hw_addr(), arp2.hw_addr_length()) == 0);
+    EXPECT_EQ((bool)arp1.inner_pdu(), (bool)arp2.inner_pdu());
 }
 
 TEST_F(ARPTest, DefaultContructor) {
@@ -67,7 +69,6 @@ TEST_F(ARPTest, NestedCopy) {
     arp1.inner_pdu(nested_arp);
     ARP arp2(arp1);
     test_equals(arp1, arp2);
-    test_equals(arp1, *nested_arp);
 }
 
 TEST_F(ARPTest, CompleteContructor) {
@@ -146,23 +147,6 @@ TEST_F(ARPTest, Serialize) {
     EXPECT_TRUE(memcmp(buffer, buffer2, size) == 0);
     delete[] buffer;
     delete[] buffer2;
-}
-
-TEST_F(ARPTest, ClonePDU) {
-    ARP arp1(0x1234, 0xa3f1, hw_addr1, hw_addr2);
-    ARP *arp2 = static_cast<ARP*>(arp1.clone_pdu());
-    ASSERT_TRUE(arp2);
-    
-    EXPECT_EQ(arp1.opcode(), arp2->opcode());
-    ASSERT_EQ(arp1.hw_addr_length(), arp2->hw_addr_length());
-    EXPECT_EQ(arp1.hw_addr_format(), arp2->hw_addr_format());
-    ASSERT_EQ(arp1.prot_addr_length(), arp2->prot_addr_length());
-    EXPECT_EQ(arp1.prot_addr_format(), arp2->prot_addr_format());
-    EXPECT_EQ(arp1.sender_ip_addr(), arp2->sender_ip_addr());
-    EXPECT_EQ(arp1.target_ip_addr(), arp2->target_ip_addr());
-    EXPECT_TRUE(memcmp(arp1.sender_hw_addr(), arp2->sender_hw_addr(), arp2->hw_addr_length()) == 0);
-    EXPECT_TRUE(memcmp(arp1.target_hw_addr(), arp2->target_hw_addr(), arp2->hw_addr_length()) == 0);
-    delete arp2;
 }
 
 TEST_F(ARPTest, ConstructorFromBuffer) {

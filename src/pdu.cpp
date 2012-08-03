@@ -20,6 +20,7 @@
  */
 
 #include <cassert>
+#include <iostream>
 #include "utils.h"
 #include "pdu.h"
 #include "rawpdu.h"

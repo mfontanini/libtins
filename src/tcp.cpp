@@ -326,17 +326,3 @@ uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
     }
 }
 
-void Tins::TCP::copy_fields(const TCP *other) {
-    std::memcpy(&_tcp, &other->_tcp, sizeof(_tcp));
-    _options = other->_options;
-    _options_size = other->_options_size;
-    _total_options_size = other->_total_options_size;
-}
-
-Tins::PDU *Tins::TCP::clone_pdu() const {
-    TCP *new_pdu = new TCP();
-    new_pdu->copy_fields(this);
-    new_pdu->copy_inner_pdu(*this);
-    return new_pdu;
-}
-

@@ -31,6 +31,27 @@ TEST_F(IPTest, DefaultConstructor) {
     EXPECT_EQ(ip.pdu_type(), PDU::IP);
 }
 
+TEST_F(IPTest, CopyConstructor) {
+    IP ip1(expected_packet, sizeof(expected_packet));
+    IP ip2(ip1);
+    test_equals(ip1, ip2);
+}
+
+TEST_F(IPTest, CopyAssignmentOperator) {
+    IP ip1(expected_packet, sizeof(expected_packet));
+    IP ip2;
+    ip2 = ip1;
+    test_equals(ip1, ip2);
+}
+
+TEST_F(IPTest, NestedCopy) {
+    IP *nested = new IP(expected_packet, sizeof(expected_packet));
+    IP ip1;
+    ip1.inner_pdu(nested);
+    IP ip2(ip1);
+    test_equals(ip1, ip2);
+}
+
 TEST_F(IPTest, IPIntConstructor) {
     IP ip(0x23abcdef, 0xff1443ab);
     EXPECT_EQ(ip.dst_addr(), IPv4Address(0x23abcdef));
@@ -146,6 +167,7 @@ void IPTest::test_equals(const IP &ip1, const IP &ip2) {
     EXPECT_EQ(ip1.tos(), ip2.tos());
     EXPECT_EQ(ip1.ttl(), ip2.ttl());
     EXPECT_EQ(ip1.version(), ip2.version());
+    EXPECT_EQ((bool)ip1.inner_pdu(), (bool)ip2.inner_pdu());
 }
 
 TEST_F(IPTest, ConstructorFromBuffer) {

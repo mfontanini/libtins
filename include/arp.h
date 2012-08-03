@@ -61,13 +61,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         ARP(const uint8_t *buffer, uint32_t total_sz);
-        
-        /**
-         * \brief Copy constructor
-         * 
-         * \param other The object which will be copied.
-         */
-        //ARP(const ARP &other);
 
         /* Getters */
         /**
@@ -282,13 +275,13 @@ namespace Tins {
          * \sa PDU::clone_packet
          */
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
-
+        
         /**
-         * \brief Clones this PDU.
-         *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<ARP>();
+        }
     private:
         struct arphdr {
             uint16_t ar_hrd;	/* format of hardware address	*/
@@ -303,7 +296,6 @@ namespace Tins {
             uint32_t ar_tip;	/* target IP address		*/
         } __attribute__((__packed__));
 
-        void copy_fields(const ARP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         arphdr _arp;

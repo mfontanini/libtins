@@ -397,13 +397,13 @@ namespace Tins {
          * \return A pointer to the option, or 0 if it was not found.
          */
         const TCPOption *search_option(Option opt) const;
-
+        
         /**
-         * \brief Clones this PDU.
-         * 
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<TCP>();
+        }
     private:
         struct tcphdr {
             uint16_t sport;
@@ -441,8 +441,6 @@ namespace Tins {
         } __attribute__((packed));
 
         static const uint16_t DEFAULT_WINDOW;
-
-        void copy_fields(const TCP *other);
         
         template<class T> bool generic_search(Option opt, T *value) {
             const TCPOption *option = search_option(opt);

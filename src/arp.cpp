@@ -181,15 +181,4 @@ PDU* ARP::make_arp_reply(const string& iface, IPv4Address target,
     EthernetII* eth = new EthernetII(iface, hw_tgt, hw_snd, arp);
     return eth;
 }
-
-PDU *ARP::clone_pdu() const {
-    ARP *new_pdu = new ARP();
-    new_pdu->copy_fields(this);
-    new_pdu->copy_inner_pdu(*this);
-    return new_pdu;
-}
-
-void ARP::copy_fields(const ARP *other) {
-    std::memcpy(&_arp, &other->_arp, sizeof(_arp));
-}
 }

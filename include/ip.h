@@ -101,7 +101,7 @@ namespace Tins {
                 unsigned int op_class:2;
                 unsigned int number:5;
             #endif
-            } type;
+            } __attribute__((__packed__)) type;
             
             uint8_t* write(uint8_t* buffer);
             
@@ -115,8 +115,8 @@ namespace Tins {
              */
             uint8_t data_size() const;
         private:
-            uint8_t* optional_data, optional_data_size;
-        } __attribute__((__packed__));
+            std::vector<uint8_t> optional_data;
+        };
 
         /**
          * \brief Default constructor.
@@ -137,30 +137,12 @@ namespace Tins {
         IP(IPv4Address ip_dst, IPv4Address ip_src = 0, PDU *child = 0);
 
         /**
-         * \brief Copy constructor.
-         */
-        IP(const IP &other);
-
-        /**
          * \brief Constructor which creates an IP object from a buffer and adds all identifiable
          * PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         IP(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Destructor for IP objects.
-         *
-         * Destructs IP objects releasing the allocated memory for the options
-         * if options exist.
-         */
-        ~IP();
-
-        /**
-         * \brief Copy assignment operator.
-         */
-        IP &operator= (const IP &other);
 
         /* Getters */
 
@@ -169,73 +151,73 @@ namespace Tins {
          *
          * \return The number of dwords the header occupies in an uin8_t.
          */
-        inline uint8_t head_len() const { return this->_ip.ihl; }
+        uint8_t head_len() const { return this->_ip.ihl; }
 
         /**
          * \brief Getter for the type of service field.
          *
          * \return The this IP PDU's type of service.
          */
-        inline uint8_t tos() const { return _ip.tos; }
+        uint8_t tos() const { return _ip.tos; }
 
         /**
          * \brief Getter for the total length field.
          *
          * \return The total length of this IP PDU.
          */
-        inline uint16_t tot_len() const { return Utils::net_to_host_s(_ip.tot_len); }
+        uint16_t tot_len() const { return Utils::net_to_host_s(_ip.tot_len); }
 
         /**
          * \brief Getter for the id field.
          *
          * \return The id for this IP PDU.
          */
-        inline uint16_t id() const { return Utils::net_to_host_s(_ip.id); }
+        uint16_t id() const { return Utils::net_to_host_s(_ip.id); }
 
         /**
          * \brief Getter for the fragment offset field.
          *
          * \return The fragment offset for this IP PDU.
          */
-        inline uint16_t frag_off() const { return Utils::net_to_host_s(_ip.frag_off); }
+        uint16_t frag_off() const { return Utils::net_to_host_s(_ip.frag_off); }
 
         /**
          * \brief Getter for the time to live field.
          *
          * \return The time to live for this IP PDU.
          */
-        inline uint8_t ttl() const { return _ip.ttl; }
+        uint8_t ttl() const { return _ip.ttl; }
 
         /**
          * \brief Getter for the protocol field.
          *
          * \return The protocol for this IP PDU.
          */
-        inline uint8_t protocol() const { return _ip.protocol; }
+        uint8_t protocol() const { return _ip.protocol; }
 
         /**
          * \brief Getter for the checksum field.
          *
          * \return The checksum for this IP PDU.
          */
-        inline uint16_t check() const { return Utils::net_to_host_s(_ip.check); }
+        uint16_t check() const { return Utils::net_to_host_s(_ip.check); }
 
         /**
          * \brief Getter for the source address field.
          *
          * \return The source address for this IP PDU.
          */
-        inline IPv4Address src_addr() const { return Utils::net_to_host_l(_ip.saddr); }
+        IPv4Address src_addr() const { return Utils::net_to_host_l(_ip.saddr); }
 
         /** \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
-        inline IPv4Address dst_addr() const  { return Utils::net_to_host_l(_ip.daddr); }
+        IPv4Address dst_addr() const  { return Utils::net_to_host_l(_ip.daddr); }
         
         /** \brief Getter for the version field.
          * \return The version for this IP PDU.
          */
-        inline uint8_t version() const  { return _ip.version; }
+        uint8_t version() const  { return _ip.version; }
 
         /* Setters */
 
@@ -403,11 +385,11 @@ namespace Tins {
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
 
         /**
-         * \brief Clones this PDU.
-         *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<IP>();
+        }
     private:
         static const uint8_t DEFAULT_TTL;
 
@@ -433,10 +415,8 @@ namespace Tins {
             /*The options start here. */
         } __attribute__((__packed__));
 
-        void copy_fields(const IP *other);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-        void cleanup();
 
         iphdr _ip;
         std::list<IPOption> _ip_options;

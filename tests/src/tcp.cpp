@@ -48,7 +48,6 @@ TEST_F(TCPTest, NestedCopy) {
     tcp1.inner_pdu(nested_tcp);
     TCP tcp2(tcp1);
     test_equals(tcp1, tcp2);
-    test_equals(tcp1, *nested_tcp);
 }
 
 TEST_F(TCPTest, CompleteConstructor) {
@@ -185,6 +184,7 @@ void TCPTest::test_equals(const TCP &tcp1, const TCP &tcp2) {
     EXPECT_EQ(tcp1.check(), tcp2.check());
     EXPECT_EQ(tcp1.urg_ptr(), tcp2.urg_ptr());
     EXPECT_EQ(tcp1.data_offset(), tcp2.data_offset());
+    EXPECT_EQ((bool)tcp1.inner_pdu(), (bool)tcp2.inner_pdu());
 }
 
 // This is not working, but i don't want to fix it right now.

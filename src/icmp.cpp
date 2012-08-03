@@ -57,10 +57,6 @@ Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_ICMP) {
         inner_pdu(new RawPDU(buffer + sizeof(icmphdr), total_sz));
 }
 
-Tins::ICMP::ICMP(const ICMP &other) : PDU(other) {
-    copy_fields(&other);
-}
-
 void Tins::ICMP::code(uint8_t new_code) {
     _icmp.code = new_code;
 }
@@ -202,15 +198,4 @@ Tins::PDU *Tins::ICMP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     cloned = new ICMP(ptr, std::min(total_sz, (uint32_t)sizeof(_icmp)));
     cloned->inner_pdu(child);
     return cloned;
-}
-
-void Tins::ICMP::copy_fields(const ICMP *other) {
-    std::memcpy(&_icmp, &other->_icmp, sizeof(_icmp));
-}
-
-Tins::PDU *Tins::ICMP::clone_pdu() const {
-    ICMP *new_pdu = new ICMP();
-    new_pdu->copy_fields(this);
-    new_pdu->copy_inner_pdu(*this);
-    return new_pdu;
 }

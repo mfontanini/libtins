@@ -270,7 +270,8 @@ namespace Tins {
         void copy_inner_pdu(const PDU &pdu);
 
 
-        /** \brief Serializes this PDU and propagates this action to child PDUs.
+        /** 
+         * \brief Serializes this PDU and propagates this action to child PDUs.
          *
          * \param buffer The buffer in which to store this PDU's serialization.
          * \param total_sz The total size of the buffer.
@@ -278,7 +279,8 @@ namespace Tins {
          */
         void serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
-        /** \brief Clones the inner pdu(if any).
+        /** 
+         * \brief Clones the inner pdu(if any).
          *
          * This method clones the inner pdu using data from a buffer.
          * \param ptr The pointer from which the child PDU must be cloned.
@@ -287,7 +289,8 @@ namespace Tins {
          */
         PDU *clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz);
 
-        /** \brief Serializes this TCP PDU.
+        /** 
+         * \brief Serializes this TCP PDU.
          *
          * Each PDU must override this method and implement it's own
          * serialization.
@@ -296,6 +299,16 @@ namespace Tins {
          * \param parent The PDU that's one level below this one on the stack. Might be 0.
          */
         virtual void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) = 0;
+        
+        /**
+         * \brief Generic clone pdu method.
+         */
+        template<class T>
+        T *do_clone_pdu() const {
+            T *new_pdu = new T(*static_cast<const T*>(this));
+            new_pdu->copy_inner_pdu(*this);
+            return new_pdu;
+        }
     private:
         uint32_t _flag;
         PDU *_inner_pdu;

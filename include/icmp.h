@@ -66,13 +66,6 @@ namespace Tins {
         ICMP(const uint8_t *buffer, uint32_t total_sz);
         
         /**
-         * \brief Copy constructor
-         * 
-         * \param other The object which will be copied.
-         */
-        ICMP(const ICMP &other);
-        
-        /**
          * \brief Sets the code field.
          *
          * \param new_code The code which will be stored in the ICMP struct.
@@ -305,11 +298,11 @@ namespace Tins {
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
         
         /**
-         * \brief Clones this PDU.
-         * 
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<ICMP>();
+        }
     private:
         static uint16_t global_id, global_seq;
 
@@ -330,8 +323,6 @@ namespace Tins {
                 uint8_t pointer;
             } un;
         } __attribute__((__packed__));
-
-        void copy_fields(const ICMP *other);
         
         /** \brief Serialices this ICMP PDU.
          * \param buffer The buffer in which the PDU will be serialized.

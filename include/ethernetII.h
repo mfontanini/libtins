@@ -80,13 +80,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         EthernetII(const uint8_t *buffer, uint32_t total_sz);
-        
-        /**
-         * \brief EthernetII copy constructor.
-         * 
-         * \param other The packet which will be copied.
-         */
-        EthernetII(const EthernetII &other);
 
         /* Getters */
         /**
@@ -94,27 +87,27 @@ namespace Tins {
          *
          * \return Returns the destination's mac address as a constant uint8_t pointer.
          */
-        inline const uint8_t* dst_addr() const { return _eth.dst_mac; }
+        const uint8_t* dst_addr() const { return _eth.dst_mac; }
 
         /**
          * \brief Getter for the source's mac address.
          *
          * \return Returns the source's mac address as a constant uint8_t pointer.
          */
-        inline const uint8_t* src_addr() const { return _eth.src_mac; }
+        const uint8_t* src_addr() const { return _eth.src_mac; }
 
         /**
          * \brief Getter for the interface.
          *
          * \return Returns the interface's index as an uint32_t.
          */
-        inline uint32_t iface() const { return this->_iface_index; }
+        uint32_t iface() const { return _iface_index; }
 
         /**
          * \brief Getter for the payload_type
          * \return The payload type.
          */
-        inline uint16_t payload_type() const { return Utils::net_to_host_s(_eth.payload_type); };
+        uint16_t payload_type() const { return Utils::net_to_host_s(_eth.payload_type); };
 
         /* Setters */
 
@@ -199,11 +192,11 @@ namespace Tins {
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
 
         /**
-         * \brief Clones this PDU.
-         *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<EthernetII>();
+        }
     private:
         /**
          * Struct that represents the Ethernet II header
@@ -213,10 +206,8 @@ namespace Tins {
             uint8_t src_mac[ADDR_SIZE];
             uint16_t payload_type;
         } __attribute__((__packed__));
-
-        void copy_fields(const EthernetII *other);
+        
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-
 
         ethhdr _eth;
         uint32_t _iface_index;
