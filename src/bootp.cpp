@@ -117,6 +117,8 @@ void Tins::BootP::copy_bootp_fields(const BootP *other) {
         _vend = new uint8_t[_vend_size];
         std::memcpy(_vend, other->_vend, _vend_size);
     }
+    else
+        _vend = 0;
 }
 
 Tins::PDU *Tins::BootP::clone_pdu() const {

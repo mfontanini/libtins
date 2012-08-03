@@ -26,19 +26,24 @@
 #include "dhcp.h"
 #include "ethernetII.h"
 
-const uint32_t Tins::DHCP::MAX_DHCP_SIZE = 312;
+using std::string;
+using std::list;
+using std::runtime_error;
 
-using namespace std;
+namespace Tins {
+const uint32_t DHCP::MAX_DHCP_SIZE = 312;
 
 /* Magic cookie: uint32_t.
  * end of options: 1 byte. */
-Tins::DHCP::DHCP() : _size(sizeof(uint32_t) + 1) {
+DHCP::DHCP() : _size(sizeof(uint32_t) + 1) {
     opcode(BOOTREQUEST);
     htype(1); //ethernet
     hlen(EthernetII::ADDR_SIZE);
 }
 
-Tins::DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) : BootP(buffer, total_sz, 0), _size(sizeof(uint32_t) + 1){
+DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) 
+: BootP(buffer, total_sz, 0), _size(sizeof(uint32_t) + 1)
+{
     buffer += BootP::header_size() - vend_size();
     total_sz -= BootP::header_size() - vend_size();
     uint8_t args[2] = {0};
@@ -70,33 +75,34 @@ Tins::DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) : BootP(buffer, total
     }
 }
 
-Tins::DHCP::DHCP(const DHCP &other) : BootP(other) {
+DHCP::DHCP(const DHCP &other) : BootP(other) {
     copy_fields(&other);
 }
 
-Tins::DHCP &Tins::DHCP::operator= (const DHCP &other) {
+DHCP &DHCP::operator= (const DHCP &other) {
     copy_fields(&other);
     copy_inner_pdu(other);
     return *this;
 }
 
-Tins::DHCP::~DHCP() {
-    while(_options.size()) {
+DHCP::~DHCP() {
+    /*while(_options.size()) {
         delete[] _options.front().value;
         _options.pop_front();
-    }
+    }*/
 }
 
-Tins::DHCP::DHCPOption::DHCPOption(uint8_t opt, uint8_t len, const uint8_t *val) : option(opt), length(len) {
-    if(len) {
+DHCP::DHCPOption::DHCPOption(uint8_t opt, uint8_t len, const uint8_t *val) 
+: option(opt), value(val, val ? (val + len) : val) {
+    /*if(len) {
         value = new uint8_t[len];    
         std::memcpy(value, val, len);
     }
     else
-        value = 0;
+        value = 0;*/
 }
 
-bool Tins::DHCP::add_option(Options opt, uint8_t len, const uint8_t *val) {
+bool DHCP::add_option(Options opt, uint8_t len, const uint8_t *val) {
     uint32_t opt_size = len + (sizeof(uint8_t) << 1);
     if(_size + opt_size > MAX_DHCP_SIZE)
         return false;
@@ -105,59 +111,59 @@ bool Tins::DHCP::add_option(Options opt, uint8_t len, const uint8_t *val) {
     return true;
 }
 
-const Tins::DHCP::DHCPOption *Tins::DHCP::search_option(Options opt) const{
-    for(std::list<DHCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+const DHCP::DHCPOption *DHCP::search_option(Options opt) const{
+    for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         if(it->option == opt)
             return &(*it);
     }
     return 0;
 }
 
-bool Tins::DHCP::add_type_option(Flags type) {
+bool DHCP::add_type_option(Flags type) {
     return add_option(DHCP_MESSAGE_TYPE, sizeof(uint8_t), (const uint8_t*)&type);
 }
 
-bool Tins::DHCP::search_type_option(uint8_t *value) {
+bool DHCP::search_type_option(uint8_t *value) {
     return generic_search(DHCP_MESSAGE_TYPE, value);
 }
 
-bool Tins::DHCP::add_server_identifier(uint32_t ip) {
+bool DHCP::add_server_identifier(uint32_t ip) {
     ip = Utils::net_to_host_l(ip);
     return add_option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), (const uint8_t*)&ip);
 }
 
-bool Tins::DHCP::search_server_identifier(uint32_t *value) {
+bool DHCP::search_server_identifier(uint32_t *value) {
     return generic_search(DHCP_SERVER_IDENTIFIER, value);
 }
 
-bool Tins::DHCP::add_lease_time(uint32_t time) {
+bool DHCP::add_lease_time(uint32_t time) {
     time = Utils::net_to_host_l(time);
     return add_option(DHCP_LEASE_TIME, sizeof(uint32_t), (const uint8_t*)&time);
 }
 
-bool Tins::DHCP::search_lease_time(uint32_t *value) {
+bool DHCP::search_lease_time(uint32_t *value) {
     return generic_search(DHCP_LEASE_TIME, value);
 }
 
-bool Tins::DHCP::add_renewal_time(uint32_t time) {
+bool DHCP::add_renewal_time(uint32_t time) {
     time = Utils::net_to_host_l(time);
     return add_option(DHCP_RENEWAL_TIME, sizeof(uint32_t), (const uint8_t*)&time);
 }
         
-bool Tins::DHCP::search_renewal_time(uint32_t *value) {
+bool DHCP::search_renewal_time(uint32_t *value) {
     return generic_search(DHCP_RENEWAL_TIME, value);
 }
 
-bool Tins::DHCP::add_subnet_mask(uint32_t mask) {
+bool DHCP::add_subnet_mask(uint32_t mask) {
     mask = Utils::net_to_host_l(mask);
     return add_option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask);
 }
 
-bool Tins::DHCP::search_subnet_mask(uint32_t *value) {
+bool DHCP::search_subnet_mask(uint32_t *value) {
     return generic_search(SUBNET_MASK, value);
 }
 
-bool Tins::DHCP::add_routers_option(const list<uint32_t> &routers) {
+bool DHCP::add_routers_option(const list<uint32_t> &routers) {
     uint32_t size;
     uint8_t *buffer = serialize_list(routers, size);
     bool ret = add_option(ROUTERS, size, buffer);
@@ -165,11 +171,11 @@ bool Tins::DHCP::add_routers_option(const list<uint32_t> &routers) {
     return ret;
 }
 
-bool Tins::DHCP::search_routers_option(std::list<uint32_t> *routers) {
+bool DHCP::search_routers_option(std::list<uint32_t> *routers) {
     return generic_search(ROUTERS, routers);
 }
 
-bool Tins::DHCP::add_dns_option(const list<uint32_t> &dns) {
+bool DHCP::add_dns_option(const list<uint32_t> &dns) {
     uint32_t size;
     uint8_t *buffer = serialize_list(dns, size);
     bool ret = add_option(DOMAIN_NAME_SERVERS, size, buffer);
@@ -177,46 +183,46 @@ bool Tins::DHCP::add_dns_option(const list<uint32_t> &dns) {
     return ret;
 }
 
-bool Tins::DHCP::search_dns_option(std::list<uint32_t> *dns) {
+bool DHCP::search_dns_option(std::list<uint32_t> *dns) {
     return generic_search(DOMAIN_NAME_SERVERS, dns);
 }
 
-bool Tins::DHCP::add_broadcast_option(uint32_t addr) {
+bool DHCP::add_broadcast_option(uint32_t addr) {
     addr = Utils::net_to_host_l(addr);
     return add_option(BROADCAST_ADDRESS, sizeof(uint32_t), (uint8_t*)&addr);
 }
 
-bool Tins::DHCP::search_broadcast_option(uint32_t *value) {
+bool DHCP::search_broadcast_option(uint32_t *value) {
     return generic_search(BROADCAST_ADDRESS, value);
 }
 
-bool Tins::DHCP::add_requested_ip_option(uint32_t addr) {
+bool DHCP::add_requested_ip_option(uint32_t addr) {
     addr = Utils::net_to_host_l(addr);
     return add_option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), (uint8_t*)&addr);
 }
 
-bool Tins::DHCP::search_requested_ip_option(uint32_t *value) {
+bool DHCP::search_requested_ip_option(uint32_t *value) {
     return generic_search(DHCP_REQUESTED_ADDRESS, value);
 }
 
-bool Tins::DHCP::add_domain_name(const string &name) {
+bool DHCP::add_domain_name(const string &name) {
     return add_option(DOMAIN_NAME, name.size(), (const uint8_t*)name.c_str());
 }
 
-bool Tins::DHCP::search_domain_name(std::string *value) {
+bool DHCP::search_domain_name(std::string *value) {
     return generic_search(DOMAIN_NAME, value);
 }
 
-bool Tins::DHCP::add_rebind_time(uint32_t time) {
+bool DHCP::add_rebind_time(uint32_t time) {
     time = Utils::net_to_host_l(time);
     return add_option(DHCP_REBINDING_TIME, sizeof(uint32_t), (uint8_t*)&time);
 }
         
-bool Tins::DHCP::search_rebind_time(uint32_t *value) {
+bool DHCP::search_rebind_time(uint32_t *value) {
     return generic_search(DHCP_REBINDING_TIME, value);
 }
 
-uint8_t *Tins::DHCP::serialize_list(const list<uint32_t> &int_list, uint32_t &sz) {
+uint8_t *DHCP::serialize_list(const list<uint32_t> &int_list, uint32_t &sz) {
     uint8_t *buffer = new uint8_t[int_list.size() * sizeof(uint32_t)];
     uint32_t *ptr = (uint32_t*)buffer;
     for(list<uint32_t>::const_iterator it = int_list.begin(); it != int_list.end(); ++it)
@@ -225,11 +231,11 @@ uint8_t *Tins::DHCP::serialize_list(const list<uint32_t> &int_list, uint32_t &sz
     return buffer;
 }
 
-uint32_t Tins::DHCP::header_size() const {
+uint32_t DHCP::header_size() const {
     return BootP::header_size() - vend_size() + _size;
 }
 
-void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= header_size());
     uint8_t *result = 0;
     if(_size) {
@@ -237,12 +243,11 @@ void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
         uint8_t *ptr = result + sizeof(uint32_t);
         // Magic cookie
         *((uint32_t*)result) = Utils::net_to_host_l(0x63825363);
-        for(std::list<DHCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+        for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
             *(ptr++) = it->option;
-            *(ptr++) = it->length;
-            if(it->length)
-                std::memcpy(ptr, it->value, it->length);
-            ptr += it->length;
+            *(ptr++) = it->value.size();
+            std::copy(it->value.begin(), it->value.end(), ptr);
+            ptr += it->value.size();
         }
         // End of options
         result[_size-1] = END;
@@ -252,25 +257,26 @@ void Tins::DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     delete[] result;
 }
 
-void Tins::DHCP::copy_fields(const DHCP *other) {
+void DHCP::copy_fields(const DHCP *other) {
     BootP::copy_bootp_fields(other);
     _size = other->_size;
-    for(std::list<DHCPOption>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
-        _options.push_back(DHCPOption(it->option, it->length, it->value));
+    for(options_type::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
+        _options.push_back(*it);
+        //_options.push_back(DHCPOption(it->option, it->length, it->value));
 }
 
-Tins::PDU *Tins::DHCP::clone_pdu() const {
+PDU *DHCP::clone_pdu() const {
     DHCP *new_pdu = new DHCP();
     new_pdu->copy_fields(this);
     return new_pdu;
 }
 
-bool Tins::DHCP::generic_search(Options opt, std::list<uint32_t> *container) {
+bool DHCP::generic_search(Options opt, std::list<uint32_t> *container) {
     const DHCPOption *option = search_option(opt);
     if(!option)
         return false;
-    const uint32_t *ptr = (const uint32_t*)option->value;
-    uint32_t len = option->length;
+    const uint32_t *ptr = (const uint32_t*)&option->value[0];
+    uint32_t len = option->value.size();
     if((len % sizeof(uint32_t)) != 0)
         return false;
     while(len) {
@@ -280,18 +286,20 @@ bool Tins::DHCP::generic_search(Options opt, std::list<uint32_t> *container) {
     return true;
 }
 
-bool Tins::DHCP::generic_search(Options opt, std::string *str) {
+bool DHCP::generic_search(Options opt, std::string *str) {
     const DHCPOption *option = search_option(opt);
     if(!option)
         return false;
-    *str = string((const char*)option->value, option->length);
+    //*str = string((const char*)option->value, option->length);
+    *str = string(option->value.begin(), option->value.end());
     return true;
 }
 
-bool Tins::DHCP::generic_search(Options opt, uint32_t *value) {
+bool DHCP::generic_search(Options opt, uint32_t *value) {
     if(generic_search<uint32_t>(opt, value)) {
         *value = Utils::net_to_host_l(*value);
         return true;
     }
     return false;
+}
 }

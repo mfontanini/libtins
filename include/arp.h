@@ -67,7 +67,7 @@ namespace Tins {
          * 
          * \param other The object which will be copied.
          */
-        ARP(const ARP &other);
+        //ARP(const ARP &other);
 
         /* Getters */
         /**
@@ -75,63 +75,63 @@ namespace Tins {
          *
          * \return Returns the sender's hardware address in an uint8_t*.
          */
-        inline const uint8_t* sender_hw_addr() { return this->_arp.ar_sha; }
+        const uint8_t* sender_hw_addr() const { return this->_arp.ar_sha; }
 
         /**
          * \brief Getter for the sender's IP address.
          *
          * \return Returns the sender's IP address in an uint32_t.
          */
-        inline IPv4Address sender_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_sip); }
+        IPv4Address sender_ip_addr() const { return Utils::net_to_host_l(this->_arp.ar_sip); }
 
         /**
          * \brief Getter for the target's hardware address.
          *
          * \return Returns the target's hardware address in an uint8_t*.
          */
-        inline const uint8_t* target_hw_addr() { return this->_arp.ar_tha; }
+        const uint8_t* target_hw_addr() const { return this->_arp.ar_tha; }
 
         /**
          * \brief Getter for the target's IP address.
          *
          * \return Returns the target's IP address in an uint32_t.
          */
-        inline IPv4Address target_ip_addr() { return Utils::net_to_host_l(this->_arp.ar_tip); }
+        IPv4Address target_ip_addr() const { return Utils::net_to_host_l(this->_arp.ar_tip); }
 
         /**
          * \brief Getter for the hardware address format.
          *
          * \return Returns the hardware address' format in an uint16_t.
          */
-        inline uint16_t hw_addr_format() { return Utils::net_to_host_s(this->_arp.ar_hrd); }
+        uint16_t hw_addr_format() const { return Utils::net_to_host_s(this->_arp.ar_hrd); }
 
         /**
          * \brief Getter for the protocol address format.
          *
          * \return Returns the protocol address' format in an uint16_t.
          */
-        inline uint16_t prot_addr_format() { return Utils::net_to_host_s(this->_arp.ar_pro); }
+        uint16_t prot_addr_format() const { return Utils::net_to_host_s(this->_arp.ar_pro); }
 
         /**
          * \brief Getter for the hardware address length.
          *
          * \return Returns the hardware address' length in an uint8_t.
          */
-        inline uint8_t hw_addr_length() { return this->_arp.ar_hln; }
+        uint8_t hw_addr_length() const { return this->_arp.ar_hln; }
 
         /**
          * \brief Getter for the protocol address length.
          *
          * \return Returns the protocol address' length in an uint8_t.
          */
-        inline uint8_t prot_addr_length() { return this->_arp.ar_pln; }
+        uint8_t prot_addr_length() const { return this->_arp.ar_pln; }
 
         /**
          * \brief Getter for the ARP opcode.
          *
          * \return Returns the ARP opcode in an uint16_t.
          */
-        inline uint16_t opcode() { return Utils::net_to_host_s(this->_arp.ar_op); }
+        uint16_t opcode() const { return Utils::net_to_host_s(this->_arp.ar_op); }
 
         /** \brief Getter for the header size.
          * \return Returns the ARP header size.

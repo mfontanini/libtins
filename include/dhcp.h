@@ -24,6 +24,7 @@
 
 
 #include <list>
+#include <vector>
 #include <string>
 #include "bootp.h"
 
@@ -131,19 +132,6 @@ namespace Tins {
          * \brief DHCP options struct.
          */
         struct DHCPOption {
-            /** 
-             * \brief The option number.
-             */
-            uint8_t option;
-            /** 
-             * \brief The value's length in bytes.
-             */
-            uint8_t length;
-            /** 
-             * \brief The option's value.
-             */
-            uint8_t *value;
-            
             /**
              * \brief Creates an instance of DHCPOption.
              * 
@@ -154,7 +142,23 @@ namespace Tins {
              * \param val The option's value.
              */
             DHCPOption(uint8_t opt, uint8_t len, const uint8_t *val);
+            
+            /** 
+             * \brief The option number.
+             */
+            uint8_t option;
+            /** 
+             * \brief The value's length in bytes.
+             */
+            //uint8_t length;
+            /** 
+             * \brief The option's value.
+             */
+            //uint8_t *value;
+            std::vector<uint8_t> value;
         };
+        
+        typedef std::list<DHCPOption> options_type;
         
         /** 
          * \brief Creates an instance of DHCP.
@@ -366,7 +370,7 @@ namespace Tins {
         /** \brief Getter for the options list.
          * \return The option list.
          */
-        const std::list<DHCPOption> options() const { return _options; }
+        const options_type options() const { return _options; }
         
         /**
          * \brief Getter for the PDU's type.
@@ -395,8 +399,8 @@ namespace Tins {
         
         template<class T> bool generic_search(Options opt, T *value) {
             const DHCPOption *option = search_option(opt);
-            if(option && option->length == sizeof(T)) {
-                *value = *(T*)option->value;
+            if(option && option->value.size() == sizeof(T)) {
+                *value = *(T*)&option->value[0];
                 return true;
             }
             return false;
@@ -408,7 +412,7 @@ namespace Tins {
         
         uint8_t *serialize_list(const std::list<uint32_t> &int_list, uint32_t &sz);
         
-        std::list<DHCPOption> _options;
+        options_type _options;
         uint32_t _size;
     };
 };

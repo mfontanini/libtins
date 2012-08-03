@@ -172,4 +172,5 @@ TEST_F(IPTest, ConstructorFromBuffer) {
     ASSERT_TRUE(buffer);
     
     IP ip2(buffer, size);
+    delete[] buffer;
 }

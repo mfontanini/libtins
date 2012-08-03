@@ -42,6 +42,15 @@ TEST_F(TCPTest, CopyAssignmentOperator) {
     test_equals(tcp1, tcp2);
 }
 
+TEST_F(TCPTest, NestedCopy) {
+    TCP *nested_tcp = new TCP(0x6d1f, 0x78f2);
+    TCP tcp1(0x6d1f, 0x78f2);
+    tcp1.inner_pdu(nested_tcp);
+    TCP tcp2(tcp1);
+    test_equals(tcp1, tcp2);
+    test_equals(tcp1, *nested_tcp);
+}
+
 TEST_F(TCPTest, CompleteConstructor) {
     TCP tcp(0x6d1f, 0x78f2);
     EXPECT_EQ(tcp.dport(), 0x6d1f);

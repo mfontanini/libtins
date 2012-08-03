@@ -64,6 +64,23 @@ TEST_F(DHCPTest, DefaultConstructor) {
     EXPECT_EQ(dhcp.hlen(), EthernetII::ADDR_SIZE);
 }
 
+TEST_F(DHCPTest, CopyConstructor) {
+    DHCP dhcp1(expected_packet, sizeof(expected_packet));
+    DHCP dhcp2(dhcp1);
+    test_equals(dhcp1, dhcp2);
+}
+
+TEST_F(DHCPTest, CopyAssignmentOperator) {
+    DHCP dhcp1(expected_packet, sizeof(expected_packet));
+    DHCP dhcp2 = dhcp1;
+    test_equals(dhcp1, dhcp2);
+}
+
+TEST_F(DHCPTest, NestedCopy) {
+    
+}
+
+
 TEST_F(DHCPTest, OpCode) {
     DHCP dhcp;
     dhcp.opcode(0x71);
@@ -152,9 +169,9 @@ void DHCPTest::test_option(const DHCP &dhcp, DHCP::Options opt, uint32_t len, ui
     const DHCP::DHCPOption *option = dhcp.search_option(opt);
     ASSERT_TRUE(option != 0);
     EXPECT_EQ(option->option, opt);
-    EXPECT_EQ(option->length, len);
+    ASSERT_EQ(option->value.size(), len);
     if(len)
-        EXPECT_TRUE(memcmp(option->value, value, len) == 0);
+        EXPECT_TRUE(std::equal(option->value.begin(), option->value.end(), value));
 }
 
 TEST_F(DHCPTest, TypeOption) {
@@ -261,8 +278,8 @@ void DHCPTest::test_equals(const DHCP &dhcp1, const DHCP &dhcp2) {
     it2 = options2.begin();
     while(it1 != options1.end()) {
         EXPECT_EQ(it1->option, it2->option);
-        ASSERT_EQ(it1->length, it2->length);
-        EXPECT_TRUE(memcmp(it1->value, it2->value, it1->length) == 0);
+        ASSERT_EQ(it1->value.size(), it2->value.size());
+        EXPECT_TRUE(std::equal(it1->value.begin(), it1->value.end(), it2->value.begin()));
         it1++; it2++;
     }
 }
@@ -278,12 +295,12 @@ TEST_F(DHCPTest, ConstructorFromBuffer) {
     EXPECT_EQ(dhcp1.xid(), 0x3fab23de);
     EXPECT_EQ(dhcp1.secs(), 0x9f1a);
     EXPECT_EQ(dhcp1.padding(), 0);
-    EXPECT_EQ(dhcp1.ciaddr(), Utils::ip_to_int("192.168.0.102"));
-    EXPECT_EQ(dhcp1.yiaddr(), Utils::ip_to_int("243.22.34.98"));
-    EXPECT_EQ(dhcp1.giaddr(), Utils::ip_to_int("123.43.55.254"));
-    EXPECT_EQ(dhcp1.siaddr(), Utils::ip_to_int("167.32.11.154"));
+    EXPECT_EQ(dhcp1.ciaddr(), IPv4Address("192.168.0.102"));
+    EXPECT_EQ(dhcp1.yiaddr(), IPv4Address("243.22.34.98"));
+    EXPECT_EQ(dhcp1.giaddr(), IPv4Address("123.43.55.254"));
+    EXPECT_EQ(dhcp1.siaddr(), IPv4Address("167.32.11.154"));
     ASSERT_TRUE(dhcp1.search_server_identifier(&ip));
-    EXPECT_EQ(ip, Utils::net_to_host_l(Utils::ip_to_int("192.168.4.2")));
+    EXPECT_EQ(ip, Utils::net_to_host_l(IPv4Address("192.168.4.2")));
 
     uint32_t size;
     uint8_t *buffer = dhcp1.serialize(size);
