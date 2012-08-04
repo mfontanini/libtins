@@ -136,7 +136,7 @@ uint32_t Tins::DNS::header_size() const {
 }
 
 void Tins::DNS::id(uint16_t new_id) {
-    dns.id = new_id;
+    dns.id = Utils::net_to_host_s(new_id);
 }
 
 void Tins::DNS::type(QRType new_qr) {
@@ -406,7 +406,7 @@ void Tins::DNS::build_suffix_map() {
 void Tins::DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
     uint32_t i(0);
     while(i < sz) {
-        if(i)
+        if(i && ptr[i])
             out.push_back('.');
         if((ptr[i] & 0xc0)) {
             uint16_t index = Utils::net_to_host_s(*((uint16_t*)(ptr + i)));

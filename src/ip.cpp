@@ -65,10 +65,11 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz)
     if(total_sz < head_len() * sizeof(uint32_t))
         throw std::runtime_error(msg);
     buffer += head_len() * sizeof(uint32_t);
+    
     this->_options_size = 0;
     this->_padded_options_size = head_len() * sizeof(uint32_t) - sizeof(iphdr);
     /* While the end of the options is not reached read an option */
-    while (total_sz && ptr_buffer < buffer && (*ptr_buffer != 0)) {
+    while (ptr_buffer < buffer && (*ptr_buffer != 0)) {
         IPOption opt_to_add;
         memcpy(&opt_to_add.type, ptr_buffer, sizeof(uint8_t));
         ptr_buffer++;
@@ -91,21 +92,24 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz)
             case DPS:
             case UMP:
             case QS:
-                if(!total_sz || *ptr_buffer == 0)
+                if(ptr_buffer == buffer || *ptr_buffer == 0)
                     throw std::runtime_error(msg);
+                    
                 {
                     const uint8_t data_size = *ptr_buffer - 1;
                     if(data_size > 0) {
-                        if(total_sz < data_size)
+                        if(buffer - ptr_buffer < data_size)
                             throw std::runtime_error(msg);
                         opt_to_add.optional_data.assign(ptr_buffer, ptr_buffer + data_size);
                     }
                 }
+                
                 ptr_buffer += opt_to_add.optional_data.size();
         }
         this->_ip_options.push_back(opt_to_add);
         this->_options_size += opt_to_add.optional_data.size() + 1;
     }
+    // check this line PLX
     total_sz -= head_len() * sizeof(uint32_t);
     if (total_sz) {
         switch(_ip.protocol) {

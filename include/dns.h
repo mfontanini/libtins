@@ -163,7 +163,7 @@ namespace Tins {
          * 
          * \return uint16_t containing the value of the id field.
          */
-        uint16_t id() { return dns.id; }
+        uint16_t id() const { return Utils::net_to_host_s(dns.id); }
         
         /**
          * \brief Setter for the query response field.
@@ -171,14 +171,14 @@ namespace Tins {
          * \return QRType containing the value of the query response
          * field.
          */
-        QRType type() { return static_cast<QRType>(dns.qr); }
+        QRType type() const { return static_cast<QRType>(dns.qr); }
         
         /**
          * \brief Setter for the opcode field.
          * 
          * \return uint8_t containing the value of the opcode field.
          */
-        uint8_t opcode() { return dns.opcode; }
+        uint8_t opcode() const { return dns.opcode; }
         
         /**
          * \brief Setter for the authoritative answer field.
@@ -186,14 +186,14 @@ namespace Tins {
          * \return uint8_t containing the value of the authoritative 
          * answer field.
          */
-        uint8_t authoritative_answer() { return dns.aa; }
+        uint8_t authoritative_answer() const { return dns.aa; }
         
         /**
          * \brief Setter for the truncated field.
          * 
          * \return uint8_t containing the value of the truncated field.
          */
-        uint8_t truncated() { return dns.tc; }
+        uint8_t truncated() const { return dns.tc; }
         
         /**
          * \brief Setter for the recursion desired field.
@@ -201,7 +201,7 @@ namespace Tins {
          * \return uint8_t containing the value of the recursion
          * desired field.
          */
-        uint8_t recursion_desired() { return dns.rd; }
+        uint8_t recursion_desired() const { return dns.rd; }
         
         /**
          * \brief Setter for the recursion available field.
@@ -209,14 +209,14 @@ namespace Tins {
          * \return uint8_t containing the value of the recursion
          * available field.
          */
-        uint8_t recursion_available() { return dns.ra; }
+        uint8_t recursion_available() const { return dns.ra; }
         
         /**
          * \brief Setter for the z desired field.
          * 
          * \return uint8_t containing the value of the z field.
          */
-        uint8_t z() { return dns.z; }
+        uint8_t z() const { return dns.z; }
         
         /**
          * \brief Setter for the authenticated data field.
@@ -224,7 +224,7 @@ namespace Tins {
          * \return uint8_t containing the value of the authenticated
          * data field.
          */
-        uint8_t authenticated_data() { return dns.ad; }
+        uint8_t authenticated_data() const { return dns.ad; }
         
         /**
          * \brief Setter for the checking disabled field.
@@ -232,42 +232,42 @@ namespace Tins {
          * \return uint8_t containing the value of the checking 
          * disabled field.
          */
-        uint8_t checking_disabled() { return dns.cd; }
+        uint8_t checking_disabled() const { return dns.cd; }
         
         /**
          * \brief Setter for the rcode field.
          * 
          * \return uint8_t containing the value of the rcode field.
          */
-        uint8_t rcode() { return dns.rcode; }
+        uint8_t rcode() const { return dns.rcode; }
         
         /**
          * \brief Setter for the questions field.
          * 
          * \return uint16_t containing the value of the questions field.
          */
-        uint16_t questions() { return Utils::net_to_host_s(dns.questions); }
+        uint16_t questions() const { return Utils::net_to_host_s(dns.questions); }
         
         /**
          * \brief Setter for the answers field.
          * 
          * \return uint16_t containing the value of the answers field.
          */
-        uint16_t answers() { return Utils::net_to_host_s(dns.answers); }
+        uint16_t answers() const { return Utils::net_to_host_s(dns.answers); }
         
         /**
          * \brief Setter for the authority field.
          * 
          * \return uint16_t containing the value of the authority field.
          */
-        uint16_t authority() { return Utils::net_to_host_s(dns.authority); }
+        uint16_t authority() const { return Utils::net_to_host_s(dns.authority); }
         
         /**
          * \brief Setter for the additional field.
          * 
          * \return uint16_t containing the value of the additional field.
          */
-        uint16_t additional() { return Utils::net_to_host_s(dns.additional); }
+        uint16_t additional() const { return Utils::net_to_host_s(dns.additional); }
 
         /**
          * \brief Getter for the PDU's type.
