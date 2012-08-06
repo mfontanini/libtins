@@ -54,33 +54,23 @@ namespace Tins {
          */
         UDP(const uint8_t *buffer, uint32_t total_sz);
         
-        /**
-         * \brief Copy constructor.
-         */
-        UDP(const UDP &other);
-
-        /**
-         * \brief Copy assignment operator.
-         */
-        UDP &operator= (const UDP& other);
-        
         /** 
          * \brief Getter for the destination port.
          * \return The datagram's destination port.
          */
-        inline uint16_t dport() const { return Utils::net_to_host_s(_udp.dport); }
+        uint16_t dport() const { return Utils::net_to_host_s(_udp.dport); }
 
         /** 
          * \brief Getter for the source port.
          * \return The datagram's source port.
          */
-        inline uint16_t sport() const { return Utils::net_to_host_s(_udp.sport); }
+        uint16_t sport() const { return Utils::net_to_host_s(_udp.sport); }
         
         /**
          * \brief Getter for the length of the datagram.
          * \return The length of the datagram.
          */
-        inline uint16_t length() const { return Utils::net_to_host_s(_udp.len); }
+        uint16_t length() const { return Utils::net_to_host_s(_udp.len); }
 
         /** 
          * \brief Set the destination port.
@@ -126,11 +116,11 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::UDP; }
         
         /**
-         * \brief Clones this PDU.
-         * 
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<UDP>();
+        }
     private:
         struct udphdr {
             uint16_t sport;

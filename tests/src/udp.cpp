@@ -12,16 +12,40 @@ using namespace Tins;
 class UDPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
+    
+    void test_equals(const UDP& udp1, const UDP& udp2);
 };
 
 const uint8_t UDPTest::expected_packet[] = {'\xf5', '\x1a', 'G', '\xf1', '\x04', 'S', '\x00', '\x00'};
 
+
+void UDPTest::test_equals(const UDP& udp1, const UDP& udp2) {
+    EXPECT_EQ(udp1.dport(), udp2.dport());
+    EXPECT_EQ(udp1.sport(), udp2.sport());
+    EXPECT_EQ(udp1.length(), udp2.length());
+    EXPECT_EQ(udp1.size(), udp2.size());
+    EXPECT_EQ(udp1.header_size(), udp2.header_size());
+    EXPECT_EQ(bool(udp1.inner_pdu()), bool(udp2.inner_pdu()));
+}
 
 TEST_F(UDPTest, DefaultContructor) {
     UDP udp;
     EXPECT_EQ(udp.dport(), 0);
     EXPECT_EQ(udp.sport(), 0);
     EXPECT_FALSE(udp.inner_pdu());
+}
+
+TEST_F(UDPTest, CopyContructor) {
+    UDP udp1(expected_packet, sizeof(expected_packet));
+    UDP udp2(udp1);
+    test_equals(udp1, udp2);
+}
+
+TEST_F(UDPTest, CopyAssignmentOperator) {
+    UDP udp1(expected_packet, sizeof(expected_packet));
+    UDP udp2;
+    udp2 = udp1;
+    test_equals(udp1, udp2);
 }
 
 TEST_F(UDPTest, CompleteConstructor) {
@@ -56,34 +80,6 @@ TEST_F(UDPTest, Length) {
 TEST_F(UDPTest, PDUType) {
     UDP udp;
     EXPECT_EQ(udp.pdu_type(), PDU::UDP);
-}
-
-TEST_F(UDPTest, CopyConstructor) {
-    UDP udp1;
-    udp1.dport(0x1234);
-    udp1.sport(0x4321);
-    udp1.length(0xdead);
-    
-    UDP udp2(udp1);
-    EXPECT_EQ(udp2.sport(), udp1.sport());
-    EXPECT_EQ(udp2.dport(), udp1.dport());
-    EXPECT_EQ(udp2.length(), udp1.length());
-    EXPECT_EQ(udp2.size(), udp1.size());
-    EXPECT_EQ(udp2.header_size(), udp1.header_size());
-}
-
-TEST_F(UDPTest, CopyAssignmentOperator) {
-    UDP udp1;
-    udp1.dport(0x1234);
-    udp1.sport(0x4321);
-    udp1.length(0xdead);
-    
-    UDP udp2 = udp1;
-    EXPECT_EQ(udp2.sport(), udp1.sport());
-    EXPECT_EQ(udp2.dport(), udp1.dport());
-    EXPECT_EQ(udp2.length(), udp1.length());
-    EXPECT_EQ(udp2.size(), udp1.size());
-    EXPECT_EQ(udp2.header_size(), udp1.header_size());
 }
 
 TEST_F(UDPTest, ClonePDU) {

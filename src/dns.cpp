@@ -22,17 +22,19 @@
 #include <utility>
 #include <stdexcept>
 #include <cassert>
+#include <memory>
 #include "dns.h"
 
 using std::string;
 using std::list;
 
+namespace Tins {
 
-Tins::DNS::DNS() : PDU(255), extra_size(0) {
+DNS::DNS() : PDU(255), extra_size(0) {
     std::memset(&dns, 0, sizeof(dns));
 }
 
-Tins::DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : PDU(255), extra_size(0) {
+DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : PDU(255), extra_size(0) {
     if(total_sz < sizeof(dnshdr))
         throw std::runtime_error("Not enough size for a DNS header in the buffer.");
     std::memcpy(&dns, buffer, sizeof(dnshdr));
@@ -61,23 +63,43 @@ Tins::DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : PDU(255), extra_size(
     build_resource_list(addit, buffer, total_sz, additional());
 }
 
-Tins::DNS::DNS(const DNS &other) : PDU(255) {
-    copy_fields(&other);
-    copy_inner_pdu(other);
+DNS::DNS(const DNS& rhs) : PDU(rhs) {
+    copy_fields(&rhs);
 }
 
-const uint8_t *Tins::DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_t *ptr, uint32_t &sz, uint16_t nrecs) {
+DNS& DNS::operator=(const DNS& rhs) {
+    free_list(ans);
+    free_list(arity);
+    free_list(addit);
+    copy_fields(&rhs);
+    return *this;
+}
+
+DNS::~DNS() {
+    free_list(ans);
+    free_list(arity);
+    free_list(addit);
+}
+
+void DNS::free_list(ResourcesType &lst) {
+    while(lst.size()) {
+        delete lst.front();
+        lst.pop_front();
+    }
+}
+
+const uint8_t *DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_t *ptr, uint32_t &sz, uint16_t nrecs) {
     const uint8_t *ptr_end(ptr + sz);
     const uint8_t *parse_start(ptr);
     for(uint16_t i(0); i < nrecs; ++i) {
         const uint8_t *this_opt_start(ptr);
         if(ptr + sizeof(uint16_t) > ptr_end)
             throw std::runtime_error("Not enough size for a given resource.");
-        ResourceRecord *res;
+        std::auto_ptr<ResourceRecord> res;
         if((*ptr  & 0xc0)) {
             uint16_t offset(*reinterpret_cast<const uint16_t*>(ptr));
             offset = Utils::net_to_host_s(offset) & 0x3fff;
-            res = new OffsetedResourceRecord(Utils::net_to_host_s(offset));
+            res.reset(new OffsetedResourceRecord(Utils::net_to_host_s(offset)));
             ptr += sizeof(uint16_t);
         }
         else {
@@ -87,7 +109,7 @@ const uint8_t *Tins::DNS::build_resource_list(list<ResourceRecord*> &lst, const 
             if(str_end == end)
                 throw std::runtime_error("Not enough size for a resource domain name.");
             str_end++;
-            res = new NamedResourceRecord(string(ptr, str_end));
+            res.reset(new NamedResourceRecord(string(ptr, str_end)));
             ptr = str_end;
         }
         if(ptr + sizeof(res->info) > ptr_end)
@@ -96,95 +118,81 @@ const uint8_t *Tins::DNS::build_resource_list(list<ResourceRecord*> &lst, const 
         ptr += sizeof(res->info);
         if(ptr + sizeof(uint16_t) > ptr_end)
             throw std::runtime_error("Not enough size for resource data size.");
-        res->data_sz = Utils::net_to_host_s(
-            *reinterpret_cast<const uint16_t*>(ptr)
+
+        // Store the option size.
+        res->data.resize(
+            Utils::net_to_host_s(*reinterpret_cast<const uint16_t*>(ptr))
         );
         ptr += sizeof(uint16_t);
-        if(ptr + res->data_sz > ptr_end)
+        if(ptr + res->data.size() > ptr_end)
             throw std::runtime_error("Not enough size for resource data");
-        res->data = new uint8_t[res->data_sz];
         if(contains_dname(res->info.type))
-            std::memcpy(res->data, ptr, res->data_sz);
-        else {
-            *(uint32_t*)res->data = Utils::net_to_host_l(*(uint32_t*)ptr);
-        }
+            std::copy(ptr, ptr + res->data.size(), res->data.begin());
+        else
+            *(uint32_t*)&res->data[0] = Utils::net_to_host_l(*(uint32_t*)ptr);
         
-        ptr += res->data_sz;
+        ptr += res->data.size();
         extra_size += ptr - this_opt_start;
-        lst.push_back(res);
+        lst.push_back(res.release());
     }
     sz -= ptr - parse_start;
     return ptr;
 }
 
-Tins::DNS::~DNS() {
-    free_list(ans);
-    free_list(arity);
-    free_list(addit);
-}
-
-void Tins::DNS::free_list(std::list<ResourceRecord*> &lst) {
-    while(lst.size()) {
-        delete[] lst.front()->data;
-        delete lst.front();
-        lst.pop_front();
-    }
-}
-
-uint32_t Tins::DNS::header_size() const {
+uint32_t DNS::header_size() const {
     return sizeof(dns) + extra_size;
 }
 
-void Tins::DNS::id(uint16_t new_id) {
+void DNS::id(uint16_t new_id) {
     dns.id = Utils::net_to_host_s(new_id);
 }
 
-void Tins::DNS::type(QRType new_qr) {
+void DNS::type(QRType new_qr) {
     dns.qr = new_qr;
 }
 
-void Tins::DNS::opcode(uint8_t new_opcode) {
+void DNS::opcode(uint8_t new_opcode) {
     dns.opcode = new_opcode;
 }
 
-void Tins::DNS::authoritative_answer(uint8_t new_aa) {
+void DNS::authoritative_answer(uint8_t new_aa) {
     dns.aa = new_aa;
 }
 
-void Tins::DNS::truncated(uint8_t new_tc) {
+void DNS::truncated(uint8_t new_tc) {
     dns.tc = new_tc;
 }
 
-void Tins::DNS::recursion_desired(uint8_t new_rd) {
+void DNS::recursion_desired(uint8_t new_rd) {
     dns.rd = new_rd;
 }
 
-void Tins::DNS::recursion_available(uint8_t new_ra) {
+void DNS::recursion_available(uint8_t new_ra) {
     dns.ra = new_ra;
 }
 
-void Tins::DNS::z(uint8_t new_z) {
+void DNS::z(uint8_t new_z) {
     dns.z = new_z;
 }
 
-void Tins::DNS::authenticated_data(uint8_t new_ad) {
+void DNS::authenticated_data(uint8_t new_ad) {
     dns.ad = new_ad;
 }
 
-void Tins::DNS::checking_disabled(uint8_t new_cd) {
+void DNS::checking_disabled(uint8_t new_cd) {
     dns.cd = new_cd;
 }
 
-void Tins::DNS::rcode(uint8_t new_rcode) {
+void DNS::rcode(uint8_t new_rcode) {
     dns.rcode = new_rcode;
 }
 
-bool Tins::DNS::contains_dname(uint16_t type) {
+bool DNS::contains_dname(uint16_t type) {
     return type == Utils::net_to_host_s(MX) || type == Utils::net_to_host_s(CNAME) ||
           type == Utils::net_to_host_s(PTR) || type == Utils::net_to_host_s(NS);
 }
 
-void Tins::DNS::add_query(const string &name, QueryType type, QueryClass qclass) {
+void DNS::add_query(const string &name, QueryType type, QueryClass qclass) {
     string new_str;
     parse_domain_name(name, new_str);
     
@@ -197,7 +205,7 @@ void Tins::DNS::add_query(const string &name, QueryType type, QueryClass qclass)
     dns.questions = Utils::net_to_host_s(queries.size());
 }
 
-void Tins::DNS::add_query(const Query &query) {
+void DNS::add_query(const Query &query) {
     add_query(
         query.name, 
         static_cast<QueryType>(query.type), 
@@ -205,13 +213,13 @@ void Tins::DNS::add_query(const Query &query) {
     );
 }
 
-void Tins::DNS::add_answer(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
+void DNS::add_answer(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
     ResourceRecord *res = make_record(name, type, qclass, ttl, ip);
     ans.push_back(res);
     dns.answers = Utils::net_to_host_s(ans.size());
 }
 
-void Tins::DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
+void DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
                         uint32_t ttl, const std::string &dname) {
     string new_str;
     parse_domain_name(dname, new_str);
@@ -220,36 +228,36 @@ void Tins::DNS::add_answer(const std::string &name, QueryType type, QueryClass q
     dns.answers = Utils::net_to_host_s(ans.size());
 }
 
-void Tins::DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
+void DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
                         uint32_t ttl, const uint8_t *data, uint32_t sz) {
     ResourceRecord *res = make_record(name, type, qclass, ttl, data, sz);
     ans.push_back(res);
     dns.answers = Utils::net_to_host_s(ans.size());
 }
 
-void Tins::DNS::add_authority(const string &name, QueryType type, 
+void DNS::add_authority(const string &name, QueryType type, 
   QueryClass qclass, uint32_t ttl, const uint8_t *data, uint32_t sz) {
     ResourceRecord *res = make_record(name, type, qclass, ttl, data, sz);
     arity.push_back(res);
     dns.authority = Utils::net_to_host_s(arity.size());
 }
 
-void Tins::DNS::add_additional(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
+void DNS::add_additional(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
     ResourceRecord *res = make_record(name, type, qclass, ttl, ip);
     addit.push_back(res);
     dns.additional = Utils::net_to_host_s(addit.size());
 }
 
-Tins::DNS::ResourceRecord *Tins::DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
+DNS::ResourceRecord *DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
     ip = Utils::net_to_host_l(ip);
     return make_record(name, type, qclass, ttl, reinterpret_cast<uint8_t*>(&ip), sizeof(ip));
 }
 
-Tins::DNS::ResourceRecord *Tins::DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const std::string &dname) {
+DNS::ResourceRecord *DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const std::string &dname) {
     return make_record(name, type, qclass, ttl, reinterpret_cast<const uint8_t*>(dname.c_str()), dname.size() + 1);
 }
 
-Tins::DNS::ResourceRecord *Tins::DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const uint8_t *ptr, uint32_t len) {
+DNS::ResourceRecord *DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const uint8_t *ptr, uint32_t len) {
     string nm;
     parse_domain_name(name, nm);
     uint16_t index = find_domain_name(nm);
@@ -265,7 +273,7 @@ Tins::DNS::ResourceRecord *Tins::DNS::make_record(const std::string &name, Query
     return res;
 }
 
-uint32_t Tins::DNS::find_domain_name(const std::string &dname) {
+uint32_t DNS::find_domain_name(const std::string &dname) {
     uint16_t index(sizeof(dnshdr));
     list<Query>::const_iterator it(queries.begin());
     for(; it != queries.end() && it->name != dname; ++it)
@@ -279,8 +287,8 @@ uint32_t Tins::DNS::find_domain_name(const std::string &dname) {
         return 0;
 }
 
-bool Tins::DNS::find_domain_name(const std::string &dname, const std::list<ResourceRecord*> &lst, uint16_t &out) {
-    list<ResourceRecord*>::const_iterator it(lst.begin());
+bool DNS::find_domain_name(const std::string &dname, const ResourcesType &lst, uint16_t &out) {
+    ResourcesType::const_iterator it(lst.begin());
     while(it != lst.end()) {
         if((*it)->matches(dname))
             break;
@@ -290,7 +298,7 @@ bool Tins::DNS::find_domain_name(const std::string &dname, const std::list<Resou
     return it != lst.end();
 }
 
-void Tins::DNS::parse_domain_name(const std::string &dn, std::string &out) const {
+void DNS::parse_domain_name(const std::string &dn, std::string &out) const {
     size_t last_index(0), index;
     while((index = dn.find('.', last_index+1)) != string::npos) {
         out.push_back(index - last_index);
@@ -301,7 +309,7 @@ void Tins::DNS::parse_domain_name(const std::string &dn, std::string &out) const
     out.append(dn.begin() + last_index, dn.end());
 }
 
-void Tins::DNS::unparse_domain_name(const std::string &dn, std::string &out) const {
+void DNS::unparse_domain_name(const std::string &dn, std::string &out) const {
     if(dn.size()) {
         uint32_t index(1), len(dn[0]);
         while(index + len < dn.size() && len) {
@@ -320,7 +328,7 @@ void Tins::DNS::unparse_domain_name(const std::string &dn, std::string &out) con
     }
 }
 
-void Tins::DNS::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void DNS::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= sizeof(dns) + extra_size);
     std::memcpy(buffer, &dns, sizeof(dns)); 
     buffer += sizeof(dns);
@@ -337,13 +345,13 @@ void Tins::DNS::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     buffer = serialize_list(addit, buffer);
 }
 
-uint8_t *Tins::DNS::serialize_list(const std::list<ResourceRecord*> &lst, uint8_t *buffer) const {
-    for(list<ResourceRecord*>::const_iterator it(lst.begin()); it != lst.end(); ++it)
+uint8_t *DNS::serialize_list(const ResourcesType &lst, uint8_t *buffer) const {
+    for(ResourcesType::const_iterator it(lst.begin()); it != lst.end(); ++it)
         buffer += (*it)->write(buffer);
     return buffer;
 }
 
-void Tins::DNS::add_suffix(uint32_t index, const uint8_t *data, uint32_t sz) {
+void DNS::add_suffix(uint32_t index, const uint8_t *data, uint32_t sz) {
     uint32_t i(0), suff_sz(data[0]);
     SuffixMap::iterator it;
     while((i + suff_sz + 1 <= sz || (suff_sz == 0xc0 && i + 1 < sz)) && suff_sz) {
@@ -362,9 +370,9 @@ void Tins::DNS::add_suffix(uint32_t index, const uint8_t *data, uint32_t sz) {
     }
 }
 
-uint32_t Tins::DNS::build_suffix_map(uint32_t index, const list<ResourceRecord*> &lst) {
+uint32_t DNS::build_suffix_map(uint32_t index, const list<ResourceRecord*> &lst) {
     const string *str;
-    for(list<ResourceRecord*>::const_iterator it(lst.begin()); it != lst.end(); ++it) {
+    for(ResourcesType::const_iterator it(lst.begin()); it != lst.end(); ++it) {
         str = (*it)->dname_pointer();
         if(str) {
             add_suffix(index, (uint8_t*)str->c_str(), str->size());
@@ -387,7 +395,7 @@ uint32_t Tins::DNS::build_suffix_map(uint32_t index, const list<ResourceRecord*>
     return index;
 }
 
-uint32_t Tins::DNS::build_suffix_map(uint32_t index, const list<Query> &lst) {
+uint32_t DNS::build_suffix_map(uint32_t index, const list<Query> &lst) {
     for(list<Query>::const_iterator it(lst.begin()); it != lst.end(); ++it) {
         add_suffix(index, (uint8_t*)it->name.c_str(), it->name.size());
         index += it->name.size() + 1 + (sizeof(uint16_t) << 1);
@@ -395,7 +403,7 @@ uint32_t Tins::DNS::build_suffix_map(uint32_t index, const list<Query> &lst) {
     return index;
 }
 
-void Tins::DNS::build_suffix_map() {
+void DNS::build_suffix_map() {
     uint32_t index(sizeof(dnshdr));
     index = build_suffix_map(index, queries);
     index = build_suffix_map(index, ans);
@@ -403,7 +411,7 @@ void Tins::DNS::build_suffix_map() {
     build_suffix_map(index, addit);
 }
 
-void Tins::DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
+void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
     uint32_t i(0);
     while(i < sz) {
         if(i && ptr[i])
@@ -444,13 +452,13 @@ void Tins::DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) 
     }
 }
 
-void Tins::DNS::convert_resources(const std::list<ResourceRecord*> &lst, std::list<Resource> &res) {
+void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) {
     if(!suffixes.size())
         build_suffix_map();
     const string *str_ptr;
     const uint8_t *ptr;
     uint32_t sz;
-    for(list<ResourceRecord*>::const_iterator it(lst.begin()); it != lst.end(); ++it) {
+    for(ResourcesType::const_iterator it(lst.begin()); it != lst.end(); ++it) {
         string dname, addr;
         if((str_ptr = (*it)->dname_pointer())) 
             compose_name(reinterpret_cast<const uint8_t*>(str_ptr->c_str()), str_ptr->size(), dname);
@@ -476,7 +484,7 @@ void Tins::DNS::convert_resources(const std::list<ResourceRecord*> &lst, std::li
     }
 }
 
-list<Tins::DNS::Query> Tins::DNS::dns_queries() const { 
+list<DNS::Query> DNS::dns_queries() const { 
     list<Query> output;
     for(std::list<Query>::const_iterator it(queries.begin()); it != queries.end(); ++it) {
         string dn;
@@ -486,20 +494,13 @@ list<Tins::DNS::Query> Tins::DNS::dns_queries() const {
     return output;
 }
 
-list<Tins::DNS::Resource> Tins::DNS::dns_answers() {
+list<DNS::Resource> DNS::dns_answers() {
     list<Resource> res;
     convert_resources(ans, res);
     return res;
 }
 
-Tins::PDU *Tins::DNS::clone_pdu() const {
-    DNS *new_pdu = new DNS();
-    new_pdu->copy_fields(this);
-    new_pdu->copy_inner_pdu(*this);
-    return new_pdu;
-}
-
-void Tins::DNS::copy_fields(const DNS *other) {
+void DNS::copy_fields(const DNS *other) {
     std::memcpy(&dns, &other->dns, sizeof(dns));
     extra_size = other->extra_size;
     queries = other->queries;
@@ -508,40 +509,30 @@ void Tins::DNS::copy_fields(const DNS *other) {
     copy_list(other->addit, addit);
 }
 
-void Tins::DNS::copy_list(const list<ResourceRecord*> &from, list<ResourceRecord*> &to) const {
-    for(list<ResourceRecord*>::const_iterator it(from.begin()); it != from.end(); ++it) {
+void DNS::copy_list(const ResourcesType &from, ResourcesType &to) const {
+    for(ResourcesType::const_iterator it(from.begin()); it != from.end(); ++it) {
         to.push_back((*it)->clone());
     }
 }
 
 // ResourceRecord
 
-void Tins::DNS::ResourceRecord::copy_fields(ResourceRecord *other) const {
-    std::memcpy(&other->info, &info, sizeof(info));
-    other->data_sz = data_sz;
-    other->data = new uint8_t[data_sz];
-    std::memcpy(other->data, data, data_sz);
-}
-
-uint32_t Tins::DNS::ResourceRecord::write(uint8_t *buffer) const {
-    uint32_t sz(do_write(buffer));
+uint32_t DNS::ResourceRecord::write(uint8_t *buffer) const {
+    const uint32_t sz(do_write(buffer));
     buffer += sz;
     std::memcpy(buffer, &info, sizeof(info));
     buffer += sizeof(info);
-    *((uint16_t*)buffer) = Utils::net_to_host_s(data_sz);
+    *((uint16_t*)buffer) = Utils::net_to_host_s(data.size());
     buffer += sizeof(uint16_t);
-    std::memcpy(buffer, data, data_sz);
-    return sz + sizeof(info) + sizeof(uint16_t) + data_sz;
+    std::copy(data.begin(), data.end(), buffer);
+    return sz + sizeof(info) + sizeof(uint16_t) + data.size();
 }
 
-Tins::DNS::ResourceRecord *Tins::DNS::OffsetedResourceRecord::clone() const {
-    ResourceRecord *r = new OffsetedResourceRecord(offset);
-    copy_fields(r);
-    return r;
+DNS::ResourceRecord *DNS::OffsetedResourceRecord::clone() const {
+    return new OffsetedResourceRecord(*this);
 }
 
-Tins::DNS::ResourceRecord *Tins::DNS::NamedResourceRecord::clone() const {
-    ResourceRecord *r = new NamedResourceRecord(name);
-    copy_fields(r);
-    return r;
+DNS::ResourceRecord *DNS::NamedResourceRecord::clone() const {
+    return new NamedResourceRecord(*this);
+}
 }

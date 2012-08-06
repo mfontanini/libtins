@@ -39,6 +39,7 @@ void DNSTest::test_equals(const DNS &dns1, const DNS &dns2) {
     EXPECT_EQ(dns1.additional(), dns2.additional());
     EXPECT_EQ(dns1.pdu_type(), dns2.pdu_type());
     EXPECT_EQ(dns1.header_size(), dns2.header_size());
+    EXPECT_EQ(bool(dns1.inner_pdu()), bool(dns2.inner_pdu()));
 }
 
 void DNSTest::test_equals(const DNS::Query &q1, const DNS::Query &q2) {
@@ -77,6 +78,27 @@ TEST_F(DNSTest, ConstructorFromBuffer) {
     std::list<DNS::Resource> answers = dns.dns_answers();
     ASSERT_EQ(answers.size(), 1);
     test_equals(answers.front(), DNS::Resource("www.example.com", "192.168.0.1", DNS::A, DNS::IN, 0x1234));
+}
+
+TEST_F(DNSTest, CopyConstructor) {
+    DNS dns1(expected_packet, sizeof(expected_packet));
+    DNS dns2(dns1);
+    test_equals(dns1, dns2);
+}
+
+TEST_F(DNSTest, CopyAssignmentOperator) {
+    DNS dns1(expected_packet, sizeof(expected_packet));
+    DNS dns2;
+    dns2 = dns1;
+    test_equals(dns1, dns2);
+}
+
+TEST_F(DNSTest, NestedCopy) {
+    DNS *nested = new DNS(expected_packet, sizeof(expected_packet));
+    DNS dns1(expected_packet, sizeof(expected_packet));
+    dns1.inner_pdu(nested);
+    DNS dns2(dns1);
+    test_equals(dns1, dns2);
 }
 
 TEST_F(DNSTest, ID) {
