@@ -27,6 +27,7 @@
 
 #include "pdu.h"
 #include "utils.h"
+#include "hwaddress.h"
 
 namespace Tins {
 
@@ -35,6 +36,8 @@ namespace Tins {
      */
     class EthernetII : public PDU {
     public:
+        typedef HWAddress<6> address_type;
+        
         /**
          * \brief This PDU's flag.
          */
@@ -61,7 +64,11 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        EthernetII(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        //EthernetII(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        EthernetII(const std::string& iface, 
+                    const address_type &dst_hw_addr = address_type(), 
+                    const address_type &src_hw_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating an ethernet PDU
@@ -74,7 +81,10 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        EthernetII(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        EthernetII(uint32_t iface_index, 
+                    const address_type &dst_hw_addr = address_type(), 
+                    const address_type &src_hw_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an EthernetII object from a buffer and adds all identifiable
@@ -90,14 +100,14 @@ namespace Tins {
          *
          * \return Returns the destination's mac address as a constant uint8_t pointer.
          */
-        const uint8_t* dst_addr() const { return _eth.dst_mac; }
+        address_type dst_addr() const { return _eth.dst_mac; }
 
         /**
          * \brief Getter for the source's mac address.
          *
          * \return Returns the source's mac address as a constant uint8_t pointer.
          */
-        const uint8_t* src_addr() const { return _eth.src_mac; }
+        address_type src_addr() const { return _eth.src_mac; }
 
         /**
          * \brief Getter for the interface.
@@ -119,14 +129,14 @@ namespace Tins {
          *
          * \param new_dst_mac uint8_t array of 6 bytes containing the new destination's MAC.
          */
-        void dst_addr(const uint8_t* new_dst_mac);
+        void dst_addr(const address_type &new_dst_mac);
 
         /**
          * \brief Setter for the source's MAC.
          *
          * \param new_src_mac uint8_t array of 6 bytes containing the new source's MAC.
          */
-        void src_addr(const uint8_t* new_src_mac);
+        void src_addr(const address_type &new_src_mac);
 
         /**
          * \brief Setter for the interface.

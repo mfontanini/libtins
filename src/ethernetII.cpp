@@ -22,6 +22,7 @@
 #include <cassert>
 #include <cstring>
 #include <stdexcept>
+#include <algorithm>
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -35,28 +36,34 @@
 const uint8_t* Tins::EthernetII::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
 const uint32_t Tins::EthernetII::ADDR_SIZE;
 
-Tins::EthernetII::EthernetII(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child) {
+Tins::EthernetII::EthernetII(const std::string& iface, 
+  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
+  PDU* child) 
+: PDU(ETHERTYPE_IP, child)
+{
     memset(&_eth, 0, sizeof(ethhdr));
-    if(dst_hw_addr)
-        this->dst_addr(dst_hw_addr);
-    if(src_hw_addr)
-        this->src_addr(src_hw_addr);
+    dst_addr(dst_hw_addr);
+    src_addr(src_hw_addr);
     this->iface(iface);
-    this->_eth.payload_type = 0;
+    _eth.payload_type = 0;
 
 }
 
-Tins::EthernetII::EthernetII(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child) {
+Tins::EthernetII::EthernetII(uint32_t iface_index, 
+  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
+  PDU* child) 
+: PDU(ETHERTYPE_IP, child) 
+{
     memset(&_eth, 0, sizeof(ethhdr));
-    if(dst_hw_addr)
-        this->dst_addr(dst_hw_addr);
-    if(src_hw_addr)
-        this->src_addr(src_hw_addr);
-    this->iface(iface_index);
-    this->_eth.payload_type = 0;
+    dst_addr(dst_hw_addr);
+    src_addr(src_hw_addr);
+    iface(iface_index);
+    _eth.payload_type = 0;
 }
 
-Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP) {
+Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) 
+: PDU(ETHERTYPE_IP) 
+{
     if(total_sz < sizeof(ethhdr))
         throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
     memcpy(&_eth, buffer, sizeof(ethhdr));
@@ -77,12 +84,12 @@ Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) : PDU(ETH
     }
 }
 
-void Tins::EthernetII::dst_addr(const uint8_t* new_dst_mac) {
-    memcpy(_eth.dst_mac, new_dst_mac, sizeof(_eth.dst_mac));
+void Tins::EthernetII::dst_addr(const address_type &new_dst_mac) {
+    std::copy(new_dst_mac.begin(), new_dst_mac.end(), _eth.dst_mac);
 }
 
-void Tins::EthernetII::src_addr(const uint8_t* new_src_mac) {
-    memcpy(_eth.src_mac, new_src_mac, sizeof(_eth.src_mac));
+void Tins::EthernetII::src_addr(const address_type &new_src_mac) {
+    std::copy(new_src_mac.begin(), new_src_mac.end(), _eth.src_mac);
 }
 
 void Tins::EthernetII::iface(uint32_t new_iface_index) {

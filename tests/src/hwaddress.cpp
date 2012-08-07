@@ -25,6 +25,11 @@ TEST_F(HWAddressTest, DefaultConstructor) {
     EXPECT_TRUE(std::equal(addr.begin(), addr.end(), empty_addr));
 }
 
+TEST_F(HWAddressTest, ConstructorFromBytes) {
+    HWAddress<6> addr(byte_address);
+    EXPECT_TRUE(std::equal(addr.begin(), addr.end(), byte_address));
+}
+
 TEST_F(HWAddressTest, ConstructorFromAddress) {
     HWAddress<6> addr(address);
     EXPECT_TRUE(std::equal(addr.begin(), addr.end(), byte_address));

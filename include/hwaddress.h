@@ -24,23 +24,34 @@
 
 #include <stdint.h>
 #include <stdexcept>
+#include <iterator>
+#include <algorithm>
+#include <iomanip>
 #include <iostream>
-#include <tins/utils.h> //borrame
+#include <sstream>
 
 namespace Tins {
-template<size_t n>
+template<size_t n, typename Storage = uint8_t>
 class HWAddress {
 public:
-    typedef uint8_t element_type;
-    typedef element_type* iterator;
-    typedef const element_type* const_iterator;
+    typedef Storage storage_type;
+    typedef storage_type* iterator;
+    typedef const storage_type* const_iterator;
     static const size_t address_size = n;
     
     HWAddress() {
-        std::fill(buffer, buffer + address_size, element_type());
+        std::fill(buffer, buffer + address_size, storage_type());
+    }
+    
+    HWAddress(const storage_type* ptr) {
+        std::copy(ptr, ptr + address_size, buffer);
     }
     
     HWAddress(const std::string &address) {
+        convert(address, buffer);
+    }
+    
+    HWAddress& operator=(const std::string &address) {
         convert(address, buffer);
     }
     
@@ -60,6 +71,14 @@ public:
         return buffer + address_size;
     }
     
+    bool operator==(const HWAddress &rhs) const {
+        return std::equal(begin(), end(), rhs.begin());
+    }
+    
+    bool operator!=(const HWAddress &rhs) const {
+        return !(*this == rhs);
+    }
+    
     friend std::ostream &operator<<(std::ostream &os, const HWAddress &addr) {
         std::transform(
             addr.buffer, 
@@ -73,7 +92,7 @@ private:
     template<typename OutputIterator>
     static void convert(const std::string &hw_addr, OutputIterator output);
     
-    static std::string to_string(element_type element) {
+    static std::string to_string(storage_type element) {
         std::ostringstream oss;
         oss << std::hex;
         if(element < 0x10)
@@ -82,17 +101,19 @@ private:
         return oss.str();
     }
 
-    element_type buffer[n];
+    storage_type buffer[n];
 };
 
-template<size_t n>
+template<size_t n, typename Storage>
 template<typename OutputIterator>
-void HWAddress<n>::convert(const std::string &hw_addr, OutputIterator output) {
+void HWAddress<n, Storage>::convert(const std::string &hw_addr, 
+  OutputIterator output) 
+{
     unsigned i(0);
-    element_type tmp;
+    storage_type tmp;
     while(i < hw_addr.size()) {
         const unsigned end = i+2;
-        tmp = element_type();
+        tmp = storage_type();
         while(i < end) {
             if(hw_addr[i] >= 'a' && hw_addr[i] <= 'f')
                 tmp = (tmp << 4) | (hw_addr[i] - 'a' + 10);
