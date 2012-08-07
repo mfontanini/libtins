@@ -37,7 +37,7 @@ using std::runtime_error;
 namespace Tins {
 
 ARP::ARP(IPv4Address target_ip, IPv4Address sender_ip, 
-  const uint8_t *target_hw, const uint8_t *sender_hw) 
+  const hwaddress_type &target_hw, const hwaddress_type &sender_hw) 
 : PDU(0x0608) 
 {
     memset(&_arp, 0, sizeof(arphdr));
@@ -47,10 +47,8 @@ ARP::ARP(IPv4Address target_ip, IPv4Address sender_ip,
     prot_addr_length(IP::ADDR_SIZE);
     sender_ip_addr(sender_ip);
     target_ip_addr(target_ip);
-    if(sender_hw)
-        sender_hw_addr(sender_hw);
-    if(target_hw)
-        target_hw_addr(target_hw);
+    sender_hw_addr(sender_hw);
+    target_hw_addr(target_hw);
 }
 
 ARP::ARP(const uint8_t *buffer, uint32_t total_sz) 
@@ -64,18 +62,16 @@ ARP::ARP(const uint8_t *buffer, uint32_t total_sz)
         inner_pdu(new RawPDU(buffer + sizeof(arphdr), total_sz));
 }
 
-void ARP::sender_hw_addr(const uint8_t* new_snd_hw_addr) {
-    //Should this use hardware address' length?
-    memcpy(this->_arp.ar_sha, new_snd_hw_addr, 6); 
+void ARP::sender_hw_addr(const hwaddress_type &new_snd_hw_addr) {
+    std::copy(new_snd_hw_addr.begin(), new_snd_hw_addr.end(), _arp.ar_sha);
 }
 
 void ARP::sender_ip_addr(IPv4Address new_snd_ip_addr) {
     this->_arp.ar_sip = new_snd_ip_addr;
 }
 
-void ARP::target_hw_addr(const uint8_t* new_tgt_hw_addr) {
-    //Should this use hardware address' length?
-    memcpy(this->_arp.ar_tha, new_tgt_hw_addr, 6); 
+void ARP::target_hw_addr(const hwaddress_type &new_tgt_hw_addr) {
+    std::copy(new_tgt_hw_addr.begin(), new_tgt_hw_addr.end(), _arp.ar_tha);
 }
 
 void ARP::target_ip_addr(IPv4Address new_tgt_ip_addr) {
@@ -100,27 +96,6 @@ void ARP::prot_addr_length(uint8_t new_prot_addr_len) {
 
 void ARP::opcode(Flags new_opcode) {
     this->_arp.ar_op = Utils::net_to_host_s(new_opcode);
-}
-
-void ARP::set_arp_request(const string& ip_tgt, const string& ip_snd, 
-  const uint8_t* hw_snd) 
-{
-    this->target_ip_addr(ip_tgt);
-    this->sender_ip_addr(ip_snd);
-    if (hw_snd)
-        this->sender_hw_addr(hw_snd);
-    this->opcode(REQUEST);
-}
-
-void ARP::set_arp_reply(const std::string& ip_tgt, const std::string& ip_snd,
- const uint8_t* hw_tgt, const uint8_t* hw_snd) 
-{
-    this->target_ip_addr(ip_tgt);
-    this->sender_ip_addr(ip_snd);
-    this->sender_hw_addr(hw_snd);
-    this->target_hw_addr(hw_tgt);
-    this->opcode(REPLY);
-
 }
 
 uint32_t ARP::header_size() const {
@@ -154,24 +129,22 @@ PDU *ARP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
 }
 
 PDU* ARP::make_arp_request(const std::string& iface, IPv4Address target,
-  IPv4Address sender, const uint8_t* hw_snd) 
+  IPv4Address sender, const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */
     ARP* arp = new ARP();
     arp->target_ip_addr(target);
     arp->sender_ip_addr(sender);
-    if (hw_snd) {
-        arp->sender_hw_addr(hw_snd);
-    }
+    arp->sender_hw_addr(hw_snd);
     arp->opcode(REQUEST);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
-    EthernetII* eth = new EthernetII(iface, EthernetII::BROADCAST, hw_snd, arp);
-    return eth;
+    return new EthernetII(iface, EthernetII::BROADCAST, hw_snd, arp);
 }
 
 PDU* ARP::make_arp_reply(const string& iface, IPv4Address target,
-  IPv4Address sender, const uint8_t* hw_tgt, const uint8_t* hw_snd) 
+  IPv4Address sender, const hwaddress_type &hw_tgt, 
+  const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */
     ARP* arp = new ARP(target, sender, hw_tgt, hw_snd);

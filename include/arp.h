@@ -28,6 +28,7 @@
 #include "pdu.h"
 #include "ipaddress.h"
 #include "utils.h"
+#include "hwaddress.h"
 
 namespace Tins {
 
@@ -37,6 +38,8 @@ namespace Tins {
      */
     class ARP : public PDU {
     public:
+        typedef HWAddress<6> hwaddress_type;
+    
         /**
          * \brief This PDU's flag.
          */
@@ -57,7 +60,8 @@ namespace Tins {
          * ARP::make_arp_request/reply static functions.
          */
         ARP(IPv4Address target_ip = 0, IPv4Address sender_ip = 0, 
-          const uint8_t *target_hw = 0, const uint8_t *sender_hw = 0);
+            const hwaddress_type &target_hw = hwaddress_type(), 
+            const hwaddress_type &sender_hw = hwaddress_type());
 
         /**
          * \brief Constructor which creates an ARP object from a buffer and adds all identifiable
@@ -73,63 +77,63 @@ namespace Tins {
          *
          * \return Returns the sender's hardware address in an uint8_t*.
          */
-        const uint8_t* sender_hw_addr() const { return this->_arp.ar_sha; }
+        hwaddress_type sender_hw_addr() const { return _arp.ar_sha; }
 
         /**
          * \brief Getter for the sender's IP address.
          *
          * \return Returns the sender's IP address in an uint32_t.
          */
-        IPv4Address sender_ip_addr() const { return Utils::net_to_host_l(this->_arp.ar_sip); }
+        IPv4Address sender_ip_addr() const { return Utils::net_to_host_l(_arp.ar_sip); }
 
         /**
          * \brief Getter for the target's hardware address.
          *
          * \return Returns the target's hardware address in an uint8_t*.
          */
-        const uint8_t* target_hw_addr() const { return this->_arp.ar_tha; }
+        hwaddress_type target_hw_addr() const { return _arp.ar_tha; }
 
         /**
          * \brief Getter for the target's IP address.
          *
          * \return Returns the target's IP address in an uint32_t.
          */
-        IPv4Address target_ip_addr() const { return Utils::net_to_host_l(this->_arp.ar_tip); }
+        IPv4Address target_ip_addr() const { return Utils::net_to_host_l(_arp.ar_tip); }
 
         /**
          * \brief Getter for the hardware address format.
          *
          * \return Returns the hardware address' format in an uint16_t.
          */
-        uint16_t hw_addr_format() const { return Utils::net_to_host_s(this->_arp.ar_hrd); }
+        uint16_t hw_addr_format() const { return Utils::net_to_host_s(_arp.ar_hrd); }
 
         /**
          * \brief Getter for the protocol address format.
          *
          * \return Returns the protocol address' format in an uint16_t.
          */
-        uint16_t prot_addr_format() const { return Utils::net_to_host_s(this->_arp.ar_pro); }
+        uint16_t prot_addr_format() const { return Utils::net_to_host_s(_arp.ar_pro); }
 
         /**
          * \brief Getter for the hardware address length.
          *
          * \return Returns the hardware address' length in an uint8_t.
          */
-        uint8_t hw_addr_length() const { return this->_arp.ar_hln; }
+        uint8_t hw_addr_length() const { return _arp.ar_hln; }
 
         /**
          * \brief Getter for the protocol address length.
          *
          * \return Returns the protocol address' length in an uint8_t.
          */
-        uint8_t prot_addr_length() const { return this->_arp.ar_pln; }
+        uint8_t prot_addr_length() const { return _arp.ar_pln; }
 
         /**
          * \brief Getter for the ARP opcode.
          *
          * \return Returns the ARP opcode in an uint16_t.
          */
-        uint16_t opcode() const { return Utils::net_to_host_s(this->_arp.ar_op); }
+        uint16_t opcode() const { return Utils::net_to_host_s(_arp.ar_op); }
 
         /** \brief Getter for the header size.
          * \return Returns the ARP header size.
@@ -143,7 +147,7 @@ namespace Tins {
          *
          * \param new_snd_hw_addr uint8_t array containing the new sender's hardware address.
          */
-        void sender_hw_addr(const uint8_t* new_snd_hw_addr);
+        void sender_hw_addr(const hwaddress_type &new_snd_hw_addr);
 
         /**
          * \brief Setter for the sender's IP address.
@@ -157,7 +161,7 @@ namespace Tins {
          *
          * \param new_tgt_hw_addr uint8_t array containing the new target's hardware address.
          */
-        void target_hw_addr(const uint8_t* new_tgt_hw_addr);
+        void target_hw_addr(const hwaddress_type &new_tgt_hw_addr);
 
         /**
          * \brief Setter for the target's IP address.
@@ -220,7 +224,7 @@ namespace Tins {
          * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Request.
          */
         static PDU* make_arp_request(const std::string& iface, IPv4Address target, 
-          IPv4Address sender, const uint8_t* hw_snd = 0);
+          IPv4Address sender, const hwaddress_type &hw_snd = hwaddress_type());
 
         /**
          * \brief Creates an ARP Reply within a Layer 2 PDU using uint32_t for target and sender.
@@ -236,32 +240,8 @@ namespace Tins {
          * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Replay.
          */
         static PDU* make_arp_reply(const std::string& iface, IPv4Address target, 
-          IPv4Address sender, const uint8_t* hw_tgt, const uint8_t* hw_snd);
-
-        /**
-         * \brief Converts the current ARP PDU to an ARP Request.
-         *
-         * Calling this method sets the values of the target ARP PDU to become
-         * an ARP Request PDU.
-         *
-         * \param ip_tgt string with the target's IP or hostname.
-         * \param ip_snd string with the sender's IP or hostname.
-         * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address(optional).
-         */
-        void set_arp_request(const std::string& ip_tgt, const std::string& ip_snd, const uint8_t* hw_snd = 0);
-
-        /**
-         * \brief Converts the current ARP PDU to an ARP Reply.
-         *
-         * Calling this method sets the values of the target ARP PDU to become
-         * an ARP Reply PDU.
-         *
-         * \param ip_tgt string with the target's IP or hostname.
-         * \param ip_snd string with the sender's IP or hostname.
-         * \param hw_tgt uint8_t array of 6 bytes containing the target's hardware address.
-         * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
-         */
-         void set_arp_reply(const std::string& ip_tgt, const std::string& ip_snd, const uint8_t* hw_tgt, const uint8_t* hw_snd);
+          IPv4Address sender, const hwaddress_type &hw_tgt = hwaddress_type(), 
+          const hwaddress_type &hw_snd = hwaddress_type());
 
         /** \brief Check wether ptr points to a valid response for this PDU.
          *
@@ -295,10 +275,14 @@ namespace Tins {
             uint8_t	ar_pln;		/* length of protocol address	*/
             uint16_t ar_op;		/* ARP opcode (command)		*/
 
-            uint8_t ar_sha[6];	/* sender hardware address	*/
-            uint32_t ar_sip;	/* sender IP address		*/
-            uint8_t ar_tha[6];	/* target hardware address	*/
-            uint32_t ar_tip;	/* target IP address		*/
+            /* sender hardware address	*/
+            uint8_t ar_sha[hwaddress_type::address_size];	
+            /* sender IP address		*/
+            uint32_t ar_sip;	
+            /* target hardware address	*/
+            uint8_t ar_tha[hwaddress_type::address_size];	
+            /* target IP address		*/
+            uint32_t ar_tip;
         } __attribute__((__packed__));
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

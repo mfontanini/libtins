@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include "packetsender.h"
 #include "ipaddress.h"
+#include "hwaddress.h"
 
 namespace Tins {
     /** \brief Network utils namespace.
@@ -124,7 +125,7 @@ namespace Tins {
          * false otherwise.
          */
         bool resolve_hwaddr(const std::string &iface, IPv4Address ip, 
-          uint8_t *buffer, PacketSender *sender);
+          HWAddress<6> *address, PacketSender *sender);
 
         /** \brief List all network interfaces.
          *
@@ -168,7 +169,7 @@ namespace Tins {
          * 
          * \return bool indicating wether the operation was successfull.
          */
-        bool interface_hwaddr(const std::string &iface, uint8_t *buffer);
+        bool interface_hwaddr(const std::string &iface, HWAddress<6> *address);
 
         /**
          * \brief Lookup the interface identifier.

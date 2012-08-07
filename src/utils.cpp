@@ -66,15 +66,16 @@ struct IPv4Collector {
 
 /** \cond */
 struct HWAddressCollector {
-    uint8_t *result;
+    Tins::HWAddress<6> *result;
     bool found;
     const char *iface;
 
-    HWAddressCollector(uint8_t *res, const char *interface) : result(res), found(false), iface(interface) { }
+    HWAddressCollector(Tins::HWAddress<6> *res, const char *interface) 
+    : result(res), found(false), iface(interface) { }
 
     void operator() (struct ifaddrs *addr) {
         if(!found && addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface)) {
-            memcpy(result, ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr, 6);
+            *result = ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr;
             found = true;
         }
     }
@@ -225,10 +226,10 @@ Tins::PDU *Tins::Utils::ping_address(uint32_t ip, PacketSender *sender, IPv4Addr
 }
 
 bool Tins::Utils::resolve_hwaddr(const string &iface, IPv4Address ip, 
-  uint8_t *buffer, PacketSender *sender) {
+  HWAddress<6> *address, PacketSender *sender) {
     IPv4Address my_ip;
-    uint8_t my_hw[6];
-    if(!interface_ip(iface, my_ip) || !interface_hwaddr(iface, my_hw))
+    HWAddress<6> my_hw;
+    if(!interface_ip(iface, my_ip) || !interface_hwaddr(iface, &my_hw))
         return false;
     PDU *packet = ARP::make_arp_request(iface, ip, my_ip, my_hw);
     PDU *response = sender->send_recv(packet);
@@ -236,7 +237,7 @@ bool Tins::Utils::resolve_hwaddr(const string &iface, IPv4Address ip,
     if(response) {
         ARP *arp_resp = dynamic_cast<ARP*>(response->inner_pdu());
         if(arp_resp)
-            memcpy(buffer, arp_resp->sender_hw_addr(), 6);
+            *address = arp_resp->sender_hw_addr();
         delete response;
         return arp_resp;
     }
@@ -258,11 +259,11 @@ string Tins::Utils::interface_from_ip(IPv4Address ip) {
 }
 
 bool Tins::Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
-    std::vector<RouteEntry> entries;
+    typedef std::vector<RouteEntry> entries_type;
+    entries_type entries;
     uint32_t ip_int = ip;
     route_entries(std::back_inserter(entries));
-    for(std::vector<RouteEntry>::const_iterator it(entries.begin()); it != entries.end(); ++it) {
-        std::cout << std::hex << ip_int << " " << (uint32_t)it->mask << " " << (uint32_t)it->destination << "\n";
+    for(entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
         if((ip_int & it->mask) == it->destination) {
             gw_addr = it->gateway;
             return true;
@@ -284,8 +285,8 @@ bool Tins::Utils::interface_ip(const string &iface, IPv4Address &ip) {
     return collector.found;
 }
 
-bool Tins::Utils::interface_hwaddr(const string &iface, uint8_t *buffer) {
-    HWAddressCollector collector(buffer, iface.c_str());
+bool Tins::Utils::interface_hwaddr(const string &iface, HWAddress<6> *address) {
+    HWAddressCollector collector(address, iface.c_str());
     generic_iface_loop(collector);
     return collector.found;
 }
