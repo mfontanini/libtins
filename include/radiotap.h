@@ -38,6 +38,11 @@ namespace Tins {
     class RadioTap : public PDU {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::RADIOTAP;
+    
+        /**
          * \brief Enumeration of the different channel type flags.
          * 
          * These channel type flags can be OR'd and set using the

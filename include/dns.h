@@ -34,6 +34,11 @@
 namespace Tins {
     class DNS : public PDU {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DNS;
+    
         enum QRType {
             QUERY = 0,
             RESPONSE = 1

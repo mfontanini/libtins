@@ -34,8 +34,11 @@ namespace Tins {
      * \brief Class representing an Ethernet II PDU.
      */
     class EthernetII : public PDU {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::ETHERNET_II;
 
         /**
          * \brief Represents the ethernetII broadcast address.

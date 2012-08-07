@@ -34,8 +34,11 @@ namespace Tins {
      * \brief Class representing an Ethernet II PDU.
      */
     class IEEE802_3 : public PDU {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::IEEE802_3;
 
         /**
          * \brief Represents the IEEE802_3 broadcast address.

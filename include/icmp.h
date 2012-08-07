@@ -35,6 +35,11 @@ namespace Tins {
      */
     class ICMP : public PDU {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::ICMP;
+    
         /** \brief ICMP flags
          */
         enum Flags {

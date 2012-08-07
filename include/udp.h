@@ -35,6 +35,11 @@ namespace Tins {
      */
     class UDP : public PDU {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::UDP;
+    
         /** 
          * \brief UDP constructor.
          *

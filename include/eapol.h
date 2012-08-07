@@ -40,6 +40,11 @@ namespace Tins {
      */
     class EAPOL : public PDU {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::EAPOL;
+    
         enum EAPOLTYPE {
             RC4 = 1,
             RSN,
@@ -164,6 +169,11 @@ namespace Tins {
      */
     class RC4EAPOL : public EAPOL {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::RC4EAPOL;
+    
         /**
          * \brief Creates an instance of RC4EAPOL
          */
@@ -339,6 +349,11 @@ namespace Tins {
      */
     class RSNEAPOL : public EAPOL {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::RSNEAPOL;
+    
         /**
          * \brief Creates an instance of RSNEAPOL.
          */

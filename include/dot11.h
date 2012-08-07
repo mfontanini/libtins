@@ -38,6 +38,11 @@ namespace Tins {
     class Dot11 : public PDU {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11;
+    
+        /**
          * \brief Broadcast hardware address.
          */
         static const uint8_t *BROADCAST;
@@ -658,8 +663,11 @@ namespace Tins {
      * \brief Abstract class that englobes all Management frames in the 802.11 protocol.
      */
     class Dot11ManagementFrame : public Dot11 {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_MANAGEMENT;
 
         enum ReasonCodes {
             UNSPECIFIED = 1,
@@ -1283,8 +1291,11 @@ namespace Tins {
      *
      */
     class Dot11Beacon : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_BEACON;
 
         /**
          * \brief Default constructor for the beacon frame.
@@ -1685,8 +1696,11 @@ namespace Tins {
      *
      */
     class Dot11AssocRequest : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_ASSOC_REQ;
 
         /**
          * \brief Default constructor for the Association Request frame.
@@ -1840,8 +1854,11 @@ namespace Tins {
      *
      */
     class Dot11AssocResponse : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_ASSOC_RESP;
 
         /**
          * \brief Default constructor for the Association Response frame.
@@ -1984,8 +2001,11 @@ namespace Tins {
      *
      */
     class Dot11ReAssocRequest : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_REASSOC_REQ;
 
         /**
          * \brief Default constructor for the ReAssociation Request frame.
@@ -2154,8 +2174,11 @@ namespace Tins {
      *
      */
     class Dot11ReAssocResponse : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_REASSOC_RESP;
 
         /**
          * \brief Default constructor for the ReAssociation Response frame.
@@ -2298,8 +2321,11 @@ namespace Tins {
      *
      */
     class Dot11Authentication : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_AUTH;
 
         /**
          * \brief Default constructor for the Authentication frame.
@@ -2427,8 +2453,11 @@ namespace Tins {
      *
      */
     class Dot11Deauthentication : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_DEAUTH;
 
         /**
          * \brief Default constructor for the Deauthentication frame.
@@ -2517,8 +2546,11 @@ namespace Tins {
      *
      */
     class Dot11ProbeRequest : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_PROBE_REQ;
 
         /**
          * \brief Default constructor for the Probe Request frame.
@@ -2606,8 +2638,11 @@ namespace Tins {
      *
      */
     class Dot11ProbeResponse : public Dot11ManagementFrame {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_PROBE_RESP;
 
         /**
          * \brief Default constructor for the Probe Response frame.
@@ -2887,6 +2922,11 @@ namespace Tins {
     class Dot11Data : public Dot11 {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_DATA;
+    
+        /**
          * \brief Constructor which creates a Dot11Data object from a buffer and adds all identifiable
          * PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
@@ -3020,8 +3060,11 @@ namespace Tins {
     };
 
     class Dot11QoSData : public Dot11Data {
-
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_QOS_DATA;
 
         /**
          * \brief Constructor for creating a 802.11 QoS Data PDU
@@ -3134,6 +3177,11 @@ namespace Tins {
      */
     class Dot11Control : public Dot11 {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_CONTROL;
+    
         /**
          * \brief Constructor for creating a 802.11 control frame PDU
          *
@@ -3276,6 +3324,11 @@ namespace Tins {
     class Dot11RTS : public Dot11ControlTA {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_RTS;
+        
+        /**
          * \brief Constructor for creating a 802.11 RTS frame PDU
          *
          * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
@@ -3345,6 +3398,11 @@ namespace Tins {
 
     class Dot11PSPoll : public Dot11ControlTA {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_PS_POLL;
+    
         /**
          * \brief Constructor for creating a 802.11 PS-Poll frame PDU
          *
@@ -3416,6 +3474,11 @@ namespace Tins {
     class Dot11CFEnd : public Dot11ControlTA {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_CF_END;
+    
+        /**
          * \brief Constructor for creating a 802.11 CF-End frame PDU
          *
          * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
@@ -3486,6 +3549,11 @@ namespace Tins {
     class Dot11EndCFAck : public Dot11ControlTA {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_END_CF_ACK;
+    
+        /**
          * \brief Constructor for creating a 802.11 End-CF-Ack frame PDU
          *
          * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
@@ -3552,6 +3620,11 @@ namespace Tins {
 
     class Dot11Ack : public Dot11Control {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_ACK;
+    
         /**
          * \brief Constructor for creating a 802.11 Ack frame PDU
          *
@@ -3623,6 +3696,11 @@ namespace Tins {
      */
     class Dot11BlockAckRequest : public Dot11ControlTA {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_BLOCK_ACK_REQ;
+    
         /**
          * \brief Constructor for creating a 802.11 Block Ack request frame PDU
          *
@@ -3745,6 +3823,11 @@ namespace Tins {
      */
     class Dot11BlockAck : public Dot11ControlTA {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DOT11_BLOCK_ACK;
+    
         /**
          * \brief Constructor for creating a 802.11 Block Ack frame PDU.
          *

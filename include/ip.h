@@ -44,6 +44,11 @@ namespace Tins {
     class IP : public PDU {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::IP;
+    
+        /**
          * \brief IP address size.
          */
         static const uint32_t ADDR_SIZE = 4;

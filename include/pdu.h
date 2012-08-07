@@ -164,7 +164,8 @@ namespace Tins {
          * If no PDU matches, 0 is returned.
          * \param flag The flag which being searched.
          */
-        template<class T> T *find_inner_pdu(PDUType type) {
+        template<class T> 
+        T *find_inner_pdu(PDUType type = T::pdu_flag) {
             PDU *pdu = this;
             while(pdu) {
                 if(pdu->pdu_type() == type)

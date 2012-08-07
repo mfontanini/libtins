@@ -35,6 +35,11 @@ namespace Tins {
      */
     class RawPDU : public PDU {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::RAW;
+    
         /** \brief Creates an instance of RawPDU.
          *
          * The payload is copied, therefore the original payload's memory

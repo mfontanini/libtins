@@ -38,6 +38,11 @@ namespace Tins {
     class ARP : public PDU {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::ARP;
+    
+        /**
          * \brief Enum which indicates the type of ARP packet.
          */
         enum Flags {

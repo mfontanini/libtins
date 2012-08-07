@@ -38,6 +38,11 @@ namespace Tins {
 
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::BOOTP;
+    
+        /**
          * \brief Enum which contains the different opcodes BootP messages.
          */
         enum OpCodes {

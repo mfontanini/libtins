@@ -45,6 +45,11 @@ namespace Tins {
     class TCP : public PDU {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::TCP;
+    
+        /**
          * \brief TCP flags enum.
          *
          * These flags identify those supported by the TCP PDU.

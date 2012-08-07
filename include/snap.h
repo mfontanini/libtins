@@ -38,6 +38,11 @@ namespace Tins {
     class SNAP : public PDU {
     public:
         /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::SNAP;
+    
+        /**
          * \brief Creates an instance of SNAP
          * This constructor sets the dsap and ssap fields to 0xaa, and
          * the id field to 3.

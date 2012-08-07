@@ -37,6 +37,10 @@ namespace Tins {
      */
     class LLC : public PDU {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::LLC;
 
     	/**
          * \brief Represents the LLC global DSAP address.

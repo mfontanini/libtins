@@ -38,6 +38,11 @@ namespace Tins {
      */
     class DHCP : public BootP {
     public:
+        /**
+         * \brief This PDU's flag.
+         */
+        static const PDU::PDUType pdu_flag = PDU::DHCP;
+    
         /** 
          * \brief DHCP flags.
          */
