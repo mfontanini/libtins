@@ -208,8 +208,11 @@ bool Tins::RadioTap::send(PacketSender* sender) {
     addr.sll_ifindex = _iface_index;
     
     Tins::Dot11 *wlan = dynamic_cast<Tins::Dot11*>(inner_pdu());
-    if(wlan)
-        memcpy(&(addr.sll_addr), wlan->addr1(), 6);
+    if(wlan) {
+        Dot11::address_type dot11_addr(wlan->addr1());
+        std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);
+        //memcpy(&(addr.sll_addr), wlan->addr1(), 6);
+    }
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }

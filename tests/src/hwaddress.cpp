@@ -25,6 +25,27 @@ TEST_F(HWAddressTest, DefaultConstructor) {
     EXPECT_TRUE(std::equal(addr.begin(), addr.end(), empty_addr));
 }
 
+TEST_F(HWAddressTest, EqualsOperator) {
+    HWAddress<6> addr1(byte_address), addr2(byte_address);
+    EXPECT_EQ(addr1, addr2);
+}
+
+TEST_F(HWAddressTest, DistinctOperator) {
+    HWAddress<6> addr1(byte_address), addr2(empty_addr);
+    EXPECT_NE(addr1, addr2);
+}
+
+TEST_F(HWAddressTest, CopyConstructor) {
+    HWAddress<6> addr1(byte_address), addr2(addr1);
+    EXPECT_EQ(addr1, addr2);
+}
+
+TEST_F(HWAddressTest, CopyAssignmentOperator) {
+    HWAddress<6> addr1(byte_address), addr2;
+    addr2 = addr1;
+    EXPECT_EQ(addr1, addr2);
+}
+
 TEST_F(HWAddressTest, ConstructorFromBytes) {
     HWAddress<6> addr(byte_address);
     EXPECT_TRUE(std::equal(addr.begin(), addr.end(), byte_address));

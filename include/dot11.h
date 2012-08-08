@@ -29,6 +29,7 @@
 
 #include "pdu.h"
 #include "utils.h"
+#include "hwaddress.h"
 
 namespace Tins {
 
@@ -37,6 +38,8 @@ namespace Tins {
      */
     class Dot11 : public PDU {
     public:
+        typedef HWAddress<6> address_type;
+    
         /**
          * \brief This PDU's flag.
          */
@@ -205,7 +208,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(const uint8_t* dst_hw_addr = 0, PDU* child = 0);
+        Dot11(const address_type &dst_hw_addr = address_type(), 
+               PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 PDU
@@ -217,7 +221,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(const std::string& iface, const uint8_t* dst_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11(const std::string& iface, 
+               const address_type &dst_hw_addr = address_type(), 
+               PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 PDU
@@ -229,7 +235,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, PDU* child = 0);
+        Dot11(uint32_t iface_index, 
+               const address_type &dst_hw_addr = address_type(), 
+               PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 object from a buffer and adds all identifiable
@@ -338,7 +346,7 @@ namespace Tins {
          *
          * \return The first address as a constant uint8_t pointer.
          */
-        inline const uint8_t* addr1() const { return this->_header.addr1; }
+        inline address_type addr1() const { return this->_header.addr1; }
 
         /**
          * \brief Getter for the interface.
@@ -429,7 +437,7 @@ namespace Tins {
          *
          * \param new_addr1 const uint8_t array of 6 bytes containing the new first's address.
          */
-        void addr1(const uint8_t* new_addr1);
+        void addr1(const address_type &new_addr1);
 
         /**
          * \brief Setter for the interface.
@@ -443,7 +451,7 @@ namespace Tins {
          *
          * \param new_iface string reference containing the new interface name.
          */
-        void iface(const std::string& new_iface) throw (std::runtime_error);
+        void iface(const std::string& new_iface);
 
         /* Virtual methods */
         /**
@@ -536,7 +544,7 @@ namespace Tins {
             #endif
             } __attribute__((__packed__)) control;
             uint16_t duration_id;
-            uint8_t addr1[ADDR_SIZE];
+            uint8_t addr1[address_type::address_size];
 
         } __attribute__((__packed__));
         private:
@@ -953,14 +961,14 @@ namespace Tins {
          *
          * \return The second address as a constant uint8_t pointer.
          */
-        inline const uint8_t* addr2() const { return this->_ext_header.addr2; }
+        inline address_type addr2() const { return this->_ext_header.addr2; }
 
         /**
          * \brief Getter for the third address.
          *
          * \return The third address as a constant uint8_t pointer.
          */
-        inline const uint8_t* addr3() const { return this->_ext_header.addr3; }
+        inline address_type addr3() const { return this->_ext_header.addr3; }
 
         /**
          * \brief Getter for the fragment number.
@@ -988,14 +996,14 @@ namespace Tins {
          *
          * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
          */
-        void addr2(const uint8_t* new_addr2);
+        void addr2(const address_type &new_addr2);
 
         /**
          * \brief Setter for the third address.
          *
          * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
          */
-        void addr3(const uint8_t* new_addr3);
+        void addr3(const address_type &new_addr3);
 
         /**
          * \brief Setter for the fragment number.
@@ -1062,8 +1070,11 @@ namespace Tins {
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        Dot11ManagementFrame(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0);
-        Dot11ManagementFrame(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) throw (std::runtime_error);
+        Dot11ManagementFrame(const address_type &dst_hw_addr = address_type(), 
+                                const address_type &src_hw_addr = address_type());
+        Dot11ManagementFrame(const std::string &iface, 
+                                const address_type &dst_hw_addr = address_type(), 
+                                const address_type &src_hw_addr = address_type());
         Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
         Dot11ManagementFrame(const Dot11ManagementFrame& other);
 
@@ -1302,7 +1313,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Beacon(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11Beacon(const address_type &dst_hw_addr = address_type(), 
+                     const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Beacon.
@@ -1314,7 +1326,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Beacon(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11Beacon(const std::string& iface, 
+                     const address_type &dst_hw_addr = address_type(), 
+                     const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11Beacon object from a buffer and adds
@@ -1615,7 +1629,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Disassoc(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11Disassoc(const address_type &dst_hw_addr = address_type(), 
+                        const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Disassociation.
@@ -1627,7 +1642,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Disassoc(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11Disassoc(const std::string& iface, 
+                        const address_type &dst_hw_addr = address_type(), 
+                        const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11Disassoc object from a buffer and adds
@@ -1708,7 +1725,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocRequest(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11AssocRequest(const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Association Request.
@@ -1720,7 +1738,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11AssocRequest(const std::string& iface, 
+                            const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11AssocRequest object from a
@@ -1866,7 +1886,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocResponse(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11AssocResponse(const address_type &dst_hw_addr = address_type(), 
+                              const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Association Response.
@@ -1878,7 +1899,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocResponse(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11AssocResponse(const std::string& iface, 
+                              const address_type &dst_hw_addr = address_type(), 
+                              const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11AssocResponse object from a
@@ -2013,7 +2036,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ReAssocRequest(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11ReAssocRequest(const address_type &dst_hw_addr = address_type(), 
+                               const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 ReAssociation Request.
@@ -2025,7 +2049,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ReAssocRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11ReAssocRequest(const std::string& iface, 
+                               const address_type &dst_hw_addr = address_type(), 
+                               const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11AssocRequest object from a
@@ -2186,7 +2212,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ReAssocResponse(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11ReAssocResponse(const address_type &dst_hw_addr = address_type(), 
+                                const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Association Response.
@@ -2198,7 +2225,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ReAssocResponse(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11ReAssocResponse(const std::string& iface, 
+                                const address_type &dst_hw_addr = address_type(), 
+                                const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11ReAssocResponse object from a
@@ -2333,7 +2362,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Authentication(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11Authentication(const address_type &dst_hw_addr = address_type(), 
+                               const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Authentication.
@@ -2345,7 +2375,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Authentication(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11Authentication(const std::string& iface, 
+                               const address_type &dst_hw_addr = address_type(), 
+                               const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11Authentication object from a
@@ -2465,7 +2497,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Deauthentication(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11Deauthentication(const address_type &dst_hw_addr = address_type(), 
+                                 const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Deauthentication.
@@ -2477,7 +2510,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Deauthentication(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11Deauthentication(const std::string& iface, 
+                                 const address_type &dst_hw_addr = address_type(), 
+                                 const address_type &src_hw_addr = 0);
 
         /**
          * \brief Constructor which creates a Dot11Deauthentication object from a buffer and adds
@@ -2558,7 +2593,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ProbeRequest(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11ProbeRequest(const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Probe Request.
@@ -2570,7 +2606,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ProbeRequest(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11ProbeRequest(const std::string& iface, 
+                            const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11ProbeRequest object from a
@@ -2650,7 +2688,8 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ProbeResponse(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0);
+        Dot11ProbeResponse(const address_type &dst_hw_addr = address_type(), 
+                              const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor for creating a 802.11 Probe Response.
@@ -2662,7 +2701,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ProbeResponse(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0) throw (std::runtime_error);
+        Dot11ProbeResponse(const std::string& iface, 
+                            const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11ProbeResponse object from a
@@ -2932,23 +2973,32 @@ namespace Tins {
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        Dot11Data(uint32_t iface_index, const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
-        Dot11Data(const uint8_t *dst_hw_addr = 0, const uint8_t *src_hw_addr = 0, PDU* child = 0);
-        Dot11Data(const std::string &iface, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child = 0) throw (std::runtime_error);
+        Dot11Data(uint32_t iface_index, 
+                    const address_type &dst_hw_addr = address_type(), 
+                    const address_type &src_hw_addr = address_type(), 
+                    PDU* child = 0);
+                    
+        Dot11Data(const address_type &dst_hw_addr = address_type(), 
+                    const address_type &src_hw_addr = address_type(), 
+                    PDU* child = 0);
+                    
+        Dot11Data(const std::string &iface, const address_type &dst_hw_addr, 
+                    const address_type &src_hw_addr, PDU* child = 0);
+                    
         Dot11Data(const uint8_t *buffer, uint32_t total_sz);
         /**
          * \brief Getter for the second address.
          *
          * \return The second address as a constant uint8_t pointer.
          */
-        inline const uint8_t* addr2() const { return this->_ext_header.addr2; }
+        inline address_type addr2() const { return this->_ext_header.addr2; }
 
         /**
          * \brief Getter for the third address.
          *
          * \return The third address as a constant uint8_t pointer.
          */
-        inline const uint8_t* addr3() const { return this->_ext_header.addr3; }
+        inline address_type addr3() const { return this->_ext_header.addr3; }
 
         /**
          * \brief Getter for the fragment number.
@@ -2976,14 +3026,14 @@ namespace Tins {
          *
          * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
          */
-        void addr2(const uint8_t* new_addr2);
+        void addr2(const address_type &new_addr2);
 
         /**
          * \brief Setter for the third address.
          *
          * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
          */
-        void addr3(const uint8_t* new_addr3);
+        void addr3(const address_type &new_addr3);
 
         /**
          * \brief Setter for the fragment number.
@@ -3075,7 +3125,9 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11QoSData(const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        Dot11QoSData(const address_type &dst_hw_addr = 0, 
+                        const address_type &src_hw_addr = 0, 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 QoS Data PDU
@@ -3088,7 +3140,10 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11QoSData(const std::string& iface, 
+                        const address_type &dst_hw_addr = address_type(), 
+                        const address_type &src_hw_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 QoS Data PDU
@@ -3101,7 +3156,10 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11QoSData(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        Dot11QoSData(uint32_t iface_index, 
+                        const address_type &dst_hw_addr = address_type(), 
+                        const address_type &src_hw_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 QoS Data object from a buffer and adds all identifiable
@@ -3190,7 +3248,8 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(const uint8_t* dst_addr = 0, PDU* child = 0);
+        Dot11Control(const address_type &dst_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 control frame PDU
@@ -3202,7 +3261,9 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(const std::string& iface, const uint8_t* dst_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11Control(const std::string& iface, 
+                        const address_type &dst_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 control frame PDU
@@ -3214,7 +3275,9 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(uint32_t iface_index, const uint8_t* dst_addr = 0, PDU* child = 0);
+        Dot11Control(uint32_t iface_index, 
+                        const address_type &dst_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 control frame object from a buffer and
@@ -3255,7 +3318,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11ControlTA(const uint8_t* dst_addr = 0, const uint8_t* target_addr = 0, PDU* child = 0);
+        Dot11ControlTA(const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 control frame TA PDU
@@ -3268,7 +3333,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11ControlTA(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11ControlTA(const std::string& iface, 
+                        const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 control frame TA PDU
@@ -3281,7 +3349,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11ControlTA(uint32_t iface_index, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
+        Dot11ControlTA(uint32_t iface_index, 
+                        const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 control frame object from a buffer and
@@ -3294,13 +3365,13 @@ namespace Tins {
         /**
          * \brief Getter for the target address field.
          */
-        inline const uint8_t* target_addr() const { return _taddr; }
+        inline address_type target_addr() const { return _taddr; }
 
         /**
          * \brief Setter for the target address field.
          * \param addr The new target address.
          */
-        void target_addr(const uint8_t *addr);
+        void target_addr(const address_type &addr);
 
         /**
          * \brief Returns the 802.11 frame's header length.
@@ -3337,7 +3408,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11RTS(const uint8_t* dst_addr = 0, const uint8_t* target_addr = 0, PDU* child = 0);
+        Dot11RTS(const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 RTS frame PDU
@@ -3350,7 +3423,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11RTS(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11RTS(const std::string& iface, 
+                    const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 RTS frame PDU
@@ -3363,7 +3439,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11RTS(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0);
+        Dot11RTS(uint32_t iface_index, 
+                    const address_type &dst_hw_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 RTS frame object from a buffer and
@@ -3412,7 +3491,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11PSPoll(const uint8_t* dst_addr = 0, const uint8_t* target_addr = 0, PDU* child = 0);
+        Dot11PSPoll(const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 PS-Poll frame PDU
@@ -3425,7 +3506,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11PSPoll(const std::string& iface, 
+                        const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 PS-Poll frame PDU
@@ -3438,7 +3522,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
+        Dot11PSPoll(uint32_t iface_index, 
+                        const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 PS-Poll frame object from a buffer and
@@ -3487,7 +3574,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11CFEnd(const uint8_t* dst_addr = 0, const uint8_t* target_addr = 0, PDU* child = 0);
+        Dot11CFEnd(const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 CF-End frame PDU
@@ -3500,7 +3589,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11CFEnd(const std::string& iface, 
+                    const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 CF-End frame PDU
@@ -3513,7 +3605,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
+        Dot11CFEnd(uint32_t iface_index, 
+                    const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 CF-End frame object from a buffer and
@@ -3561,7 +3656,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11EndCFAck(const uint8_t* dst_addr = 0, const uint8_t* target_addr = 0, PDU* child = 0);
+        Dot11EndCFAck(const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 End-CF-Ack frame PDU
@@ -3573,7 +3670,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11EndCFAck(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11EndCFAck(const std::string& iface, 
+                        const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 End-CF-Ack frame PDU
@@ -3585,7 +3685,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
+        Dot11EndCFAck(uint32_t iface_index, 
+                        const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(),  
+                        PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 End-CF-Ack frame object from a buffer and
@@ -3633,7 +3736,7 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Ack(const uint8_t* dst_addr = 0, PDU* child = 0);
+        Dot11Ack(const address_type &dst_addr = address_type(), PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Ack frame PDU
@@ -3645,7 +3748,9 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Ack(const std::string& iface, const uint8_t* dst_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11Ack(const std::string& iface, 
+                    const address_type &dst_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 Ack frame PDU
@@ -3658,7 +3763,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* child);
+        Dot11Ack(uint32_t iface_index, 
+                    const address_type &dst_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 Ack frame object from a buffer and
@@ -3709,7 +3816,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAckRequest(const uint8_t* dst_addr = 0, const uint8_t* target_addr = 0, PDU* child = 0);
+        Dot11BlockAckRequest(const address_type &dst_addr = address_type(), 
+                                const address_type &target_addr = address_type(), 
+                                PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Block Ack request frame PDU
@@ -3721,7 +3830,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAckRequest(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11BlockAckRequest(const std::string& iface, 
+                                const address_type &dst_addr = address_type(), 
+                                const address_type &target_addr = address_type(), 
+                                PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 Block Ack request frame PDU
@@ -3733,7 +3845,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
+        Dot11BlockAckRequest(uint32_t iface_index, 
+                                const address_type &dst_addr = address_type(), 
+                                const address_type &target_addr = address_type(), 
+                                PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and
@@ -3836,7 +3951,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAck(const uint8_t* dst_addr = 0, const uint8_t* target_addr = 0, PDU* child = 0);
+        Dot11BlockAck(const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Block Ack frame PDU
@@ -3848,7 +3965,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr = 0, const uint8_t *target_addr = 0, PDU* child = 0) throw (std::runtime_error);
+        Dot11BlockAck(const std::string& iface, 
+                        const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating an 802.11 Block Ack frame PDU
@@ -3860,7 +3980,10 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child);
+        Dot11BlockAck(uint32_t iface_index, 
+                        const address_type &dst_addr = address_type(), 
+                        const address_type &target_addr = address_type(), 
+                        PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and

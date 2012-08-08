@@ -42,32 +42,41 @@ using namespace std;
 const uint8_t *Tins::Dot11::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
 const uint32_t Tins::Dot11::ADDR_SIZE;
 
-Tins::Dot11::Dot11(const uint8_t* dst_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
+Tins::Dot11::Dot11(const address_type &dst_hw_addr, PDU* child) 
+: PDU(ETHERTYPE_IP, child), _options_size(0) 
+{
     memset(&this->_header, 0, sizeof(ieee80211_header));
-    if(dst_hw_addr)
-        this->addr1(dst_hw_addr);
+    addr1(dst_hw_addr);
 }
 
-Tins::Dot11::Dot11(const std::string& iface, const uint8_t* dst_hw_addr, PDU* child) throw (std::runtime_error) : PDU(ETHERTYPE_IP, child), _options_size(0) {
-    memset(&this->_header, 0, sizeof(ieee80211_header));
-    if(dst_hw_addr)
-        this->addr1(dst_hw_addr);
+Tins::Dot11::Dot11(const std::string& iface, 
+  const address_type &dst_hw_addr, PDU* child) 
+: PDU(ETHERTYPE_IP, child), _options_size(0) 
+{
+    memset(&_header, 0, sizeof(ieee80211_header));
+    addr1(dst_hw_addr);
     this->iface(iface);
 }
 
 
-Tins::Dot11::Dot11(uint32_t iface_index, const uint8_t* dst_hw_addr, PDU* child) : PDU(ETHERTYPE_IP, child), _options_size(0) {
-    memset(&this->_header, 0, sizeof(ieee80211_header));
-    if(dst_hw_addr)
-        this->addr1(dst_hw_addr);
+Tins::Dot11::Dot11(uint32_t iface_index, 
+  const address_type &dst_hw_addr, PDU* child) 
+: PDU(ETHERTYPE_IP, child), _options_size(0) 
+{
+    memset(&_header, 0, sizeof(ieee80211_header));
+    addr1(dst_hw_addr);
     this->iface(iface_index);
 }
 
-Tins::Dot11::Dot11(const ieee80211_header *header_ptr) : PDU(ETHERTYPE_IP) {
+Tins::Dot11::Dot11(const ieee80211_header *header_ptr) 
+: PDU(ETHERTYPE_IP) 
+{
 
 }
 
-Tins::Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP), _options_size(0) {
+Tins::Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz) 
+: PDU(ETHERTYPE_IP), _options_size(0) 
+{
     if(total_sz < sizeof(_header.control))
         throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
     uint32_t sz = std::min((uint32_t)sizeof(_header), total_sz);
@@ -170,15 +179,16 @@ void Tins::Dot11::duration_id(uint16_t new_duration_id) {
     this->_header.duration_id = new_duration_id;
 }
 
-void Tins::Dot11::addr1(const uint8_t* new_addr1) {
-    memcpy(this->_header.addr1, new_addr1, 6);
+void Tins::Dot11::addr1(const address_type &new_addr1) {
+    //memcpy(this->_header.addr1, new_addr1, 6);
+    std::copy(new_addr1.begin(), new_addr1.end(), _header.addr1);
 }
 
 void Tins::Dot11::iface(uint32_t new_iface_index) {
     this->_iface_index = new_iface_index;
 }
 
-void Tins::Dot11::iface(const std::string& new_iface) throw (std::runtime_error) {
+void Tins::Dot11::iface(const std::string& new_iface) {
     if (!Tins::Utils::interface_id(new_iface, this->_iface_index)) {
         throw std::runtime_error("Invalid interface name!");
     }
@@ -283,22 +293,20 @@ Tins::Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t
         std::memcpy(_addr4, buffer + sizeof(_ext_header), sizeof(_addr4));
 }
 
-Tins::Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr) : Dot11(dst_hw_addr) {
-    this->type(Dot11::MANAGEMENT);
-    if(src_hw_addr)
-        addr2(src_hw_addr);
-    else
-        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
+Tins::Dot11ManagementFrame::Dot11ManagementFrame(
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11(dst_hw_addr) 
+{
+    type(Dot11::MANAGEMENT);
+    addr2(src_hw_addr);
 }
 
 Tins::Dot11ManagementFrame::Dot11ManagementFrame(const std::string &iface,
-                                                 const uint8_t *dst_hw_addr,
-                                                 const uint8_t *src_hw_addr) throw (std::runtime_error) : Dot11(iface, dst_hw_addr) {
-    this->type(Dot11::MANAGEMENT);
-    if(src_hw_addr)
-        addr2(src_hw_addr);
-    else
-        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11(iface, dst_hw_addr) 
+{
+    type(Dot11::MANAGEMENT);
+    addr2(src_hw_addr);
 }
 
 Tins::Dot11ManagementFrame::Dot11ManagementFrame(const Dot11ManagementFrame &other) : Dot11(other) {
@@ -318,12 +326,14 @@ uint32_t Tins::Dot11ManagementFrame::header_size() const {
     return sz;
 }
 
-void Tins::Dot11ManagementFrame::addr2(const uint8_t* new_addr2) {
-    memcpy(this->_ext_header.addr2, new_addr2, 6);
+void Tins::Dot11ManagementFrame::addr2(const address_type &new_addr2) {
+    //memcpy(this->_ext_header.addr2, new_addr2, 6);
+    std::copy(new_addr2.begin(), new_addr2.end(), _ext_header.addr2);
 }
 
-void Tins::Dot11ManagementFrame::addr3(const uint8_t* new_addr3) {
-    memcpy(this->_ext_header.addr3, new_addr3, 6);
+void Tins::Dot11ManagementFrame::addr3(const address_type &new_addr3) {
+    //memcpy(this->_ext_header.addr3, new_addr3, 6);
+    std::copy(new_addr3.begin(), new_addr3.end(), _ext_header.addr3);
 }
 
 void Tins::Dot11ManagementFrame::frag_num(uint8_t new_frag_num) {
@@ -611,19 +621,24 @@ void Tins::Dot11ManagementFrame::challenge_text(uint8_t* ch_text, uint8_t ch_tex
 
 /* Dot11Beacon */
 
-Tins::Dot11Beacon::Dot11Beacon(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame() {
-    this->subtype(Dot11::BEACON);
+Tins::Dot11Beacon::Dot11Beacon(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+    subtype(Dot11::BEACON);
     memset(&_body, 0, sizeof(_body));
 }
 
 Tins::Dot11Beacon::Dot11Beacon(const std::string& iface,
-                                           const uint8_t* dst_hw_addr,
-                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
-    this->subtype(Dot11::BEACON);
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+{
+    subtype(Dot11::BEACON);
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+Tins::Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
     uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
@@ -818,14 +833,16 @@ Tins::PDU *Tins::Dot11Beacon::clone_pdu() const {
 
 /* Diassoc */
 
-Tins::Dot11Disassoc::Dot11Disassoc(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
-    this->subtype(Dot11::DISASSOC);
+Tins::Dot11Disassoc::Dot11Disassoc(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+    subtype(Dot11::DISASSOC);
     memset(&_body, 0, sizeof(_body));
 }
 
 Tins::Dot11Disassoc::Dot11Disassoc(const std::string& iface,
-                                           const uint8_t* dst_hw_addr,
-                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
     this->subtype(Dot11::DISASSOC);
     memset(&_body, 0, sizeof(_body));
 }
@@ -867,15 +884,19 @@ Tins::PDU *Tins::Dot11Disassoc::clone_pdu() const {
 
 /* Assoc request. */
 
-Tins::Dot11AssocRequest::Dot11AssocRequest(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
-    this->subtype(Dot11::ASSOC_REQ);
+Tins::Dot11AssocRequest::Dot11AssocRequest(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+{
+    subtype(Dot11::ASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
 }
 
 Tins::Dot11AssocRequest::Dot11AssocRequest(const std::string& iface,
-                                           const uint8_t* dst_hw_addr,
-                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
-    this->subtype(Dot11::ASSOC_REQ);
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+{
+    subtype(Dot11::ASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
 }
 
@@ -944,19 +965,25 @@ Tins::PDU *Tins::Dot11AssocRequest::clone_pdu() const {
 
 /* Assoc response. */
 
-Tins::Dot11AssocResponse::Dot11AssocResponse(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
-    this->subtype(Dot11::ASSOC_RESP);
+Tins::Dot11AssocResponse::Dot11AssocResponse(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+{
+    subtype(Dot11::ASSOC_RESP);
     memset(&_body, 0, sizeof(_body));
 }
 
 Tins::Dot11AssocResponse::Dot11AssocResponse(const std::string& iface,
-                                                           const uint8_t* dst_hw_addr,
-                                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
-    this->subtype(Dot11::ASSOC_RESP);
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+{
+    subtype(Dot11::ASSOC_RESP);
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11AssocResponse::Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+Tins::Dot11AssocResponse::Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
     uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
@@ -1009,19 +1036,25 @@ Tins::PDU *Tins::Dot11AssocResponse::clone_pdu() const {
 
 /* ReAssoc request. */
 
-Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::REASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
 }
 
 Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const std::string& iface,
-                                           const uint8_t* dst_hw_addr,
-                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+{
     this->subtype(Dot11::REASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
     uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
@@ -1090,19 +1123,24 @@ Tins::PDU *Tins::Dot11ReAssocRequest::clone_pdu() const {
 
 /* ReAssoc response. */
 
-Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::REASSOC_RESP);
     memset(&_body, 0, sizeof(_body));
 }
 
 Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const std::string& iface,
-                                                 const uint8_t* dst_hw_addr,
-                                                 const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+  const address_type &dst_hw_addr, const address_type &src_hw_addr)
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::REASSOC_RESP);
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) {
     uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
@@ -1155,17 +1193,23 @@ Tins::PDU *Tins::Dot11ReAssocResponse::clone_pdu() const {
 
 /* Probe Request */
 
-Tins::Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+Tins::Dot11ProbeRequest::Dot11ProbeRequest(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::PROBE_REQ);
 }
 
 Tins::Dot11ProbeRequest::Dot11ProbeRequest(const std::string& iface,
-                                           const uint8_t* dst_hw_addr,
-                                           const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::PROBE_REQ);
 }
 
-Tins::Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+Tins::Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
     parse_tagged_parameters(buffer, total_sz);
 }
 
@@ -1194,19 +1238,25 @@ Tins::PDU* Tins::Dot11ProbeRequest::clone_pdu() const {
 
 /* Probe Response */
 
-Tins::Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+Tins::Dot11ProbeResponse::Dot11ProbeResponse(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::PROBE_RESP);
     memset(&this->_body, 0, sizeof(this->_body));
 }
 
 Tins::Dot11ProbeResponse::Dot11ProbeResponse(const std::string& iface,
-                                             const uint8_t* dst_hw_addr,
-                                             const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::PROBE_RESP);
     memset(&this->_body, 0, sizeof(this->_body));
 }
 
-Tins::Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+Tins::Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
     uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
@@ -1337,19 +1387,25 @@ uint32_t Tins::Dot11ProbeResponse::write_fixed_parameters(uint8_t *buffer, uint3
 
 /* Auth */
 
-Tins::Dot11Authentication::Dot11Authentication(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+Tins::Dot11Authentication::Dot11Authentication(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::AUTH);
     memset(&_body, 0, sizeof(_body));
 }
 
 Tins::Dot11Authentication::Dot11Authentication(const std::string& iface,
-                                               const uint8_t* dst_hw_addr,
-                                               const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) {
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::AUTH);
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_sz) : Dot11ManagementFrame(buffer, total_sz) {
+Tins::Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
     uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
@@ -1398,19 +1454,24 @@ uint32_t Tins::Dot11Authentication::write_fixed_parameters(uint8_t *buffer, uint
 
 /* Deauth */
 
-Tins::Dot11Deauthentication::Dot11Deauthentication(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr) : Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+Tins::Dot11Deauthentication::Dot11Deauthentication(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+{
     this->subtype(Dot11::DEAUTH);
     memset(&_body, 0, sizeof(_body));
 }
 
 Tins::Dot11Deauthentication::Dot11Deauthentication(const std::string& iface,
-                                                   const uint8_t* dst_hw_addr,
-                                                   const uint8_t* src_hw_addr) throw (std::runtime_error) : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+{
     this->subtype(Dot11::DEAUTH);
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz) {
+Tins::Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) {
     uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
@@ -1447,7 +1508,8 @@ Tins::PDU *Tins::Dot11Deauthentication::clone_pdu() const {
 
 /* Dot11Data */
 
-Tins::Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
+Tins::Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11(buffer, total_sz) {
     uint32_t sz = Dot11::header_size();
     buffer += sz;
     total_sz -= sz;
@@ -1467,32 +1529,30 @@ Tins::Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz) : Dot11(buf
         inner_pdu(new Tins::SNAP(buffer, total_sz));
 }
 
-Tins::Dot11Data::Dot11Data(uint32_t iface_index, const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(iface_index, dst_hw_addr, child) {
-    this->type(Dot11::DATA);
-    if(src_hw_addr)
-        this->addr2(src_hw_addr);
-    else
-        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
+Tins::Dot11Data::Dot11Data(uint32_t iface_index, const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr, PDU* child) 
+: Dot11(iface_index, dst_hw_addr, child) 
+{
+    type(Dot11::DATA);
+    addr2(src_hw_addr);
 }
 
-Tins::Dot11Data::Dot11Data(const uint8_t *dst_hw_addr, const uint8_t *src_hw_addr, PDU* child) : Dot11(dst_hw_addr, child) {
-    this->type(Dot11::DATA);
-    if(src_hw_addr)
-        this->addr2(src_hw_addr);
-    else
-        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
+Tins::Dot11Data::Dot11Data(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr, PDU* child) 
+: Dot11(dst_hw_addr, child) 
+{
+    type(Dot11::DATA);
+    addr2(src_hw_addr);
 }
 
 
 Tins::Dot11Data::Dot11Data(const std::string &iface,
-                                     const uint8_t *dst_hw_addr,
-                                     const uint8_t *src_hw_addr,
-                                     PDU* child) throw (std::runtime_error) : Dot11(iface, dst_hw_addr, child) {
-    this->type(Dot11::DATA);
-    if(src_hw_addr)
-        this->addr2(src_hw_addr);
-    else
-        std::memset(_ext_header.addr2, 0, sizeof(_ext_header.addr2));
+  const address_type &dst_hw_addr, const address_type &src_hw_addr,
+  PDU* child) 
+: Dot11(iface, dst_hw_addr, child) 
+{
+    type(Dot11::DATA);
+    addr2(src_hw_addr);
 }
 
 void Tins::Dot11Data::copy_ext_header(const Dot11Data* other) {
@@ -1508,12 +1568,14 @@ uint32_t Tins::Dot11Data::header_size() const {
     return sz;
 }
 
-void Tins::Dot11Data::addr2(const uint8_t* new_addr2) {
-    memcpy(this->_ext_header.addr2, new_addr2, 6);
+void Tins::Dot11Data::addr2(const address_type &new_addr2) {
+    //memcpy(this->_ext_header.addr2, new_addr2, 6);
+    std::copy(new_addr2.begin(), new_addr2.end(), _ext_header.addr2);
 }
 
-void Tins::Dot11Data::addr3(const uint8_t* new_addr3) {
-    memcpy(this->_ext_header.addr3, new_addr3, 6);
+void Tins::Dot11Data::addr3(const address_type &new_addr3) {
+    //memcpy(this->_ext_header.addr3, new_addr3, 6);
+    std::copy(new_addr3.begin(), new_addr3.end(), _ext_header.addr3);
 }
 
 void Tins::Dot11Data::frag_num(uint8_t new_frag_num) {
@@ -1548,21 +1610,33 @@ Tins::PDU *Tins::Dot11Data::clone_pdu() const {
 
 /* QoS data. */
 
-Tins::Dot11QoSData::Dot11QoSData(const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11Data(dst_hw_addr, src_hw_addr, child) {
+Tins::Dot11QoSData::Dot11QoSData(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr, PDU* child) 
+: Dot11Data(dst_hw_addr, src_hw_addr, child) 
+{
 
 }
 
-Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) throw (std::runtime_error) : Dot11Data(iface, dst_hw_addr, src_hw_addr, child) {
+Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, 
+  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
+  PDU* child) 
+: Dot11Data(iface, dst_hw_addr, src_hw_addr, child) 
+{
     this->subtype(Dot11::QOS_DATA_DATA);
     this->_qos_control = 0;
 }
 
-Tins::Dot11QoSData::Dot11QoSData(uint32_t iface_index, const uint8_t* dst_hw_addr, const uint8_t* src_hw_addr, PDU* child) : Dot11Data(iface_index, dst_hw_addr, src_hw_addr, child) {
+Tins::Dot11QoSData::Dot11QoSData(uint32_t iface_index, 
+  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
+  PDU* child) 
+: Dot11Data(iface_index, dst_hw_addr, src_hw_addr, child) 
+{
     this->subtype(Dot11::QOS_DATA_DATA);
     this->_qos_control = 0;
 }
 
-Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) : Dot11Data(buffer, std::min(data_frame_size(), total_sz)) {
+Tins::Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11Data(buffer, std::min(data_frame_size(), total_sz)) {
     uint32_t sz = data_frame_size();
     buffer += sz;
     total_sz -= sz;
@@ -1613,42 +1687,51 @@ Tins::PDU *Tins::Dot11QoSData::clone_pdu() const {
 
 /* Dot11Control */
 
-Tins::Dot11Control::Dot11Control(const uint8_t* dst_addr, PDU* child) : Dot11(dst_addr, child) {
+Tins::Dot11Control::Dot11Control(const address_type &dst_addr, PDU* child) 
+: Dot11(dst_addr, child) 
+{
     type(CONTROL);
 }
 
-Tins::Dot11Control::Dot11Control(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11(iface, dst_addr, child) {
+Tins::Dot11Control::Dot11Control(const std::string& iface, 
+  const address_type &dst_addr, PDU* child) 
+: Dot11(iface, dst_addr, child) 
+{
     type(CONTROL);
 }
 
-Tins::Dot11Control::Dot11Control(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11(iface_index, dst_addr, child) {
+Tins::Dot11Control::Dot11Control(uint32_t iface_index, 
+const address_type &dst_addr, PDU* child) 
+: Dot11(iface_index, dst_addr, child) 
+{
     type(CONTROL);
 }
 
-Tins::Dot11Control::Dot11Control(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
+Tins::Dot11Control::Dot11Control(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11(buffer, total_sz) {
 
 }
 
 /* Dot11ControlTA */
-Tins::Dot11ControlTA::Dot11ControlTA(const uint8_t* dst_addr, const uint8_t *target_address, PDU* child) : Dot11Control(dst_addr, child) {
-    if(target_address)
-        target_addr(target_address);
-    else
-        std::memset(_taddr, 0, sizeof(_taddr));
+Tins::Dot11ControlTA::Dot11ControlTA(const address_type &dst_addr, 
+  const address_type &target_address, PDU* child) 
+: Dot11Control(dst_addr, child) 
+{
+    target_addr(target_address);
 }
 
-Tins::Dot11ControlTA::Dot11ControlTA(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_address, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child){
-    if(target_address)
-        target_addr(target_address);
-    else
-        std::memset(_taddr, 0, sizeof(_taddr));
+Tins::Dot11ControlTA::Dot11ControlTA(const std::string& iface, 
+  const address_type &dst_addr, const address_type &target_address, PDU* child) 
+: Dot11Control(iface, dst_addr, child)
+{
+    target_addr(target_address);
 }
 
-Tins::Dot11ControlTA::Dot11ControlTA(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_address, PDU* child) : Dot11Control(iface_index, dst_addr, child) {
-    if(target_address)
-        target_addr(target_address);
-    else
-        std::memset(_taddr, 0, sizeof(_taddr));
+Tins::Dot11ControlTA::Dot11ControlTA(uint32_t iface_index, 
+  const address_type &dst_addr, const address_type &target_address, PDU* child) 
+: Dot11Control(iface_index, dst_addr, child) 
+{
+    target_addr(target_address);
 }
 
 Tins::Dot11ControlTA::Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) {
@@ -1669,24 +1752,35 @@ uint32_t Tins::Dot11ControlTA::write_ext_header(uint8_t *buffer, uint32_t total_
     return sizeof(_taddr);
 }
 
-void Tins::Dot11ControlTA::target_addr(const uint8_t *addr) {
-    std::memcpy(_taddr, addr, sizeof(_taddr));
+void Tins::Dot11ControlTA::target_addr(const address_type &addr) {
+    //std::memcpy(_taddr, addr, sizeof(_taddr));
+    std::copy(addr.begin(), addr.end(), _taddr);
 }
 
 /* Dot11RTS */
-Tins::Dot11RTS::Dot11RTS(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
+Tins::Dot11RTS::Dot11RTS(const address_type &dst_addr , 
+  const address_type &target_addr, PDU* child) 
+:  Dot11ControlTA(dst_addr, target_addr, child) 
+{
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
+Tins::Dot11RTS::Dot11RTS(const std::string& iface, const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+{
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
+Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
+{
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+Tins::Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ControlTA(buffer, total_sz) {
 
 }
 
@@ -1698,19 +1792,29 @@ Tins::PDU *Tins::Dot11RTS::clone_pdu() const {
 
 /* Dot11PSPoll */
 
-Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
+Tins::Dot11PSPoll::Dot11PSPoll(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(dst_addr, target_addr, child) 
+{
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
+Tins::Dot11PSPoll::Dot11PSPoll(const std::string& iface, 
+  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+{
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
+Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
+{
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+Tins::Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ControlTA(buffer, total_sz) {
 
 }
 
@@ -1722,19 +1826,29 @@ Tins::PDU *Tins::Dot11PSPoll::clone_pdu() const {
 
 /* Dot11CFEnd */
 
-Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
+Tins::Dot11CFEnd::Dot11CFEnd(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+:  Dot11ControlTA(dst_addr, target_addr, child) 
+{
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
+Tins::Dot11CFEnd::Dot11CFEnd(const std::string& iface, 
+  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+{
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
+Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
+{
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+Tins::Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ControlTA(buffer, total_sz) {
 
 }
 
@@ -1746,19 +1860,29 @@ Tins::PDU *Tins::Dot11CFEnd::clone_pdu() const {
 
 /* Dot11EndCFAck */
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
+Tins::Dot11EndCFAck::Dot11EndCFAck(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+:  Dot11ControlTA(dst_addr, target_addr, child) 
+{
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
+Tins::Dot11EndCFAck::Dot11EndCFAck(const std::string& iface, 
+  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+{
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
+Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, 
+  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
+{
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+Tins::Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ControlTA(buffer, total_sz) {
 
 }
 
@@ -1770,15 +1894,23 @@ Tins::PDU *Tins::Dot11EndCFAck::clone_pdu() const {
 
 /* Dot11Ack */
 
-Tins::Dot11Ack::Dot11Ack(const uint8_t* dst_addr, PDU* child) :  Dot11Control(dst_addr, child) {
+Tins::Dot11Ack::Dot11Ack(const address_type &dst_addr, PDU* child) 
+: Dot11Control(dst_addr, child) 
+{
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(const std::string& iface, const uint8_t* dst_addr, PDU* child) throw (std::runtime_error) : Dot11Control(iface, dst_addr, child) {
+Tins::Dot11Ack::Dot11Ack(const std::string& iface, 
+  const address_type &dst_addr, PDU* child) 
+: Dot11Control(iface, dst_addr, child) 
+{
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, const uint8_t* dst_addr, PDU* child) : Dot11Control(iface_index, dst_addr, child) {
+Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, 
+  const address_type &dst_addr, PDU* child) 
+: Dot11Control(iface_index, dst_addr, child) 
+{
     subtype(ACK);
 }
 
@@ -1794,15 +1926,24 @@ Tins::PDU *Tins::Dot11Ack::clone_pdu() const {
 
 /* Dot11BlockAck */
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(
+  const address_type &dst_addr , const address_type &target_addr, PDU* child) 
+:  Dot11ControlTA(dst_addr, target_addr, child) 
+{
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const std::string& iface, 
+  const address_type &dst_addr, const address_type &target_addr, PDU* child)
+: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+{
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, 
+  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
+{
     init_block_ack();
 }
 
@@ -1851,17 +1992,26 @@ Tins::PDU *Tins::Dot11BlockAckRequest::clone_pdu() const {
 }
 
 /* Dot11BlockAck */
-Tins::Dot11BlockAck::Dot11BlockAck(const uint8_t* dst_addr , const uint8_t* target_addr, PDU* child) :  Dot11ControlTA(dst_addr, target_addr, child) {
+Tins::Dot11BlockAck::Dot11BlockAck(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+:  Dot11ControlTA(dst_addr, target_addr, child) 
+{
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) throw (std::runtime_error) : Dot11ControlTA(iface, dst_addr, target_addr, child) {
+Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, 
+  const address_type &dst_addr, const address_type &target_addr, PDU* child)
+: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+{
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, const uint8_t* dst_addr, const uint8_t *target_addr, PDU* child) : Dot11ControlTA(iface_index, dst_addr, target_addr, child) {
+Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, 
+  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
+{
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
