@@ -285,12 +285,15 @@ namespace Tins {
          * the object to collect data from them.
          * \param functor An instance of an class which implements operator(struct ifaddrs*).
          */
-        template<class T> void generic_iface_loop(T &functor) {
+        template<class Functor> 
+        void generic_iface_loop(Functor &functor) {
             struct ifaddrs *ifaddrs = 0;
             struct ifaddrs *if_it = 0;
             getifaddrs(&ifaddrs);
-            for(if_it = ifaddrs; if_it; if_it = if_it->ifa_next)
-                functor(if_it);
+            for(if_it = ifaddrs; if_it; if_it = if_it->ifa_next) {
+                if(!functor(if_it))
+                    break;
+            }
             if(ifaddrs)
                 freeifaddrs(ifaddrs);
         }

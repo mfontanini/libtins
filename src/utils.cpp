@@ -43,8 +43,9 @@ using namespace std;
 struct InterfaceCollector {
     set<string> ifaces;
 
-    void operator() (struct ifaddrs *addr) {
+    bool operator() (struct ifaddrs *addr) {
         ifaces.insert(addr->ifa_name);
+        return true;
     }
 };
 
@@ -56,11 +57,12 @@ struct IPv4Collector {
 
     IPv4Collector(const char *interface) : ip(0), found(false), iface(interface) { }
 
-    void operator() (struct ifaddrs *addr) {
+    bool operator() (struct ifaddrs *addr) {
         if(!found && addr->ifa_addr->sa_family == AF_INET && !strcmp(addr->ifa_name, iface)) {
             ip = ((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr;
             found = true;
         }
+        return found;
     }
 };
 
@@ -73,11 +75,12 @@ struct HWAddressCollector {
     HWAddressCollector(Tins::HWAddress<6> *res, const char *interface) 
     : result(res), found(false), iface(interface) { }
 
-    void operator() (struct ifaddrs *addr) {
+    bool operator() (struct ifaddrs *addr) {
         if(!found && addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface)) {
             *result = ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr;
             found = true;
         }
+        return found;
     }
 };
 
@@ -90,7 +93,7 @@ struct InterfaceInfoCollector {
     InterfaceInfoCollector(Tins::Utils::InterfaceInfo *res, const char *interface) : 
       info(res), iface(interface), found(false) { }
 
-    void operator() (struct ifaddrs *addr) {
+    bool operator() (struct ifaddrs *addr) {
         if(addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface))
             memcpy(info->hw_addr, ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr, sizeof(info->hw_addr));
         else if(addr->ifa_addr->sa_family == AF_INET && !strcmp(addr->ifa_name, iface)) {
@@ -102,6 +105,7 @@ struct InterfaceInfoCollector {
                 info->bcast_addr = 0;
             found = true;
         }
+        return found;
     }
 };
 
