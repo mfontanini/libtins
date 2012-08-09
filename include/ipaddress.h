@@ -38,6 +38,11 @@ namespace Tins {
         operator uint32_t() const;
         operator std::string() const;
         
+        bool operator==(const std::string &rhs) const;
+        bool operator!=(const std::string &rhs) const {
+            return !(*this == rhs);
+        }
+        
         friend std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
             return output << (std::string)addr;
         }

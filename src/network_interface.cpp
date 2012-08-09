@@ -20,6 +20,8 @@
  */
 
 #include <stdexcept>
+#include <cstring>
+#include <vector>
 #ifndef WIN32
     #include <linux/if_packet.h>
     #include <net/if.h>
@@ -28,24 +30,35 @@
 #include "utils.h"
 
 /** \cond */
-template<typename Address>
-struct HWAddressCollector {
-    Address *result;
+struct InterfaceInfoCollector {
+    typedef Tins::NetworkInterface::Info info_type;
+    info_type *info;
     int iface_id;
+    const char* iface_name;
     bool found;
 
-    HWAddressCollector(Tins::HWAddress<6> *res, int id) 
-    : result(res), iface_id(id), found(false){ }
+    InterfaceInfoCollector(info_type *res, int id, const char* if_name) 
+    : info(res), iface_id(id), iface_name(if_name), found(false) { }
 
     bool operator() (struct ifaddrs *addr) {
+        using Tins::Utils::net_to_host_l;
         const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
-        if(!found && addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id) {
-            *result = addr_ptr->sll_addr;
+        
+        if(addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id)
+            info->hw_addr = addr_ptr->sll_addr;
+        else if(addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
+            info->ip_addr = net_to_host_l(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
+            info->netmask = net_to_host_l(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
+            if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
+                info->bcast_addr = net_to_host_l(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
+            else
+                info->bcast_addr = 0;
             found = true;
         }
         return found;
     }
 };
+/** \endcond */
 
 namespace Tins {
 NetworkInterface::NetworkInterface(const std::string &name) {
@@ -54,18 +67,41 @@ NetworkInterface::NetworkInterface(const std::string &name) {
         throw std::runtime_error("Invalid interface error");
 }
 
-NetworkInterface::NetworkInterface(id_type id) 
-: iface_id(id) {
+NetworkInterface::NetworkInterface(IPv4Address ip) : iface_id(0) {
+    typedef std::vector<Utils::RouteEntry> entries_type;
     
+    if(ip == "127.0.0.1")
+        iface_id = if_nametoindex("lo");
+    else {
+        entries_type entries;
+        uint32_t ip_int = ip;
+        route_entries(std::back_inserter(entries));
+        for(entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
+            if((ip_int & it->mask) == it->destination) {
+                iface_id = if_nametoindex(it->interface.c_str());
+                break;
+            }
+        }
+        if(!iface_id)
+            throw std::runtime_error("Error looking up interface");
+    }
 }
 
-NetworkInterface::address_type NetworkInterface::address() {
-    address_type addr;
-    ::HWAddressCollector<address_type> collector(&addr, iface_id);
+std::string NetworkInterface::name() const {
+    char iface_name[IF_NAMESIZE];
+    if(!if_indextoname(iface_id, iface_name))
+        throw std::runtime_error("Error fetching this interface's name");
+    return iface_name;
+}
+
+NetworkInterface::Info NetworkInterface::addresses() const {
+    const std::string &iface_name = name();
+    Info info;
+    InterfaceInfoCollector collector(&info, iface_id, iface_name.c_str());
     Utils::generic_iface_loop(collector);
     if(!collector.found)
         throw std::runtime_error("Error looking up interface address");
-    return addr;
+    return info;
 }
 }
 

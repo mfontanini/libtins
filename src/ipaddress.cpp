@@ -24,30 +24,35 @@
 
 using std::string;
 
-Tins::IPv4Address::IPv4Address(uint32_t ip) : ip_addr(ip) {
+namespace Tins{
+IPv4Address::IPv4Address(uint32_t ip) : ip_addr(ip) {
     
 }
 
-Tins::IPv4Address::IPv4Address(const std::string &ip) : 
+IPv4Address::IPv4Address(const std::string &ip) : 
   ip_addr(Utils::ip_to_int(ip)) {
       
 } 
 
-Tins::IPv4Address &Tins::IPv4Address::operator=(uint32_t ip) {
+IPv4Address &IPv4Address::operator=(uint32_t ip) {
     ip_addr = ip;
     return *this;
 }
 
-Tins::IPv4Address &Tins::IPv4Address::operator=(const string &ip) {
+IPv4Address &Tins::IPv4Address::operator=(const string &ip) {
     ip_addr = Utils::ip_to_int(ip);
     return *this;
 }
 
-Tins::IPv4Address::operator uint32_t() const { 
+IPv4Address::operator uint32_t() const { 
     return Utils::net_to_host_l(ip_addr); 
 }
 
-Tins::IPv4Address::operator std::string() const { 
+IPv4Address::operator std::string() const { 
     return Utils::ip_to_string(ip_addr); 
 } 
 
+bool IPv4Address::operator==(const std::string &rhs) const {
+    return ip_addr == Utils::ip_to_int(rhs);
+}
+}

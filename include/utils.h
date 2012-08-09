@@ -291,7 +291,7 @@ namespace Tins {
             struct ifaddrs *if_it = 0;
             getifaddrs(&ifaddrs);
             for(if_it = ifaddrs; if_it; if_it = if_it->ifa_next) {
-                if(!functor(if_it))
+                if(functor(if_it))
                     break;
             }
             if(ifaddrs)

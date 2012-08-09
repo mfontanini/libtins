@@ -25,26 +25,89 @@
 #include <string>
 #include <stdint.h>
 #include "hwaddress.h"
+#include "ipaddress.h"
 
 namespace Tins {
+/**
+ * \class NetworkInterface
+ * \brief Abstraction of a network interface
+ */
 class NetworkInterface {
 public:
+    /**
+     * \brief The type used to store the interface's identifier.
+     */
     typedef uint32_t id_type;
-    typedef HWAddress<6> address_type;
-
-    NetworkInterface(const std::string &name);
-    NetworkInterface(id_type id);
     
+    /**
+     * \brief The type of this interface's address.
+     */
+    typedef HWAddress<6> address_type;
+    
+    /**
+     * \brief Struct that holds an interface's addresses.
+     */
+    struct Info {
+        IPv4Address ip_addr, netmask, bcast_addr;
+        address_type hw_addr;
+    };
+
+    /**
+     * \brief Constructor from std::string.
+     * 
+     * \param name The name of the interface this object will abstract.
+     */
+    NetworkInterface(const std::string &name);
+    
+    /**
+     * \brief Constructs a NetworkInterface from an ip address.
+     * 
+     * This abstracted interface will be the one that would be the gateway
+     * when sending a packet to the given ip.
+     * 
+     * \param ip The ip address being looked up.
+     */
+    NetworkInterface(IPv4Address ip);
+    
+    /**
+     * \brief Getter for this interface's identifier.
+     * 
+     * \return id_type containing the identifier.
+     */
     id_type id() const {
         return iface_id;
     }
     
-    address_type address();
+    /**
+     * \brief Retrieves this interface's name.
+     * 
+     * \return std::string containing this interface's name.
+     */
+    std::string name() const;
     
+    /**
+     * \brief Retrieve this interface's addresses.
+     * 
+     * This method iterates through all the interface's until the 
+     * correct one is found. Therefore it's O(N), being N the amount
+     * of interfaces in the system.
+     */
+    Info addresses() const;
+    
+    /**
+     * \brief Compares this interface for equality.
+     * 
+     * \param rhs The interface being compared.
+     */
     bool operator==(const NetworkInterface &rhs) const {
         return iface_id == rhs.iface_id;
     }
     
+    /**
+     * \brief Compares this interface for inequality.
+     * 
+     * \param rhs The interface being compared.
+     */
     bool operator!=(const NetworkInterface &rhs) const {
         return !(*this == rhs);
     }

@@ -79,6 +79,10 @@ public:
         return !(*this == rhs);
     }
     
+    const size_t size() const {
+        return address_size;
+    }
+    
     friend std::ostream &operator<<(std::ostream &os, const HWAddress &addr) {
         std::transform(
             addr.buffer, 
