@@ -53,11 +53,23 @@ public:
     };
 
     /**
+     * \brief Default constructor.
+     */
+    NetworkInterface(); 
+    
+    /**
      * \brief Constructor from std::string.
      * 
      * \param name The name of the interface this object will abstract.
      */
     NetworkInterface(const std::string &name);
+    
+    /**
+     * \brief Constructor to allow implicit conversions from const char*.
+     * 
+     * \param name The name of the interface this object will abstract.
+     */
+    NetworkInterface(const char *name); 
     
     /**
      * \brief Constructs a NetworkInterface from an ip address.
@@ -95,6 +107,16 @@ public:
     Info addresses() const;
     
     /**
+     * \brief Tests whether this is a valid interface;
+     * 
+     * An interface will not be valid iff it was created using the
+     * default constructor. 
+     */
+    operator bool() const {
+        return iface_id != 0;
+    }
+    
+    /**
      * \brief Compares this interface for equality.
      * 
      * \param rhs The interface being compared.
@@ -112,6 +134,8 @@ public:
         return !(*this == rhs);
     }
 private:
+    id_type resolve_index(const char *name);
+
     id_type iface_id;
 };
 }

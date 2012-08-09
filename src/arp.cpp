@@ -128,7 +128,7 @@ PDU *ARP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     return cloned;
 }
 
-PDU* ARP::make_arp_request(const std::string& iface, IPv4Address target,
+PDU* ARP::make_arp_request(const NetworkInterface& iface, IPv4Address target,
   IPv4Address sender, const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */
@@ -142,7 +142,7 @@ PDU* ARP::make_arp_request(const std::string& iface, IPv4Address target,
     return new EthernetII(iface, EthernetII::BROADCAST, hw_snd, arp);
 }
 
-PDU* ARP::make_arp_reply(const string& iface, IPv4Address target,
+PDU* ARP::make_arp_reply(const NetworkInterface& iface, IPv4Address target,
   IPv4Address sender, const hwaddress_type &hw_tgt, 
   const hwaddress_type &hw_snd) 
 {

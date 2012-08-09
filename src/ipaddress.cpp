@@ -29,10 +29,15 @@ IPv4Address::IPv4Address(uint32_t ip) : ip_addr(ip) {
     
 }
 
-IPv4Address::IPv4Address(const std::string &ip) : 
-  ip_addr(Utils::ip_to_int(ip)) {
+IPv4Address::IPv4Address(const std::string &ip) 
+: ip_addr(Utils::ip_to_int(ip)) {
       
 } 
+
+IPv4Address::IPv4Address(const char *ip) 
+: ip_addr(Utils::ip_to_int(ip)) {
+    
+}
 
 IPv4Address &IPv4Address::operator=(uint32_t ip) {
     ip_addr = ip;

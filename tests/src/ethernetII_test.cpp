@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include "ethernetII.h"
 #include "utils.h"
+#include "network_interface.h"
 
 using namespace Tins;
 
@@ -13,8 +14,8 @@ public:
     static address_type s_addr;
     static address_type d_addr;
     static address_type empty_addr;
+    static const NetworkInterface iface;
     static const uint16_t p_type;
-    static const uint32_t iface;
 
     void test_equals(const EthernetII &eth1, const EthernetII &eth2);
 };
@@ -32,9 +33,9 @@ address_type EthernetIITest::d_addr("aa:bb:cc:dd:ee:ff");
 
 address_type EthernetIITest::empty_addr;
 
-const uint16_t EthernetIITest::p_type = 0xd0ab;
+const NetworkInterface EthernetIITest::iface("lo");
 
-const uint32_t EthernetIITest::iface = 0x12345678;
+const uint16_t EthernetIITest::p_type = 0xd0ab;
 
 void EthernetIITest::test_equals(const EthernetII &eth1, const EthernetII &eth2) {
     EXPECT_EQ(eth1.dst_addr(), eth2.dst_addr());
@@ -45,8 +46,8 @@ void EthernetIITest::test_equals(const EthernetII &eth1, const EthernetII &eth2)
 }
 
 TEST_F(EthernetIITest, DefaultConstructor) {
-    EthernetII eth(0);
-    EXPECT_EQ(eth.iface(), 0);
+    EthernetII eth(iface);
+    EXPECT_EQ(eth.iface(), iface);
     EXPECT_EQ(eth.dst_addr(), empty_addr);
     EXPECT_EQ(eth.src_addr(), empty_addr);
     EXPECT_EQ(eth.payload_type(), 0);
@@ -56,57 +57,51 @@ TEST_F(EthernetIITest, DefaultConstructor) {
 
 TEST_F(EthernetIITest, CopyConstructor) {
     EthernetII eth1(expected_packet, sizeof(expected_packet));
-    eth1.iface(0);
     EthernetII eth2(eth1);
     test_equals(eth1, eth2);
 }
 
 TEST_F(EthernetIITest, CopyAssignmentOperator) {
     EthernetII eth1(expected_packet, sizeof(expected_packet));
-    eth1.iface(0);
-    EthernetII eth2(0);
+    EthernetII eth2;
     eth2 = eth1;
     test_equals(eth1, eth2);
 }
 
 TEST_F(EthernetIITest, NestedCopy) {
     EthernetII *nested = new EthernetII(expected_packet, sizeof(expected_packet));
-    nested->iface(0);
     EthernetII eth1(expected_packet, sizeof(expected_packet));
-    eth1.iface(0);
     eth1.inner_pdu(nested);
     EthernetII eth2(eth1);
     test_equals(eth1, eth2);
 }
 
 TEST_F(EthernetIITest, SourceAddress) {
-    EthernetII eth(0);
+    EthernetII eth;
     eth.src_addr(s_addr);
     ASSERT_EQ(eth.src_addr(), s_addr);
 }
 
 TEST_F(EthernetIITest, DestinationAddress) {
-    EthernetII eth(0);
+    EthernetII eth;
     eth.dst_addr(d_addr);
     ASSERT_EQ(eth.dst_addr(), d_addr);
 }
 
 TEST_F(EthernetIITest, PayloadType) {
-
-    EthernetII eth(0);
+    EthernetII eth;
     eth.payload_type(p_type);
     ASSERT_EQ(eth.payload_type(), p_type);
 }
 
 TEST_F(EthernetIITest, Interface) {
-
-    EthernetII eth(0);
+    EthernetII eth;
     eth.iface(iface);
     ASSERT_EQ(eth.iface(), iface);
 }
 
 TEST_F(EthernetIITest, CompleteConstructor) {
-    EthernetII* eth2 = new EthernetII(0);
+    EthernetII* eth2 = new EthernetII();
     EthernetII eth(iface, d_addr, s_addr, eth2);
     EXPECT_EQ(eth.dst_addr(), d_addr);
     EXPECT_EQ(eth.src_addr(), s_addr);
@@ -116,7 +111,7 @@ TEST_F(EthernetIITest, CompleteConstructor) {
 }
 
 TEST_F(EthernetIITest, Serialize) {
-    EthernetII eth(0, d_addr, s_addr);
+    EthernetII eth(iface, d_addr, s_addr);
     eth.payload_type(p_type);
     uint32_t sz;
     uint8_t *serialized = eth.serialize(sz);

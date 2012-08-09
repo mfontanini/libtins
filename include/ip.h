@@ -139,7 +139,7 @@ namespace Tins {
          * \param ip_src The source ip address(optional).
          * \param child pointer to a PDU which will be set as the inner_pdu for the packet being constructed(optional).
          */
-        IP(IPv4Address ip_dst, IPv4Address ip_src = 0, PDU *child = 0);
+        IP(IPv4Address ip_dst, IPv4Address ip_src = IPv4Address(), PDU *child = 0);
 
         /**
          * \brief Constructor which creates an IP object from a buffer and adds all identifiable

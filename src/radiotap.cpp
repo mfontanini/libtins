@@ -30,14 +30,9 @@
 #include "utils.h"
 
 
-Tins::RadioTap::RadioTap(const std::string &iface, PDU *child) throw (std::runtime_error) : PDU(0xff, child), _options_size(0) {
-    if(!Utils::interface_id(iface, _iface_index))
-        throw std::runtime_error("Invalid interface name!");
-    std::memset(&_radio, 0, sizeof(_radio));
-    init();
-}
-
-Tins::RadioTap::RadioTap(uint32_t iface_index, PDU *child) : PDU(0xff, child), _iface_index(iface_index) {
+Tins::RadioTap::RadioTap(const NetworkInterface &iface, PDU *child)
+: PDU(0xff, child), _iface(iface), _options_size(0)
+{
     std::memset(&_radio, 0, sizeof(_radio));
     init();
 }
@@ -205,7 +200,7 @@ bool Tins::RadioTap::send(PacketSender* sender) {
     addr.sll_family = Utils::net_to_host_s(PF_PACKET);
     addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
     addr.sll_halen = 6;
-    addr.sll_ifindex = _iface_index;
+    addr.sll_ifindex = _iface.id();
     
     Tins::Dot11 *wlan = dynamic_cast<Tins::Dot11*>(inner_pdu());
     if(wlan) {

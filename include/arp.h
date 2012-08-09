@@ -29,6 +29,7 @@
 #include "ipaddress.h"
 #include "utils.h"
 #include "hwaddress.h"
+#include "network_interface.h"
 
 namespace Tins {
 
@@ -59,7 +60,8 @@ namespace Tins {
          * ARP requests and replies can be constructed easily using
          * ARP::make_arp_request/reply static functions.
          */
-        ARP(IPv4Address target_ip = 0, IPv4Address sender_ip = 0, 
+        ARP(IPv4Address target_ip = IPv4Address(), 
+            IPv4Address sender_ip = IPv4Address(), 
             const hwaddress_type &target_hw = hwaddress_type(), 
             const hwaddress_type &sender_hw = hwaddress_type());
 
@@ -223,7 +225,7 @@ namespace Tins {
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Request.
          */
-        static PDU* make_arp_request(const std::string& iface, IPv4Address target, 
+        static PDU* make_arp_request(const NetworkInterface& iface, IPv4Address target, 
           IPv4Address sender, const hwaddress_type &hw_snd = hwaddress_type());
 
         /**
@@ -239,7 +241,7 @@ namespace Tins {
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Replay.
          */
-        static PDU* make_arp_reply(const std::string& iface, IPv4Address target, 
+        static PDU* make_arp_reply(const NetworkInterface& iface, IPv4Address target, 
           IPv4Address sender, const hwaddress_type &hw_tgt = hwaddress_type(), 
           const hwaddress_type &hw_snd = hwaddress_type());
 

@@ -24,6 +24,7 @@
 
 #include <stdexcept>
 #include "pdu.h"
+#include "network_interface.h"
 
 namespace Tins {
     
@@ -94,20 +95,13 @@ namespace Tins {
             PADDING       = 32,
             FAILED_FCS    = 64
         };
-    
-        /**
-         * \brief Creates an instance of RadioTap.
-         * \param iface The name of the interface in which to send this PDU.
-         * \param child The child PDU.(optional)
-         */
-        RadioTap(const std::string &iface, PDU *child = 0) throw (std::runtime_error);
         
         /**
          * \brief Creates an instance of RadioTap.
-         * \param iface_index The index of the interface in which to send this PDU.
+         * \param iface The interface in which to send this PDU.
          * \param child The child PDU.(optional)
          */
-        RadioTap(uint32_t iface_index, PDU *child = 0);
+        RadioTap(const NetworkInterface &iface, PDU *child = 0);
         
         /**
          * \brief Constructor which creates a RadioTap object from a buffer and adds all
@@ -314,7 +308,8 @@ namespace Tins {
         
         
         radiotap_hdr _radio;
-        uint32_t _iface_index, _options_size;
+        NetworkInterface _iface;
+        uint32_t _options_size;
         // present fields...
         uint64_t _tsft;
         uint8_t _flags, _rate;

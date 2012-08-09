@@ -31,6 +31,7 @@ namespace Tins {
     public:
         IPv4Address(uint32_t ip = 0);
         IPv4Address(const std::string &ip);
+        IPv4Address(const char *ip);
         
         IPv4Address &operator=(uint32_t ip);
         IPv4Address &operator=(const std::string &ip);

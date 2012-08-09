@@ -40,7 +40,7 @@ public:
     static const size_t address_size = n;
     
     HWAddress() {
-        std::fill(buffer, buffer + address_size, storage_type());
+        std::fill(begin(), end(), storage_type());
     }
     
     HWAddress(const storage_type* ptr) {
@@ -48,6 +48,10 @@ public:
     }
     
     HWAddress(const std::string &address) {
+        convert(address, buffer);
+    }
+    
+    HWAddress(const char *address) {
         convert(address, buffer);
     }
     

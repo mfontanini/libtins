@@ -27,6 +27,8 @@
 
 #include "pdu.h"
 #include "utils.h"
+#include "hwaddress.h"
+#include "network_interface.h"
 
 namespace Tins {
 
@@ -36,6 +38,11 @@ namespace Tins {
     class IEEE802_3 : public PDU {
     public:
         /**
+         * \brief The address type.
+         */
+        typedef HWAddress<6> address_type; 
+        
+        /**
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::IEEE802_3;
@@ -44,11 +51,6 @@ namespace Tins {
          * \brief Represents the IEEE802_3 broadcast address.
          */
         static const uint8_t* BROADCAST;
-
-        /**
-         * \brief IEEE802_3 hardware address size.
-         */
-        static const unsigned ADDR_SIZE = 6;
 
         /**
          * \brief Constructor for creating an IEEE802_3 PDU
@@ -61,20 +63,10 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        IEEE802_3(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0) throw (std::runtime_error);
-
-        /**
-         * \brief Constructor for creating an IEEE802_3 PDU
-         *
-         * Constructor that builds an IEEE802_3 PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the ethernet PDU (optional).
-         */
-        IEEE802_3(uint32_t iface_index, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
+        IEEE802_3(const NetworkInterface& iface, 
+                  const address_type &dst_hw_addr = address_type(), 
+                  const address_type &src_hw_addr = address_type(), 
+                  PDU* child = 0);
 
         /**
          * \brief Constructor which creates an IEEE802_3 object from a buffer and adds all identifiable
@@ -90,27 +82,27 @@ namespace Tins {
          *
          * \return Returns the destination's mac address as a constant uint8_t pointer.
          */
-        inline const uint8_t* dst_addr() const { return _eth.dst_mac; }
+        address_type dst_addr() const { return _eth.dst_mac; }
 
         /**
          * \brief Getter for the source's mac address.
          *
          * \return Returns the source's mac address as a constant uint8_t pointer.
          */
-        inline const uint8_t* src_addr() const { return _eth.src_mac; }
+        address_type src_addr() const { return _eth.src_mac; }
 
         /**
          * \brief Getter for the interface.
          *
          * \return Returns the interface's index as an uint32_t.
          */
-        inline uint32_t iface() const { return this->_iface_index; }
+        const NetworkInterface &iface() const { return this->_iface; }
 
         /**
          * \brief Getter for the length field.
          * \return The length field value.
          */
-        inline uint16_t length() const { return Utils::net_to_host_s(_eth.length); };
+        uint16_t length() const { return Utils::net_to_host_s(_eth.length); };
 
         /* Setters */
 
@@ -119,21 +111,21 @@ namespace Tins {
          *
          * \param new_dst_mac uint8_t array of 6 bytes containing the new destination's MAC.
          */
-        void dst_addr(const uint8_t* new_dst_mac);
+        void dst_addr(const address_type &new_dst_mac);
 
         /**
          * \brief Setter for the source's MAC.
          *
          * \param new_src_mac uint8_t array of 6 bytes containing the new source's MAC.
          */
-        void src_addr(const uint8_t* new_src_mac);
+        void src_addr(const address_type &new_src_mac);
 
         /**
          * \brief Setter for the interface.
          *
          * \param new_iface_index uint32_t containing the new interface index.
          */
-        void iface(uint32_t new_iface_index);
+        void iface(const NetworkInterface &new_iface_index);
 
         /**
          * \brief Setter for the interface.
@@ -195,27 +187,26 @@ namespace Tins {
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
 
         /**
-         * \brief Clones this PDU.
-         *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<IEEE802_3>();
+        }
     private:
         /**
          * Struct that represents the Ethernet II header
          */
         struct ethhdr {
-            uint8_t dst_mac[ADDR_SIZE];
-            uint8_t src_mac[ADDR_SIZE];
+            uint8_t dst_mac[address_type::address_size];
+            uint8_t src_mac[address_type::address_size];
             uint16_t length;
         } __attribute__((__packed__));
 
-        void copy_fields(const IEEE802_3 *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
 
         ethhdr _eth;
-        uint32_t _iface_index;
+        NetworkInterface _iface;
     };
 
 };

@@ -29,6 +29,7 @@
 
 #include "pdu.h"
 #include "utils.h"
+#include "network_interface.h"
 #include "hwaddress.h"
 
 namespace Tins {
@@ -212,20 +213,6 @@ namespace Tins {
                PDU* child = 0);
 
         /**
-         * \brief Constructor for creating a 802.11 PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
-         *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11(const std::string& iface, 
-               const address_type &dst_hw_addr = address_type(), 
-               PDU* child = 0);
-
-        /**
          * \brief Constructor for creating an 802.11 PDU
          *
          * Constructor that builds an 802.11 PDU taking the interface index,
@@ -235,7 +222,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(uint32_t iface_index, 
+        Dot11(const NetworkInterface &iface, 
                const address_type &dst_hw_addr = address_type(), 
                PDU* child = 0);
 
@@ -269,91 +256,91 @@ namespace Tins {
          *
          * \return The protocol version in an uint8_t.
          */
-        inline uint8_t protocol() const { return this->_header.control.protocol; }
+        uint8_t protocol() const { return this->_header.control.protocol; }
 
         /**
          * \brief Getter for the 802.11 frame's type.
          *
          * \return The type of the 802.11 frame in an uint8_t.
          */
-        inline uint8_t type() const { return this->_header.control.type; }
+        uint8_t type() const { return this->_header.control.type; }
 
         /**
          * \brief Getter for the 802.11 frame's subtype.
          *
          * \return The subtype of the 802.11 frame in an uint8_t.
          */
-        inline uint8_t subtype() const { return this->_header.control.subtype; }
+        uint8_t subtype() const { return this->_header.control.subtype; }
 
         /**
          * \brief Getter for the 802.11 frame's "To DS" bit.
          *
          * \return Boolean indicating if the "To DS" bit is set.
          */
-        inline bool to_ds() const { return this->_header.control.to_ds; }
+        bool to_ds() const { return this->_header.control.to_ds; }
 
         /**
          * \brief Getter for the 802.11 frame's "From DS" bit.
          *
          * \return Boolean indicating if the "From DS" bit is set.
          */
-        inline bool from_ds() const { return this->_header.control.from_ds; }
+        bool from_ds() const { return this->_header.control.from_ds; }
 
         /**
          * \brief Getter for the 802.11 frame's "More Frag" bit.
          *
          * \return Boolean indicating if the "More Frag" bit is set.
          */
-        inline bool more_frag() const { return this->_header.control.more_frag; }
+        bool more_frag() const { return this->_header.control.more_frag; }
 
         /**
          * \brief Getter for the 802.11 frame's "Retry" bit.
          *
          * \return Boolean indicating if the "Retry" bit is set.
          */
-        inline bool retry() const { return this->_header.control.retry; }
+        bool retry() const { return this->_header.control.retry; }
 
         /**
          * \brief Getter for the 802.11 frame's "Power Management" bit.
          *
          * \return Boolean indicating if the "Power Management" bit is set.
          */
-        inline bool power_mgmt() const { return this->_header.control.power_mgmt; }
+        bool power_mgmt() const { return this->_header.control.power_mgmt; }
 
         /**
          * \brief Getter for the 802.11 frame's "WEP" bit.
          *
          * \return Boolean indicating if the "WEP" bit is set.
          */
-        inline bool wep() const { return this->_header.control.wep; }
+        bool wep() const { return this->_header.control.wep; }
 
         /**
          * \brief Getter for the 802.11 frame's "Order" bit.
          *
          * \return Boolean indicating if the "Order" bit is set.
          */
-        inline bool order() const { return this->_header.control.order; }
+        bool order() const { return this->_header.control.order; }
 
         /**
          * \brief Getter for the duration/id field.
          *
          * \return The value of the duration/id field in an uint16_t.
          */
-        inline uint16_t duration_id() const { return this->_header.duration_id; }
+        uint16_t duration_id() const { return this->_header.duration_id; }
 
         /**
          * \brief Getter for the first address.
          *
          * \return The first address as a constant uint8_t pointer.
          */
-        inline address_type addr1() const { return this->_header.addr1; }
+        address_type addr1() const { return this->_header.addr1; }
 
         /**
          * \brief Getter for the interface.
          *
          * \return The interface's index as an uint32_t.
          */
-        inline uint32_t iface() const { return this->_iface_index; }
+        const NetworkInterface &iface() const { return this->_iface; }
 
         /**
          * \brief Setter for the protocol version.
@@ -444,14 +431,7 @@ namespace Tins {
          *
          * \param new_iface_index uint32_t containing the new interface index.
          */
-        void iface(uint32_t new_iface_index);
-
-        /**
-         * \brief Setter for the interface.
-         *
-         * \param new_iface string reference containing the new interface name.
-         */
-        void iface(const std::string& new_iface);
+        void iface(const NetworkInterface &new_ifac);
 
         /* Virtual methods */
         /**
@@ -555,7 +535,8 @@ namespace Tins {
 
 
         ieee80211_header _header;
-        uint32_t _iface_index, _options_size;
+        NetworkInterface _iface;
+        uint32_t _options_size;
         std::list<Dot11Option> _options;
     };
 
@@ -632,25 +613,25 @@ namespace Tins {
          * \brief Getter for the group suite field.
          * \return The group suite field.
          */
-        inline CypherSuites group_suite() const { return _group_suite; }
+        CypherSuites group_suite() const { return _group_suite; }
 
         /**
          * \brief Getter for the version field.
          * \return The version field.
          */
-        inline uint16_t version() const { return _version; }
+        uint16_t version() const { return _version; }
 
         /**
          * \brief Getter for the pairwise cypher suite list.
          * \return A list of pairwise cypher suites.
          */
-        inline const std::list<CypherSuites> &pairwise_cyphers() const { return _pairwise_cyphers; }
+        const std::list<CypherSuites> &pairwise_cyphers() const { return _pairwise_cyphers; }
 
         /**
          * \brief Getter for the akm suite list.
          * \return A list of akm suites.
          */
-        inline const std::list<AKMSuites> &akm_cyphers() const { return _akm_cyphers; }
+        const std::list<AKMSuites> &akm_cyphers() const { return _akm_cyphers; }
 
         /**
          * \brief Serializes this object.
@@ -735,112 +716,112 @@ namespace Tins {
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool ess() const { return this->_ess; }
+            bool ess() const { return this->_ess; }
 
             /**
              * \brief Getter for the ibss flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool ibss() const { return this->_ibss; }
+            bool ibss() const { return this->_ibss; }
 
             /**
              * \brief Getter for the cf_poll flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool cf_poll() const { return this->_cf_poll; }
+            bool cf_poll() const { return this->_cf_poll; }
 
             /**
              * \brief Getter for the cf_poll_req flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool cf_poll_req() const { return this->_cf_poll_req; }
+            bool cf_poll_req() const { return this->_cf_poll_req; }
 
             /**
              * \brief Getter for the privacy flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool privacy() const { return this->_privacy; }
+            bool privacy() const { return this->_privacy; }
 
             /**
              * \brief Getter for the short_preamble flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool short_preamble() const { return this->_short_preamble; }
+            bool short_preamble() const { return this->_short_preamble; }
 
             /**
              * \brief Getter for the pbcc flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool pbcc() const { return this->_pbcc; }
+            bool pbcc() const { return this->_pbcc; }
 
             /**
              * \brief Getter for the channel_agility flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool channel_agility() const { return this->_channel_agility; }
+            bool channel_agility() const { return this->_channel_agility; }
 
             /**
              * \brief Getter for the spectrum_mgmt flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool spectrum_mgmt() const { return this->_spectrum_mgmt; }
+            bool spectrum_mgmt() const { return this->_spectrum_mgmt; }
 
             /**
              * \brief Getter for the qos flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool qos() const { return this->_qos; }
+            bool qos() const { return this->_qos; }
 
             /**
              * \brief Getter for the sst flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool sst() const { return this->_sst; }
+            bool sst() const { return this->_sst; }
 
             /**
              * \brief Getter for the apsd flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool apsd() const { return this->_apsd; }
+            bool apsd() const { return this->_apsd; }
 
             /**
              * \brief Getter for the reserved flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool reserved() const { return this->_reserved; }
+            bool reserved() const { return this->_reserved; }
 
             /**
              * \brief Getter for the dsss_ofdm flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool dsss_ofdm() const { return this->_dsss_ofdm; }
+            bool dsss_ofdm() const { return this->_dsss_ofdm; }
 
             /**
              * \brief Getter for the delayed_block_ack flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool delayed_block_ack() const { return this->_delayed_block_ack; }
+            bool delayed_block_ack() const { return this->_delayed_block_ack; }
 
             /**
              * \brief Getter for the immediate_block_ack flag.
              *
              * \return Bool indicating the flag's value.
              */
-            inline bool immediate_block_ack() const { return this->_immediate_block_ack; }
+            bool immediate_block_ack() const { return this->_immediate_block_ack; }
 
             /**
              * \brief Setter for the ess flag.
@@ -961,35 +942,35 @@ namespace Tins {
          *
          * \return The second address as a constant uint8_t pointer.
          */
-        inline address_type addr2() const { return this->_ext_header.addr2; }
+        address_type addr2() const { return this->_ext_header.addr2; }
 
         /**
          * \brief Getter for the third address.
          *
          * \return The third address as a constant uint8_t pointer.
          */
-        inline address_type addr3() const { return this->_ext_header.addr3; }
+        address_type addr3() const { return this->_ext_header.addr3; }
 
         /**
          * \brief Getter for the fragment number.
          *
          * \return The fragment number as an uint8_t.
          */
-        inline uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
+        uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
 
         /**
          * \brief Getter for the sequence number.
          *
          * \return The sequence number as an uint16_t.
          */
-        inline uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
+        uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
 
         /**
          * \brief Getter for the fourth address.
          *
          * \return The fourth address as a constant uint8_t pointer.
          */
-        inline const uint8_t* addr4() const { return this->_addr4; }
+        const uint8_t* addr4() const { return this->_addr4; }
 
         /**
          * \brief Setter for the second address.
@@ -1072,7 +1053,7 @@ namespace Tins {
          */
         Dot11ManagementFrame(const address_type &dst_hw_addr = address_type(), 
                                 const address_type &src_hw_addr = address_type());
-        Dot11ManagementFrame(const std::string &iface, 
+        Dot11ManagementFrame(const NetworkInterface &iface, 
                                 const address_type &dst_hw_addr = address_type(), 
                                 const address_type &src_hw_addr = address_type());
         Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
@@ -1326,7 +1307,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Beacon(const std::string& iface, 
+        Dot11Beacon(const NetworkInterface& iface, 
                      const address_type &dst_hw_addr = address_type(), 
                      const address_type &src_hw_addr = address_type());
 
@@ -1344,28 +1325,28 @@ namespace Tins {
          *
          * \return Timestamp value in an uint64_t.
          */
-        inline uint64_t timestamp() const { return this->_body.timestamp; }
+        uint64_t timestamp() const { return this->_body.timestamp; }
 
         /**
          * \brief Getter for the interval field.
          *
          * \return Timestamp value in an uint16_t.
          */
-        inline uint16_t interval() const { return this->_body.interval; }
+        uint16_t interval() const { return this->_body.interval; }
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return this->_body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return this->_body.capability;}
 
         /**
          * \brief Setter for the timestamp field.
@@ -1642,7 +1623,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Disassoc(const std::string& iface, 
+        Dot11Disassoc(const NetworkInterface& iface, 
                         const address_type &dst_hw_addr = address_type(), 
                         const address_type &src_hw_addr = address_type());
 
@@ -1660,7 +1641,7 @@ namespace Tins {
          *
          * \return uint16_t with the reason code.
          */
-        inline uint16_t reason_code() const { return this->_body.reason_code; }
+        uint16_t reason_code() const { return this->_body.reason_code; }
 
         /**
          * \brief Setter for the reason code.
@@ -1738,7 +1719,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocRequest(const std::string& iface, 
+        Dot11AssocRequest(const NetworkInterface& iface, 
                             const address_type &dst_hw_addr = address_type(), 
                             const address_type &src_hw_addr = address_type());
 
@@ -1756,21 +1737,21 @@ namespace Tins {
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return this->_body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return this->_body.capability;}
 
         /**
          * \brief Getter for the listen interval.
          *
          * \return The listen interval in an uint16_t.
          */
-        inline uint16_t listen_interval() const { return this->_body.listen_interval; }
+        uint16_t listen_interval() const { return this->_body.listen_interval; }
 
         /**
          * \brief Setter for the listen interval.
@@ -1899,7 +1880,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocResponse(const std::string& iface, 
+        Dot11AssocResponse(const NetworkInterface& iface, 
                               const address_type &dst_hw_addr = address_type(), 
                               const address_type &src_hw_addr = address_type());
 
@@ -1917,28 +1898,28 @@ namespace Tins {
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return this->_body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return this->_body.capability;}
 
         /**
          * \brief Getter for the status code.
          *
          * \return The status code in an uint16_t.
          */
-        inline uint16_t status_code() const { return this->_body.status_code; }
+        uint16_t status_code() const { return this->_body.status_code; }
 
         /**
          * \brief Getter for the AID field.
          *
          * \return The AID field value in an uint16_t.
          */
-        inline uint16_t aid() const { return this->_body.aid; }
+        uint16_t aid() const { return this->_body.aid; }
 
         /**
          * \brief Setter for the status code.
@@ -2049,7 +2030,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ReAssocRequest(const std::string& iface, 
+        Dot11ReAssocRequest(const NetworkInterface& iface, 
                                const address_type &dst_hw_addr = address_type(), 
                                const address_type &src_hw_addr = address_type());
 
@@ -2067,28 +2048,28 @@ namespace Tins {
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return this->_body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return this->_body.capability;}
 
         /**
          * \brief Getter for the listen interval.
          *
          * \return The listen interval in an uint16_t.
          */
-        inline uint16_t listen_interval() const { return this->_body.listen_interval; }
+        uint16_t listen_interval() const { return this->_body.listen_interval; }
 
         /**
          * \brief Getter for the current ap field.
          *
          * \return The current ap in an array of 6 uint8_t.
          */
-        inline const uint8_t* current_ap() const { return this->_body.current_ap; }
+        const uint8_t* current_ap() const { return this->_body.current_ap; }
 
         /**
          * \brief Setter for the listen interval.
@@ -2225,7 +2206,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ReAssocResponse(const std::string& iface, 
+        Dot11ReAssocResponse(const NetworkInterface& iface, 
                                 const address_type &dst_hw_addr = address_type(), 
                                 const address_type &src_hw_addr = address_type());
 
@@ -2243,28 +2224,28 @@ namespace Tins {
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return this->_body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return this->_body.capability;}
 
         /**
          * \brief Getter for the status code.
          *
          * \return The status code in an uint16_t.
          */
-        inline uint16_t status_code() const { return this->_body.status_code; }
+        uint16_t status_code() const { return this->_body.status_code; }
 
         /**
          * \brief Getter for the AID field.
          *
          * \return The AID field value in an uint16_t.
          */
-        inline uint16_t aid() const { return this->_body.aid; }
+        uint16_t aid() const { return this->_body.aid; }
 
         /**
          * \brief Setter for the status code.
@@ -2375,7 +2356,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Authentication(const std::string& iface, 
+        Dot11Authentication(const NetworkInterface& iface, 
                                const address_type &dst_hw_addr = address_type(), 
                                const address_type &src_hw_addr = address_type());
 
@@ -2393,21 +2374,21 @@ namespace Tins {
          *
          * \return The authentication algorithm number in an uint16_t.
          */
-        inline uint16_t auth_algorithm() const {return this->_body.auth_algorithm; }
+        uint16_t auth_algorithm() const {return this->_body.auth_algorithm; }
 
         /**
          * \brief Getter for the Authetication Sequence Number.
          *
          * \return The authentication sequence number in an uint16_t.
          */
-        inline uint16_t auth_seq_number() const {return this->_body.auth_seq_number; }
+        uint16_t auth_seq_number() const {return this->_body.auth_seq_number; }
 
         /**
          * \brief Getter for the status code.
          *
          * \return The status code in an uint16_t.
          */
-        inline uint16_t status_code() const { return this->_body.status_code; }
+        uint16_t status_code() const { return this->_body.status_code; }
 
         /**
          * \brief Setter for the Authetication Algorithm Number.
@@ -2510,7 +2491,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Deauthentication(const std::string& iface, 
+        Dot11Deauthentication(const NetworkInterface& iface, 
                                  const address_type &dst_hw_addr = address_type(), 
                                  const address_type &src_hw_addr = 0);
 
@@ -2528,7 +2509,7 @@ namespace Tins {
          *
          * \return uint16_t with the reason code.
          */
-        inline uint16_t reason_code() const { return this->_body.reason_code; }
+        uint16_t reason_code() const { return this->_body.reason_code; }
 
         /**
          * \brief Setter for the reason code.
@@ -2606,7 +2587,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ProbeRequest(const std::string& iface, 
+        Dot11ProbeRequest(const NetworkInterface& iface, 
                             const address_type &dst_hw_addr = address_type(), 
                             const address_type &src_hw_addr = address_type());
 
@@ -2701,7 +2682,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ProbeResponse(const std::string& iface, 
+        Dot11ProbeResponse(const NetworkInterface& iface, 
                             const address_type &dst_hw_addr = address_type(), 
                             const address_type &src_hw_addr = address_type());
 
@@ -2719,28 +2700,28 @@ namespace Tins {
          *
          * \return Timestamp value in an uint64_t.
          */
-        inline uint64_t timestamp() const { return this->_body.timestamp; }
+        uint64_t timestamp() const { return this->_body.timestamp; }
 
         /**
          * \brief Getter for the interval field.
          *
          * \return Timestamp value in an uint16_t.
          */
-        inline uint16_t interval() const { return this->_body.interval; }
+        uint16_t interval() const { return this->_body.interval; }
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return this->_body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        inline CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return this->_body.capability;}
 
         /**
          * \brief Setter for the timestamp field.
@@ -2966,60 +2947,55 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_DATA;
-    
+                    
+        Dot11Data(const address_type &dst_hw_addr = address_type(), 
+                    const address_type &src_hw_addr = address_type(), 
+                    PDU* child = 0);
+                    
+        Dot11Data(const NetworkInterface &iface, const address_type &dst_hw_addr, 
+                    const address_type &src_hw_addr, PDU* child = 0);
+                    
         /**
          * \brief Constructor which creates a Dot11Data object from a buffer and adds all identifiable
          * PDUs found in the buffer as children of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
-        Dot11Data(uint32_t iface_index, 
-                    const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type(), 
-                    PDU* child = 0);
-                    
-        Dot11Data(const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type(), 
-                    PDU* child = 0);
-                    
-        Dot11Data(const std::string &iface, const address_type &dst_hw_addr, 
-                    const address_type &src_hw_addr, PDU* child = 0);
-                    
         Dot11Data(const uint8_t *buffer, uint32_t total_sz);
         /**
          * \brief Getter for the second address.
          *
          * \return The second address as a constant uint8_t pointer.
          */
-        inline address_type addr2() const { return this->_ext_header.addr2; }
+        address_type addr2() const { return this->_ext_header.addr2; }
 
         /**
          * \brief Getter for the third address.
          *
          * \return The third address as a constant uint8_t pointer.
          */
-        inline address_type addr3() const { return this->_ext_header.addr3; }
+        address_type addr3() const { return this->_ext_header.addr3; }
 
         /**
          * \brief Getter for the fragment number.
          *
          * \return The fragment number as an uint8_t.
          */
-        inline uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
+        uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
 
         /**
          * \brief Getter for the sequence number.
          *
          * \return The sequence number as an uint16_t.
          */
-        inline uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
+        uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
 
         /**
          * \brief Getter for the fourth address.
          *
          * \return The fourth address as a constant uint8_t pointer.
          */
-        inline const uint8_t* addr4() const { return this->_addr4; }
+        const uint8_t* addr4() const { return this->_addr4; }
 
         /**
          * \brief Setter for the second address.
@@ -3125,9 +3101,9 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11QoSData(const address_type &dst_hw_addr = 0, 
-                        const address_type &src_hw_addr = 0, 
-                        PDU* child = 0);
+        Dot11QoSData(const address_type &dst_hw_addr = address_type(), 
+                     const address_type &src_hw_addr = address_type(), 
+                     PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 QoS Data PDU
@@ -3140,23 +3116,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11QoSData(const std::string& iface, 
-                        const address_type &dst_hw_addr = address_type(), 
-                        const address_type &src_hw_addr = address_type(), 
-                        PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 QoS Data PDU
-         *
-         * Constructor that builds an 802.11 QoS Data PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11QoSData(uint32_t iface_index, 
+        Dot11QoSData(const NetworkInterface& iface, 
                         const address_type &dst_hw_addr = address_type(), 
                         const address_type &src_hw_addr = address_type(), 
                         PDU* child = 0);
@@ -3184,7 +3144,7 @@ namespace Tins {
          *
          * \return The value of the qos_control field in an uint16_t.
          */
-        inline uint16_t qos_control() const { return this->_qos_control; }
+        uint16_t qos_control() const { return this->_qos_control; }
 
         /**
          * \brief Setter for the qos_control field.
@@ -3261,21 +3221,7 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(const std::string& iface, 
-                        const address_type &dst_addr = address_type(), 
-                        PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 control frame PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11Control(uint32_t iface_index, 
+        Dot11Control(const NetworkInterface& iface, 
                         const address_type &dst_addr = address_type(), 
                         PDU* child = 0);
 
@@ -3333,23 +3279,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11ControlTA(const std::string& iface, 
-                        const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 control frame TA PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11ControlTA(uint32_t iface_index, 
+        Dot11ControlTA(const NetworkInterface& iface, 
                         const address_type &dst_addr = address_type(), 
                         const address_type &target_addr = address_type(), 
                         PDU* child = 0);
@@ -3365,7 +3295,7 @@ namespace Tins {
         /**
          * \brief Getter for the target address field.
          */
-        inline address_type target_addr() const { return _taddr; }
+        address_type target_addr() const { return _taddr; }
 
         /**
          * \brief Setter for the target address field.
@@ -3423,27 +3353,11 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11RTS(const std::string& iface, 
+        Dot11RTS(const NetworkInterface& iface, 
                     const address_type &dst_addr = address_type(), 
                     const address_type &target_addr = address_type(), 
                     PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 RTS frame PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11RTS(uint32_t iface_index, 
-                    const address_type &dst_hw_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
-
+                    
         /**
          * \brief Constructor which creates an 802.11 RTS frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
@@ -3506,23 +3420,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11PSPoll(const std::string& iface, 
-                        const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 PS-Poll frame PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11PSPoll(uint32_t iface_index, 
+        Dot11PSPoll(const NetworkInterface& iface, 
                         const address_type &dst_addr = address_type(), 
                         const address_type &target_addr = address_type(), 
                         PDU* child = 0);
@@ -3589,27 +3487,11 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11CFEnd(const std::string& iface, 
+        Dot11CFEnd(const NetworkInterface& iface, 
                     const address_type &dst_addr = address_type(), 
                     const address_type &target_addr = address_type(), 
                     PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 CF-End frame PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11CFEnd(uint32_t iface_index, 
-                    const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
-
+                    
         /**
          * \brief Constructor which creates an 802.11 CF-End frame object from a buffer and
          * adds all identifiable PDUs found in the buffer as children of this one.
@@ -3670,24 +3552,9 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11EndCFAck(const std::string& iface, 
+        Dot11EndCFAck(const NetworkInterface& iface, 
                         const address_type &dst_addr = address_type(), 
                         const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 End-CF-Ack frame PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11EndCFAck(uint32_t iface_index, 
-                        const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(),  
                         PDU* child = 0);
 
         /**
@@ -3748,22 +3615,7 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Ack(const std::string& iface, 
-                    const address_type &dst_addr = address_type(), 
-                    PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 Ack frame PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11Ack(uint32_t iface_index, 
+        Dot11Ack(const NetworkInterface& iface, 
                     const address_type &dst_addr = address_type(), 
                     PDU* child = 0);
 
@@ -3830,22 +3682,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAckRequest(const std::string& iface, 
-                                const address_type &dst_addr = address_type(), 
-                                const address_type &target_addr = address_type(), 
-                                PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 Block Ack request frame PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11BlockAckRequest(uint32_t iface_index, 
+        Dot11BlockAckRequest(const NetworkInterface& iface, 
                                 const address_type &dst_addr = address_type(), 
                                 const address_type &target_addr = address_type(), 
                                 PDU* child = 0);
@@ -3965,22 +3802,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAck(const std::string& iface, 
-                        const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an 802.11 Block Ack frame PDU
-         *
-         * Constructor that builds an 802.11 PDU taking the interface index,
-         * destination's and source's MAC.
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11BlockAck(uint32_t iface_index, 
+        Dot11BlockAck(const NetworkInterface& iface, 
                         const address_type &dst_addr = address_type(), 
                         const address_type &target_addr = address_type(), 
                         PDU* child = 0);

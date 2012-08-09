@@ -28,6 +28,7 @@
 #include "pdu.h"
 #include "utils.h"
 #include "hwaddress.h"
+#include "network_interface.h"
 
 namespace Tins {
 
@@ -64,24 +65,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        //EthernetII(const std::string& iface, const uint8_t* dst_hw_addr = 0, const uint8_t* src_hw_addr = 0, PDU* child = 0);
-        EthernetII(const std::string& iface, 
-                    const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type(), 
-                    PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating an ethernet PDU
-         *
-         * Constructor that builds an ethernet PDU taking the interface index,
-         * destination's and source's MAC.
-         *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the ethernet PDU (optional).
-         */
-        EthernetII(uint32_t iface_index, 
+        EthernetII(const NetworkInterface& iface = NetworkInterface(), 
                     const address_type &dst_hw_addr = address_type(), 
                     const address_type &src_hw_addr = address_type(), 
                     PDU* child = 0);
@@ -114,7 +98,7 @@ namespace Tins {
          *
          * \return Returns the interface's index as an uint32_t.
          */
-        uint32_t iface() const { return _iface_index; }
+        const NetworkInterface &iface() const { return _iface; }
 
         /**
          * \brief Getter for the payload_type
@@ -141,16 +125,9 @@ namespace Tins {
         /**
          * \brief Setter for the interface.
          *
-         * \param new_iface_index uint32_t containing the new interface index.
-         */
-        void iface(uint32_t new_iface_index);
-
-        /**
-         * \brief Setter for the interface.
-         *
          * \param new_iface string reference containing the new interface name.
          */
-        void iface(const std::string& new_iface) throw (std::runtime_error);
+        void iface(const NetworkInterface& new_iface);
 
         /**
          * \brief Setter for the payload type.
@@ -223,7 +200,7 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         ethhdr _eth;
-        uint32_t _iface_index;
+        NetworkInterface _iface;
     };
 
 };

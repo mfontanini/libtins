@@ -49,23 +49,13 @@ Tins::Dot11::Dot11(const address_type &dst_hw_addr, PDU* child)
     addr1(dst_hw_addr);
 }
 
-Tins::Dot11::Dot11(const std::string& iface, 
+Tins::Dot11::Dot11(const NetworkInterface &iface, 
   const address_type &dst_hw_addr, PDU* child) 
 : PDU(ETHERTYPE_IP, child), _options_size(0) 
 {
     memset(&_header, 0, sizeof(ieee80211_header));
     addr1(dst_hw_addr);
     this->iface(iface);
-}
-
-
-Tins::Dot11::Dot11(uint32_t iface_index, 
-  const address_type &dst_hw_addr, PDU* child) 
-: PDU(ETHERTYPE_IP, child), _options_size(0) 
-{
-    memset(&_header, 0, sizeof(ieee80211_header));
-    addr1(dst_hw_addr);
-    this->iface(iface_index);
 }
 
 Tins::Dot11::Dot11(const ieee80211_header *header_ptr) 
@@ -180,18 +170,11 @@ void Tins::Dot11::duration_id(uint16_t new_duration_id) {
 }
 
 void Tins::Dot11::addr1(const address_type &new_addr1) {
-    //memcpy(this->_header.addr1, new_addr1, 6);
     std::copy(new_addr1.begin(), new_addr1.end(), _header.addr1);
 }
 
-void Tins::Dot11::iface(uint32_t new_iface_index) {
-    this->_iface_index = new_iface_index;
-}
-
-void Tins::Dot11::iface(const std::string& new_iface) {
-    if (!Tins::Utils::interface_id(new_iface, this->_iface_index)) {
-        throw std::runtime_error("Invalid interface name!");
-    }
+void Tins::Dot11::iface(const NetworkInterface &new_iface) {
+    this->_iface = new_iface;
 }
 
 uint32_t Tins::Dot11::header_size() const {
@@ -207,7 +190,7 @@ bool Tins::Dot11::send(PacketSender* sender) {
     addr.sll_family = Utils::net_to_host_s(PF_PACKET);
     addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
     addr.sll_halen = 6;
-    addr.sll_ifindex = this->_iface_index;
+    addr.sll_ifindex = this->_iface.id();
     memcpy(&(addr.sll_addr), this->_header.addr1, 6);
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
@@ -275,7 +258,7 @@ Tins::PDU *Tins::Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
 
 void Tins::Dot11::copy_80211_fields(const Dot11 *other) {
     std::memcpy(&_header, &other->_header, sizeof(_header));
-    _iface_index = other->_iface_index;
+    _iface = other->_iface;
     _options_size = other->_options_size;
     for(std::list<Dot11Option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
         _options.push_back(Dot11Option(it->option, it->length, it->value));
@@ -301,7 +284,7 @@ Tins::Dot11ManagementFrame::Dot11ManagementFrame(
     addr2(src_hw_addr);
 }
 
-Tins::Dot11ManagementFrame::Dot11ManagementFrame(const std::string &iface,
+Tins::Dot11ManagementFrame::Dot11ManagementFrame(const NetworkInterface &iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11(iface, dst_hw_addr) 
 {
@@ -327,12 +310,10 @@ uint32_t Tins::Dot11ManagementFrame::header_size() const {
 }
 
 void Tins::Dot11ManagementFrame::addr2(const address_type &new_addr2) {
-    //memcpy(this->_ext_header.addr2, new_addr2, 6);
     std::copy(new_addr2.begin(), new_addr2.end(), _ext_header.addr2);
 }
 
 void Tins::Dot11ManagementFrame::addr3(const address_type &new_addr3) {
-    //memcpy(this->_ext_header.addr3, new_addr3, 6);
     std::copy(new_addr3.begin(), new_addr3.end(), _ext_header.addr3);
 }
 
@@ -628,7 +609,7 @@ Tins::Dot11Beacon::Dot11Beacon(const address_type &dst_hw_addr,
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11Beacon::Dot11Beacon(const std::string& iface,
+Tins::Dot11Beacon::Dot11Beacon(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
 {
@@ -840,7 +821,7 @@ Tins::Dot11Disassoc::Dot11Disassoc(const address_type &dst_hw_addr,
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11Disassoc::Dot11Disassoc(const std::string& iface,
+Tins::Dot11Disassoc::Dot11Disassoc(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
     this->subtype(Dot11::DISASSOC);
@@ -892,7 +873,7 @@ Tins::Dot11AssocRequest::Dot11AssocRequest(const address_type &dst_hw_addr,
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11AssocRequest::Dot11AssocRequest(const std::string& iface,
+Tins::Dot11AssocRequest::Dot11AssocRequest(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
 {
@@ -973,7 +954,7 @@ Tins::Dot11AssocResponse::Dot11AssocResponse(const address_type &dst_hw_addr,
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11AssocResponse::Dot11AssocResponse(const std::string& iface,
+Tins::Dot11AssocResponse::Dot11AssocResponse(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
 {
@@ -1044,7 +1025,7 @@ Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const address_type &dst_hw_addr,
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const std::string& iface,
+Tins::Dot11ReAssocRequest::Dot11ReAssocRequest(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
 {
@@ -1131,7 +1112,7 @@ Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const address_type &dst_hw_addr
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const std::string& iface,
+Tins::Dot11ReAssocResponse::Dot11ReAssocResponse(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr)
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
 {
@@ -1200,7 +1181,7 @@ Tins::Dot11ProbeRequest::Dot11ProbeRequest(const address_type &dst_hw_addr,
     this->subtype(Dot11::PROBE_REQ);
 }
 
-Tins::Dot11ProbeRequest::Dot11ProbeRequest(const std::string& iface,
+Tins::Dot11ProbeRequest::Dot11ProbeRequest(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
 {
@@ -1246,7 +1227,7 @@ Tins::Dot11ProbeResponse::Dot11ProbeResponse(const address_type &dst_hw_addr,
     memset(&this->_body, 0, sizeof(this->_body));
 }
 
-Tins::Dot11ProbeResponse::Dot11ProbeResponse(const std::string& iface,
+Tins::Dot11ProbeResponse::Dot11ProbeResponse(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
 {
@@ -1395,7 +1376,7 @@ Tins::Dot11Authentication::Dot11Authentication(const address_type &dst_hw_addr,
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11Authentication::Dot11Authentication(const std::string& iface,
+Tins::Dot11Authentication::Dot11Authentication(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
 {
@@ -1462,7 +1443,7 @@ Tins::Dot11Deauthentication::Dot11Deauthentication(const address_type &dst_hw_ad
     memset(&_body, 0, sizeof(_body));
 }
 
-Tins::Dot11Deauthentication::Dot11Deauthentication(const std::string& iface,
+Tins::Dot11Deauthentication::Dot11Deauthentication(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
 {
@@ -1529,14 +1510,6 @@ Tins::Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz)
         inner_pdu(new Tins::SNAP(buffer, total_sz));
 }
 
-Tins::Dot11Data::Dot11Data(uint32_t iface_index, const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr, PDU* child) 
-: Dot11(iface_index, dst_hw_addr, child) 
-{
-    type(Dot11::DATA);
-    addr2(src_hw_addr);
-}
-
 Tins::Dot11Data::Dot11Data(const address_type &dst_hw_addr, 
   const address_type &src_hw_addr, PDU* child) 
 : Dot11(dst_hw_addr, child) 
@@ -1546,7 +1519,7 @@ Tins::Dot11Data::Dot11Data(const address_type &dst_hw_addr,
 }
 
 
-Tins::Dot11Data::Dot11Data(const std::string &iface,
+Tins::Dot11Data::Dot11Data(const NetworkInterface &iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr,
   PDU* child) 
 : Dot11(iface, dst_hw_addr, child) 
@@ -1569,12 +1542,10 @@ uint32_t Tins::Dot11Data::header_size() const {
 }
 
 void Tins::Dot11Data::addr2(const address_type &new_addr2) {
-    //memcpy(this->_ext_header.addr2, new_addr2, 6);
     std::copy(new_addr2.begin(), new_addr2.end(), _ext_header.addr2);
 }
 
 void Tins::Dot11Data::addr3(const address_type &new_addr3) {
-    //memcpy(this->_ext_header.addr3, new_addr3, 6);
     std::copy(new_addr3.begin(), new_addr3.end(), _ext_header.addr3);
 }
 
@@ -1617,19 +1588,10 @@ Tins::Dot11QoSData::Dot11QoSData(const address_type &dst_hw_addr,
 
 }
 
-Tins::Dot11QoSData::Dot11QoSData(const std::string& iface, 
+Tins::Dot11QoSData::Dot11QoSData(const NetworkInterface &iface, 
   const address_type &dst_hw_addr, const address_type &src_hw_addr, 
   PDU* child) 
 : Dot11Data(iface, dst_hw_addr, src_hw_addr, child) 
-{
-    this->subtype(Dot11::QOS_DATA_DATA);
-    this->_qos_control = 0;
-}
-
-Tins::Dot11QoSData::Dot11QoSData(uint32_t iface_index, 
-  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
-  PDU* child) 
-: Dot11Data(iface_index, dst_hw_addr, src_hw_addr, child) 
 {
     this->subtype(Dot11::QOS_DATA_DATA);
     this->_qos_control = 0;
@@ -1693,16 +1655,9 @@ Tins::Dot11Control::Dot11Control(const address_type &dst_addr, PDU* child)
     type(CONTROL);
 }
 
-Tins::Dot11Control::Dot11Control(const std::string& iface, 
+Tins::Dot11Control::Dot11Control(const NetworkInterface &iface, 
   const address_type &dst_addr, PDU* child) 
 : Dot11(iface, dst_addr, child) 
-{
-    type(CONTROL);
-}
-
-Tins::Dot11Control::Dot11Control(uint32_t iface_index, 
-const address_type &dst_addr, PDU* child) 
-: Dot11(iface_index, dst_addr, child) 
 {
     type(CONTROL);
 }
@@ -1720,16 +1675,9 @@ Tins::Dot11ControlTA::Dot11ControlTA(const address_type &dst_addr,
     target_addr(target_address);
 }
 
-Tins::Dot11ControlTA::Dot11ControlTA(const std::string& iface, 
+Tins::Dot11ControlTA::Dot11ControlTA(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_address, PDU* child) 
 : Dot11Control(iface, dst_addr, child)
-{
-    target_addr(target_address);
-}
-
-Tins::Dot11ControlTA::Dot11ControlTA(uint32_t iface_index, 
-  const address_type &dst_addr, const address_type &target_address, PDU* child) 
-: Dot11Control(iface_index, dst_addr, child) 
 {
     target_addr(target_address);
 }
@@ -1753,7 +1701,6 @@ uint32_t Tins::Dot11ControlTA::write_ext_header(uint8_t *buffer, uint32_t total_
 }
 
 void Tins::Dot11ControlTA::target_addr(const address_type &addr) {
-    //std::memcpy(_taddr, addr, sizeof(_taddr));
     std::copy(addr.begin(), addr.end(), _taddr);
 }
 
@@ -1765,16 +1712,9 @@ Tins::Dot11RTS::Dot11RTS(const address_type &dst_addr ,
     subtype(RTS);
 }
 
-Tins::Dot11RTS::Dot11RTS(const std::string& iface, const address_type &dst_addr, 
+Tins::Dot11RTS::Dot11RTS(const NetworkInterface &iface, const address_type &dst_addr, 
   const address_type &target_addr, PDU* child) 
 : Dot11ControlTA(iface, dst_addr, target_addr, child) 
-{
-    subtype(RTS);
-}
-
-Tins::Dot11RTS::Dot11RTS(uint32_t iface_index, const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
 {
     subtype(RTS);
 }
@@ -1799,16 +1739,9 @@ Tins::Dot11PSPoll::Dot11PSPoll(const address_type &dst_addr,
     subtype(PS);
 }
 
-Tins::Dot11PSPoll::Dot11PSPoll(const std::string& iface, 
+Tins::Dot11PSPoll::Dot11PSPoll(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child) 
 : Dot11ControlTA(iface, dst_addr, target_addr, child) 
-{
-    subtype(PS);
-}
-
-Tins::Dot11PSPoll::Dot11PSPoll(uint32_t iface_index, const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
 {
     subtype(PS);
 }
@@ -1833,16 +1766,9 @@ Tins::Dot11CFEnd::Dot11CFEnd(const address_type &dst_addr,
     subtype(CF_END);
 }
 
-Tins::Dot11CFEnd::Dot11CFEnd(const std::string& iface, 
+Tins::Dot11CFEnd::Dot11CFEnd(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child) 
 : Dot11ControlTA(iface, dst_addr, target_addr, child) 
-{
-    subtype(CF_END);
-}
-
-Tins::Dot11CFEnd::Dot11CFEnd(uint32_t iface_index, const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
 {
     subtype(CF_END);
 }
@@ -1867,16 +1793,9 @@ Tins::Dot11EndCFAck::Dot11EndCFAck(const address_type &dst_addr,
     subtype(CF_END_ACK);
 }
 
-Tins::Dot11EndCFAck::Dot11EndCFAck(const std::string& iface, 
+Tins::Dot11EndCFAck::Dot11EndCFAck(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child) 
 : Dot11ControlTA(iface, dst_addr, target_addr, child) 
-{
-    subtype(CF_END_ACK);
-}
-
-Tins::Dot11EndCFAck::Dot11EndCFAck(uint32_t iface_index, 
-  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
 {
     subtype(CF_END_ACK);
 }
@@ -1900,16 +1819,9 @@ Tins::Dot11Ack::Dot11Ack(const address_type &dst_addr, PDU* child)
     subtype(ACK);
 }
 
-Tins::Dot11Ack::Dot11Ack(const std::string& iface, 
+Tins::Dot11Ack::Dot11Ack(const NetworkInterface &iface, 
   const address_type &dst_addr, PDU* child) 
 : Dot11Control(iface, dst_addr, child) 
-{
-    subtype(ACK);
-}
-
-Tins::Dot11Ack::Dot11Ack(uint32_t iface_index, 
-  const address_type &dst_addr, PDU* child) 
-: Dot11Control(iface_index, dst_addr, child) 
 {
     subtype(ACK);
 }
@@ -1933,16 +1845,9 @@ Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(
     init_block_ack();
 }
 
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const std::string& iface, 
+Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child)
 : Dot11ControlTA(iface, dst_addr, target_addr, child) 
-{
-    init_block_ack();
-}
-
-Tins::Dot11BlockAckRequest::Dot11BlockAckRequest(uint32_t iface_index, 
-  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
 {
     init_block_ack();
 }
@@ -2000,17 +1905,9 @@ Tins::Dot11BlockAck::Dot11BlockAck(const address_type &dst_addr,
     std::memset(_bitmap, 0, sizeof(_bitmap));
 }
 
-Tins::Dot11BlockAck::Dot11BlockAck(const std::string& iface, 
+Tins::Dot11BlockAck::Dot11BlockAck(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child)
 : Dot11ControlTA(iface, dst_addr, target_addr, child) 
-{
-    subtype(BLOCK_ACK);
-    std::memset(_bitmap, 0, sizeof(_bitmap));
-}
-
-Tins::Dot11BlockAck::Dot11BlockAck(uint32_t iface_index, 
-  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface_index, dst_addr, target_addr, child) 
 {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));

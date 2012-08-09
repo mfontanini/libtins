@@ -36,7 +36,7 @@
 const uint8_t* Tins::EthernetII::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
 const uint32_t Tins::EthernetII::ADDR_SIZE;
 
-Tins::EthernetII::EthernetII(const std::string& iface, 
+Tins::EthernetII::EthernetII(const NetworkInterface& iface, 
   const address_type &dst_hw_addr, const address_type &src_hw_addr, 
   PDU* child) 
 : PDU(ETHERTYPE_IP, child)
@@ -47,18 +47,6 @@ Tins::EthernetII::EthernetII(const std::string& iface,
     this->iface(iface);
     _eth.payload_type = 0;
 
-}
-
-Tins::EthernetII::EthernetII(uint32_t iface_index, 
-  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
-  PDU* child) 
-: PDU(ETHERTYPE_IP, child) 
-{
-    memset(&_eth, 0, sizeof(ethhdr));
-    dst_addr(dst_hw_addr);
-    src_addr(src_hw_addr);
-    iface(iface_index);
-    _eth.payload_type = 0;
 }
 
 Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) 
@@ -92,14 +80,8 @@ void Tins::EthernetII::src_addr(const address_type &new_src_mac) {
     std::copy(new_src_mac.begin(), new_src_mac.end(), _eth.src_mac);
 }
 
-void Tins::EthernetII::iface(uint32_t new_iface_index) {
-    _iface_index = new_iface_index;
-}
-
-void Tins::EthernetII::iface(const std::string& new_iface) throw (std::runtime_error) {
-    if (!Tins::Utils::interface_id(new_iface, this->_iface_index)) {
-        throw std::runtime_error("Invalid interface name!");
-    }
+void Tins::EthernetII::iface(const NetworkInterface& new_iface) {
+    _iface = new_iface;
 }
 
 void Tins::EthernetII::payload_type(uint16_t new_payload_type) {
@@ -118,7 +100,7 @@ bool Tins::EthernetII::send(PacketSender* sender) {
     addr.sll_family = Utils::net_to_host_s(PF_PACKET);
     addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
     addr.sll_halen = ADDR_SIZE;
-    addr.sll_ifindex = _iface_index;
+    addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, ADDR_SIZE);
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
@@ -164,7 +146,7 @@ Tins::PDU *Tins::EthernetII::recv_response(PacketSender *sender) {
     addr.sll_family = Utils::net_to_host_s(PF_PACKET);
     addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
     addr.sll_halen = ADDR_SIZE;
-    addr.sll_ifindex = _iface_index;
+    addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, ADDR_SIZE);
 
     return sender->recv_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
