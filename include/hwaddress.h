@@ -51,7 +51,8 @@ public:
         convert(address, buffer);
     }
     
-    HWAddress(const char *address) {
+    template<size_t i>
+    HWAddress(const char (&address)[i]) {
         convert(address, buffer);
     }
     
@@ -104,6 +105,11 @@ public:
             &HWAddress::to_string
         );
         return os << to_string(addr.buffer[HWAddress::address_size-1]);
+    }
+    
+    template<typename OutputIterator>
+    OutputIterator copy(OutputIterator iter) {
+        return std::copy(begin(), end(), iter);
     }
 private:
     template<typename OutputIterator>

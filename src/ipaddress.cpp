@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <stdexcept>
 #include "ipaddress.h"
 #include "utils.h"
 
@@ -34,10 +35,10 @@ IPv4Address::IPv4Address(const std::string &ip)
       
 } 
 
-IPv4Address::IPv4Address(const char *ip) 
+/*IPv4Address::IPv4Address(const char *ip) 
 : ip_addr(Utils::ip_to_int(ip)) {
     
-}
+}*/
 
 IPv4Address &IPv4Address::operator=(uint32_t ip) {
     ip_addr = ip;
@@ -59,5 +60,29 @@ IPv4Address::operator std::string() const {
 
 bool IPv4Address::operator==(const std::string &rhs) const {
     return ip_addr == Utils::ip_to_int(rhs);
+}
+
+uint32_t IPv4Address::ip_to_int(const string &ip) {
+    uint32_t result(0), i(0), end, bytes_found(0);
+    while(i < ip.size() && bytes_found < 4) {
+        uint16_t this_byte(0);
+        end = i + 3;
+        while(i < ip.size() && i < end && ip[i] != '.') {
+            if(ip[i] < '0' || ip[i] > '9')
+                throw std::runtime_error("Non-digit character found in ip");
+            this_byte = (this_byte * 10)  + (ip[i] - '0');
+            i++;
+        }
+        if (this_byte > 0xFF) {
+            throw std::runtime_error("Byte greater than 255");
+        }
+        result = (result << 8) | (this_byte & 0xFF);
+        bytes_found++;
+        if(bytes_found < 4 && i < ip.size() && ip[i] == '.')
+            i++;
+    }
+    if(bytes_found < 4 || (i < ip.size() && bytes_found == 4))
+        throw std::runtime_error("Invalid ip address");
+    return result;
 }
 }
