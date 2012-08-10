@@ -23,10 +23,11 @@
 #define TINS_BOOTP_H
 
 #include <stdint.h>
-#include <stdint.h>
+#include <algorithm>
 #include "pdu.h"
 #include "utils.h"
 #include "ipaddress.h"
+#include "hwaddress.h"
 
 
 namespace Tins {
@@ -35,8 +36,8 @@ namespace Tins {
      * \brief Class representing a BootP packet.
      */
     class BootP : public PDU {
-
     public:
+        typedef HWAddress<16> chaddr_type;
         /**
          * \brief This PDU's flag.
          */
@@ -156,7 +157,8 @@ namespace Tins {
          * \brief Getter for the chaddr field.
          * \return The chddr field for this BootP PDU.
          */
-        const uint8_t *chaddr() const { return _bootp.chaddr; }
+        //const uint8_t *chaddr() const { return _bootp.chaddr; }
+        chaddr_type chaddr() const { return _bootp.chaddr; }
 
         /** 
          * \brief Getter for the sname field.
@@ -260,7 +262,17 @@ namespace Tins {
          * The new_chaddr pointer must be at least BOOTP::hlen() bytes long.
          * \param new_chaddr The chaddr to be set.
          */
-        void chaddr(const uint8_t *new_chaddr);
+        template<size_t n>
+        void chaddr(const HWAddress<n> &new_chaddr) {
+            // Copy the new addr
+            uint8_t *end = std::copy(
+                new_chaddr.begin(), 
+                new_chaddr.begin() + std::min(n, sizeof(_bootp.chaddr)), 
+                _bootp.chaddr
+            );
+            // Fill what's left with zeros
+            std::fill(end, _bootp.chaddr + chaddr_type::address_size, 0);
+        }
 
         /** 
          * \brief Setter for the sname field.
@@ -288,11 +300,11 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::BOOTP; }
 
         /**
-         * \brief Clones this PDU.
-         *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<BootP>();
+        }
     protected:
         void copy_bootp_fields(const BootP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

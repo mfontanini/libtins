@@ -126,13 +126,13 @@ namespace Tins {
          * \brief Getter for this PDU's type flag identifier.
          * \return The type flag identifier.
          */
-        inline uint32_t flag() const { return _flag; }
+        uint32_t flag() const { return _flag; }
 
         /**
          * \brief Getter for the inner PDU.
          * \return The current inner PDU. Might be 0.
          */
-        inline PDU *inner_pdu() const { return _inner_pdu; }
+        PDU *inner_pdu() const { return _inner_pdu; }
 
         /** \brief Sets the flag identifier.
          */

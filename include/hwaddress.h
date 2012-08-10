@@ -55,6 +55,15 @@ public:
         convert(address, buffer);
     }
     
+    template<size_t i>
+    HWAddress(const HWAddress<i> &rhs) {
+        std::copy(
+            rhs.begin(),
+            rhs.begin() + std::min(i, n),
+            begin()
+        );
+    }
+    
     HWAddress& operator=(const std::string &address) {
         convert(address, buffer);
     }

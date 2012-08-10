@@ -49,12 +49,7 @@ namespace Tins {
         /**
          * \brief Broadcast hardware address.
          */
-        static const uint8_t *BROADCAST;
-        
-        /**
-         * \brief Dot11 address size.
-         */
-        static const uint32_t ADDR_SIZE = 6;
+        static const address_type BROADCAST;
 
         /**
          * \brief Enum for the different types of 802.11 frames.
@@ -970,7 +965,7 @@ namespace Tins {
          *
          * \return The fourth address as a constant uint8_t pointer.
          */
-        const uint8_t* addr4() const { return this->_addr4; }
+        const address_type &addr4() const { return this->_addr4; }
 
         /**
          * \brief Setter for the second address.
@@ -1005,7 +1000,7 @@ namespace Tins {
          *
          * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
          */
-        void addr4(const uint8_t* new_addr4);
+        void addr4(const address_type &new_addr4);
 
         /**
          * \brief Returns the 802.11 frame's header length.
@@ -1271,11 +1266,12 @@ namespace Tins {
 
         void copy_ext_header(const Dot11ManagementFrame *other);
 
-        uint32_t management_frame_size() { return sizeof(_ext_header) + (from_ds() && to_ds()) ? sizeof(_addr4) : 0; }
+        uint32_t management_frame_size() { 
+            return sizeof(_ext_header) + (from_ds() && to_ds()) ? address_type::address_size : 0; 
+        }
     private:
         ExtendedHeader _ext_header;
-        uint8_t _addr4[6];
-
+        address_type _addr4;
     };
 
     /**

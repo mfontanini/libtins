@@ -7,6 +7,7 @@
 #include "dhcp.h"
 #include "utils.h"
 #include "ethernetII.h"
+#include "hwaddress.h"
 #include "ipaddress.h"
 
 using namespace std;
@@ -15,14 +16,15 @@ using namespace Tins;
 class DHCPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
-    static const uint8_t chaddr[], sname[], file[];
+    static const BootP::chaddr_type chaddr;
+    static const uint8_t sname[], file[];
     static const IPv4Address addr;
 
     void test_equals(const DHCP &dhcp1, const DHCP &dhcp2);
     void test_option(const DHCP &dhcp, DHCP::Options opt, uint32_t len = 0, uint8_t *value = 0);
 };
 
-const uint8_t DHCPTest::chaddr[] = "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xab\x19\x18";
+const BootP::chaddr_type DHCPTest::chaddr("16:ab:54:12:fa:ca:56:7f:1b:65:11:fa:da:ab:19:18");
 const uint8_t DHCPTest::sname[] = "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xbb\x19\x18"
                                   "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xcb\x19\x18"
                                   "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xeb\x19\x18"
@@ -150,7 +152,12 @@ TEST_F(DHCPTest, Giaddr) {
 TEST_F(DHCPTest, Chaddr) {
     DHCP dhcp;
     dhcp.chaddr(chaddr);
-    EXPECT_TRUE(memcmp(dhcp.chaddr(), chaddr, dhcp.hlen()) == 0);
+    EXPECT_EQ(dhcp.chaddr(), chaddr);
+    
+    HWAddress<4> hwaddr("31:33:70:00");
+    dhcp.chaddr(hwaddr);
+    HWAddress<4> copied(dhcp.chaddr());
+    EXPECT_EQ(copied, hwaddr);
 }
 
 TEST_F(DHCPTest, Sname) {
@@ -267,7 +274,7 @@ void DHCPTest::test_equals(const DHCP &dhcp1, const DHCP &dhcp2) {
     EXPECT_EQ(dhcp1.yiaddr(), dhcp2.yiaddr());
     EXPECT_EQ(dhcp1.siaddr(), dhcp2.siaddr());
     EXPECT_EQ(dhcp1.giaddr(), dhcp2.giaddr());
-    EXPECT_TRUE(memcmp(dhcp1.chaddr(), dhcp2.chaddr(), dhcp1.hlen()) == 0);
+    EXPECT_EQ(dhcp1.chaddr(), dhcp2.chaddr());
     EXPECT_TRUE(memcmp(dhcp1.sname(), dhcp2.sname(), 64) == 0);
     EXPECT_TRUE(memcmp(dhcp1.file(), dhcp2.file(), 128) == 0);
     const std::list<DHCP::DHCPOption> options1(dhcp1.options());

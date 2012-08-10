@@ -182,23 +182,6 @@ namespace Tins {
          */
         DHCP(const uint8_t *buffer, uint32_t total_sz);
         
-        /**
-         * \brief Copy constructor.
-         */
-        DHCP(const DHCP &other);
-        
-        /**
-         * \brief Copy assignment operator.
-         */
-        DHCP &operator= (const DHCP &other);
-        
-        /**
-         * \brief DHCP destructor
-         * 
-         * Releases the memory allocated for options.
-         */
-        ~DHCP();
-        
         /** 
          * \brief Adds a new option to this DHCP PDU.
          * 
@@ -391,11 +374,11 @@ namespace Tins {
         uint32_t header_size() const;
         
         /**
-         * \brief Clones this PDU.
-         * 
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return do_clone_pdu<DHCP>();
+        }
     private:
         static const uint32_t MAX_DHCP_SIZE;
 

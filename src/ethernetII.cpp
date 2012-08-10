@@ -93,6 +93,8 @@ uint32_t Tins::EthernetII::header_size() const {
 }
 
 bool Tins::EthernetII::send(PacketSender* sender) {
+    if(!_iface)
+        throw std::runtime_error("Interface has not been set");
     struct sockaddr_ll addr;
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));

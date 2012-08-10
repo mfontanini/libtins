@@ -61,7 +61,7 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
                 throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
         }
         // If the END-OF-OPTIONS was not found...
-        if(args[0] != END && args[0] != PAD) {            
+        if(args[0] != END && args[0] != PAD) {
             // Not enough size for this option
             if(total_sz < args[1])
                 throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
@@ -75,31 +75,9 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
     }
 }
 
-DHCP::DHCP(const DHCP &other) : BootP(other) {
-    copy_fields(&other);
-}
-
-DHCP &DHCP::operator= (const DHCP &other) {
-    copy_fields(&other);
-    copy_inner_pdu(other);
-    return *this;
-}
-
-DHCP::~DHCP() {
-    /*while(_options.size()) {
-        delete[] _options.front().value;
-        _options.pop_front();
-    }*/
-}
-
 DHCP::DHCPOption::DHCPOption(uint8_t opt, uint8_t len, const uint8_t *val) 
 : option(opt), value(val, val ? (val + len) : val) {
-    /*if(len) {
-        value = new uint8_t[len];    
-        std::memcpy(value, val, len);
-    }
-    else
-        value = 0;*/
+
 }
 
 bool DHCP::add_option(Options opt, uint8_t len, const uint8_t *val) {
@@ -262,13 +240,6 @@ void DHCP::copy_fields(const DHCP *other) {
     _size = other->_size;
     for(options_type::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
         _options.push_back(*it);
-        //_options.push_back(DHCPOption(it->option, it->length, it->value));
-}
-
-PDU *DHCP::clone_pdu() const {
-    DHCP *new_pdu = new DHCP();
-    new_pdu->copy_fields(this);
-    return new_pdu;
 }
 
 bool DHCP::generic_search(Options opt, std::list<uint32_t> *container) {
