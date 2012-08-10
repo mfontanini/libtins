@@ -21,26 +21,13 @@
 
 
 #include "sniffer.h"
-#include "ethernetII.h"
-#include "radiotap.h"
 
 
 using namespace std;
 
-/** \cond */
-
-struct LoopData {
-    pcap_t *handle;
-    Tins::AbstractSnifferHandler *c_handler;
-    bool wired;
-    
-    LoopData(pcap_t *_handle, Tins::AbstractSnifferHandler *_handler, bool is_wired) : handle(_handle), c_handler(_handler), wired(is_wired) { }
-};
-
-/** \endcond */
-
-
-Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size, bool promisc, const string &filter) throw(std::runtime_error) {
+Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size, 
+bool promisc, const string &filter) 
+{
     char error[PCAP_ERRBUF_SIZE];
     if (pcap_lookupnet(device.c_str(), &ip, &mask, error) == -1) {
         ip = 0;
@@ -90,33 +77,9 @@ void Tins::Sniffer::stop_sniff() {
     pcap_breakloop(handle);
 }
 
-void Tins::Sniffer::sniff_loop(AbstractSnifferHandler *cback_handler, uint32_t max_packets) {
-    LoopData data(handle, cback_handler, wired);
-    pcap_loop(handle, max_packets, Sniffer::callback_handler, (u_char*)&data);
-}
-
 bool Tins::Sniffer::set_filter(const std::string &filter) {
     if(actual_filter.bf_insns)
         pcap_freecode(&actual_filter);
     return compile_set_filter(filter, actual_filter);
-}
-
-// Static
-void Tins::Sniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
-    try {
-        PDU *pdu = 0;
-        LoopData *data = reinterpret_cast<LoopData*>(args);
-        if(data->wired)
-            pdu = new EthernetII((const uint8_t*)packet, header->caplen);
-        else
-            pdu = new RadioTap((const uint8_t*)packet, header->caplen);
-        bool ret_val = data->c_handler->handle(pdu);
-        delete pdu;
-        if(!ret_val)
-            pcap_breakloop(data->handle);
-    }
-    catch(...) {
-        
-    }
 }
 

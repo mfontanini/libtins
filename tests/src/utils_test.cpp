@@ -80,25 +80,6 @@ TEST_F(UtilsTest, IpToString) {
 
 }
 
-TEST_F(UtilsTest, HwaddrToByte) {
-    uint8_t result_buf[6];
-
-    Utils::hwaddr_to_byte("00:00:00:00:00:00", result_buf);
-    EXPECT_TRUE(memcmp(result_buf, zero_hw_addr, 6) == 0);
-    Utils::hwaddr_to_byte("ff:ff:ff:ff:ff:ff", result_buf);
-    EXPECT_TRUE(memcmp(result_buf, full_hw_addr, 6) == 0);
-    Utils::hwaddr_to_byte("01:02:03:04:05:06", result_buf);
-    EXPECT_TRUE(memcmp(result_buf, mix_hw_addr, 6) == 0);
-
-}
-
-TEST_F(UtilsTest, HwaddrToString) {
-
-    EXPECT_EQ(Utils::hwaddr_to_string(zero_hw_addr), "00:00:00:00:00:00");
-    EXPECT_EQ(Utils::hwaddr_to_string(full_hw_addr), "ff:ff:ff:ff:ff:ff");
-    EXPECT_EQ(Utils::hwaddr_to_string(mix_hw_addr), "01:02:03:04:05:06");
-
-}
 
 TEST_F(UtilsTest, ResolveIp) {
     uint32_t localhost_ip = Utils::ip_to_int("127.0.0.1");
@@ -108,17 +89,6 @@ TEST_F(UtilsTest, ResolveIp) {
 
 }
 
-TEST_F(UtilsTest, InterfaceIp) {
-    IPv4Address ip;
-    IPv4Address localhost_ip = Utils::ip_to_int("127.0.0.1");
-
-#ifndef WIN32
-    ASSERT_TRUE(Utils::interface_ip("lo", ip));
-    EXPECT_EQ(ip, localhost_ip);
-#endif
-    EXPECT_FALSE(Utils::interface_ip("asdfghgfdsa", ip));
-
-}
 
 TEST_F(UtilsTest, NetToHostS) {
     uint16_t a = 0x01FE;

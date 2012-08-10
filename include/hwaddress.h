@@ -39,12 +39,11 @@ public:
     typedef const storage_type* const_iterator;
     static const size_t address_size = n;
     
-    HWAddress() {
-        std::fill(begin(), end(), storage_type());
-    }
-    
-    HWAddress(const storage_type* ptr) {
-        std::copy(ptr, ptr + address_size, buffer);
+    HWAddress(const storage_type* ptr = 0) {
+        if(ptr)
+            std::copy(ptr, ptr + address_size, buffer);
+        else
+            std::fill(begin(), end(), storage_type());
     }
     
     HWAddress(const std::string &address) {
@@ -97,14 +96,20 @@ public:
         return address_size;
     }
     
+    std::string to_string() const {
+        std::ostringstream oss;
+        oss << *this;
+        return oss.str();
+    }
+    
     friend std::ostream &operator<<(std::ostream &os, const HWAddress &addr) {
         std::transform(
-            addr.buffer, 
-            addr.buffer + HWAddress::address_size - 1,
+            addr.begin(), 
+            addr.end() - 1,
             std::ostream_iterator<std::string>(os, ":"),
-            &HWAddress::to_string
+            &HWAddress::storage_to_string
         );
-        return os << to_string(addr.buffer[HWAddress::address_size-1]);
+        return os << storage_to_string(addr.buffer[HWAddress::address_size-1]);
     }
     
     template<typename OutputIterator>
@@ -115,7 +120,7 @@ private:
     template<typename OutputIterator>
     static void convert(const std::string &hw_addr, OutputIterator output);
     
-    static std::string to_string(storage_type element) {
+    static std::string storage_to_string(storage_type element) {
         std::ostringstream oss;
         oss << std::hex;
         if(element < 0x10)

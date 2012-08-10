@@ -66,49 +66,6 @@ struct IPv4Collector {
     }
 };
 
-/** \cond */
-struct HWAddressCollector {
-    Tins::HWAddress<6> *result;
-    bool found;
-    const char *iface;
-
-    HWAddressCollector(Tins::HWAddress<6> *res, const char *interface) 
-    : result(res), found(false), iface(interface) { }
-
-    bool operator() (struct ifaddrs *addr) {
-        if(!found && addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface)) {
-            *result = ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr;
-            found = true;
-        }
-        return found;
-    }
-};
-
-/** \cond */
-struct InterfaceInfoCollector {
-    Tins::Utils::InterfaceInfo *info;
-    const char *iface;
-    bool found;
-
-    InterfaceInfoCollector(Tins::Utils::InterfaceInfo *res, const char *interface) : 
-      info(res), iface(interface), found(false) { }
-
-    bool operator() (struct ifaddrs *addr) {
-        if(addr->ifa_addr->sa_family == AF_PACKET && !strcmp(addr->ifa_name, iface))
-            memcpy(info->hw_addr, ((struct sockaddr_ll*)addr->ifa_addr)->sll_addr, sizeof(info->hw_addr));
-        else if(addr->ifa_addr->sa_family == AF_INET && !strcmp(addr->ifa_name, iface)) {
-            info->ip_addr = ((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr;
-            info->netmask = ((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr;
-            if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
-                info->bcast_addr = ((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr;
-            else
-                info->bcast_addr = 0;
-            found = true;
-        }
-        return found;
-    }
-};
-
 bool Tins::Utils::Internals::from_hex(const string &str, uint32_t &result) {
     unsigned i(0);
     result = 0;
@@ -170,72 +127,33 @@ string Tins::Utils::ip_to_string(uint32_t ip) {
     return oss.str();
 }
 
-bool Tins::Utils::hwaddr_to_byte(const std::string &hw_addr, uint8_t *array) {
-    if(hw_addr.size() != 17)
-        return false;
-    unsigned i(0), arr_index(0);
-    uint8_t tmp;
-    while(i < hw_addr.size()) {
-        unsigned end=i+2;
-        tmp = 0;
-        while(i < end) {
-            if(hw_addr[i] >= 'a' && hw_addr[i] <= 'f')
-                tmp = (tmp << 4) | (hw_addr[i] - 'a' + 10);
-            else if(hw_addr[i] >= '0' && hw_addr[i] <= '9')
-                tmp = (tmp << 4) | (hw_addr[i] - '0');
-            else
-                return false;
-            i++;
-        }
-        array[arr_index++] = tmp;
-        if(i < hw_addr.size()) {
-            if(hw_addr[i] == ':')
-                i++;
-            else
-                return false;
-        }
-    }
-    return true;
-}
-
-string Tins::Utils::hwaddr_to_string(const uint8_t *array) {
-    ostringstream oss;
-    oss << hex;
-    for(unsigned i(0); i < 6; ++i) {
-        if(array[i] < 0x10)
-            oss << '0';
-        oss << (unsigned)array[i];
-        if(i < 5)
-            oss << ':';
-    }
-    return oss.str();
-}
-
-uint32_t Tins::Utils::resolve_ip(const string &to_resolve) throw (std::runtime_error) {
+uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
     struct hostent *data = gethostbyname(to_resolve.c_str());
     if(!data)
         throw std::runtime_error("Could not resolve IP");
     return Utils::net_to_host_l(((struct in_addr**)data->h_addr_list)[0]->s_addr);
 }
 
-Tins::PDU *Tins::Utils::ping_address(uint32_t ip, PacketSender *sender, IPv4Address ip_src) {
+Tins::PDU *Tins::Utils::ping_address(IPv4Address ip, PacketSender *sender, IPv4Address ip_src) {
     ICMP *icmp = new ICMP(ICMP::ECHO_REQUEST);
     if(!ip_src) {
-        std::string iface(Utils::interface_from_ip(ip));
-        if(!iface.size() || !Utils::interface_ip(iface, ip_src))
+        try {
+            NetworkInterface iface(ip);
+            ip_src = iface.addresses().ip_addr;
+        } catch(...) {
             return 0;
+        }
     }
     IP ip_packet(ip, ip_src, icmp);
     return sender->send_recv(&ip_packet);
 }
 
-bool Tins::Utils::resolve_hwaddr(const string &iface, IPv4Address ip, 
-  HWAddress<6> *address, PacketSender *sender) {
+bool Tins::Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
+  HWAddress<6> *address, PacketSender *sender) 
+{
     IPv4Address my_ip;
-    HWAddress<6> my_hw;
-    if(!interface_ip(iface, my_ip) || !interface_hwaddr(iface, &my_hw))
-        return false;
-    PDU *packet = ARP::make_arp_request(iface, ip, my_ip, my_hw);
+    NetworkInterface::Info info(iface.addresses());
+    PDU *packet = ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr);
     PDU *response = sender->send_recv(packet);
     delete packet;
     if(response) {
@@ -247,19 +165,6 @@ bool Tins::Utils::resolve_hwaddr(const string &iface, IPv4Address ip,
     }
     else
         return false;
-}
-
-string Tins::Utils::interface_from_ip(IPv4Address ip) {
-    if(ip == 0x7f000001)
-        return "lo";
-    std::vector<RouteEntry> entries;
-    uint32_t ip_int = ip;
-    route_entries(std::back_inserter(entries));
-    for(std::vector<RouteEntry>::const_iterator it(entries.begin()); it != entries.end(); ++it) {
-        if((ip_int & it->mask) == it->destination)
-            return it->interface;
-    }
-    return "";
 }
 
 bool Tins::Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
@@ -280,33 +185,6 @@ set<string> Tins::Utils::network_interfaces() {
     InterfaceCollector collector;
     generic_iface_loop(collector);
     return collector.ifaces;
-}
-
-bool Tins::Utils::interface_ip(const string &iface, IPv4Address &ip) {
-    IPv4Collector collector(iface.c_str());
-    generic_iface_loop(collector);
-    ip = Utils::net_to_host_l(collector.ip);
-    return collector.found;
-}
-
-bool Tins::Utils::interface_hwaddr(const string &iface, HWAddress<6> *address) {
-    HWAddressCollector collector(address, iface.c_str());
-    generic_iface_loop(collector);
-    return collector.found;
-}
-
-bool Tins::Utils::interface_info(const string &iface, InterfaceInfo &info) {
-    InterfaceInfoCollector collector(&info, iface.c_str());
-    generic_iface_loop(collector);
-    info.ip_addr = net_to_host_l(info.ip_addr);
-    info.netmask = net_to_host_l(info.netmask);
-    info.bcast_addr = net_to_host_l(info.bcast_addr);
-    return collector.found;
-}
-
-bool Tins::Utils::interface_id(const string &iface, uint32_t &id) {
-    id = if_nametoindex(iface.c_str());
-    return (((int32_t)id) != -1);
 }
 
 uint16_t Tins::Utils::channel_to_mhz(uint16_t channel) {

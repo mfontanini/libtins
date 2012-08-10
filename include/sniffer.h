@@ -28,29 +28,10 @@
 #include <string>
 #include <stdexcept>
 #include "pdu.h"
+#include "ethernetII.h"
+#include "radiotap.h"
 
 namespace Tins {
-    
-    /**
-     * \brief Abstract sniffed packet handler.
-     * 
-     * Base class to handle sniffed packets when using Sniffer::sniff_loop.
-     * Users should either inherit this class, or use the template class
-     * SnifferHandler to provide their own handlers.
-     */
-    class AbstractSnifferHandler {
-    public:
-        /**
-         * \brief AbstractSnifferHandler destructor.
-         */
-        virtual ~AbstractSnifferHandler() { }
-        /**
-         * \brief Handle a captured PDU. 
-         * \return Should return false if no more sniffing is required.
-         */
-        virtual bool handle(PDU *pdu) = 0;
-    };
-    
     /** 
      * \brief Sniffer class can be used to sniff packets using filters.
      * 
@@ -69,7 +50,8 @@ namespace Tins {
          * \param promisc bool indicating wether to put the interface in promiscuous mode.
          * \param filter A capture filter to compile and use for sniffing sessions.(optional);
          */
-        Sniffer(const std::string &device, unsigned max_packet_size, bool promisc = false, const std::string &filter = "") throw(std::runtime_error);
+        Sniffer(const std::string &device, unsigned max_packet_size,
+          bool promisc = false, const std::string &filter = "");
         
         /**
          * \brief Sniffer destructor.
@@ -92,13 +74,24 @@ namespace Tins {
          * \brief Starts a sniffing loop, using a callback object for every
          * sniffed packet.
          * 
-         * Handlers could be user-provided classes which inherit AbstractSnifferHandler,
-         * or it could be a specific SnifferHandler specialization. This method deletes
-         * packets after they are handled, therefore the handlers MUST NOT delete them.
+         * The callback object must implement an operator with the 
+         * following(or compatible) signature:
+         * 
+         * bool operator()(PDU*);
+         * 
+         * This operator will be called using the sniffed packets 
+         * as arguments. The callback object <b>must not</b> delete the
+         * PDU parameter.
+         * 
+         * Note that the Functor object will be copied using its copy
+         * constructor, so that object should be some kind of proxy to
+         * another object which will process the packets(e.g. std::bind).
+         * 
          * \param cback_handler The callback handler object which should process packets.
          * \param max_packets The maximum amount of packets to sniff. 0 == infinite.
          */
-        void sniff_loop(AbstractSnifferHandler *cback_handler, uint32_t max_packets = 0);
+        template<class Functor>
+        void sniff_loop(const Functor &function, uint32_t max_packets = 0);
         
         /**
          * \brief Sets a filter on this sniffer.
@@ -112,10 +105,22 @@ namespace Tins {
          */
         void stop_sniff();
     private:
+        template<class Functor>
+        struct LoopData {
+            pcap_t *handle;
+            Functor c_handler;
+            bool wired;
+            
+            LoopData(pcap_t *_handle, const Functor _handler, 
+              bool is_wired) 
+            : handle(_handle), c_handler(_handler), wired(is_wired) { }
+        };
+    
         Sniffer(const Sniffer&);
         Sniffer &operator=(const Sniffer&);
         bool compile_set_filter(const std::string &filter, bpf_program &prog);
         
+        template<class Functor>
         static void callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
         
         pcap_t *handle;
@@ -123,33 +128,31 @@ namespace Tins {
         bpf_program actual_filter;
         bool wired;
     };
-    
-    /**
-     * \brief Concrete implementation of AbstractSnifferHandler.
-     * 
-     * This class is instantiated using a pointer to the actual handler.
-     * Every time a packet is sniffed, operator() (PDU*) will be called on
-     * the given pointer. \sa AbstractSnifferHandler
-     */
-    template<class T> class SnifferHandler : public AbstractSnifferHandler {
-    public:
-        /**
-         * Creates an instance of SnifferHandler.
-         * \param ptr The pointer to the actual handler.
-         */
-        SnifferHandler(T *ptr) : handler(ptr) { }
         
-        /**
-         * \brief The overriden AbstractSnifferHandler::handle.
-         * \param pdu The sniffed PDU.
-         * \return False if no more sniffing is required, otherwise true.
-         */
-        bool handle(PDU *pdu) {
-            return (*handler)(pdu);
+    template<class Functor>
+    void Tins::Sniffer::sniff_loop(const Functor &function, uint32_t max_packets) {
+        LoopData<Functor> data(handle, function, wired);
+        pcap_loop(handle, max_packets, &Sniffer::callback_handler<Functor>, (u_char*)&data);
+    }
+    
+    template<class Functor>
+    void Tins::Sniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
+        try {
+            PDU *pdu = 0;
+            LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
+            if(data->wired)
+                pdu = new Tins::EthernetII((const uint8_t*)packet, header->caplen);
+            else
+                pdu = new Tins::RadioTap((const uint8_t*)packet, header->caplen);
+            bool ret_val = data->c_handler(pdu);
+            delete pdu;
+            if(!ret_val)
+                pcap_breakloop(data->handle);
         }
-    private:
-        T *handler;
-    };
+        catch(...) {
+            
+        }
+    }
 };
     
 #endif // TINS_SNIFFER_H

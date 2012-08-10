@@ -34,6 +34,7 @@
 #include "packetsender.h"
 #include "ipaddress.h"
 #include "hwaddress.h"
+#include "network_interface.h"
 
 namespace Tins {
     /** \brief Network utils namespace.
@@ -71,24 +72,6 @@ namespace Tins {
          */
         std::string ip_to_string(uint32_t ip);
 
-        /** \brief Converts a hardware address string into a byte array.
-         *
-         * The hardware address must be formatted using the notation 'HH:HH:HH:HH:HH:HH'.
-         * Where H is a hexadecimal character(0-9, a-f).
-         *
-         * \param hw_addr The harware address string.
-         * \param array The output buffer. It must be at least 6 bytes long.
-         */
-        bool hwaddr_to_byte(const std::string &hw_addr, uint8_t *array);
-
-        /** \brief Converts a byte array representing a hardware address
-         * into a string.
-         *
-         * The input buffer must be at least 6 bytes long.
-         * \param array The input buffer.
-         */
-        std::string hwaddr_to_string(const uint8_t *array);
-
         /** \brief Resolves a domain name and returns its corresponding ip address.
          *
          * If an ip address is given, its integer representation is returned.
@@ -96,7 +79,7 @@ namespace Tins {
          *
          * \param to_resolve The domain name/ip address to resolve.
          */
-        uint32_t resolve_ip(const std::string &to_resolve) throw (std::runtime_error);
+        uint32_t resolve_ip(const std::string &to_resolve);
         
         /**
          * \brief Pings an ip address.
@@ -113,7 +96,7 @@ namespace Tins {
          * \return PDU * containing either 0 if no response was received,
          * or the ICMP response otherwise.
          */
-        PDU *ping_address(uint32_t ip, PacketSender *sender, IPv4Address ip_src = 0);
+        PDU *ping_address(IPv4Address ip, PacketSender *sender, IPv4Address ip_src = 0);
 
         /** \brief Resolves the hardware address for a given ip.
          *
@@ -124,7 +107,7 @@ namespace Tins {
          * \return Returns true if the hardware address was resolved successfully,
          * false otherwise.
          */
-        bool resolve_hwaddr(const std::string &iface, IPv4Address ip, 
+        bool resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
           HWAddress<6> *address, PacketSender *sender);
 
         /** \brief List all network interfaces.
@@ -134,63 +117,6 @@ namespace Tins {
          * interface for Utils::interface_ip, Utils::interface_hwaddr, etc.
          */
         std::set<std::string> network_interfaces();
-
-        /**
-         * \brief Lookup the ip address of the given interface.
-         *
-         * If the lookup fails, false will be returned, true otherwise.
-         * \param iface The interface from which to extract the ip address.
-         * \param ip The ip address found will be returned in this param.
-         * 
-         * \return bool indicating wether the operation was successfull.
-         */
-        bool interface_ip(const std::string &iface, IPv4Address &ip);
-        
-        /**
-         * \brief Lookup the ip/hw/netmask/broadcast address of the 
-         * given interface.
-         *
-         * If the lookup fails, false will be returned, true otherwise.
-         * \param iface The interface from which to extract the ip address.
-         * \param info The InterfaceInfo in which the information will
-         * be stored.
-         * 
-         * \return bool indicating wether the operation was successfull.
-         */
-        bool interface_info(const std::string &iface, InterfaceInfo &info);
-
-        /**
-         * \brief Lookup the hardware address of the given interface.
-         *
-         * If the lookup fails, false will be returned, true otherwise.
-         * \param iface The interface from which to extract the hardware address.
-         * \param buffer The hw address will be stored in this buffer. It must
-         * be at least 6 bytes long.
-         * 
-         * \return bool indicating wether the operation was successfull.
-         */
-        bool interface_hwaddr(const std::string &iface, HWAddress<6> *address);
-
-        /**
-         * \brief Lookup the interface identifier.
-         *
-         * If the lookup fails, false will be returned, true otherwise.
-         * \param iface The interface from which to extract the identifier.
-         * \param id The interface id will be returned in this parameter.
-         * 
-         * \return bool indicating wether the operation was successfull.
-         */
-        bool interface_id(const std::string &iface, uint32_t &id);
-
-        /**
-         * \brief Finds the gateway interface matching the given ip.
-         *
-         * This function find the interface which would be the gateway
-         * when sending a packet to the given ip.
-         * \param ip The ip of the interface we are looking for.
-         * \return The interface's name.
-         */
-        std::string interface_from_ip(IPv4Address ip);
         
         /**
          * \brief Finds the gateway's IP address for the given IP 
