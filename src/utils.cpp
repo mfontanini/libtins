@@ -49,7 +49,6 @@ struct InterfaceCollector {
     }
 };
 
-/** \cond */
 struct IPv4Collector {
     uint32_t ip;
     bool found;

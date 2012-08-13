@@ -52,6 +52,7 @@ BootP::BootP(const BootP &other) : PDU(other) {
 
 BootP &BootP::operator= (const BootP &other) {
     copy_bootp_fields(&other);
+    copy_inner_pdu(other);
     return *this;
 }
 

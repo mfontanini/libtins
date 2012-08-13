@@ -32,7 +32,7 @@
 
 namespace Tins {
 
-    /**
+    /** 
      * \brief Class representing an Ethernet II PDU.
      */
     class IEEE802_3 : public PDU {
@@ -50,7 +50,7 @@ namespace Tins {
         /**
          * \brief Represents the IEEE802_3 broadcast address.
          */
-        static const uint8_t* BROADCAST;
+        static const address_type BROADCAST;
 
         /**
          * \brief Constructor for creating an IEEE802_3 PDU

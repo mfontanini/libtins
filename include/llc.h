@@ -195,38 +195,38 @@ namespace Tins {
 		 * \brief Getter for the group destination bit.
 		 * \return Whether the group bit is set or not.
 		 */
-		inline bool group() {return _header.dsap & 0x01; }
+		bool group() {return _header.dsap & 0x01; }
 
 		/**
 		 * \brief Getter for the dsap field.
 		 * \return The dsap field value
 		 */
-		inline uint8_t dsap() {return _header.dsap; }
+		uint8_t dsap() {return _header.dsap; }
 
 		/**
 		 * \brief Getter for the response bit.
 		 * \return Whether the response bit is set or not.
 		 */
-		inline bool response() {return (_header.ssap & 0x01); }
+		bool response() {return (_header.ssap & 0x01); }
 
 		/**
 		 * \brief Getter for the ssap field.
 		 * \return The ssap field.
 		 */
-		inline uint8_t ssap() {return _header.ssap; }
+		uint8_t ssap() {return _header.ssap; }
 
 		/**
 		 * \brief Getter for the LLC frame format type.
 		 * \return The LLC frame format.
 		 */
-		inline uint8_t type() {return _type; }
+		uint8_t type() {return _type; }
 
 		/**
 		 * \brief Getter for sender send sequence number.
 		 *
 		 * \return The sender send sequence number if format is INFORMATION else 0.
 		 */
-		inline uint8_t send_seq_number() {
+		uint8_t send_seq_number() {
 			return (type() == INFORMATION) ? (control_field.info.send_seq_num) : 0;
 		}
 
@@ -236,7 +236,7 @@ namespace Tins {
 		 * \return 	The sender receive sequence number if format is
 		 * 			INFORMATION or SUPERVISORY else 0.
 		 */
-		inline uint8_t receive_seq_number() {
+		uint8_t receive_seq_number() {
 			switch (type()) {
 				case INFORMATION:
 					return control_field.info.recv_seq_num;
@@ -253,7 +253,7 @@ namespace Tins {
 		 * \brief Getter for the poll/final flag.
 		 * \return Whether the poll/final flag is set.
 		 */
-		inline bool poll_final() {
+		bool poll_final() {
 			switch (type()) {
 				case UNNUMBERED:
 					return control_field.unnumbered.poll_final_bit;
@@ -271,7 +271,7 @@ namespace Tins {
 		 *
 		 * \return The supervisory function if format is SUPERVISORY else 0.
 		 */
-		inline uint8_t supervisory_function() {
+		uint8_t supervisory_function() {
 			if (type() == SUPERVISORY)
 				return control_field.super.supervisory_func;
 			return 0;
@@ -282,7 +282,7 @@ namespace Tins {
 		 *
 		 * \return The modifier function if format is UNNUMBERED else 0.
 		 */
-		inline uint8_t modifier_function() {
+		uint8_t modifier_function() {
 			if (type() == UNNUMBERED)
 				return (control_field.unnumbered.mod_func1 << 3) + control_field.unnumbered.mod_func2;
 			return 0;

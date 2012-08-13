@@ -33,10 +33,11 @@
 #include "arp.h"
 #include "utils.h"
 
-const uint8_t* Tins::EthernetII::BROADCAST = (const uint8_t*)"\xff\xff\xff\xff\xff\xff";
-const uint32_t Tins::EthernetII::ADDR_SIZE;
+namespace Tins {
+const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
+const size_t EthernetII::ADDR_SIZE(address_type::address_size);
 
-Tins::EthernetII::EthernetII(const NetworkInterface& iface, 
+EthernetII::EthernetII(const NetworkInterface& iface, 
   const address_type &dst_hw_addr, const address_type &src_hw_addr, 
   PDU* child) 
 : PDU(ETHERTYPE_IP, child)
@@ -49,7 +50,7 @@ Tins::EthernetII::EthernetII(const NetworkInterface& iface,
 
 }
 
-Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) 
+EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) 
 : PDU(ETHERTYPE_IP) 
 {
     if(total_sz < sizeof(ethhdr))
@@ -72,27 +73,27 @@ Tins::EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz)
     }
 }
 
-void Tins::EthernetII::dst_addr(const address_type &new_dst_mac) {
-    std::copy(new_dst_mac.begin(), new_dst_mac.end(), _eth.dst_mac);
+void EthernetII::dst_addr(const address_type &new_dst_addr) {
+    new_dst_addr.copy(_eth.dst_mac);
 }
 
-void Tins::EthernetII::src_addr(const address_type &new_src_mac) {
-    std::copy(new_src_mac.begin(), new_src_mac.end(), _eth.src_mac);
+void EthernetII::src_addr(const address_type &new_src_addr) {
+    new_src_addr.copy(_eth.src_mac);
 }
 
-void Tins::EthernetII::iface(const NetworkInterface& new_iface) {
+void EthernetII::iface(const NetworkInterface& new_iface) {
     _iface = new_iface;
 }
 
-void Tins::EthernetII::payload_type(uint16_t new_payload_type) {
+void EthernetII::payload_type(uint16_t new_payload_type) {
     this->_eth.payload_type = Utils::net_to_host_s(new_payload_type);
 }
 
-uint32_t Tins::EthernetII::header_size() const {
+uint32_t EthernetII::header_size() const {
     return sizeof(ethhdr);
 }
 
-bool Tins::EthernetII::send(PacketSender* sender) {
+bool EthernetII::send(PacketSender* sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
     struct sockaddr_ll addr;
@@ -108,7 +109,7 @@ bool Tins::EthernetII::send(PacketSender* sender) {
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 
-bool Tins::EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(ethhdr))
         return false;
     ethhdr *eth_ptr = (ethhdr*)ptr;
@@ -119,7 +120,7 @@ bool Tins::EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
     return false;
 }
 
-void Tins::EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t my_sz = header_size();
     assert(total_sz >= my_sz);
 
@@ -141,7 +142,7 @@ void Tins::EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, c
     memcpy(buffer, &_eth, sizeof(ethhdr));
 }
 
-Tins::PDU *Tins::EthernetII::recv_response(PacketSender *sender) {
+PDU *EthernetII::recv_response(PacketSender *sender) {
     struct sockaddr_ll addr;
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
@@ -154,7 +155,7 @@ Tins::PDU *Tins::EthernetII::recv_response(PacketSender *sender) {
     return sender->recv_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 
-Tins::PDU *Tins::EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
+PDU *EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(_eth))
         return 0;
     PDU *child = 0, *cloned;
@@ -165,4 +166,5 @@ Tins::PDU *Tins::EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz)
     cloned = new EthernetII(ptr, std::min(total_sz, (uint32_t)sizeof(_eth)));
     cloned->inner_pdu(child);
     return cloned;
+}
 }

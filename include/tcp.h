@@ -141,63 +141,63 @@ namespace Tins {
          *
          * \return The destination port in an uint16_t.
          */
-        inline uint16_t dport() const { return Utils::net_to_host_s(_tcp.dport); }
+        uint16_t dport() const { return Utils::net_to_host_s(_tcp.dport); }
 
         /**
          * \brief Getter for the source port field.
          *
          * \return The source port in an uint16_t.
          */
-        inline uint16_t sport() const { return Utils::net_to_host_s(_tcp.sport); }
+        uint16_t sport() const { return Utils::net_to_host_s(_tcp.sport); }
 
         /**
          * \brief Getter for the sequence number field.
          *
          * \return The sequence number in an uint32_t.
          */
-        inline uint32_t seq() const { return Utils::net_to_host_l(_tcp.seq); }
+        uint32_t seq() const { return Utils::net_to_host_l(_tcp.seq); }
 
         /**
          * \brief Getter for the acknowledge number field.
          *
          * \return The acknowledge number in an uint32_t.
          */
-        inline uint32_t ack_seq() const { return Utils::net_to_host_l(_tcp.ack_seq); }
+        uint32_t ack_seq() const { return Utils::net_to_host_l(_tcp.ack_seq); }
 
         /**
          * \brief Getter for the window size field.
          *
          * \return The window size in an uint32_t.
          */
-        inline uint16_t window() const { return Utils::net_to_host_s(_tcp.window); }
+        uint16_t window() const { return Utils::net_to_host_s(_tcp.window); }
 
         /**
          * \brief Getter for the checksum field.
          *
          * \return The checksum field in an uint16_t.
          */
-        inline uint16_t check() const { return Utils::net_to_host_s(_tcp.check); }
+        uint16_t check() const { return Utils::net_to_host_s(_tcp.check); }
 
         /**
          * \brief Getter for the urgent pointer field.
          *
          * \return The urgent pointer in an uint16_t.
          */
-        inline uint16_t urg_ptr() const { return Utils::net_to_host_s(_tcp.urg_ptr); }
+        uint16_t urg_ptr() const { return Utils::net_to_host_s(_tcp.urg_ptr); }
 
         /**
          * \brief Getter for the data offset field.
          *
          * \return Data offset in an uint8_t.
          */
-        inline uint8_t data_offset() const { return this->_tcp.doff; }
+        uint8_t data_offset() const { return this->_tcp.doff; }
 
         /**
          * \brief Getter for the option list.
          * 
          * \return The options list.
          */
-        inline const std::list<TCPOption> &options() const { return _options; }
+        const std::list<TCPOption> &options() const { return _options; }
 
         /**
          * \brief Gets the value of a flag.

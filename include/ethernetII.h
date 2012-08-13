@@ -37,7 +37,15 @@ namespace Tins {
      */
     class EthernetII : public PDU {
     public:
+        /**
+         * \brief The hardware address type.
+         */
         typedef HWAddress<6> address_type;
+        
+        /**
+         * \brief The hardware address size.
+         */
+        static const size_t ADDR_SIZE;
         
         /**
          * \brief This PDU's flag.
@@ -47,12 +55,7 @@ namespace Tins {
         /**
          * \brief Represents the ethernetII broadcast address.
          */
-        static const uint8_t* BROADCAST;
-
-        /**
-         * \brief Ethernet II hardware address size.
-         */
-        static const unsigned ADDR_SIZE = 6;
+        static const address_type BROADCAST;
 
         /**
          * \brief Constructor for creating an ethernet PDU
@@ -61,8 +64,8 @@ namespace Tins {
          * destination's and source's MAC.
          *
          * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr address_type containing the destination's MAC(optional).
+         * \param src_hw_addr address_type containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
         EthernetII(const NetworkInterface& iface = NetworkInterface(), 
@@ -73,6 +76,7 @@ namespace Tins {
         /**
          * \brief Constructor which creates an EthernetII object from a buffer and adds all identifiable
          * PDUs found in the buffer as children of this one.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -80,23 +84,24 @@ namespace Tins {
 
         /* Getters */
         /**
-         * \brief Getter for the destination's mac address.
+         * \brief Getter for the destination's hardware address.
          *
-         * \return Returns the destination's mac address as a constant uint8_t pointer.
+         * \return address_type containing the destination hardware 
+         * address.
          */
         address_type dst_addr() const { return _eth.dst_mac; }
 
         /**
-         * \brief Getter for the source's mac address.
+         * \brief Getter for the source's hardware address.
          *
-         * \return Returns the source's mac address as a constant uint8_t pointer.
+         * \return address_type containing the source hardware address.
          */
         address_type src_addr() const { return _eth.src_mac; }
 
         /**
          * \brief Getter for the interface.
          *
-         * \return Returns the interface's index as an uint32_t.
+         * \return Returns the interface in which this PDU will be sent.
          */
         const NetworkInterface &iface() const { return _iface; }
 
@@ -109,30 +114,30 @@ namespace Tins {
         /* Setters */
 
         /**
-         * \brief Setter for the destination's MAC.
+         * \brief Setter for the destination hardware address.
          *
-         * \param new_dst_mac uint8_t array of 6 bytes containing the new destination's MAC.
+         * \param new_dst_addr the destination hardware address to be set.
          */
-        void dst_addr(const address_type &new_dst_mac);
+        void dst_addr(const address_type &new_dst_addr);
 
         /**
-         * \brief Setter for the source's MAC.
+         * \brief Setter for the source hardware address.
          *
-         * \param new_src_mac uint8_t array of 6 bytes containing the new source's MAC.
+         * \param new_src_addr the source hardware address to be set.
          */
-        void src_addr(const address_type &new_src_mac);
+        void src_addr(const address_type &new_src_addr);
 
         /**
          * \brief Setter for the interface.
          *
-         * \param new_iface string reference containing the new interface name.
+         * \param new_iface the interface to be set.
          */
         void iface(const NetworkInterface& new_iface);
 
         /**
          * \brief Setter for the payload type.
          *
-         * \param new_payload_type uint16_t with the new value of the payload type field.
+         * \param new_payload_type the new value of the payload type field.
          */
         void payload_type(uint16_t new_payload_type);
 
@@ -192,8 +197,8 @@ namespace Tins {
          * Struct that represents the Ethernet II header
          */
         struct ethhdr {
-            uint8_t dst_mac[ADDR_SIZE];
-            uint8_t src_mac[ADDR_SIZE];
+            uint8_t dst_mac[address_type::address_size];
+            uint8_t src_mac[address_type::address_size];
             uint16_t payload_type;
         } __attribute__((__packed__));
         

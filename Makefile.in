@@ -6,6 +6,7 @@ SOURCES=$(wildcard src/*.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
 INCLUDE=-Iinclude/
 EXECUTABLE=libtins.so
+DEPS = $(SOURCES:.cpp=.d)
 
 all: $(SOURCES) $(EXECUTABLE)
 
@@ -13,11 +14,20 @@ compile: $(OBJECTS)
 
 recompile: clean all
 
+depends: $(SOURCES) $(DEPS)
+	rm -f ./depends.d
+	make do_make_deps
+
+do_make_deps: $(DEPS)
+
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
 
 .cpp.o:
 	$(CXX) $(CFLAGS) $(INCLUDE) $< -o $@
+
+%.d : %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -MG -MM -MP -MT"$(<:.cpp=.o)" $< >> depends.d
 
 clean:
 	rm $(OBJECTS) $(EXECUTABLE)
@@ -31,54 +41,3 @@ uninstall:
 	rm -r /usr/include/tins/
 	rm /usr/lib/$(EXECUTABLE)
 
-depends: $(SOURCES)
-	rm -f ./.depends
-	$(CXX) $(CFLAGS) $(INCLUDE) -MM $^ >> ./.depends
-
-# Dependencies
-src/arp.o: src/arp.cpp include/arp.h include/pdu.h include/packetsender.h \
- include/utils.h include/ip.h include/ethernetII.h include/rawpdu.h \
- include/utils.h include/constants.h
-src/bootp.o: src/bootp.cpp include/bootp.h include/pdu.h \
- include/packetsender.h include/utils.h
-src/dhcp.o: src/dhcp.cpp include/utils.h include/packetsender.h include/pdu.h \
- include/dhcp.h include/bootp.h
-src/dot11.o: src/dot11.cpp include/dot11.h include/pdu.h \
- include/packetsender.h include/utils.h include/rawpdu.h \
- include/radiotap.h include/sniffer.h include/utils.h include/snap.h
-src/eapol.o: src/eapol.cpp include/eapol.h include/pdu.h \
- include/packetsender.h include/utils.h include/dot11.h
-src/ethernetII.o: src/ethernetII.cpp include/ethernetII.h include/pdu.h \
- include/packetsender.h include/utils.h include/rawpdu.h include/ip.h \
- include/arp.h include/utils.h
-src/icmp.o: src/icmp.cpp include/icmp.h include/pdu.h include/packetsender.h \
- include/utils.h include/rawpdu.h include/utils.h
-src/ip.o: src/ip.cpp include/ip.h include/pdu.h include/packetsender.h \
- include/utils.h include/tcp.h include/udp.h include/icmp.h \
- include/rawpdu.h include/utils.h include/constants.h
-src/main.o: src/main.cpp include/tins.h include/arp.h include/pdu.h \
- include/packetsender.h include/utils.h include/bootp.h include/dhcp.h \
- include/eapol.h include/ethernetII.h include/icmp.h include/dot11.h \
- include/ip.h include/radiotap.h include/rawpdu.h include/snap.h \
- include/sniffer.h include/tcp.h include/udp.h
-src/packetsender.o: src/packetsender.cpp include/packetsender.h include/pdu.h \
- include/packetsender.h
-src/pdu.o: src/pdu.cpp include/utils.h include/packetsender.h include/pdu.h \
- include/pdu.h include/rawpdu.h
-src/radiotap.o: src/radiotap.cpp include/radiotap.h include/pdu.h \
- include/packetsender.h include/dot11.h include/utils.h include/utils.h
-src/rawpdu.o: src/rawpdu.cpp include/rawpdu.h include/pdu.h \
- include/packetsender.h
-src/snap.o: src/snap.cpp include/snap.h include/pdu.h include/packetsender.h \
- include/constants.h include/utils.h include/arp.h include/utils.h \
- include/ip.h include/eapol.h
-src/sniffer.o: src/sniffer.cpp include/sniffer.h include/pdu.h \
- include/packetsender.h include/ethernetII.h include/utils.h \
- include/radiotap.h
-src/tcp.o: src/tcp.cpp include/tcp.h include/pdu.h include/packetsender.h \
- include/utils.h include/ip.h include/constants.h include/rawpdu.h \
- include/utils.h
-src/udp.o: src/udp.cpp include/udp.h include/pdu.h include/packetsender.h \
- include/utils.h include/constants.h include/ip.h include/rawpdu.h
-src/utils.o: src/utils.cpp include/utils.h include/packetsender.h \
- include/pdu.h include/pdu.h include/arp.h include/utils.h

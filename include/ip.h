@@ -111,12 +111,12 @@ namespace Tins {
             uint8_t* write(uint8_t* buffer);
             
             /**
-             * \brief Getter for IP options' data pointer.
+             * Getter for IP options' data pointer.
              */
             const uint8_t* data_ptr() const;
             
             /**
-             * \brief Getter for the data size field
+             * Getter for the data size field
              */
             uint8_t data_size() const;
         private:
@@ -214,12 +214,14 @@ namespace Tins {
          */
         IPv4Address src_addr() const { return Utils::net_to_host_l(_ip.saddr); }
 
-        /** \brief Getter for the destination address field.
+        /** 
+         * \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
         IPv4Address dst_addr() const  { return Utils::net_to_host_l(_ip.daddr); }
         
-        /** \brief Getter for the version field.
+        /** 
+         * \brief Getter for the version field.
          * \return The version for this IP PDU.
          */
         uint8_t version() const  { return _ip.version; }

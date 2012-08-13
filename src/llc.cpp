@@ -33,8 +33,7 @@
 using std::list;
 using std::pair;
 
-using Tins::LLC;
-
+namespace Tins {
 const uint8_t LLC::GLOBAL_DSAP_ADDR = 0xFF;
 const uint8_t LLC::NULL_ADDR = 0x00;
 
@@ -54,6 +53,7 @@ LLC::LLC(uint8_t dsap, uint8_t ssap, PDU *child) : PDU(0xff, child), _type(LLC::
 }
 
 LLC::LLC(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
+    // header + 1 info byte
 	if(total_sz < sizeof(_header) + 1)
 		throw std::runtime_error("Not enough size for a LLC header in the buffer.");
 	std::memcpy(&_header, buffer, sizeof(_header));
@@ -61,20 +61,25 @@ LLC::LLC(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
 	total_sz -= sizeof(_header);
 	information_field_length = 0;
 	if ((buffer[0] & 0x03) == LLC::UNNUMBERED) {
+        if(total_sz < sizeof(un_control_field))
+            throw std::runtime_error("Not enough size for a LLC header in the buffer.");
 		type(LLC::UNNUMBERED);
 		std::memcpy(&control_field.unnumbered, buffer, sizeof(un_control_field));
-		buffer++;
-		total_sz -= 1;
+		buffer += sizeof(un_control_field);
+		total_sz -= sizeof(un_control_field);
 		//TODO: Create information fields if corresponding.
 	}
 	else {
+        if(total_sz < sizeof(info_control_field))
+            throw std::runtime_error("Not enough size for a LLC header in the buffer.");
 		type((Format)(buffer[0] & 0x03));
 		control_field_length = 2;
 		std::memcpy(&control_field.info, buffer, sizeof(info_control_field));
 		buffer += 2;
 		total_sz -= 2;
 	}
-	inner_pdu(new Tins::RawPDU(buffer, total_sz));
+    if(total_sz > 0)
+        inner_pdu(new Tins::RawPDU(buffer, total_sz));
 }
 
 LLC::LLC(const LLC &other): PDU(other) {
@@ -242,4 +247,6 @@ void LLC::write_serialization(uint8_t *buffer, uint32_t total_sz, const Tins::PD
 		std::memcpy(buffer, it->second, it->first);
 		buffer += it->first;
 	}
+}
+
 }

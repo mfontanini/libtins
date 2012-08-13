@@ -27,6 +27,8 @@
 #include "dhcp.h"
 #include "eapol.h"
 #include "ethernetII.h"
+#include "ieee802_3.h"
+#include "llc.h"
 #include "icmp.h"
 #include "dot11.h"
 #include "ip.h"

@@ -37,42 +37,55 @@
 #include "network_interface.h"
 
 namespace Tins {
-    /** \brief Network utils namespace.
+    /** 
+     * \brief Network utils namespace.
      *
      * This namespace provides utils to convert between integer IP addresses
-     * and dotted notation strings, hw addresses, "net to host" integer
-     * conversions, interface listing, etc.
+     * and dotted notation strings, "net to host" integer conversions, 
+     * interface listing, etc.
      */
     namespace Utils {
         /**
-         * \brief Struct that represents an interface's information.
-         */
-        struct InterfaceInfo {
-            IPv4Address ip_addr, netmask, bcast_addr;
-            uint8_t hw_addr[6];
-        };
-        
-        /**
-         * \brief Struct that represents an entry in /proc/net/route
+         * Struct that represents an entry in /proc/net/route
          */
         struct RouteEntry {
+            /**
+             * This interface's name.
+             */
             std::string interface;
-            IPv4Address destination, gateway, mask;
+            
+            /**
+             * This route entry's destination.
+             */
+            IPv4Address destination;
+            
+            /**
+             * This route entry's gateway.
+             */
+            IPv4Address gateway;
+            
+            /**
+             * This route entry's subnet mask.
+             */
+            IPv4Address mask;
         };
         
-        /** \brief Convert a dotted-ip-notation string to an integer.
+        /** 
+         * \brief Convert a dotted-ip-notation string to an integer.
          *
          * \param ip A dotted ip notation string
          */
         uint32_t ip_to_int(const std::string &ip) throw (std::runtime_error);
 
-        /** \brief Convert an integer ip to a dotted-ip-notation string.
+        /** 
+         * \brief Convert an integer ip to a dotted-ip-notation string.
          *
          * \param ip An integer ip.
          */
         std::string ip_to_string(uint32_t ip);
 
-        /** \brief Resolves a domain name and returns its corresponding ip address.
+        /** 
+         * \brief Resolves a domain name and returns its corresponding ip address.
          *
          * If an ip address is given, its integer representation is returned.
          * Otherwise, the domain name is resolved and its ip address is returned.

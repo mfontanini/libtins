@@ -46,7 +46,7 @@ DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : PDU(255), extra_size(0) {
         while(ptr < end && *ptr)
             ptr++;
         Query query;
-        if((ptr + (sizeof(uint16_t) << 1)) > end)
+        if((ptr + (sizeof(uint16_t) << 1)) >= end)
             throw std::runtime_error("Not enough size for a given query.");
         query.name = string(buffer, ptr);
         ptr++;
@@ -72,6 +72,7 @@ DNS& DNS::operator=(const DNS& rhs) {
     free_list(arity);
     free_list(addit);
     copy_fields(&rhs);
+    copy_inner_pdu(rhs);
     return *this;
 }
 

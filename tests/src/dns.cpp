@@ -99,6 +99,9 @@ TEST_F(DNSTest, NestedCopy) {
     dns1.inner_pdu(nested);
     DNS dns2(dns1);
     test_equals(dns1, dns2);
+    dns2.inner_pdu(0);
+    dns2 = dns1;
+    test_equals(dns1, dns2);
 }
 
 TEST_F(DNSTest, ID) {
