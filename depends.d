@@ -184,12 +184,12 @@ include/network_interface.h:
 include/rawpdu.h:
 
 include/utils.h:
-src/ieee802-3.o: src/ieee802-3.cpp include/ieee802-3.h include/pdu.h \
+src/ieee802_3.o: src/ieee802_3.cpp include/ieee802_3.h include/pdu.h \
  include/packetsender.h include/utils.h include/ipaddress.h \
  include/hwaddress.h include/network_interface.h include/llc.h \
  include/utils.h
 
-include/ieee802-3.h:
+include/ieee802_3.h:
 
 include/pdu.h:
 

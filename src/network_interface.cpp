@@ -61,6 +61,11 @@ struct InterfaceInfoCollector {
 /** \endcond */
 
 namespace Tins {
+// static
+NetworkInterface NetworkInterface::default_interface() {
+    return NetworkInterface(IPv4Address(0));
+}
+    
 NetworkInterface::NetworkInterface() : iface_id(0) {
 
 }
@@ -69,26 +74,23 @@ NetworkInterface::NetworkInterface(const std::string &name) {
     iface_id = resolve_index(name.c_str());
 }
 
-NetworkInterface::NetworkInterface(const char *name) {
-    iface_id = resolve_index(name);
-}
-
 NetworkInterface::NetworkInterface(IPv4Address ip) : iface_id(0) {
     typedef std::vector<Utils::RouteEntry> entries_type;
     
     if(ip == "127.0.0.1")
         iface_id = resolve_index("lo");
     else {
+        Utils::RouteEntry *best_match = 0;
         entries_type entries;
         uint32_t ip_int = ip;
-        route_entries(std::back_inserter(entries));
+        Utils::route_entries(std::back_inserter(entries));
         for(entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
             if((ip_int & it->mask) == it->destination) {
-                iface_id = if_nametoindex(it->interface.c_str());
-                break;
+                if(!best_match || it->mask > best_match->mask) 
+                    iface_id = if_nametoindex(it->interface.c_str());
             }
         }
-        if(!iface_id)
+        if(best_match)
             throw std::runtime_error("Error looking up interface");
     }
 }

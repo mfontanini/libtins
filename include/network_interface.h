@@ -53,7 +53,13 @@ public:
     };
 
     /**
-     * \brief Default constructor.
+     * Returns a NetworkInterface object associated with the default
+     * interface.
+     */
+    static NetworkInterface default_interface();
+
+    /**
+     * Default constructor.
      */
     NetworkInterface(); 
     
@@ -65,11 +71,15 @@ public:
     NetworkInterface(const std::string &name);
     
     /**
-     * \brief Constructor to allow implicit conversions from const char*.
+     * \brief Constructor to allow implicit conversions from string
+     * literals.
      * 
      * \param name The name of the interface this object will abstract.
      */
-    NetworkInterface(const char *name); 
+    template<size_t n>
+    NetworkInterface(const char (&name)[n]) {
+        iface_id = resolve_index(name);
+    }
     
     /**
      * \brief Constructs a NetworkInterface from an ip address.

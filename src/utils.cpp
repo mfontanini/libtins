@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <stdexcept>
+#include <memory>
 #include <cassert>
 #include <cstring>
 #ifndef WIN32
@@ -134,7 +135,6 @@ uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
 }
 
 Tins::PDU *Tins::Utils::ping_address(IPv4Address ip, PacketSender *sender, IPv4Address ip_src) {
-    ICMP *icmp = new ICMP(ICMP::ECHO_REQUEST);
     if(!ip_src) {
         try {
             NetworkInterface iface(ip);
@@ -143,6 +143,7 @@ Tins::PDU *Tins::Utils::ping_address(IPv4Address ip, PacketSender *sender, IPv4A
             return 0;
         }
     }
+    ICMP *icmp = new ICMP(ICMP::ECHO_REQUEST);
     IP ip_packet(ip, ip_src, icmp);
     return sender->send_recv(&ip_packet);
 }
@@ -152,14 +153,12 @@ bool Tins::Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
 {
     IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
-    PDU *packet = ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr);
-    PDU *response = sender->send_recv(packet);
-    delete packet;
-    if(response) {
-        ARP *arp_resp = dynamic_cast<ARP*>(response->inner_pdu());
+    std::auto_ptr<PDU> packet(ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr));
+    std::auto_ptr<PDU> response(sender->send_recv(packet.get()));
+    if(response.get()) {
+        ARP *arp_resp = response->find_inner_pdu<ARP>();
         if(arp_resp)
             *address = arp_resp->sender_hw_addr();
-        delete response;
         return arp_resp;
     }
     else
