@@ -44,7 +44,12 @@ namespace Tins {
         operator uint32_t() const;
         operator std::string() const;
         
-        bool operator==(const std::string &rhs) const;
+        std::string to_string() const;
+        
+        bool operator==(const IPv4Address &rhs) const {
+            return ip_addr == rhs.ip_addr;
+        }
+        
         bool operator!=(const std::string &rhs) const {
             return !(*this == rhs);
         }

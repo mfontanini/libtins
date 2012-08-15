@@ -1,11 +1,11 @@
 CXX=@CXX@
-CFLAGS=-c -Wall @CFLAGS@
+CXXFLAGS=-c -Wall @CXXFLAGS@
 LDFLAGS=-lpcap -ltins -lpthread
-SOURCES=arpspoofing.cpp portscan.cpp
+SOURCES=arpspoofing.cpp portscan.cpp 
 
 OBJECTS=$(SOURCES:.cpp=.o)
 INCLUDE=
-EXECUTABLES=arpspoof portscan
+EXECUTABLES=arpspoof portscan traceroute
 
 all: $(SOURCES) $(EXECUTABLES)
 
@@ -18,9 +18,12 @@ arpspoof: arpspoofing.o
 
 portscan: portscan.o
 	$(CXX) portscan.o $(LDFLAGS) -o portscan
+	
+traceroute: 
+	$(CXX) traceroute.cpp -o traceroute -std=c++0x -Wall $(LDFLAGS) 
 
 .cpp.o:
-	$(CXX) $(CFLAGS) $(INCLUDE) $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -o $@
 
 clean:
-	rm $(OBJECTS) $(EXECUTABLE)
+	rm $(OBJECTS) $(EXECUTABLES)
