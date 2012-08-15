@@ -230,28 +230,28 @@ namespace Tins {
          *
          * \return Returns the checksum as an unit16_t.
          */
-        uint16_t check() const { return Utils::net_to_host_s(this->_icmp.check); }
+        uint16_t check() const { return Utils::be_to_host(this->_icmp.check); }
 
         /**
          * \brief Getter for the echo id.
          *
          * \return Returns the echo id.
          */
-        uint16_t id() const { return Utils::net_to_host_s(_icmp.un.echo.id); }
+        uint16_t id() const { return Utils::be_to_host(_icmp.un.echo.id); }
 
         /**
          * \brief Getter for the echo sequence number.
          *
          * \return Returns the echo sequence number.
          */
-        uint16_t sequence() const { return Utils::net_to_host_s(_icmp.un.echo.sequence); }
+        uint16_t sequence() const { return Utils::be_to_host(_icmp.un.echo.sequence); }
 
         /**
          * \brief Getter for the gateway field.
          *
          * \return Returns the gateways in an unit32_t.
          */
-         uint32_t gateway() const { return Utils::net_to_host_l(this->_icmp.un.gateway); }
+         uint32_t gateway() const { return Utils::be_to_host(this->_icmp.un.gateway); }
 
          /**
           * \brief Getter for the pointer field.
@@ -265,7 +265,7 @@ namespace Tins {
           *
           * \return Returns the mtu value in an uint16_t.
           */
-        uint16_t mtu() const { return Utils::net_to_host_s(this->_icmp.un.frag.mtu); }
+        uint16_t mtu() const { return Utils::be_to_host(this->_icmp.un.frag.mtu); }
 
         /**
          * \brief Returns the header size.

@@ -170,21 +170,21 @@ namespace Tins {
          *
          * \return The total length of this IP PDU.
          */
-        uint16_t tot_len() const { return Utils::net_to_host_s(_ip.tot_len); }
+        uint16_t tot_len() const { return Utils::be_to_host(_ip.tot_len); }
 
         /**
          * \brief Getter for the id field.
          *
          * \return The id for this IP PDU.
          */
-        uint16_t id() const { return Utils::net_to_host_s(_ip.id); }
+        uint16_t id() const { return Utils::be_to_host(_ip.id); }
 
         /**
          * \brief Getter for the fragment offset field.
          *
          * \return The fragment offset for this IP PDU.
          */
-        uint16_t frag_off() const { return Utils::net_to_host_s(_ip.frag_off); }
+        uint16_t frag_off() const { return Utils::be_to_host(_ip.frag_off); }
 
         /**
          * \brief Getter for the time to live field.
@@ -205,20 +205,20 @@ namespace Tins {
          *
          * \return The checksum for this IP PDU.
          */
-        uint16_t check() const { return Utils::net_to_host_s(_ip.check); }
+        uint16_t check() const { return Utils::be_to_host(_ip.check); }
 
         /**
          * \brief Getter for the source address field.
          *
          * \return The source address for this IP PDU.
          */
-        IPv4Address src_addr() const { return Utils::net_to_host_l(_ip.saddr); }
+        IPv4Address src_addr() const { return Utils::be_to_host(_ip.saddr); }
 
         /** 
          * \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
-        IPv4Address dst_addr() const  { return Utils::net_to_host_l(_ip.daddr); }
+        IPv4Address dst_addr() const  { return Utils::be_to_host(_ip.daddr); }
         
         /** 
          * \brief Getter for the version field.

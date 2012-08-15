@@ -201,12 +201,14 @@ uint32_t Tins::Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
     return checksum + padding;
 }
 
-uint32_t Tins::Utils::pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, uint32_t len, uint32_t flag) {
+uint32_t Tins::Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
     uint32_t checksum(0);
-    uint16_t *ptr = (uint16_t*)&source_ip;
+    uint32_t source_ip_int = Utils::to_be<uint32_t>(source_ip),
+             dest_ip_int = Utils::to_be<uint32_t>(dest_ip);
+    uint16_t *ptr = (uint16_t*)&source_ip_int;
 
     checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
-    ptr = (uint16_t*)&dest_ip;
+    ptr = (uint16_t*)&dest_ip_int;
     checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
     checksum += flag + len;
     return checksum;

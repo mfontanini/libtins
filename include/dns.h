@@ -133,6 +133,9 @@ namespace Tins {
                 dname(nm), addr(ad), type(t), qclass(c), ttl(tt) {}
         };
         
+        typedef std::list<Query> queries_type;
+        typedef std::list<Resource> resources_type;
+        
         /**
          * \brief Default constructor.
          * 
@@ -172,7 +175,7 @@ namespace Tins {
          * 
          * \return uint16_t containing the value of the id field.
          */
-        uint16_t id() const { return Utils::net_to_host_s(dns.id); }
+        uint16_t id() const { return Utils::be_to_host(dns.id); }
         
         /**
          * \brief Setter for the query response field.
@@ -255,28 +258,28 @@ namespace Tins {
          * 
          * \return uint16_t containing the value of the questions field.
          */
-        uint16_t questions() const { return Utils::net_to_host_s(dns.questions); }
+        uint16_t questions() const { return Utils::be_to_host(dns.questions); }
         
         /**
          * \brief Setter for the answers field.
          * 
          * \return uint16_t containing the value of the answers field.
          */
-        uint16_t answers() const { return Utils::net_to_host_s(dns.answers); }
+        uint16_t answers() const { return Utils::be_to_host(dns.answers); }
         
         /**
          * \brief Setter for the authority field.
          * 
          * \return uint16_t containing the value of the authority field.
          */
-        uint16_t authority() const { return Utils::net_to_host_s(dns.authority); }
+        uint16_t authority() const { return Utils::be_to_host(dns.authority); }
         
         /**
          * \brief Setter for the additional field.
          * 
          * \return uint16_t containing the value of the additional field.
          */
-        uint16_t additional() const { return Utils::net_to_host_s(dns.additional); }
+        uint16_t additional() const { return Utils::be_to_host(dns.additional); }
 
         /**
          * \brief Getter for the PDU's type.
@@ -401,7 +404,7 @@ namespace Tins {
          * \param ip The ip address of the resolved name.
          */
         void add_answer(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, uint32_t ip);
+                        uint32_t ttl, IPv4Address ip);
                         
         /**
          * \brief Add a query response.
@@ -459,14 +462,14 @@ namespace Tins {
          * \return std::list<Query> containing the queries in this
          * record.
          */
-        std::list<Query> dns_queries() const;
+        queries_type dns_queries() const;
         
         /**
          * \brief Getter for this PDU's DNS answers
          * \return std::list<Resource> containing the answers in this
          * record.
          */
-        std::list<Resource> dns_answers();
+        resources_type dns_answers();
         
         /**
          * \sa PDU::clone_pdu

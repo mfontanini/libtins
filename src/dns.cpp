@@ -97,10 +97,11 @@ const uint8_t *DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_
         if(ptr + sizeof(uint16_t) > ptr_end)
             throw std::runtime_error("Not enough size for a given resource.");
         std::auto_ptr<ResourceRecord> res;
+        // Probably convert to be this constant
         if((*ptr  & 0xc0)) {
             uint16_t offset(*reinterpret_cast<const uint16_t*>(ptr));
-            offset = Utils::net_to_host_s(offset) & 0x3fff;
-            res.reset(new OffsetedResourceRecord(Utils::net_to_host_s(offset)));
+            offset = Utils::be_to_host(offset) & 0x3fff;
+            res.reset(new OffsetedResourceRecord(Utils::to_be(offset)));
             ptr += sizeof(uint16_t);
         }
         else {
@@ -122,7 +123,7 @@ const uint8_t *DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_
 
         // Store the option size.
         res->data.resize(
-            Utils::net_to_host_s(*reinterpret_cast<const uint16_t*>(ptr))
+            Utils::to_be(*reinterpret_cast<const uint16_t*>(ptr))
         );
         ptr += sizeof(uint16_t);
         if(ptr + res->data.size() > ptr_end)
@@ -130,7 +131,7 @@ const uint8_t *DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_
         if(contains_dname(res->info.type))
             std::copy(ptr, ptr + res->data.size(), res->data.begin());
         else
-            *(uint32_t*)&res->data[0] = Utils::net_to_host_l(*(uint32_t*)ptr);
+            *(uint32_t*)&res->data[0] = Utils::to_be(*(uint32_t*)ptr);
         
         ptr += res->data.size();
         extra_size += ptr - this_opt_start;
@@ -145,7 +146,7 @@ uint32_t DNS::header_size() const {
 }
 
 void DNS::id(uint16_t new_id) {
-    dns.id = Utils::net_to_host_s(new_id);
+    dns.id = Utils::to_be(new_id);
 }
 
 void DNS::type(QRType new_qr) {
@@ -189,8 +190,9 @@ void DNS::rcode(uint8_t new_rcode) {
 }
 
 bool DNS::contains_dname(uint16_t type) {
-    return type == Utils::net_to_host_s(MX) || type == Utils::net_to_host_s(CNAME) ||
-          type == Utils::net_to_host_s(PTR) || type == Utils::net_to_host_s(NS);
+    type = Utils::be_to_host(type);
+    return type == MX || type == CNAME ||
+          type == PTR || type == NS;
 }
 
 void DNS::add_query(const string &name, QueryType type, QueryClass qclass) {
@@ -199,11 +201,11 @@ void DNS::add_query(const string &name, QueryType type, QueryClass qclass) {
     
     queries.push_back(
         Query(new_str, 
-        Utils::net_to_host_s(type), 
-        Utils::net_to_host_s(qclass))
+        Utils::to_be<uint16_t>(type), 
+        Utils::to_be<uint16_t>(qclass))
     );
     extra_size += new_str.size() + 1 + (sizeof(uint16_t) << 1);
-    dns.questions = Utils::net_to_host_s(queries.size());
+    dns.questions = Utils::to_be<uint16_t>(queries.size());
 }
 
 void DNS::add_query(const Query &query) {
@@ -214,10 +216,10 @@ void DNS::add_query(const Query &query) {
     );
 }
 
-void DNS::add_answer(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
-    ResourceRecord *res = make_record(name, type, qclass, ttl, ip);
+void DNS::add_answer(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, IPv4Address ip) {
+    ResourceRecord *res = make_record(name, type, qclass, ttl, (uint32_t)ip);
     ans.push_back(res);
-    dns.answers = Utils::net_to_host_s(ans.size());
+    dns.answers = Utils::to_be<uint16_t>(ans.size());
 }
 
 void DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
@@ -226,31 +228,31 @@ void DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
     parse_domain_name(dname, new_str);
     ResourceRecord *res = make_record(name, type, qclass, ttl, new_str);
     ans.push_back(res);
-    dns.answers = Utils::net_to_host_s(ans.size());
+    dns.answers = Utils::to_be<uint16_t>(ans.size());
 }
 
 void DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
                         uint32_t ttl, const uint8_t *data, uint32_t sz) {
     ResourceRecord *res = make_record(name, type, qclass, ttl, data, sz);
     ans.push_back(res);
-    dns.answers = Utils::net_to_host_s(ans.size());
+    dns.answers = Utils::to_be<uint16_t>(ans.size());
 }
 
 void DNS::add_authority(const string &name, QueryType type, 
   QueryClass qclass, uint32_t ttl, const uint8_t *data, uint32_t sz) {
     ResourceRecord *res = make_record(name, type, qclass, ttl, data, sz);
     arity.push_back(res);
-    dns.authority = Utils::net_to_host_s(arity.size());
+    dns.authority = Utils::to_be<uint16_t>(arity.size());
 }
 
 void DNS::add_additional(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
     ResourceRecord *res = make_record(name, type, qclass, ttl, ip);
     addit.push_back(res);
-    dns.additional = Utils::net_to_host_s(addit.size());
+    dns.additional = Utils::to_be<uint16_t>(addit.size());
 }
 
 DNS::ResourceRecord *DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
-    ip = Utils::net_to_host_l(ip);
+    ip = Utils::to_be(ip);
     return make_record(name, type, qclass, ttl, reinterpret_cast<uint8_t*>(&ip), sizeof(ip));
 }
 
@@ -264,12 +266,12 @@ DNS::ResourceRecord *DNS::make_record(const std::string &name, QueryType type, Q
     uint16_t index = find_domain_name(nm);
     ResourceRecord *res;
     if(index)
-        res = new OffsetedResourceRecord(Utils::net_to_host_s(index), ptr, len);
+        res = new OffsetedResourceRecord(Utils::to_be(index), ptr, len);
     else
         res = new NamedResourceRecord(nm, ptr, len);
-    res->info.type = Utils::net_to_host_s(type);
-    res->info.qclass = Utils::net_to_host_s(qclass);
-    res->info.ttl = Utils::net_to_host_l(ttl);
+    res->info.type = Utils::to_be<uint16_t>(type);
+    res->info.qclass = Utils::to_be<uint16_t>(qclass);
+    res->info.ttl = Utils::to_be(ttl);
     extra_size += res->size();
     return res;
 }
@@ -384,7 +386,7 @@ uint32_t DNS::build_suffix_map(uint32_t index, const list<ResourceRecord*> &lst)
         index += sizeof(ResourceRecord::Info) + sizeof(uint16_t);
         uint32_t sz((*it)->data_size());
         const uint8_t *ptr = (*it)->data_pointer();
-        if((*it)->info.type == Utils::net_to_host_s(MX)) {
+        if(Utils::be_to_host((*it)->info.type) == MX) {
             ptr += 2;
             sz -= 2;
             index += 2;
@@ -418,7 +420,7 @@ void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
         if(i && ptr[i])
             out.push_back('.');
         if((ptr[i] & 0xc0)) {
-            uint16_t index = Utils::net_to_host_s(*((uint16_t*)(ptr + i)));
+            uint16_t index = Utils::be_to_host(*((uint16_t*)(ptr + i)));
             index &= 0x3fff;
             SuffixMap::iterator it(suffixes.find(index));
             SuffixIndices::iterator suff_it(suffix_indices.find(index));
@@ -446,7 +448,7 @@ void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
         else {
             uint8_t suff_sz(ptr[i]);
             i++;
-            if(i + suff_sz < sz)
+            if(i + suff_sz <= sz)
                 out.append(ptr + i, ptr + i + suff_sz);
             i += suff_sz;
         }
@@ -472,31 +474,31 @@ void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) 
         if(sz == 4)
             addr = Utils::ip_to_string(*(uint32_t*)ptr);
         else {
-            if((*it)->info.type ==  Utils::net_to_host_s(MX)) {
+            if(Utils::be_to_host((*it)->info.type) ==  MX) {
                 ptr += 2;
                 sz -= 2;
             }
             compose_name(ptr, sz, addr);
         }
         res.push_back(
-            Resource(dname, addr, Utils::net_to_host_s((*it)->info.type), 
-            Utils::net_to_host_s((*it)->info.qclass), Utils::net_to_host_l((*it)->info.ttl))
+            Resource(dname, addr, Utils::be_to_host((*it)->info.type), 
+            Utils::to_be((*it)->info.qclass), Utils::be_to_host((*it)->info.ttl))
         );
     }
 }
 
-list<DNS::Query> DNS::dns_queries() const { 
-    list<Query> output;
+DNS::queries_type DNS::dns_queries() const { 
+    queries_type output;
     for(std::list<Query>::const_iterator it(queries.begin()); it != queries.end(); ++it) {
         string dn;
         unparse_domain_name(it->name, dn);
-        output.push_back(Query(dn, Utils::net_to_host_s(it->type), Utils::net_to_host_s(it->qclass)));
+        output.push_back(Query(dn, Utils::be_to_host(it->type), Utils::be_to_host(it->qclass)));
     }
     return output;
 }
 
-list<DNS::Resource> DNS::dns_answers() {
-    list<Resource> res;
+DNS::resources_type DNS::dns_answers() {
+    resources_type res;
     convert_resources(ans, res);
     return res;
 }
@@ -523,7 +525,7 @@ uint32_t DNS::ResourceRecord::write(uint8_t *buffer) const {
     buffer += sz;
     std::memcpy(buffer, &info, sizeof(info));
     buffer += sizeof(info);
-    *((uint16_t*)buffer) = Utils::net_to_host_s(data.size());
+    *((uint16_t*)buffer) = Utils::to_be(data.size());
     buffer += sizeof(uint16_t);
     std::copy(data.begin(), data.end(), buffer);
     return sz + sizeof(info) + sizeof(uint16_t) + data.size();

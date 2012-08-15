@@ -116,48 +116,47 @@ namespace Tins {
          * \brief Getter for the xid field.
          * \return The xid field for this BootP PDU.
          */
-        uint32_t xid() const { return Utils::net_to_host_l(_bootp.xid); }
+        uint32_t xid() const { return Utils::be_to_host(_bootp.xid); }
 
         /** 
          * \brief Getter for the secs field.
          * \return The secs field for this BootP PDU.
          */
-        uint16_t secs() const { return Utils::net_to_host_s(_bootp.secs); }
+        uint16_t secs() const { return Utils::be_to_host(_bootp.secs); }
 
         /** \brief Getter for the padding field.
          * \return The padding field for this BootP PDU.
          */
-        uint16_t padding() const { return Utils::net_to_host_s(_bootp.padding); }
+        uint16_t padding() const { return Utils::be_to_host(_bootp.padding); }
 
         /** 
          * \brief Getter for the ciaddr field.
          * \return The ciaddr field for this BootP PDU.
          */
-        IPv4Address ciaddr() const { return Utils::net_to_host_l(_bootp.ciaddr); }
+        IPv4Address ciaddr() const { return Utils::be_to_host(_bootp.ciaddr); }
 
         /** 
          * \brief Getter for the yiaddr field.
          * \return The yiaddr field for this BootP PDU.
          */
-        IPv4Address yiaddr() const { return Utils::net_to_host_l(_bootp.yiaddr); }
+        IPv4Address yiaddr() const { return Utils::be_to_host(_bootp.yiaddr); }
 
         /** 
          * \brief Getter for the siaddr field.
          * \return The siaddr field for this BootP PDU.
          */
-        IPv4Address siaddr() const { return Utils::net_to_host_l(_bootp.siaddr); }
+        IPv4Address siaddr() const { return Utils::be_to_host(_bootp.siaddr); }
 
         /** 
          * \brief Getter for the giaddr field.
          * \return The giaddr field for this BootP PDU.
          */
-        IPv4Address giaddr() const { return Utils::net_to_host_l(_bootp.giaddr); }
+        IPv4Address giaddr() const { return Utils::be_to_host(_bootp.giaddr); }
 
         /** 
          * \brief Getter for the chaddr field.
          * \return The chddr field for this BootP PDU.
          */
-        //const uint8_t *chaddr() const { return _bootp.chaddr; }
         chaddr_type chaddr() const { return _bootp.chaddr; }
 
         /** 

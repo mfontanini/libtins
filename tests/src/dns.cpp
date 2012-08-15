@@ -174,14 +174,45 @@ TEST_F(DNSTest, Question) {
     DNS dns;
     dns.add_query("www.example.com", DNS::A, DNS::IN);
     dns.add_query("www.example2.com", DNS::MX, DNS::IN);
-    EXPECT_EQ(dns.questions(), 2);
+    ASSERT_EQ(dns.questions(), 2);
+    
+    DNS::queries_type queries(dns.dns_queries());
+    for(DNS::queries_type::const_iterator it = queries.begin(); it != queries.end(); ++it) {
+        EXPECT_TRUE(it->name == "www.example.com" || it->name == "www.example2.com");
+        if(it->name == "www.example.com") {
+            EXPECT_EQ(it->type, DNS::A);
+            EXPECT_EQ(it->qclass, DNS::IN);
+        }
+        else if(it->name == "www.example2.com") {
+            EXPECT_EQ(it->type, DNS::MX);
+            EXPECT_EQ(it->qclass, DNS::IN);
+        }
+    }
 }
 
 TEST_F(DNSTest, Answers) {
     DNS dns;
-    dns.add_answer("www.example.com", DNS::A, DNS::IN, 0x762, Utils::ip_to_int("127.0.0.1"));
-    dns.add_answer("www.example2.com", DNS::MX, DNS::IN, 0x762, Utils::ip_to_int("127.0.0.1"));
-    EXPECT_EQ(dns.answers(), 2);
+    dns.add_answer("www.example.com", DNS::A, DNS::IN, 0x762, IPv4Address("127.0.0.1"));
+    dns.add_answer("www.example2.com", DNS::MX, DNS::IN, 0x762, IPv4Address("127.0.0.1"));
+    ASSERT_EQ(dns.answers(), 2);
+    
+    DNS::resources_type resources(dns.dns_answers());
+    for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
+        std::cout << it->dname << "\n";
+        EXPECT_TRUE(it->dname == "www.example.com" || it->dname == "www.example2.com");
+        if(it->dname == "www.example.com") {
+            EXPECT_EQ(it->type, DNS::A);
+            EXPECT_EQ(it->ttl, 0x762);
+            EXPECT_EQ(it->addr, "127.0.0.1");
+            EXPECT_EQ(it->qclass, DNS::IN);
+        }
+        else if(it->dname == "www.example2.com") {
+            EXPECT_EQ(it->type, DNS::MX);
+            EXPECT_EQ(it->ttl, 0x762);
+            EXPECT_EQ(it->addr, "127.0.0.1");
+            EXPECT_EQ(it->qclass, DNS::IN);
+        }
+    }
 }
 
 

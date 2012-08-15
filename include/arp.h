@@ -86,7 +86,7 @@ namespace Tins {
          *
          * \return Returns the sender's IP address in an uint32_t.
          */
-        IPv4Address sender_ip_addr() const { return Utils::net_to_host_l(_arp.ar_sip); }
+        IPv4Address sender_ip_addr() const { return Utils::be_to_host(_arp.ar_sip); }
 
         /**
          * \brief Getter for the target's hardware address.
@@ -100,21 +100,21 @@ namespace Tins {
          *
          * \return Returns the target's IP address in an uint32_t.
          */
-        IPv4Address target_ip_addr() const { return Utils::net_to_host_l(_arp.ar_tip); }
+        IPv4Address target_ip_addr() const { return Utils::be_to_host(_arp.ar_tip); }
 
         /**
          * \brief Getter for the hardware address format.
          *
          * \return Returns the hardware address' format in an uint16_t.
          */
-        uint16_t hw_addr_format() const { return Utils::net_to_host_s(_arp.ar_hrd); }
+        uint16_t hw_addr_format() const { return Utils::be_to_host(_arp.ar_hrd); }
 
         /**
          * \brief Getter for the protocol address format.
          *
          * \return Returns the protocol address' format in an uint16_t.
          */
-        uint16_t prot_addr_format() const { return Utils::net_to_host_s(_arp.ar_pro); }
+        uint16_t prot_addr_format() const { return Utils::be_to_host(_arp.ar_pro); }
 
         /**
          * \brief Getter for the hardware address length.
@@ -135,7 +135,7 @@ namespace Tins {
          *
          * \return Returns the ARP opcode in an uint16_t.
          */
-        uint16_t opcode() const { return Utils::net_to_host_s(_arp.ar_op); }
+        uint16_t opcode() const { return Utils::be_to_host(_arp.ar_op); }
 
         /** \brief Getter for the header size.
          * \return Returns the ARP header size.

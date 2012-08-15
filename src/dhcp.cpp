@@ -47,7 +47,7 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
     buffer += BootP::header_size() - vend_size();
     total_sz -= BootP::header_size() - vend_size();
     uint8_t args[2] = {0};
-    if(total_sz < sizeof(uint32_t) || *(uint32_t*)buffer != Utils::net_to_host_l(0x63825363))
+    if(total_sz < sizeof(uint32_t) || *(uint32_t*)buffer != Utils::to_be<uint32_t>(0x63825363))
         throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);
@@ -106,7 +106,7 @@ bool DHCP::search_type_option(uint8_t *value) {
 }
 
 bool DHCP::add_server_identifier(uint32_t ip) {
-    ip = Utils::net_to_host_l(ip);
+    ip = Utils::to_be(ip);
     return add_option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), (const uint8_t*)&ip);
 }
 
@@ -115,7 +115,7 @@ bool DHCP::search_server_identifier(uint32_t *value) {
 }
 
 bool DHCP::add_lease_time(uint32_t time) {
-    time = Utils::net_to_host_l(time);
+    time = Utils::to_be(time);
     return add_option(DHCP_LEASE_TIME, sizeof(uint32_t), (const uint8_t*)&time);
 }
 
@@ -124,7 +124,7 @@ bool DHCP::search_lease_time(uint32_t *value) {
 }
 
 bool DHCP::add_renewal_time(uint32_t time) {
-    time = Utils::net_to_host_l(time);
+    time = Utils::to_be(time);
     return add_option(DHCP_RENEWAL_TIME, sizeof(uint32_t), (const uint8_t*)&time);
 }
         
@@ -133,7 +133,7 @@ bool DHCP::search_renewal_time(uint32_t *value) {
 }
 
 bool DHCP::add_subnet_mask(uint32_t mask) {
-    mask = Utils::net_to_host_l(mask);
+    mask = Utils::to_be(mask);
     return add_option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask);
 }
 
@@ -166,7 +166,7 @@ bool DHCP::search_dns_option(std::list<uint32_t> *dns) {
 }
 
 bool DHCP::add_broadcast_option(uint32_t addr) {
-    addr = Utils::net_to_host_l(addr);
+    addr = Utils::to_be(addr);
     return add_option(BROADCAST_ADDRESS, sizeof(uint32_t), (uint8_t*)&addr);
 }
 
@@ -175,7 +175,7 @@ bool DHCP::search_broadcast_option(uint32_t *value) {
 }
 
 bool DHCP::add_requested_ip_option(uint32_t addr) {
-    addr = Utils::net_to_host_l(addr);
+    addr = Utils::to_be(addr);
     return add_option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), (uint8_t*)&addr);
 }
 
@@ -192,7 +192,7 @@ bool DHCP::search_domain_name(std::string *value) {
 }
 
 bool DHCP::add_rebind_time(uint32_t time) {
-    time = Utils::net_to_host_l(time);
+    time = Utils::to_be(time);
     return add_option(DHCP_REBINDING_TIME, sizeof(uint32_t), (uint8_t*)&time);
 }
         
@@ -204,7 +204,7 @@ uint8_t *DHCP::serialize_list(const list<uint32_t> &int_list, uint32_t &sz) {
     uint8_t *buffer = new uint8_t[int_list.size() * sizeof(uint32_t)];
     uint32_t *ptr = (uint32_t*)buffer;
     for(list<uint32_t>::const_iterator it = int_list.begin(); it != int_list.end(); ++it)
-        *(ptr++) = Utils::net_to_host_l(*it);
+        *(ptr++) = Utils::to_be(*it);
     sz = sizeof(uint32_t) * int_list.size();
     return buffer;
 }
@@ -220,7 +220,7 @@ void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
         result = new uint8_t[_size];
         uint8_t *ptr = result + sizeof(uint32_t);
         // Magic cookie
-        *((uint32_t*)result) = Utils::net_to_host_l(0x63825363);
+        *((uint32_t*)result) = Utils::to_be<uint32_t>(0x63825363);
         for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
             *(ptr++) = it->option;
             *(ptr++) = it->value.size();
@@ -251,7 +251,7 @@ bool DHCP::generic_search(Options opt, std::list<uint32_t> *container) {
     if((len % sizeof(uint32_t)) != 0)
         return false;
     while(len) {
-        container->push_back(Utils::net_to_host_l(*(ptr++)));
+        container->push_back(Utils::to_be(*(ptr++)));
         len -= sizeof(uint32_t);
     }
     return true;
@@ -261,14 +261,13 @@ bool DHCP::generic_search(Options opt, std::string *str) {
     const DHCPOption *option = search_option(opt);
     if(!option)
         return false;
-    //*str = string((const char*)option->value, option->length);
     *str = string(option->value.begin(), option->value.end());
     return true;
 }
 
 bool DHCP::generic_search(Options opt, uint32_t *value) {
     if(generic_search<uint32_t>(opt, value)) {
-        *value = Utils::net_to_host_l(*value);
+        *value = Utils::to_be(*value);
         return true;
     }
     return false;

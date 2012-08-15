@@ -81,15 +81,15 @@ void BootP::hops(uint8_t new_hops) {
 }
 
 void BootP::xid(uint32_t new_xid) {
-    _bootp.xid = Utils::net_to_host_l(new_xid);
+    _bootp.xid = Utils::to_be(new_xid);
 }
 
 void BootP::secs(uint16_t new_secs) {
-    _bootp.secs = Utils::net_to_host_s(new_secs);
+    _bootp.secs = Utils::to_be(new_secs);
 }
 
 void BootP::padding(uint16_t new_padding) {
-    _bootp.padding = Utils::net_to_host_s(new_padding);
+    _bootp.padding = Utils::to_be(new_padding);
 }
 
 void BootP::ciaddr(IPv4Address new_ciaddr) {
@@ -126,7 +126,6 @@ void BootP::vend(uint8_t *new_vend, uint32_t size) {
 void BootP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= sizeof(bootphdr) + _vend_size);
     std::memcpy(buffer, &_bootp, sizeof(bootphdr));
-    //std::memcpy(buffer + sizeof(bootphdr), _vend, _vend_size);
     std::copy(_vend, _vend + _vend_size, buffer + sizeof(bootphdr));
 }
 

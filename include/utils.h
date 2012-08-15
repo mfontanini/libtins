@@ -26,6 +26,7 @@
 
 #ifndef WIN32
     #include <ifaddrs.h>
+    #include <endian.h>
 #endif
 #include <string>
 #include <set>
@@ -153,6 +154,120 @@ namespace Tins {
         template<class ForwardIterator>
         void route_entries(ForwardIterator output);
         
+        /** 
+         * \brief Changes a 16-bit integral value's endianess.
+         *
+         * \param data The data to convert.
+         */
+        inline uint16_t change_endian(uint16_t data) {
+            return ((data & 0xff00) >> 8)  | ((data & 0x00ff) << 8);
+        }
+        
+        /**
+         * \brief Changes a 32-bit integral value's endianess.
+         *
+         * \param data The data to convert.
+         */
+        inline uint32_t change_endian(uint32_t data) {
+            return (((data & 0xff000000) >> 24) | ((data & 0x00ff0000) >> 8)  |
+                    ((data & 0x0000ff00) << 8)  | ((data & 0x000000ff) << 24));
+        }
+        
+        /**
+         * \brief Changes a 64-bit integral value's endianess.
+         *
+         * \param data The data to convert.
+         */
+         inline uint64_t change_endian(uint64_t data) {
+            return (((uint64_t)(change_endian((uint32_t)((data << 32) >> 32))) << 32) |
+                    (change_endian(((uint32_t)(data >> 32)))));
+         }
+        
+        #if __BYTE_ORDER == __LITTLE_ENDIAN
+            /** 
+             * \brief Convert any integral type to big endian.
+             *
+             * \param data The data to convert.
+             */
+            template<typename T>
+            inline T to_be(T data) {
+                return change_endian(data);
+            }
+             
+            /**
+             * \brief Convert any integral type to little endian.
+             *
+             * On little endian platforms, the parameter is simply returned.
+             * 
+             * \param data The data to convert.
+             */
+             template<typename T>
+             inline T to_le(T data) {
+                 return data;
+             }
+             
+            /**
+             * \brief Convert any big endian value to the host's endianess.
+             * 
+             * \param data The data to convert.
+             */
+             template<typename T>
+             inline T be_to_host(T data) {
+                 return change_endian(data);
+             }
+             
+            /**
+             * \brief Convert any little endian value to the host's endianess.
+             * 
+             * \param data The data to convert.
+             */
+             template<typename T>
+             inline T le_to_host(T data) {
+                 return data;
+             }
+        #elif __BYTE_ORDER == __BIG_ENDIAN
+            /** 
+             * \brief Convert any integral type to big endian.
+             *
+             * \param data The data to convert.
+             */
+            template<typename T>
+            inline T to_be(T data) {
+                return data;
+            }
+             
+            /**
+             * \brief Convert any integral type to little endian.
+             *
+             * On little endian platforms, the parameter is simply returned.
+             * 
+             * \param data The data to convert.
+             */
+             template<typename T>
+             inline T to_le(T data) {
+                 return change_endian(data);
+             }
+             
+            /**
+             * \brief Convert any big endian value to the host's endianess.
+             * 
+             * \param data The data to convert.
+             */
+             template<typename T>
+             inline T be_to_host(T data) {
+                 return data;
+             }
+             
+            /**
+             * \brief Convert any little endian value to the host's endianess.
+             * 
+             * \param data The data to convert.
+             */
+             template<typename T>
+             inline T le_to_host(T data) {
+                 return change_endian(data);
+             }
+        #endif
 
         /** \brief Convert 16 bit integer into network byte order.
          *
@@ -215,7 +330,7 @@ namespace Tins {
          * \param flag The flag to use in the protocol field of the pseudo header.
          * \return The pseudo header checksum.
          */
-        uint32_t pseudoheader_checksum(uint32_t source_ip, uint32_t dest_ip, uint32_t len, uint32_t flag);
+        uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag);
 
         /** \brief Generic function to iterate through interface and collect
          * data.

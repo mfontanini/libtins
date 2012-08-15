@@ -141,49 +141,49 @@ namespace Tins {
          *
          * \return The destination port in an uint16_t.
          */
-        uint16_t dport() const { return Utils::net_to_host_s(_tcp.dport); }
+        uint16_t dport() const { return Utils::be_to_host(_tcp.dport); }
 
         /**
          * \brief Getter for the source port field.
          *
          * \return The source port in an uint16_t.
          */
-        uint16_t sport() const { return Utils::net_to_host_s(_tcp.sport); }
+        uint16_t sport() const { return Utils::be_to_host(_tcp.sport); }
 
         /**
          * \brief Getter for the sequence number field.
          *
          * \return The sequence number in an uint32_t.
          */
-        uint32_t seq() const { return Utils::net_to_host_l(_tcp.seq); }
+        uint32_t seq() const { return Utils::be_to_host(_tcp.seq); }
 
         /**
          * \brief Getter for the acknowledge number field.
          *
          * \return The acknowledge number in an uint32_t.
          */
-        uint32_t ack_seq() const { return Utils::net_to_host_l(_tcp.ack_seq); }
+        uint32_t ack_seq() const { return Utils::be_to_host(_tcp.ack_seq); }
 
         /**
          * \brief Getter for the window size field.
          *
          * \return The window size in an uint32_t.
          */
-        uint16_t window() const { return Utils::net_to_host_s(_tcp.window); }
+        uint16_t window() const { return Utils::be_to_host(_tcp.window); }
 
         /**
          * \brief Getter for the checksum field.
          *
          * \return The checksum field in an uint16_t.
          */
-        uint16_t check() const { return Utils::net_to_host_s(_tcp.check); }
+        uint16_t check() const { return Utils::be_to_host(_tcp.check); }
 
         /**
          * \brief Getter for the urgent pointer field.
          *
          * \return The urgent pointer in an uint16_t.
          */
-        uint16_t urg_ptr() const { return Utils::net_to_host_s(_tcp.urg_ptr); }
+        uint16_t urg_ptr() const { return Utils::be_to_host(_tcp.urg_ptr); }
 
         /**
          * \brief Getter for the data offset field.

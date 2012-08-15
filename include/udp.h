@@ -63,19 +63,19 @@ namespace Tins {
          * \brief Getter for the destination port.
          * \return The datagram's destination port.
          */
-        uint16_t dport() const { return Utils::net_to_host_s(_udp.dport); }
+        uint16_t dport() const { return Utils::be_to_host(_udp.dport); }
 
         /** 
          * \brief Getter for the source port.
          * \return The datagram's source port.
          */
-        uint16_t sport() const { return Utils::net_to_host_s(_udp.sport); }
+        uint16_t sport() const { return Utils::be_to_host(_udp.sport); }
         
         /**
          * \brief Getter for the length of the datagram.
          * \return The length of the datagram.
          */
-        uint16_t length() const { return Utils::net_to_host_s(_udp.len); }
+        uint16_t length() const { return Utils::be_to_host(_udp.len); }
 
         /** 
          * \brief Set the destination port.

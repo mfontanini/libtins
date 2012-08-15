@@ -27,14 +27,18 @@
 #include "ip.h"
 #include "rawpdu.h"
 
-Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) : PDU(Constants::IP::PROTO_UDP, child) {
+Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) 
+: PDU(Constants::IP::PROTO_UDP, child) 
+{
     this->dport(dport);
     this->sport(sport);
     _udp.check = 0;
     _udp.len = 0;
 }
 
-Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) : PDU(Constants::IP::PROTO_UDP) {
+Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) 
+: PDU(Constants::IP::PROTO_UDP) 
+{
     if(total_sz < sizeof(udphdr))
         throw std::runtime_error("Not enough size for an UDP header in the buffer.");
     std::memcpy(&_udp, buffer, sizeof(udphdr));
@@ -48,15 +52,15 @@ void Tins::UDP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
 }
 
 void Tins::UDP::dport(uint16_t new_dport) {
-    _udp.dport = Utils::net_to_host_s(new_dport);
+    _udp.dport = Utils::to_be(new_dport);
 }
 
 void Tins::UDP::sport(uint16_t new_sport) {
-    _udp.sport = Utils::net_to_host_s(new_sport);
+    _udp.sport = Utils::to_be(new_sport);
 }
 
 void Tins::UDP::length(uint16_t new_len) {
-    _udp.len = Utils::net_to_host_s(new_len);
+    _udp.len = Utils::to_be(new_len);
 }
 
 uint32_t Tins::UDP::header_size() const {
@@ -74,7 +78,7 @@ void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
                             Utils::do_checksum(buffer, buffer + total_sz);
         while (checksum >> 16)
             checksum = (checksum & 0xffff)+(checksum >> 16);
-        ((udphdr*)buffer)->check = Utils::net_to_host_s(~checksum);
+        ((udphdr*)buffer)->check = Utils::to_be<uint16_t>(~checksum);
     }
     _udp.check = 0;
 }
