@@ -58,8 +58,8 @@ IPv4Address::operator std::string() const {
     return Utils::ip_to_string(ip_addr); 
 } 
 
-bool IPv4Address::operator==(const std::string &rhs) const {
-    return ip_addr == Utils::ip_to_int(rhs);
+std::string IPv4Address::to_string() const {
+    return Utils::ip_to_string(ip_addr); 
 }
 
 uint32_t IPv4Address::ip_to_int(const string &ip) {

@@ -24,8 +24,8 @@ const uint8_t IPTest::expected_packet[] = { '(', '\x7f', '\x00', ' ',
 
 TEST_F(IPTest, DefaultConstructor) {
     IP ip;
-    EXPECT_EQ(ip.dst_addr(), 0);
-    EXPECT_EQ(ip.src_addr(), 0);
+    EXPECT_EQ(ip.dst_addr(), IPv4Address());
+    EXPECT_EQ(ip.src_addr(), IPv4Address());
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
     EXPECT_EQ(ip.pdu_type(), PDU::IP);

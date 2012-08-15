@@ -20,12 +20,16 @@
  */
 
 #include <iostream>
+#include <iomanip>
+#include <vector>
 #include <string>
 #include <cstdlib>
 #include <pthread.h>
 #include <tins/ip.h>
 #include <tins/tcp.h>
+#include <tins/ipaddress.h>
 #include <tins/ethernetII.h>
+#include <tins/network_interface.h>
 #include <tins/sniffer.h>
 #include <tins/utils.h>
 #include <tins/packetsender.h>
@@ -34,97 +38,101 @@
 using namespace std;
 using namespace Tins;
 
+typedef std::pair<Sniffer*, std::string> sniffer_data;
+
 
 /* Our scan handler. This will receive SYNs and RSTs and inform us
  * the scanned port's status.
  */
-struct ScanHandler {
-    bool operator() (PDU *pdu) {
-        TCP *tcp = (pdu->find_inner_pdu<TCP>(PDU::TCP));
-        if(tcp) {
-            // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
-            if(tcp->get_flag(TCP::RST))
-                cout << "Port: " << tcp->sport() << " closed\n";
-            // Is SYN flag on? Then port is open!
-            else if(tcp->get_flag(TCP::SYN))
-                cout << "Port: " << tcp->sport() << " open\n";
+bool handler(PDU *pdu) {
+    TCP *tcp = pdu->find_inner_pdu<TCP>();
+    if(tcp) {
+        // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
+        if(tcp->get_flag(TCP::RST)) {
+            // This indicates we should stop sniffing.
+            if(tcp->get_flag(TCP::SYN))
+                return false;
+            cout << "Port: " << setw(5) << tcp->sport() << " closed\n";
         }
-        return true;
+        // Is SYN flag on? Then port is open!
+        else if(tcp->get_flag(TCP::SYN) && tcp->get_flag(TCP::ACK))
+            cout << "Port: " << setw(5) << tcp->sport() << " open\n";
     }
-};
-
-
-Sniffer *sniffer;
+    return true;
+}
 
 // Send syns to the given ip address, using the destination ports provided.
-void send_syns(const string &iface, uint32_t dest_ip, int argc, char *argv[]) {
-    uint32_t own_ip;
-    // Resolve our ip on that interface.
-    if(!Utils::interface_ip(iface, own_ip) && cout << "Error obtaining interface ip.\n")
-        return;
+void send_syns(const NetworkInterface &iface, IPv4Address dest_ip, const vector<string> &ips) {
+    // Retrieve the addresses.
+    NetworkInterface::Info info = iface.addresses();
     PacketSender sender;
     TCP *tcp = new TCP();
     // Allocate the IP PDU
-    IP ip(dest_ip, own_ip, tcp);
+    IP ip(dest_ip, info.ip_addr, tcp);
     // Set the SYN flag on.
     tcp->set_flag(TCP::SYN, 1);
     // Just some arbitrary port. 
     tcp->sport(1337);
-    while(argc--) {
+    cout << "Sending SYNs..." << endl;
+    for(vector<string>::const_iterator it = ips.begin(); it != ips.end(); ++it) {
         // Set the new port and send the packet!
-        uint32_t port = atoi(*(argv++));
-        tcp->dport(port);
+        tcp->dport(atoi(it->c_str()));
         sender.send(&ip);
     }
+    // Wait 1 second.
+    sleep(1);
+    /* Special packet to indicate that we're done. This will be sniffed
+     * by our function, which will in turn return false.  
+     */
+    tcp->set_flag(TCP::RST, 1);
+    // Pretend we're the scanned host...
+    ip.src_addr(dest_ip);
+    // We use an ethernet pdu, otherwise the kernel will drop it.
+    EthernetII eth(iface, info.hw_addr, info.hw_addr, ip.clone_pdu());
+    sender.send(&eth);
 }
 
 void *thread_proc(void *param) {
     // IP address is our parameter.
-    string *data = (string*)param;
-    // The scan handler.
-    ScanHandler handler;
-    // The required subclass of AbstractSnifferHandler which will serve as
-    // a proxy to our handler.
-    AbstractSnifferHandler *my_handler = new SnifferHandler<ScanHandler>(&handler);
-    sniffer->set_filter("tcp and ip src " + *data + " and tcp[tcpflags] & (tcp-rst|tcp-syn) != 0");
+    sniffer_data *data = (sniffer_data*)param;
+    Sniffer *sniffer = data->first;
+    sniffer->set_filter("tcp and ip src " + data->second + " and tcp[tcpflags] & (tcp-rst|tcp-syn) != 0");
     // Sniff loop. Only sniff TCP PDUs comming from the given IP and have either RST or SYN flag on.
-    sniffer->sniff_loop(my_handler);
-    delete my_handler;
+    sniffer->sniff_loop(handler);
     return 0;
+}
+
+void scan(int argc, char *argv[]) {
+    IPv4Address ip(argv[1]);
+    // Resolve the interface which will be our gateway
+    NetworkInterface iface(ip);
+    cout << "Sniffing on interface: " << iface.name() << endl;
+
+    // 300 bytes are enough to receive SYNs and RSTs.
+    Sniffer sniffer(iface.name(), 300);
+    sniffer_data data(&sniffer, argv[1]);
+    pthread_t thread;
+    // Launch our sniff thread.
+    pthread_create(&thread, 0, thread_proc, &data); 
+    
+    // Consume arguments
+    argv += 2;
+    argc -= 2;
+    // Start sending SYNs to port.
+    send_syns(iface, ip, vector<string>(argv, argv + (argc)));
+    
+    // Wait for our sniffer.
+    void *dummy;
+    pthread_join(thread, &dummy);
 }
 
 int main(int argc, char *argv[]) {
     if(argc < 3 && cout << "Usage: " << *argv << " <IPADDR> <port1> [port2] [port3]\n")
         return 1;
-    uint32_t ip;
     try {
-        // Resolve the ip address
-        ip = Utils::resolve_ip(argv[1]);
+        scan(argc, argv);
     }
-    catch(...) {
-        cout << "IP address is not valid.\n";
-        return 2;
+    catch(std::runtime_error &ex) {
+        cout << "Error - " << ex.what() << endl;
     }
-    // Resolve the interface which will be our gateway
-    string iface = Utils::interface_from_ip(ip);
-    if(!iface.size() && cout << "Could not locate gateway interface for given ip address\n")
-        return 3;
-        
-    // Allocate our sniffer. 300 bytes are enough to receive SYNs and RSTs.
-    sniffer = new Sniffer(iface, 300);
-
-    string ip_string = argv[1];
-    pthread_t thread;
-    // Launch our sniff thread.
-    pthread_create(&thread, 0, thread_proc, &ip_string); 
-    
-    // Start sending SYNs to port.
-    send_syns(iface, ip, argc - 2, argv + 2);
-    
-    // Give it some time...
-    sleep(5);
-    
-    // Ok, we kill our sniffer.
-    pthread_cancel(thread);
-    delete sniffer;
 }

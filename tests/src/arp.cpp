@@ -51,8 +51,8 @@ void ARPTest::test_equals(const ARP &arp1, const ARP &arp2) {
 
 TEST_F(ARPTest, DefaultContructor) {
     ARP arp;
-    EXPECT_EQ(arp.target_ip_addr(), 0);
-    EXPECT_EQ(arp.sender_ip_addr(), 0);
+    EXPECT_EQ(arp.target_ip_addr(), IPv4Address());
+    EXPECT_EQ(arp.sender_ip_addr(), IPv4Address());
     EXPECT_EQ(arp.target_hw_addr(), empty_addr);
     EXPECT_EQ(arp.target_hw_addr(), empty_addr);
     EXPECT_EQ(arp.pdu_type(), PDU::ARP);
