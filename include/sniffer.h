@@ -91,7 +91,7 @@ namespace Tins {
          * \param max_packets The maximum amount of packets to sniff. 0 == infinite.
          */
         template<class Functor>
-        void sniff_loop(const Functor &function, uint32_t max_packets = 0);
+        void sniff_loop(Functor function, uint32_t max_packets = 0);
         
         /**
          * \brief Sets a filter on this sniffer.
@@ -130,7 +130,7 @@ namespace Tins {
     };
         
     template<class Functor>
-    void Tins::Sniffer::sniff_loop(const Functor &function, uint32_t max_packets) {
+    void Tins::Sniffer::sniff_loop(Functor function, uint32_t max_packets) {
         LoopData<Functor> data(handle, function, wired);
         pcap_loop(handle, max_packets, &Sniffer::callback_handler<Functor>, (u_char*)&data);
     }
@@ -152,6 +152,29 @@ namespace Tins {
         catch(...) {
             
         }
+    }
+    
+    template<class T>
+    class HandlerProxy {
+    public:
+        typedef T* ptr_type;
+        typedef bool (T::*fun_type)(PDU*) ;
+    
+        HandlerProxy(ptr_type ptr, fun_type function) 
+        : object(ptr), fun(function) {}
+        
+        bool operator()(PDU *pdu) {
+            return (object->*fun)(pdu);
+        }
+    private:
+        ptr_type object;
+        fun_type fun;
+    };
+    
+    template<class T>
+    HandlerProxy<T> make_sniffer_handler(T *ptr, typename HandlerProxy<T>::fun_type function) 
+    {
+        return HandlerProxy<T>(ptr, function);
     }
 };
     
