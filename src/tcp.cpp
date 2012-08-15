@@ -293,7 +293,9 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
     memcpy(tcp_start, &_tcp, sizeof(tcphdr));
     if(!_tcp.check && ip_packet) {
-        uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(), ip_packet->dst_addr(), size(), Constants::IP::PROTO_TCP) +
+        uint32_t checksum = Utils::pseudoheader_checksum(Utils::net_to_host_l(ip_packet->src_addr()), 
+                                                         Utils::net_to_host_l(ip_packet->dst_addr()), 
+                                                         size(), Constants::IP::PROTO_TCP) +
                             Utils::do_checksum(tcp_start, tcp_start + total_sz);
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
