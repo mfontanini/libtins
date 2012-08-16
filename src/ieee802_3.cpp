@@ -73,7 +73,7 @@ void IEEE802_3::iface(const NetworkInterface &new_iface) {
 }
 
 void IEEE802_3::length(uint16_t new_length) {
-    this->_eth.length = Utils::net_to_host_s(new_length);
+    this->_eth.length = Utils::host_to_be(new_length);
 }
 
 uint32_t IEEE802_3::header_size() const {
@@ -85,8 +85,8 @@ bool IEEE802_3::send(PacketSender* sender) {
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Utils::net_to_host_s(PF_PACKET);
-    addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
+    addr.sll_family = Utils::host_to_be<uint16_t>(PF_PACKET);
+    addr.sll_protocol = Utils::host_to_be<uint16_t>(ETH_P_ALL);
     addr.sll_halen = address_type::address_size;
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
@@ -110,7 +110,7 @@ void IEEE802_3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     assert(total_sz >= my_sz);
 
     if (set_length)
-    	_eth.length = Utils::net_to_host_s(size() - sizeof(_eth));
+    	_eth.length = Utils::host_to_be(size() - sizeof(_eth));
 
     memcpy(buffer, &_eth, sizeof(ethhdr));
 
@@ -122,8 +122,8 @@ PDU *IEEE802_3::recv_response(PacketSender *sender) {
     struct sockaddr_ll addr;
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Utils::net_to_host_s(PF_PACKET);
-    addr.sll_protocol = Utils::net_to_host_s(ETH_P_802_3);
+    addr.sll_family = Utils::host_to_be<uint16_t>(PF_PACKET);
+    addr.sll_protocol = Utils::host_to_be<uint16_t>(ETH_P_802_3);
     addr.sll_halen = address_type::address_size;
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));

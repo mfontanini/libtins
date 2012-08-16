@@ -82,7 +82,7 @@ TEST_F(UtilsTest, IpToString) {
 
 
 TEST_F(UtilsTest, ResolveIp) {
-    uint32_t localhost_ip = Utils::ip_to_int("127.0.0.1");
+    IPv4Address localhost_ip("127.0.0.1");
 
     EXPECT_EQ(Utils::resolve_ip("localhost"), localhost_ip);
     EXPECT_THROW(Utils::resolve_ip("www.qwertyuiopasdfg.com.ar.edu.gov"), std::runtime_error);

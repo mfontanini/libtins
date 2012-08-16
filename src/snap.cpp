@@ -44,7 +44,7 @@ Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
     std::memcpy(&_snap, buffer, sizeof(_snap));
     buffer += sizeof(_snap);
     total_sz -= sizeof(_snap);
-    switch(Utils::net_to_host_s(_snap.eth_type)) {
+    switch(eth_type()) {
         case Tins::Constants::Ethernet::IP:
             inner_pdu(new Tins::IP(buffer, total_sz));
             break;
@@ -61,7 +61,7 @@ Tins::SNAP::SNAP(const SNAP &other) : PDU(other) {
     copy_fields(&other);
 }
 
-Tins::SNAP &Tins::SNAP::operator= (const SNAP &other) {
+Tins::SNAP &Tins::SNAP::operator=(const SNAP &other) {
     copy_fields(&other);
     copy_inner_pdu(other);
     return *this;

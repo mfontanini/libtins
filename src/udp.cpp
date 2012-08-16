@@ -52,15 +52,15 @@ void Tins::UDP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
 }
 
 void Tins::UDP::dport(uint16_t new_dport) {
-    _udp.dport = Utils::to_be(new_dport);
+    _udp.dport = Utils::host_to_be(new_dport);
 }
 
 void Tins::UDP::sport(uint16_t new_sport) {
-    _udp.sport = Utils::to_be(new_sport);
+    _udp.sport = Utils::host_to_be(new_sport);
 }
 
 void Tins::UDP::length(uint16_t new_len) {
-    _udp.len = Utils::to_be(new_len);
+    _udp.len = Utils::host_to_be(new_len);
 }
 
 uint32_t Tins::UDP::header_size() const {
@@ -78,7 +78,7 @@ void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
                             Utils::do_checksum(buffer, buffer + total_sz);
         while (checksum >> 16)
             checksum = (checksum & 0xffff)+(checksum >> 16);
-        ((udphdr*)buffer)->check = Utils::to_be<uint16_t>(~checksum);
+        ((udphdr*)buffer)->check = Utils::host_to_be<uint16_t>(~checksum);
     }
     _udp.check = 0;
 }

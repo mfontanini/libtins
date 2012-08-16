@@ -100,37 +100,37 @@ namespace Tins {
          * \brief Getter for the dsap field.
          * \return The dsap field.
          */
-        inline uint8_t dsap() const { return _snap.dsap; }
+        uint8_t dsap() const { return _snap.dsap; }
         
         /**
          * \brief Getter for the ssap field.
          * \return The ssap field.
          */
-        inline uint8_t ssap() const { return _snap.ssap; }
+        uint8_t ssap() const { return _snap.ssap; }
         
         /**
          * \brief Getter for the id field.
          * \return The id field.
          */
-        inline uint8_t id() const { return _snap.id; }
+        uint8_t id() const { return _snap.id; }
         
         /**
          * \brief Getter for the poll field.
          * \return The poll field.
          */
-        inline uint8_t poll() const { return _snap.poll; }
+        uint8_t poll() const { return _snap.poll; }
         
         /**
          * \brief Getter for the org code field.
          * \return The org code field.
          */
-        inline uint32_t org_code() const { return _snap.org_code; }
+        uint32_t org_code() const { return _snap.org_code; }
         
         /**
          * \brief Getter for the eth type field.
          * \return The eth field.
          */
-        inline uint16_t eth_type() const { return Utils::net_to_host_s(_snap.eth_type); }
+        uint16_t eth_type() const { return Utils::be_to_host(_snap.eth_type); }
         
         /**
          * \brief Returns the SNAP frame's header length.

@@ -31,3 +31,5 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm $(OBJECTS) $(EXECUTABLE)
+
+-include depends.d

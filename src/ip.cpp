@@ -145,15 +145,15 @@ void Tins::IP::tos(uint8_t new_tos) {
 }
 
 void Tins::IP::tot_len(uint16_t new_tot_len) {
-    _ip.tot_len = Utils::to_be(new_tot_len);
+    _ip.tot_len = Utils::host_to_be(new_tot_len);
 }
 
 void Tins::IP::id(uint16_t new_id) {
-    _ip.id = Utils::to_be(new_id);
+    _ip.id = Utils::host_to_be(new_id);
 }
 
 void Tins::IP::frag_off(uint16_t new_frag_off) {
-    _ip.frag_off = Utils::to_be(new_frag_off);
+    _ip.frag_off = Utils::host_to_be(new_frag_off);
 }
 
 void Tins::IP::ttl(uint8_t new_ttl) {
@@ -165,7 +165,7 @@ void Tins::IP::protocol(uint8_t new_protocol) {
 }
 
 void Tins::IP::check(uint16_t new_check) {
-    _ip.check = Utils::to_be(new_check);
+    _ip.check = Utils::host_to_be(new_check);
 }
 
 
@@ -304,7 +304,7 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
         uint32_t checksum = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
-        ((iphdr*)buffer)->check = Utils::to_be<uint16_t>(~checksum);
+        ((iphdr*)buffer)->check = Utils::host_to_be<uint16_t>(~checksum);
         this->check(0);
     }
 }

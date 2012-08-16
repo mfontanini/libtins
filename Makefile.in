@@ -41,3 +41,4 @@ uninstall:
 	rm -r /usr/include/tins/
 	rm /usr/lib/$(EXECUTABLE)
 
+-include depends.d

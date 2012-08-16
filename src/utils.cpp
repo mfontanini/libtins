@@ -66,7 +66,9 @@ struct IPv4Collector {
     }
 };
 
-bool Tins::Utils::Internals::from_hex(const string &str, uint32_t &result) {
+namespace Tins {
+
+bool Utils::Internals::from_hex(const string &str, uint32_t &result) {
     unsigned i(0);
     result = 0;
     while(i < str.size()) {
@@ -83,7 +85,7 @@ bool Tins::Utils::Internals::from_hex(const string &str, uint32_t &result) {
     return true;
 }
 
-void Tins::Utils::Internals::skip_line(istream &input) {
+void Utils::Internals::skip_line(istream &input) {
     int c = 0;
     while(c != '\n' && input)
          c = input.get();
@@ -91,7 +93,7 @@ void Tins::Utils::Internals::skip_line(istream &input) {
 
 /** \endcond */
 
-uint32_t Tins::Utils::ip_to_int(const string &ip) throw (std::runtime_error) {
+uint32_t Utils::ip_to_int(const string &ip) throw (std::runtime_error) {
     uint32_t result(0), i(0), end, bytes_found(0);
     while(i < ip.size() && bytes_found < 4) {
         uint16_t this_byte(0);
@@ -115,7 +117,7 @@ uint32_t Tins::Utils::ip_to_int(const string &ip) throw (std::runtime_error) {
     return result;
 }
 
-string Tins::Utils::ip_to_string(uint32_t ip) {
+string Utils::ip_to_string(uint32_t ip) {
     ostringstream oss;
     int mask(24);
     while(mask >=0) {
@@ -127,14 +129,14 @@ string Tins::Utils::ip_to_string(uint32_t ip) {
     return oss.str();
 }
 
-uint32_t Tins::Utils::resolve_ip(const string &to_resolve) {
+IPv4Address Utils::resolve_ip(const string &to_resolve) {
     struct hostent *data = gethostbyname(to_resolve.c_str());
     if(!data)
         throw std::runtime_error("Could not resolve IP");
-    return Utils::net_to_host_l(((struct in_addr**)data->h_addr_list)[0]->s_addr);
+    return be_to_host(((struct in_addr**)data->h_addr_list)[0]->s_addr);
 }
 
-Tins::PDU *Tins::Utils::ping_address(IPv4Address ip, PacketSender *sender, IPv4Address ip_src) {
+PDU *Utils::ping_address(IPv4Address ip, PacketSender *sender, IPv4Address ip_src) {
     if(!ip_src) {
         try {
             NetworkInterface iface(ip);
@@ -148,7 +150,7 @@ Tins::PDU *Tins::Utils::ping_address(IPv4Address ip, PacketSender *sender, IPv4A
     return sender->send_recv(&ip_packet);
 }
 
-bool Tins::Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
+bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
   HWAddress<6> *address, PacketSender *sender) 
 {
     IPv4Address my_ip;
@@ -165,7 +167,7 @@ bool Tins::Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
         return false;
 }
 
-bool Tins::Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
+bool Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
     typedef std::vector<RouteEntry> entries_type;
     entries_type entries;
     uint32_t ip_int = ip;
@@ -179,17 +181,17 @@ bool Tins::Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
     return false;
 }
 
-set<string> Tins::Utils::network_interfaces() {
+set<string> Utils::network_interfaces() {
     InterfaceCollector collector;
     generic_iface_loop(collector);
     return collector.ifaces;
 }
 
-uint16_t Tins::Utils::channel_to_mhz(uint16_t channel) {
+uint16_t Utils::channel_to_mhz(uint16_t channel) {
     return 2407 + (channel * 5);
 }
 
-uint32_t Tins::Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
+uint32_t Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
     uint32_t checksum(0);
     uint16_t *ptr = (uint16_t*)start, *last = (uint16_t*)end, padding(0);
     if(((end - start) & 1) == 1) {
@@ -197,14 +199,14 @@ uint32_t Tins::Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
         padding = *(end - 1) << 8;
     }
     while(ptr < last)
-        checksum += Utils::net_to_host_s(*(ptr++));
+        checksum += Utils::host_to_be(*(ptr++));
     return checksum + padding;
 }
 
-uint32_t Tins::Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
+uint32_t Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
     uint32_t checksum(0);
-    uint32_t source_ip_int = Utils::to_be<uint32_t>(source_ip),
-             dest_ip_int = Utils::to_be<uint32_t>(dest_ip);
+    uint32_t source_ip_int = Utils::host_to_be<uint32_t>(source_ip),
+             dest_ip_int = Utils::host_to_be<uint32_t>(dest_ip);
     uint16_t *ptr = (uint16_t*)&source_ip_int;
 
     checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
@@ -214,7 +216,7 @@ uint32_t Tins::Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address d
     return checksum;
 }
 
-uint32_t Tins::Utils::crc32(const uint8_t* data, uint32_t data_size) {
+uint32_t Utils::crc32(const uint8_t* data, uint32_t data_size) {
     uint32_t i, crc = 0;
     static uint32_t crc_table[] = {
         0x4DBDF21C, 0x500AE278, 0x76D3D2D4, 0x6B64C2B0,
@@ -229,4 +231,5 @@ uint32_t Tins::Utils::crc32(const uint8_t* data, uint32_t data_size) {
     }
 
     return crc;
+}
 }

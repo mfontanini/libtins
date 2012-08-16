@@ -52,7 +52,7 @@ ARP::ARP(IPv4Address target_ip, IPv4Address sender_ip,
 }
 
 ARP::ARP(const uint8_t *buffer, uint32_t total_sz) 
-: PDU(Utils::to_be<uint16_t>(Constants::Ethernet::ARP)) 
+: PDU(Utils::host_to_be<uint16_t>(Constants::Ethernet::ARP)) 
 {
     if(total_sz < sizeof(arphdr))
         throw runtime_error("Not enough size for an ARP header in the buffer.");
@@ -79,11 +79,11 @@ void ARP::target_ip_addr(IPv4Address new_tgt_ip_addr) {
 }
 
 void ARP::hw_addr_format(uint16_t new_hw_addr_fmt) {
-    this->_arp.ar_hrd = Utils::to_be(new_hw_addr_fmt);
+    this->_arp.ar_hrd = Utils::host_to_be(new_hw_addr_fmt);
 }
 
 void ARP::prot_addr_format(uint16_t new_prot_addr_fmt) {
-    this->_arp.ar_pro = Utils::to_be(new_prot_addr_fmt);
+    this->_arp.ar_pro = Utils::host_to_be(new_prot_addr_fmt);
 }
 
 void ARP::hw_addr_length(uint8_t new_hw_addr_len) {
@@ -95,7 +95,7 @@ void ARP::prot_addr_length(uint8_t new_prot_addr_len) {
 }
 
 void ARP::opcode(Flags new_opcode) {
-    this->_arp.ar_op = Utils::to_be<uint16_t>(new_opcode);
+    this->_arp.ar_op = Utils::host_to_be<uint16_t>(new_opcode);
 }
 
 uint32_t ARP::header_size() const {

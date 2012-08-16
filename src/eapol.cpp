@@ -67,8 +67,8 @@ void Tins::EAPOL::packet_type(uint8_t new_ptype) {
     _header.packet_type = new_ptype;
 }
 
-void Tins::EAPOL::length(uint8_t new_length) {
-    _header.length = Utils::net_to_host_s(new_length);
+void Tins::EAPOL::length(uint16_t new_length) {
+    _header.length = new_length;
 }
 
 void Tins::EAPOL::type(uint8_t new_type) {
@@ -127,11 +127,11 @@ Tins::RC4EAPOL::~RC4EAPOL() {
 }
 
 void Tins::RC4EAPOL::key_length(uint16_t new_key_length) {
-    _header.key_length = Utils::net_to_host_s(new_key_length);
+    _header.key_length = Utils::host_to_be(new_key_length);
 }
         
 void Tins::RC4EAPOL::replay_counter(uint16_t new_replay_counter) {
-    _header.replay_counter = Utils::net_to_host_s(new_replay_counter);
+    _header.replay_counter = Utils::host_to_be(new_replay_counter);
 }
 
 void Tins::RC4EAPOL::key_iv(const uint8_t *new_key_iv) {
@@ -165,7 +165,7 @@ void Tins::RC4EAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(_header) + _key_size;
     assert(total_sz >= sz);
     if(_key)
-        _header.key_length = Utils::net_to_host_s(_key_size);
+        _header.key_length = Utils::host_to_be(_key_size);
     std::memcpy(buffer, &_header, sizeof(_header));
     buffer += sizeof(_header);
     if(_key)
@@ -233,11 +233,11 @@ void Tins::RSNEAPOL::RSNEAPOL::nonce(const uint8_t *new_nonce) {
 }
 
 void Tins::RSNEAPOL::rsc(uint64_t new_rsc) {
-    _header.rsc = Utils::net_to_host_ll(new_rsc);
+    _header.rsc = Utils::host_to_be(new_rsc);
 }
 
 void Tins::RSNEAPOL::id(uint64_t new_id) {
-    _header.id = Utils::net_to_host_ll(new_id);
+    _header.id = Utils::host_to_be(new_id);
 }
 
 void Tins::RSNEAPOL::mic(const uint8_t *new_mic) {
@@ -245,7 +245,7 @@ void Tins::RSNEAPOL::mic(const uint8_t *new_mic) {
 }
 
 void Tins::RSNEAPOL::wpa_length(uint16_t new_wpa_length) {
-    _header.wpa_length = Utils::net_to_host_s(new_wpa_length);
+    _header.wpa_length = Utils::host_to_be(new_wpa_length);
 }
 
 void Tins::RSNEAPOL::key(const uint8_t *new_key, uint32_t sz) {
@@ -273,7 +273,7 @@ void Tins::RSNEAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
     assert(total_sz >= sz);
     if(_key) {
         if(!_header.key_type) {
-            _header.key_length = Utils::net_to_host_s(32);
+            _header.key_length = Utils::host_to_be<uint16_t>(32);
             wpa_length(_key_size);
         }
         else if(_key_size) {

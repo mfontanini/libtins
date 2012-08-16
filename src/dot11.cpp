@@ -37,7 +37,11 @@
 #include "utils.h"
 #include "snap.h"
 
-using namespace std;
+using std::pair;
+using std::vector;
+using std::string;
+using std::list;
+using std::runtime_error;
 
 namespace Tins {
 const Dot11::address_type Dot11::BROADCAST = "ff:ff:ff:ff:ff:ff";
@@ -67,12 +71,15 @@ Dot11::Dot11(const ieee80211_header *header_ptr)
 Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz) 
 : PDU(ETHERTYPE_IP), _options_size(0) 
 {
-    if(total_sz < sizeof(_header.control))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
+    /*if(total_sz < sizeof(_header.control))
+        throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
     uint32_t sz = std::min((uint32_t)sizeof(_header), total_sz);
     std::memcpy(&_header, buffer, sz);
     buffer += sz;
-    total_sz -= sz;
+    total_sz -= sz;*/
+    if(total_sz < sizeof(_header))
+        throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
+    std::memcpy(&_header, buffer, sizeof(_header));
 }
 
 Dot11::Dot11(const Dot11 &other) : PDU(other) {
@@ -221,12 +228,12 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
 PDU *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     // We only need the control field, the length of the PDU will depend on the flags set.
     if(total_sz < sizeof(ieee80211_header::control))
-        throw std::runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
+        throw runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
     const ieee80211_header *hdr = (const ieee80211_header*)buffer;
     PDU *ret = 0;
     if(hdr->control.type == MANAGEMENT && hdr->control.subtype == 8) {
         if(total_sz < sizeof(_header))
-            throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
+            throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
         ret = new Dot11Beacon(buffer, total_sz);
     }
     else if(hdr->control.type == DATA){
@@ -266,15 +273,20 @@ void Dot11::copy_80211_fields(const Dot11 *other) {
 
 /* Dot11ManagementFrame */
 
-Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz) : Dot11(buffer, total_sz) {
+Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11(buffer, total_sz) 
+{
     buffer += sizeof(ieee80211_header);
     total_sz -= sizeof(ieee80211_header);
     if(total_sz < sizeof(_ext_header))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
     std::memcpy(&_ext_header, buffer, sizeof(_ext_header));
-    if(from_ds() && to_ds())
-        _addr4 = buffer + sizeof(_ext_header);
+    total_sz -= sizeof(_ext_header);
+    if(from_ds() && to_ds() && total_sz >= _addr4.size())
         //std::memcpy(_addr4, buffer + sizeof(_ext_header), sizeof(_addr4));
+        _addr4 = buffer + sizeof(_ext_header);
+    else
+        throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");        
 }
 
 Dot11ManagementFrame::Dot11ManagementFrame(
@@ -626,7 +638,7 @@ Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz)
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for a IEEE 802.11 beacon header in the buffer.");
+        throw runtime_error("Not enough size for a IEEE 802.11 beacon header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -830,12 +842,13 @@ Dot11Disassoc::Dot11Disassoc(const NetworkInterface& iface,
     memset(&_body, 0, sizeof(_body));
 }
 
-Dot11Disassoc::Dot11Disassoc(const uint8_t *buffer, uint32_t total_sz) {
+Dot11Disassoc::Dot11Disassoc(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) {
     uint32_t sz = management_frame_size();
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for a IEEE 802.11 disassociation header in the buffer.");
+        throw runtime_error("Not enough size for a IEEE 802.11 disassociation header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -888,7 +901,7 @@ Dot11AssocRequest::Dot11AssocRequest(const uint8_t *buffer, uint32_t total_sz) :
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 association request header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 association request header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -971,7 +984,7 @@ Dot11AssocResponse::Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz)
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 association response header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 association response header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -1042,7 +1055,7 @@ Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_s
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 reassociation request header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 reassociation request header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -1128,7 +1141,7 @@ Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 reassociation response header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 reassociation response header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -1244,7 +1257,7 @@ Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz)
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 probe response header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 probe response header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -1393,7 +1406,7 @@ Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_s
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 authentication header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 authentication header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -1459,7 +1472,7 @@ Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t tot
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_body))
-        throw std::runtime_error("Not enough size for a IEEE 802.11 deauthentication header in the buffer.");
+        throw runtime_error("Not enough size for a IEEE 802.11 deauthentication header in the buffer.");
     memcpy(&_body, buffer, sizeof(_body));
     buffer += sizeof(_body);
     total_sz -= sizeof(_body);
@@ -1497,13 +1510,13 @@ Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz)
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(_ext_header))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
     std::memcpy(&_ext_header, buffer, sizeof(_ext_header));
     buffer += sizeof(_ext_header);
     total_sz -= sizeof(_ext_header);
     if(from_ds() && to_ds()) {
         if(total_sz < sizeof(_addr4))
-            throw std::runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
+            throw runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
         std::memcpy(&_addr4, buffer, sizeof(_addr4));
         buffer += sizeof(_addr4);
         total_sz -= sizeof(_addr4);
@@ -1600,12 +1613,14 @@ Dot11QoSData::Dot11QoSData(const NetworkInterface &iface,
 }
 
 Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) 
-: Dot11Data(buffer, std::min(data_frame_size(), total_sz)) {
+// Am I breaking something? :S
+//: Dot11Data(buffer, std::min(data_frame_size(), total_sz)) {
+: Dot11Data(buffer, total_sz) {
     uint32_t sz = data_frame_size();
     buffer += sz;
     total_sz -= sz;
     if(total_sz < sizeof(this->_qos_control))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
     this->_qos_control = *(uint16_t*)buffer;
     total_sz -= sizeof(uint16_t);
     buffer += sizeof(uint16_t);
@@ -1688,7 +1703,7 @@ Dot11ControlTA::Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz) : Dot11
     buffer += sizeof(ieee80211_header);
     total_sz -= sizeof(ieee80211_header);
     if(total_sz < sizeof(_taddr))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 RTS frame in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 RTS frame in the buffer.");
     std::memcpy(_taddr, buffer, sizeof(_taddr));
 }
 
@@ -1859,7 +1874,7 @@ Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total
     buffer += padding;
     total_sz -= padding;
     if(total_sz < sizeof(_bar_control) + sizeof(_start_sequence))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 Block Ack frame in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 Block Ack frame in the buffer.");
     std::memcpy(&_bar_control, buffer, sizeof(_bar_control));
     buffer += sizeof(_bar_control);
     std::memcpy(&_start_sequence, buffer, sizeof(_start_sequence));
@@ -1920,7 +1935,7 @@ Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11Co
     buffer += padding;
     total_sz -= padding;
     if(total_sz < sizeof(_bitmap) + sizeof(_bar_control) + sizeof(_start_sequence))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 Block Ack frame in the buffer.");
+        throw runtime_error("Not enough size for an IEEE 802.11 Block Ack frame in the buffer.");
     std::memcpy(&_bar_control, buffer, sizeof(_bar_control));
     buffer += sizeof(_bar_control);
     std::memcpy(&_start_sequence, buffer, sizeof(_start_sequence));

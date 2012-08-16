@@ -102,7 +102,7 @@ namespace Tins {
          * \brief Getter for the length field.
          * \return The length field value.
          */
-        uint16_t length() const { return Utils::net_to_host_s(_eth.length); };
+        uint16_t length() const { return Utils::be_to_host(_eth.length); };
 
         /* Setters */
 

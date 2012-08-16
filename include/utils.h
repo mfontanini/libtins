@@ -93,7 +93,7 @@ namespace Tins {
          *
          * \param to_resolve The domain name/ip address to resolve.
          */
-        uint32_t resolve_ip(const std::string &to_resolve);
+        IPv4Address resolve_ip(const std::string &to_resolve);
         
         /**
          * \brief Pings an ip address.
@@ -190,7 +190,7 @@ namespace Tins {
              * \param data The data to convert.
              */
             template<typename T>
-            inline T to_be(T data) {
+            inline T host_to_be(T data) {
                 return change_endian(data);
             }
              
@@ -202,7 +202,7 @@ namespace Tins {
              * \param data The data to convert.
              */
              template<typename T>
-             inline T to_le(T data) {
+             inline T host_to_le(T data) {
                  return data;
              }
              
@@ -232,7 +232,7 @@ namespace Tins {
              * \param data The data to convert.
              */
             template<typename T>
-            inline T to_be(T data) {
+            inline T host_to_be(T data) {
                 return data;
             }
              
@@ -244,7 +244,7 @@ namespace Tins {
              * \param data The data to convert.
              */
              template<typename T>
-             inline T to_le(T data) {
+             inline T host_to_le(T data) {
                  return change_endian(data);
              }
              
@@ -371,11 +371,11 @@ void Tins::Utils::route_entries(ForwardIterator output) {
         for(unsigned i(0); i < 5; ++i)
             input >> mask;
         from_hex(destination, dummy);
-        entry.destination = net_to_host_l(dummy);
+        entry.destination = be_to_host(dummy);
         from_hex(mask, dummy);
-        entry.mask = net_to_host_l(dummy);
+        entry.mask = be_to_host(dummy);
         from_hex(gw, dummy);
-        entry.gateway = net_to_host_l(dummy);
+        entry.gateway = be_to_host(dummy);
         skip_line(input);
         *output = entry;
         ++output;

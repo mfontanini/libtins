@@ -68,25 +68,6 @@ src/dns.o: src/dns.cpp ../include/dns.h ../include/pdu.h \
 ../include/network_interface.h:
 
 ../include/utils.h:
-src/dot11.o: src/dot11.cpp ../include/dot11.h ../include/pdu.h \
- ../include/packetsender.h ../include/utils.h ../include/ipaddress.h \
- ../include/hwaddress.h ../include/network_interface.h ../include/utils.h
-
-../include/dot11.h:
-
-../include/pdu.h:
-
-../include/packetsender.h:
-
-../include/utils.h:
-
-../include/ipaddress.h:
-
-../include/hwaddress.h:
-
-../include/network_interface.h:
-
-../include/utils.h:
 src/ethernetII_test.o: src/ethernetII_test.cpp ../include/ethernetII.h \
  ../include/pdu.h ../include/packetsender.h ../include/utils.h \
  ../include/ipaddress.h ../include/hwaddress.h \

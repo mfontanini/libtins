@@ -109,7 +109,7 @@ namespace Tins {
          * \brief Getter for the payload_type
          * \return The payload type.
          */
-        uint16_t payload_type() const { return Utils::net_to_host_s(_eth.payload_type); };
+        uint16_t payload_type() const { return Utils::be_to_host(_eth.payload_type); };
 
         /* Setters */
 

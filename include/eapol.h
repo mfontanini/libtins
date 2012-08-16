@@ -77,7 +77,7 @@ namespace Tins {
          * \brief Getter for the length field.
          * \return The length field.
          */
-        uint16_t length() const { return Utils::net_to_host_s(_header.length); }
+        uint16_t length() const { return Utils::be_to_host(_header.length); }
         
         /**
          * \brief Getter for the type field.
@@ -103,7 +103,7 @@ namespace Tins {
          * \brief Sets the length field.
          * \param new_length The new length to be set.
          */
-        void length(uint8_t new_length);
+        void length(uint16_t new_length);
         
         /**
          * \brief Sets the type field.
@@ -209,13 +209,13 @@ namespace Tins {
          * \brief Getter for the key length field.
          * \return The key length field.
          */
-        uint16_t key_length() const { return Utils::net_to_host_s(_header.key_length); }
+        uint16_t key_length() const { return Utils::be_to_host(_header.key_length); }
         
         /**
          * \brief Getter for the replay counter field.
          * \return The replay counter field.
          */
-        uint64_t replay_counter() const { return Utils::net_to_host_ll(_header.replay_counter); }
+        uint64_t replay_counter() const { return Utils::be_to_host(_header.replay_counter); }
         
         /**
          * \brief Getter for the key IV field.
@@ -389,13 +389,13 @@ namespace Tins {
          * \brief Getter for the key length field.
          * \return The key length field.
          */
-        uint16_t key_length() const { return Utils::net_to_host_s(_header.key_length); }
+        uint16_t key_length() const { return Utils::be_to_host(_header.key_length); }
         
         /**
          * \brief Getter for the replay counter field.
          * \return The replay counter field.
          */
-        uint64_t replay_counter() const { return Utils::net_to_host_ll(_header.replay_counter); }
+        uint64_t replay_counter() const { return Utils::be_to_host(_header.replay_counter); }
         
         /**
          * \brief Getter for the key IV field.
@@ -413,13 +413,13 @@ namespace Tins {
          * \brief Getter for the rsc field.
          * \return The rsc field.
          */
-        uint64_t rsc() const { return Utils::net_to_host_ll(_header.rsc); }
+        uint64_t rsc() const { return Utils::be_to_host(_header.rsc); }
         
         /**
          * \brief Getter for the id field.
          * \return The id field.
          */
-        uint64_t id() const { return Utils::net_to_host_ll(_header.id); }
+        uint64_t id() const { return Utils::be_to_host(_header.id); }
         
         /**
          * \brief Getter for the mic field.
@@ -431,7 +431,7 @@ namespace Tins {
          * \brief Getter for the wpa length field.
          * \return The wpa length field.
          */
-        uint16_t wpa_length() const { return Utils::net_to_host_s(_header.wpa_length); }
+        uint16_t wpa_length() const { return Utils::be_to_host(_header.wpa_length); }
         
         /**
          * \brief Getter for the key field.
