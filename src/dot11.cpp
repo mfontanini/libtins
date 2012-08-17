@@ -194,8 +194,8 @@ bool Dot11::send(PacketSender* sender) {
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Utils::net_to_host_s(PF_PACKET);
-    addr.sll_protocol = Utils::net_to_host_s(ETH_P_ALL);
+    addr.sll_family = Utils::host_to_be<uint16_t>(PF_PACKET);
+    addr.sll_protocol = Utils::host_to_be<uint16_t>(ETH_P_ALL);
     addr.sll_halen = 6;
     addr.sll_ifindex = this->_iface.id();
     memcpy(&(addr.sll_addr), this->_header.addr1, 6);

@@ -79,8 +79,8 @@ void Tins::SNAP::org_code(uint32_t new_org) {
     _snap.org_code = new_org;
 }
 
-void Tins::SNAP::eth_type(uint32_t new_eth) {
-    _snap.eth_type = Utils::net_to_host_s(new_eth);
+void Tins::SNAP::eth_type(uint16_t new_eth) {
+    _snap.eth_type = Utils::host_to_be(new_eth);
 }
 
 uint32_t Tins::SNAP::header_size() const {
@@ -104,7 +104,7 @@ void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
             default:
                 type = 0;
         }
-        _snap.eth_type = Utils::net_to_host_s(type);
+        _snap.eth_type = Utils::host_to_be(type);
     }
     std::memcpy(buffer, &_snap, sizeof(_snap));
 }

@@ -86,7 +86,7 @@ void EthernetII::iface(const NetworkInterface& new_iface) {
 }
 
 void EthernetII::payload_type(uint16_t new_payload_type) {
-    this->_eth.payload_type = Utils::net_to_host_s(new_payload_type);
+    this->_eth.payload_type = Utils::host_to_be(new_payload_type);
 }
 
 uint32_t EthernetII::header_size() const {
@@ -137,7 +137,7 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
             default:
                 type = 0;
         }
-        _eth.payload_type = Utils::net_to_host_s(type);
+        _eth.payload_type = Utils::host_to_be(type);
     }
     memcpy(buffer, &_eth, sizeof(ethhdr));
 }

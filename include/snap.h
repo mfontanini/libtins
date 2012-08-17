@@ -92,7 +92,7 @@ namespace Tins {
          * \brief Setter for the eth type field.
          * \param new_eth The new eth type to be set.
          */
-        void eth_type(uint32_t new_eth);
+        void eth_type(uint16_t new_eth);
         
         /* Getters */
         

@@ -35,11 +35,6 @@ IPv4Address::IPv4Address(const std::string &ip)
       
 } 
 
-/*IPv4Address::IPv4Address(const char *ip) 
-: ip_addr(Utils::ip_to_int(ip)) {
-    
-}*/
-
 IPv4Address &IPv4Address::operator=(uint32_t ip) {
     ip_addr = ip;
     return *this;
@@ -51,7 +46,7 @@ IPv4Address &Tins::IPv4Address::operator=(const string &ip) {
 }
 
 IPv4Address::operator uint32_t() const { 
-    return Utils::net_to_host_l(ip_addr); 
+    return Utils::host_to_be(ip_addr); 
 }
 
 IPv4Address::operator std::string() const { 

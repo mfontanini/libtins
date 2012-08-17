@@ -41,16 +41,16 @@ struct InterfaceInfoCollector {
     : info(res), iface_id(id), iface_name(if_name), found(false) { }
 
     bool operator() (struct ifaddrs *addr) {
-        using Tins::Utils::net_to_host_l;
+        using Tins::Utils::host_to_be;
         const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
         
         if(addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id)
             info->hw_addr = addr_ptr->sll_addr;
         else if(addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
-            info->ip_addr = net_to_host_l(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
-            info->netmask = net_to_host_l(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
+            info->ip_addr = host_to_be(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
+            info->netmask = host_to_be(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
             if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
-                info->bcast_addr = net_to_host_l(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
+                info->bcast_addr = host_to_be(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
             else
                 info->bcast_addr = 0;
             found = true;
