@@ -39,7 +39,7 @@ const uint8_t DHCPTest::file[] = "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\x
                                   "\x16\xab\x54\x12\xfa\xca\x56\x7f\x1b\x65\x11\xfa\xda\xfb\x19\x18";
 const IPv4Address DHCPTest::addr("192.168.8.1");
 
-const uint8_t DHCPTest::expected_packet[] = {'\x01', '\x01', '\x06', '\x1f', '?', '\xab', '#', '\xde',
+/*const uint8_t DHCPTest::expected_packet[] = {'\x01', '\x01', '\x06', '\x1f', '?', '\xab', '#', '\xde',
 '\x9f', '\x1a', '\x00', '\x00', '\xc0', '\xa8', '\x00', 'f', '\xf3', '\x16', '"', 'b', '\xa7', ' ',
 '\x0b', '\x9a', '{', '+', '7', '\xfe', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
 '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
@@ -58,7 +58,9 @@ const uint8_t DHCPTest::expected_packet[] = {'\x01', '\x01', '\x06', '\x1f', '?'
 '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
 '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00',
 '\x00', '\x00', '\x00', '\x00', '\x00', 'c', '\x82', 'S', 'c', '6', '\x04', '\xc0', '\xa8', '\x04', '\x02',
-'\x01', '\x04', '\xff', '\xff', ' ', '\x0b', '5', '\x01', '\x04'};
+'\x01', '\x04', '\xff', '\xff', ' ', '\x0b', '5', '\x01', '\x04'};*/
+
+const uint8_t DHCPTest::expected_packet[] = {'\x01', '\x01', '\x06', '\x1f', '?', '\xab', '#', '\xde', '\x9f', '\x1a', '\x00', '\x00', '\xc0', '\xa8', '\x00', 'f', '\xf3', '\x16', '"', 'b', '\xa7', ' ', '\x0b', '\x9a', '{', '+', '7', '\xfe', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 'c', '\x82', 'S', 'c', '6', '\x04', '\xc0', '\xa8', '\x04', '\x02', '\x01', '\x04', '\xff', '\xff', ' ', '\x0b', '5', '\x01', '\x04', '\x03', '\x08', '\xc0', '\xa8', '\x00', '\x01', '\x7f', '\x00', '\x00', '\x01', '\x06', '\x08', '\xc0', '\xa8', '\x00', '\x02', '\x7f', '\x00', '\x00', '\x01'};
 
 TEST_F(DHCPTest, DefaultConstructor) {
     DHCP dhcp;
@@ -184,14 +186,14 @@ void DHCPTest::test_option(const DHCP &dhcp, DHCP::Options opt, uint32_t len, ui
 TEST_F(DHCPTest, TypeOption) {
     DHCP dhcp;
     uint8_t value = DHCP::REQUEST, value_found;
-    dhcp.add_type_option((DHCP::Flags)value);
+    dhcp.add_type_option(DHCP::REQUEST);
     ASSERT_TRUE(dhcp.search_type_option(&value_found));
     EXPECT_EQ(value, value_found);
 }
 
 TEST_F(DHCPTest, ServerIdentifierOption) {
     DHCP dhcp;
-    uint32_t ip = 0xf3ba34f1, ip_found;
+    IPv4Address ip = "192.168.0.1", ip_found;
     dhcp.add_server_identifier(ip);
     ASSERT_TRUE(dhcp.search_server_identifier(&ip_found));
     EXPECT_EQ(ip, ip_found);
@@ -207,7 +209,7 @@ TEST_F(DHCPTest, LeaseTimeOption) {
 
 TEST_F(DHCPTest, SubnetMaskOption) {
     DHCP dhcp;
-    uint32_t ip = 0xf3ba34f1, ip_found;
+    IPv4Address ip = "192.168.0.1", ip_found;
     dhcp.add_subnet_mask(ip);
     ASSERT_TRUE(dhcp.search_subnet_mask(&ip_found));
     EXPECT_EQ(ip, ip_found);
@@ -215,12 +217,12 @@ TEST_F(DHCPTest, SubnetMaskOption) {
 
 TEST_F(DHCPTest, RoutersOption) {
     DHCP dhcp;
-    list<uint32_t> routers;
-    routers.push_back(Utils::ip_to_int("192.168.0.253"));
-    routers.push_back(Utils::ip_to_int("10.123.45.67"));
+    list<IPv4Address> routers;
+    routers.push_back("192.168.0.253");
+    routers.push_back("10.123.45.67");
     dhcp.add_routers_option(routers);
 
-    list<uint32_t> routers2;
+    list<IPv4Address> routers2;
     ASSERT_TRUE(dhcp.search_routers_option(&routers2));
     ASSERT_EQ(routers.size(), routers2.size());
     while(routers.size()) {
@@ -232,12 +234,12 @@ TEST_F(DHCPTest, RoutersOption) {
 
 TEST_F(DHCPTest, DNSOption) {
     DHCP dhcp;
-    list<uint32_t> dns;
-    dns.push_back(Utils::ip_to_int("192.168.0.253"));
-    dns.push_back(Utils::ip_to_int("10.123.45.67"));
+    list<IPv4Address> dns;
+    dns.push_back("192.168.0.253");
+    dns.push_back("10.123.45.67");
     dhcp.add_dns_option(dns);
 
-    list<uint32_t> dns2;
+    list<IPv4Address> dns2;
     ASSERT_TRUE(dhcp.search_dns_option(&dns2));
     ASSERT_EQ(dns.size(), dns2.size());
     while(dns.size()) {
@@ -257,7 +259,7 @@ TEST_F(DHCPTest, DomainNameOption) {
 
 TEST_F(DHCPTest, BroadcastOption) {
     DHCP dhcp;
-    uint32_t ip = 0xf3ba34f1, ip_found;
+    IPv4Address ip = "192.168.0.1", ip_found;
     dhcp.add_broadcast_option(ip);
     ASSERT_TRUE(dhcp.search_broadcast_option(&ip_found));
     EXPECT_EQ(ip, ip_found);
@@ -293,7 +295,9 @@ void DHCPTest::test_equals(const DHCP &dhcp1, const DHCP &dhcp2) {
 
 TEST_F(DHCPTest, ConstructorFromBuffer) {
     DHCP dhcp1(expected_packet, sizeof(expected_packet));
-    uint32_t ip;
+    IPv4Address ip;
+    std::list<IPv4Address> routers;
+    IPv4Address expected_routers[] = { "192.168.0.1", "127.0.0.1" };
 
     EXPECT_EQ(dhcp1.opcode(), DHCP::DISCOVER);
     EXPECT_EQ(dhcp1.htype(), 1);
@@ -307,8 +311,13 @@ TEST_F(DHCPTest, ConstructorFromBuffer) {
     EXPECT_EQ(dhcp1.giaddr(), IPv4Address("123.43.55.254"));
     EXPECT_EQ(dhcp1.siaddr(), IPv4Address("167.32.11.154"));
     ASSERT_TRUE(dhcp1.search_server_identifier(&ip));
-    EXPECT_EQ(ip, Utils::net_to_host_l(IPv4Address("192.168.4.2")));
+    EXPECT_EQ(ip, IPv4Address("192.168.4.2"));
+    ASSERT_TRUE(dhcp1.search_routers_option(&routers));
+    ASSERT_EQ(routers.size(), sizeof(expected_routers) / sizeof(IPv4Address));
 
+    ASSERT_TRUE(std::equal(routers.begin(), routers.end(), expected_routers));
+
+    
     uint32_t size;
     uint8_t *buffer = dhcp1.serialize(size);
 

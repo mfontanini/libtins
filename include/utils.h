@@ -37,6 +37,9 @@
 #include "hwaddress.h"
 #include "network_interface.h"
 
+#define TINS_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
+#define TINS_IS_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)
+
 namespace Tins {
     /** 
      * \brief Network utils namespace.
@@ -183,7 +186,7 @@ namespace Tins {
                     (change_endian(((uint32_t)(data >> 32)))));
          }
         
-        #if __BYTE_ORDER == __LITTLE_ENDIAN
+        #if TINS_IS_LITTLE_ENDIAN
             /** 
              * \brief Convert any integral type to big endian.
              *
@@ -225,7 +228,7 @@ namespace Tins {
              inline T le_to_host(T data) {
                  return data;
              }
-        #elif __BYTE_ORDER == __BIG_ENDIAN
+        #elif TINS_IS_BIG_ENDIAN
             /** 
              * \brief Convert any integral type to big endian.
              *

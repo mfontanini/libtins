@@ -480,17 +480,31 @@ namespace Tins {
     private:
         struct dnshdr {
             uint16_t id;
-            uint16_t 
-                rd:1,
-                tc:1,
-                aa:1,
-                opcode:4,
-                qr:1,
-                rcode:4,
-                cd:1,
-                ad:1,
-                z:1,
-                ra:1;
+            #if TINS_IS_LITTLE_ENDIAN
+                uint16_t 
+                    rd:1,
+                    tc:1,
+                    aa:1,
+                    opcode:4,
+                    qr:1,
+                    rcode:4,
+                    cd:1,
+                    ad:1,
+                    z:1,
+                    ra:1;
+            #elif TINS_IS_BIG_ENDIAN
+                uint16_t 
+                    qr:1,
+                    opcode:4,
+                    aa:1,
+                    tc:1,
+                    rd:1,
+                    ra:1,
+                    z:1,
+                    ad:1,
+                    cd:1,
+                    rcode:4;
+            #endif
             uint16_t questions, answers,
                      authority, additional;
         } __attribute__((packed));

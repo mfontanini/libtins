@@ -162,7 +162,7 @@ TEST_F(TCPTest, AlternateChecksum) {
     uint8_t found;
     tcp.add_altchecksum_option(TCP::CHK_16FLETCHER);
     ASSERT_TRUE(tcp.search_altchecksum_option(&found));
-    EXPECT_EQ(found, (uint8_t)TCP::CHK_16FLETCHER);
+    EXPECT_EQ(found, TCP::CHK_16FLETCHER);
 }
 
 TEST_F(TCPTest, Timestamp) {

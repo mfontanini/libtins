@@ -319,28 +319,53 @@ namespace Tins {
             uint8_t ssap;
         } __attribute__((__packed__));
 
-        struct info_control_field {
-        	uint16_t
-        				type_bit:1,
-        				send_seq_num:7,
-        				poll_final_bit:1,
-        				recv_seq_num:7;
-        } __attribute__((__packed__));
+        #if TINS_IS_LITTLE_ENDIAN
+            struct info_control_field {
+                uint16_t
+                            type_bit:1,
+                            send_seq_num:7,
+                            poll_final_bit:1,
+                            recv_seq_num:7;
+            } __attribute__((__packed__));
 
-        struct super_control_field {
-        	uint16_t	type_bit:2,
-        				supervisory_func:2,
-        				unused:4,
-        				poll_final_bit:1,
-        				recv_seq_num:7;
-        } __attribute__((__packed__));
+            struct super_control_field {
+                uint16_t	type_bit:2,
+                            supervisory_func:2,
+                            unused:4,
+                            poll_final_bit:1,
+                            recv_seq_num:7;
+            } __attribute__((__packed__));
 
-        struct un_control_field {
-        	uint8_t		type_bits:2,
-        				mod_func1:2,
-        				poll_final_bit:1,
-        				mod_func2:3;
-        } __attribute__((__packed__));
+            struct un_control_field {
+                uint8_t		type_bits:2,
+                            mod_func1:2,
+                            poll_final_bit:1,
+                            mod_func2:3;
+            } __attribute__((__packed__));
+        #elif TINS_IS_BIG_ENDIAN
+            struct info_control_field {
+                uint16_t    send_seq_num:7,
+                            type_bit:1,
+                            recv_seq_num:7,
+                            poll_final_bit:1;
+            } __attribute__((__packed__));
+
+            struct super_control_field {
+                uint16_t	unused:4,
+                            supervisory_func:2,
+                            type_bit:2,
+                            recv_seq_num:7,
+                            poll_final_bit:1;
+            } __attribute__((__packed__));
+
+            struct un_control_field {
+                uint8_t		mod_func2:3,
+                            poll_final_bit:1,
+                            mod_func1:2,
+                            type_bits:2;
+            } __attribute__((__packed__));
+
+        #endif
 
         void copy_fields(const LLC *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

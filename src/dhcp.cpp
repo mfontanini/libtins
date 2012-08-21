@@ -98,19 +98,20 @@ const DHCP::DHCPOption *DHCP::search_option(Options opt) const{
 }
 
 bool DHCP::add_type_option(Flags type) {
-    return add_option(DHCP_MESSAGE_TYPE, sizeof(uint8_t), (const uint8_t*)&type);
+    uint8_t int_type = type;
+    return add_option(DHCP_MESSAGE_TYPE, sizeof(uint8_t), &int_type);
 }
 
 bool DHCP::search_type_option(uint8_t *value) {
     return generic_search(DHCP_MESSAGE_TYPE, value);
 }
 
-bool DHCP::add_server_identifier(uint32_t ip) {
-    ip = Utils::host_to_be(ip);
-    return add_option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), (const uint8_t*)&ip);
+bool DHCP::add_server_identifier(IPv4Address ip) {
+    uint32_t ip_int = ip;
+    return add_option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), (const uint8_t*)&ip_int);
 }
 
-bool DHCP::search_server_identifier(uint32_t *value) {
+bool DHCP::search_server_identifier(IPv4Address *value) {
     return generic_search(DHCP_SERVER_IDENTIFIER, value);
 }
 
@@ -132,16 +133,16 @@ bool DHCP::search_renewal_time(uint32_t *value) {
     return generic_search(DHCP_RENEWAL_TIME, value);
 }
 
-bool DHCP::add_subnet_mask(uint32_t mask) {
-    mask = Utils::host_to_be(mask);
-    return add_option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask);
+bool DHCP::add_subnet_mask(IPv4Address mask) {
+    uint32_t mask_int = mask;
+    return add_option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask_int);
 }
 
-bool DHCP::search_subnet_mask(uint32_t *value) {
+bool DHCP::search_subnet_mask(IPv4Address *value) {
     return generic_search(SUBNET_MASK, value);
 }
 
-bool DHCP::add_routers_option(const list<uint32_t> &routers) {
+bool DHCP::add_routers_option(const list<IPv4Address> &routers) {
     uint32_t size;
     uint8_t *buffer = serialize_list(routers, size);
     bool ret = add_option(ROUTERS, size, buffer);
@@ -149,11 +150,11 @@ bool DHCP::add_routers_option(const list<uint32_t> &routers) {
     return ret;
 }
 
-bool DHCP::search_routers_option(std::list<uint32_t> *routers) {
+bool DHCP::search_routers_option(std::list<IPv4Address> *routers) {
     return generic_search(ROUTERS, routers);
 }
 
-bool DHCP::add_dns_option(const list<uint32_t> &dns) {
+bool DHCP::add_dns_option(const list<IPv4Address> &dns) {
     uint32_t size;
     uint8_t *buffer = serialize_list(dns, size);
     bool ret = add_option(DOMAIN_NAME_SERVERS, size, buffer);
@@ -161,25 +162,25 @@ bool DHCP::add_dns_option(const list<uint32_t> &dns) {
     return ret;
 }
 
-bool DHCP::search_dns_option(std::list<uint32_t> *dns) {
+bool DHCP::search_dns_option(std::list<IPv4Address> *dns) {
     return generic_search(DOMAIN_NAME_SERVERS, dns);
 }
 
-bool DHCP::add_broadcast_option(uint32_t addr) {
-    addr = Utils::host_to_be(addr);
-    return add_option(BROADCAST_ADDRESS, sizeof(uint32_t), (uint8_t*)&addr);
+bool DHCP::add_broadcast_option(IPv4Address addr) {
+    uint32_t int_addr = addr;
+    return add_option(BROADCAST_ADDRESS, sizeof(uint32_t), (uint8_t*)&int_addr);
 }
 
-bool DHCP::search_broadcast_option(uint32_t *value) {
+bool DHCP::search_broadcast_option(IPv4Address *value) {
     return generic_search(BROADCAST_ADDRESS, value);
 }
 
-bool DHCP::add_requested_ip_option(uint32_t addr) {
-    addr = Utils::host_to_be(addr);
-    return add_option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), (uint8_t*)&addr);
+bool DHCP::add_requested_ip_option(IPv4Address addr) {
+    uint32_t int_addr = addr;
+    return add_option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), (uint8_t*)&int_addr);
 }
 
-bool DHCP::search_requested_ip_option(uint32_t *value) {
+bool DHCP::search_requested_ip_option(IPv4Address *value) {
     return generic_search(DHCP_REQUESTED_ADDRESS, value);
 }
 
@@ -208,6 +209,16 @@ uint8_t *DHCP::serialize_list(const list<uint32_t> &int_list, uint32_t &sz) {
     sz = sizeof(uint32_t) * int_list.size();
     return buffer;
 }
+
+uint8_t *DHCP::serialize_list(const list<IPv4Address> &ip_list, uint32_t &sz) {
+    uint8_t *buffer = new uint8_t[ip_list.size() * sizeof(uint32_t)];
+    uint32_t *ptr = (uint32_t*)buffer;
+    for(list<IPv4Address>::const_iterator it = ip_list.begin(); it != ip_list.end(); ++it)
+        *(ptr++) = Utils::host_to_be(*it);
+    sz = sizeof(uint32_t) * ip_list.size();
+    return buffer;
+}
+
 
 uint32_t DHCP::header_size() const {
     return BootP::header_size() - vend_size() + _size;
@@ -257,6 +268,21 @@ bool DHCP::generic_search(Options opt, std::list<uint32_t> *container) {
     return true;
 }
 
+bool DHCP::generic_search(Options opt, std::list<IPv4Address> *container) {
+    const DHCPOption *option = search_option(opt);
+    if(!option)
+        return false;
+    const uint32_t *ptr = (const uint32_t*)&option->value[0];
+    uint32_t len = option->value.size();
+    if((len % sizeof(uint32_t)) != 0)
+        return false;
+    while(len) {
+        container->push_back(Utils::be_to_host(*(ptr++)));
+        len -= sizeof(uint32_t);
+    }
+    return true;
+}
+
 bool DHCP::generic_search(Options opt, std::string *str) {
     const DHCPOption *option = search_option(opt);
     if(!option)
@@ -268,6 +294,15 @@ bool DHCP::generic_search(Options opt, std::string *str) {
 bool DHCP::generic_search(Options opt, uint32_t *value) {
     if(generic_search<uint32_t>(opt, value)) {
         *value = Utils::host_to_be(*value);
+        return true;
+    }
+    return false;
+}
+
+bool DHCP::generic_search(Options opt, IPv4Address *value) {
+    uint32_t ip_int;
+    if(generic_search(opt, &ip_int)) {
+        *value = ip_int;
         return true;
     }
     return false;

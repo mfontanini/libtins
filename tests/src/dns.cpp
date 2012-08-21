@@ -198,7 +198,6 @@ TEST_F(DNSTest, Answers) {
     
     DNS::resources_type resources(dns.dns_answers());
     for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
-        std::cout << it->dname << "\n";
         EXPECT_TRUE(it->dname == "www.example.com" || it->dname == "www.example2.com");
         if(it->dname == "www.example.com") {
             EXPECT_EQ(it->type, DNS::A);

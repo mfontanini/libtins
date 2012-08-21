@@ -264,6 +264,54 @@ src/utils_test.o: src/utils_test.cpp ../include/utils.h \
 ../include/network_interface.h:
 
 ../include/ipaddress.h:
+src/dot11/beacon.o: src/dot11/beacon.cpp ../include/dot11.h \
+ ../include/pdu.h ../include/packetsender.h ../include/utils.h \
+ ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/dot11.o: src/dot11/dot11.cpp ../include/dot11.h \
+ ../include/pdu.h ../include/packetsender.h ../include/utils.h \
+ ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h ../include/utils.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+
+../include/utils.h:
 ../src/arp.o: ../src/arp.cpp ../include/arp.h ../include/pdu.h \
  ../include/packetsender.h ../include/ipaddress.h ../include/utils.h \
  ../include/hwaddress.h ../include/network_interface.h ../include/ip.h \

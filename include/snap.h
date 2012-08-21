@@ -156,11 +156,19 @@ namespace Tins {
         struct snaphdr {
             uint8_t dsap;
             uint8_t ssap;
-            uint32_t id:2,
-                reserved1:2,
-                poll:2,
-                reserved2:2,
-                org_code:24;
+            #if TINS_IS_LITTLE_ENDIAN
+                uint32_t id:2,
+                    reserved1:2,
+                    poll:2,
+                    reserved2:2,
+                    org_code:24;
+            #elif TINS_IS_BIG_ENDIAN
+                uint32_t reserved1:2,
+                    poll:2,
+                    reserved2:2,
+                    id:2,
+                    org_code:24;
+            #endif
             uint16_t eth_type;
         } __attribute__((__packed__));
         

@@ -27,6 +27,7 @@
 #include <vector>
 #include <string>
 #include "bootp.h"
+#include "ipaddress.h"
 
 
 namespace Tins {
@@ -152,14 +153,10 @@ namespace Tins {
              * \brief The option number.
              */
             uint8_t option;
-            /** 
-             * \brief The value's length in bytes.
-             */
-            //uint8_t length;
+
             /** 
              * \brief The option's value.
              */
-            //uint8_t *value;
             std::vector<uint8_t> value;
         };
         
@@ -220,14 +217,14 @@ namespace Tins {
          * \param ip The ip of the server.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
-        bool add_server_identifier(uint32_t ip);
+        bool add_server_identifier(IPv4Address ip);
         
         /**
          * \brief Searchs for a server identifier option.
          * \param value A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_server_identifier(uint32_t *value);
+        bool search_server_identifier(IPv4Address *value);
         
         /** 
          * \brief Adds an IP address lease time option.
@@ -276,70 +273,70 @@ namespace Tins {
          * \param mask The subnet mask.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
-        bool add_subnet_mask(uint32_t mask);
+        bool add_subnet_mask(IPv4Address mask);
         
         /**
          * \brief Searchs for a subnet mask option.
          * \param value A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_subnet_mask(uint32_t *value);
+        bool search_subnet_mask(IPv4Address *value);
         
         /** 
          * \brief Adds a routers option.
-         * \param routers A list of ip addresses in integer notation.
+         * \param routers A list of ip addresses.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
-        bool add_routers_option(const std::list<uint32_t> &routers);
+        bool add_routers_option(const std::list<IPv4Address> &routers);
         
         /**
          * \brief Searchs for a routers option.
          * \param routers A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_routers_option(std::list<uint32_t> *routers);
+        bool search_routers_option(std::list<IPv4Address> *routers);
         
         /** 
          * \brief Adds a domain name servers option.
-         * \param dns A list of ip addresses in integer notation.
+         * \param dns A list of ip addresses.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
-        bool add_dns_option(const std::list<uint32_t> &dns);
+        bool add_dns_option(const std::list<IPv4Address> &dns);
         
         /**
          * \brief Searchs for a dns option.
          * \param dns A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_dns_option(std::list<uint32_t> *dns);
+        bool search_dns_option(std::list<IPv4Address> *dns);
         
         /** 
          * \brief Adds a broadcast address option.
          * \param addr The broadcast address.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
-        bool add_broadcast_option(uint32_t addr);
+        bool add_broadcast_option(IPv4Address addr);
         
         /**
          * \brief Searchs for a broadcast option.
          * \param value A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_broadcast_option(uint32_t *value);
+        bool search_broadcast_option(IPv4Address *value);
         
         /** 
          * \brief Adds a requested address option.
          * \param addr The requested address.
          * \return True if the option was added successfully. \sa DHCP::add_option
          */
-        bool add_requested_ip_option(uint32_t addr);
+        bool add_requested_ip_option(IPv4Address addr);
         
         /**
          * \brief Searchs for a requested option.
          * \param value A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_requested_ip_option(uint32_t *value);
+        bool search_requested_ip_option(IPv4Address *value);
         
         /** 
          * \brief Adds a domain name option.
@@ -385,7 +382,8 @@ namespace Tins {
         void copy_fields(const DHCP *other);        
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
-        template<class T> bool generic_search(Options opt, T *value) {
+        template<class T> 
+        bool generic_search(Options opt, T *value) {
             const DHCPOption *option = search_option(opt);
             if(option && option->value.size() == sizeof(T)) {
                 *value = *(T*)&option->value[0];
@@ -394,11 +392,14 @@ namespace Tins {
             return false;
         }
         
+        bool generic_search(Options opt, std::list<IPv4Address> *container);
         bool generic_search(Options opt, std::list<uint32_t> *container);
         bool generic_search(Options opt, std::string *str);
         bool generic_search(Options opt, uint32_t *value);
+        bool generic_search(Options opt, IPv4Address *value);
         
         uint8_t *serialize_list(const std::list<uint32_t> &int_list, uint32_t &sz);
+        uint8_t *serialize_list(const std::list<IPv4Address> &ip_list, uint32_t &sz);
         
         options_type _options;
         uint32_t _size;

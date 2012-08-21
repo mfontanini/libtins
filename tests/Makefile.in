@@ -1,7 +1,7 @@
 CXX=@CXX@
 CFLAGS=-c -Wall @CFLAGS@ -DTINS_VERSION=@PACKAGE_VERSION@
 LDFLAGS=-lpcap -lgtest -lpthread
-SOURCES=$(wildcard src/*.cpp ../src/*.cpp)
+SOURCES=$(wildcard src/*.cpp src/dot11/*.cpp ../src/*.cpp)
 
 OBJECTS=$(SOURCES:.cpp=.o)
 INCLUDE=-Iinclude/ -I../include

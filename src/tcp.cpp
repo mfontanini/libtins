@@ -28,10 +28,11 @@
 #include "rawpdu.h"
 #include "utils.h"
 
+namespace Tins {
 
-const uint16_t Tins::TCP::DEFAULT_WINDOW = 32678;
+const uint16_t TCP::DEFAULT_WINDOW = 32678;
 
-Tins::TCP::TCP(uint16_t dport, uint16_t sport) 
+TCP::TCP(uint16_t dport, uint16_t sport) 
 : PDU(Constants::IP::PROTO_TCP), _options_size(0), _total_options_size(0) 
 {
     std::memset(&_tcp, 0, sizeof(tcphdr));
@@ -41,7 +42,7 @@ Tins::TCP::TCP(uint16_t dport, uint16_t sport)
     window(DEFAULT_WINDOW);
 }
 
-Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz) 
+TCP::TCP(const uint8_t *buffer, uint32_t total_sz) 
 : PDU(Constants::IP::PROTO_TCP) 
 {
     if(total_sz < sizeof(tcphdr))
@@ -87,71 +88,71 @@ Tins::TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
         inner_pdu(new RawPDU(buffer, total_sz));
 }
 
-void Tins::TCP::dport(uint16_t new_dport) {
+void TCP::dport(uint16_t new_dport) {
     _tcp.dport = Utils::host_to_be(new_dport);
 }
 
-void Tins::TCP::sport(uint16_t new_sport) {
+void TCP::sport(uint16_t new_sport) {
     _tcp.sport = Utils::host_to_be(new_sport);
 }
 
-void Tins::TCP::seq(uint32_t new_seq) {
+void TCP::seq(uint32_t new_seq) {
     _tcp.seq = Utils::host_to_be(new_seq);
 }
 
-void Tins::TCP::ack_seq(uint32_t new_ack_seq) {
+void TCP::ack_seq(uint32_t new_ack_seq) {
     _tcp.ack_seq = Utils::host_to_be(new_ack_seq);
 }
 
-void Tins::TCP::window(uint16_t new_window) {
+void TCP::window(uint16_t new_window) {
     _tcp.window = Utils::host_to_be(new_window);
 }
 
-void Tins::TCP::check(uint16_t new_check) {
+void TCP::check(uint16_t new_check) {
     _tcp.check = Utils::host_to_be(new_check);
 }
 
-void Tins::TCP::urg_ptr(uint16_t new_urg_ptr) {
+void TCP::urg_ptr(uint16_t new_urg_ptr) {
     _tcp.urg_ptr = Utils::host_to_be(new_urg_ptr);
 }
 
-void Tins::TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
+void TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
     inner_pdu(new RawPDU(new_payload, new_payload_size));
 }
 
-void Tins::TCP::data_offset(uint8_t new_doff) {
+void TCP::data_offset(uint8_t new_doff) {
     this->_tcp.doff = new_doff;
 }
 
-void Tins::TCP::add_mss_option(uint16_t value) {
+void TCP::add_mss_option(uint16_t value) {
     value = Utils::host_to_be(value);
     add_option(MSS, 2, (uint8_t*)&value);
 }
 
-bool Tins::TCP::search_mss_option(uint16_t *value) {
+bool TCP::search_mss_option(uint16_t *value) {
     if(!generic_search(MSS, value))
         return false;
     *value = Utils::host_to_be(*value);
     return true;
 }
 
-void Tins::TCP::add_winscale_option(uint8_t value) {
+void TCP::add_winscale_option(uint8_t value) {
     add_option(WSCALE, 1, &value);
 }
 
-bool Tins::TCP::search_winscale_option(uint8_t *value) {
+bool TCP::search_winscale_option(uint8_t *value) {
     return generic_search(WSCALE, value);
 }
 
-void Tins::TCP::add_sack_permitted_option() {
+void TCP::add_sack_permitted_option() {
     add_option(SACK_OK, 0, 0);
 }
 
-bool Tins::TCP::search_sack_permitted_option() {
+bool TCP::search_sack_permitted_option() {
     return search_option(SACK_OK);
 }
 
-void Tins::TCP::add_sack_option(const std::list<uint32_t> &edges) {
+void TCP::add_sack_option(const std::list<uint32_t> &edges) {
     uint32_t *value = 0;
     if(edges.size()) {
         value = new uint32_t[edges.size()];
@@ -163,7 +164,7 @@ void Tins::TCP::add_sack_option(const std::list<uint32_t> &edges) {
     delete[] value;
 }
 
-bool Tins::TCP::search_sack_option(std::list<uint32_t> *edges) {
+bool TCP::search_sack_option(std::list<uint32_t> *edges) {
     const TCPOption *option = search_option(SACK);
     if(!option || (option->value.size() % sizeof(uint32_t)) != 0)
         return false;
@@ -174,30 +175,33 @@ bool Tins::TCP::search_sack_option(std::list<uint32_t> *edges) {
     return true;
 }
 
-void Tins::TCP::add_timestamp_option(uint32_t value, uint32_t reply) {
-    uint64_t buffer = ((uint64_t)Utils::host_to_be(reply) << 32) | Utils::host_to_be(value);
+void TCP::add_timestamp_option(uint32_t value, uint32_t reply) {
+    uint64_t buffer = (uint64_t(value) << 32) | reply;
+    buffer = Utils::host_to_be(buffer);
     add_option(TSOPT, 8, (uint8_t*)&buffer);
 }
 
-bool Tins::TCP::search_timestamp_option(uint32_t *value, uint32_t *reply) {
+bool TCP::search_timestamp_option(uint32_t *value, uint32_t *reply) {
     const TCPOption *option = search_option(TSOPT);
     if(!option || option->value.size() != (sizeof(uint32_t) << 1))
         return false;
-    const uint32_t *ptr = (const uint32_t*)&option->value[0];
-    *value = Utils::host_to_be(*(ptr++));
-    *reply = Utils::host_to_be(*(ptr));
+    uint64_t buffer = *(const uint64_t*)&option->value[0];
+    buffer = Utils::be_to_host(buffer);
+    *value = (buffer >> 32) & 0xffffffff;
+    *reply = buffer & 0xffffffff;
     return true;
 }
 
-void Tins::TCP::add_altchecksum_option(AltChecksums value) {
-    add_option(ALTCHK, 1, (const uint8_t*)&value);
+void TCP::add_altchecksum_option(AltChecksums value) {
+    uint8_t int_value = value;
+    add_option(ALTCHK, 1, &int_value);
 }
 
-bool Tins::TCP::search_altchecksum_option(uint8_t *value) {
+bool TCP::search_altchecksum_option(uint8_t *value) {
     return generic_search(ALTCHK, value);
 }
 
-uint8_t Tins::TCP::get_flag(Flags tcp_flag) {
+uint8_t TCP::get_flag(Flags tcp_flag) {
     switch(tcp_flag) {
         case FIN:
             return _tcp.fin;
@@ -229,7 +233,7 @@ uint8_t Tins::TCP::get_flag(Flags tcp_flag) {
     };
 }
 
-void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
+void TCP::set_flag(Flags tcp_flag, uint8_t value) {
     switch(tcp_flag) {
         case FIN:
             _tcp.fin = value;
@@ -258,7 +262,7 @@ void Tins::TCP::set_flag(Flags tcp_flag, uint8_t value) {
     };
 }
 
-void Tins::TCP::add_option(Option tcp_option, uint8_t length, const uint8_t *data) {
+void TCP::add_option(Option tcp_option, uint8_t length, const uint8_t *data) {
     uint8_t padding;
     _options.push_back(TCPOption(tcp_option, length, data));
     
@@ -274,11 +278,11 @@ void Tins::TCP::add_option(Option tcp_option, uint8_t length, const uint8_t *dat
     _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
 }
 
-uint32_t Tins::TCP::header_size() const {
+uint32_t TCP::header_size() const {
     return sizeof(tcphdr) + _total_options_size;
 }
 
-void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= header_size());
     uint8_t *tcp_start = buffer;
     buffer += sizeof(tcphdr);
@@ -309,7 +313,7 @@ void Tins::TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     _tcp.check = 0;
 }
 
-const Tins::TCP::TCPOption *Tins::TCP::search_option(Option opt) const {
+const TCP::TCPOption *TCP::search_option(Option opt) const {
     for(std::list<TCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         if(it->option == opt)
             return &(*it);
@@ -319,7 +323,7 @@ const Tins::TCP::TCPOption *Tins::TCP::search_option(Option opt) const {
 
 /* TCPOptions */
 
-uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
+uint8_t *TCP::TCPOption::write(uint8_t *buffer) {
     if(option == 0 || option == 1) {
         *buffer = option;
         return buffer + 1;
@@ -333,3 +337,4 @@ uint8_t *Tins::TCP::TCPOption::write(uint8_t *buffer) {
     }
 }
 
+}
