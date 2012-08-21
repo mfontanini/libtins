@@ -239,3 +239,43 @@ TEST_F(Dot11BeaconTest, RequestInformation) {
     ASSERT_EQ(info.size(), found_info.size());
     EXPECT_TRUE(std::equal(info.begin(), info.end(), found_info.begin()));
 }
+
+TEST_F(Dot11BeaconTest, FHParameterSet) {
+    Dot11Beacon dot11;
+    Dot11Beacon::fh_params_set params(0x482f, 67, 42, 0xa1), output;
+    dot11.fh_parameter_set(params);
+    output = dot11.fh_parameter_set();
+    EXPECT_EQ(output.hop_index, params.hop_index);
+    EXPECT_EQ(output.hop_pattern, params.hop_pattern);
+    EXPECT_EQ(output.hop_set, params.hop_set);
+    EXPECT_EQ(output.dwell_time, params.dwell_time);
+}
+
+TEST_F(Dot11BeaconTest, DSParameterSet) {
+    Dot11Beacon dot11;
+    dot11.ds_parameter_set(0x1e);
+    EXPECT_EQ(dot11.ds_parameter_set(), 0x1e);
+}
+
+TEST_F(Dot11BeaconTest, IBSSParameterSet) {
+    Dot11Beacon dot11;
+    dot11.ibss_parameter_set(0x1ef3);
+    EXPECT_EQ(dot11.ibss_parameter_set(), 0x1ef3);
+}
+
+TEST_F(Dot11BeaconTest, IBSS_DFS) {
+    Dot11Beacon dot11;
+    Dot11Beacon::ibss_dfs_params params, output;
+    params.dfs_owner = "00:01:02:03:04:05";
+    params.recovery_interval = 0x7f;
+    params.channel_map.push_back(std::make_pair(0x8e, 0x92));
+    params.channel_map.push_back(std::make_pair(0x02, 0xf2));
+    params.channel_map.push_back(std::make_pair(0x3a, 0x53));
+    dot11.ibss_dfs(params);
+    output = dot11.ibss_dfs();
+    EXPECT_EQ(params.dfs_owner, output.dfs_owner);
+    EXPECT_EQ(params.recovery_interval, output.recovery_interval);
+    ASSERT_EQ(params.channel_map.size(), output.channel_map.size());
+    EXPECT_TRUE(std::equal(params.channel_map.begin(), params.channel_map.end(), output.channel_map.begin()));
+}
+

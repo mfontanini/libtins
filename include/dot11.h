@@ -938,6 +938,47 @@ namespace Tins {
             void immediate_block_ack(bool new_value) { this->_immediate_block_ack = new_value; }
 
         } __attribute__((__packed__));
+        
+        struct fh_params_set {
+            uint16_t dwell_time;
+            uint8_t hop_set, hop_pattern, hop_index;
+            
+            fh_params_set() {}
+            
+            fh_params_set(uint16_t dwell_time, uint8_t hop_set, 
+              uint8_t hop_pattern, uint8_t hop_index) 
+            : dwell_time(dwell_time), hop_set(hop_set), 
+              hop_pattern(hop_pattern), hop_index(hop_index) {}
+        } __attribute__((__packed__));
+        
+        struct cf_params_set {
+            uint8_t cfp_count, cfp_period;
+            uint16_t cfp_max_duration, cfp_dur_remaining;
+            
+            cf_params_set() {}
+            
+            cf_params_set(uint8_t cfp_count, uint8_t cfp_period,
+              uint16_t cfp_max_duration, uint16_t cfp_dur_remaining) 
+            : cfp_count(cfp_count), cfp_period(cfp_period), 
+              cfp_max_duration(cfp_max_duration), 
+              cfp_dur_remaining(cfp_dur_remaining) {}
+        } __attribute__((__packed__));
+        
+        struct ibss_dfs_params {
+            static const bool minimum_size = address_type::address_size + sizeof(uint8_t) + 2 * sizeof(uint8_t);
+            
+            address_type dfs_owner;
+            uint8_t recovery_interval; 
+            channels_type channel_map;
+           
+            ibss_dfs_params() {}
+           
+            ibss_dfs_params(const address_type &addr, 
+              uint8_t recovery_interval, const channels_type &channels)
+            : dfs_owner(addr), recovery_interval(recovery_interval),
+              channel_map(channels) {}
+        };
+        
 
         /**
          * \brief Getter for the second address.
@@ -1081,12 +1122,9 @@ namespace Tins {
         /**
          * \brief Helper method to set the FH parameter.
          *
-         * \param dwell_time uint16_t with the dwell_time value.
-         * \param hop_set uint8_t with the value of the set_hop.
-         * \param hop_pattern uint8_t with the value of the hop_pattern field.
-         * \param hop_index uint8_t with the value of the hop_index field.
+         * \param fh_params the fh parameter set.
          */
-        void fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index);
+        void fh_parameter_set(fh_params_set fh_params);
 
         /**
          * \brief Helper method to set the DS parameter.
@@ -1098,12 +1136,9 @@ namespace Tins {
         /**
          * \brief Helper method to set the CF parameter.
          *
-         * \param cfp_count uint8_t with the value of the cfp count field.
-         * \param cfp_period uint8_t with the value of the cfp period field.
-         * \param cfp_max_duration uint16_t with the value of the cfp max duration field.
-         * \param cfp_dur_remaining uint16_t with the value of the DurRemaining field.
+         * \param params the CF parammeters to be set.
          */
-        void cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining);
+        void cf_parameter_set(cf_params_set params);
 
         /**
          * \brief Helper method to set the IBSS parameter.
@@ -1115,11 +1150,9 @@ namespace Tins {
         /**
          * \brief Helper method to set the IBSS DFS tagged option.
          *
-         * \param dfs_owner uint8_t array of 6 bytes with the dfs owner.
-         * \param recovery_interval uint8_t with the value of the recovery interval field.
-         * \param channel_map Reference to a constant vector of pair of uint8_t with the map of channels.
+         * \param params The IBSS DFS data to be set.
          */
-        void ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const std::vector<std::pair<uint8_t, uint8_t> >& channel_map);
+        void ibss_dfs(const ibss_dfs_params &params);
 
         /**
          * \brief Helper method to set the country tagged option.
@@ -1292,6 +1325,42 @@ namespace Tins {
          * \return request_info_type containing the request information.
          */
         request_info_type request_information() const;
+        
+        /**
+         * \brief Helper method to get the fh parameter set.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return fh_params_set containing the fh parameter set.
+         */
+        fh_params_set fh_parameter_set() const;
+        
+        /**
+         * \brief Helper method to get the ds parameter set.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return uint8_t containing the ds parameter set.
+         */
+        uint8_t ds_parameter_set() const;
+        
+        /**
+         * \brief Helper method to get the ibss parameter set.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return uint16_t containing the ibss parameter set.
+         */
+        uint16_t ibss_parameter_set() const;
+        
+        /**
+         * \brief Helper method to get the ibss dfs.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return ibss_dfs_params containing the ibss dfs.
+         */
+        ibss_dfs_params ibss_dfs() const;
         
         // ************************
 

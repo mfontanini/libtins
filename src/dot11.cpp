@@ -411,14 +411,12 @@ void Dot11ManagementFrame::request_information(const request_info_type elements)
     delete[] buffer;
 }
 
-void Dot11ManagementFrame::fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index) {
-    uint8_t buffer[5];
-    uint16_t* ptr_buffer = (uint16_t*)buffer;
-    ptr_buffer[0] = dwell_time;
-    buffer[2] = hop_set;
-    buffer[3] = hop_pattern;
-    buffer[4] = hop_index;
-    add_tagged_option(FH_SET, 5, buffer);
+void Dot11ManagementFrame::fh_parameter_set(fh_params_set fh_params) {
+    fh_params.dwell_time = Utils::host_to_le(fh_params.dwell_time);
+    fh_params.hop_set = Utils::host_to_le(fh_params.hop_set);
+    fh_params.hop_pattern = Utils::host_to_le(fh_params.hop_pattern);
+    fh_params.hop_index = Utils::host_to_le(fh_params.hop_index);
+    add_tagged_option(FH_SET, sizeof(fh_params_set), (uint8_t*)&fh_params);
 
 }
 
@@ -426,22 +424,35 @@ void Dot11ManagementFrame::ds_parameter_set(uint8_t current_channel) {
     add_tagged_option(DS_SET, 1, &current_channel);
 }
 
-void Dot11ManagementFrame::cf_parameter_set(uint8_t cfp_count,
-                                                  uint8_t cfp_period,
-                                                  uint16_t cfp_max_duration,
-                                                  uint16_t cfp_dur_remaining) {
-    uint8_t buffer[6];
-    uint16_t* ptr_buffer = (uint16_t*)buffer;
-    buffer[0] = cfp_count;
-    buffer[1] = cfp_period;
-    ptr_buffer[1] = cfp_max_duration;
-    ptr_buffer[2] = cfp_dur_remaining;
-    add_tagged_option(CF_SET, 6, buffer);
-
+void Dot11ManagementFrame::cf_parameter_set(cf_params_set params) {
+    params.cfp_count = Utils::host_to_le(params.cfp_count);
+    params.cfp_period = Utils::host_to_le(params.cfp_period);
+    params.cfp_max_duration = Utils::host_to_le(params.cfp_max_duration);
+    params.cfp_dur_remaining = Utils::host_to_le(params.cfp_dur_remaining);
+    add_tagged_option(CF_SET, sizeof(params), (uint8_t*)&params);
 }
 
 void Dot11ManagementFrame::ibss_parameter_set(uint16_t atim_window) {
+    atim_window = Utils::host_to_le(atim_window);
     add_tagged_option(IBSS_SET, 2, (uint8_t*)&atim_window);
+}
+
+void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params &params) {
+    uint8_t sz = address_type::address_size + sizeof(uint8_t) + sizeof(uint8_t) * 2 * params.channel_map.size();
+    uint8_t* buffer = new uint8_t[sz];
+    uint8_t* ptr_buffer = buffer;
+
+    ptr_buffer = params.dfs_owner.copy(ptr_buffer);
+    *(ptr_buffer++) = params.recovery_interval;
+    for (channels_type::const_iterator it = params.channel_map.begin(); it != params.channel_map.end(); ++it) {
+        *(ptr_buffer++) = it->first;
+        *(ptr_buffer++) = it->second;
+    }
+
+    add_tagged_option(IBSS_DFS, sz, buffer);
+
+    delete[] buffer;
+
 }
 
 void Dot11ManagementFrame::country(const std::vector<uint8_t*>& countries,
@@ -523,25 +534,6 @@ void Dot11ManagementFrame::quiet(uint8_t quiet_count, uint8_t quiet_period, uint
     ptr_buffer[1] = quiet_duration;
     ptr_buffer[2] = quiet_offset;
     add_tagged_option(QUIET, 6, buffer);
-
-}
-
-void Dot11ManagementFrame::ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const vector<pair<uint8_t, uint8_t> >& channel_map) {
-    uint8_t sz = 7 + 2 * channel_map.size();
-    uint8_t* buffer = new uint8_t[sz];
-    uint8_t* ptr_buffer = buffer;
-
-    memcpy(ptr_buffer, dfs_owner, 6);
-    ptr_buffer += 6;
-    *(ptr_buffer++) = recovery_interval;
-    for (vector<pair<uint8_t, uint8_t> >::const_iterator it = channel_map.begin(); it != channel_map.end(); it++) {
-        *(ptr_buffer++) = it->first;
-        *(ptr_buffer++) = it->second;
-    }
-
-    add_tagged_option(IBSS_DFS, sz, buffer);
-
-    delete[] buffer;
 
 }
 
@@ -680,11 +672,55 @@ Dot11ManagementFrame::channels_type Dot11ManagementFrame::supported_channels() c
 Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_information() const {
     const Dot11::Dot11Option *option = search_option(REQUEST_INFORMATION);
     if(!option)
-        throw std::runtime_error("Supported channels not set");
+        throw std::runtime_error("Request information not set");
     request_info_type output;
     const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
     while(ptr != end)
         output.push_back(*(ptr++));
+    return output;
+}
+
+Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() const {
+    const Dot11::Dot11Option *option = search_option(FH_SET);
+    if(!option || option->data_size() != sizeof(fh_params_set))
+        throw std::runtime_error("FH parameters set not set");
+    fh_params_set output = *reinterpret_cast<const fh_params_set*>(option->data_ptr());
+    output.dwell_time = Utils::le_to_host(output.dwell_time);
+    output.hop_set = Utils::le_to_host(output.hop_set);
+    output.hop_pattern = Utils::le_to_host(output.hop_pattern);
+    output.hop_index = Utils::le_to_host(output.hop_index);
+    return output;
+}
+
+uint8_t Dot11ManagementFrame::ds_parameter_set() const {
+    const Dot11::Dot11Option *option = search_option(DS_SET);
+    if(!option || option->data_size() != sizeof(uint8_t))
+        throw std::runtime_error("DS parameters set not set");
+    return *option->data_ptr();
+}
+
+uint16_t Dot11ManagementFrame::ibss_parameter_set() const {
+    const Dot11::Dot11Option *option = search_option(IBSS_SET);
+    if(!option || option->data_size() != sizeof(uint16_t))
+        throw std::runtime_error("IBSS parameters set not set");
+    return Utils::le_to_host(*reinterpret_cast<const uint16_t*>(option->data_ptr()));
+}
+
+Dot11ManagementFrame::ibss_dfs_params Dot11ManagementFrame::ibss_dfs() const {
+    const Dot11::Dot11Option *option = search_option(IBSS_DFS);
+    if(!option || option->data_size() < ibss_dfs_params::minimum_size)
+        throw std::runtime_error("IBSS DFS set not set");
+    ibss_dfs_params output;
+    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
+    output.dfs_owner = ptr;
+    ptr += output.dfs_owner.size();
+    output.recovery_interval = *(ptr++);
+    while(ptr != end) {
+        uint8_t first = *(ptr++);
+        if(ptr == end)
+            throw std::runtime_error("Malformed channel data");
+        output.channel_map.push_back(std::make_pair(first, *(ptr++)));
+    }
     return output;
 }
 
