@@ -46,20 +46,12 @@ using std::runtime_error;
 namespace Tins {
 const Dot11::address_type Dot11::BROADCAST = "ff:ff:ff:ff:ff:ff";
 
-Dot11::Dot11(const address_type &dst_hw_addr, PDU* child) 
-: PDU(ETHERTYPE_IP, child), _options_size(0) 
-{
-    memset(&this->_header, 0, sizeof(ieee80211_header));
-    addr1(dst_hw_addr);
-}
-
 Dot11::Dot11(const NetworkInterface &iface, 
   const address_type &dst_hw_addr, PDU* child) 
-: PDU(ETHERTYPE_IP, child), _options_size(0) 
+: PDU(ETHERTYPE_IP, child), _iface(iface), _options_size(0)
 {
     memset(&_header, 0, sizeof(ieee80211_header));
     addr1(dst_hw_addr);
-    this->iface(iface);
 }
 
 Dot11::Dot11(const ieee80211_header *header_ptr) 
@@ -78,19 +70,8 @@ Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz)
     buffer += sz;
     total_sz -= sz;*/
     if(total_sz < sizeof(_header))
-        throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
+        throw runtime_error("Not enough size for an Dot11 header in the buffer.");
     std::memcpy(&_header, buffer, sizeof(_header));
-}
-
-Dot11::Dot11(const Dot11 &other) : PDU(other) {
-    copy_80211_fields(&other);
-}
-
-Dot11::~Dot11() {
-    while(_options.size()) {
-        delete[] _options.front().value;
-        _options.pop_front();
-    }
 }
 
 Dot11 &Dot11::operator= (const Dot11 &other) {
@@ -114,9 +95,9 @@ void Dot11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
     }
 }
 
-Dot11::Dot11Option::Dot11Option(uint8_t opt, uint8_t len, const uint8_t *val) : option(opt), length(len) {
-    value = new uint8_t[len];
-    std::memcpy(value, val, len);
+Dot11::Dot11Option::Dot11Option(uint8_t opt, uint8_t len, const uint8_t *val) 
+: option_id(opt), value(val, val + len) {
+    
 }
 
 void Dot11::add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val) {
@@ -127,7 +108,7 @@ void Dot11::add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val)
 
 const Dot11::Dot11Option *Dot11::search_option(TaggedOption opt) const {
     for(std::list<Dot11Option>::const_iterator it = _options.begin(); it != _options.end(); ++it)
-        if(it->option == (uint8_t)opt)
+        if(it->option() == (uint8_t)opt)
             return &(*it);
     return 0;
 }
@@ -173,7 +154,7 @@ void Dot11::order(bool new_value) {
 }
 
 void Dot11::duration_id(uint16_t new_duration_id) {
-    this->_header.duration_id = new_duration_id;
+    this->_header.duration_id = Utils::host_to_le(new_duration_id);
 }
 
 void Dot11::addr1(const address_type &new_addr1) {
@@ -218,10 +199,11 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
     buffer += child_len;
     assert(total_sz >= child_len + _options_size);
     for(std::list<Dot11Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-        *(buffer++) = it->option;
-        *(buffer++) = it->length;
-        std::memcpy(buffer, it->value, it->length);
-        buffer += it->length;
+        *(buffer++) = it->option();
+        *(buffer++) = it->data_size();
+        //std::memcpy(buffer, it->value, it->length);
+        std::copy(it->data_ptr(), it->data_ptr() + it->data_size(), buffer);
+        buffer += it->data_size();
     }
 }
 
@@ -268,7 +250,7 @@ void Dot11::copy_80211_fields(const Dot11 *other) {
     _iface = other->_iface;
     _options_size = other->_options_size;
     for(std::list<Dot11Option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
-        _options.push_back(Dot11Option(it->option, it->length, it->value));
+        _options.push_back(Dot11Option(it->option(), it->data_size(), it->data_ptr()));
 }
 
 /* Dot11ManagementFrame */
@@ -279,22 +261,15 @@ Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t total
     buffer += sizeof(ieee80211_header);
     total_sz -= sizeof(ieee80211_header);
     if(total_sz < sizeof(_ext_header))
-        throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
+        throw runtime_error("Not enough size for an Dot11ManagementFrame header in the buffer.");
     std::memcpy(&_ext_header, buffer, sizeof(_ext_header));
     total_sz -= sizeof(_ext_header);
-    if(from_ds() && to_ds() && total_sz >= _addr4.size())
-        //std::memcpy(_addr4, buffer + sizeof(_ext_header), sizeof(_addr4));
-        _addr4 = buffer + sizeof(_ext_header);
-    else
-        throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");        
-}
-
-Dot11ManagementFrame::Dot11ManagementFrame(
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11(dst_hw_addr) 
-{
-    type(Dot11::MANAGEMENT);
-    addr2(src_hw_addr);
+    if(from_ds() && to_ds()) {
+        if(total_sz >= _addr4.size())
+            _addr4 = buffer + sizeof(_ext_header);
+        else
+            throw runtime_error("Not enough size for an Dot11ManagementFrame header in the buffer.");        
+    }
 }
 
 Dot11ManagementFrame::Dot11ManagementFrame(const NetworkInterface &iface,
@@ -302,11 +277,8 @@ Dot11ManagementFrame::Dot11ManagementFrame(const NetworkInterface &iface,
 : Dot11(iface, dst_hw_addr) 
 {
     type(Dot11::MANAGEMENT);
+    memset(&_ext_header, 0, sizeof(_ext_header));
     addr2(src_hw_addr);
-}
-
-Dot11ManagementFrame::Dot11ManagementFrame(const Dot11ManagementFrame &other) : Dot11(other) {
-    copy_ext_header(&other);
 }
 
 void Dot11ManagementFrame::copy_ext_header(const Dot11ManagementFrame* other) {
@@ -365,45 +337,53 @@ void Dot11ManagementFrame::rsn_information(const RSNInformation& info) {
     delete[] buffer;
 }
 
-void Dot11ManagementFrame::supported_rates(const std::list<float> &new_rates) {
-    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
-    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
-        uint8_t result = 0x80, left = *it / 0.5;
-        if(*it - left > 0)
-            left++;
-        *(ptr++) = (result | left);
+uint8_t *Dot11ManagementFrame::serialize_rates(const rates_type &rates) {
+    uint8_t *buffer = new uint8_t[rates.size()], *ptr = buffer;
+    for(rates_type::const_iterator it = rates.begin(); it != rates.end(); ++it) {
+        uint8_t result = *it * 2;
+        if(result == 2 || result == 4 || result == 11 || result == 22)
+            result |= 0x80;
+        *(ptr++) = result;
     }
+    return buffer;
+}
+
+Dot11ManagementFrame::rates_type Dot11ManagementFrame::deserialize_rates(const Dot11Option *option) {
+    rates_type output;
+    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
+    while(ptr != end) {
+        output.push_back(float(*(ptr++) & 0x7f) / 2);
+    }
+    return output;
+}
+
+void Dot11ManagementFrame::supported_rates(const rates_type &new_rates) {
+    uint8_t *buffer = serialize_rates(new_rates);
     add_tagged_option(SUPPORTED_RATES, new_rates.size(), buffer);
     delete[] buffer;
 }
 
-void Dot11ManagementFrame::extended_supported_rates(const std::list<float> &new_rates) {
-    uint8_t *buffer = new uint8_t[new_rates.size()], *ptr = buffer;
-    for(std::list<float>::const_iterator it = new_rates.begin(); it != new_rates.end(); ++it) {
-        uint8_t result = 0x80, left = *it / 0.5;
-        if(*it - left > 0)
-            left++;
-        *(ptr++) = (result | left);
-    }
+void Dot11ManagementFrame::extended_supported_rates(const rates_type &new_rates) {
+    uint8_t *buffer = serialize_rates(new_rates);
     add_tagged_option(EXT_SUPPORTED_RATES, new_rates.size(), buffer);
     delete[] buffer;
 }
 
-void Dot11ManagementFrame::qos_capabilities(uint8_t new_qos_capabilities) {
-    add_tagged_option(QOS_CAPABILITY, 1, &new_qos_capabilities);
+void Dot11ManagementFrame::qos_capability(uint8_t new_qos_capability) {
+    add_tagged_option(QOS_CAPABILITY, 1, &new_qos_capability);
 }
 
-void Dot11ManagementFrame::power_capabilities(uint8_t min_power, uint8_t max_power) {
+void Dot11ManagementFrame::power_capability(uint8_t min_power, uint8_t max_power) {
     uint8_t buffer[2];
     buffer[0] = min_power;
     buffer[1] = max_power;
     add_tagged_option(POWER_CAPABILITY, 2, buffer);
 }
 
-void Dot11ManagementFrame::supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels) {
+void Dot11ManagementFrame::supported_channels(const channels_type &new_channels) {
     uint8_t* buffer = new uint8_t[new_channels.size() * 2];
     uint8_t* ptr = buffer;
-    for(std::list<pair<uint8_t, uint8_t> >::const_iterator it = new_channels.begin(); it != new_channels.end(); ++it) {
+    for(channels_type::const_iterator it = new_channels.begin(); it != new_channels.end(); ++it) {
         *(ptr++) = it->first;
         *(ptr++) = it->second;
     }
@@ -414,23 +394,20 @@ void Dot11ManagementFrame::supported_channels(const std::list<std::pair<uint8_t,
 void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
     uint8_t buffer[18];
     buffer[0] = 0;
-    uint32_t* ptr = (uint32_t*)(buffer + 1);
-    *(ptr++) = ac_be;
-    *(ptr++) = ac_bk;
-    *(ptr++) = ac_vi;
-    *(ptr++) = ac_vo;
-    add_tagged_option(EDCA, 18, buffer);
+    buffer[1] = 0;
+    uint32_t* ptr = (uint32_t*)(buffer + 2);
+    *(ptr++) = Utils::host_to_le(ac_be);
+    *(ptr++) = Utils::host_to_le(ac_bk);
+    *(ptr++) = Utils::host_to_le(ac_vi);
+    *(ptr++) = Utils::host_to_le(ac_vo);
+    add_tagged_option(EDCA, sizeof(buffer), buffer);
 }
 
-void Dot11ManagementFrame::request_information(const std::list<uint8_t> elements) {
-    uint16_t sz = elements.size();
-    list<uint8_t>::const_iterator it = elements.begin();
-    uint8_t* buffer = new uint8_t[sz];
-    for (uint16_t i = 0; i < sz; i++) {
-        buffer[i] = *it;
-        it++;
-    }
-    add_tagged_option(REQUEST, sz, buffer);
+void Dot11ManagementFrame::request_information(const request_info_type elements) {
+    uint8_t *buffer = new uint8_t[elements.size()], *ptr = buffer;
+    for (request_info_type::const_iterator it = elements.begin(); it != elements.end(); ++it)
+        *(ptr++) = *it;
+    add_tagged_option(REQUEST_INFORMATION, elements.size(), buffer);
     delete[] buffer;
 }
 
@@ -529,7 +506,6 @@ void Dot11ManagementFrame::power_constraint(uint8_t local_power_constraint) {
 }
 
 void Dot11ManagementFrame::channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count) {
-
     uint8_t buffer[3];
     buffer[0] = switch_mode;
     buffer[1] = new_channel;
@@ -539,7 +515,6 @@ void Dot11ManagementFrame::channel_switch(uint8_t switch_mode, uint8_t new_chann
 }
 
 void Dot11ManagementFrame::quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset) {
-
     uint8_t buffer[6];
     uint16_t* ptr_buffer = (uint16_t*)buffer;
 
@@ -552,7 +527,6 @@ void Dot11ManagementFrame::quiet(uint8_t quiet_count, uint8_t quiet_period, uint
 }
 
 void Dot11ManagementFrame::ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const vector<pair<uint8_t, uint8_t> >& channel_map) {
-
     uint8_t sz = 7 + 2 * channel_map.size();
     uint8_t* buffer = new uint8_t[sz];
     uint8_t* ptr_buffer = buffer;
@@ -572,7 +546,6 @@ void Dot11ManagementFrame::ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_i
 }
 
 void Dot11ManagementFrame::tpc_report(uint8_t transmit_power, uint8_t link_margin) {
-
     uint8_t buffer[2];
     buffer[0] = transmit_power;
     buffer[1] = link_margin;
@@ -614,164 +587,12 @@ void Dot11ManagementFrame::challenge_text(uint8_t* ch_text, uint8_t ch_text_sz) 
     add_tagged_option(CHALLENGE_TEXT, ch_text_sz, ch_text);
 }
 
-/* Dot11Beacon */
-
-Dot11Beacon::Dot11Beacon(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
-    subtype(Dot11::BEACON);
-    memset(&_body, 0, sizeof(_body));
-}
-
-Dot11Beacon::Dot11Beacon(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
-{
-    subtype(Dot11::BEACON);
-    memset(&_body, 0, sizeof(_body));
-}
-
-Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) 
-: Dot11ManagementFrame(buffer, total_sz) 
-{
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw runtime_error("Not enough size for a IEEE 802.11 beacon header in the buffer.");
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
-}
-
-void Dot11Beacon::timestamp(uint64_t new_timestamp) {
-    this->_body.timestamp = new_timestamp;
-}
-
-void Dot11Beacon::interval(uint16_t new_interval) {
-    this->_body.interval = new_interval;
-}
-
-void Dot11Beacon::essid(const std::string &new_essid) {
-    Dot11ManagementFrame::ssid(new_essid);
-}
-
-void Dot11Beacon::supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::supported_rates(new_rates);
-}
-
-void Dot11Beacon::ds_parameter_set(uint8_t current_channel) {
-    Dot11ManagementFrame::ds_parameter_set(current_channel);
-}
-
-void Dot11Beacon::fh_parameter_set(uint16_t dwell_time,
-                                         uint8_t hop_set,
-                                         uint8_t hop_pattern,
-                                         uint8_t hop_index) {
-    Dot11ManagementFrame::fh_parameter_set(dwell_time, hop_set, hop_pattern, hop_index);
-}
-
-void Dot11Beacon::cf_parameter_set(uint8_t cfp_count,
-                                         uint8_t cfp_period,
-                                         uint16_t cfp_max_duration,
-                                         uint16_t cfp_dur_remaining) {
-    Dot11ManagementFrame::cf_parameter_set(cfp_count, cfp_period, cfp_max_duration, cfp_dur_remaining);
-}
-
-void Dot11Beacon::ibss_parameter_set(uint16_t atim_window) {
-    Dot11ManagementFrame::ibss_parameter_set(atim_window);
-}
-
-void Dot11Beacon::tim(uint8_t dtim_count,
-                            uint8_t dtim_period,
-                            uint8_t bitmap_control,
-                            uint8_t* partial_virtual_bitmap,
-                            uint8_t partial_virtual_bitmap_sz) {
-    Dot11ManagementFrame::tim(dtim_count, dtim_period, bitmap_control, partial_virtual_bitmap, partial_virtual_bitmap_sz);
-}
-
-void Dot11Beacon::country(const std::vector<uint8_t*>& countries,
-                                const std::vector<uint8_t>& first_channels,
-                                const std::vector<uint8_t>& number_channels,
-                                const std::vector<uint8_t>& max_power) {
-    Dot11ManagementFrame::country(countries, first_channels, number_channels, max_power);
-}
-
-void Dot11Beacon::fh_parameters(uint8_t prime_radix, uint8_t number_channels) {
-    Dot11ManagementFrame::fh_parameters(prime_radix, number_channels);
-}
-
-void Dot11Beacon::fh_pattern_table(uint8_t flag,
-                                         uint8_t number_of_sets,
-                                         uint8_t modulus,
-                                         uint8_t offset,
-                                         const std::vector<uint8_t>& random_table) {
-    Dot11ManagementFrame::fh_pattern_table(flag, number_of_sets, modulus, offset, random_table);
-}
-
-void Dot11Beacon::power_constraint(uint8_t local_power_constraint) {
-    Dot11ManagementFrame::power_constraint(local_power_constraint);
-}
-
-void Dot11Beacon::channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count) {
-    Dot11ManagementFrame::channel_switch(switch_mode, new_channel, switch_count);
-}
-
-void Dot11Beacon::quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset) {
-    Dot11ManagementFrame::quiet(quiet_count, quiet_period, quiet_duration, quiet_offset);
-}
-
-void Dot11Beacon::ibss_dfs(const uint8_t* dfs_owner,
-                                 uint8_t recovery_interval,
-                                 const std::vector<std::pair<uint8_t, uint8_t> >& channel_map) {
-    Dot11ManagementFrame::ibss_dfs(dfs_owner, recovery_interval, channel_map);
-}
-
-void Dot11Beacon::tpc_report(uint8_t transmit_power, uint8_t link_margin) {
-    Dot11ManagementFrame::tpc_report(transmit_power, link_margin);
-}
-
-void Dot11Beacon::erp_information(uint8_t value) {
-    Dot11ManagementFrame::erp_information(value);
-}
-
-void Dot11Beacon::extended_supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::extended_supported_rates(new_rates);
-}
-
-void Dot11Beacon::rsn_information(const RSNInformation& info) {
-    Dot11ManagementFrame::rsn_information(info);
-}
-
-void Dot11Beacon::bss_load(uint16_t station_count,
-                                 uint8_t channel_utilization,
-                                 uint16_t available_capacity) {
-    Dot11ManagementFrame::bss_load(station_count, channel_utilization, available_capacity);
-}
-
-void Dot11Beacon::edca_parameter_set(uint32_t ac_be,
-                                           uint32_t ac_bk,
-                                           uint32_t ac_vi,
-                                           uint32_t ac_vo) {
-    Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
-}
-
-void Dot11Beacon::qos_capabilities(uint8_t qos_info) {
-    Dot11ManagementFrame::qos_capabilities(qos_info);
-}
-
-string Dot11Beacon::essid() const {
-    const Dot11::Dot11Option *option = search_option(SSID);
-    return (option) ? string((const char*)option->value, option->length) : 0;
-}
-
-bool Dot11Beacon::rsn_information(RSNInformation *rsn) {
+bool Dot11ManagementFrame::rsn_information(RSNInformation *rsn) {
     const Dot11::Dot11Option *option = search_option(RSN);
-    if(!option || option->length < (sizeof(uint16_t) << 1) + sizeof(uint32_t))
+    if(!option || option->data_size() < (sizeof(uint16_t) << 1) + sizeof(uint32_t))
         return false;
-    const uint8_t *buffer = option->value;
-    uint32_t bytes_left = option->length;
+    const uint8_t *buffer = option->data_ptr();
+    uint32_t bytes_left = option->data_size();
     rsn->version(*(uint16_t*)buffer);
     buffer += sizeof(uint16_t);
     rsn->group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
@@ -807,6 +628,98 @@ bool Dot11Beacon::rsn_information(RSNInformation *rsn) {
     return true;
 }
 
+string Dot11ManagementFrame::ssid() const {
+    const Dot11::Dot11Option *option = search_option(SSID);
+    if(!option)
+        throw std::runtime_error("SSID not set");
+    return string((const char*)option->data_ptr(), option->data_size());
+}
+
+Dot11ManagementFrame::rates_type Dot11ManagementFrame::supported_rates() const {
+    const Dot11::Dot11Option *option = search_option(SUPPORTED_RATES);
+    if(!option)
+        throw std::runtime_error("Supported rates not set");
+    return deserialize_rates(option);
+}
+
+Dot11ManagementFrame::rates_type Dot11ManagementFrame::extended_supported_rates() const {
+    const Dot11::Dot11Option *option = search_option(EXT_SUPPORTED_RATES);
+    if(!option)
+        throw std::runtime_error("Extended supported rates not set");
+    return deserialize_rates(option);
+}
+
+uint8_t Dot11ManagementFrame::qos_capability() const {
+    const Dot11::Dot11Option *option = search_option(QOS_CAPABILITY);
+    if(!option || option->data_size() != 1)
+        throw std::runtime_error("QOS capability not set");
+    return *option->data_ptr();
+}
+
+std::pair<uint8_t, uint8_t> Dot11ManagementFrame::power_capability() const {
+    const Dot11::Dot11Option *option = search_option(POWER_CAPABILITY);
+    if(!option || option->data_size() != 2)
+        throw std::runtime_error("Power capability not set");
+    return std::make_pair(*option->data_ptr(), *(option->data_ptr() + 1));
+}
+
+Dot11ManagementFrame::channels_type Dot11ManagementFrame::supported_channels() const {
+    const Dot11::Dot11Option *option = search_option(SUPPORTED_CHANNELS);
+    // We need a multiple of two
+    if(!option || ((option->data_size() & 0x1) == 1))
+        throw std::runtime_error("Supported channels not set");
+    channels_type output;
+    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
+    while(ptr != end) {
+        uint8_t first = *(ptr++);
+        output.push_back(std::make_pair(first, *(ptr++)));
+    }
+    return output;
+}
+
+Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_information() const {
+    const Dot11::Dot11Option *option = search_option(REQUEST_INFORMATION);
+    if(!option)
+        throw std::runtime_error("Supported channels not set");
+    request_info_type output;
+    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
+    while(ptr != end)
+        output.push_back(*(ptr++));
+    return output;
+}
+
+/* Dot11Beacon */
+
+Dot11Beacon::Dot11Beacon(const NetworkInterface& iface,
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+{
+    subtype(Dot11::BEACON);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
+    uint32_t sz = management_frame_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw runtime_error("Not enough size for a IEEE 802.11 beacon header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Dot11Beacon::timestamp(uint64_t new_timestamp) {
+    this->_body.timestamp = Utils::host_to_le(new_timestamp);
+}
+
+void Dot11Beacon::interval(uint16_t new_interval) {
+    this->_body.interval = Utils::host_to_le(new_interval);
+}
+
 uint32_t Dot11Beacon::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(_body);
 }
@@ -818,22 +731,7 @@ uint32_t Dot11Beacon::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz)
     return sz;
 }
 
-PDU *Dot11Beacon::clone_pdu() const {
-    Dot11Beacon *new_pdu = new Dot11Beacon();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
-    return new_pdu;
-}
-
 /* Diassoc */
-
-Dot11Disassoc::Dot11Disassoc(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
-    subtype(Dot11::DISASSOC);
-    memset(&_body, 0, sizeof(_body));
-}
 
 Dot11Disassoc::Dot11Disassoc(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
@@ -880,14 +778,6 @@ PDU *Dot11Disassoc::clone_pdu() const {
 
 /* Assoc request. */
 
-Dot11AssocRequest::Dot11AssocRequest(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    subtype(Dot11::ASSOC_REQ);
-    memset(&_body, 0, sizeof(_body));
-}
-
 Dot11AssocRequest::Dot11AssocRequest(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
@@ -912,34 +802,6 @@ void Dot11AssocRequest::listen_interval(uint16_t new_listen_interval) {
     this->_body.listen_interval = new_listen_interval;
 }
 
-void Dot11AssocRequest::ssid(const std::string &new_ssid) {
-    Dot11ManagementFrame::ssid(new_ssid);
-}
-
-void Dot11AssocRequest::supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::supported_rates(new_rates);
-}
-
-void Dot11AssocRequest::extended_supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::extended_supported_rates(new_rates);
-}
-
-void Dot11AssocRequest::power_capabilities(uint8_t min_power, uint8_t max_power) {
-    Dot11ManagementFrame::power_capabilities(min_power, max_power);
-}
-
-void Dot11AssocRequest::supported_channels(const std::list<pair<uint8_t, uint8_t> > &new_channels) {
-    Dot11ManagementFrame::supported_channels(new_channels);
-}
-
-void Dot11AssocRequest::rsn_information(const RSNInformation& info) {
-    Dot11ManagementFrame::rsn_information(info);
-}
-
-void Dot11AssocRequest::qos_capabilities(uint8_t new_qos_capabilities) {
-    Dot11ManagementFrame::qos_capabilities(new_qos_capabilities);
-}
-
 uint32_t Dot11AssocRequest::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(AssocReqBody);
 }
@@ -960,14 +822,6 @@ PDU *Dot11AssocRequest::clone_pdu() const {
 }
 
 /* Assoc response. */
-
-Dot11AssocResponse::Dot11AssocResponse(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    subtype(Dot11::ASSOC_RESP);
-    memset(&_body, 0, sizeof(_body));
-}
 
 Dot11AssocResponse::Dot11AssocResponse(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
@@ -999,18 +853,6 @@ void Dot11AssocResponse::aid(uint16_t new_aid) {
     this->_body.aid = new_aid;
 }
 
-void Dot11AssocResponse::supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::supported_rates(new_rates);
-}
-
-void Dot11AssocResponse::extended_supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::extended_supported_rates(new_rates);
-}
-
-void Dot11AssocResponse::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
-    Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
-}
-
 uint32_t Dot11AssocResponse::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(AssocRespBody);
 }
@@ -1031,14 +873,6 @@ PDU *Dot11AssocResponse::clone_pdu() const {
 }
 
 /* ReAssoc request. */
-
-Dot11ReAssocRequest::Dot11ReAssocRequest(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::REASSOC_REQ);
-    memset(&_body, 0, sizeof(_body));
-}
 
 Dot11ReAssocRequest::Dot11ReAssocRequest(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
@@ -1070,34 +904,6 @@ void Dot11ReAssocRequest::current_ap(uint8_t* new_current_ap) {
     memcpy(this->_body.current_ap, new_current_ap, 6);
 }
 
-void Dot11ReAssocRequest::ssid(const std::string &new_ssid) {
-    Dot11ManagementFrame::ssid(new_ssid);
-}
-
-void Dot11ReAssocRequest::supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::supported_rates(new_rates);
-}
-
-void Dot11ReAssocRequest::extended_supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::extended_supported_rates(new_rates);
-}
-
-void Dot11ReAssocRequest::power_capabilities(uint8_t min_power, uint8_t max_power) {
-    Dot11ManagementFrame::power_capabilities(min_power, max_power);
-}
-
-void Dot11ReAssocRequest::supported_channels(const std::list<pair<uint8_t, uint8_t> > &new_channels) {
-    Dot11ManagementFrame::supported_channels(new_channels);
-}
-
-void Dot11ReAssocRequest::rsn_information(const RSNInformation& info) {
-    Dot11ManagementFrame::rsn_information(info);
-}
-
-void Dot11ReAssocRequest::qos_capabilities(uint8_t new_qos_capabilities) {
-    Dot11ManagementFrame::qos_capabilities(new_qos_capabilities);
-}
-
 uint32_t Dot11ReAssocRequest::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(this->_body);
 }
@@ -1118,14 +924,6 @@ PDU *Dot11ReAssocRequest::clone_pdu() const {
 }
 
 /* ReAssoc response. */
-
-Dot11ReAssocResponse::Dot11ReAssocResponse(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::REASSOC_RESP);
-    memset(&_body, 0, sizeof(_body));
-}
 
 Dot11ReAssocResponse::Dot11ReAssocResponse(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr)
@@ -1156,18 +954,6 @@ void Dot11ReAssocResponse::aid(uint16_t new_aid) {
     this->_body.aid = new_aid;
 }
 
-void Dot11ReAssocResponse::supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::supported_rates(new_rates);
-}
-
-void Dot11ReAssocResponse::extended_supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::extended_supported_rates(new_rates);
-}
-
-void Dot11ReAssocResponse::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
-    Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
-}
-
 uint32_t Dot11ReAssocResponse::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(this->_body);
 }
@@ -1189,13 +975,6 @@ PDU *Dot11ReAssocResponse::clone_pdu() const {
 
 /* Probe Request */
 
-Dot11ProbeRequest::Dot11ProbeRequest(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::PROBE_REQ);
-}
-
 Dot11ProbeRequest::Dot11ProbeRequest(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
@@ -1209,22 +988,6 @@ Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz)
     parse_tagged_parameters(buffer, total_sz);
 }
 
-void Dot11ProbeRequest::ssid(const std::string &new_ssid) {
-    Dot11ManagementFrame::ssid(new_ssid);
-}
-
-void Dot11ProbeRequest::supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::supported_rates(new_rates);
-}
-
-void Dot11ProbeRequest::request_information(const std::list<uint8_t> elements) {
-    Dot11ManagementFrame::request_information(elements);
-}
-
-void Dot11ProbeRequest::extended_supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::extended_supported_rates(new_rates);
-}
-
 PDU* Dot11ProbeRequest::clone_pdu() const {
     Dot11ProbeRequest* new_pdu = new Dot11ProbeRequest();
     new_pdu->copy_80211_fields(this);
@@ -1233,14 +996,6 @@ PDU* Dot11ProbeRequest::clone_pdu() const {
 }
 
 /* Probe Response */
-
-Dot11ProbeResponse::Dot11ProbeResponse(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::PROBE_RESP);
-    memset(&this->_body, 0, sizeof(this->_body));
-}
 
 Dot11ProbeResponse::Dot11ProbeResponse(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
@@ -1272,96 +1027,6 @@ void Dot11ProbeResponse::interval(uint16_t new_interval) {
     this->_body.interval = new_interval;
 }
 
-void Dot11ProbeResponse::ssid(const std::string &new_ssid) {
-    Dot11ManagementFrame::ssid(new_ssid);
-}
-
-void Dot11ProbeResponse::supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::supported_rates(new_rates);
-}
-
-void Dot11ProbeResponse::fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index) {
-    Dot11ManagementFrame::fh_parameter_set(dwell_time, hop_set, hop_pattern, hop_index);
-}
-
-void Dot11ProbeResponse::ds_parameter_set(uint8_t current_channel) {
-    Dot11ManagementFrame::ds_parameter_set(current_channel);
-}
-
-void Dot11ProbeResponse::cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining) {
-    Dot11ManagementFrame::cf_parameter_set(cfp_count, cfp_period, cfp_max_duration, cfp_dur_remaining);
-}
-
-void Dot11ProbeResponse::ibss_parameter_set(uint16_t atim_window) {
-    Dot11ManagementFrame::ibss_parameter_set(atim_window);
-}
-
-void Dot11ProbeResponse::country(const std::vector<uint8_t*>& countries,
-                                       const std::vector<uint8_t>& first_channels,
-                                       const std::vector<uint8_t>& number_channels,
-                                       const std::vector<uint8_t>& max_power) {
-    Dot11ManagementFrame::country(countries, first_channels, number_channels, max_power);
-}
-
-void Dot11ProbeResponse::fh_parameters(uint8_t prime_radix, uint8_t number_channels) {
-    Dot11ManagementFrame::fh_parameters(prime_radix, number_channels);
-}
-
-void Dot11ProbeResponse::fh_pattern_table(uint8_t flag,
-                                                uint8_t number_of_sets,
-                                                uint8_t modulus,
-                                                uint8_t offset,
-                                                const std::vector<uint8_t>& random_table) {
-    Dot11ManagementFrame::fh_pattern_table(flag, number_of_sets, modulus, offset, random_table);
-}
-
-void Dot11ProbeResponse::power_constraint(uint8_t local_power_constraint) {
-    Dot11ManagementFrame::power_constraint(local_power_constraint);
-}
-
-void Dot11ProbeResponse::channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count) {
-    Dot11ManagementFrame::channel_switch(switch_mode, new_channel, switch_count);
-}
-
-void Dot11ProbeResponse::quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset) {
-    Dot11ManagementFrame::quiet(quiet_count, quiet_period, quiet_duration, quiet_offset);
-}
-
-void Dot11ProbeResponse::ibss_dfs(const uint8_t* dfs_owner,
-                                        uint8_t recovery_interval,
-                                        const std::vector<std::pair<uint8_t, uint8_t> >& channel_map) {
-    Dot11ManagementFrame::ibss_dfs(dfs_owner, recovery_interval, channel_map);
-}
-
-void Dot11ProbeResponse::tpc_report(uint8_t transmit_power, uint8_t link_margin) {
-    Dot11ManagementFrame::tpc_report(transmit_power, link_margin);
-}
-
-void Dot11ProbeResponse::erp_information(uint8_t value) {
-    Dot11ManagementFrame::erp_information(value);
-}
-
-void Dot11ProbeResponse::extended_supported_rates(const std::list<float> &new_rates) {
-    Dot11ManagementFrame::extended_supported_rates(new_rates);
-}
-
-void Dot11ProbeResponse::rsn_information(const RSNInformation& info) {
-    Dot11ManagementFrame::rsn_information(info);
-}
-
-void Dot11ProbeResponse::bss_load(uint16_t station_count,
-                                        uint8_t channel_utilization,
-                                        uint16_t available_capacity) {
-    Dot11ManagementFrame::bss_load(station_count, channel_utilization, available_capacity);
-}
-
-void Dot11ProbeResponse::edca_parameter_set(uint32_t ac_be,
-                                                  uint32_t ac_bk,
-                                                  uint32_t ac_vi,
-                                                  uint32_t ac_vo) {
-    Dot11ManagementFrame::edca_parameter_set(ac_be, ac_bk, ac_vi, ac_vo);
-}
-
 uint32_t Dot11ProbeResponse::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(this->_body);
 }
@@ -1382,14 +1047,6 @@ uint32_t Dot11ProbeResponse::write_fixed_parameters(uint8_t *buffer, uint32_t to
 }
 
 /* Auth */
-
-Dot11Authentication::Dot11Authentication(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::AUTH);
-    memset(&_body, 0, sizeof(_body));
-}
 
 Dot11Authentication::Dot11Authentication(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
@@ -1425,10 +1082,6 @@ void Dot11Authentication::status_code(uint16_t new_status_code) {
     this->_body.status_code = new_status_code;
 }
 
-void Dot11Authentication::challenge_text(uint8_t* ch_text, uint8_t ch_text_sz) {
-    Dot11ManagementFrame::challenge_text(ch_text, ch_text_sz);
-}
-
 uint32_t Dot11Authentication::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(this->_body);
 }
@@ -1449,14 +1102,6 @@ uint32_t Dot11Authentication::write_fixed_parameters(uint8_t *buffer, uint32_t t
 }
 
 /* Deauth */
-
-Dot11Deauthentication::Dot11Deauthentication(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::DEAUTH);
-    memset(&_body, 0, sizeof(_body));
-}
 
 Dot11Deauthentication::Dot11Deauthentication(const NetworkInterface& iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr) 
@@ -1525,14 +1170,6 @@ Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz)
         inner_pdu(new Tins::SNAP(buffer, total_sz));
 }
 
-Dot11Data::Dot11Data(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr, PDU* child) 
-: Dot11(dst_hw_addr, child) 
-{
-    type(Dot11::DATA);
-    addr2(src_hw_addr);
-}
-
 
 Dot11Data::Dot11Data(const NetworkInterface &iface,
   const address_type &dst_hw_addr, const address_type &src_hw_addr,
@@ -1595,13 +1232,6 @@ PDU *Dot11Data::clone_pdu() const {
 }
 
 /* QoS data. */
-
-Dot11QoSData::Dot11QoSData(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr, PDU* child) 
-: Dot11Data(dst_hw_addr, src_hw_addr, child) 
-{
-
-}
 
 Dot11QoSData::Dot11QoSData(const NetworkInterface &iface, 
   const address_type &dst_hw_addr, const address_type &src_hw_addr, 
@@ -1666,12 +1296,6 @@ PDU *Dot11QoSData::clone_pdu() const {
 
 /* Dot11Control */
 
-Dot11Control::Dot11Control(const address_type &dst_addr, PDU* child) 
-: Dot11(dst_addr, child) 
-{
-    type(CONTROL);
-}
-
 Dot11Control::Dot11Control(const NetworkInterface &iface, 
   const address_type &dst_addr, PDU* child) 
 : Dot11(iface, dst_addr, child) 
@@ -1685,12 +1309,6 @@ Dot11Control::Dot11Control(const uint8_t *buffer, uint32_t total_sz)
 }
 
 /* Dot11ControlTA */
-Dot11ControlTA::Dot11ControlTA(const address_type &dst_addr, 
-  const address_type &target_address, PDU* child) 
-: Dot11Control(dst_addr, child) 
-{
-    target_addr(target_address);
-}
 
 Dot11ControlTA::Dot11ControlTA(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_address, PDU* child) 
@@ -1722,12 +1340,6 @@ void Dot11ControlTA::target_addr(const address_type &addr) {
 }
 
 /* Dot11RTS */
-Dot11RTS::Dot11RTS(const address_type &dst_addr , 
-  const address_type &target_addr, PDU* child) 
-:  Dot11ControlTA(dst_addr, target_addr, child) 
-{
-    subtype(RTS);
-}
 
 Dot11RTS::Dot11RTS(const NetworkInterface &iface, const address_type &dst_addr, 
   const address_type &target_addr, PDU* child) 
@@ -1749,13 +1361,6 @@ PDU *Dot11RTS::clone_pdu() const {
 
 /* Dot11PSPoll */
 
-Dot11PSPoll::Dot11PSPoll(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(dst_addr, target_addr, child) 
-{
-    subtype(PS);
-}
-
 Dot11PSPoll::Dot11PSPoll(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child) 
 : Dot11ControlTA(iface, dst_addr, target_addr, child) 
@@ -1775,13 +1380,6 @@ PDU *Dot11PSPoll::clone_pdu() const {
 }
 
 /* Dot11CFEnd */
-
-Dot11CFEnd::Dot11CFEnd(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-:  Dot11ControlTA(dst_addr, target_addr, child) 
-{
-    subtype(CF_END);
-}
 
 Dot11CFEnd::Dot11CFEnd(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child) 
@@ -1803,13 +1401,6 @@ PDU *Dot11CFEnd::clone_pdu() const {
 
 /* Dot11EndCFAck */
 
-Dot11EndCFAck::Dot11EndCFAck(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-:  Dot11ControlTA(dst_addr, target_addr, child) 
-{
-    subtype(CF_END_ACK);
-}
-
 Dot11EndCFAck::Dot11EndCFAck(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child) 
 : Dot11ControlTA(iface, dst_addr, target_addr, child) 
@@ -1830,12 +1421,6 @@ PDU *Dot11EndCFAck::clone_pdu() const {
 
 /* Dot11Ack */
 
-Dot11Ack::Dot11Ack(const address_type &dst_addr, PDU* child) 
-: Dot11Control(dst_addr, child) 
-{
-    subtype(ACK);
-}
-
 Dot11Ack::Dot11Ack(const NetworkInterface &iface, 
   const address_type &dst_addr, PDU* child) 
 : Dot11Control(iface, dst_addr, child) 
@@ -1854,13 +1439,6 @@ PDU *Dot11Ack::clone_pdu() const {
 }
 
 /* Dot11BlockAck */
-
-Dot11BlockAckRequest::Dot11BlockAckRequest(
-  const address_type &dst_addr , const address_type &target_addr, PDU* child) 
-:  Dot11ControlTA(dst_addr, target_addr, child) 
-{
-    init_block_ack();
-}
 
 Dot11BlockAckRequest::Dot11BlockAckRequest(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child)
@@ -1914,13 +1492,6 @@ PDU *Dot11BlockAckRequest::clone_pdu() const {
 }
 
 /* Dot11BlockAck */
-Dot11BlockAck::Dot11BlockAck(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-:  Dot11ControlTA(dst_addr, target_addr, child) 
-{
-    subtype(BLOCK_ACK);
-    std::memset(_bitmap, 0, sizeof(_bitmap));
-}
 
 Dot11BlockAck::Dot11BlockAck(const NetworkInterface &iface, 
   const address_type &dst_addr, const address_type &target_addr, PDU* child)

@@ -23,6 +23,7 @@
 #define TINS_DOT_11
 
 #include <list>
+#include <vector>
 #include <stdint.h>
 #include <stdexcept>
 #include <utility>
@@ -75,7 +76,7 @@ namespace Tins {
             COUNTRY,
             HOPPING_PATTERN_PARAMS,
             HOPPING_PATTERN_TABLE,
-            REQUEST,
+            REQUEST_INFORMATION,
             BSS_LOAD,
             EDCA,
             TSPEC,
@@ -174,39 +175,22 @@ namespace Tins {
             /**
              * \brief Getter for Dot11 options' data pointer.
              */
-            const uint8_t* data_ptr() const { return value; }
+            const uint8_t* data_ptr() const { return &value[0]; }
             
             /**
              * \brief Getter for the data size field
              */
-            uint8_t data_size() const { return length; }
+            uint8_t data_size() const { return value.size(); }
             
             /**
-             * \brief The option number.
+             * \brief Getter for the data size field
              */
-            uint8_t option;
-            private:
-                /**
-                 * \brief The value's length in bytes.
-                 */
-                uint8_t length;
-                /**
-                 * \brief The option's value.
-                 */
-                uint8_t *value;
+            uint8_t option() const { return option_id; }
+        private:
+            uint8_t option_id;
+            std::vector<uint8_t> value;
         };
-
-        /**
-         * \brief Constructor for creating a 802.11 PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11(const address_type &dst_hw_addr = address_type(), 
-               PDU* child = 0);
-
+        
         /**
          * \brief Constructor for creating an 802.11 PDU
          *
@@ -217,7 +201,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(const NetworkInterface &iface, 
+        Dot11(const NetworkInterface &iface = NetworkInterface(), 
                const address_type &dst_hw_addr = address_type(), 
                PDU* child = 0);
 
@@ -228,18 +212,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Copy constructor.
-         */
-        Dot11(const Dot11 &other);
-
-        /**
-         * \brief Dot11 destructor.
-         *
-         * Releases the memory allocated for tagged options.
-         */
-        ~Dot11();
 
         /**
          * \brief Copy assignment operator.
@@ -321,7 +293,7 @@ namespace Tins {
          *
          * \return The value of the duration/id field in an uint16_t.
          */
-        uint16_t duration_id() const { return this->_header.duration_id; }
+        uint16_t duration_id() const { return Utils::le_to_host(this->_header.duration_id); }
 
         /**
          * \brief Getter for the first address.
@@ -492,7 +464,7 @@ namespace Tins {
          */
         struct ieee80211_header {
             struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
+            #if TINS_IS_LITTLE_ENDIAN
                 unsigned int protocol:2;
                 unsigned int type:2;
                 unsigned int subtype:4;
@@ -504,18 +476,18 @@ namespace Tins {
                 unsigned int more_data:1;
                 unsigned int wep:1;
                 unsigned int order:1;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int protocol:2;
-                unsigned int type:2;
+            #elif TINS_IS_BIG_ENDIAN
                 unsigned int subtype:4;
-                unsigned int to_ds:1;
-                unsigned int from_ds:1;
-                unsigned int more_frag:1;
-                unsigned int retry:1;
-                unsigned int power_mgmt:1;
-                unsigned int more_data:1;
-                unsigned int wep:1;
+                unsigned int type:2;
+                unsigned int protocol:2;
                 unsigned int order:1;
+                unsigned int wep:1;
+                unsigned int more_data:1;
+                unsigned int power_mgmt:1;
+                unsigned int retry:1;
+                unsigned int more_frag:1;
+                unsigned int from_ds:1;
+                unsigned int to_ds:1;
             #endif
             } __attribute__((__packed__)) control;
             uint16_t duration_id;
@@ -649,7 +621,22 @@ namespace Tins {
     class Dot11ManagementFrame : public Dot11 {
     public:
         /**
-         * \brief This PDU's flag.
+         * The supported rates container type.
+         */
+        typedef std::vector<float> rates_type;
+        
+        /**
+         * The supported channels container type.
+         */
+        typedef std::vector<std::pair<uint8_t, uint8_t> > channels_type;
+    
+        /**
+         * The requested information container type.
+         */
+        typedef std::vector<uint8_t> request_info_type;
+    
+        /**
+         * This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_MANAGEMENT;
 
@@ -688,24 +675,44 @@ namespace Tins {
             PEER_STA_NOT_SUPPORT_CIPHER = 45
         };
 
-        struct CapabilityInformation {
-            unsigned int _ess:1;
-            unsigned int _ibss:1;
-            unsigned int _cf_poll:1;
-            unsigned int _cf_poll_req:1;
-            unsigned int _privacy:1;
-            unsigned int _short_preamble:1;
-            unsigned int _pbcc:1;
-            unsigned int _channel_agility:1;
-            unsigned int _spectrum_mgmt:1;
-            unsigned int _qos:1;
-            unsigned int _sst:1;
-            unsigned int _apsd:1;
-            unsigned int _reserved:1;
-            unsigned int _dsss_ofdm:1;
-            unsigned int _delayed_block_ack:1;
-            unsigned int _immediate_block_ack:1;
-
+        class CapabilityInformation {
+        private:
+            #if TINS_IS_LITTLE_ENDIAN
+                uint16_t _ess:1,
+                         _ibss:1,
+                         _cf_poll:1,
+                         _cf_poll_req:1,
+                         _privacy:1,
+                         _short_preamble:1,
+                         _pbcc:1,
+                         _channel_agility:1,
+                         _spectrum_mgmt:1,
+                         _qos:1,
+                         _sst:1,
+                         _apsd:1,
+                         _reserved:1,
+                         _dsss_ofdm:1,
+                         _delayed_block_ack:1,
+                         _immediate_block_ack:1;
+            #elif TINS_IS_BIG_ENDIAN
+                uint16_t _channel_agility:1,
+                         _pbcc:1,
+                         _short_preamble:1,
+                         _privacy:1,
+                         _cf_poll_req:1,
+                         _cf_poll:1,
+                         _ibss:1,
+                        _ess:1,
+                        _immediate_block_ack:1,
+                         _delayed_block_ack:1,
+                         _dsss_ofdm:1,
+                         _reserved:1,
+                         _apsd:1,
+                         _sst:1,
+                         _qos:1,
+                         _spectrum_mgmt:1;
+            #endif
+        public:
             /**
              * \brief Getter for the ess flag.
              *
@@ -1002,58 +1009,8 @@ namespace Tins {
          */
         void addr4(const address_type &new_addr4);
 
-        /**
-         * \brief Returns the 802.11 frame's header length.
-         *
-         * \return An uint32_t with the header's size.
-         * \sa PDU::header_size()
-         */
-        uint32_t header_size() const;
-
-        /**
-         * \brief Getter for the PDU's type.
-         *
-         * \sa PDU::pdu_type
-         */
-        PDUType pdu_type() const { return PDU::DOT11_MANAGEMENT; }
-
-        /**
-         * \brief Check wether this PDU matches the specified flag.
-         * \param flag The flag to match
-         * \sa PDU::matches_flag
-         */
-        bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_MANAGEMENT || Dot11::matches_flag(flag);
-        }
-    protected:
-        struct ExtendedHeader {
-            uint8_t addr2[6];
-            uint8_t addr3[6];
-            struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int frag_number:4;
-                unsigned int seq_number:12;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int seq_number:12;
-                unsigned int frag_number:4;
-            #endif
-            } __attribute__((__packed__)) seq_control;
-        } __attribute__((__packed__));
-
-        /**
-         * \brief Constructor which creates a Dot11ManagementFrame object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        Dot11ManagementFrame(const address_type &dst_hw_addr = address_type(), 
-                                const address_type &src_hw_addr = address_type());
-        Dot11ManagementFrame(const NetworkInterface &iface, 
-                                const address_type &dst_hw_addr = address_type(), 
-                                const address_type &src_hw_addr = address_type());
-        Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
-        Dot11ManagementFrame(const Dot11ManagementFrame& other);
-
+        // Option setter helpers
+    
         /**
          * \brief Helper method to set the ssid.
          *
@@ -1071,23 +1028,23 @@ namespace Tins {
         /**
          * \brief Helper method to set the supported rates.
          *
-         * \param new_rates A list of rates to be set.
+         * \param new_rates The new rates to be set.
          */
-        void supported_rates(const std::list<float> &new_rates);
+        void supported_rates(const rates_type &new_rates);
 
         /**
          * \brief Helper method to set the extended supported rates.
          *
-         * \param new_rates A list of rates to be set.
+         * \param new_rates The new rates to be set.
          */
-        void extended_supported_rates(const std::list<float> &new_rates);
+        void extended_supported_rates(const rates_type &new_rates);
 
         /**
          * \brief Helper method to set the QoS capabilities.
          *
          * \param new_qos_capabilities uint8_t with the capabilities.
          */
-        void qos_capabilities(uint8_t new_qos_capabilities);
+        void qos_capability(uint8_t new_qos_capability);
 
         /**
          * \brief Helper method to set the power capabilities.
@@ -1095,14 +1052,14 @@ namespace Tins {
          * \param min_power uint8_t indicating the minimum transmiting power capability.
          * \param max_power uint8_t indicating the maximum transmiting power capability.
          */
-        void power_capabilities(uint8_t min_power, uint8_t max_power);
+        void power_capability(uint8_t min_power, uint8_t max_power);
 
         /**
          * \brief Helper method to set the supported channels.
          *
          * \param new_channels A list of channels to be set.
          */
-        void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
+        void supported_channels(const channels_type &new_channels);
 
         /**
          * \brief Helper method to set the EDCA Parameter Set.
@@ -1119,7 +1076,7 @@ namespace Tins {
          *
          * \param elements A list of elements.
          */
-        void request_information(const std::list<uint8_t> elements);
+        void request_information(const request_info_type elements);
 
         /**
          * \brief Helper method to set the FH parameter.
@@ -1261,15 +1218,147 @@ namespace Tins {
          * \brief ch_text_sz uint8_t with the ch_text's length.
          */
         void challenge_text(uint8_t* ch_text, uint8_t ch_text_sz);
+        
+        // Option searching helpers
+        
+        /**
+         * \brief Helper method to search for the RSN information of this PDU.
+         *
+         * This method fills the RSN information structure of this PDU.
+         * \param rsn A pointer in which the RSN information will be stored.
+         * \return True if the RSNInformation option has been set.
+         */
+        bool rsn_information(RSNInformation *rsn);
+        
+        /**
+         * \brief Helper method to search for this PDU's ssid.
+         * 
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return std::string containing the ssid.
+         */
+        std::string ssid() const;
+
+        /**
+         * \brief Helper method to get the supported rates.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return rates_type containing the supported rates.
+         */
+        rates_type supported_rates() const;
+
+        /**
+         * \brief Helper method to get the extended supported rates.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return rates_type containing the extended supported rates.
+         */
+        rates_type extended_supported_rates() const;
+
+        /**
+         * \brief Helper method to get the QOS capability.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return uint8_t containing the QOS capability.
+         */
+        uint8_t qos_capability() const;
+
+        /**
+         * \brief Helper method to get the power capability.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return std::pair<uint8_t, uint8_t> containing the power capability.
+         */
+        std::pair<uint8_t, uint8_t> power_capability() const;
+        
+        /**
+         * \brief Helper method to get the supported channels.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return channels_type containing the power capability.
+         */
+        channels_type supported_channels() const;
+        
+        /**
+         * \brief Helper method to get the request information.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return request_info_type containing the request information.
+         */
+        request_info_type request_information() const;
+        
+        // ************************
+
+        /**
+         * \brief Returns the 802.11 frame's header length.
+         *
+         * \return An uint32_t with the header's size.
+         * \sa PDU::header_size()
+         */
+        uint32_t header_size() const;
+
+        /**
+         * \brief Getter for the PDU's type.
+         *
+         * \sa PDU::pdu_type
+         */
+        PDUType pdu_type() const { return PDU::DOT11_MANAGEMENT; }
+
+        /**
+         * \brief Check wether this PDU matches the specified flag.
+         * \param flag The flag to match
+         * \sa PDU::matches_flag
+         */
+        bool matches_flag(PDUType flag) {
+           return flag == PDU::DOT11_MANAGEMENT || Dot11::matches_flag(flag);
+        }
+    protected:
+        struct ExtendedHeader {
+            uint8_t addr2[address_type::address_size];
+            uint8_t addr3[address_type::address_size];
+            struct {
+            #if __BYTE_ORDER == __LITTLE_ENDIAN
+                unsigned int frag_number:4;
+                unsigned int seq_number:12;
+            #elif __BYTE_ORDER == __BIG_ENDIAN
+                unsigned int seq_number:12;
+                unsigned int frag_number:4;
+            #endif
+            } __attribute__((__packed__)) seq_control;
+        } __attribute__((__packed__));
+
+        
+        Dot11ManagementFrame(const NetworkInterface &iface = NetworkInterface(), 
+                                const address_type &dst_hw_addr = address_type(), 
+                                const address_type &src_hw_addr = address_type());
+        
+        /**
+         * \brief Constructor which creates a Dot11ManagementFrame object from a buffer and adds all identifiable
+         * PDUs found in the buffer as children of this one.
+         * 
+         * \param buffer The buffer from which this PDU will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
+        Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 
         void copy_ext_header(const Dot11ManagementFrame *other);
 
         uint32_t management_frame_size() { 
-            return sizeof(_ext_header) + (from_ds() && to_ds()) ? address_type::address_size : 0; 
+            return sizeof(ieee80211_header) + sizeof(_ext_header) + 
+                    ((from_ds() && to_ds()) ? address_type::address_size : 0); 
         }
     private:
+        static uint8_t *serialize_rates(const rates_type &rates);
+        static rates_type deserialize_rates(const Dot11Option *option);
+    
         ExtendedHeader _ext_header;
         address_type _addr4;
     };
@@ -1286,14 +1375,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_BEACON;
 
         /**
-         * \brief Default constructor for the beacon frame.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11Beacon(const address_type &dst_hw_addr = address_type(), 
-                     const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 Beacon.
          *
          * Constructor that builds a 802.11 Beacon taking the interface name,
@@ -1303,7 +1384,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Beacon(const NetworkInterface& iface, 
+        Dot11Beacon(const NetworkInterface& iface = NetworkInterface(), 
                      const address_type &dst_hw_addr = address_type(), 
                      const address_type &src_hw_addr = address_type());
 
@@ -1321,28 +1402,28 @@ namespace Tins {
          *
          * \return Timestamp value in an uint64_t.
          */
-        uint64_t timestamp() const { return this->_body.timestamp; }
+        uint64_t timestamp() const { return Utils::le_to_host(this->_body.timestamp); }
 
         /**
          * \brief Getter for the interval field.
          *
          * \return Timestamp value in an uint16_t.
          */
-        uint16_t interval() const { return this->_body.interval; }
+        uint16_t interval() const { return Utils::le_to_host(this->_body.interval); }
+
+        /**
+         * \brief Getter for the Capabilities Information structure.
+         *
+         * \return const CapabilityInformation&.
+         */
+        const CapabilityInformation& capabilities() const { return this->_body.capability; }
 
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return CapabilityInformation&.
          */
-        const CapabilityInformation& capabilities() const { return this->_body.capability;}
-
-        /**
-         * \brief Getter for the Capabilities Information.
-         *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
-         */
-        CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return this->_body.capability; }
 
         /**
          * \brief Setter for the timestamp field.
@@ -1357,199 +1438,6 @@ namespace Tins {
          * \param new_interval uint16_t with the interval to set.
          */
         void interval(uint16_t new_interval);
-
-        /**
-         * \brief Helper method to set the essid.
-         * \param new_essid The essid to be set.
-         */
-        void essid(const std::string &new_essid);
-
-        /**
-         * \brief Helper method to set the supported rates.
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the FH parameter.
-         *
-         * \param dwell_time uint16_t with the dwell_time value.
-         * \param hop_set uint8_t with the value of the set_hop.
-         * \param hop_pattern uint8_t with the value of the hop_pattern field.
-         * \param hop_index uint8_t with the value of the hop_index field.
-         */
-        void fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index);
-
-        /**
-         * \brief Helper method to set the DS parameter.
-         *
-         * \param current_channel uint8_t with the value of the current_channel field.
-         */
-        void ds_parameter_set(uint8_t current_channel);
-
-        /**
-         * \brief Helper method to set the CF parameter.
-         *
-         * \param cfp_count uint8_t with the value of the cfp count field.
-         * \param cfp_period uint8_t with the value of the cfp period field.
-         * \param cfp_max_duration uint16_t with the value of the cfp max duration field.
-         * \param cfp_dur_remaining uint16_t with the value of the DurRemaining field.
-         */
-        void cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining);
-
-        /**
-         * \brief Helper method to set the IBSS parameter.
-         *
-         * \param atim_window uint16_t with the value of the ATIM window field.
-         */
-        void ibss_parameter_set(uint16_t atim_window);
-
-        /**
-         * \brief Helper method to set the TIM tagged option.
-         *
-         * \brief dtim_count uint8_t with the value of the DTIM count field.
-         * \brief dtim_period uint8_t with the value of the DTIM period field.
-         * \brief bitmap_control uint8_t with the value of the Bitmap Control field.
-         * \brief partial_virtual_bitmap uint8_t array with the value fo the Partial Virtual Bitmap field.
-         * \brief partial_virtual_bitmap_sz uint8_t with the size of the partial_virtual_bitmap array.
-         */
-         void tim(uint8_t dtim_count, uint8_t dtim_period, uint8_t bitmap_control, uint8_t* partial_virtual_bitmap, uint8_t partial_virtual_bitmap_sz);
-
-         /**
-         * \brief Helper method to set the country tagged option.
-         *
-         * \param countries Reference to a vector of uint8_t arrays of 3 bytes. Containing the list of countries.
-         * \param first_channels Reference to a vector of uint8_t. Containing the first channels for each country.
-         * \param num_channels Reference to a vector of uint8_t. Containing the number of channels for each country.
-         * \param max_power Reference to a vector of uint8_t. Containing the max power for each country.
-         */
-        void country(const std::vector<uint8_t*>& countries, const std::vector<uint8_t>& first_channels, const std::vector<uint8_t>& number_channels, const std::vector<uint8_t>& max_power);
-
-        /**
-         * \brief Helper method to set the FH parameters.
-         *
-         * \param prime_radix uint8_t with the value of the prime radix field.
-         * \param number_channels uint8_t with the value of the number channels field.
-         */
-        void fh_parameters(uint8_t prime_radix, uint8_t number_channels);
-
-        /**
-         * \brief Helper method to set the FH pattern table.
-         *
-         * \param flag uint8_t with the value of the flag field.
-         * \param number_of_sets uint8_t with the value of the number of sets field.
-         * \param modulus uint8_t with the value of the modulus field.
-         * \param offset uint8_t with the value of the offset field.
-         * \param random_table reference to vector of uint8_t witht the elements of the table.
-         */
-        void fh_pattern_table(uint8_t flag, uint8_t number_of_sets, uint8_t modulus, uint8_t offset, const std::vector<uint8_t>& random_table);
-
-        /**
-         * \brief Helper method to set the Power Constraint tagged option.
-         *
-         * \param local_power_constraint uint8_t with the value of the local power constraint field.
-         */
-        void power_constraint(uint8_t local_power_constraint);
-
-        /**
-         * \brief Helper method to set the Channel Switch tagged option.
-         *
-         * \param switch_mode uint8_t with the value of the switch mode field.
-         * \param new_channel uint8_t with the value of the new channel field.
-         * \param switch_count uint8_t with the value of the switch count field.
-         */
-        void channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count);
-
-        /**
-         * \brief Helper method to set the Quiet tagged option.
-         *
-         * \param quiet_count uint8_t with the value of the quiet count field.
-         * \param quiet_period uint8_t with the value of the quiet period field.
-         * \param quiet_duration uint16_t with the value of the quiet duration field.
-         * \param quiet_offset uint16_t with the value of the quiet offset field.
-         */
-        void quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset);
-
-        /**
-         * \brief Helper method to set the IBSS DFS tagged option.
-         *
-         * \param dfs_owner uint8_t array of 6 bytes with the dfs owner.
-         * \param recovery_interval uint8_t with the value of the recovery interval field.
-         * \param channel_map Reference to a constant vector of pair of uint8_t with the map of channels.
-         */
-        void ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const std::vector<std::pair<uint8_t, uint8_t> >& channel_map);
-
-        /**
-         * \brief Helper method to set the TPC Report tagged option.
-         *
-         * \param transmit_power uint8_t with the value of the transmit power field.
-         * \param link_margin uint8_t with the value of the link margin field.
-         */
-        void tpc_report(uint8_t transmit_power, uint8_t link_margin);
-
-        /**
-         * \brief Helper method to set the ERP Information tagged option.
-         *
-         * \param value with the value to set as argument of the tagged option.
-         */
-        void erp_information(uint8_t value);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the RSN information option.
-         *
-         * \param info The RSNInformation structure to be set.
-         */
-        void rsn_information(const RSNInformation& info);
-
-        /**
-         * \brief Helper method to set the BSS Load tagged option.
-         *
-         * \param station_count uint16_t with the value of the station count field.
-         * \param channel_utilization uint8_t with the value of the channel utilization field.
-         * \param available_capacity uint16_t with the value of the available capacity field.
-         */
-        void bss_load(uint16_t station_count, uint8_t channel_utilization, uint16_t avaliable_capacity);
-
-        /**
-         * \brief Helper method to set the EDCA Parameter Set.
-         *
-         * \param ac_be uint32_t with the value of the ac_be field.
-         * \param ac_bk uint32_t with the value of the ac_bk field.
-         * \param ac_vi uint32_t with the value of the ac_vi field.
-         * \param ac_vo uint32_t with the value of the ac_vo field.
-         */
-        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
-
-        /**
-          * \brief Helper method to set the QoS capability tagged option.
-          *
-          * \brief qos_info uint8_t with the QoS info byte.
-          */
-        void qos_capabilities(uint8_t qos_info);
-
-        /**
-         * \brief Helper method to search for the ESSID of this beacon.
-         *
-         * This method returns the essid of this beacon, or an empty
-         * string if no essid has been set.
-         */
-        std::string essid() const;
-
-        /**
-         * \brief Helper method to search for the RSN information of this beacon.
-         *
-         * This method fills the RSN information structure of this beacon.
-         * \param rsn A pointer in which the RSN information will be stored.
-         * \return True if the RSNInformation option has been set.
-         */
-        bool rsn_information(RSNInformation *rsn);
 
         /**
          * \brief Returns the frame's header length.
@@ -1573,7 +1461,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        PDU *clone_pdu() const {
+            return PDU::do_clone_pdu<Dot11Beacon>();
+        }
 
         /**
          * \brief Getter for the PDU's type.
@@ -1597,18 +1487,12 @@ namespace Tins {
      *
      */
     class Dot11Disassoc : public Dot11ManagementFrame {
-
     public:
-
-        /**
-         * \brief Default constructor for the Disassociation frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+       /**
+         * \brief This PDU's flag.
          */
-        Dot11Disassoc(const address_type &dst_hw_addr = address_type(), 
-                        const address_type &src_hw_addr = address_type());
-
+        static const PDU::PDUType pdu_flag = PDU::DOT11_DIASSOC;
+    
         /**
          * \brief Constructor for creating a 802.11 Disassociation.
          *
@@ -1619,7 +1503,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Disassoc(const NetworkInterface& iface, 
+        Dot11Disassoc(const NetworkInterface& iface = NetworkInterface(), 
                         const address_type &dst_hw_addr = address_type(), 
                         const address_type &src_hw_addr = address_type());
 
@@ -1697,15 +1581,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_ASSOC_REQ;
 
         /**
-         * \brief Default constructor for the Association Request frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11AssocRequest(const address_type &dst_hw_addr = address_type(), 
-                            const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 Association Request.
          *
          * Constructor that builds a 802.11 Association Request taking the interface name,
@@ -1715,7 +1590,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocRequest(const NetworkInterface& iface, 
+        Dot11AssocRequest(const NetworkInterface& iface = NetworkInterface(), 
                             const address_type &dst_hw_addr = address_type(), 
                             const address_type &src_hw_addr = address_type());
 
@@ -1755,56 +1630,6 @@ namespace Tins {
          * \param new_listen_interval uint16_t with the new listen interval.
          */
         void listen_interval(uint16_t new_listen_interval);
-
-        /**
-         * \brief Helper method to set the essid.
-         *
-         * \param new_ssid The ssid to be set.
-         */
-        void ssid(const std::string &new_ssid);
-
-        /**
-         * \brief Helper method to set the supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the power capabilities.
-         *
-         * \param min_power uint8_t indicating the minimum transmiting power capability.
-         * \param max_power uint8_t indicating the maximum transmiting power capability.
-         */
-        void power_capabilities(uint8_t min_power, uint8_t max_power);
-
-        /**
-         * \brief Helper method to set the supported channels.
-         *
-         * \param new_channels A list of channels to be set.
-         */
-        void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
-
-        /**
-         * \brief Helper method to set the RSN information option.
-         *
-         * \param info The RSNInformation structure to be set.
-         */
-        void rsn_information(const RSNInformation& info);
-
-        /**
-         * \brief Helper method to set the QoS capabilities.
-         *
-         * \param new_qos_capabilities uint8_t with the capabilities.
-         */
-        void qos_capabilities(uint8_t new_qos_capabilities);
 
         /**
          * \brief Returns the frame's header length.
@@ -1858,15 +1683,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_ASSOC_RESP;
 
         /**
-         * \brief Default constructor for the Association Response frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11AssocResponse(const address_type &dst_hw_addr = address_type(), 
-                              const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 Association Response.
          *
          * Constructor that builds a 802.11 Association Response taking the interface name,
@@ -1876,7 +1692,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11AssocResponse(const NetworkInterface& iface, 
+        Dot11AssocResponse(const NetworkInterface& iface = NetworkInterface(), 
                               const address_type &dst_hw_addr = address_type(), 
                               const address_type &src_hw_addr = address_type());
 
@@ -1932,30 +1748,6 @@ namespace Tins {
         void aid(uint16_t new_aid);
 
         /**
-         * \brief Helper method to set the supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the EDCA Parameter Set.
-         *
-         * \param ac_be uint32_t with the value of the ac_be field.
-         * \param ac_bk uint32_t with the value of the ac_bk field.
-         * \param ac_vi uint32_t with the value of the ac_vi field.
-         * \param ac_vo uint32_t with the value of the ac_vo field.
-         */
-        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
-
-        /**
          * \brief Returns the frame's header length.
          *
          * \return An uint32_t with the header's size.
@@ -2008,15 +1800,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_REASSOC_REQ;
 
         /**
-         * \brief Default constructor for the ReAssociation Request frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11ReAssocRequest(const address_type &dst_hw_addr = address_type(), 
-                               const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 ReAssociation Request.
          *
          * Constructor that builds a 802.11 Association Request taking the interface name,
@@ -2026,7 +1809,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ReAssocRequest(const NetworkInterface& iface, 
+        Dot11ReAssocRequest(const NetworkInterface& iface = NetworkInterface(), 
                                const address_type &dst_hw_addr = address_type(), 
                                const address_type &src_hw_addr = address_type());
 
@@ -2082,56 +1865,6 @@ namespace Tins {
         void current_ap(uint8_t* new_current_ap);
 
         /**
-         * \brief Helper method to set the essid.
-         *
-         * \param new_ssid The ssid to be set.
-         */
-        void ssid(const std::string &new_ssid);
-
-        /**
-         * \brief Helper method to set the supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the power capabilities.
-         *
-         * \param min_power uint8_t indicating the minimum transmiting power capability.
-         * \param max_power uint8_t indicating the maximum transmiting power capability.
-         */
-        void power_capabilities(uint8_t min_power, uint8_t max_power);
-
-        /**
-         * \brief Helper method to set the supported channels.
-         *
-         * \param new_channels A list of channels to be set.
-         */
-        void supported_channels(const std::list<std::pair<uint8_t, uint8_t> > &new_channels);
-
-        /**
-         * \brief Helper method to set the RSN information option.
-         *
-         * \param info The RSNInformation structure to be set.
-         */
-        void rsn_information(const RSNInformation& info);
-
-        /**
-         * \brief Helper method to set the QoS capabilities.
-         *
-         * \param new_qos_capabilities uint8_t with the capabilities.
-         */
-        void qos_capabilities(uint8_t new_qos_capabilities);
-
-        /**
          * \brief Returns the frame's header length.
          *
          * \return An uint32_t with the header's size.
@@ -2184,15 +1917,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_REASSOC_RESP;
 
         /**
-         * \brief Default constructor for the ReAssociation Response frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11ReAssocResponse(const address_type &dst_hw_addr = address_type(), 
-                                const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 Association Response.
          *
          * Constructor that builds a 802.11 ReAssociation Response taking the interface name,
@@ -2202,7 +1926,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ReAssocResponse(const NetworkInterface& iface, 
+        Dot11ReAssocResponse(const NetworkInterface& iface = NetworkInterface(), 
                                 const address_type &dst_hw_addr = address_type(), 
                                 const address_type &src_hw_addr = address_type());
 
@@ -2258,30 +1982,6 @@ namespace Tins {
         void aid(uint16_t new_aid);
 
         /**
-         * \brief Helper method to set the supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the EDCA Parameter Set.
-         *
-         * \param ac_be uint32_t with the value of the ac_be field.
-         * \param ac_bk uint32_t with the value of the ac_bk field.
-         * \param ac_vi uint32_t with the value of the ac_vi field.
-         * \param ac_vo uint32_t with the value of the ac_vo field.
-         */
-        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
-
-        /**
          * \brief Returns the frame's header length.
          *
          * \return An uint32_t with the header's size.
@@ -2334,15 +2034,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_AUTH;
 
         /**
-         * \brief Default constructor for the Authentication frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11Authentication(const address_type &dst_hw_addr = address_type(), 
-                               const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 Authentication.
          *
          * Constructor that builds a 802.11 Dot11Authentication taking the interface name,
@@ -2352,7 +2043,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Authentication(const NetworkInterface& iface, 
+        Dot11Authentication(const NetworkInterface& iface = NetworkInterface(), 
                                const address_type &dst_hw_addr = address_type(), 
                                const address_type &src_hw_addr = address_type());
 
@@ -2408,14 +2099,6 @@ namespace Tins {
         void status_code(uint16_t new_status_code);
 
         /**
-         * \brief Helper method to set the Challenge Text tagged option.
-         *
-         * \brief ch_text uint8_t array with the challenge_text.
-         * \brief ch_text_sz uint8_t with the ch_text's length.
-         */
-        void challenge_text(uint8_t* ch_text, uint8_t ch_text_sz);
-
-        /**
          * \brief Returns the frame's header length.
          *
          * \return An uint32_t with the header's size.
@@ -2469,15 +2152,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_DEAUTH;
 
         /**
-         * \brief Default constructor for the Deauthentication frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11Deauthentication(const address_type &dst_hw_addr = address_type(), 
-                                 const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 Deauthentication.
          *
          * Constructor that builds a 802.11 Deauthentication taking the interface name,
@@ -2487,9 +2161,9 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11Deauthentication(const NetworkInterface& iface, 
+        Dot11Deauthentication(const NetworkInterface& iface = NetworkInterface(), 
                                  const address_type &dst_hw_addr = address_type(), 
-                                 const address_type &src_hw_addr = 0);
+                                 const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11Deauthentication object from a buffer and adds
@@ -2565,15 +2239,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_PROBE_REQ;
 
         /**
-         * \brief Default constructor for the Probe Request frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11ProbeRequest(const address_type &dst_hw_addr = address_type(), 
-                            const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 Probe Request.
          *
          * Constructor that builds a 802.11 Probe Request taking the interface name,
@@ -2583,7 +2248,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ProbeRequest(const NetworkInterface& iface, 
+        Dot11ProbeRequest(const NetworkInterface& iface = NetworkInterface(), 
                             const address_type &dst_hw_addr = address_type(), 
                             const address_type &src_hw_addr = address_type());
 
@@ -2595,34 +2260,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Helper method to set the essid.
-         *
-         * \param new_ssid The ssid to be set.
-         */
-        void ssid(const std::string &new_ssid);
-
-        /**
-         * \brief Helper method to set the supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the Request Information element.
-         *
-         * \param elements A list of elements.
-         */
-        void request_information(const std::list<uint8_t> elements);
 
         /**
          * \brief Getter for the PDU's type.
@@ -2660,15 +2297,6 @@ namespace Tins {
         static const PDU::PDUType pdu_flag = PDU::DOT11_PROBE_RESP;
 
         /**
-         * \brief Default constructor for the Probe Response frame.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         */
-        Dot11ProbeResponse(const address_type &dst_hw_addr = address_type(), 
-                              const address_type &src_hw_addr = address_type());
-
-        /**
          * \brief Constructor for creating a 802.11 Probe Response.
          *
          * Constructor that builds a 802.11 Probe Response taking the interface name,
@@ -2678,7 +2306,7 @@ namespace Tins {
          * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          */
-        Dot11ProbeResponse(const NetworkInterface& iface, 
+        Dot11ProbeResponse(const NetworkInterface& iface = NetworkInterface(), 
                             const address_type &dst_hw_addr = address_type(), 
                             const address_type &src_hw_addr = address_type());
 
@@ -2734,166 +2362,6 @@ namespace Tins {
         void interval(uint16_t new_interval);
 
         /**
-         * \brief Helper method to set the ssid.
-         *
-         * \param new_ssid The ssid to be set.
-         */
-        void ssid(const std::string &new_ssid);
-
-        /**
-         * \brief Helper method to set the supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the FH parameter.
-         *
-         * \param dwell_time uint16_t with the dwell_time value.
-         * \param hop_set uint8_t with the value of the set_hop.
-         * \param hop_pattern uint8_t with the value of the hop_pattern field.
-         * \param hop_index uint8_t with the value of the hop_index field.
-         */
-        void fh_parameter_set(uint16_t dwell_time, uint8_t hop_set, uint8_t hop_pattern, uint8_t hop_index);
-
-        /**
-         * \brief Helper method to set the DS parameter.
-         *
-         * \param current_channel uint8_t with the value of the current_channel field.
-         */
-        void ds_parameter_set(uint8_t current_channel);
-
-        /**
-         * \brief Helper method to set the CF parameter.
-         *
-         * \param cfp_count uint8_t with the value of the cfp count field.
-         * \param cfp_period uint8_t with the value of the cfp period field.
-         * \param cfp_max_duration uint16_t with the value of the cfp max duration field.
-         * \param cfp_dur_remaining uint16_t with the value of the DurRemaining field.
-         */
-        void cf_parameter_set(uint8_t cfp_count, uint8_t cfp_period, uint16_t cfp_max_duration, uint16_t cfp_dur_remaining);
-
-        /**
-         * \brief Helper method to set the IBSS parameter.
-         *
-         * \param atim_window uint16_t with the value of the ATIM window field.
-         */
-        void ibss_parameter_set(uint16_t atim_window);
-
-        /**
-         * \brief Helper method to set the country tagged option.
-         *
-         * \param countries Reference to a vector of uint8_t arrays of 3 bytes. Containing the list of countries.
-         * \param first_channels Reference to a vector of uint8_t. Containing the first channels for each country.
-         * \param num_channels Reference to a vector of uint8_t. Containing the number of channels for each country.
-         * \param max_power Reference to a vector of uint8_t. Containing the max power for each country.
-         */
-        void country(const std::vector<uint8_t*>& countries, const std::vector<uint8_t>& first_channels, const std::vector<uint8_t>& number_channels, const std::vector<uint8_t>& max_power);
-
-        /**
-         * \brief Helper method to set the FH parameters.
-         *
-         * \param prime_radix uint8_t with the value of the prime radix field.
-         * \param number_channels uint8_t with the value of the number channels field.
-         */
-        void fh_parameters(uint8_t prime_radix, uint8_t number_channels);
-
-        /**
-         * \brief Helper method to set the FH pattern table.
-         *
-         * \param flag uint8_t with the value of the flag field.
-         * \param number_of_sets uint8_t with the value of the number of sets field.
-         * \param modulus uint8_t with the value of the modulus field.
-         * \param offset uint8_t with the value of the offset field.
-         * \param random_table reference to vector of uint8_t witht the elements of the table.
-         */
-        void fh_pattern_table(uint8_t flag, uint8_t number_of_sets, uint8_t modulus, uint8_t offset, const std::vector<uint8_t>& random_table);
-
-        /**
-         * \brief Helper method to set the Power Constraint tagged option.
-         *
-         * \param local_power_constraint uint8_t with the value of the local power constraint field.
-         */
-        void power_constraint(uint8_t local_power_constraint);
-
-        /**
-         * \brief Helper method to set the Channel Switch tagged option.
-         *
-         * \param switch_mode uint8_t with the value of the switch mode field.
-         * \param new_channel uint8_t with the value of the new channel field.
-         * \param switch_count uint8_t with the value of the switch count field.
-         */
-        void channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count);
-
-        /**
-         * \brief Helper method to set the Quiet tagged option.
-         *
-         * \param quiet_count uint8_t with the value of the quiet count field.
-         * \param quiet_period uint8_t with the value of the quiet period field.
-         * \param quiet_duration uint16_t with the value of the quiet duration field.
-         * \param quiet_offset uint16_t with the value of the quiet offset field.
-         */
-        void quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset);
-
-        /**
-         * \brief Helper method to set the IBSS DFS tagged option.
-         *
-         * \param dfs_owner uint8_t array of 6 bytes with the dfs owner.
-         * \param recovery_interval uint8_t with the value of the recovery interval field.
-         * \param channel_map Reference to a constant vector of pair of uint8_t with the map of channels.
-         */
-        void ibss_dfs(const uint8_t* dfs_owner, uint8_t recovery_interval, const std::vector<std::pair<uint8_t, uint8_t> >& channel_map);
-
-        /**
-         * \brief Helper method to set the TPC Report tagged option.
-         *
-         * \param transmit_power uint8_t with the value of the transmit power field.
-         * \param link_margin uint8_t with the value of the link margin field.
-         */
-        void tpc_report(uint8_t transmit_power, uint8_t link_margin);
-
-        /**
-         * \brief Helper method to set the ERP Information tagged option.
-         *
-         * \param value with the value to set as argument of the tagged option.
-         */
-        void erp_information(uint8_t value);
-
-        /**
-         * \brief Helper method to set the extended supported rates.
-         *
-         * \param new_rates A list of rates to be set.
-         */
-        void extended_supported_rates(const std::list<float> &new_rates);
-
-        /**
-         * \brief Helper method to set the RSN information option.
-         *
-         * \param info The RSNInformation structure to be set.
-         */
-        void rsn_information(const RSNInformation& info);
-
-        /**
-         * \brief Helper method to set the BSS Load tagged option.
-         *
-         * \param station_count uint16_t with the value of the station count field.
-         * \param channel_utilization uint8_t with the value of the channel utilization field.
-         * \param available_capacity uint16_t with the value of the available capacity field.
-         */
-        void bss_load(uint16_t station_count, uint8_t channel_utilization, uint16_t avaliable_capacity);
-
-        /**
-         * \brief Helper method to set the EDCA Parameter Set.
-         *
-         * \param ac_be uint32_t with the value of the ac_be field.
-         * \param ac_bk uint32_t with the value of the ac_bk field.
-         * \param ac_vi uint32_t with the value of the ac_vi field.
-         * \param ac_vo uint32_t with the value of the ac_vo field.
-         */
-        void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
-
-        /**
          * \brief Returns the frame's header length.
          *
          * \return An uint32_t with the header's size.
@@ -2944,12 +2412,10 @@ namespace Tins {
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_DATA;
                     
-        Dot11Data(const address_type &dst_hw_addr = address_type(), 
+        Dot11Data(const NetworkInterface &iface = NetworkInterface(), 
+                    const address_type &dst_hw_addr = address_type(), 
                     const address_type &src_hw_addr = address_type(), 
                     PDU* child = 0);
-                    
-        Dot11Data(const NetworkInterface &iface, const address_type &dst_hw_addr, 
-                    const address_type &src_hw_addr, PDU* child = 0);
                     
         /**
          * \brief Constructor which creates a Dot11Data object from a buffer and adds all identifiable
@@ -3091,19 +2557,6 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 QoS Data PDU
          *
-         * Constructor that builds a 802.11 QoS Data PDU taking the destination's and source's MAC.
-         *
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11QoSData(const address_type &dst_hw_addr = address_type(), 
-                     const address_type &src_hw_addr = address_type(), 
-                     PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating a 802.11 QoS Data PDU
-         *
          * Constructor that builds a 802.11 QoS Data PDU taking the interface name,
          * destination's and source's MAC.
          *
@@ -3112,7 +2565,7 @@ namespace Tins {
          * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11QoSData(const NetworkInterface& iface, 
+        Dot11QoSData(const NetworkInterface& iface = NetworkInterface(), 
                         const address_type &dst_hw_addr = address_type(), 
                         const address_type &src_hw_addr = address_type(), 
                         PDU* child = 0);
@@ -3195,18 +2648,7 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_CONTROL;
-    
-        /**
-         * \brief Constructor for creating a 802.11 control frame PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         *
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11Control(const address_type &dst_addr = address_type(), 
-                        PDU* child = 0);
-
+        
         /**
          * \brief Constructor for creating a 802.11 control frame PDU
          *
@@ -3217,7 +2659,7 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(const NetworkInterface& iface, 
+        Dot11Control(const NetworkInterface& iface = NetworkInterface(), 
                         const address_type &dst_addr = address_type(), 
                         PDU* child = 0);
 
@@ -3254,19 +2696,6 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 control frame TA PDU
          *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         *
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11ControlTA(const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
-
-        /**
-         * \brief Constructor for creating a 802.11 control frame TA PDU
-         *
          * Constructor that builds a 802.11 PDU taking the interface name,
          * destination's and source's MAC.
          *
@@ -3275,7 +2704,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11ControlTA(const NetworkInterface& iface, 
+        Dot11ControlTA(const NetworkInterface& iface = NetworkInterface(), 
                         const address_type &dst_addr = address_type(), 
                         const address_type &target_addr = address_type(), 
                         PDU* child = 0);
@@ -3324,19 +2753,6 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_RTS;
-        
-        /**
-         * \brief Constructor for creating a 802.11 RTS frame PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         *
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11RTS(const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 RTS frame PDU
@@ -3349,7 +2765,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11RTS(const NetworkInterface& iface, 
+        Dot11RTS(const NetworkInterface& iface = NetworkInterface(), 
                     const address_type &dst_addr = address_type(), 
                     const address_type &target_addr = address_type(), 
                     PDU* child = 0);
@@ -3391,19 +2807,6 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_PS_POLL;
-    
-        /**
-         * \brief Constructor for creating a 802.11 PS-Poll frame PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         *
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11PSPoll(const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 PS-Poll frame PDU
@@ -3416,7 +2819,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11PSPoll(const NetworkInterface& iface, 
+        Dot11PSPoll(const NetworkInterface& iface = NetworkInterface(), 
                         const address_type &dst_addr = address_type(), 
                         const address_type &target_addr = address_type(), 
                         PDU* child = 0);
@@ -3458,19 +2861,6 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_CF_END;
-    
-        /**
-         * \brief Constructor for creating a 802.11 CF-End frame PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         *
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11CFEnd(const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 CF-End frame PDU
@@ -3483,7 +2873,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11CFEnd(const NetworkInterface& iface, 
+        Dot11CFEnd(const NetworkInterface& iface = NetworkInterface(), 
                     const address_type &dst_addr = address_type(), 
                     const address_type &target_addr = address_type(), 
                     PDU* child = 0);
@@ -3525,18 +2915,6 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_END_CF_ACK;
-    
-        /**
-         * \brief Constructor for creating a 802.11 End-CF-Ack frame PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11EndCFAck(const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 End-CF-Ack frame PDU
@@ -3548,7 +2926,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11EndCFAck(const NetworkInterface& iface, 
+        Dot11EndCFAck(const NetworkInterface& iface = NetworkInterface(), 
                         const address_type &dst_addr = address_type(), 
                         const address_type &target_addr = address_type(), 
                         PDU* child = 0);
@@ -3590,16 +2968,6 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_ACK;
-    
-        /**
-         * \brief Constructor for creating a 802.11 Ack frame PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         *
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11Ack(const address_type &dst_addr = address_type(), PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Ack frame PDU
@@ -3611,7 +2979,7 @@ namespace Tins {
          * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Ack(const NetworkInterface& iface, 
+        Dot11Ack(const NetworkInterface& iface = NetworkInterface(), 
                     const address_type &dst_addr = address_type(), 
                     PDU* child = 0);
 
@@ -3655,18 +3023,6 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_BLOCK_ACK_REQ;
-    
-        /**
-         * \brief Constructor for creating a 802.11 Block Ack request frame PDU
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11BlockAckRequest(const address_type &dst_addr = address_type(), 
-                                const address_type &target_addr = address_type(), 
-                                PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Block Ack request frame PDU
@@ -3678,7 +3034,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAckRequest(const NetworkInterface& iface, 
+        Dot11BlockAckRequest(const NetworkInterface& iface = NetworkInterface(), 
                                 const address_type &dst_addr = address_type(), 
                                 const address_type &target_addr = address_type(), 
                                 PDU* child = 0);
@@ -3775,18 +3131,6 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_BLOCK_ACK;
-    
-        /**
-         * \brief Constructor for creating a 802.11 Block Ack frame PDU.
-         *
-         * Constructor that builds a 802.11 PDU taking the destination's and source's MAC.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
-         */
-        Dot11BlockAck(const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
 
         /**
          * \brief Constructor for creating a 802.11 Block Ack frame PDU
@@ -3798,7 +3142,7 @@ namespace Tins {
          * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAck(const NetworkInterface& iface, 
+        Dot11BlockAck(const NetworkInterface& iface = NetworkInterface(), 
                         const address_type &dst_addr = address_type(), 
                         const address_type &target_addr = address_type(), 
                         PDU* child = 0);
