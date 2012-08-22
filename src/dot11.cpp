@@ -308,7 +308,7 @@ void Dot11ManagementFrame::frag_num(uint8_t new_frag_num) {
 }
 
 void Dot11ManagementFrame::seq_num(uint16_t new_seq_num) {
-    this->_ext_header.seq_control.seq_number = new_seq_num;
+    this->_ext_header.seq_control.seq_number = Utils::host_to_le(new_seq_num);
 }
 
 void Dot11ManagementFrame::addr4(const address_type &new_addr4) {
@@ -455,35 +455,24 @@ void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params &params) {
 
 }
 
-void Dot11ManagementFrame::country(const std::vector<uint8_t*>& countries,
-                                         const std::vector<uint8_t>& first_channels,
-                                         const std::vector<uint8_t>& number_channels,
-                                         const std::vector<uint8_t>& max_power) {
-
-    /* Check that the lists have the same number of elements */
-    if ((countries.size() != first_channels.size()) ||
-        (countries.size() != number_channels.size()) ||
-        (countries.size() != max_power.size()))
-        throw runtime_error("Lists should be of equal length!");
-
-    uint8_t sz = 6 * countries.size();
-    if (sz & 1) // If size is odd, pad it
+void Dot11ManagementFrame::country(const country_params &params) {
+    if ((params.first_channel.size() != params.number_channels.size()) ||
+        (params.number_channels.size() != params.max_transmit_power.size()))
+        throw runtime_error("The length of the lists are distinct");
+    if(params.country.size() != 3)
+        throw runtime_error("Invalid country identifier length");
+    size_t sz = sizeof(uint8_t) * 3 * params.first_channel.size() + params.country.size();
+    // Use 1 byte padding at the end if the length is odd.
+    if((sz & 1) == 1)
         sz++;
-    uint8_t* buffer = new uint8_t[sz];
-    uint8_t* ptr_buffer = buffer;
-    for (uint8_t i = 0; i < countries.size(); i++) {
-        memcpy(ptr_buffer, countries[i], 3);
-        ptr_buffer += 3;
-        *ptr_buffer = first_channels[i];
-        ptr_buffer++;
-        *ptr_buffer = number_channels[i];
-        ptr_buffer++;
-        *ptr_buffer = max_power[i];
-        ptr_buffer++;
+    std::vector<uint8_t> buffer(sz);
+    uint8_t *ptr = std::copy(params.country.begin(), params.country.end(), &buffer[0]);
+    for(size_t i(0); i < params.first_channel.size(); ++i) {
+        *(ptr++) = params.first_channel[i];
+        *(ptr++) = params.number_channels[i];
+        *(ptr++) = params.max_transmit_power[i];
     }
-    add_tagged_option(COUNTRY, sz, buffer);
-    delete[] buffer;
-
+    add_tagged_option(COUNTRY, sz, &buffer[0]);
 }
 
 void Dot11ManagementFrame::fh_parameters(uint8_t prime_radix, uint8_t number_channels) {
@@ -493,13 +482,8 @@ void Dot11ManagementFrame::fh_parameters(uint8_t prime_radix, uint8_t number_cha
     add_tagged_option(HOPPING_PATTERN_PARAMS, 2, buffer);
 }
 
-void Dot11ManagementFrame::fh_pattern_table(uint8_t flag,
-                                                  uint8_t number_of_sets,
-                                                  uint8_t modulus,
-                                                  uint8_t offset,
-                                                  const vector<uint8_t>& random_table) {
-
-    uint8_t sz = 4 + random_table.size();
+void Dot11ManagementFrame::fh_pattern_table(const fh_pattern_type &params) {
+    /*uint8_t sz = 4 + random_table.size();
     uint8_t* buffer = new uint8_t[sz];
     buffer[0] = flag;
     buffer[1] = number_of_sets;
@@ -509,7 +493,17 @@ void Dot11ManagementFrame::fh_pattern_table(uint8_t flag,
     for (vector<uint8_t>::const_iterator it = random_table.begin(); it != random_table.end(); it++)
         *(ptr_buffer++) = *it;
     add_tagged_option(HOPPING_PATTERN_TABLE, sz, buffer);
-    delete[] buffer;
+    delete[] buffer;*/
+    std::vector<uint8_t> data(sizeof(uint8_t) * 4 + params.random_table.size());
+    uint8_t *ptr = &data[0];
+    *(ptr++) = params.flag;
+    *(ptr++) = params.number_of_sets;
+    *(ptr++) = params.modulus;
+    *(ptr++) = params.offset;
+    fh_pattern_type::container_type::const_iterator it(params.random_table.begin());
+    for(; it != params.random_table.end(); ++it)
+        *(ptr++) = *it;
+    add_tagged_option(HOPPING_PATTERN_TABLE, data.size(), &data[0]);
 }
 
 void Dot11ManagementFrame::power_constraint(uint8_t local_power_constraint) {
@@ -675,8 +669,9 @@ Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_informatio
         throw std::runtime_error("Request information not set");
     request_info_type output;
     const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
-    while(ptr != end)
-        output.push_back(*(ptr++));
+    //while(ptr != end)
+    //    output.push_back(*(ptr++));
+    output.assign(ptr, end);
     return output;
 }
 
@@ -721,6 +716,49 @@ Dot11ManagementFrame::ibss_dfs_params Dot11ManagementFrame::ibss_dfs() const {
             throw std::runtime_error("Malformed channel data");
         output.channel_map.push_back(std::make_pair(first, *(ptr++)));
     }
+    return output;
+}
+
+Dot11ManagementFrame::country_params Dot11ManagementFrame::country() const {
+    const Dot11::Dot11Option *option = search_option(COUNTRY);
+    if(!option || option->data_size() < country_params::minimum_size)
+        throw std::runtime_error("Country option not set");
+    country_params output;
+    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
+    std::copy(ptr, ptr + 3, std::back_inserter(output.country));
+    ptr += output.country.size();
+    while(end - ptr >= 3) {
+        output.first_channel.push_back(*(ptr++));
+        output.number_channels.push_back(*(ptr++));
+        output.max_transmit_power.push_back(*(ptr++));
+    }
+    if(ptr != end)
+        throw std::runtime_error("Malformed option");
+    return output;
+}
+
+std::pair<uint8_t, uint8_t> Dot11ManagementFrame::fh_parameters() const {
+    const Dot11::Dot11Option *option = search_option(HOPPING_PATTERN_PARAMS);
+    if(!option || option->data_size() != sizeof(uint8_t) * 2)
+        throw std::runtime_error("FH parameters option not set");
+    const uint8_t *ptr = option->data_ptr();
+    uint8_t first = *(ptr++);
+    return std::make_pair(first, *ptr);
+}
+
+Dot11ManagementFrame::fh_pattern_type Dot11ManagementFrame::fh_pattern_table() const {
+    const Dot11::Dot11Option *option = search_option(HOPPING_PATTERN_TABLE);
+    if(!option || option->data_size() < fh_pattern_type::minimum_size)
+        throw std::runtime_error("FH pattern option not set");
+    fh_pattern_type output;
+    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
+    
+    output.flag = *(ptr++);
+    output.number_of_sets = *(ptr++);
+    output.modulus = *(ptr++);
+    output.offset = *(ptr++);
+    
+    output.random_table.assign(ptr, end);
     return output;
 }
 

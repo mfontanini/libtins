@@ -965,7 +965,7 @@ namespace Tins {
         } __attribute__((__packed__));
         
         struct ibss_dfs_params {
-            static const bool minimum_size = address_type::address_size + sizeof(uint8_t) + 2 * sizeof(uint8_t);
+            static const size_t minimum_size = address_type::address_size + sizeof(uint8_t) + 2 * sizeof(uint8_t);
             
             address_type dfs_owner;
             uint8_t recovery_interval; 
@@ -979,6 +979,36 @@ namespace Tins {
               channel_map(channels) {}
         };
         
+        struct country_params {
+            typedef std::vector<uint8_t> container_type;
+            // String identifier: 3 bytes
+            static const size_t minimum_size = 3 + sizeof(uint8_t) * 3;
+            
+            std::string country;
+            container_type first_channel, number_channels, max_transmit_power;
+            
+            country_params() {}
+            
+            country_params(const std::string &country, const container_type &first,
+              const container_type &number, const container_type &max) 
+            : country(country), first_channel(first), number_channels(number),
+              max_transmit_power(max) {}
+        };
+        
+        struct fh_pattern_type {
+            typedef std::vector<uint8_t> container_type;
+            static const size_t minimum_size = sizeof(uint8_t) * 4;
+            
+            uint8_t flag, number_of_sets, modulus, offset;
+            container_type random_table;
+            
+            fh_pattern_type() {}
+            
+            fh_pattern_type(uint8_t flag, uint8_t sets, uint8_t modulus,
+              uint8_t offset, const container_type& table) : flag(flag),
+              number_of_sets(sets), modulus(modulus), offset(offset),
+              random_table(table) {}
+        };
 
         /**
          * \brief Getter for the second address.
@@ -1006,7 +1036,7 @@ namespace Tins {
          *
          * \return The sequence number as an uint16_t.
          */
-        uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
+        uint16_t seq_num() const { return Utils::le_to_host(_ext_header.seq_control.seq_number); }
 
         /**
          * \brief Getter for the fourth address.
@@ -1157,12 +1187,9 @@ namespace Tins {
         /**
          * \brief Helper method to set the country tagged option.
          *
-         * \param countries Reference to a vector of uint8_t arrays of 3 bytes. Containing the list of countries.
-         * \param first_channels Reference to a vector of uint8_t. Containing the first channels for each country.
-         * \param num_channels Reference to a vector of uint8_t. Containing the number of channels for each country.
-         * \param max_power Reference to a vector of uint8_t. Containing the max power for each country.
+         * \param params The data to be used for this country option.
          */
-        void country(const std::vector<uint8_t*>& countries, const std::vector<uint8_t>& first_channels, const std::vector<uint8_t>& number_channels, const std::vector<uint8_t>& max_power);
+        void country(const country_params &params);
 
         /**
          * \brief Helper method to set the FH parameters.
@@ -1175,13 +1202,9 @@ namespace Tins {
         /**
          * \brief Helper method to set the FH pattern table.
          *
-         * \param flag uint8_t with the value of the flag field.
-         * \param number_of_sets uint8_t with the value of the number of sets field.
-         * \param modulus uint8_t with the value of the modulus field.
-         * \param offset uint8_t with the value of the offset field.
-         * \param random_table reference to vector of uint8_t witht the elements of the table.
+         * \param params The data to be used for this fh_pattern_table option.
          */
-        void fh_pattern_table(uint8_t flag, uint8_t number_of_sets, uint8_t modulus, uint8_t offset, const std::vector<uint8_t>& random_table);
+        void fh_pattern_table(const fh_pattern_type &params);
 
         /**
          * \brief Helper method to set the Power Constraint tagged option.
@@ -1361,6 +1384,33 @@ namespace Tins {
          * \return ibss_dfs_params containing the ibss dfs.
          */
         ibss_dfs_params ibss_dfs() const;
+        
+        /**
+         * \brief Helper method to get the country option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return country_params containing the country attributes.
+         */
+        country_params country() const;
+        
+        /**
+         * \brief Helper method to get the fh parameters option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return ibss_dfs_params containing the fh parameters.
+         */
+        std::pair<uint8_t, uint8_t> fh_parameters() const;
+        
+        /**
+         * \brief Helper method to get the fh patterns option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return ibss_dfs_params containing the fh patterns.
+         */
+        fh_pattern_type fh_pattern_table() const;
         
         // ************************
 

@@ -183,8 +183,7 @@ TEST_F(Dot11BeaconTest, SupportedRates) {
     rates.push_back(7.5f);
     dot11.supported_rates(rates);
     found_rates = dot11.supported_rates();
-    ASSERT_EQ(rates.size(), found_rates.size());
-    EXPECT_TRUE(std::equal(rates.begin(), rates.end(), found_rates.begin()));
+    EXPECT_EQ(rates, found_rates);
 }
 
 TEST_F(Dot11BeaconTest, ExtendedSupportedRates) {
@@ -196,8 +195,7 @@ TEST_F(Dot11BeaconTest, ExtendedSupportedRates) {
     rates.push_back(7.5f);
     dot11.extended_supported_rates(rates);
     found_rates = dot11.extended_supported_rates();
-    ASSERT_EQ(rates.size(), found_rates.size());
-    EXPECT_TRUE(std::equal(rates.begin(), rates.end(), found_rates.begin()));
+    EXPECT_EQ(rates, found_rates);
 }
 
 TEST_F(Dot11BeaconTest, QOSCapability) {
@@ -223,8 +221,7 @@ TEST_F(Dot11BeaconTest, SupportedChannels) {
     channels.push_back(std::make_pair(67, 159));
     dot11.supported_channels(channels);
     output = dot11.supported_channels();
-    ASSERT_EQ(output.size(), channels.size());
-    EXPECT_TRUE(std::equal(channels.begin(), channels.end(), output.begin()));
+    EXPECT_EQ(output, channels);
 }
 
 TEST_F(Dot11BeaconTest, RequestInformation) {
@@ -236,8 +233,7 @@ TEST_F(Dot11BeaconTest, RequestInformation) {
     info.push_back(42);
     dot11.request_information(info);
     found_info = dot11.request_information();
-    ASSERT_EQ(info.size(), found_info.size());
-    EXPECT_TRUE(std::equal(info.begin(), info.end(), found_info.begin()));
+    EXPECT_EQ(info, found_info);
 }
 
 TEST_F(Dot11BeaconTest, FHParameterSet) {
@@ -275,7 +271,58 @@ TEST_F(Dot11BeaconTest, IBSS_DFS) {
     output = dot11.ibss_dfs();
     EXPECT_EQ(params.dfs_owner, output.dfs_owner);
     EXPECT_EQ(params.recovery_interval, output.recovery_interval);
-    ASSERT_EQ(params.channel_map.size(), output.channel_map.size());
-    EXPECT_TRUE(std::equal(params.channel_map.begin(), params.channel_map.end(), output.channel_map.begin()));
+    EXPECT_EQ(params.channel_map, output.channel_map);
 }
 
+TEST_F(Dot11BeaconTest, Country) {
+    Dot11Beacon dot11;
+    Dot11Beacon::country_params params, output;
+    params.country = "ARO";
+    params.first_channel.push_back(65);
+    params.first_channel.push_back(11);
+    params.first_channel.push_back(97);
+    
+    params.number_channels.push_back(123);
+    params.number_channels.push_back(56);
+    params.number_channels.push_back(42);
+    
+    params.max_transmit_power.push_back(4);
+    params.max_transmit_power.push_back(213);
+    params.max_transmit_power.push_back(165);
+    
+    dot11.country(params);
+    output = dot11.country();
+    
+    EXPECT_EQ(params.country, output.country);
+    EXPECT_EQ(params.first_channel, output.first_channel);
+    EXPECT_EQ(params.number_channels, output.number_channels);
+    EXPECT_EQ(params.max_transmit_power, output.max_transmit_power);
+}
+
+TEST_F(Dot11BeaconTest, FHParameters) {
+    Dot11Beacon dot11;
+    std::pair<uint8_t, uint8_t> data(0x42, 0x1f);
+    dot11.fh_parameters(data.first, data.second);
+    EXPECT_EQ(data, dot11.fh_parameters());
+}
+
+TEST_F(Dot11BeaconTest, FHPattern) {
+    Dot11Beacon dot11;
+    Dot11Beacon::fh_pattern_type data, output;
+    data.flag = 0x67;
+    data.number_of_sets = 0x42;
+    data.modulus = 0x1f;
+    data.offset = 0x3a;
+    data.random_table.push_back(23);
+    data.random_table.push_back(15);
+    data.random_table.push_back(129);
+    
+    dot11.fh_pattern_table(data);
+    output = dot11.fh_pattern_table();
+    
+    EXPECT_EQ(data.flag, data.flag);
+    EXPECT_EQ(data.number_of_sets, data.number_of_sets);
+    EXPECT_EQ(data.modulus, data.modulus);
+    EXPECT_EQ(data.offset, data.offset);
+    EXPECT_EQ(data.random_table, data.random_table);
+}
