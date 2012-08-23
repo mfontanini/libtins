@@ -201,7 +201,6 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
     for(std::list<Dot11Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option();
         *(buffer++) = it->data_size();
-        //std::memcpy(buffer, it->value, it->length);
         std::copy(it->data_ptr(), it->data_ptr() + it->data_size(), buffer);
         buffer += it->data_size();
     }
@@ -213,10 +212,12 @@ PDU *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
         throw runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
     const ieee80211_header *hdr = (const ieee80211_header*)buffer;
     PDU *ret = 0;
-    if(hdr->control.type == MANAGEMENT && hdr->control.subtype == 8) {
-        if(total_sz < sizeof(_header))
-            throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
-        ret = new Dot11Beacon(buffer, total_sz);
+    if(hdr->control.type == MANAGEMENT) {
+        if(hdr->control.subtype == BEACON)
+            ret = new Dot11Beacon(buffer, total_sz);
+        //else if(hdr->control.subtype == DISASSOC)
+        else
+            ret = new Dot11Disassoc(buffer, total_sz);
     }
     else if(hdr->control.type == DATA){
         if(hdr->control.subtype <= 4)
@@ -413,9 +414,9 @@ void Dot11ManagementFrame::request_information(const request_info_type elements)
 
 void Dot11ManagementFrame::fh_parameter_set(fh_params_set fh_params) {
     fh_params.dwell_time = Utils::host_to_le(fh_params.dwell_time);
-    fh_params.hop_set = Utils::host_to_le(fh_params.hop_set);
-    fh_params.hop_pattern = Utils::host_to_le(fh_params.hop_pattern);
-    fh_params.hop_index = Utils::host_to_le(fh_params.hop_index);
+    fh_params.hop_set = fh_params.hop_set;
+    fh_params.hop_pattern = fh_params.hop_pattern;
+    fh_params.hop_index = fh_params.hop_index;
     add_tagged_option(FH_SET, sizeof(fh_params_set), (uint8_t*)&fh_params);
 
 }
@@ -425,8 +426,8 @@ void Dot11ManagementFrame::ds_parameter_set(uint8_t current_channel) {
 }
 
 void Dot11ManagementFrame::cf_parameter_set(cf_params_set params) {
-    params.cfp_count = Utils::host_to_le(params.cfp_count);
-    params.cfp_period = Utils::host_to_le(params.cfp_period);
+    params.cfp_count = params.cfp_count;
+    params.cfp_period = params.cfp_period;
     params.cfp_max_duration = Utils::host_to_le(params.cfp_max_duration);
     params.cfp_dur_remaining = Utils::host_to_le(params.cfp_dur_remaining);
     add_tagged_option(CF_SET, sizeof(params), (uint8_t*)&params);
@@ -452,7 +453,6 @@ void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params &params) {
     add_tagged_option(IBSS_DFS, sz, buffer);
 
     delete[] buffer;
-
 }
 
 void Dot11ManagementFrame::country(const country_params &params) {
@@ -483,17 +483,6 @@ void Dot11ManagementFrame::fh_parameters(uint8_t prime_radix, uint8_t number_cha
 }
 
 void Dot11ManagementFrame::fh_pattern_table(const fh_pattern_type &params) {
-    /*uint8_t sz = 4 + random_table.size();
-    uint8_t* buffer = new uint8_t[sz];
-    buffer[0] = flag;
-    buffer[1] = number_of_sets;
-    buffer[2] = modulus;
-    buffer[3] = offset;
-    uint8_t* ptr_buffer = &buffer[4];
-    for (vector<uint8_t>::const_iterator it = random_table.begin(); it != random_table.end(); it++)
-        *(ptr_buffer++) = *it;
-    add_tagged_option(HOPPING_PATTERN_TABLE, sz, buffer);
-    delete[] buffer;*/
     std::vector<uint8_t> data(sizeof(uint8_t) * 4 + params.random_table.size());
     uint8_t *ptr = &data[0];
     *(ptr++) = params.flag;
@@ -510,24 +499,24 @@ void Dot11ManagementFrame::power_constraint(uint8_t local_power_constraint) {
     add_tagged_option(POWER_CONSTRAINT, 1, &local_power_constraint);
 }
 
-void Dot11ManagementFrame::channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count) {
+void Dot11ManagementFrame::channel_switch(const channel_switch_type &data) {
     uint8_t buffer[3];
-    buffer[0] = switch_mode;
-    buffer[1] = new_channel;
-    buffer[2] = switch_count;
+    buffer[0] = data.switch_mode;
+    buffer[1] = data.new_channel;
+    buffer[2] = data.switch_count;
     add_tagged_option(CHANNEL_SWITCH, 3, buffer);
 
 }
 
-void Dot11ManagementFrame::quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset) {
+void Dot11ManagementFrame::quiet(const quiet_type &data) {
     uint8_t buffer[6];
-    uint16_t* ptr_buffer = (uint16_t*)buffer;
+    uint16_t* ptr_buffer = (uint16_t*)(buffer + 2);
 
-    buffer[0] = quiet_count;
-    buffer[1] = quiet_period;
-    ptr_buffer[1] = quiet_duration;
-    ptr_buffer[2] = quiet_offset;
-    add_tagged_option(QUIET, 6, buffer);
+    buffer[0] = data.quiet_count;
+    buffer[1] = data.quiet_period;
+    ptr_buffer[0] = Utils::host_to_le(data.quiet_duration);
+    ptr_buffer[1] = Utils::host_to_le(data.quiet_offset);
+    add_tagged_option(QUIET, sizeof(buffer), buffer);
 
 }
 
@@ -543,35 +532,37 @@ void Dot11ManagementFrame::erp_information(uint8_t value) {
     add_tagged_option(ERP_INFORMATION, 1, &value);
 }
 
-void Dot11ManagementFrame::bss_load(uint16_t station_count, uint8_t channel_utilization, uint16_t available_capacity) {
+void Dot11ManagementFrame::bss_load(const bss_load_type &data) {
     uint8_t buffer[5];
 
-    buffer[0] = station_count & 0xFF;
-    buffer[1] = station_count >> 8;
-    buffer[2] = channel_utilization;
-    buffer[3] = available_capacity & 0xFF;
-    buffer[4] = available_capacity >> 8;
-    add_tagged_option(BSS_LOAD, 5, buffer);
+    *(uint16_t*)buffer = Utils::host_to_le(data.station_count);
+    buffer[2] = data.channel_utilization;
+    *(uint16_t*)(buffer + 3) = Utils::host_to_le(data.available_capacity);
+    add_tagged_option(BSS_LOAD, sizeof(buffer), buffer);
 }
 
-void Dot11ManagementFrame::tim(uint8_t dtim_count,
-                                     uint8_t dtim_period,
-                                     uint8_t bitmap_control,
-                                     uint8_t* partial_virtual_bitmap,
-                                     uint8_t partial_virtual_bitmap_sz) {
-
-    uint8_t sz = 3 + partial_virtual_bitmap_sz;
-    uint8_t* buffer = new uint8_t[sz];
-    buffer[0] = dtim_count;
-    buffer[1] = dtim_period;
-    buffer[2] = bitmap_control;
-    memcpy(buffer + 3, partial_virtual_bitmap, partial_virtual_bitmap_sz);
-    add_tagged_option(TIM, sz, buffer);
+void Dot11ManagementFrame::tim(const tim_type &data) {
+    std::vector<uint8_t> buffer(sizeof(uint8_t) * 3 + data.partial_virtual_bitmap.size());
+    buffer[0] = data.dtim_count;
+    buffer[1] = data.dtim_period;
+    buffer[2] = data.bitmap_control;
+    std::copy(
+        data.partial_virtual_bitmap.begin(), 
+        data.partial_virtual_bitmap.end(),
+        &buffer[3]
+    );
+    add_tagged_option(TIM, buffer.size(), &buffer[0]);
 }
 
-void Dot11ManagementFrame::challenge_text(uint8_t* ch_text, uint8_t ch_text_sz) {
-    add_tagged_option(CHALLENGE_TEXT, ch_text_sz, ch_text);
+void Dot11ManagementFrame::challenge_text(const std::string &text) {
+    add_tagged_option(
+        CHALLENGE_TEXT, 
+        text.size(),
+        (const uint8_t*)text.c_str()
+    );
 }
+
+// Getters
 
 bool Dot11ManagementFrame::rsn_information(RSNInformation *rsn) {
     const Dot11::Dot11Option *option = search_option(RSN);
@@ -616,21 +607,21 @@ bool Dot11ManagementFrame::rsn_information(RSNInformation *rsn) {
 
 string Dot11ManagementFrame::ssid() const {
     const Dot11::Dot11Option *option = search_option(SSID);
-    if(!option)
+    if(!option || option->data_size() == 0)
         throw std::runtime_error("SSID not set");
     return string((const char*)option->data_ptr(), option->data_size());
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::supported_rates() const {
     const Dot11::Dot11Option *option = search_option(SUPPORTED_RATES);
-    if(!option)
+    if(!option || option->data_size() == 0)
         throw std::runtime_error("Supported rates not set");
     return deserialize_rates(option);
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::extended_supported_rates() const {
     const Dot11::Dot11Option *option = search_option(EXT_SUPPORTED_RATES);
-    if(!option)
+    if(!option || option->data_size() == 0)
         throw std::runtime_error("Extended supported rates not set");
     return deserialize_rates(option);
 }
@@ -665,12 +656,10 @@ Dot11ManagementFrame::channels_type Dot11ManagementFrame::supported_channels() c
 
 Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_information() const {
     const Dot11::Dot11Option *option = search_option(REQUEST_INFORMATION);
-    if(!option)
+    if(!option || option->data_size() == 0)
         throw std::runtime_error("Request information not set");
     request_info_type output;
     const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
-    //while(ptr != end)
-    //    output.push_back(*(ptr++));
     output.assign(ptr, end);
     return output;
 }
@@ -681,9 +670,9 @@ Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() con
         throw std::runtime_error("FH parameters set not set");
     fh_params_set output = *reinterpret_cast<const fh_params_set*>(option->data_ptr());
     output.dwell_time = Utils::le_to_host(output.dwell_time);
-    output.hop_set = Utils::le_to_host(output.hop_set);
-    output.hop_pattern = Utils::le_to_host(output.hop_pattern);
-    output.hop_index = Utils::le_to_host(output.hop_index);
+    output.hop_set = output.hop_set;
+    output.hop_pattern = output.hop_pattern;
+    output.hop_index = output.hop_index;
     return output;
 }
 
@@ -762,6 +751,91 @@ Dot11ManagementFrame::fh_pattern_type Dot11ManagementFrame::fh_pattern_table() c
     return output;
 }
 
+uint8_t Dot11ManagementFrame::power_constraint() const {
+    const Dot11::Dot11Option *option = search_option(POWER_CONSTRAINT);
+    if(!option || option->data_size() != 1)
+        throw std::runtime_error("Power constraint option not set");
+    return *option->data_ptr();
+}
+
+Dot11ManagementFrame::channel_switch_type Dot11ManagementFrame::channel_switch() const {
+    const Dot11::Dot11Option *option = search_option(CHANNEL_SWITCH);
+    if(!option || option->data_size() != sizeof(uint8_t) * 3)
+        throw std::runtime_error("Channel switch option not set");
+    const uint8_t *ptr = option->data_ptr();
+    channel_switch_type output;
+    output.switch_mode = *(ptr++);
+    output.new_channel = *(ptr++);
+    output.switch_count = *(ptr++);
+    return output;
+}
+
+Dot11ManagementFrame::quiet_type Dot11ManagementFrame::quiet() const {
+    const Dot11::Dot11Option *option = search_option(QUIET);
+    if(!option || option->data_size() != (sizeof(uint8_t) * 2 + sizeof(uint16_t) * 2))
+        throw std::runtime_error("Quiet option not set");
+    const uint8_t *ptr = option->data_ptr();
+    quiet_type output;
+    
+    output.quiet_count = *(ptr++);
+    output.quiet_period = *(ptr++);
+    const uint16_t *ptr_16 = (const uint16_t*)ptr;
+    output.quiet_duration = Utils::le_to_host(*(ptr_16++));
+    output.quiet_offset = Utils::le_to_host(*ptr_16);
+    return output;
+}
+
+std::pair<uint8_t, uint8_t> Dot11ManagementFrame::tpc_report() const {
+    const Dot11::Dot11Option *option = search_option(TPC_REPORT);
+    if(!option || option->data_size() != sizeof(uint8_t) * 2)
+        throw std::runtime_error("TPC Report option not set");
+    const uint8_t *ptr = option->data_ptr();
+    uint8_t first = *(ptr++);
+    return std::make_pair(first, *ptr);
+}
+
+uint8_t Dot11ManagementFrame::erp_information() const {
+    const Dot11::Dot11Option *option = search_option(ERP_INFORMATION);
+    if(!option || option->data_size() != sizeof(uint8_t))
+        throw std::runtime_error("ERP Information option not set");
+    return *option->data_ptr();
+}
+
+Dot11ManagementFrame::bss_load_type Dot11ManagementFrame::bss_load() const {
+    const Dot11::Dot11Option *option = search_option(BSS_LOAD);
+    if(!option || option->data_size() != sizeof(uint8_t) + 2 * sizeof(uint16_t))
+        throw std::runtime_error("BSS Load option not set");
+    bss_load_type output;
+    
+    const uint8_t *ptr = option->data_ptr();
+    output.station_count = Utils::le_to_host(*(uint16_t*)ptr);
+    output.channel_utilization = ptr[2];
+    output.available_capacity = Utils::le_to_host(*(uint16_t*)(ptr + 3));
+    return output;
+}
+
+Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim() const {
+    const Dot11::Dot11Option *option = search_option(TIM);
+    if(!option || option->data_size() < 4 * sizeof(uint8_t))
+        throw std::runtime_error("TIM option not set");
+    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
+    tim_type output;
+    
+    output.dtim_count = *(ptr++);
+    output.dtim_period = *(ptr++);
+    output.bitmap_control = *(ptr++);
+    
+    output.partial_virtual_bitmap.assign(ptr, end);
+    return output;
+}
+
+std::string Dot11ManagementFrame::challenge_text() const {
+    const Dot11::Dot11Option *option = search_option(CHALLENGE_TEXT);
+    if(!option || option->data_size() == 0)
+        throw std::runtime_error("Challenge text option not set");
+    return std::string(option->data_ptr(), option->data_ptr() + option->data_size());
+}
+
 /* Dot11Beacon */
 
 Dot11Beacon::Dot11Beacon(const NetworkInterface& iface,
@@ -828,7 +902,7 @@ Dot11Disassoc::Dot11Disassoc(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot11Disassoc::reason_code(uint16_t new_reason_code) {
-    this->_body.reason_code = new_reason_code;
+    this->_body.reason_code = Utils::host_to_le(new_reason_code);
 }
 
 uint32_t Dot11Disassoc::header_size() const {
@@ -840,14 +914,6 @@ uint32_t Dot11Disassoc::write_fixed_parameters(uint8_t *buffer, uint32_t total_s
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
-}
-
-PDU *Dot11Disassoc::clone_pdu() const {
-    Dot11Disassoc *new_pdu = new Dot11Disassoc();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    memcpy(&new_pdu->_body, &this->_body, sizeof(this->_body));
-    return new_pdu;
 }
 
 /* Assoc request. */

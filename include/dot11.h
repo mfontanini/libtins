@@ -223,91 +223,91 @@ namespace Tins {
          *
          * \return The protocol version in an uint8_t.
          */
-        uint8_t protocol() const { return this->_header.control.protocol; }
+        uint8_t protocol() const { return _header.control.protocol; }
 
         /**
          * \brief Getter for the 802.11 frame's type.
          *
          * \return The type of the 802.11 frame in an uint8_t.
          */
-        uint8_t type() const { return this->_header.control.type; }
+        uint8_t type() const { return _header.control.type; }
 
         /**
          * \brief Getter for the 802.11 frame's subtype.
          *
          * \return The subtype of the 802.11 frame in an uint8_t.
          */
-        uint8_t subtype() const { return this->_header.control.subtype; }
+        uint8_t subtype() const { return _header.control.subtype; }
 
         /**
          * \brief Getter for the 802.11 frame's "To DS" bit.
          *
          * \return Boolean indicating if the "To DS" bit is set.
          */
-        bool to_ds() const { return this->_header.control.to_ds; }
+        bool to_ds() const { return _header.control.to_ds; }
 
         /**
          * \brief Getter for the 802.11 frame's "From DS" bit.
          *
          * \return Boolean indicating if the "From DS" bit is set.
          */
-        bool from_ds() const { return this->_header.control.from_ds; }
+        bool from_ds() const { return _header.control.from_ds; }
 
         /**
          * \brief Getter for the 802.11 frame's "More Frag" bit.
          *
          * \return Boolean indicating if the "More Frag" bit is set.
          */
-        bool more_frag() const { return this->_header.control.more_frag; }
+        bool more_frag() const { return _header.control.more_frag; }
 
         /**
          * \brief Getter for the 802.11 frame's "Retry" bit.
          *
          * \return Boolean indicating if the "Retry" bit is set.
          */
-        bool retry() const { return this->_header.control.retry; }
+        bool retry() const { return _header.control.retry; }
 
         /**
          * \brief Getter for the 802.11 frame's "Power Management" bit.
          *
          * \return Boolean indicating if the "Power Management" bit is set.
          */
-        bool power_mgmt() const { return this->_header.control.power_mgmt; }
+        bool power_mgmt() const { return _header.control.power_mgmt; }
 
         /**
          * \brief Getter for the 802.11 frame's "WEP" bit.
          *
          * \return Boolean indicating if the "WEP" bit is set.
          */
-        bool wep() const { return this->_header.control.wep; }
+        bool wep() const { return _header.control.wep; }
 
         /**
          * \brief Getter for the 802.11 frame's "Order" bit.
          *
          * \return Boolean indicating if the "Order" bit is set.
          */
-        bool order() const { return this->_header.control.order; }
+        bool order() const { return _header.control.order; }
 
         /**
          * \brief Getter for the duration/id field.
          *
          * \return The value of the duration/id field in an uint16_t.
          */
-        uint16_t duration_id() const { return Utils::le_to_host(this->_header.duration_id); }
+        uint16_t duration_id() const { return Utils::le_to_host(_header.duration_id); }
 
         /**
          * \brief Getter for the first address.
          *
          * \return The first address as a constant uint8_t pointer.
          */
-        address_type addr1() const { return this->_header.addr1; }
+        address_type addr1() const { return _header.addr1; }
 
         /**
          * \brief Getter for the interface.
          *
          * \return The interface's index as an uint32_t.
          */
-        const NetworkInterface &iface() const { return this->_iface; }
+        const NetworkInterface &iface() const { return _iface; }
 
         /**
          * \brief Setter for the protocol version.
@@ -718,224 +718,224 @@ namespace Tins {
              *
              * \return Bool indicating the flag's value.
              */
-            bool ess() const { return this->_ess; }
+            bool ess() const { return _ess; }
 
             /**
              * \brief Getter for the ibss flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool ibss() const { return this->_ibss; }
+            bool ibss() const { return _ibss; }
 
             /**
              * \brief Getter for the cf_poll flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool cf_poll() const { return this->_cf_poll; }
+            bool cf_poll() const { return _cf_poll; }
 
             /**
              * \brief Getter for the cf_poll_req flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool cf_poll_req() const { return this->_cf_poll_req; }
+            bool cf_poll_req() const { return _cf_poll_req; }
 
             /**
              * \brief Getter for the privacy flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool privacy() const { return this->_privacy; }
+            bool privacy() const { return _privacy; }
 
             /**
              * \brief Getter for the short_preamble flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool short_preamble() const { return this->_short_preamble; }
+            bool short_preamble() const { return _short_preamble; }
 
             /**
              * \brief Getter for the pbcc flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool pbcc() const { return this->_pbcc; }
+            bool pbcc() const { return _pbcc; }
 
             /**
              * \brief Getter for the channel_agility flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool channel_agility() const { return this->_channel_agility; }
+            bool channel_agility() const { return _channel_agility; }
 
             /**
              * \brief Getter for the spectrum_mgmt flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool spectrum_mgmt() const { return this->_spectrum_mgmt; }
+            bool spectrum_mgmt() const { return _spectrum_mgmt; }
 
             /**
              * \brief Getter for the qos flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool qos() const { return this->_qos; }
+            bool qos() const { return _qos; }
 
             /**
              * \brief Getter for the sst flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool sst() const { return this->_sst; }
+            bool sst() const { return _sst; }
 
             /**
              * \brief Getter for the apsd flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool apsd() const { return this->_apsd; }
+            bool apsd() const { return _apsd; }
 
             /**
              * \brief Getter for the reserved flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool reserved() const { return this->_reserved; }
+            bool reserved() const { return _reserved; }
 
             /**
              * \brief Getter for the dsss_ofdm flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool dsss_ofdm() const { return this->_dsss_ofdm; }
+            bool dsss_ofdm() const { return _dsss_ofdm; }
 
             /**
              * \brief Getter for the delayed_block_ack flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool delayed_block_ack() const { return this->_delayed_block_ack; }
+            bool delayed_block_ack() const { return _delayed_block_ack; }
 
             /**
              * \brief Getter for the immediate_block_ack flag.
              *
              * \return Bool indicating the flag's value.
              */
-            bool immediate_block_ack() const { return this->_immediate_block_ack; }
+            bool immediate_block_ack() const { return _immediate_block_ack; }
 
             /**
              * \brief Setter for the ess flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void ess(bool new_value) { this->_ess = new_value; }
+            void ess(bool new_value) { _ess = new_value; }
 
             /**
              * \brief Setter for the ibss flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void ibss(bool new_value) { this->_ibss = new_value; }
+            void ibss(bool new_value) { _ibss = new_value; }
 
             /**
              * \brief Setter for the cf_poll flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void cf_poll(bool new_value) { this->_cf_poll = new_value; }
+            void cf_poll(bool new_value) { _cf_poll = new_value; }
 
             /**
              * \brief Setter for the cf_poll_req flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void cf_poll_req(bool new_value) { this->_cf_poll_req = new_value; }
+            void cf_poll_req(bool new_value) { _cf_poll_req = new_value; }
 
             /**
              * \brief Setter for the privacy flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void privacy(bool new_value) { this->_privacy = new_value; }
+            void privacy(bool new_value) { _privacy = new_value; }
 
             /**
              * \brief Setter for the short_preamble flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void short_preamble(bool new_value) { this->_short_preamble = new_value; }
+            void short_preamble(bool new_value) { _short_preamble = new_value; }
 
             /**
              * \brief Setter for the pbcc flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void pbcc(bool new_value) { this->_pbcc = new_value; }
+            void pbcc(bool new_value) { _pbcc = new_value; }
 
             /**
              * \brief Setter for the channel_agility flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void channel_agility(bool new_value) { this->_channel_agility = new_value; }
+            void channel_agility(bool new_value) { _channel_agility = new_value; }
 
             /**
              * \brief Setter for the spectrum_mgmt flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void spectrum_mgmt(bool new_value) { this->_spectrum_mgmt = new_value; }
+            void spectrum_mgmt(bool new_value) { _spectrum_mgmt = new_value; }
 
             /**
              * \brief Setter for the qos flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void qos(bool new_value) { this->_qos = new_value; }
+            void qos(bool new_value) { _qos = new_value; }
 
             /**
              * \brief Setter for the sst flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void sst(bool new_value) { this->_sst = new_value; }
+            void sst(bool new_value) { _sst = new_value; }
 
             /**
              * \brief Setter for the apsd flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void apsd(bool new_value) { this->_apsd = new_value; }
+            void apsd(bool new_value) { _apsd = new_value; }
 
             /**
              * \brief Setter for the reserved flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void reserved(bool new_value) { this->_reserved = new_value; }
+            void reserved(bool new_value) { _reserved = new_value; }
 
             /**
              * \brief Setter for the dsss_ofdm flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void dsss_ofdm(bool new_value) { this->_dsss_ofdm = new_value; }
+            void dsss_ofdm(bool new_value) { _dsss_ofdm = new_value; }
 
             /**
              * \brief Setter for the delayed_block_ack flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void delayed_block_ack(bool new_value) { this->_delayed_block_ack = new_value; }
+            void delayed_block_ack(bool new_value) { _delayed_block_ack = new_value; }
 
             /**
              * \brief Setter for the immediate_block_ack flag.
              *
              * \param new_value bool indicating the flag's new value.
              */
-            void immediate_block_ack(bool new_value) { this->_immediate_block_ack = new_value; }
+            void immediate_block_ack(bool new_value) { _immediate_block_ack = new_value; }
 
         } __attribute__((__packed__));
         
@@ -1005,9 +1005,57 @@ namespace Tins {
             fh_pattern_type() {}
             
             fh_pattern_type(uint8_t flag, uint8_t sets, uint8_t modulus,
-              uint8_t offset, const container_type& table) : flag(flag),
-              number_of_sets(sets), modulus(modulus), offset(offset),
-              random_table(table) {}
+              uint8_t offset, const container_type& table) 
+            : flag(flag), number_of_sets(sets), modulus(modulus), 
+              offset(offset), random_table(table) {}
+        };
+        
+        struct channel_switch_type {
+            uint8_t switch_mode, new_channel, switch_count;
+            
+            channel_switch_type() {}
+            
+            channel_switch_type(uint8_t mode, uint8_t channel, uint8_t count)
+            : switch_mode(mode), new_channel(channel), switch_count(count) { }
+        };
+        
+        struct quiet_type {
+            uint8_t quiet_count, quiet_period;
+            uint16_t quiet_duration, quiet_offset;
+            
+            quiet_type() {}
+            
+            quiet_type(uint8_t count, uint8_t period, uint16_t duration,
+              uint16_t offset)
+            : quiet_count(count), quiet_period(period), 
+            quiet_duration(duration), quiet_offset(offset) {}
+        };
+        
+        struct bss_load_type {
+            uint16_t station_count;
+            uint16_t available_capacity;
+            uint8_t channel_utilization;
+            
+            bss_load_type() {}
+            
+            bss_load_type(uint16_t count, uint8_t utilization, 
+              uint16_t capacity) 
+            : station_count(count), available_capacity(capacity),
+            channel_utilization(utilization) {}
+        };
+        
+        struct tim_type {
+            typedef std::vector<uint8_t> container_type;
+            
+            uint8_t dtim_count, dtim_period, bitmap_control;
+            container_type partial_virtual_bitmap;
+            
+            tim_type() {}
+            
+            tim_type(uint8_t count, uint8_t period, uint8_t control,
+              const container_type &bitmap) 
+            : dtim_count(count), dtim_period(period), bitmap_control(control),
+            partial_virtual_bitmap(bitmap) {}
         };
 
         /**
@@ -1015,21 +1063,21 @@ namespace Tins {
          *
          * \return The second address as a constant uint8_t pointer.
          */
-        address_type addr2() const { return this->_ext_header.addr2; }
+        address_type addr2() const { return _ext_header.addr2; }
 
         /**
          * \brief Getter for the third address.
          *
          * \return The third address as a constant uint8_t pointer.
          */
-        address_type addr3() const { return this->_ext_header.addr3; }
+        address_type addr3() const { return _ext_header.addr3; }
 
         /**
          * \brief Getter for the fragment number.
          *
          * \return The fragment number as an uint8_t.
          */
-        uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
+        uint8_t frag_num() const { return _ext_header.seq_control.frag_number; }
 
         /**
          * \brief Getter for the sequence number.
@@ -1043,7 +1091,7 @@ namespace Tins {
          *
          * \return The fourth address as a constant uint8_t pointer.
          */
-        const address_type &addr4() const { return this->_addr4; }
+        const address_type &addr4() const { return _addr4; }
 
         /**
          * \brief Setter for the second address.
@@ -1209,28 +1257,23 @@ namespace Tins {
         /**
          * \brief Helper method to set the Power Constraint tagged option.
          *
-         * \param local_power_constraint uint8_t with the value of the local power constraint field.
+         * \param local_power_constraint The value of the local power constraint field.
          */
         void power_constraint(uint8_t local_power_constraint);
 
         /**
          * \brief Helper method to set the Channel Switch tagged option.
          *
-         * \param switch_mode uint8_t with the value of the switch mode field.
-         * \param new_channel uint8_t with the value of the new channel field.
-         * \param switch_count uint8_t with the value of the switch count field.
+         * \param data The value of the Channel Switch option.
          */
-        void channel_switch(uint8_t switch_mode, uint8_t new_channel, uint8_t switch_count);
+        void channel_switch(const channel_switch_type &data);
 
         /**
          * \brief Helper method to set the Quiet tagged option.
          *
-         * \param quiet_count uint8_t with the value of the quiet count field.
-         * \param quiet_period uint8_t with the value of the quiet period field.
-         * \param quiet_duration uint16_t with the value of the quiet duration field.
-         * \param quiet_offset uint16_t with the value of the quiet offset field.
+         * \param data The value of the quiet count field.
          */
-        void quiet(uint8_t quiet_count, uint8_t quiet_period, uint16_t quiet_duration, uint16_t quiet_offset);
+        void quiet(const quiet_type &data);
 
         /**
          * \brief Helper method to set the TPC Report tagged option.
@@ -1243,37 +1286,30 @@ namespace Tins {
         /**
          * \brief Helper method to set the ERP Information tagged option.
          *
-         * \param value with the value to set as argument of the tagged option.
+         * \param value The value to set in this erp information option.
          */
         void erp_information(uint8_t value);
 
         /**
          * \brief Helper method to set the BSS Load tagged option.
          *
-         * \param station_count uint16_t with the value of the station count field.
-         * \param channel_utilization uint8_t with the value of the channel utilization field.
-         * \param available_capacity uint16_t with the value of the available capacity field.
+         * \param data The value to set in this bss load option.
          */
-        void bss_load(uint16_t station_count, uint8_t channel_utilization, uint16_t avaliable_capacity);
+        void bss_load(const bss_load_type &data);
 
         /**
          * \brief Helper method to set the TIM tagged option.
          *
-         * \brief dtim_count uint8_t with the value of the DTIM count field.
-         * \brief dtim_period uint8_t with the value of the DTIM period field.
-         * \brief bitmap_control uint8_t with the value of the Bitmap Control field.
-         * \brief partial_virtual_bitmap uint8_t array with the value fo the Partial Virtual Bitmap field.
-         * \brief partial_virtual_bitmap_sz uint8_t with the size of the partial_virtual_bitmap array.
+         * \brief data The value to set in this tim option.
          */
-        void tim(uint8_t dtim_count, uint8_t dtim_period, uint8_t bitmap_control, uint8_t* partial_virtual_bitmap, uint8_t partial_virtual_bitmap_sz);
+        void tim(const tim_type &data);
 
         /**
          * \brief Helper method to set the Challenge Text tagged option.
          *
-         * \brief ch_text uint8_t array with the challenge_text.
-         * \brief ch_text_sz uint8_t with the ch_text's length.
+         * \brief text The challenge text to be added.
          */
-        void challenge_text(uint8_t* ch_text, uint8_t ch_text_sz);
+        void challenge_text(const std::string &text);
         
         // Option searching helpers
         
@@ -1399,7 +1435,7 @@ namespace Tins {
          *
          * Throws a std::runtime_error if the option has not been set.
          * 
-         * \return ibss_dfs_params containing the fh parameters.
+         * \return std::pair<uint8_t, uint8_t> containing the fh parameters.
          */
         std::pair<uint8_t, uint8_t> fh_parameters() const;
         
@@ -1408,9 +1444,81 @@ namespace Tins {
          *
          * Throws a std::runtime_error if the option has not been set.
          * 
-         * \return ibss_dfs_params containing the fh patterns.
+         * \return fh_pattern_type containing the fh patterns.
          */
         fh_pattern_type fh_pattern_table() const;
+        
+        /**
+         * \brief Helper method to get the power constraint option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return uint8_t containing the power constraint.
+         */
+        uint8_t power_constraint() const;
+        
+        /**
+         * \brief Helper method to get the channel switch option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return channel_switch_type containing the channel switch.
+         */
+        channel_switch_type channel_switch() const;
+        
+        /**
+         * \brief Helper method to get the quiet option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return quiet_type containing the quiet option value.
+         */
+        quiet_type quiet() const;
+        
+        /**
+         * \brief Helper method to get the tpc report option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return quiet_type containing the tpc report option value.
+         */
+        std::pair<uint8_t, uint8_t> tpc_report() const;
+        
+        /**
+         * \brief Helper method to get the erp information option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return quiet_type containing the erp information option value.
+         */
+        uint8_t erp_information() const;
+        
+        /**
+         * \brief Helper method to get the bss load option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return quiet_type containing the bss load option value.
+         */
+        bss_load_type bss_load() const;
+        
+        /**
+         * \brief Helper method to get the tim option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return tim_type containing the tim option value.
+         */
+        tim_type tim() const;
+        
+        /**
+         * \brief Helper method to get the challenge text option.
+         *
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return std::string containing the challenge text option value.
+         */
+        std::string challenge_text() const;
         
         // ************************
 
@@ -1521,28 +1629,28 @@ namespace Tins {
          *
          * \return Timestamp value in an uint64_t.
          */
-        uint64_t timestamp() const { return Utils::le_to_host(this->_body.timestamp); }
+        uint64_t timestamp() const { return Utils::le_to_host(_body.timestamp); }
 
         /**
          * \brief Getter for the interval field.
          *
          * \return Timestamp value in an uint16_t.
          */
-        uint16_t interval() const { return Utils::le_to_host(this->_body.interval); }
+        uint16_t interval() const { return Utils::le_to_host(_body.interval); }
 
         /**
          * \brief Getter for the Capabilities Information structure.
          *
          * \return const CapabilityInformation&.
          */
-        const CapabilityInformation& capabilities() const { return this->_body.capability; }
+        const CapabilityInformation& capabilities() const { return _body.capability; }
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation&.
          */
-        CapabilityInformation& capabilities() { return this->_body.capability; }
+        CapabilityInformation& capabilities() { return _body.capability; }
 
         /**
          * \brief Setter for the timestamp field.
@@ -1580,7 +1688,7 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
+        Dot11Beacon *clone_pdu() const {
             return PDU::do_clone_pdu<Dot11Beacon>();
         }
 
@@ -1640,7 +1748,7 @@ namespace Tins {
          *
          * \return uint16_t with the reason code.
          */
-        uint16_t reason_code() const { return this->_body.reason_code; }
+        uint16_t reason_code() const { return Utils::le_to_host(_body.reason_code); }
 
         /**
          * \brief Setter for the reason code.
@@ -1669,7 +1777,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_DIASSOC || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -1677,7 +1785,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11Disassoc *clone_pdu() const {
+            return PDU::do_clone_pdu<Dot11Disassoc>();
+        }
     private:
         struct DisassocBody {
             uint16_t reason_code;
@@ -1727,21 +1837,21 @@ namespace Tins {
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return _body.capability;}
 
         /**
          * \brief Getter for the listen interval.
          *
          * \return The listen interval in an uint16_t.
          */
-        uint16_t listen_interval() const { return this->_body.listen_interval; }
+        uint16_t listen_interval() const { return _body.listen_interval; }
 
         /**
          * \brief Setter for the listen interval.
@@ -1770,7 +1880,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_ASSOC_REQ || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -1829,28 +1939,28 @@ namespace Tins {
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return _body.capability;}
 
         /**
          * \brief Getter for the status code.
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return this->_body.status_code; }
+        uint16_t status_code() const { return _body.status_code; }
 
         /**
          * \brief Getter for the AID field.
          *
          * \return The AID field value in an uint16_t.
          */
-        uint16_t aid() const { return this->_body.aid; }
+        uint16_t aid() const { return _body.aid; }
 
         /**
          * \brief Setter for the status code.
@@ -1946,28 +2056,28 @@ namespace Tins {
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return _body.capability;}
 
         /**
          * \brief Getter for the listen interval.
          *
          * \return The listen interval in an uint16_t.
          */
-        uint16_t listen_interval() const { return this->_body.listen_interval; }
+        uint16_t listen_interval() const { return _body.listen_interval; }
 
         /**
          * \brief Getter for the current ap field.
          *
          * \return The current ap in an array of 6 uint8_t.
          */
-        const uint8_t* current_ap() const { return this->_body.current_ap; }
+        const uint8_t* current_ap() const { return _body.current_ap; }
 
         /**
          * \brief Setter for the listen interval.
@@ -2063,28 +2173,28 @@ namespace Tins {
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return _body.capability;}
 
         /**
          * \brief Getter for the status code.
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return this->_body.status_code; }
+        uint16_t status_code() const { return _body.status_code; }
 
         /**
          * \brief Getter for the AID field.
          *
          * \return The AID field value in an uint16_t.
          */
-        uint16_t aid() const { return this->_body.aid; }
+        uint16_t aid() const { return _body.aid; }
 
         /**
          * \brief Setter for the status code.
@@ -2180,21 +2290,21 @@ namespace Tins {
          *
          * \return The authentication algorithm number in an uint16_t.
          */
-        uint16_t auth_algorithm() const {return this->_body.auth_algorithm; }
+        uint16_t auth_algorithm() const {return _body.auth_algorithm; }
 
         /**
          * \brief Getter for the Authetication Sequence Number.
          *
          * \return The authentication sequence number in an uint16_t.
          */
-        uint16_t auth_seq_number() const {return this->_body.auth_seq_number; }
+        uint16_t auth_seq_number() const {return _body.auth_seq_number; }
 
         /**
          * \brief Getter for the status code.
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return this->_body.status_code; }
+        uint16_t status_code() const { return _body.status_code; }
 
         /**
          * \brief Setter for the Authetication Algorithm Number.
@@ -2298,7 +2408,7 @@ namespace Tins {
          *
          * \return uint16_t with the reason code.
          */
-        uint16_t reason_code() const { return this->_body.reason_code; }
+        uint16_t reason_code() const { return _body.reason_code; }
 
         /**
          * \brief Setter for the reason code.
@@ -2443,28 +2553,28 @@ namespace Tins {
          *
          * \return Timestamp value in an uint64_t.
          */
-        uint64_t timestamp() const { return this->_body.timestamp; }
+        uint64_t timestamp() const { return _body.timestamp; }
 
         /**
          * \brief Getter for the interval field.
          *
          * \return Timestamp value in an uint16_t.
          */
-        uint16_t interval() const { return this->_body.interval; }
+        uint16_t interval() const { return _body.interval; }
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        const CapabilityInformation& capabilities() const { return this->_body.capability;}
+        const CapabilityInformation& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
          * \return CapabilityInformation Structure in a CapabilityInformation&.
          */
-        CapabilityInformation& capabilities() { return this->_body.capability;}
+        CapabilityInformation& capabilities() { return _body.capability;}
 
         /**
          * \brief Setter for the timestamp field.
@@ -2548,35 +2658,35 @@ namespace Tins {
          *
          * \return The second address as a constant uint8_t pointer.
          */
-        address_type addr2() const { return this->_ext_header.addr2; }
+        address_type addr2() const { return _ext_header.addr2; }
 
         /**
          * \brief Getter for the third address.
          *
          * \return The third address as a constant uint8_t pointer.
          */
-        address_type addr3() const { return this->_ext_header.addr3; }
+        address_type addr3() const { return _ext_header.addr3; }
 
         /**
          * \brief Getter for the fragment number.
          *
          * \return The fragment number as an uint8_t.
          */
-        uint8_t frag_num() const { return this->_ext_header.seq_control.frag_number; }
+        uint8_t frag_num() const { return _ext_header.seq_control.frag_number; }
 
         /**
          * \brief Getter for the sequence number.
          *
          * \return The sequence number as an uint16_t.
          */
-        uint16_t seq_num() const { return this->_ext_header.seq_control.seq_number; }
+        uint16_t seq_num() const { return _ext_header.seq_control.seq_number; }
 
         /**
          * \brief Getter for the fourth address.
          *
          * \return The fourth address as a constant uint8_t pointer.
          */
-        const uint8_t* addr4() const { return this->_addr4; }
+        const uint8_t* addr4() const { return _addr4; }
 
         /**
          * \brief Setter for the second address.
@@ -2712,7 +2822,7 @@ namespace Tins {
          *
          * \return The value of the qos_control field in an uint16_t.
          */
-        uint16_t qos_control() const { return this->_qos_control; }
+        uint16_t qos_control() const { return _qos_control; }
 
         /**
          * \brief Setter for the qos_control field.

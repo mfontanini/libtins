@@ -55,7 +55,7 @@ TEST_F(Dot11Test, CopyAssignmentOperator) {
     test_equals(dot1, dot2);
 }
 
-//type="Control", subtype=3, proto=1, FCfield="to-DS", ID=0x234f, addr1="00:01:02:03:04:05")
+// type="Control", subtype=3, proto=1, FCfield="to-DS", ID=0x234f, addr1="00:01:02:03:04:05"
 TEST_F(Dot11Test, ConstructorFromBuffer) {
     Dot11 dot11(expected_packet, sizeof(expected_packet));
     EXPECT_EQ(dot11.protocol(), 1);

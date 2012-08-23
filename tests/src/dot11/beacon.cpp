@@ -16,7 +16,6 @@ class Dot11BeaconTest : public testing::Test {
 public:
     static const address_type empty_addr, hwaddr;
     static const uint8_t expected_packet[];
-    static void test_equals_expected(const Dot11Beacon&dot11);
 };
 
 const address_type Dot11BeaconTest::empty_addr,
@@ -30,22 +29,8 @@ const uint8_t Dot11BeaconTest::expected_packet[] = {
     '\x95', ' '
 };
 
-void Dot11BeaconTest::test_equals_expected(const Dot11Beacon &dot11) {
-    EXPECT_EQ(dot11.protocol(), 1);
-    EXPECT_EQ(dot11.type(), Dot11::MANAGEMENT);
+void test_equals_expected(const Dot11Beacon &dot11) {
     EXPECT_EQ(dot11.subtype(), 8);
-    EXPECT_EQ(dot11.to_ds(), 1);
-    EXPECT_EQ(dot11.from_ds(), 0);
-    EXPECT_EQ(dot11.more_frag(), 0);
-    EXPECT_EQ(dot11.retry(), 0);
-    EXPECT_EQ(dot11.power_mgmt(), 0);
-    EXPECT_EQ(dot11.wep(), 0);
-    EXPECT_EQ(dot11.order(), 0);
-    EXPECT_EQ(dot11.duration_id(), 0x234f);
-    EXPECT_EQ(dot11.addr1(), "00:01:02:03:04:05");
-    EXPECT_EQ(dot11.addr2(), "01:02:03:04:05:06");
-    EXPECT_EQ(dot11.addr3(), "02:03:04:05:06:07");
-    
     EXPECT_EQ(dot11.timestamp(), 0x1fad2341289301faLL);
     EXPECT_EQ(dot11.interval(), 0x14fa);
     
@@ -66,19 +51,16 @@ void Dot11BeaconTest::test_equals_expected(const Dot11Beacon &dot11) {
     EXPECT_EQ(info.dsss_ofdm(), 1);
     EXPECT_EQ(info.delayed_block_ack(), 0);
     EXPECT_EQ(info.immediate_block_ack(), 0);
+    
+    ::test_equals_expected(static_cast<const Dot11ManagementFrame&>(dot11));
 }
 
 void test_equals(const Dot11Beacon& b1, const Dot11Beacon& b2) {
-    EXPECT_EQ(b1.addr2(), b2.addr2());
-    EXPECT_EQ(b1.addr3(), b2.addr3());
-    EXPECT_EQ(b1.addr4(), b2.addr4());
-    EXPECT_EQ(b1.frag_num(), b2.frag_num());
-    EXPECT_EQ(b1.seq_num(), b2.seq_num());
     EXPECT_EQ(b1.interval(), b2.interval());
     EXPECT_EQ(b1.timestamp(), b2.timestamp());
     
-    const Dot11Beacon::CapabilityInformation& info1 = b1.capabilities(),
-                                                    info2 = b2.capabilities();
+    const Dot11Beacon::CapabilityInformation &info1 = b1.capabilities(),
+                                                  &info2 = b2.capabilities();
      EXPECT_EQ(info1.ess(), info2.ess());
      EXPECT_EQ(info1.ibss(), info2.ibss());
      EXPECT_EQ(info1.cf_poll(), info2.cf_poll());
@@ -96,16 +78,15 @@ void test_equals(const Dot11Beacon& b1, const Dot11Beacon& b2) {
      EXPECT_EQ(info1.delayed_block_ack(), info2.delayed_block_ack());
      EXPECT_EQ(info1.immediate_block_ack(), info2.immediate_block_ack());
     
-    test_equals(static_cast<const Dot11&>(b1), static_cast<const Dot11&>(b2));
+    test_equals(
+        static_cast<const Dot11ManagementFrame&>(b1), 
+        static_cast<const Dot11ManagementFrame&>(b2)
+    );
 }
                    
 TEST_F(Dot11BeaconTest, DefaultConstructor) {
     Dot11Beacon dot11;
-    EXPECT_EQ(dot11.addr2(), empty_addr);
-    EXPECT_EQ(dot11.addr3(), empty_addr);
-    EXPECT_EQ(dot11.addr4(), empty_addr);
-    EXPECT_EQ(dot11.frag_num(), 0);
-    EXPECT_EQ(dot11.seq_num(), 0);
+    test_equals_empty(static_cast<const Dot11ManagementFrame&>(dot11));
     
     const Dot11Beacon::CapabilityInformation& info = dot11.capabilities();
     EXPECT_EQ(info.ess(), 0);
@@ -127,6 +108,7 @@ TEST_F(Dot11BeaconTest, DefaultConstructor) {
     
     EXPECT_EQ(dot11.interval(), 0);
     EXPECT_EQ(dot11.timestamp(), 0);
+    EXPECT_EQ(dot11.subtype(), Dot11::BEACON);
 }
 
 // beacon_interval=0x14fa, timestamp=0x1fad2341289301fa, cap="ESS+CFP+privacy+DSSS-OFDM"
@@ -326,3 +308,84 @@ TEST_F(Dot11BeaconTest, FHPattern) {
     EXPECT_EQ(data.offset, data.offset);
     EXPECT_EQ(data.random_table, data.random_table);
 }
+
+TEST_F(Dot11BeaconTest, PowerConstraint) {
+    Dot11Beacon dot11;
+    dot11.power_constraint(0x1e);
+    EXPECT_EQ(dot11.power_constraint(), 0x1e);
+}
+
+TEST_F(Dot11BeaconTest, ChannelSwitch) {
+    Dot11Beacon dot11;
+    Dot11Beacon::channel_switch_type data(13, 42, 98), output;
+    dot11.channel_switch(data);
+    
+    output = dot11.channel_switch();
+    EXPECT_EQ(output.switch_mode, data.switch_mode);
+    EXPECT_EQ(output.new_channel, data.new_channel);
+    EXPECT_EQ(output.switch_count, data.switch_count);
+}
+
+
+TEST_F(Dot11BeaconTest, Quiet) {
+    Dot11Beacon dot11;
+    Dot11Beacon::quiet_type data(13, 42, 0x928f, 0xf1ad), output;
+    dot11.quiet(data);
+    
+    output = dot11.quiet();
+    EXPECT_EQ(output.quiet_count, data.quiet_count);
+    EXPECT_EQ(output.quiet_period, data.quiet_period);
+    EXPECT_EQ(output.quiet_duration, data.quiet_duration);
+    EXPECT_EQ(output.quiet_offset, data.quiet_offset);
+}
+
+TEST_F(Dot11BeaconTest, TPCReport) {
+    Dot11Beacon dot11;
+    std::pair<uint8_t, uint8_t> data(42, 193);
+    dot11.tpc_report(data.first, data.second);
+    EXPECT_EQ(dot11.tpc_report(), data);
+}
+
+TEST_F(Dot11BeaconTest, ERPInformation) {
+    Dot11Beacon dot11;
+    dot11.erp_information(0x1e);
+    EXPECT_EQ(dot11.erp_information(), 0x1e);
+}
+
+TEST_F(Dot11BeaconTest, BSSLoad) {
+    Dot11Beacon dot11;
+    Dot11Beacon::bss_load_type data(0x129f, 42, 0xf5a2), output;
+    dot11.bss_load(data);
+    output = dot11.bss_load();
+    
+    EXPECT_EQ(data.station_count, output.station_count);
+    EXPECT_EQ(data.channel_utilization, output.channel_utilization);
+    EXPECT_EQ(data.available_capacity, output.available_capacity);
+}
+
+TEST_F(Dot11BeaconTest, TIM) {
+    Dot11Beacon dot11;
+    Dot11Beacon::tim_type data, output;
+    data.dtim_count = 42;
+    data.dtim_period = 59;
+    data.bitmap_control = 191;
+    
+    data.partial_virtual_bitmap.push_back(92);
+    data.partial_virtual_bitmap.push_back(182);
+    data.partial_virtual_bitmap.push_back(212);
+    
+    dot11.tim(data);
+    output = dot11.tim();
+    
+    EXPECT_EQ(data.dtim_count, output.dtim_count);
+    EXPECT_EQ(data.dtim_period, output.dtim_period);
+    EXPECT_EQ(data.bitmap_control, output.bitmap_control);
+    EXPECT_EQ(data.partial_virtual_bitmap, output.partial_virtual_bitmap);
+}
+
+TEST_F(Dot11BeaconTest, ChallengeText) {
+    Dot11Beacon dot11;
+    dot11.challenge_text("libtins ftw");
+    EXPECT_EQ(dot11.challenge_text(), "libtins ftw");
+}
+
