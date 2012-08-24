@@ -215,9 +215,21 @@ PDU *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     if(hdr->control.type == MANAGEMENT) {
         if(hdr->control.subtype == BEACON)
             ret = new Dot11Beacon(buffer, total_sz);
-        //else if(hdr->control.subtype == DISASSOC)
-        else
+        else if(hdr->control.subtype == DISASSOC)
             ret = new Dot11Disassoc(buffer, total_sz);
+        else if(hdr->control.subtype == ASSOC_REQ)
+            ret = new Dot11AssocRequest(buffer, total_sz);
+        else if(hdr->control.subtype == ASSOC_RESP)
+            ret = new Dot11AssocResponse(buffer, total_sz);
+        else if(hdr->control.subtype == REASSOC_REQ)
+            ret = new Dot11ReAssocRequest(buffer, total_sz);
+        else if(hdr->control.subtype == REASSOC_RESP)
+            ret = new Dot11ReAssocResponse(buffer, total_sz); 
+        else if(hdr->control.subtype == AUTH)
+            ret = new Dot11Authentication(buffer, total_sz); 
+        //else if(hdr->control.subtype == DEAUTH)
+        else 
+            ret = new Dot11Deauthentication(buffer, total_sz); 
     }
     else if(hdr->control.type == DATA){
         if(hdr->control.subtype <= 4)
@@ -939,7 +951,7 @@ Dot11AssocRequest::Dot11AssocRequest(const uint8_t *buffer, uint32_t total_sz) :
 }
 
 void Dot11AssocRequest::listen_interval(uint16_t new_listen_interval) {
-    this->_body.listen_interval = new_listen_interval;
+    this->_body.listen_interval = Utils::host_to_le(new_listen_interval);
 }
 
 uint32_t Dot11AssocRequest::header_size() const {
@@ -951,14 +963,6 @@ uint32_t Dot11AssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t tot
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
-}
-
-PDU *Dot11AssocRequest::clone_pdu() const {
-    Dot11AssocRequest *new_pdu = new Dot11AssocRequest();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
-    return new_pdu;
 }
 
 /* Assoc response. */
@@ -986,11 +990,11 @@ Dot11AssocResponse::Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot11AssocResponse::status_code(uint16_t new_status_code) {
-    this->_body.status_code = new_status_code;
+    this->_body.status_code = Utils::host_to_le(new_status_code);
 }
 
 void Dot11AssocResponse::aid(uint16_t new_aid) {
-    this->_body.aid = new_aid;
+    this->_body.aid = Utils::host_to_le(new_aid);
 }
 
 uint32_t Dot11AssocResponse::header_size() const {
@@ -1002,14 +1006,6 @@ uint32_t Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t to
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
-}
-
-PDU *Dot11AssocResponse::clone_pdu() const {
-    Dot11AssocResponse *new_pdu = new Dot11AssocResponse();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
-    return new_pdu;
 }
 
 /* ReAssoc request. */
@@ -1037,11 +1033,11 @@ Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_s
 }
 
 void Dot11ReAssocRequest::listen_interval(uint16_t new_listen_interval) {
-    this->_body.listen_interval = new_listen_interval;
+    this->_body.listen_interval = Utils::host_to_le(new_listen_interval);
 }
 
-void Dot11ReAssocRequest::current_ap(uint8_t* new_current_ap) {
-    memcpy(this->_body.current_ap, new_current_ap, 6);
+void Dot11ReAssocRequest::current_ap(const address_type &new_current_ap) {
+    new_current_ap.copy(_body.current_ap);
 }
 
 uint32_t Dot11ReAssocRequest::header_size() const {
@@ -1053,14 +1049,6 @@ uint32_t Dot11ReAssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t t
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
-}
-
-PDU *Dot11ReAssocRequest::clone_pdu() const {
-    Dot11ReAssocRequest *new_pdu = new Dot11ReAssocRequest();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
-    return new_pdu;
 }
 
 /* ReAssoc response. */
@@ -1087,11 +1075,11 @@ Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total
 }
 
 void Dot11ReAssocResponse::status_code(uint16_t new_status_code) {
-    this->_body.status_code = new_status_code;
+    this->_body.status_code = Utils::host_to_le(new_status_code);
 }
 
 void Dot11ReAssocResponse::aid(uint16_t new_aid) {
-    this->_body.aid = new_aid;
+    this->_body.aid = Utils::host_to_le(new_aid);
 }
 
 uint32_t Dot11ReAssocResponse::header_size() const {
@@ -1105,12 +1093,90 @@ uint32_t Dot11ReAssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t 
     return sz;
 }
 
-PDU *Dot11ReAssocResponse::clone_pdu() const {
-    Dot11ReAssocResponse *new_pdu = new Dot11ReAssocResponse();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
-    return new_pdu;
+
+/* Auth */
+
+Dot11Authentication::Dot11Authentication(const NetworkInterface& iface,
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+{
+    this->subtype(Dot11::AUTH);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
+    uint32_t sz = management_frame_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw runtime_error("Not enough size for an IEEE 802.11 authentication header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Dot11Authentication::auth_algorithm(uint16_t new_auth_algorithm) {
+    this->_body.auth_algorithm = Utils::host_to_le(new_auth_algorithm);
+}
+
+void Dot11Authentication::auth_seq_number(uint16_t new_auth_seq_number) {
+    this->_body.auth_seq_number = Utils::host_to_le(new_auth_seq_number);
+}
+
+void Dot11Authentication::status_code(uint16_t new_status_code) {
+    this->_body.status_code = Utils::host_to_le(new_status_code);
+}
+
+uint32_t Dot11Authentication::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(_body);
+}
+
+uint32_t Dot11Authentication::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+
+/* Deauth */
+
+Dot11Deauthentication::Dot11Deauthentication(const NetworkInterface& iface,
+  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
+: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+{
+    this->subtype(Dot11::DEAUTH);
+    memset(&_body, 0, sizeof(_body));
+}
+
+Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) {
+    uint32_t sz = management_frame_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw runtime_error("Not enough size for a IEEE 802.11 deauthentication header in the buffer.");
+    memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Dot11Deauthentication::reason_code(uint16_t new_reason_code) {
+    this->_body.reason_code = Utils::host_to_le(new_reason_code);
+}
+
+uint32_t Dot11Deauthentication::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+}
+
+uint32_t Dot11Deauthentication::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(this->_body);
+    assert(sz <= total_sz);
+    memcpy(buffer, &this->_body, sz);
+    return sz;
 }
 
 /* Probe Request */
@@ -1184,107 +1250,6 @@ uint32_t Dot11ProbeResponse::write_fixed_parameters(uint8_t *buffer, uint32_t to
     assert(sz <= total_sz);
     memcpy(buffer, &this->_body, sz);
     return sz;
-}
-
-/* Auth */
-
-Dot11Authentication::Dot11Authentication(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::AUTH);
-    memset(&_body, 0, sizeof(_body));
-}
-
-Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_sz) 
-: Dot11ManagementFrame(buffer, total_sz) 
-{
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw runtime_error("Not enough size for an IEEE 802.11 authentication header in the buffer.");
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
-}
-
-void Dot11Authentication::auth_algorithm(uint16_t new_auth_algorithm) {
-    this->_body.auth_algorithm = new_auth_algorithm;
-}
-
-void Dot11Authentication::auth_seq_number(uint16_t new_auth_seq_number) {
-    this->_body.auth_seq_number = new_auth_seq_number;
-}
-
-void Dot11Authentication::status_code(uint16_t new_status_code) {
-    this->_body.status_code = new_status_code;
-}
-
-uint32_t Dot11Authentication::header_size() const {
-    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
-}
-
-PDU* Dot11Authentication::clone_pdu() const {
-    Dot11Authentication *new_pdu = new Dot11Authentication();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    std::memcpy(&new_pdu->_body, &_body, sizeof(_body));
-    return new_pdu;
-}
-
-uint32_t Dot11Authentication::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(this->_body);
-    assert(sz <= total_sz);
-    memcpy(buffer, &this->_body, sz);
-    return sz;
-}
-
-/* Deauth */
-
-Dot11Deauthentication::Dot11Deauthentication(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
-{
-    this->subtype(Dot11::DEAUTH);
-    memset(&_body, 0, sizeof(_body));
-}
-
-Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz) 
-: Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw runtime_error("Not enough size for a IEEE 802.11 deauthentication header in the buffer.");
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
-}
-
-void Dot11Deauthentication::reason_code(uint16_t new_reason_code) {
-    this->_body.reason_code = new_reason_code;
-}
-
-uint32_t Dot11Deauthentication::header_size() const {
-    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
-}
-
-uint32_t Dot11Deauthentication::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(this->_body);
-    assert(sz <= total_sz);
-    memcpy(buffer, &this->_body, sz);
-    return sz;
-}
-
-PDU *Dot11Deauthentication::clone_pdu() const {
-    Dot11Deauthentication *new_pdu = new Dot11Deauthentication();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    memcpy(&new_pdu->_body, &this->_body, sizeof(this->_body));
-    return new_pdu;
 }
 
 /* Dot11Data */

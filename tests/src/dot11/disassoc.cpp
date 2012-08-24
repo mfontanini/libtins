@@ -42,6 +42,7 @@ TEST_F(Dot11DisassocTest, Constructor) {
     Dot11Disassoc dot11;
     test_equals_empty(static_cast<const Dot11ManagementFrame&>(dot11));
     EXPECT_EQ(dot11.reason_code(), 0);
+    EXPECT_EQ(dot11.subtype(), Dot11::DISASSOC);
 }
 
 TEST_F(Dot11DisassocTest, ConstructorFromBuffer) {
@@ -71,8 +72,7 @@ TEST_F(Dot11DisassocTest, ClonePDU) {
 TEST_F(Dot11DisassocTest, FromBytes) {
     std::auto_ptr<PDU> dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get());
-    std::cout << (int)dot11->pdu_type() << std::endl;
-    const Dot11Disassoc *disassoc = dot11->find_inner_pdu<Dot11Disassoc>();
-    ASSERT_TRUE(disassoc);
-    test_equals_expected(*disassoc);
+    const Dot11Disassoc *inner = dot11->find_inner_pdu<Dot11Disassoc>();
+    ASSERT_TRUE(inner);
+    test_equals_expected(*inner);
 }

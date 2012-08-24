@@ -435,7 +435,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -443,7 +443,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11;
+           return flag == pdu_flag;
         }
 
         /**
@@ -1535,7 +1535,7 @@ namespace Tins {
          *
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_MANAGEMENT; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -1543,7 +1543,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_MANAGEMENT || Dot11::matches_flag(flag);
+           return flag == pdu_flag || Dot11::matches_flag(flag);
         }
     protected:
         struct ExtendedHeader {
@@ -1680,7 +1680,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_BEACON || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -1689,14 +1689,14 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         Dot11Beacon *clone_pdu() const {
-            return PDU::do_clone_pdu<Dot11Beacon>();
+            return new Dot11Beacon(*this);
         }
 
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_BEACON; }
+        PDUType pdu_type() const { return pdu_flag; }
     private:
         struct BeaconBody {
             uint64_t timestamp;
@@ -1769,7 +1769,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_DIASSOC; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -1786,7 +1786,7 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         Dot11Disassoc *clone_pdu() const {
-            return PDU::do_clone_pdu<Dot11Disassoc>();
+            return new Dot11Disassoc(*this);
         }
     private:
         struct DisassocBody {
@@ -1851,7 +1851,7 @@ namespace Tins {
          *
          * \return The listen interval in an uint16_t.
          */
-        uint16_t listen_interval() const { return _body.listen_interval; }
+        uint16_t listen_interval() const { return Utils::le_to_host(_body.listen_interval); }
 
         /**
          * \brief Setter for the listen interval.
@@ -1872,7 +1872,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_ASSOC_REQ; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -1888,7 +1888,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11AssocRequest *clone_pdu() const {
+            return new Dot11AssocRequest(*this);
+        }
     private:
         struct AssocReqBody {
             CapabilityInformation capability;
@@ -1953,14 +1955,14 @@ namespace Tins {
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return _body.status_code; }
+        uint16_t status_code() const { return Utils::le_to_host(_body.status_code); }
 
         /**
          * \brief Getter for the AID field.
          *
          * \return The AID field value in an uint16_t.
          */
-        uint16_t aid() const { return _body.aid; }
+        uint16_t aid() const { return Utils::le_to_host(_body.aid); }
 
         /**
          * \brief Setter for the status code.
@@ -1988,7 +1990,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_ASSOC_RESP; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -1996,7 +1998,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_ASSOC_RESP || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -2004,7 +2006,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11AssocResponse *clone_pdu() const {
+            return new Dot11AssocResponse(*this);
+        }
     private:
         struct AssocRespBody {
             CapabilityInformation capability;
@@ -2070,14 +2074,14 @@ namespace Tins {
          *
          * \return The listen interval in an uint16_t.
          */
-        uint16_t listen_interval() const { return _body.listen_interval; }
+        uint16_t listen_interval() const { return Utils::le_to_host(_body.listen_interval); }
 
         /**
          * \brief Getter for the current ap field.
          *
          * \return The current ap in an array of 6 uint8_t.
          */
-        const uint8_t* current_ap() const { return _body.current_ap; }
+        address_type current_ap() const { return _body.current_ap; }
 
         /**
          * \brief Setter for the listen interval.
@@ -2091,7 +2095,7 @@ namespace Tins {
          *
          * \param new_current_ap uint8_t array of 6 bytes with the new current ap.
          */
-        void current_ap(uint8_t* new_current_ap);
+        void current_ap(const address_type &new_current_ap);
 
         /**
          * \brief Returns the frame's header length.
@@ -2105,7 +2109,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_REASSOC_REQ; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -2113,7 +2117,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_REASSOC_REQ || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -2121,12 +2125,14 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11ReAssocRequest *clone_pdu() const {
+            return new Dot11ReAssocRequest(*this);
+        }
     private:
         struct ReAssocReqBody {
             CapabilityInformation capability;
             uint16_t listen_interval;
-            uint8_t current_ap[6];
+            uint8_t current_ap[address_type::address_size];
         };
 
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
@@ -2187,14 +2193,14 @@ namespace Tins {
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return _body.status_code; }
+        uint16_t status_code() const { return Utils::le_to_host(_body.status_code); }
 
         /**
          * \brief Getter for the AID field.
          *
          * \return The AID field value in an uint16_t.
          */
-        uint16_t aid() const { return _body.aid; }
+        uint16_t aid() const { return Utils::le_to_host(_body.aid); }
 
         /**
          * \brief Setter for the status code.
@@ -2222,7 +2228,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_ASSOC_RESP; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -2230,7 +2236,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_ASSOC_RESP || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -2238,7 +2244,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11ReAssocResponse *clone_pdu() const {
+            return new Dot11ReAssocResponse(*this);
+        }
     private:
         struct ReAssocRespBody {
             CapabilityInformation capability;
@@ -2290,21 +2298,21 @@ namespace Tins {
          *
          * \return The authentication algorithm number in an uint16_t.
          */
-        uint16_t auth_algorithm() const {return _body.auth_algorithm; }
+        uint16_t auth_algorithm() const {return Utils::le_to_host(_body.auth_algorithm); }
 
         /**
          * \brief Getter for the Authetication Sequence Number.
          *
          * \return The authentication sequence number in an uint16_t.
          */
-        uint16_t auth_seq_number() const {return _body.auth_seq_number; }
+        uint16_t auth_seq_number() const {return Utils::le_to_host(_body.auth_seq_number); }
 
         /**
          * \brief Getter for the status code.
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return _body.status_code; }
+        uint16_t status_code() const { return Utils::le_to_host(_body.status_code); }
 
         /**
          * \brief Setter for the Authetication Algorithm Number.
@@ -2339,7 +2347,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_AUTH; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -2347,7 +2355,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_AUTH || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -2355,7 +2363,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11Authentication *clone_pdu() const {
+            return new Dot11Authentication(*this);
+        }
     private:
         struct AuthBody {
             uint16_t auth_algorithm;
@@ -2408,7 +2418,7 @@ namespace Tins {
          *
          * \return uint16_t with the reason code.
          */
-        uint16_t reason_code() const { return _body.reason_code; }
+        uint16_t reason_code() const { return Utils::le_to_host(_body.reason_code); }
 
         /**
          * \brief Setter for the reason code.
@@ -2429,7 +2439,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_DEAUTH; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -2437,7 +2447,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_DEAUTH || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -2445,7 +2455,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11Deauthentication *clone_pdu() const {
+            return new Dot11Deauthentication(*this);
+        }
     private:
         struct DeauthBody {
             uint16_t reason_code;

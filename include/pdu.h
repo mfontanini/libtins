@@ -307,7 +307,7 @@ namespace Tins {
         template<class T>
         T *do_clone_pdu() const {
             T *new_pdu = new T(*static_cast<const T*>(this));
-            new_pdu->copy_inner_pdu(*this);
+            //new_pdu->copy_inner_pdu(*this);
             return new_pdu;
         }
     private:
