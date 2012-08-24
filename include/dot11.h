@@ -2514,7 +2514,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_PROBE_REQ || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
         /**
@@ -2522,7 +2522,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu()
          */
-        PDU* clone_pdu() const;
+        Dot11ProbeRequest* clone_pdu() const {
+            return new Dot11ProbeRequest(*this);
+        }
 
     };
 
@@ -2565,14 +2567,14 @@ namespace Tins {
          *
          * \return Timestamp value in an uint64_t.
          */
-        uint64_t timestamp() const { return _body.timestamp; }
+        uint64_t timestamp() const { return Utils::le_to_host(_body.timestamp); }
 
         /**
          * \brief Getter for the interval field.
          *
          * \return Timestamp value in an uint16_t.
          */
-        uint16_t interval() const { return _body.interval; }
+        uint16_t interval() const { return Utils::le_to_host(_body.interval); }
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -2615,13 +2617,15 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu()
          */
-        PDU* clone_pdu() const;
+        Dot11ProbeResponse* clone_pdu() const {
+            return new Dot11ProbeResponse(*this);
+        }
 
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_PROBE_RESP; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -2629,7 +2633,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_PROBE_RESP || Dot11ManagementFrame::matches_flag(flag);
+           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
     protected:
 
@@ -2691,14 +2695,14 @@ namespace Tins {
          *
          * \return The sequence number as an uint16_t.
          */
-        uint16_t seq_num() const { return _ext_header.seq_control.seq_number; }
+        uint16_t seq_num() const { return Utils::le_to_host(_ext_header.seq_control.seq_number); }
 
         /**
          * \brief Getter for the fourth address.
          *
          * \return The fourth address as a constant uint8_t pointer.
          */
-        const uint8_t* addr4() const { return _addr4; }
+        address_type addr4() const { return _addr4; }
 
         /**
          * \brief Setter for the second address.
@@ -2733,7 +2737,7 @@ namespace Tins {
          *
          * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
          */
-        void addr4(const uint8_t* new_addr4);
+        void addr4(const address_type &new_addr4);
 
         /**
          * \brief Returns the 802.11 frame's header length.
@@ -2747,7 +2751,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_DATA; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -2755,7 +2759,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_DATA || Dot11::matches_flag(flag);
+           return flag == pdu_flag || Dot11::matches_flag(flag);
         }
 
         /**
@@ -2763,7 +2767,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11Data *clone_pdu() const {
+            return new Dot11Data(*this);
+        }
     protected:
         struct ExtendedHeader {
             uint8_t addr2[6];
@@ -2785,7 +2791,7 @@ namespace Tins {
         uint32_t data_frame_size() { return sizeof(_ext_header) + (from_ds() && to_ds()) ? sizeof(_addr4) : 0; }
     private:
         ExtendedHeader _ext_header;
-        uint8_t _addr4[6];
+        address_type _addr4;
     };
 
     class Dot11QoSData : public Dot11Data {
@@ -2856,7 +2862,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11QoSData *clone_pdu() const {
+            return new Dot11QoSData(*this);
+        }
 
         /**
          * \brief Getter for the PDU's type.

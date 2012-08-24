@@ -227,9 +227,15 @@ PDU *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
             ret = new Dot11ReAssocResponse(buffer, total_sz); 
         else if(hdr->control.subtype == AUTH)
             ret = new Dot11Authentication(buffer, total_sz); 
-        //else if(hdr->control.subtype == DEAUTH)
-        else 
+        else if(hdr->control.subtype == DEAUTH)
             ret = new Dot11Deauthentication(buffer, total_sz); 
+        else if(hdr->control.subtype == PROBE_REQ)
+            ret = new Dot11ProbeRequest(buffer, total_sz); 
+        //else if(hdr->control.subtype == PROBE_RESP)
+        else 
+            ret = new Dot11ProbeResponse(buffer, total_sz); 
+        
+            
     }
     else if(hdr->control.type == DATA){
         if(hdr->control.subtype <= 4)
@@ -1194,13 +1200,6 @@ Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz)
     parse_tagged_parameters(buffer, total_sz);
 }
 
-PDU* Dot11ProbeRequest::clone_pdu() const {
-    Dot11ProbeRequest* new_pdu = new Dot11ProbeRequest();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    return new_pdu;
-}
-
 /* Probe Response */
 
 Dot11ProbeResponse::Dot11ProbeResponse(const NetworkInterface& iface,
@@ -1208,7 +1207,7 @@ Dot11ProbeResponse::Dot11ProbeResponse(const NetworkInterface& iface,
 : Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
 {
     this->subtype(Dot11::PROBE_RESP);
-    memset(&this->_body, 0, sizeof(this->_body));
+    memset(&_body, 0, sizeof(_body));
 }
 
 Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz) 
@@ -1226,23 +1225,15 @@ Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot11ProbeResponse::timestamp(uint64_t new_timestamp) {
-    this->_body.timestamp = new_timestamp;
+    this->_body.timestamp = Utils::host_to_le(new_timestamp);
 }
 
 void Dot11ProbeResponse::interval(uint16_t new_interval) {
-    this->_body.interval = new_interval;
+    this->_body.interval = Utils::host_to_le(new_interval);
 }
 
 uint32_t Dot11ProbeResponse::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(this->_body);
-}
-
-PDU* Dot11ProbeResponse::clone_pdu() const {
-    Dot11ProbeResponse* new_pdu = new Dot11ProbeResponse();
-    new_pdu->copy_80211_fields(this);
-    new_pdu->copy_ext_header(this);
-    memcpy(&new_pdu->_body, &this->_body, sizeof(this->_body));
-    return new_pdu;
 }
 
 uint32_t Dot11ProbeResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
@@ -1282,13 +1273,14 @@ Dot11Data::Dot11Data(const NetworkInterface &iface,
 : Dot11(iface, dst_hw_addr, child) 
 {
     type(Dot11::DATA);
+    memset(&_ext_header, 0, sizeof(_ext_header));
     addr2(src_hw_addr);
 }
 
 void Dot11Data::copy_ext_header(const Dot11Data* other) {
-    Dot11::copy_80211_fields(other);
+    /*Dot11::copy_80211_fields(other);
     std::memcpy(&this->_ext_header, &other->_ext_header, sizeof(this->_ext_header));
-    std::memcpy(this->_addr4, other->_addr4, 6);
+    _addr4, other->_addr4, 6);*/
 }
 
 uint32_t Dot11Data::header_size() const {
@@ -1307,33 +1299,27 @@ void Dot11Data::addr3(const address_type &new_addr3) {
 }
 
 void Dot11Data::frag_num(uint8_t new_frag_num) {
-    this->_ext_header.seq_control.frag_number = new_frag_num;
+    _ext_header.seq_control.frag_number = new_frag_num;
 }
 
 void Dot11Data::seq_num(uint16_t new_seq_num) {
-    this->_ext_header.seq_control.seq_number = new_seq_num;
+    _ext_header.seq_control.seq_number = new_seq_num;
 }
 
-void Dot11Data::addr4(const uint8_t* new_addr4) {
-    memcpy(this->_addr4, new_addr4, 6);
+void Dot11Data::addr4(const address_type &new_addr4) {
+    _addr4 = new_addr4;
 }
 
 uint32_t Dot11Data::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t written = sizeof(this->_ext_header);
-    memcpy(buffer, &this->_ext_header, sizeof(this->_ext_header));
-    buffer += sizeof(this->_ext_header);
-    if (this->from_ds() && this->to_ds()) {
+    uint32_t written = sizeof(_ext_header);
+    memcpy(buffer, &_ext_header, sizeof(_ext_header));
+    buffer += sizeof(_ext_header);
+    if (from_ds() && to_ds()) {
         written += 6;
-        memcpy(buffer, this->_addr4, 6);
+        _addr4.copy(buffer);
     }
     return written;
 
-}
-
-PDU *Dot11Data::clone_pdu() const {
-    Dot11Data *new_pdu = new Dot11Data();
-    new_pdu->copy_80211_fields(this);
-    return new_pdu;
 }
 
 /* QoS data. */
@@ -1343,8 +1329,8 @@ Dot11QoSData::Dot11QoSData(const NetworkInterface &iface,
   PDU* child) 
 : Dot11Data(iface, dst_hw_addr, src_hw_addr, child) 
 {
-    this->subtype(Dot11::QOS_DATA_DATA);
-    this->_qos_control = 0;
+    subtype(Dot11::QOS_DATA_DATA);
+    _qos_control = 0;
 }
 
 Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) 
@@ -1356,7 +1342,7 @@ Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz)
     total_sz -= sz;
     if(total_sz < sizeof(this->_qos_control))
         throw runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
-    this->_qos_control = *(uint16_t*)buffer;
+    _qos_control = *(uint16_t*)buffer;
     total_sz -= sizeof(uint16_t);
     buffer += sizeof(uint16_t);
     if(total_sz)
@@ -1391,12 +1377,6 @@ uint32_t Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz
     assert(sz <= total_sz);
     *(uint16_t*)buffer = this->_qos_control;
     return sz;
-}
-
-PDU *Dot11QoSData::clone_pdu() const {
-    Dot11QoSData *new_pdu = new Dot11QoSData();
-    new_pdu->copy_80211_fields(this);
-    return new_pdu;
 }
 
 /* Dot11Control */

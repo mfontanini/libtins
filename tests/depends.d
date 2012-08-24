@@ -264,7 +264,122 @@ src/utils_test.o: src/utils_test.cpp ../include/utils.h \
 ../include/network_interface.h:
 
 ../include/ipaddress.h:
+src/dot11/assoc_request.o: src/dot11/assoc_request.cpp ../include/dot11.h \
+ ../include/pdu.h ../include/packetsender.h ../include/utils.h \
+ ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/assoc_response.o: src/dot11/assoc_response.cpp \
+ ../include/dot11.h ../include/pdu.h ../include/packetsender.h \
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/authentication.o: src/dot11/authentication.cpp \
+ ../include/dot11.h ../include/pdu.h ../include/packetsender.h \
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
 src/dot11/beacon.o: src/dot11/beacon.cpp ../include/dot11.h \
+ ../include/pdu.h ../include/packetsender.h ../include/utils.h \
+ ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/deauthentication.o: src/dot11/deauthentication.cpp \
+ ../include/dot11.h ../include/pdu.h ../include/packetsender.h \
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/disassoc.o: src/dot11/disassoc.cpp ../include/dot11.h \
  ../include/pdu.h ../include/packetsender.h ../include/utils.h \
  ../include/ipaddress.h ../include/hwaddress.h \
  ../include/network_interface.h include/tests/dot11.h \
@@ -312,6 +427,75 @@ include/tests/dot11.h:
 include/tests/dot11.h:
 
 ../include/utils.h:
+src/dot11/probe_request.o: src/dot11/probe_request.cpp ../include/dot11.h \
+ ../include/pdu.h ../include/packetsender.h ../include/utils.h \
+ ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/reassoc_request.o: src/dot11/reassoc_request.cpp \
+ ../include/dot11.h ../include/pdu.h ../include/packetsender.h \
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/reassoc_response.o: src/dot11/reassoc_response.cpp \
+ ../include/dot11.h ../include/pdu.h ../include/packetsender.h \
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
 ../src/arp.o: ../src/arp.cpp ../include/arp.h ../include/pdu.h \
  ../include/packetsender.h ../include/ipaddress.h ../include/utils.h \
  ../include/hwaddress.h ../include/network_interface.h ../include/ip.h \
