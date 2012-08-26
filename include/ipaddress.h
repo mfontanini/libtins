@@ -42,7 +42,6 @@ namespace Tins {
         IPv4Address &operator=(const std::string &ip);
         
         operator uint32_t() const;
-        operator std::string() const;
         
         std::string to_string() const;
         
@@ -55,7 +54,7 @@ namespace Tins {
         }
         
         friend std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
-            return output << (std::string)addr;
+            return output << addr.to_string();
         }
     private:
         uint32_t ip_to_int(const std::string &ip);

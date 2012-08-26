@@ -41,6 +41,7 @@ DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : PDU(255), extra_size(0) {
     const uint8_t *end(buffer + total_sz);
     uint16_t nquestions(questions());
     buffer += sizeof(dnshdr);
+    total_sz -= sizeof(dnshdr);
     for(uint16_t i(0); i < nquestions; ++i) {
         const uint8_t *ptr(buffer);
         while(ptr < end && *ptr)
@@ -105,10 +106,10 @@ const uint8_t *DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_
             ptr += sizeof(uint16_t);
         }
         else {
-            const uint8_t *str_end(ptr), *end(ptr + sz);
-            while(str_end < end && *str_end)
+            const uint8_t *str_end(ptr);
+            while(str_end < ptr_end && *str_end)
                 str_end++;
-            if(str_end == end)
+            if(str_end == ptr_end)
                 throw std::runtime_error("Not enough size for a resource domain name.");
             //str_end++;
             res.reset(new NamedResourceRecord(string(ptr, str_end)));
@@ -123,7 +124,7 @@ const uint8_t *DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_
 
         // Store the option size.
         res->data.resize(
-            Utils::host_to_be(*reinterpret_cast<const uint16_t*>(ptr))
+            Utils::be_to_host(*reinterpret_cast<const uint16_t*>(ptr))
         );
         ptr += sizeof(uint16_t);
         if(ptr + res->data.size() > ptr_end)
@@ -131,7 +132,7 @@ const uint8_t *DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_
         if(contains_dname(res->info.type))
             std::copy(ptr, ptr + res->data.size(), res->data.begin());
         else if(res->data.size() == sizeof(uint32_t))
-            *(uint32_t*)&res->data[0] = Utils::host_to_be(*(uint32_t*)ptr);
+            *(uint32_t*)&res->data[0] = Utils::be_to_host(*(uint32_t*)ptr);
         else
             throw std::runtime_error("Not enough size for resource data");
         

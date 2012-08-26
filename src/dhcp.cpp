@@ -35,14 +35,14 @@ const uint32_t DHCP::MAX_DHCP_SIZE = 312;
 
 /* Magic cookie: uint32_t.
  * end of options: 1 byte. */
-DHCP::DHCP() : _size(sizeof(uint32_t) + 1) {
+DHCP::DHCP() : _size(sizeof(uint32_t)) {
     opcode(BOOTREQUEST);
     htype(1); //ethernet
     hlen(EthernetII::ADDR_SIZE);
 }
 
 DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) 
-: BootP(buffer, total_sz, 0), _size(sizeof(uint32_t) + 1)
+: BootP(buffer, total_sz, 0), _size(sizeof(uint32_t))
 {
     buffer += BootP::header_size() - vend_size();
     total_sz -= BootP::header_size() - vend_size();
@@ -55,23 +55,18 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
         for(unsigned i(0); i < 2; ++i) {
             args[i] = *(buffer++);
             total_sz--;
-            if(args[0] == END || args[0] == PAD)
+            if(args[0] == END || args[0] == PAD) {
+                args[1] = 0;
                 i = 2;
+            }
             else if(!total_sz)
                 throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
         }
-        // If the END-OF-OPTIONS was not found...
-        if(args[0] != END && args[0] != PAD) {
-            // Not enough size for this option
-            if(total_sz < args[1])
-                throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
-            add_option((Options)args[0], args[1], buffer);
-            buffer += args[1];
-            total_sz -= args[1];
-        }
-        // Otherwise, break the loop.
-        else
-            total_sz = 0;
+        if(total_sz < args[1])
+            throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
+        add_option((Options)args[0], args[1], buffer);
+        buffer += args[1];
+        total_sz -= args[1];
     }
 }
 
@@ -100,6 +95,10 @@ const DHCP::DHCPOption *DHCP::search_option(Options opt) const{
 bool DHCP::add_type_option(Flags type) {
     uint8_t int_type = type;
     return add_option(DHCP_MESSAGE_TYPE, sizeof(uint8_t), &int_type);
+}
+
+bool DHCP::add_end_option() {
+    return add_option(DHCP_MESSAGE_TYPE, 0, 0);
 }
 
 bool DHCP::search_type_option(uint8_t *value) {
@@ -239,7 +238,7 @@ void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
             ptr += it->value.size();
         }
         // End of options
-        result[_size-1] = END;
+        //result[_size-1] = END;
         vend(result, _size);
     }
     BootP::write_serialization(buffer, total_sz, parent);

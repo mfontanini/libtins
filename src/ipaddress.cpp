@@ -49,10 +49,6 @@ IPv4Address::operator uint32_t() const {
     return Utils::host_to_be(ip_addr); 
 }
 
-IPv4Address::operator std::string() const { 
-    return Utils::ip_to_string(ip_addr); 
-} 
-
 std::string IPv4Address::to_string() const {
     return Utils::ip_to_string(ip_addr); 
 }

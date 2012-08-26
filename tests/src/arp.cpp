@@ -143,25 +143,18 @@ TEST_F(ARPTest, Opcode) {
 TEST_F(ARPTest, Serialize) {
     ARP arp1(0x1234, 0xa3f1, hw_addr1, hw_addr2);
     
-    uint32_t size;
-    uint8_t *buffer = arp1.serialize(size);
-    ASSERT_TRUE(buffer);
+    PDU::serialization_type buffer = arp1.serialize();
     
     ARP arp2(arp1);
-    uint32_t size2;
-    uint8_t *buffer2 = arp2.serialize(size2);
-    ASSERT_EQ(size, size2);
-    EXPECT_TRUE(memcmp(buffer, buffer2, size) == 0);
-    delete[] buffer;
-    delete[] buffer2;
+    PDU::serialization_type buffer2 = arp2.serialize();
+    EXPECT_EQ(buffer, buffer2);
 }
 
 TEST_F(ARPTest, ConstructorFromBuffer) {
     ARP arp1(expected_packet, sizeof(expected_packet));
-    uint32_t size;
-    uint8_t *buffer = arp1.serialize(size);
+    PDU::serialization_type buffer = arp1.serialize();
     
-    ARP arp2(buffer, size);
+    ARP arp2(&buffer[0], buffer.size());
     EXPECT_EQ(arp1.opcode(), arp2.opcode());
     ASSERT_EQ(arp1.hw_addr_length(), arp2.hw_addr_length());
     EXPECT_EQ(arp1.hw_addr_format(), arp2.hw_addr_format());
@@ -171,6 +164,4 @@ TEST_F(ARPTest, ConstructorFromBuffer) {
     EXPECT_EQ(arp1.target_ip_addr(), arp2.target_ip_addr());
     EXPECT_EQ(arp1.sender_hw_addr(), arp2.sender_hw_addr());
     EXPECT_EQ(arp1.target_hw_addr(), arp2.target_hw_addr());
-    
-    delete[] buffer;
 }

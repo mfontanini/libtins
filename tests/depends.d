@@ -264,6 +264,28 @@ src/utils_test.o: src/utils_test.cpp ../include/utils.h \
 ../include/network_interface.h:
 
 ../include/ipaddress.h:
+src/dot11/ack.o: src/dot11/ack.cpp ../include/dot11.h ../include/pdu.h \
+ ../include/packetsender.h ../include/utils.h ../include/ipaddress.h \
+ ../include/hwaddress.h ../include/network_interface.h \
+ include/tests/dot11.h include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
 src/dot11/assoc_request.o: src/dot11/assoc_request.cpp ../include/dot11.h \
  ../include/pdu.h ../include/packetsender.h ../include/utils.h \
  ../include/ipaddress.h ../include/hwaddress.h \
@@ -338,6 +360,97 @@ src/dot11/beacon.o: src/dot11/beacon.cpp ../include/dot11.h \
  ../include/ipaddress.h ../include/hwaddress.h \
  ../include/network_interface.h include/tests/dot11.h \
  include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/block_ack_request.o: src/dot11/block_ack_request.cpp \
+ ../include/dot11.h ../include/pdu.h ../include/packetsender.h \
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/cfendack.o: src/dot11/cfendack.cpp ../include/dot11.h \
+ ../include/pdu.h ../include/packetsender.h ../include/utils.h \
+ ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/cfend.o: src/dot11/cfend.cpp ../include/dot11.h \
+ ../include/pdu.h ../include/packetsender.h ../include/utils.h \
+ ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/data.o: src/dot11/data.cpp ../include/dot11.h ../include/pdu.h \
+ ../include/packetsender.h ../include/utils.h ../include/ipaddress.h \
+ ../include/hwaddress.h ../include/network_interface.h \
+ include/tests/dot11.h include/tests/dot11.h
 
 ../include/dot11.h:
 
@@ -450,6 +563,52 @@ src/dot11/probe_request.o: src/dot11/probe_request.cpp ../include/dot11.h \
 include/tests/dot11.h:
 
 include/tests/dot11.h:
+src/dot11/probe_response.o: src/dot11/probe_response.cpp \
+ ../include/dot11.h ../include/pdu.h ../include/packetsender.h \
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/pspoll.o: src/dot11/pspoll.cpp ../include/dot11.h \
+ ../include/pdu.h ../include/packetsender.h ../include/utils.h \
+ ../include/ipaddress.h ../include/hwaddress.h \
+ ../include/network_interface.h include/tests/dot11.h \
+ include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
 src/dot11/reassoc_request.o: src/dot11/reassoc_request.cpp \
  ../include/dot11.h ../include/pdu.h ../include/packetsender.h \
  ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
@@ -478,6 +637,28 @@ src/dot11/reassoc_response.o: src/dot11/reassoc_response.cpp \
  ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h \
  ../include/network_interface.h include/tests/dot11.h \
  include/tests/dot11.h
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/packetsender.h:
+
+../include/utils.h:
+
+../include/ipaddress.h:
+
+../include/hwaddress.h:
+
+../include/network_interface.h:
+
+include/tests/dot11.h:
+
+include/tests/dot11.h:
+src/dot11/rts.o: src/dot11/rts.cpp ../include/dot11.h ../include/pdu.h \
+ ../include/packetsender.h ../include/utils.h ../include/ipaddress.h \
+ ../include/hwaddress.h ../include/network_interface.h \
+ include/tests/dot11.h include/tests/dot11.h
 
 ../include/dot11.h:
 

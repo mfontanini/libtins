@@ -25,32 +25,33 @@
 #include "pdu.h"
 #include "rawpdu.h"
 
+namespace Tins {
 
-Tins::PDU::PDU(uint32_t flag, PDU *next_pdu) : _flag(flag), _inner_pdu(next_pdu) {
+PDU::PDU(uint32_t flag, PDU *next_pdu) : _flag(flag), _inner_pdu(next_pdu) {
 
 }
 
-Tins::PDU::PDU(const PDU &other) : _inner_pdu(0) {
+PDU::PDU(const PDU &other) : _inner_pdu(0) {
     _flag = other.flag();
     copy_inner_pdu(other);
 }
 
-Tins::PDU &Tins::PDU::operator=(const PDU &other) {
+PDU &PDU::operator=(const PDU &other) {
     _flag = other.flag();
     copy_inner_pdu(other);
     return *this;
 }
 
-Tins::PDU::~PDU() {
+PDU::~PDU() {
     delete _inner_pdu;
 }
 
-void Tins::PDU::copy_inner_pdu(const PDU &pdu) {
+void PDU::copy_inner_pdu(const PDU &pdu) {
     if(pdu.inner_pdu())
         inner_pdu(pdu.inner_pdu()->clone_pdu());
 }
 
-uint32_t Tins::PDU::size() const {
+uint32_t PDU::size() const {
     uint32_t sz = header_size() + trailer_size();
     const PDU *ptr(_inner_pdu);
     while(ptr) {
@@ -60,23 +61,24 @@ uint32_t Tins::PDU::size() const {
     return sz;
 }
 
-void Tins::PDU::flag(uint32_t new_flag) {
+void PDU::flag(uint32_t new_flag) {
     _flag = new_flag;
 }
 
-void Tins::PDU::inner_pdu(PDU *next_pdu) {
+void PDU::inner_pdu(PDU *next_pdu) {
     delete _inner_pdu;
     _inner_pdu = next_pdu;
 }
 
-uint8_t *Tins::PDU::serialize(uint32_t &sz) {
-    sz = size();
-    uint8_t *buffer = new uint8_t[sz];
-    serialize(buffer, sz, 0);
+PDU::serialization_type PDU::serialize() {
+    std::vector<uint8_t> buffer(size());
+    serialize(&buffer[0], buffer.size(), 0);
+    
+    // Copy elision, do your magic
     return buffer;
 }
 
-void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void PDU::serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t sz = header_size() + trailer_size();
     /* Must not happen... */
     assert(total_sz >= sz);
@@ -85,7 +87,7 @@ void Tins::PDU::serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent)
     write_serialization(buffer, total_sz, parent);
 }
 
-Tins::PDU *Tins::PDU::clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz) {
+PDU *PDU::clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz) {
     PDU *child = 0;
     if(inner_pdu()) {
         child = inner_pdu()->clone_packet(ptr, total_sz);
@@ -97,7 +99,7 @@ Tins::PDU *Tins::PDU::clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz) {
     return child;
 }
 
-Tins::PDU *Tins::PDU::clone_packet() const {
+PDU *PDU::clone_packet() const {
     PDU *ret = clone_pdu();
     if(ret) {
         PDU *ptr = 0, *last = ret;
@@ -108,4 +110,5 @@ Tins::PDU *Tins::PDU::clone_packet() const {
         }
     }
     return ret;
+}
 }

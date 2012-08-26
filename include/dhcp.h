@@ -205,6 +205,17 @@ namespace Tins {
          */
         bool add_type_option(Flags type);
         
+        /** 
+         * \brief Adds an end option the the option list.
+         * 
+         * The END option is not added automatically. You should explicitly
+         * add it at the end of the DHCP options for the PDU to be
+         * standard-compliant.
+         * 
+         * \return True if the option was added successfully. \sa DHCP::add_option
+         */
+        bool add_end_option();
+        
         /**
          * \brief Searchs for a type option.
          * \param value A pointer in which the option's value will be stored.

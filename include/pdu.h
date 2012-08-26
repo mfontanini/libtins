@@ -24,6 +24,7 @@
 
 
 #include <stdint.h>
+#include <vector>
 #include "packetsender.h"
 
 /** \brief The Tins namespace.
@@ -43,6 +44,10 @@ namespace Tins {
      */
     class PDU {
     public:
+        /**
+         * The type that will be returned when serializing PDUs.
+         */
+        typedef std::vector<uint8_t> serialization_type;
 
         /**
          * \brief Enum which identifies each type of PDU.
@@ -148,13 +153,16 @@ namespace Tins {
         void inner_pdu(PDU *next_pdu);
 
 
-        /** \brief Serializes the whole chain of PDU's, including this one.
+        /** 
+         * \brief Serializes the whole chain of PDU's, including this one.
          *
-         * \param sz The size of the buffer must be returned through this parameter.
-         * The buffer returned must be deleted by the user using
-         * operator delete[].
+         * This allocates a std::vector of size size(), and fills it
+         * with the serialization this PDU, and all of the inner ones'.
+         * 
+         * \return serialization_type containing the serialization
+         * of the whole stack of PDUs.
          */
-        uint8_t *serialize(uint32_t &sz);
+        serialization_type serialize();
 
         /**
          * \brief Find and returns the first PDU that matches the given flag.

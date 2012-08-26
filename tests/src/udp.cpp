@@ -105,35 +105,26 @@ TEST_F(UDPTest, Serialize) {
     udp1.sport(sport);
     udp1.length(length);
     
-    uint32_t size;
-    uint8_t *buffer = udp1.serialize(size);
-    ASSERT_TRUE(buffer);
+    PDU::serialization_type buffer = udp1.serialize();
     
     UDP udp2(udp1);
-    uint32_t size2;
-    uint8_t *buffer2 = udp2.serialize(size2);
-    ASSERT_EQ(size, size2);
-    EXPECT_TRUE(memcmp(buffer, buffer2, size) == 0);
-    delete[] buffer;
-    delete[] buffer2;
+    PDU::serialization_type buffer2 = udp2.serialize();
+    EXPECT_EQ(buffer, buffer2);
 }
 
 TEST_F(UDPTest, ConstructorFromBuffer) {
     UDP udp1(expected_packet, sizeof(expected_packet));
-    uint32_t size;
-    uint8_t *buffer = udp1.serialize(size);
+    PDU::serialization_type buffer = udp1.serialize();
     
-    EXPECT_EQ(size, sizeof(expected_packet));
+    EXPECT_EQ(buffer.size(), sizeof(expected_packet));
     EXPECT_EQ(udp1.dport(), 0x47f1);
     EXPECT_EQ(udp1.sport(), 0xf51a);
     EXPECT_EQ(udp1.length(), 0x453);
     
-    UDP udp2(buffer, size);
+    UDP udp2(&buffer[0], buffer.size());
     EXPECT_EQ(udp1.dport(), udp2.dport());
     EXPECT_EQ(udp1.sport(), udp2.sport());
     EXPECT_EQ(udp1.length(), udp2.length());
     EXPECT_EQ(udp1.size(), udp2.size());
     EXPECT_EQ(udp1.header_size(), udp2.header_size());
-    
-    delete[] buffer;
 }

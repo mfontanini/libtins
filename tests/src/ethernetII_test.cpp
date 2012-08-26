@@ -113,12 +113,9 @@ TEST_F(EthernetIITest, CompleteConstructor) {
 TEST_F(EthernetIITest, Serialize) {
     EthernetII eth(iface, d_addr, s_addr);
     eth.payload_type(p_type);
-    uint32_t sz;
-    uint8_t *serialized = eth.serialize(sz);
-    EXPECT_EQ(eth.size(), sz);
-    EXPECT_TRUE(serialized);
-    EXPECT_TRUE(memcmp(serialized, expected_packet, sz) == 0);
-    delete[] serialized;
+    PDU::serialization_type serialized = eth.serialize();
+    ASSERT_EQ(serialized.size(), sizeof(expected_packet));
+    EXPECT_TRUE(std::equal(serialized.begin(), serialized.end(), expected_packet));
 }
 
 TEST_F(EthernetIITest, ConstructorFromBuffer) {

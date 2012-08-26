@@ -187,12 +187,12 @@ TEST_F(IPTest, ConstructorFromBuffer) {
     EXPECT_EQ(option->type.number, IP::SEC);
     EXPECT_EQ(option->type.op_class, IP::CONTROL);
     ASSERT_EQ(option->data_size(), sizeof(opt_sec));
-    EXPECT_TRUE(memcmp(option->data_ptr(), opt_sec, sizeof(opt_sec)) == 0);
-    
-    uint32_t size;
-    uint8_t *buffer = ip1.serialize(size);
-    ASSERT_TRUE(buffer);
-    
-    IP ip2(buffer, size);
-    delete[] buffer;
+    EXPECT_TRUE(std::equal(option->data_ptr(), option->data_ptr() + option->data_size(), opt_sec));
+}
+
+TEST_F(IPTest, Serialize) {
+    IP ip1(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = ip1.serialize();
+    ASSERT_EQ(buffer.size(), sizeof(expected_packet));
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }

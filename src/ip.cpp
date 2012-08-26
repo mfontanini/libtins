@@ -47,10 +47,6 @@ Tins::IP::IP(IPv4Address ip_dst, IPv4Address ip_src, PDU *child) :
     this->src_addr(ip_src); 
 }
 
-Tins::IP::IP() : PDU(IPPROTO_IP) {
-    init_ip_fields();
-}
-
 Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) 
 : PDU(Constants::IP::PROTO_IP)
 {

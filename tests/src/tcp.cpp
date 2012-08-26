@@ -220,19 +220,15 @@ TEST_F(TCPTest, ConstructorFromBuffer) {
     EXPECT_EQ(edges.front(), 0x00010203); edges.pop_front();
     EXPECT_EQ(edges.front(), 0x04050607); 
     
-    uint32_t size;
-    uint8_t *buffer = tcp1.serialize(size);
+    PDU::serialization_type buffer = tcp1.serialize();
     
-    TCP tcp2(buffer, size);
+    TCP tcp2(&buffer[0], buffer.size());
     test_equals(tcp1, tcp2);
-    delete[] buffer;
 }
 
 TEST_F(TCPTest, Serialize) {
     TCP tcp1(expected_packet, sizeof(expected_packet));
-    uint32_t size;
-    uint8_t *buffer = tcp1.serialize(size);
-    ASSERT_EQ(size, sizeof(expected_packet));
-    ASSERT_TRUE(std::equal(buffer, buffer + size, expected_packet));
-    delete[] buffer;
+    PDU::serialization_type buffer = tcp1.serialize();
+    ASSERT_EQ(buffer.size(), sizeof(expected_packet));
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }

@@ -31,6 +31,7 @@
 #include <cassert>
 #include <errno.h>
 #include <cstring>
+#include <vector>
 #include <ctime>
 #include "packetsender.h"
 
@@ -102,11 +103,11 @@ bool Tins::PacketSender::send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t 
     if(!open_l2_socket())
         return false;
 
-    uint32_t sz;
     int sock = _sockets[ETHER_SOCKET];
-    uint8_t *buffer = pdu->serialize(sz);
-    bool ret_val = (sendto(sock, buffer, sz, 0, link_addr, len_addr) != -1);
-    delete[] buffer;
+    PDU::serialization_type buffer = pdu->serialize();
+    if(buffer.size() == 0)
+        return false;
+    bool ret_val = (sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) != -1);
 
     return ret_val;
 }
@@ -128,11 +129,9 @@ bool Tins::PacketSender::send_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t 
     if(!open_l3_socket(type))
         ret_val = false;
     if (ret_val) {
-        uint32_t sz;
         int sock = _sockets[type];
-        uint8_t *buffer = pdu->serialize(sz);
-        ret_val = (sendto(sock, buffer, sz, 0, link_addr, len_addr) != -1);
-        delete[] buffer;
+        PDU::serialization_type buffer = pdu->serialize();
+        ret_val = (sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) != -1);
     }
     return ret_val;
 }

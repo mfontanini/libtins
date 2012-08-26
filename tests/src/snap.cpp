@@ -79,17 +79,11 @@ TEST_F(SNAPTest, Serialize) {
     snap1.poll(0x1);
     snap1.id(0x1);
     
-    uint32_t size;
-    uint8_t *buffer = snap1.serialize(size);
-    ASSERT_TRUE(buffer);
+    PDU::serialization_type buffer = snap1.serialize();
     
     SNAP snap2(snap1);
-    uint32_t size2;
-    uint8_t *buffer2 = snap2.serialize(size2);
-    ASSERT_EQ(size, size2);
-    EXPECT_TRUE(memcmp(buffer, buffer2, size) == 0);
-    delete[] buffer;
-    delete[] buffer2;
+    PDU::serialization_type buffer2 = snap2.serialize();
+    EXPECT_EQ(buffer, buffer2);
 }
 
 TEST_F(SNAPTest, ClonePDU) {
@@ -107,17 +101,15 @@ TEST_F(SNAPTest, ClonePDU) {
 
 TEST_F(SNAPTest, ConstructorFromBuffer) {
     SNAP snap1(expected_packet, sizeof(expected_packet));
-    uint32_t size;
-    uint8_t *buffer = snap1.serialize(size);
+    PDU::serialization_type buffer = snap1.serialize();
     
     EXPECT_EQ(snap1.id(), 3);
     EXPECT_EQ(snap1.dsap(), 0xaa);
     EXPECT_EQ(snap1.ssap(), 0xaa);
     EXPECT_EQ(snap1.eth_type(), 0x7ab1);
     
-    SNAP snap2(buffer, size);
+    SNAP snap2(&buffer[0], buffer.size());
     test_equals(snap1, snap2);
-    delete[] buffer;
 }
 
 void SNAPTest::test_equals(const SNAP &snap1, const SNAP &snap2) {

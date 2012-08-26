@@ -196,24 +196,17 @@ TEST_F(ICMPTest, Serialize) {
     ICMP icmp1;
     icmp1.set_echo_request(0x34ab, 0x12f7);
     
-    uint32_t size;
-    uint8_t *buffer = icmp1.serialize(size);
-    ASSERT_TRUE(buffer);
+    PDU::serialization_type buffer = icmp1.serialize();
     
     ICMP icmp2(icmp1);
-    uint32_t size2;
-    uint8_t *buffer2 = icmp2.serialize(size2);
-    ASSERT_EQ(size, size2);
-    EXPECT_TRUE(memcmp(buffer, buffer2, size) == 0);
-    delete[] buffer;
-    delete[] buffer2;
+    PDU::serialization_type buffer2 = icmp2.serialize();
+    EXPECT_EQ(buffer, buffer2);
 }
 
 TEST_F(ICMPTest, ConstructorFromBuffer) {
     for(unsigned i(0); i < expected_packet_count; ++i) {
         ICMP icmp1(expected_packets[i], sizeof(expected_packets[i]));
-        uint32_t size;
-        uint8_t *buffer = icmp1.serialize(size);
+        PDU::serialization_type buffer = icmp1.serialize();
         
         switch(i) {
             case 0:
@@ -229,9 +222,7 @@ TEST_F(ICMPTest, ConstructorFromBuffer) {
                 break;
         }
         
-        ICMP icmp2(buffer, size);
+        ICMP icmp2(&buffer[0], buffer.size());
         test_equals(icmp1, icmp2);
-        
-        delete[] buffer;
     }
 }
