@@ -249,30 +249,30 @@ TEST_F(Dot11BeaconTest, Country) {
 
 TEST_F(Dot11BeaconTest, FHParameters) {
     Dot11Beacon dot11;
-    std::pair<uint8_t, uint8_t> data(0x42, 0x1f);
-    dot11.fh_parameters(data.first, data.second);
-    EXPECT_EQ(data, dot11.fh_parameters());
+    std::pair<uint8_t, uint8_t> tim(0x42, 0x1f);
+    dot11.fh_parameters(tim.first, tim.second);
+    EXPECT_EQ(tim, dot11.fh_parameters());
 }
 
 TEST_F(Dot11BeaconTest, FHPattern) {
     Dot11Beacon dot11;
-    Dot11Beacon::fh_pattern_type data, output;
-    data.flag = 0x67;
-    data.number_of_sets = 0x42;
-    data.modulus = 0x1f;
-    data.offset = 0x3a;
-    data.random_table.push_back(23);
-    data.random_table.push_back(15);
-    data.random_table.push_back(129);
+    Dot11Beacon::fh_pattern_type tim, output;
+    tim.flag = 0x67;
+    tim.number_of_sets = 0x42;
+    tim.modulus = 0x1f;
+    tim.offset = 0x3a;
+    tim.random_table.push_back(23);
+    tim.random_table.push_back(15);
+    tim.random_table.push_back(129);
     
-    dot11.fh_pattern_table(data);
+    dot11.fh_pattern_table(tim);
     output = dot11.fh_pattern_table();
     
-    EXPECT_EQ(data.flag, data.flag);
-    EXPECT_EQ(data.number_of_sets, data.number_of_sets);
-    EXPECT_EQ(data.modulus, data.modulus);
-    EXPECT_EQ(data.offset, data.offset);
-    EXPECT_EQ(data.random_table, data.random_table);
+    EXPECT_EQ(tim.flag, tim.flag);
+    EXPECT_EQ(tim.number_of_sets, tim.number_of_sets);
+    EXPECT_EQ(tim.modulus, tim.modulus);
+    EXPECT_EQ(tim.offset, tim.offset);
+    EXPECT_EQ(tim.random_table, tim.random_table);
 }
 
 TEST_F(Dot11BeaconTest, PowerConstraint) {
@@ -283,33 +283,33 @@ TEST_F(Dot11BeaconTest, PowerConstraint) {
 
 TEST_F(Dot11BeaconTest, ChannelSwitch) {
     Dot11Beacon dot11;
-    Dot11Beacon::channel_switch_type data(13, 42, 98), output;
-    dot11.channel_switch(data);
+    Dot11Beacon::channel_switch_type tim(13, 42, 98), output;
+    dot11.channel_switch(tim);
     
     output = dot11.channel_switch();
-    EXPECT_EQ(output.switch_mode, data.switch_mode);
-    EXPECT_EQ(output.new_channel, data.new_channel);
-    EXPECT_EQ(output.switch_count, data.switch_count);
+    EXPECT_EQ(output.switch_mode, tim.switch_mode);
+    EXPECT_EQ(output.new_channel, tim.new_channel);
+    EXPECT_EQ(output.switch_count, tim.switch_count);
 }
 
 
 TEST_F(Dot11BeaconTest, Quiet) {
     Dot11Beacon dot11;
-    Dot11Beacon::quiet_type data(13, 42, 0x928f, 0xf1ad), output;
-    dot11.quiet(data);
+    Dot11Beacon::quiet_type tim(13, 42, 0x928f, 0xf1ad), output;
+    dot11.quiet(tim);
     
     output = dot11.quiet();
-    EXPECT_EQ(output.quiet_count, data.quiet_count);
-    EXPECT_EQ(output.quiet_period, data.quiet_period);
-    EXPECT_EQ(output.quiet_duration, data.quiet_duration);
-    EXPECT_EQ(output.quiet_offset, data.quiet_offset);
+    EXPECT_EQ(output.quiet_count, tim.quiet_count);
+    EXPECT_EQ(output.quiet_period, tim.quiet_period);
+    EXPECT_EQ(output.quiet_duration, tim.quiet_duration);
+    EXPECT_EQ(output.quiet_offset, tim.quiet_offset);
 }
 
 TEST_F(Dot11BeaconTest, TPCReport) {
     Dot11Beacon dot11;
-    std::pair<uint8_t, uint8_t> data(42, 193);
-    dot11.tpc_report(data.first, data.second);
-    EXPECT_EQ(dot11.tpc_report(), data);
+    std::pair<uint8_t, uint8_t> tim(42, 193);
+    dot11.tpc_report(tim.first, tim.second);
+    EXPECT_EQ(dot11.tpc_report(), tim);
 }
 
 TEST_F(Dot11BeaconTest, ERPInformation) {
@@ -320,33 +320,33 @@ TEST_F(Dot11BeaconTest, ERPInformation) {
 
 TEST_F(Dot11BeaconTest, BSSLoad) {
     Dot11Beacon dot11;
-    Dot11Beacon::bss_load_type data(0x129f, 42, 0xf5a2), output;
-    dot11.bss_load(data);
+    Dot11Beacon::bss_load_type tim(0x129f, 42, 0xf5a2), output;
+    dot11.bss_load(tim);
     output = dot11.bss_load();
     
-    EXPECT_EQ(data.station_count, output.station_count);
-    EXPECT_EQ(data.channel_utilization, output.channel_utilization);
-    EXPECT_EQ(data.available_capacity, output.available_capacity);
+    EXPECT_EQ(tim.station_count, output.station_count);
+    EXPECT_EQ(tim.channel_utilization, output.channel_utilization);
+    EXPECT_EQ(tim.available_capacity, output.available_capacity);
 }
 
 TEST_F(Dot11BeaconTest, TIM) {
     Dot11Beacon dot11;
-    Dot11Beacon::tim_type data, output;
-    data.dtim_count = 42;
-    data.dtim_period = 59;
-    data.bitmap_control = 191;
+    Dot11Beacon::tim_type tim, output;
+    tim.dtim_count = 42;
+    tim.dtim_period = 59;
+    tim.bitmap_control = 191;
     
-    data.partial_virtual_bitmap.push_back(92);
-    data.partial_virtual_bitmap.push_back(182);
-    data.partial_virtual_bitmap.push_back(212);
+    tim.partial_virtual_bitmap.push_back(92);
+    tim.partial_virtual_bitmap.push_back(182);
+    tim.partial_virtual_bitmap.push_back(212);
     
-    dot11.tim(data);
+    dot11.tim(tim);
     output = dot11.tim();
     
-    EXPECT_EQ(data.dtim_count, output.dtim_count);
-    EXPECT_EQ(data.dtim_period, output.dtim_period);
-    EXPECT_EQ(data.bitmap_control, output.bitmap_control);
-    EXPECT_EQ(data.partial_virtual_bitmap, output.partial_virtual_bitmap);
+    EXPECT_EQ(tim.dtim_count, output.dtim_count);
+    EXPECT_EQ(tim.dtim_period, output.dtim_period);
+    EXPECT_EQ(tim.bitmap_control, output.bitmap_control);
+    EXPECT_EQ(tim.partial_virtual_bitmap, output.partial_virtual_bitmap);
 }
 
 TEST_F(Dot11BeaconTest, ChallengeText) {
@@ -355,3 +355,63 @@ TEST_F(Dot11BeaconTest, ChallengeText) {
     EXPECT_EQ(dot11.challenge_text(), "libtins ftw");
 }
 
+
+TEST_F(Dot11BeaconTest, PCAPLoad1) {
+    const uint8_t buffer[] = {
+        '\x80', '\x00', '\x00', '\x00', '\xff', '\xff', '\xff', '\xff', 
+        '\xff', '\xff', '\xf4', '\xec', '8', '\xfe', 'M', '\x92', '\xf4', 
+        '\xec', '8', '\xfe', 'M', '\x92', '\xe0', '\xea', '\x80', '\xd1', 
+        '\xd4', '\xce', ',', '\x00', '\x00', '\x00', 'd', '\x00', '1', 
+        '\x04', '\x00', '\x07', 'S', 'e', 'g', 'u', 'n', 'd', 'o', '\x01', 
+        '\x08', '\x82', '\x84', '\x8b', '\x96', '\x0c', '\x12', '\x18', '$', 
+        '\x03', '\x01', '\x01', '\x05', '\x04', '\x00', '\x01', '\x00', 
+        '\x00', '\x07', '\x06', 'U', 'S', ' ', '\x01', '\r', '\x14', '*', 
+        '\x01', '\x00', '0', '\x14', '\x01', '\x00', '\x00', '\x0f', '\xac', 
+        '\x04', '\x01', '\x00', '\x00', '\x0f', '\xac', '\x04', '\x01', 
+        '\x00', '\x00', '\x0f', '\xac', '\x02', '\x00', '\x00', '2', '\x04', 
+        '0', 'H', '`', 'l', '\xdd', '\x18', '\x00', 'P', '\xf2', '\x02', 
+        '\x01', '\x01', '\x03', '\x00', '\x03', '\xa4', '\x00', '\x00', 
+        '\'', '\xa4', '\x00', '\x00', 'B', 'C', '^', '\x00', 'b', '2', 
+        '/', '\x00', '\xdd', '\t', '\x00', '\x03', '\x7f', '\x01', '\x01', 
+        '\x00', '\x00', '\xff', '\x7f'
+    };
+    typedef Dot11Beacon::country_params::container_type country_container;
+    Dot11Beacon dot11(buffer, sizeof(buffer));
+    float rates[] = { 1.0f, 2.0f, 5.5f, 11.0f, 6.0f, 9.0f, 12.0f, 18.0f},
+           ext_rates[] = { 24.0f, 36.0f, 48.0f, 54.0f };
+    Dot11Beacon::rates_type rates_parsed = dot11.supported_rates();
+    Dot11Beacon::rates_type ext_rates_parsed = dot11.extended_supported_rates();
+    Dot11Beacon::tim_type tim(0, 1, 0, Dot11Beacon::tim_type::container_type(1)), 
+                             tim_parsed = dot11.tim();
+    Dot11Beacon::country_params country("US ", 
+                                            country_container(1, 1),
+                                            country_container(1, 13),
+                                            country_container(1, 20)),
+                                    country_parsed = dot11.country();
+    EXPECT_EQ(dot11.ssid(), "Segundo");
+    ASSERT_EQ(rates_parsed.size(), sizeof(rates) / sizeof(float));
+    EXPECT_TRUE(std::equal(rates_parsed.begin(), rates_parsed.end(), rates));
+    ASSERT_EQ(ext_rates_parsed.size(), sizeof(ext_rates) / sizeof(float));
+    EXPECT_TRUE(std::equal(ext_rates_parsed.begin(), ext_rates_parsed.end(), ext_rates));
+    EXPECT_EQ(1, dot11.ds_parameter_set());
+    EXPECT_EQ(tim.dtim_count, tim_parsed.dtim_count);
+    EXPECT_EQ(tim.dtim_period, tim_parsed.dtim_period);
+    EXPECT_EQ(tim.bitmap_control, tim_parsed.bitmap_control);
+    EXPECT_EQ(tim.partial_virtual_bitmap, tim_parsed.partial_virtual_bitmap);
+    EXPECT_EQ(country.country, country_parsed.country);
+    EXPECT_EQ(country.first_channel, country_parsed.first_channel);
+    EXPECT_EQ(country.number_channels, country_parsed.number_channels);
+    EXPECT_EQ(country.max_transmit_power, country_parsed.max_transmit_power);
+    EXPECT_EQ(dot11.erp_information(), 0);
+    
+    PDU::serialization_type serialized = dot11.serialize();
+    ASSERT_EQ(sizeof(buffer), serialized.size());
+    EXPECT_TRUE(std::equal(serialized.begin(), serialized.end(), buffer));
+}
+
+TEST_F(Dot11BeaconTest, Serialize) {
+    Dot11Beacon pdu(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = pdu.serialize();
+    ASSERT_EQ(sizeof(expected_packet), buffer.size());
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
+}

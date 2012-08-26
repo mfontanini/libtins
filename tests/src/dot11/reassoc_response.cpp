@@ -81,3 +81,10 @@ TEST_F(Dot11ReAssocResponseTest, FromBytes) {
     test_equals_expected(*inner);
 }
 
+TEST_F(Dot11ReAssocResponseTest, Serialize) {
+    Dot11ReAssocResponse pdu(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = pdu.serialize();
+    ASSERT_EQ(sizeof(expected_packet), buffer.size());
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
+}
+

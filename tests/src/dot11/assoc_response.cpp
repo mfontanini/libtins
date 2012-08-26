@@ -67,6 +67,18 @@ TEST_F(Dot11AssocResponseTest, CopyAssignmentOperator) {
     test_equals(dot1, dot2);
 }
 
+TEST_F(Dot11AssocResponseTest, StatusCode) {
+    Dot11AssocResponse dot11;
+    dot11.status_code(0x92f3);
+    EXPECT_EQ(dot11.status_code(), 0x92f3);
+}
+
+TEST_F(Dot11AssocResponseTest, AID) {
+    Dot11AssocResponse dot11;
+    dot11.aid(0x92f3);
+    EXPECT_EQ(dot11.aid(), 0x92f3);
+}
+
 TEST_F(Dot11AssocResponseTest, ClonePDU) {
     Dot11AssocResponse dot1(expected_packet, sizeof(expected_packet));
     std::auto_ptr<Dot11AssocResponse> dot2(dot1.clone_pdu());
@@ -80,5 +92,12 @@ TEST_F(Dot11AssocResponseTest, FromBytes) {
     const Dot11AssocResponse *inner = dot11->find_inner_pdu<Dot11AssocResponse>();
     ASSERT_TRUE(inner);
     test_equals_expected(*inner);
+}
+
+TEST_F(Dot11AssocResponseTest, Serialize) {
+    Dot11AssocResponse pdu(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = pdu.serialize();
+    ASSERT_EQ(sizeof(expected_packet), buffer.size());
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
 

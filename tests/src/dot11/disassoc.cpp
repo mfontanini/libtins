@@ -63,6 +63,12 @@ TEST_F(Dot11DisassocTest, CopyAssignmentOperator) {
     test_equals(dot1, dot2);
 }
 
+TEST_F(Dot11DisassocTest, ReasonCode) {
+    Dot11Disassoc dot11;
+    dot11.reason_code(0x92f3);
+    EXPECT_EQ(dot11.reason_code(), 0x92f3);
+}
+
 TEST_F(Dot11DisassocTest, ClonePDU) {
     Dot11Disassoc dot1(expected_packet, sizeof(expected_packet));
     std::auto_ptr<Dot11Disassoc> dot2(dot1.clone_pdu());
@@ -75,4 +81,11 @@ TEST_F(Dot11DisassocTest, FromBytes) {
     const Dot11Disassoc *inner = dot11->find_inner_pdu<Dot11Disassoc>();
     ASSERT_TRUE(inner);
     test_equals_expected(*inner);
+}
+
+TEST_F(Dot11DisassocTest, Serialize) {
+    Dot11Disassoc pdu(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = pdu.serialize();
+    ASSERT_EQ(sizeof(expected_packet), buffer.size());
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }

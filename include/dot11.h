@@ -1551,11 +1551,11 @@ namespace Tins {
             uint8_t addr3[address_type::address_size];
             struct {
             #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int frag_number:4;
-                unsigned int seq_number:12;
+                uint16_t frag_number:4,
+                         seq_number:12;
             #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int seq_number:12;
-                unsigned int frag_number:4;
+                uint16_t seq_number:12,
+                         frag_number:4;
             #endif
             } __attribute__((__packed__)) seq_control;
         } __attribute__((__packed__));
@@ -2642,7 +2642,7 @@ namespace Tins {
             uint64_t timestamp;
             uint16_t interval;
             CapabilityInformation capability;
-        };
+        } __attribute__((__packed__));
 
         ProbeResp _body;
 
@@ -2772,21 +2772,20 @@ namespace Tins {
         }
     protected:
         struct ExtendedHeader {
-            uint8_t addr2[6];
-            uint8_t addr3[6];
+            uint8_t addr2[address_type::address_size];
+            uint8_t addr3[address_type::address_size];
             struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
-                unsigned int seq_number:12;
-                unsigned int frag_number:4;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
-                unsigned int frag_number:4;
-                unsigned int seq_number:12;
+            #if TINS_IS_LITTLE_ENDIAN
+                uint16_t frag_number:4,
+                         seq_number:12;
+            #elif TINS_IS_BIG_ENDIAN
+                uint16_t frag_number:4,
+                         seq_number:12;
             #endif
             } __attribute__((__packed__)) seq_control;
         } __attribute__((__packed__));
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
-        void copy_ext_header(const Dot11Data *other);
 
         uint32_t data_frame_size() { return sizeof(_ext_header) + (from_ds() && to_ds()) ? sizeof(_addr4) : 0; }
     private:
@@ -2824,23 +2823,13 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11QoSData(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Copy constructor.
-         */
-        Dot11QoSData(const Dot11QoSData &other);
-
-        /**
-         * \brief Copy assignment operator.
-         */
-        Dot11QoSData &operator= (const Dot11QoSData &other);
-
+        
         /**
          * \brief Getter for the qos_control field.
          *
          * \return The value of the qos_control field in an uint16_t.
          */
-        uint16_t qos_control() const { return _qos_control; }
+        uint16_t qos_control() const { return Utils::le_to_host(_qos_control); }
 
         /**
          * \brief Setter for the qos_control field.
@@ -2881,7 +2870,6 @@ namespace Tins {
            return flag == PDU::DOT11_QOS_DATA || Dot11Data::matches_flag(flag);
         }
     private:
-        void copy_fields(const Dot11QoSData *other);
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
 
@@ -2941,6 +2929,17 @@ namespace Tins {
      * that contain a target address.
      */
     class Dot11ControlTA : public Dot11Control {
+    public:
+        /**
+         * \brief Getter for the target address field.
+         */
+        address_type target_addr() const { return _taddr; }
+
+        /**
+         * \brief Setter for the target address field.
+         * \param addr The new target address.
+         */
+        void target_addr(const address_type &addr);
     protected:
         /**
          * \brief Constructor for creating a 802.11 control frame TA PDU
@@ -2967,17 +2966,6 @@ namespace Tins {
         Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz);
 
         /**
-         * \brief Getter for the target address field.
-         */
-        address_type target_addr() const { return _taddr; }
-
-        /**
-         * \brief Setter for the target address field.
-         * \param addr The new target address.
-         */
-        void target_addr(const address_type &addr);
-
-        /**
          * \brief Returns the 802.11 frame's header length.
          *
          * \return An uint32_t with the header's size.
@@ -2993,7 +2981,7 @@ namespace Tins {
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
 
-        uint8_t _taddr[6];
+        address_type _taddr;
     };
 
     class Dot11RTS : public Dot11ControlTA {
@@ -3032,13 +3020,15 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11RTS *clone_pdu() const {
+            return new Dot11RTS(*this);
+        }
 
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_RTS; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -3046,7 +3036,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_RTS || Dot11Control::matches_flag(flag);
+           return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -3086,13 +3076,15 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11PSPoll *clone_pdu() const {
+            return new Dot11PSPoll(*this);
+        }
 
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_PS_POLL; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -3100,7 +3092,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_PS_POLL || Dot11Control::matches_flag(flag);
+           return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -3140,13 +3132,15 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11CFEnd *clone_pdu() const {
+            return new Dot11CFEnd(*this);
+        }
 
          /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_CF_END; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -3154,7 +3148,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_CF_END || Dot11Control::matches_flag(flag);
+           return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -3193,13 +3187,15 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11EndCFAck *clone_pdu() const {
+            return new Dot11EndCFAck(*this);
+        }
 
          /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_END_CF_ACK; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -3207,7 +3203,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_END_CF_ACK || Dot11Control::matches_flag(flag);
+           return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -3245,13 +3241,15 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11Ack *clone_pdu() const {
+            return new Dot11Ack(*this);
+        }
 
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_ACK; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -3259,7 +3257,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_ACK || Dot11Control::matches_flag(flag);
+           return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
 
@@ -3302,17 +3300,24 @@ namespace Tins {
          * \brief Getter for the bar control field.
          * \return The bar control field.
          */
-        uint16_t bar_control() const { return _bar_control.tid; }
+        uint16_t bar_control() const { return Utils::le_to_host(_bar_control.tid); }
 
         /**
          * \brief Getter for the start sequence field.
          * \return The bar start sequence.
          */
-        uint16_t start_sequence() const { return (_start_sequence.frag << 12) | (_start_sequence.seq); }
+        uint16_t start_sequence() const { return Utils::le_to_host(_start_sequence.seq); }
+        
+        /**
+         * \brief Getter for the fragment number field.
+         * \return The fragment number field.
+         */
+        uint8_t fragment_number() const { return _start_sequence.frag; }
+        
         /**
          * \brief Returns the 802.11 frame's header length.
          *
-         * \return An uint32_t with the header's size.
+         * \return The header's size.
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
@@ -3330,19 +3335,27 @@ namespace Tins {
          * \param bar The new start sequence field.
          */
         void start_sequence(uint16_t seq);
+        
+        /**
+         * \brief Setter for the fragment number field.
+         * \param frag The new fragment number field.
+         */
+        void fragment_number(uint8_t frag);
 
         /**
          * \brief Clones this PDU.
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11BlockAckRequest *clone_pdu() const {
+            return new Dot11BlockAckRequest(*this);
+        }
 
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_BLOCK_ACK_REQ; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -3350,7 +3363,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_BLOCK_ACK_REQ || Dot11Control::matches_flag(flag);
+           return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     protected:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
@@ -3455,7 +3468,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DOT11_BLOCK_ACK; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -3463,7 +3476,7 @@ namespace Tins {
          * \sa PDU::matches_flag
          */
         bool matches_flag(PDUType flag) {
-           return flag == PDU::DOT11_BLOCK_ACK || Dot11Control::matches_flag(flag);
+           return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
 
         /**
@@ -3471,7 +3484,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        Dot11BlockAck *clone_pdu() const {
+            return new Dot11BlockAck(*this);
+        }
     private:
         struct BarControl {
             uint16_t reserved:12,

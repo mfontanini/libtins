@@ -6,7 +6,9 @@
 using Tins::Dot11;
 using Tins::Dot11ManagementFrame;
 using Tins::Dot11Data;
+using Tins::Dot11ControlTA;
 
+typedef Dot11::address_type address_type;
 typedef Dot11ManagementFrame::CapabilityInformation CapabilityInformation;
 
 inline void test_equals(const Dot11 &dot1, const Dot11 &dot2) {
@@ -41,6 +43,11 @@ inline void test_equals(const Dot11Data& b1, const Dot11Data& b2) {
     EXPECT_EQ(b1.frag_num(), b2.frag_num());
     EXPECT_EQ(b1.seq_num(), b2.seq_num());
     
+    test_equals(static_cast<const Dot11&>(b1), static_cast<const Dot11&>(b2));
+}
+
+inline void test_equals(const Dot11ControlTA& b1, const Dot11ControlTA& b2) {
+    EXPECT_EQ(b1.target_addr(), b2.target_addr());
     test_equals(static_cast<const Dot11&>(b1), static_cast<const Dot11&>(b2));
 }
 
@@ -88,6 +95,11 @@ inline void test_equals_expected(const Dot11Data &dot11) {
     EXPECT_EQ(dot11.seq_num(), 0xf1d);
 }
 
+inline void test_equals_expected(const Dot11ControlTA &dot11) {
+    EXPECT_EQ(dot11.target_addr(), "01:02:03:04:05:06");
+    EXPECT_EQ(dot11.addr1(), "00:01:02:03:04:05");
+}
+
 inline void test_equals_empty(const Dot11 &dot11) {
     Dot11::address_type empty_addr;
     
@@ -124,6 +136,13 @@ inline void test_equals_empty(const Dot11Data &dot11) {
     EXPECT_EQ(dot11.addr3(), empty_addr);
     EXPECT_EQ(dot11.frag_num(), 0);
     EXPECT_EQ(dot11.seq_num(), 0);
+}
+
+inline void test_equals_empty(const Dot11ControlTA &dot11) {
+    Dot11::address_type empty_addr;
+    
+    EXPECT_EQ(dot11.target_addr(), empty_addr);
+    EXPECT_EQ(dot11.addr1(), empty_addr);
 }
 
 inline void test_equals_empty(const CapabilityInformation &info) {

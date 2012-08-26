@@ -69,6 +69,24 @@ TEST_F(Dot11AuthenticationTest, CopyAssignmentOperator) {
     test_equals(dot1, dot2);
 }
 
+TEST_F(Dot11AuthenticationTest, StatusCode) {
+    Dot11Authentication dot11;
+    dot11.status_code(0x92f3);
+    EXPECT_EQ(dot11.status_code(), 0x92f3);
+}
+
+TEST_F(Dot11AuthenticationTest, AuthSequenceNumber) {
+    Dot11Authentication dot11;
+    dot11.auth_seq_number(0x92f3);
+    EXPECT_EQ(dot11.auth_seq_number(), 0x92f3);
+}
+
+TEST_F(Dot11AuthenticationTest, AuthAlgorithm) {
+    Dot11Authentication dot11;
+    dot11.auth_algorithm(0x92f3);
+    EXPECT_EQ(dot11.auth_algorithm(), 0x92f3);
+}
+
 TEST_F(Dot11AuthenticationTest, ClonePDU) {
     Dot11Authentication dot1(expected_packet, sizeof(expected_packet));
     std::auto_ptr<Dot11Authentication> dot2(dot1.clone_pdu());
@@ -81,5 +99,12 @@ TEST_F(Dot11AuthenticationTest, FromBytes) {
     const Dot11Authentication *inner = dot11->find_inner_pdu<Dot11Authentication>();
     ASSERT_TRUE(inner);
     test_equals_expected(*inner);
+}
+
+TEST_F(Dot11AuthenticationTest, Serialize) {
+    Dot11Authentication pdu(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = pdu.serialize();
+    ASSERT_EQ(sizeof(expected_packet), buffer.size());
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
 

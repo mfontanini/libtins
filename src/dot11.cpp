@@ -63,12 +63,6 @@ Dot11::Dot11(const ieee80211_header *header_ptr)
 Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz) 
 : PDU(ETHERTYPE_IP), _options_size(0) 
 {
-    /*if(total_sz < sizeof(_header.control))
-        throw runtime_error("Not enough size for an IEEE 802.11 header in the buffer.");
-    uint32_t sz = std::min((uint32_t)sizeof(_header), total_sz);
-    std::memcpy(&_header, buffer, sz);
-    buffer += sz;
-    total_sz -= sz;*/
     if(total_sz < sizeof(_header))
         throw runtime_error("Not enough size for an Dot11 header in the buffer.");
     std::memcpy(&_header, buffer, sizeof(_header));
@@ -81,17 +75,20 @@ Dot11 &Dot11::operator= (const Dot11 &other) {
 }
 
 void Dot11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
-    uint8_t opcode, length;
-    while(total_sz >= 2) {
-        opcode = buffer[0];
-        length = buffer[1];
-        buffer += 2;
-        total_sz -= 2;
-        if(length > total_sz)
-            return; //malformed
-        add_tagged_option((TaggedOption)opcode, length, buffer);
-        buffer += length;
-        total_sz -= length;
+    if(total_sz > 0) {
+        uint8_t opcode, length;
+        while(total_sz >= 2) {
+            opcode = buffer[0];
+            length = buffer[1];
+            buffer += 2;
+            total_sz -= 2;
+            if(length > total_sz) {
+                throw std::runtime_error("Malformed option encountered");
+            }
+            add_tagged_option((TaggedOption)opcode, length, buffer);
+            buffer += length;
+            total_sz -= length;
+        }
     }
 }
 
@@ -1197,6 +1194,9 @@ Dot11ProbeRequest::Dot11ProbeRequest(const NetworkInterface& iface,
 Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) 
 {
+    uint32_t sz = management_frame_size();
+    buffer += sz;
+    total_sz -= sz;
     parse_tagged_parameters(buffer, total_sz);
 }
 
@@ -1256,11 +1256,11 @@ Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz)
     buffer += sizeof(_ext_header);
     total_sz -= sizeof(_ext_header);
     if(from_ds() && to_ds()) {
-        if(total_sz < sizeof(_addr4))
+        if(total_sz < _addr4.size())
             throw runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
-        std::memcpy(&_addr4, buffer, sizeof(_addr4));
-        buffer += sizeof(_addr4);
-        total_sz -= sizeof(_addr4);
+        _addr4 = buffer;
+        buffer += _addr4.size();
+        total_sz -= _addr4.size();
     }
     if(total_sz)
         inner_pdu(new Tins::SNAP(buffer, total_sz));
@@ -1275,12 +1275,6 @@ Dot11Data::Dot11Data(const NetworkInterface &iface,
     type(Dot11::DATA);
     memset(&_ext_header, 0, sizeof(_ext_header));
     addr2(src_hw_addr);
-}
-
-void Dot11Data::copy_ext_header(const Dot11Data* other) {
-    /*Dot11::copy_80211_fields(other);
-    std::memcpy(&this->_ext_header, &other->_ext_header, sizeof(this->_ext_header));
-    _addr4, other->_addr4, 6);*/
 }
 
 uint32_t Dot11Data::header_size() const {
@@ -1303,7 +1297,7 @@ void Dot11Data::frag_num(uint8_t new_frag_num) {
 }
 
 void Dot11Data::seq_num(uint16_t new_seq_num) {
-    _ext_header.seq_control.seq_number = new_seq_num;
+    _ext_header.seq_control.seq_number = Utils::host_to_le(new_seq_num);
 }
 
 void Dot11Data::addr4(const address_type &new_addr4) {
@@ -1349,23 +1343,8 @@ Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz)
         inner_pdu(new Tins::SNAP(buffer, total_sz));
 }
 
-Dot11QoSData::Dot11QoSData(const Dot11QoSData &other) : Dot11Data(other) {
-    copy_fields(&other);
-}
-
-Dot11QoSData &Dot11QoSData::operator= (const Dot11QoSData &other) {
-    copy_inner_pdu(other);
-    copy_fields(&other);
-    return *this;
-}
-
-void Dot11QoSData::copy_fields(const Dot11QoSData *other) {
-    Dot11Data::copy_ext_header(other);
-    _qos_control = other->_qos_control;
-}
-
 void Dot11QoSData::qos_control(uint16_t new_qos_control) {
-    this->_qos_control = new_qos_control;
+    this->_qos_control = Utils::host_to_le(new_qos_control);
 }
 
 uint32_t Dot11QoSData::header_size() const {
@@ -1407,7 +1386,8 @@ Dot11ControlTA::Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz) : Dot11
     total_sz -= sizeof(ieee80211_header);
     if(total_sz < sizeof(_taddr))
         throw runtime_error("Not enough size for an IEEE 802.11 RTS frame in the buffer.");
-    std::memcpy(_taddr, buffer, sizeof(_taddr));
+    //std::memcpy(_taddr, buffer, sizeof(_taddr));
+    _taddr = buffer;
 }
 
 uint32_t Dot11ControlTA::header_size() const {
@@ -1416,12 +1396,13 @@ uint32_t Dot11ControlTA::header_size() const {
 
 uint32_t Dot11ControlTA::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
     assert(total_sz >= sizeof(_taddr));
-    std::memcpy(buffer, _taddr, sizeof(_taddr));
+    //std::memcpy(buffer, _taddr, sizeof(_taddr));
+    _taddr.copy(buffer);
     return sizeof(_taddr);
 }
 
 void Dot11ControlTA::target_addr(const address_type &addr) {
-    std::copy(addr.begin(), addr.end(), _taddr);
+    _taddr = addr;
 }
 
 /* Dot11RTS */
@@ -1438,12 +1419,6 @@ Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz)
 
 }
 
-PDU *Dot11RTS::clone_pdu() const {
-    Dot11RTS *new_pdu = new Dot11RTS();
-    new_pdu->copy_80211_fields(this);
-    return new_pdu;
-}
-
 /* Dot11PSPoll */
 
 Dot11PSPoll::Dot11PSPoll(const NetworkInterface &iface, 
@@ -1456,12 +1431,6 @@ Dot11PSPoll::Dot11PSPoll(const NetworkInterface &iface,
 Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ControlTA(buffer, total_sz) {
 
-}
-
-PDU *Dot11PSPoll::clone_pdu() const {
-    Dot11PSPoll *new_pdu = new Dot11PSPoll();
-    new_pdu->copy_80211_fields(this);
-    return new_pdu;
 }
 
 /* Dot11CFEnd */
@@ -1478,12 +1447,6 @@ Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz)
 
 }
 
-PDU *Dot11CFEnd::clone_pdu() const {
-    Dot11CFEnd *new_pdu = new Dot11CFEnd();
-    new_pdu->copy_80211_fields(this);
-    return new_pdu;
-}
-
 /* Dot11EndCFAck */
 
 Dot11EndCFAck::Dot11EndCFAck(const NetworkInterface &iface, 
@@ -1498,12 +1461,6 @@ Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz)
 
 }
 
-PDU *Dot11EndCFAck::clone_pdu() const {
-    Dot11EndCFAck *new_pdu = new Dot11EndCFAck();
-    new_pdu->copy_80211_fields(this);
-    return new_pdu;
-}
-
 /* Dot11Ack */
 
 Dot11Ack::Dot11Ack(const NetworkInterface &iface, 
@@ -1515,12 +1472,6 @@ Dot11Ack::Dot11Ack(const NetworkInterface &iface,
 
 Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) {
 
-}
-
-PDU *Dot11Ack::clone_pdu() const {
-    Dot11Ack *ack = new Dot11Ack();
-    ack->copy_80211_fields(this);
-    return ack;
 }
 
 /* Dot11BlockAck */
@@ -1559,21 +1510,21 @@ uint32_t Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t total_
 }
 
 void Dot11BlockAckRequest::bar_control(uint16_t bar) {
-    std::memcpy(&_bar_control, &bar, sizeof(bar));
+    //std::memcpy(&_bar_control, &bar, sizeof(bar));
+    _bar_control.tid = Utils::host_to_le(bar);
 }
 
 void Dot11BlockAckRequest::start_sequence(uint16_t seq) {
-    std::memcpy(&_start_sequence, &seq, sizeof(seq));
+    //std::memcpy(&_start_sequence, &seq, sizeof(seq));
+    _start_sequence.seq = Utils::host_to_le(seq);
+}
+
+void Dot11BlockAckRequest::fragment_number(uint8_t frag) {
+    _start_sequence.frag = frag;
 }
 
 uint32_t Dot11BlockAckRequest::header_size() const {
     return Dot11ControlTA::header_size() + sizeof(_start_sequence) + sizeof(_start_sequence);
-}
-
-PDU *Dot11BlockAckRequest::clone_pdu() const {
-    Dot11BlockAckRequest *new_pdu = new Dot11BlockAckRequest();
-    new_pdu->copy_80211_fields(this);
-    return new_pdu;
 }
 
 /* Dot11BlockAck */
@@ -1624,12 +1575,6 @@ uint32_t Dot11BlockAck::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
 
 uint32_t Dot11BlockAck::header_size() const {
     return Dot11ControlTA::header_size() + sizeof(_start_sequence) + sizeof(_start_sequence) + sizeof(_bitmap);
-}
-
-PDU *Dot11BlockAck::clone_pdu() const {
-    Dot11BlockAck *new_pdu = new Dot11BlockAck();
-    new_pdu->copy_80211_fields(this);
-    return new_pdu;
 }
 
 /* RSNInformation */

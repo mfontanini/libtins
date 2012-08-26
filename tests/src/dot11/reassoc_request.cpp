@@ -66,6 +66,18 @@ TEST_F(Dot11ReAssocRequestTest, CopyAssignmentOperator) {
     test_equals(dot1, dot2);
 }
 
+TEST_F(Dot11ReAssocRequestTest, ListenInterval) {
+    Dot11ReAssocRequest dot11;
+    dot11.listen_interval(0x92fd);
+    EXPECT_EQ(dot11.listen_interval(), 0x92fd);
+}
+
+TEST_F(Dot11ReAssocRequestTest, CurrentAP) {
+    Dot11ReAssocRequest dot11;
+    dot11.current_ap("00:01:02:03:04:05");
+    EXPECT_EQ(dot11.current_ap(), "00:01:02:03:04:05");
+}
+
 TEST_F(Dot11ReAssocRequestTest, ClonePDU) {
     Dot11ReAssocRequest dot1(expected_packet, sizeof(expected_packet));
     std::auto_ptr<Dot11ReAssocRequest> dot2(dot1.clone_pdu());
@@ -80,3 +92,9 @@ TEST_F(Dot11ReAssocRequestTest, FromBytes) {
     test_equals_expected(*inner);
 }
 
+TEST_F(Dot11ReAssocRequestTest, Serialize) {
+    Dot11ReAssocRequest pdu(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = pdu.serialize();
+    ASSERT_EQ(sizeof(expected_packet), buffer.size());
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
+}

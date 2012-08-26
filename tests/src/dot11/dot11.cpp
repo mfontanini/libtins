@@ -159,5 +159,11 @@ TEST_F(Dot11Test, AddTaggedOption) {
     EXPECT_TRUE(std::equal(hwaddr.begin(), hwaddr.end(), option->data_ptr()));
 }
 
+TEST_F(Dot11Test, Serialize) {
+    Dot11 pdu(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = pdu.serialize();
+    ASSERT_EQ(sizeof(expected_packet), buffer.size());
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
+}
 
 
