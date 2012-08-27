@@ -265,7 +265,7 @@ bool DHCP::generic_search(Options opt, uint32_t *value) {
 bool DHCP::generic_search(Options opt, ipaddress_type *value) {
     uint32_t ip_int;
     if(generic_search(opt, &ip_int)) {
-        *value = ip_int;
+        *value = IPv4Address(Utils::host_to_be(ip_int));
         return true;
     }
     return false;

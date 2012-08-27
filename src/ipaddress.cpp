@@ -40,22 +40,20 @@ IPv4Address::IPv4Address(const std::string &ip)
       
 } 
 
-IPv4Address &IPv4Address::operator=(uint32_t ip) {
-    ip_addr = ip;
-    return *this;
-}
-
-IPv4Address &Tins::IPv4Address::operator=(const string &ip) {
-    ip_addr = ip_to_int(ip);
-    return *this;
-}
-
 IPv4Address::operator uint32_t() const { 
     return Utils::host_to_be(ip_addr); 
 }
 
 std::string IPv4Address::to_string() const {
-    return Utils::ip_to_string(ip_addr); 
+    std::ostringstream oss;
+    int mask(24);
+    while(mask >=0) {
+        oss << ((ip_addr >> mask) & 0xff);
+        if(mask)
+            oss <<  '.';
+        mask -= 8;
+    }
+    return oss.str();
 }
 
 uint32_t IPv4Address::ip_to_int(const string &ip) {
@@ -80,5 +78,9 @@ uint32_t IPv4Address::ip_to_int(const string &ip) {
     if(bytes_found < 4 || (i < ip.size() && bytes_found == 4))
         throw std::runtime_error("Invalid ip address");
     return result;
+}
+
+std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
+    return output << addr.to_string();
 }
 }

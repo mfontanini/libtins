@@ -42,15 +42,16 @@ struct InterfaceInfoCollector {
 
     bool operator() (struct ifaddrs *addr) {
         using Tins::Utils::host_to_be;
+        using Tins::IPv4Address;
         const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
         
         if(addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id)
             info->hw_addr = addr_ptr->sll_addr;
         else if(addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
-            info->ip_addr = host_to_be(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
-            info->netmask = host_to_be(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
+            info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
+            info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
             if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
-                info->bcast_addr = host_to_be(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
+                info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
             else
                 info->bcast_addr = 0;
             found = true;

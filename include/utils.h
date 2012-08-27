@@ -374,11 +374,11 @@ void Tins::Utils::route_entries(ForwardIterator output) {
         for(unsigned i(0); i < 5; ++i)
             input >> mask;
         from_hex(destination, dummy);
-        entry.destination = be_to_host(dummy);
+        entry.destination = IPv4Address(dummy);
         from_hex(mask, dummy);
-        entry.mask = be_to_host(dummy);
+        entry.mask = IPv4Address(dummy);
         from_hex(gw, dummy);
-        entry.gateway = be_to_host(dummy);
+        entry.gateway = IPv4Address(dummy);
         skip_line(input);
         *output = entry;
         ++output;
