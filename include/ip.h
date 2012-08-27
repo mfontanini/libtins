@@ -44,9 +44,14 @@ namespace Tins {
     class IP : public PDU {
     public:
         /**
-         * \brief This PDU's flag.
+         * his PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::IP;
+    
+        /**
+         * The type used to store addresses.
+         */
+        typedef IPv4Address address_type;
     
         /**
          * \brief IP address size.
@@ -124,22 +129,20 @@ namespace Tins {
         };
 
         /**
-         * \brief Default constructor.
-         * Sets the source and destination port to 0.
-         */
-        IP();
-
-        /**
-         * \brief Constructor for building the IP PDU taking integer as ip addresses.
+         * \brief Constructor for building the IP PDU.
          *
-         * Constructor that builds an IP using strings as addresses. They
-         * can be hostnames or IPs.
+         * Both the destination and source IP address can be supplied.
+         * By default, those fields are initialized using the IP 
+         * address 0.0.0.0.
          *
          * \param ip_dst The destination ip address(optional).
          * \param ip_src The source ip address(optional).
-         * \param child pointer to a PDU which will be set as the inner_pdu for the packet being constructed(optional).
+         * \param child pointer to a PDU which will be set as the inner_pdu 
+         * for the packet being constructed(optional).
          */
-        IP(IPv4Address ip_dst, IPv4Address ip_src = IPv4Address(), PDU *child = 0);
+        IP(address_type ip_dst = address_type(), 
+            address_type ip_src = address_type(), 
+            PDU *child = 0);
 
         /**
          * \brief Constructor which creates an IP object from a buffer and adds all identifiable
@@ -212,13 +215,13 @@ namespace Tins {
          *
          * \return The source address for this IP PDU.
          */
-        IPv4Address src_addr() const { return Utils::be_to_host(_ip.saddr); }
+        address_type src_addr() const { return address_type(_ip.saddr); }
 
         /** 
          * \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
-        IPv4Address dst_addr() const  { return Utils::be_to_host(_ip.daddr); }
+        address_type dst_addr() const  { return address_type(_ip.daddr); }
         
         /** 
          * \brief Getter for the version field.
@@ -287,16 +290,16 @@ namespace Tins {
         /**
          * \brief Setter for the source address field.
          *
-         * \param ip The ip address in integer notation.
+         * \param ip The source address to be set.
          */
-        void src_addr(IPv4Address ip);
+        void src_addr(address_type ip);
 
         /**
          * \brief Setter for the destination address field.
          *
-         * \param ip The ip address in integer notation.
+         * \param ip The destination address to be set.
          */
-        void dst_addr(IPv4Address ip);
+        void dst_addr(address_type ip);
         
         /**
          * \brief Setter for the version field.

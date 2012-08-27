@@ -214,11 +214,6 @@ namespace Tins {
         Dot11(const uint8_t *buffer, uint32_t total_sz);
 
         /**
-         * \brief Copy assignment operator.
-         */
-        Dot11 &operator= (const Dot11 &other);
-
-        /**
          * \brief Getter for the protocol version.
          *
          * \return The protocol version in an uint8_t.
@@ -448,11 +443,17 @@ namespace Tins {
 
         /**
          * \brief Allocates an Dot11 PDU from a buffer.
+         * 
+         * This can be used somehow as a "virtual constructor". This 
+         * method instantiates a subclass of Dot11 from the given buffer.
+         * The allocated class' type will be figured out from the
+         * information provided in the buffer.
+         * 
          * \param buffer The buffer from which to take the PDU data.
          * \param total_sz The total size of the buffer.
-         * \return The allocated PDU.
+         * \return The allocated Dot11 PDU.
          */
-        static PDU *from_bytes(const uint8_t *buffer, uint32_t total_sz);
+        static Dot11 *from_bytes(const uint8_t *buffer, uint32_t total_sz);
     protected:
         virtual uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz) { return 0; }
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }

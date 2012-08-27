@@ -39,7 +39,15 @@ namespace Tins {
      */
     class ARP : public PDU {
     public:
+        /**
+         * The type of the hardware address.
+         */
         typedef HWAddress<6> hwaddress_type;
+        
+        /**
+         * The type of the IP address.
+         */
+        typedef IPv4Address ipaddress_type;
     
         /**
          * \brief This PDU's flag.
@@ -60,8 +68,8 @@ namespace Tins {
          * ARP requests and replies can be constructed easily using
          * ARP::make_arp_request/reply static functions.
          */
-        ARP(IPv4Address target_ip = IPv4Address(), 
-            IPv4Address sender_ip = IPv4Address(), 
+        ARP(ipaddress_type target_ip = ipaddress_type(), 
+            ipaddress_type sender_ip = ipaddress_type(), 
             const hwaddress_type &target_hw = hwaddress_type(), 
             const hwaddress_type &sender_hw = hwaddress_type());
 
@@ -86,7 +94,7 @@ namespace Tins {
          *
          * \return Returns the sender's IP address in an uint32_t.
          */
-        IPv4Address sender_ip_addr() const { return Utils::be_to_host(_arp.ar_sip); }
+        ipaddress_type sender_ip_addr() const { return ipaddress_type(_arp.ar_sip); }
 
         /**
          * \brief Getter for the target's hardware address.
@@ -100,7 +108,7 @@ namespace Tins {
          *
          * \return Returns the target's IP address in an uint32_t.
          */
-        IPv4Address target_ip_addr() const { return Utils::be_to_host(_arp.ar_tip); }
+        ipaddress_type target_ip_addr() const { return ipaddress_type(_arp.ar_tip); }
 
         /**
          * \brief Getter for the hardware address format.
@@ -156,7 +164,7 @@ namespace Tins {
          *
          * \param new_snd_ip_addr IPv4Address containing the new sender's IP address.
          */
-        void sender_ip_addr(IPv4Address new_snd_ip_addr);
+        void sender_ip_addr(ipaddress_type new_snd_ip_addr);
 
         /**
          * \brief Setter for the target's hardware address.
@@ -170,7 +178,7 @@ namespace Tins {
          *
          * \param new_tgt_ip_addr IPv4Address containing the new target's IP address.
          */
-        void target_ip_addr(IPv4Address new_tgt_ip_addr);
+        void target_ip_addr(ipaddress_type new_tgt_ip_addr);
 
         /**
          * \brief Setter for the hardware address format.
@@ -225,8 +233,8 @@ namespace Tins {
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Request.
          */
-        static PDU* make_arp_request(const NetworkInterface& iface, IPv4Address target, 
-          IPv4Address sender, const hwaddress_type &hw_snd = hwaddress_type());
+        static PDU* make_arp_request(const NetworkInterface& iface, ipaddress_type target, 
+          ipaddress_type sender, const hwaddress_type &hw_snd = hwaddress_type());
 
         /**
          * \brief Creates an ARP Reply within a Layer 2 PDU using uint32_t for target and sender.
@@ -241,8 +249,8 @@ namespace Tins {
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Replay.
          */
-        static PDU* make_arp_reply(const NetworkInterface& iface, IPv4Address target, 
-          IPv4Address sender, const hwaddress_type &hw_tgt = hwaddress_type(), 
+        static PDU* make_arp_reply(const NetworkInterface& iface, ipaddress_type target, 
+          ipaddress_type sender, const hwaddress_type &hw_tgt = hwaddress_type(), 
           const hwaddress_type &hw_snd = hwaddress_type());
 
         /** \brief Check wether ptr points to a valid response for this PDU.

@@ -24,6 +24,7 @@
 
 #include <stdint.h>
 #include <algorithm>
+#include <vector>
 #include "pdu.h"
 #include "utils.h"
 #include "ipaddress.h"
@@ -37,7 +38,21 @@ namespace Tins {
      */
     class BootP : public PDU {
     public:
+        /**
+         * The type of the IP addresses.
+         */
+        typedef IPv4Address ipaddress_type;
+        
+        /**
+         * The type of the chaddr field.
+         */
         typedef HWAddress<16> chaddr_type;
+        
+        /**
+         * The type of the vend field.
+         */
+        typedef std::vector<uint8_t> vend_type;
+        
         /**
          * \brief This PDU's flag.
          */
@@ -68,23 +83,6 @@ namespace Tins {
          * Subclasses might use 0 to provide their own interpretation of this field.
          */
         BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size = 64);
-
-        /**
-         * \brief Copy constructor.
-         */
-        BootP(const BootP &other);
-
-        /**
-         * \brief Copy assignment operator.
-         */
-        BootP &operator= (const BootP &other);
-
-        /** 
-         * \brief BootP destructor.
-         *
-         * This frees the memory allocated to hold the vend field.
-         */
-        ~BootP();
 
         /* Getters */
 
@@ -133,25 +131,25 @@ namespace Tins {
          * \brief Getter for the ciaddr field.
          * \return The ciaddr field for this BootP PDU.
          */
-        IPv4Address ciaddr() const { return Utils::be_to_host(_bootp.ciaddr); }
+        ipaddress_type ciaddr() const { return ipaddress_type(_bootp.ciaddr); }
 
         /** 
          * \brief Getter for the yiaddr field.
          * \return The yiaddr field for this BootP PDU.
          */
-        IPv4Address yiaddr() const { return Utils::be_to_host(_bootp.yiaddr); }
+        ipaddress_type yiaddr() const { return ipaddress_type(_bootp.yiaddr); }
 
         /** 
          * \brief Getter for the siaddr field.
          * \return The siaddr field for this BootP PDU.
          */
-        IPv4Address siaddr() const { return Utils::be_to_host(_bootp.siaddr); }
+        ipaddress_type siaddr() const { return ipaddress_type(_bootp.siaddr); }
 
         /** 
          * \brief Getter for the giaddr field.
          * \return The giaddr field for this BootP PDU.
          */
-        IPv4Address giaddr() const { return Utils::be_to_host(_bootp.giaddr); }
+        ipaddress_type giaddr() const { return ipaddress_type(_bootp.giaddr); }
 
         /** 
          * \brief Getter for the chaddr field.
@@ -175,12 +173,7 @@ namespace Tins {
          * \brief Getter for the vend field.
          * \return The vend field for this BootP PDU.
          */
-        uint8_t *vend() { return _vend; }
-
-        /** 
-         * \brief Getter for the vend field.
-         */
-        uint32_t vend_size() const { return _vend_size; }
+        const vend_type &vend() const { return _vend; }
 
         /** 
          * \brief Getter for the header size.
@@ -236,25 +229,25 @@ namespace Tins {
          * \brief Setter for the ciaddr field.
          * \param new_ciaddr The ciaddr to be set.
          */
-        void ciaddr(IPv4Address new_ciaddr);
+        void ciaddr(ipaddress_type new_ciaddr);
 
         /** 
          * \brief Setter for the yiaddr field.
          * \param new_yiaddr The yiaddr to be set.
          */
-        void yiaddr(IPv4Address new_yiaddr);
+        void yiaddr(ipaddress_type new_yiaddr);
 
         /** 
          * \brief Setter for the siaddr field.
          * \param new_siaddr The siaddr to be set.
          */
-        void siaddr(IPv4Address new_siaddr);
+        void siaddr(ipaddress_type new_siaddr);
 
         /** 
          * \brief Setter for the giaddr field.
          * \param new_giaddr The giaddr to be set.
          */
-        void giaddr(IPv4Address new_giaddr);
+        void giaddr(ipaddress_type new_giaddr);
 
         /** 
          * \brief Setter for the chaddr field.
@@ -288,9 +281,8 @@ namespace Tins {
         /** 
          * \brief Setter for the vend field.
          * \param new_vend The vend to be set.
-         * \param size The size of the new vend field.
          */
-        void vend(uint8_t *new_vend, uint32_t size);
+        void vend(const vend_type &new_vend);
 
         /**
          * \brief Getter for the PDU's type.
@@ -305,7 +297,16 @@ namespace Tins {
             return do_clone_pdu<BootP>();
         }
     protected:
-        void copy_bootp_fields(const BootP *other);
+        /** 
+         * \brief Getter for the vend field.
+         * 
+         * This getter can be used by subclasses to avoid copying the
+         * vend field around.
+         * 
+         * \return The vend field for this BootP PDU.
+         */
+        vend_type &vend() { return _vend; }
+
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     private:
         /**
@@ -329,8 +330,7 @@ namespace Tins {
         } __attribute__((__packed__));
 
         bootphdr _bootp;
-        uint8_t *_vend;
-        uint32_t _vend_size;
+        vend_type _vend;
     };
 };
 

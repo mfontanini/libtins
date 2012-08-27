@@ -68,12 +68,6 @@ Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz)
     std::memcpy(&_header, buffer, sizeof(_header));
 }
 
-Dot11 &Dot11::operator= (const Dot11 &other) {
-    copy_80211_fields(&other);
-    copy_inner_pdu(other);
-    return *this;
-}
-
 void Dot11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz > 0) {
         uint8_t opcode, length;
@@ -175,8 +169,8 @@ bool Dot11::send(PacketSender* sender) {
     addr.sll_family = Utils::host_to_be<uint16_t>(PF_PACKET);
     addr.sll_protocol = Utils::host_to_be<uint16_t>(ETH_P_ALL);
     addr.sll_halen = 6;
-    addr.sll_ifindex = this->_iface.id();
-    memcpy(&(addr.sll_addr), this->_header.addr1, 6);
+    addr.sll_ifindex = _iface.id();
+    memcpy(&(addr.sll_addr), _header.addr1, 6);
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
@@ -188,7 +182,7 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
 
-    uint32_t written = this->write_ext_header(buffer, total_sz);
+    uint32_t written = write_ext_header(buffer, total_sz);
     buffer += written;
     total_sz -= written;
 
@@ -203,12 +197,12 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
     }
 }
 
-PDU *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
+Dot11 *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     // We only need the control field, the length of the PDU will depend on the flags set.
     if(total_sz < sizeof(ieee80211_header::control))
         throw runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
     const ieee80211_header *hdr = (const ieee80211_header*)buffer;
-    PDU *ret = 0;
+    Dot11 *ret = 0;
     if(hdr->control.type == MANAGEMENT) {
         if(hdr->control.subtype == BEACON)
             ret = new Dot11Beacon(buffer, total_sz);
@@ -228,11 +222,8 @@ PDU *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
             ret = new Dot11Deauthentication(buffer, total_sz); 
         else if(hdr->control.subtype == PROBE_REQ)
             ret = new Dot11ProbeRequest(buffer, total_sz); 
-        //else if(hdr->control.subtype == PROBE_RESP)
-        else 
+        else if(hdr->control.subtype == PROBE_RESP)
             ret = new Dot11ProbeResponse(buffer, total_sz); 
-        
-            
     }
     else if(hdr->control.type == DATA){
         if(hdr->control.subtype <= 4)
@@ -256,7 +247,7 @@ PDU *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
         else if(hdr->control.subtype == BLOCK_ACK_REQ)
             ret = new Dot11BlockAckRequest(buffer, total_sz);
     }
-    else
+    if(ret == 0)
         ret = new Dot11(buffer, total_sz);
     return ret;
 }
@@ -1309,7 +1300,7 @@ uint32_t Dot11Data::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
     memcpy(buffer, &_ext_header, sizeof(_ext_header));
     buffer += sizeof(_ext_header);
     if (from_ds() && to_ds()) {
-        written += 6;
+        written += _addr4.size();
         _addr4.copy(buffer);
     }
     return written;
@@ -1348,7 +1339,7 @@ void Dot11QoSData::qos_control(uint16_t new_qos_control) {
 }
 
 uint32_t Dot11QoSData::header_size() const {
-    return Dot11::header_size() + sizeof(this->_qos_control);
+    return Dot11Data::header_size() + sizeof(this->_qos_control);
 }
 
 uint32_t Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {

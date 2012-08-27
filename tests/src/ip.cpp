@@ -24,8 +24,8 @@ const uint8_t IPTest::expected_packet[] = { '(', '\x7f', '\x00', ' ',
 
 TEST_F(IPTest, DefaultConstructor) {
     IP ip;
-    EXPECT_EQ(ip.dst_addr(), IPv4Address());
-    EXPECT_EQ(ip.src_addr(), IPv4Address());
+    EXPECT_EQ(ip.dst_addr(), 0);
+    EXPECT_EQ(ip.src_addr(), 0);
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
     EXPECT_EQ(ip.pdu_type(), PDU::IP);
@@ -53,9 +53,9 @@ TEST_F(IPTest, NestedCopy) {
 }
 
 TEST_F(IPTest, IPIntConstructor) {
-    IP ip(0x23abcdef, 0xff1443ab);
-    EXPECT_EQ(ip.dst_addr(), IPv4Address(0x23abcdef));
-    EXPECT_EQ(ip.src_addr(), IPv4Address(0xff1443ab));
+    IP ip("192.168.0.1", "192.168.0.100");
+    EXPECT_EQ(ip.dst_addr(), "192.168.0.1");
+    EXPECT_EQ(ip.src_addr(), "192.168.0.100");
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
 }
@@ -63,8 +63,8 @@ TEST_F(IPTest, IPIntConstructor) {
 TEST_F(IPTest, IPStringConstructor) {
     string ip1 = "154.33.200.55", ip2 = "192.10.11.52";
     IP ip(ip1, ip2);
-    EXPECT_EQ(ip.dst_addr(), IPv4Address(ip1));
-    EXPECT_EQ(ip.src_addr(), IPv4Address(ip2));
+    EXPECT_EQ(ip.dst_addr(), ip1);
+    EXPECT_EQ(ip.src_addr(), ip2);
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
 }
@@ -133,14 +133,14 @@ TEST_F(IPTest, DstIPString) {
 
 TEST_F(IPTest, SrcIPInt) {
     IP ip;
-    ip.src_addr(0x7f137ab3);
-    EXPECT_EQ(ip.src_addr(), IPv4Address(0x7f137ab3));
+    ip.src_addr("192.155.32.10");
+    EXPECT_EQ(ip.src_addr(), "192.155.32.10");
 }
 
 TEST_F(IPTest, DstIPInt) {
     IP ip;
-    ip.dst_addr(0x7f137ab3);
-    EXPECT_EQ(ip.dst_addr(), IPv4Address(0x7f137ab3));
+    ip.dst_addr("192.155.32.10");
+    EXPECT_EQ(ip.dst_addr(), "192.155.32.10");
 }
 
 TEST_F(IPTest, Version) {
@@ -174,8 +174,8 @@ TEST_F(IPTest, ConstructorFromBuffer) {
     IP ip1(expected_packet, sizeof(expected_packet));
     const uint8_t opt_sec[] = { 't', 'j', 'g', '\xab', 'w', '\xab', 'h', 'e', 'l' };
     
-    EXPECT_EQ(ip1.dst_addr(), IPv4Address ("192.168.9.43"));
-    EXPECT_EQ(ip1.src_addr(), IPv4Address("84.52.254.5"));
+    EXPECT_EQ(ip1.dst_addr(), "192.168.9.43");
+    EXPECT_EQ(ip1.src_addr(), "84.52.254.5");
     EXPECT_EQ(ip1.id(), 0x7a);
     EXPECT_EQ(ip1.tos(), 0x7f);
     EXPECT_EQ(ip1.frag_off(), 0x43);

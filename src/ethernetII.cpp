@@ -67,6 +67,8 @@ EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz)
             case ETHERTYPE_ARP:
                 next = new Tins::ARP(buffer, total_sz);
                 break;
+            default:
+                next = new Tins::RawPDU(buffer, total_sz);
             // Other protos plz
         }
         inner_pdu(next);

@@ -25,43 +25,25 @@
 #include "bootp.h"
 
 namespace Tins{
-BootP::BootP() : PDU(255), _vend_size(64) {
-    _vend = new uint8_t[64];
+BootP::BootP() 
+: PDU(255), _vend(64) {
     std::memset(&_bootp, 0, sizeof(bootphdr));
-    std::memset(_vend, 0, 64);
 }
 
 BootP::BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size) 
-: PDU(255), _vend(0), _vend_size(vend_field_size) 
+: PDU(255), _vend(vend_field_size) 
 {
     if(total_sz < sizeof(bootphdr) + vend_field_size)
         throw std::runtime_error("Not enough size for a BootP header in the buffer.");
     std::memcpy(&_bootp, buffer, sizeof(bootphdr));
     buffer += sizeof(bootphdr);
     total_sz -= sizeof(bootphdr);
-    if(_vend_size) {
-        _vend = new uint8_t[_vend_size];
-        std::copy(buffer, buffer + _vend_size, _vend);
-    }
+    _vend.assign(buffer, buffer + vend_field_size);
     // Maybe RawPDU on what is left on the buffer?...
 }
 
-BootP::BootP(const BootP &other) : PDU(other) {
-    copy_bootp_fields(&other);
-}
-
-BootP &BootP::operator= (const BootP &other) {
-    copy_bootp_fields(&other);
-    copy_inner_pdu(other);
-    return *this;
-}
-
-BootP::~BootP() {
-    delete[] _vend;
-}
-
 uint32_t BootP::header_size() const {
-    return sizeof(bootphdr) + _vend_size;
+    return sizeof(bootphdr) + _vend.size();
 }
 
 void BootP::opcode(uint8_t new_opcode) {
@@ -92,19 +74,19 @@ void BootP::padding(uint16_t new_padding) {
     _bootp.padding = Utils::host_to_be(new_padding);
 }
 
-void BootP::ciaddr(IPv4Address new_ciaddr) {
+void BootP::ciaddr(ipaddress_type new_ciaddr) {
     _bootp.ciaddr = new_ciaddr;
 }
 
-void BootP::yiaddr(IPv4Address new_yiaddr) {
+void BootP::yiaddr(ipaddress_type new_yiaddr) {
     _bootp.yiaddr = new_yiaddr;
 }
 
-void BootP::siaddr(IPv4Address new_siaddr) {
+void BootP::siaddr(ipaddress_type new_siaddr) {
     _bootp.siaddr = new_siaddr;
 }
 
-void BootP::giaddr(IPv4Address new_giaddr) {
+void BootP::giaddr(ipaddress_type new_giaddr) {
     _bootp.giaddr = new_giaddr;
 }
 
@@ -116,27 +98,13 @@ void BootP::file(const uint8_t *new_file) {
     std::memcpy(_bootp.file, new_file, sizeof(_bootp.file));
 }
 
-void BootP::vend(uint8_t *new_vend, uint32_t size) {
-    delete[] _vend;
-    _vend_size = size;
-    _vend = new uint8_t[size];
-    std::copy(new_vend, new_vend + size, _vend);
+void BootP::vend(const vend_type &new_vend) {
+    _vend = new_vend;
 }
 
 void BootP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    assert(total_sz >= sizeof(bootphdr) + _vend_size);
+    assert(total_sz >= sizeof(bootphdr) + _vend.size());
     std::memcpy(buffer, &_bootp, sizeof(bootphdr));
-    std::copy(_vend, _vend + _vend_size, buffer + sizeof(bootphdr));
-}
-
-void BootP::copy_bootp_fields(const BootP *other) {
-    std::memcpy(&_bootp, &other->_bootp, sizeof(_bootp));
-    _vend_size = other->_vend_size;
-    if(_vend_size) {
-        _vend = new uint8_t[_vend_size];
-        std::memcpy(_vend, other->_vend, _vend_size);
-    }
-    else
-        _vend = 0;
+    std::copy(_vend.begin(), _vend.end(), buffer + sizeof(bootphdr));
 }
 }

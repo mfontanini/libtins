@@ -93,7 +93,7 @@ void Utils::Internals::skip_line(istream &input) {
 
 /** \endcond */
 
-uint32_t Utils::ip_to_int(const string &ip) throw (std::runtime_error) {
+uint32_t Utils::ip_to_int(const string &ip) {
     uint32_t result(0), i(0), end, bytes_found(0);
     while(i < ip.size() && bytes_found < 4) {
         uint16_t this_byte(0);
@@ -133,7 +133,7 @@ IPv4Address Utils::resolve_ip(const string &to_resolve) {
     struct hostent *data = gethostbyname(to_resolve.c_str());
     if(!data)
         throw std::runtime_error("Could not resolve IP");
-    return be_to_host(((struct in_addr**)data->h_addr_list)[0]->s_addr);
+    return IPv4Address(((struct in_addr**)data->h_addr_list)[0]->s_addr);
 }
 
 PDU *Utils::ping_address(IPv4Address ip, PacketSender *sender, IPv4Address ip_src) {

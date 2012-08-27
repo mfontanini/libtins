@@ -79,7 +79,7 @@ namespace Tins {
          *
          * \param ip A dotted ip notation string
          */
-        uint32_t ip_to_int(const std::string &ip) throw (std::runtime_error);
+        uint32_t ip_to_int(const std::string &ip);
 
         /** 
          * \brief Convert an integer ip to a dotted-ip-notation string.

@@ -26,12 +26,17 @@
 using std::string;
 
 namespace Tins{
-IPv4Address::IPv4Address(uint32_t ip) : ip_addr(ip) {
+IPv4Address::IPv4Address(uint32_t ip) 
+: ip_addr(Utils::be_to_host(ip)) {
     
 }
 
+IPv4Address::IPv4Address(const char *ip) {
+    ip_addr = ip ? ip_to_int(ip) : 0; 
+}
+
 IPv4Address::IPv4Address(const std::string &ip) 
-: ip_addr(Utils::ip_to_int(ip)) {
+: ip_addr(ip_to_int(ip)) {
       
 } 
 
@@ -41,7 +46,7 @@ IPv4Address &IPv4Address::operator=(uint32_t ip) {
 }
 
 IPv4Address &Tins::IPv4Address::operator=(const string &ip) {
-    ip_addr = Utils::ip_to_int(ip);
+    ip_addr = ip_to_int(ip);
     return *this;
 }
 

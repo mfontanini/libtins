@@ -40,8 +40,9 @@ using namespace std;
 
 const uint8_t Tins::IP::DEFAULT_TTL = 128;
 
-Tins::IP::IP(IPv4Address ip_dst, IPv4Address ip_src, PDU *child) : 
-  PDU(Constants::IP::PROTO_IP, child) {
+Tins::IP::IP(address_type ip_dst, address_type ip_src, PDU *child) 
+: PDU(Constants::IP::PROTO_IP, child) 
+{
     init_ip_fields();
     this->dst_addr(ip_dst);
     this->src_addr(ip_src); 
@@ -60,10 +61,12 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz)
     const uint8_t* ptr_buffer = buffer + sizeof(iphdr);
     if(total_sz < head_len() * sizeof(uint32_t))
         throw std::runtime_error(msg);
+    if(head_len() * sizeof(uint32_t) < sizeof(iphdr))
+        throw std::runtime_error("Malformed head len field");
     buffer += head_len() * sizeof(uint32_t);
     
-    this->_options_size = 0;
-    this->_padded_options_size = head_len() * sizeof(uint32_t) - sizeof(iphdr);
+    _options_size = 0;
+    _padded_options_size = head_len() * sizeof(uint32_t) - sizeof(iphdr);
     /* While the end of the options is not reached read an option */
     while (ptr_buffer < buffer && (*ptr_buffer != 0)) {
         IPOption opt_to_add;
@@ -165,12 +168,12 @@ void Tins::IP::check(uint16_t new_check) {
 }
 
 
-void Tins::IP::src_addr(IPv4Address ip) {
+void Tins::IP::src_addr(address_type ip) {
     _ip.saddr = ip;
 }
 
 
-void Tins::IP::dst_addr(IPv4Address ip) {
+void Tins::IP::dst_addr(address_type ip) {
     _ip.daddr = ip;
 }
 
@@ -214,7 +217,7 @@ void Tins::IP::set_option(uint8_t copied,
     _ip_options.push_back(option);
     _options_size += 1 + (!option.optional_data.empty() ? (data_size) : 0);
     uint8_t padding = _options_size & 3;
-    _padded_options_size = padding? (_options_size - padding + 4) : _options_size;
+    _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
 }
 
 const Tins::IP::IPOption *Tins::IP::search_option(OptionClass opt_class, Option opt_number) const {

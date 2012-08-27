@@ -63,13 +63,17 @@ struct InterfaceInfoCollector {
 namespace Tins {
 // static
 NetworkInterface NetworkInterface::default_interface() {
-    return NetworkInterface(IPv4Address(0));
+    return NetworkInterface(0);
 }
     
 NetworkInterface::NetworkInterface() : iface_id(0) {
 
 }
-    
+
+NetworkInterface::NetworkInterface(const char *name) {
+    iface_id = name ? resolve_index(name) : 0;
+}    
+
 NetworkInterface::NetworkInterface(const std::string &name) {
     iface_id = resolve_index(name.c_str());
 }

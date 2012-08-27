@@ -29,14 +29,9 @@
 namespace Tins {
     class IPv4Address {
     public:
-        IPv4Address(uint32_t ip = 0);
+        IPv4Address(const char *ip = 0);
         IPv4Address(const std::string &ip);
-        
-        template<size_t n>
-        IPv4Address(const char (&ip)[n]) 
-        : ip_addr(ip_to_int(ip)) {
-            
-        }
+        explicit IPv4Address(uint32_t ip);
         
         IPv4Address &operator=(uint32_t ip);
         IPv4Address &operator=(const std::string &ip);

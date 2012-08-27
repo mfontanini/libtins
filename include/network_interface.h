@@ -71,15 +71,11 @@ public:
     NetworkInterface(const std::string &name);
     
     /**
-     * \brief Constructor to allow implicit conversions from string
-     * literals.
+     * \brief Constructor from const char*.
      * 
      * \param name The name of the interface this object will abstract.
      */
-    template<size_t n>
-    NetworkInterface(const char (&name)[n]) {
-        iface_id = resolve_index(name);
-    }
+    NetworkInterface(const char *name);
     
     /**
      * \brief Constructs a NetworkInterface from an ip address.

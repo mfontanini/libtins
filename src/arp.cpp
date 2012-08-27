@@ -36,7 +36,7 @@ using std::runtime_error;
 
 namespace Tins {
 
-ARP::ARP(IPv4Address target_ip, IPv4Address sender_ip, 
+ARP::ARP(ipaddress_type target_ip, ipaddress_type sender_ip, 
   const hwaddress_type &target_hw, const hwaddress_type &sender_hw) 
 : PDU(0x0608) 
 {
@@ -66,7 +66,7 @@ void ARP::sender_hw_addr(const hwaddress_type &new_snd_hw_addr) {
     std::copy(new_snd_hw_addr.begin(), new_snd_hw_addr.end(), _arp.ar_sha);
 }
 
-void ARP::sender_ip_addr(IPv4Address new_snd_ip_addr) {
+void ARP::sender_ip_addr(ipaddress_type new_snd_ip_addr) {
     this->_arp.ar_sip = new_snd_ip_addr;
 }
 
@@ -74,7 +74,7 @@ void ARP::target_hw_addr(const hwaddress_type &new_tgt_hw_addr) {
     std::copy(new_tgt_hw_addr.begin(), new_tgt_hw_addr.end(), _arp.ar_tha);
 }
 
-void ARP::target_ip_addr(IPv4Address new_tgt_ip_addr) {
+void ARP::target_ip_addr(ipaddress_type new_tgt_ip_addr) {
     this->_arp.ar_tip = new_tgt_ip_addr;
 }
 
@@ -128,8 +128,8 @@ PDU *ARP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     return cloned;
 }
 
-PDU* ARP::make_arp_request(const NetworkInterface& iface, IPv4Address target,
-  IPv4Address sender, const hwaddress_type &hw_snd) 
+PDU* ARP::make_arp_request(const NetworkInterface& iface, ipaddress_type target,
+  ipaddress_type sender, const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */
     ARP* arp = new ARP();
@@ -142,8 +142,8 @@ PDU* ARP::make_arp_request(const NetworkInterface& iface, IPv4Address target,
     return new EthernetII(iface, EthernetII::BROADCAST, hw_snd, arp);
 }
 
-PDU* ARP::make_arp_reply(const NetworkInterface& iface, IPv4Address target,
-  IPv4Address sender, const hwaddress_type &hw_tgt, 
+PDU* ARP::make_arp_reply(const NetworkInterface& iface, ipaddress_type target,
+  ipaddress_type sender, const hwaddress_type &hw_tgt, 
   const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */

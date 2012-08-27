@@ -141,7 +141,7 @@ TEST_F(ARPTest, Opcode) {
 }
 
 TEST_F(ARPTest, Serialize) {
-    ARP arp1(0x1234, 0xa3f1, hw_addr1, hw_addr2);
+    ARP arp1("192.168.0.1", "192.168.0.100", hw_addr1, hw_addr2);
     
     PDU::serialization_type buffer = arp1.serialize();
     
