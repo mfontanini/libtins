@@ -138,6 +138,20 @@ namespace Tins {
          * \return The current inner PDU. Might be 0.
          */
         PDU *inner_pdu() const { return _inner_pdu; }
+        
+        /**
+         * \brief Releases the inner PDU.
+         * 
+         * This method makes this PDU to <b>no longer own</b> the inner
+         * PDU. The current inner PDU is returned, and is <b>not</b>
+         * destroyed. 
+         * 
+         * Use this method if you want to somehow re-use a PDU that
+         * is already owned by another PDU.
+         * 
+         * \return The current inner PDU. Might be 0.
+         */
+        PDU *release_inner_pdu();
 
         /** \brief Sets the flag identifier.
          */

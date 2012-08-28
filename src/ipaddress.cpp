@@ -46,13 +46,7 @@ IPv4Address::operator uint32_t() const {
 
 std::string IPv4Address::to_string() const {
     std::ostringstream oss;
-    int mask(24);
-    while(mask >=0) {
-        oss << ((ip_addr >> mask) & 0xff);
-        if(mask)
-            oss <<  '.';
-        mask -= 8;
-    }
+    oss << *this;
     return oss.str();
 }
 
@@ -81,6 +75,14 @@ uint32_t IPv4Address::ip_to_int(const string &ip) {
 }
 
 std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
-    return output << addr.to_string();
+    int mask(24);
+    uint32_t ip_addr = addr.ip_addr;
+    while(mask >=0) {
+        output << ((ip_addr >> mask) & 0xff);
+        if(mask)
+            output <<  '.';
+        mask -= 8;
+    }
+    return output;;
 }
 }

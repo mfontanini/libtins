@@ -73,20 +73,6 @@ namespace Tins {
              */
             IPv4Address mask;
         };
-        
-        /** 
-         * \brief Convert a dotted-ip-notation string to an integer.
-         *
-         * \param ip A dotted ip notation string
-         */
-        uint32_t ip_to_int(const std::string &ip);
-
-        /** 
-         * \brief Convert an integer ip to a dotted-ip-notation string.
-         *
-         * \param ip An integer ip.
-         */
-        std::string ip_to_string(uint32_t ip);
 
         /** 
          * \brief Resolves a domain name and returns its corresponding ip address.

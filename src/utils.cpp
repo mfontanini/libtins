@@ -93,42 +93,6 @@ void Utils::Internals::skip_line(istream &input) {
 
 /** \endcond */
 
-uint32_t Utils::ip_to_int(const string &ip) {
-    uint32_t result(0), i(0), end, bytes_found(0);
-    while(i < ip.size() && bytes_found < 4) {
-        uint16_t this_byte(0);
-        end = i + 3;
-        while(i < ip.size() && i < end && ip[i] != '.') {
-            if(ip[i] < '0' || ip[i] > '9')
-                throw std::runtime_error("Non-digit character found in ip");
-            this_byte = (this_byte * 10)  + (ip[i] - '0');
-            i++;
-        }
-        if (this_byte > 0xFF) {
-            throw std::runtime_error("Byte greater than 255");
-        }
-        result = (result << 8) | (this_byte & 0xFF);
-        bytes_found++;
-        if(bytes_found < 4 && i < ip.size() && ip[i] == '.')
-            i++;
-    }
-    if(bytes_found < 4 || (i < ip.size() && bytes_found == 4))
-        throw std::runtime_error("Invalid ip address");
-    return result;
-}
-
-string Utils::ip_to_string(uint32_t ip) {
-    ostringstream oss;
-    int mask(24);
-    while(mask >=0) {
-        oss << ((ip >> mask) & 0xff);
-        if(mask)
-            oss << '.';
-        mask -= 8;
-    }
-    return oss.str();
-}
-
 IPv4Address Utils::resolve_ip(const string &to_resolve) {
     struct hostent *data = gethostbyname(to_resolve.c_str());
     if(!data)

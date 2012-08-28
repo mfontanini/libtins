@@ -70,6 +70,12 @@ void PDU::inner_pdu(PDU *next_pdu) {
     _inner_pdu = next_pdu;
 }
 
+PDU *PDU::release_inner_pdu() {
+    PDU *result = 0;
+    std::swap(result, _inner_pdu);
+    return result;
+}
+
 PDU::serialization_type PDU::serialize() {
     std::vector<uint8_t> buffer(size());
     serialize(&buffer[0], buffer.size(), 0);

@@ -132,7 +132,7 @@ const uint8_t *DNS::build_resource_list(list<ResourceRecord*> &lst, const uint8_
         if(contains_dname(res->info.type))
             std::copy(ptr, ptr + res->data.size(), res->data.begin());
         else if(res->data.size() == sizeof(uint32_t))
-            *(uint32_t*)&res->data[0] = Utils::be_to_host(*(uint32_t*)ptr);
+            *(uint32_t*)&res->data[0] = *(uint32_t*)ptr;
         else
             throw std::runtime_error("Not enough size for resource data");
         
@@ -220,7 +220,7 @@ void DNS::add_query(const Query &query) {
 }
 
 void DNS::add_answer(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, IPv4Address ip) {
-    ResourceRecord *res = make_record(name, type, qclass, ttl, (uint32_t)ip);
+    ResourceRecord *res = make_record(name, type, qclass, ttl, Utils::host_to_be((uint32_t)ip));
     ans.push_back(res);
     dns.answers = Utils::host_to_be<uint16_t>(ans.size());
 }
@@ -475,7 +475,7 @@ void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) 
         ptr = (*it)->data_pointer();
         sz = (*it)->data_size();
         if(sz == 4)
-            addr = Utils::ip_to_string(*(uint32_t*)ptr);
+            addr = IPv4Address(*(uint32_t*)ptr).to_string();
         else {
             if(Utils::be_to_host((*it)->info.type) ==  MX) {
                 ptr += 2;
@@ -485,7 +485,8 @@ void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) 
         }
         res.push_back(
             Resource(dname, addr, Utils::be_to_host((*it)->info.type), 
-            Utils::host_to_be((*it)->info.qclass), Utils::be_to_host((*it)->info.ttl))
+              Utils::host_to_be((*it)->info.qclass), Utils::be_to_host((*it)->info.ttl)
+            )
         );
     }
 }

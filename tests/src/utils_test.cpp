@@ -57,30 +57,6 @@ const uint8_t UtilsTest::data[] = {
     };
 const uint32_t UtilsTest::data_len = 500;
 
-TEST_F(UtilsTest, IpToInt) {
-
-    EXPECT_EQ(Utils::ip_to_int("0.0.0.0"), zero_int_ip);
-    EXPECT_EQ(Utils::ip_to_int("255.255.255.255"), full_int_ip);
-    EXPECT_EQ(Utils::ip_to_int("1.2.255.3"), mix_int_ip);
-
-    /* Invalid number */
-    EXPECT_THROW(Utils::ip_to_int("123.a.5.6"), std::runtime_error);
-    EXPECT_THROW(Utils::ip_to_int("0.0.256.0"), std::runtime_error);
-    EXPECT_THROW(Utils::ip_to_int("0.0.255.0a"), std::runtime_error);
-    EXPECT_THROW(Utils::ip_to_int("0.0.255.127a"), std::runtime_error);
-    EXPECT_THROW(Utils::ip_to_int("0.0.255.1.5"), std::runtime_error);
-
-}
-
-TEST_F(UtilsTest, IpToString) {
-
-    EXPECT_EQ(Utils::ip_to_string(zero_int_ip), "0.0.0.0");
-    EXPECT_EQ(Utils::ip_to_string(full_int_ip), "255.255.255.255");
-    EXPECT_EQ(Utils::ip_to_string(mix_int_ip), "1.2.255.3");
-
-}
-
-
 TEST_F(UtilsTest, ResolveIp) {
     IPv4Address localhost_ip("127.0.0.1");
 
@@ -88,7 +64,6 @@ TEST_F(UtilsTest, ResolveIp) {
     EXPECT_THROW(Utils::resolve_ip("www.qwertyuiopasdfg.com.ar.edu.gov"), std::runtime_error);
 
 }
-
 
 TEST_F(UtilsTest, NetToHostS) {
     uint16_t a = 0x01FE;
