@@ -120,7 +120,7 @@ void TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
     inner_pdu(new RawPDU(new_payload, new_payload_size));
 }
 
-void TCP::data_offset(uint8_t new_doff) {
+void TCP::data_offset(small_uint<4> new_doff) {
     this->_tcp.doff = new_doff;
 }
 
@@ -201,7 +201,7 @@ bool TCP::search_altchecksum_option(uint8_t *value) {
     return generic_search(ALTCHK, value);
 }
 
-uint8_t TCP::get_flag(Flags tcp_flag) {
+small_uint<1> TCP::get_flag(Flags tcp_flag) {
     switch(tcp_flag) {
         case FIN:
             return _tcp.fin;
@@ -233,7 +233,7 @@ uint8_t TCP::get_flag(Flags tcp_flag) {
     };
 }
 
-void TCP::set_flag(Flags tcp_flag, uint8_t value) {
+void TCP::set_flag(Flags tcp_flag, small_uint<1> value) {
     switch(tcp_flag) {
         case FIN:
             _tcp.fin = value;

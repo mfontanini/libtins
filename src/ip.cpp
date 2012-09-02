@@ -38,9 +38,11 @@
 
 using namespace std;
 
-const uint8_t Tins::IP::DEFAULT_TTL = 128;
+namespace Tins {
 
-Tins::IP::IP(address_type ip_dst, address_type ip_src, PDU *child) 
+const uint8_t IP::DEFAULT_TTL = 128;
+
+IP::IP(address_type ip_dst, address_type ip_src, PDU *child) 
 : PDU(Constants::IP::PROTO_IP, child) 
 {
     init_ip_fields();
@@ -48,7 +50,7 @@ Tins::IP::IP(address_type ip_dst, address_type ip_src, PDU *child)
     this->src_addr(ip_src); 
 }
 
-Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz) 
+IP::IP(const uint8_t *buffer, uint32_t total_sz) 
 : PDU(Constants::IP::PROTO_IP)
 {
     static const char *msg("Not enough size for an IP header in the buffer.");
@@ -128,7 +130,7 @@ Tins::IP::IP(const uint8_t *buffer, uint32_t total_sz)
     }
 }
 
-void Tins::IP::init_ip_fields() {
+void IP::init_ip_fields() {
     memset(&_ip, 0, sizeof(iphdr));
     this->_ip.version = 4;
     this->ttl(DEFAULT_TTL);
@@ -139,65 +141,65 @@ void Tins::IP::init_ip_fields() {
 
 /* Setters */
 
-void Tins::IP::tos(uint8_t new_tos) {
+void IP::tos(uint8_t new_tos) {
     _ip.tos = new_tos;
 }
 
-void Tins::IP::tot_len(uint16_t new_tot_len) {
+void IP::tot_len(uint16_t new_tot_len) {
     _ip.tot_len = Utils::host_to_be(new_tot_len);
 }
 
-void Tins::IP::id(uint16_t new_id) {
+void IP::id(uint16_t new_id) {
     _ip.id = Utils::host_to_be(new_id);
 }
 
-void Tins::IP::frag_off(uint16_t new_frag_off) {
+void IP::frag_off(uint16_t new_frag_off) {
     _ip.frag_off = Utils::host_to_be(new_frag_off);
 }
 
-void Tins::IP::ttl(uint8_t new_ttl) {
+void IP::ttl(uint8_t new_ttl) {
     _ip.ttl = new_ttl;
 }
 
-void Tins::IP::protocol(uint8_t new_protocol) {
+void IP::protocol(uint8_t new_protocol) {
     _ip.protocol = new_protocol;
 }
 
-void Tins::IP::check(uint16_t new_check) {
+void IP::check(uint16_t new_check) {
     _ip.check = Utils::host_to_be(new_check);
 }
 
 
-void Tins::IP::src_addr(address_type ip) {
+void IP::src_addr(address_type ip) {
     _ip.saddr = ip;
 }
 
 
-void Tins::IP::dst_addr(address_type ip) {
+void IP::dst_addr(address_type ip) {
     _ip.daddr = ip;
 }
 
-void Tins::IP::head_len(uint8_t new_head_len) {
+void IP::head_len(small_uint<4> new_head_len) {
     _ip.ihl = new_head_len;
 }
 
-void Tins::IP::version(uint8_t ver) {
+void IP::version(small_uint<4> ver) {
     _ip.version = ver;
 }
 
-void Tins::IP::set_eol_option() {
+void IP::set_eol_option() {
     this->set_option(0, IP::CONTROL, IP::END);
 }
 
-void Tins::IP::set_noop_option() {
+void IP::set_noop_option() {
     this->set_option(0, IP::CONTROL, IP::NOOP);
 }
 
-void Tins::IP::set_sec_option(const uint8_t* data, uint32_t data_len) {
+void IP::set_sec_option(const uint8_t* data, uint32_t data_len) {
     this->set_option(1, IP::CONTROL, IP::SEC, data, data_len);
 }
 
-void Tins::IP::set_option(uint8_t copied,
+void IP::set_option(uint8_t copied,
                 OptionClass op_class,
                 Option number,
                 const uint8_t* data,
@@ -220,7 +222,7 @@ void Tins::IP::set_option(uint8_t copied,
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
 }
 
-const Tins::IP::IPOption *Tins::IP::search_option(OptionClass opt_class, Option opt_number) const {
+const IP::IPOption *IP::search_option(OptionClass opt_class, Option opt_number) const {
     for(std::list<IPOption>::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
         if(it->type.op_class == (uint8_t)opt_class && it->type.number == (uint8_t)opt_number)
             return &(*it);
@@ -228,7 +230,7 @@ const Tins::IP::IPOption *Tins::IP::search_option(OptionClass opt_class, Option 
     return 0;
 }
 
-uint8_t* Tins::IP::IPOption::write(uint8_t* buffer) {
+uint8_t* IP::IPOption::write(uint8_t* buffer) {
     memcpy(buffer, &type, 1);
     buffer += 1;
     if (!optional_data.empty()) {
@@ -238,21 +240,21 @@ uint8_t* Tins::IP::IPOption::write(uint8_t* buffer) {
     return buffer;
 }
 
-const uint8_t* Tins::IP::IPOption::data_ptr() const {
+const uint8_t* IP::IPOption::data_ptr() const {
     return !optional_data.empty() ? (&optional_data[1]) : 0;
 }
 
-uint8_t Tins::IP::IPOption::data_size() const {
+uint8_t IP::IPOption::data_size() const {
     return !optional_data.empty() ? (optional_data.size() - 1) : 0;
 }
 
 /* Virtual method overriding. */
 
-uint32_t Tins::IP::header_size() const {
+uint32_t IP::header_size() const {
     return sizeof(iphdr) + _padded_options_size;
 }
 
-bool Tins::IP::send(PacketSender* sender) {
+bool IP::send(PacketSender* sender) {
     struct sockaddr_in link_addr;
     PacketSender::SocketType type = PacketSender::IP_SOCKET;
     link_addr.sin_family = AF_INET;
@@ -264,7 +266,7 @@ bool Tins::IP::send(PacketSender* sender) {
     return sender->send_l3(this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
-Tins::PDU *Tins::IP::recv_response(PacketSender *sender) {
+PDU *IP::recv_response(PacketSender *sender) {
     struct sockaddr_in link_addr;
     PacketSender::SocketType type = PacketSender::IP_SOCKET;
     link_addr.sin_family = AF_INET;
@@ -276,7 +278,7 @@ Tins::PDU *Tins::IP::recv_response(PacketSender *sender) {
     return sender->recv_l3(this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
-void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
+void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
     uint32_t my_sz = header_size();
     assert(total_sz >= my_sz);
     if(inner_pdu()) {
@@ -308,7 +310,7 @@ void Tins::IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     }
 }
 
-bool Tins::IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(iphdr))
         return false;
     iphdr *ip_ptr = (iphdr*)ptr;
@@ -319,7 +321,7 @@ bool Tins::IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     return false;
 }
 
-Tins::PDU *Tins::IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
+PDU *IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(iphdr))
         return 0;
     const iphdr *ip_ptr = (iphdr*)ptr;
@@ -334,4 +336,5 @@ Tins::PDU *Tins::IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     cloned = new IP(ptr, std::min(total_sz, (uint32_t)(Utils::be_to_host(ip_ptr->tot_len) * sizeof(uint32_t))));
     cloned->inner_pdu(child);
     return cloned;
+}
 }

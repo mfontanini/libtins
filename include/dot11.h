@@ -32,6 +32,7 @@
 #include "utils.h"
 #include "network_interface.h"
 #include "hwaddress.h"
+#include "small_uint.h"
 
 namespace Tins {
 
@@ -218,70 +219,70 @@ namespace Tins {
          *
          * \return The protocol version in an uint8_t.
          */
-        uint8_t protocol() const { return _header.control.protocol; }
+        small_uint<2> protocol() const { return _header.control.protocol; }
 
         /**
          * \brief Getter for the 802.11 frame's type.
          *
          * \return The type of the 802.11 frame in an uint8_t.
          */
-        uint8_t type() const { return _header.control.type; }
+        small_uint<2> type() const { return _header.control.type; }
 
         /**
          * \brief Getter for the 802.11 frame's subtype.
          *
          * \return The subtype of the 802.11 frame in an uint8_t.
          */
-        uint8_t subtype() const { return _header.control.subtype; }
+        small_uint<4> subtype() const { return _header.control.subtype; }
 
         /**
          * \brief Getter for the 802.11 frame's "To DS" bit.
          *
          * \return Boolean indicating if the "To DS" bit is set.
          */
-        bool to_ds() const { return _header.control.to_ds; }
+        small_uint<1> to_ds() const { return _header.control.to_ds; }
 
         /**
          * \brief Getter for the 802.11 frame's "From DS" bit.
          *
          * \return Boolean indicating if the "From DS" bit is set.
          */
-        bool from_ds() const { return _header.control.from_ds; }
+        small_uint<1> from_ds() const { return _header.control.from_ds; }
 
         /**
          * \brief Getter for the 802.11 frame's "More Frag" bit.
          *
          * \return Boolean indicating if the "More Frag" bit is set.
          */
-        bool more_frag() const { return _header.control.more_frag; }
+        small_uint<1> more_frag() const { return _header.control.more_frag; }
 
         /**
          * \brief Getter for the 802.11 frame's "Retry" bit.
          *
          * \return Boolean indicating if the "Retry" bit is set.
          */
-        bool retry() const { return _header.control.retry; }
+        small_uint<1> retry() const { return _header.control.retry; }
 
         /**
          * \brief Getter for the 802.11 frame's "Power Management" bit.
          *
          * \return Boolean indicating if the "Power Management" bit is set.
          */
-        bool power_mgmt() const { return _header.control.power_mgmt; }
+        small_uint<1> power_mgmt() const { return _header.control.power_mgmt; }
 
         /**
          * \brief Getter for the 802.11 frame's "WEP" bit.
          *
          * \return Boolean indicating if the "WEP" bit is set.
          */
-        bool wep() const { return _header.control.wep; }
+        small_uint<1> wep() const { return _header.control.wep; }
 
         /**
          * \brief Getter for the 802.11 frame's "Order" bit.
          *
          * \return Boolean indicating if the "Order" bit is set.
          */
-        bool order() const { return _header.control.order; }
+        small_uint<1> order() const { return _header.control.order; }
 
         /**
          * \brief Getter for the duration/id field.
@@ -309,70 +310,70 @@ namespace Tins {
          *
          * \param new_proto uint8_t with the new protocol version.
          */
-        void protocol(uint8_t new_proto);
+        void protocol(small_uint<2> new_proto);
 
         /**
          * \brief Setter for the 802.11 frame's type.
          *
          * \param new_type uint8_t with the new type of the 802.11 frame.
          */
-        void type(uint8_t new_type);
+        void type(small_uint<2> new_type);
 
         /**
          * \brief Setter for the 802.11 frame's subtype.
          *
          * \param new_subtype uint8_t with the new subtype of the 802.11 frame.
          */
-        void subtype(uint8_t new_subtype);
+        void subtype(small_uint<4> new_subtype);
 
         /**
          * \brief Setter for the 802.11 frame's "To DS" bit.
          *
          * \param new_value bool indicating the new value of the flag.
          */
-        void to_ds(bool new_value);
+        void to_ds(small_uint<1> new_value);
 
         /**
          * \brief Setter for the 802.11 frame's "From DS" bit.
          *
          * \param new_value bool indicating the new value of the flag.
          */
-        void from_ds(bool new_value);
+        void from_ds(small_uint<1> new_value);
 
         /**
          * \brief Setter for the 802.11 frame's "More Frag" bit.
          *
          * \param new_value bool indicating the new value of the flag.
          */
-        void more_frag(bool new_value);
+        void more_frag(small_uint<1> new_value);
 
         /**
          * \brief Setter for the 802.11 frame's "Retry" bit.
          *
          * \param new_value bool indicating the new value of the flag.
          */
-        void retry(bool new_value);
+        void retry(small_uint<1> new_value);
 
         /**
          * \brief Setter for the 802.11 frame's "Power Management" bit.
          *
          * \param new_value bool indicating the new value of the flag.
          */
-        void power_mgmt(bool new_value);
+        void power_mgmt(small_uint<1> new_value);
 
         /**
          * \brief Setter for the 802.11 frame's "WEP" bit.
          *
          * \param new_value bool indicating the new value of the flag.
          */
-        void wep(bool new_value);
+        void wep(small_uint<1> new_value);
 
         /**
          * \brief Setter for the 802.11 frame's "Order" bit.
          *
          * \param new_value bool indicating the new value of the flag.
          */
-        void order(bool new_value);
+        void order(small_uint<1> new_value);
 
         /**
          * \brief Setter for the duration/id field.
@@ -532,6 +533,21 @@ namespace Tins {
         };
 
         /**
+         * The type used to store the cypher suites.
+         */
+        typedef std::vector<CypherSuites> cyphers_type;
+        
+        /**
+         * The type used to store the AKM suites.
+         */
+        typedef std::vector<AKMSuites> akm_type;
+        
+        /**
+         * The type returned on serialization.
+         */
+        typedef std::vector<uint8_t> serialization_type;
+
+        /**
          * \brief Creates an instance of RSNInformation.
          *
          * By default, the version is set to 1.
@@ -587,33 +603,36 @@ namespace Tins {
          * \brief Getter for the version field.
          * \return The version field.
          */
-        uint16_t version() const { return _version; }
+        uint16_t version() const { return Utils::le_to_host(_version); }
+        
+        /**
+         * \brief Getter for the capabilities field.
+         * \return The version field.
+         */
+        uint16_t capabilities() const { return Utils::le_to_host(_capabilities); }
 
         /**
          * \brief Getter for the pairwise cypher suite list.
          * \return A list of pairwise cypher suites.
          */
-        const std::list<CypherSuites> &pairwise_cyphers() const { return _pairwise_cyphers; }
+        const cyphers_type &pairwise_cyphers() const { return _pairwise_cyphers; }
 
         /**
          * \brief Getter for the akm suite list.
          * \return A list of akm suites.
          */
-        const std::list<AKMSuites> &akm_cyphers() const { return _akm_cyphers; }
+        const akm_type &akm_cyphers() const { return _akm_cyphers; }
 
         /**
          * \brief Serializes this object.
-         * \param size Output parameter which will contain the size of
-         * the allocated buffer.
-         * \return The result of the serialization. This pointer should
-         * be free'd using operator delete[].
+         * \return The result of the serialization. 
          */
-        uint8_t *serialize(uint32_t &size) const;
+         serialization_type serialize() const;
     private:
         uint16_t _version, _capabilities;
         CypherSuites _group_suite;
-        std::list<AKMSuites> _akm_cyphers;
-        std::list<CypherSuites> _pairwise_cyphers;
+        akm_type _akm_cyphers;
+        cyphers_type _pairwise_cyphers;
     };
 
     /**
@@ -1315,13 +1334,14 @@ namespace Tins {
         // Option searching helpers
         
         /**
-         * \brief Helper method to search for the RSN information of this PDU.
-         *
-         * This method fills the RSN information structure of this PDU.
-         * \param rsn A pointer in which the RSN information will be stored.
-         * \return True if the RSNInformation option has been set.
+         * \brief Helper method to search for this PDU's rsn information 
+         * option.
+         * 
+         * Throws a std::runtime_error if the option has not been set.
+         * 
+         * \return std::string containing the ssid.
          */
-        bool rsn_information(RSNInformation *rsn);
+        RSNInformation rsn_information();
         
         /**
          * \brief Helper method to search for this PDU's ssid.

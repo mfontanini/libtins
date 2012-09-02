@@ -20,30 +20,27 @@
  */
 
 #include <cassert>
-#include <cstring>
+#include <algorithm>
 #include "rawpdu.h"
 
 
-Tins::RawPDU::RawPDU(const uint8_t *pload, uint32_t size) : PDU(255), _payload_size(size), _owns_payload(true) {
-    _payload = new uint8_t[size];
-    std::memcpy(_payload, pload, size);
-}
-
-Tins::RawPDU::RawPDU(uint8_t *pload, uint32_t size) : PDU(255), _payload(pload), _payload_size(size), _owns_payload(false) {
+namespace Tins {
+RawPDU::RawPDU(const uint8_t *pload, uint32_t size) 
+: PDU(255), _payload(pload, pload + size) 
+{
     
 }
 
-Tins::RawPDU::~RawPDU() {
-    if(_owns_payload)
-        delete[] _payload;
+uint32_t RawPDU::header_size() const {
+    return _payload.size();
 }
 
-uint32_t Tins::RawPDU::header_size() const {
-    return _payload_size;
+void RawPDU::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+    assert(total_sz >= _payload.size());
+    std::copy(_payload.begin(), _payload.end(), buffer);
 }
 
-void Tins::RawPDU::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    assert(total_sz >= _payload_size);
-    std::memcpy(buffer, _payload, _payload_size);
+void RawPDU::payload(const payload_type &pload) {
+    _payload = pload;
 }
-
+}

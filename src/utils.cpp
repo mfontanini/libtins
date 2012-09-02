@@ -122,7 +122,7 @@ bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
     std::auto_ptr<PDU> packet(ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr));
     std::auto_ptr<PDU> response(sender->send_recv(packet.get()));
     if(response.get()) {
-        ARP *arp_resp = response->find_inner_pdu<ARP>();
+        ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)
             *address = arp_resp->sender_hw_addr();
         return arp_resp;

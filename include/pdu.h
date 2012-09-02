@@ -187,7 +187,7 @@ namespace Tins {
          * \param flag The flag which being searched.
          */
         template<class T> 
-        T *find_inner_pdu(PDUType type = T::pdu_flag) {
+        T *find_pdu(PDUType type = T::pdu_flag) {
             PDU *pdu = this;
             while(pdu) {
                 if(pdu->pdu_type() == type)

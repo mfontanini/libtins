@@ -78,7 +78,7 @@ TEST_F(Dot11DeauthenticationTest, ClonePDU) {
 TEST_F(Dot11DeauthenticationTest, FromBytes) {
     std::auto_ptr<PDU> dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get());
-    const Dot11Deauthentication *inner = dot11->find_inner_pdu<Dot11Deauthentication>();
+    const Dot11Deauthentication *inner = dot11->find_pdu<Dot11Deauthentication>();
     ASSERT_TRUE(inner);
     test_equals_expected(*inner);
 }

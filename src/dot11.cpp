@@ -104,43 +104,43 @@ const Dot11::Dot11Option *Dot11::search_option(TaggedOption opt) const {
     return 0;
 }
 
-void Dot11::protocol(uint8_t new_proto) {
+void Dot11::protocol(small_uint<2> new_proto) {
     this->_header.control.protocol = new_proto;
 }
 
-void Dot11::type(uint8_t new_type) {
+void Dot11::type(small_uint<2> new_type) {
     this->_header.control.type = new_type;
 }
 
-void Dot11::subtype(uint8_t new_subtype) {
+void Dot11::subtype(small_uint<4> new_subtype) {
     this->_header.control.subtype = new_subtype;
 }
 
-void Dot11::to_ds(bool new_value) {
+void Dot11::to_ds(small_uint<1> new_value) {
     this->_header.control.to_ds = (new_value)? 1 : 0;
 }
 
-void Dot11::from_ds(bool new_value) {
+void Dot11::from_ds(small_uint<1> new_value) {
     this->_header.control.from_ds = (new_value)? 1 : 0;
 }
 
-void Dot11::more_frag(bool new_value) {
+void Dot11::more_frag(small_uint<1> new_value) {
     this->_header.control.more_frag = (new_value)? 1 : 0;
 }
 
-void Dot11::retry(bool new_value) {
+void Dot11::retry(small_uint<1> new_value) {
     this->_header.control.retry = (new_value)? 1 : 0;
 }
 
-void Dot11::power_mgmt(bool new_value) {
+void Dot11::power_mgmt(small_uint<1> new_value) {
     this->_header.control.power_mgmt = (new_value)? 1 : 0;
 }
 
-void Dot11::wep(bool new_value) {
+void Dot11::wep(small_uint<1> new_value) {
     this->_header.control.wep = (new_value)? 1 : 0;
 }
 
-void Dot11::order(bool new_value) {
+void Dot11::order(small_uint<1> new_value) {
     this->_header.control.order = (new_value)? 1 : 0;
 }
 
@@ -338,10 +338,8 @@ void Dot11ManagementFrame::ssid(const std::string &new_ssid) {
 }
 
 void Dot11ManagementFrame::rsn_information(const RSNInformation& info) {
-    uint32_t size;
-    uint8_t *buffer = info.serialize(size);
-    add_tagged_option(RSN, size, buffer);
-    delete[] buffer;
+    RSNInformation::serialization_type buffer = info.serialize();
+    add_tagged_option(RSN, buffer.size(), &buffer[0]);
 }
 
 uint8_t *Dot11ManagementFrame::serialize_rates(const rates_type &rates) {
@@ -570,45 +568,47 @@ void Dot11ManagementFrame::challenge_text(const std::string &text) {
 
 // Getters
 
-bool Dot11ManagementFrame::rsn_information(RSNInformation *rsn) {
+RSNInformation Dot11ManagementFrame::rsn_information() {
+    const char *err_msg = "Malformed RSN information option";
     const Dot11::Dot11Option *option = search_option(RSN);
     if(!option || option->data_size() < (sizeof(uint16_t) << 1) + sizeof(uint32_t))
-        return false;
+        throw std::runtime_error("RSN information not set");
+    RSNInformation rsn;
     const uint8_t *buffer = option->data_ptr();
     uint32_t bytes_left = option->data_size();
-    rsn->version(*(uint16_t*)buffer);
+    rsn.version(*(uint16_t*)buffer);
     buffer += sizeof(uint16_t);
-    rsn->group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
+    rsn.group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
     buffer += sizeof(uint32_t);
 
     bytes_left -= (sizeof(uint16_t) << 1) + sizeof(uint32_t);
     if(bytes_left < sizeof(uint16_t))
-        return false;
+        throw std::runtime_error(err_msg);
     uint16_t count = *(uint16_t*)buffer;
     buffer += sizeof(uint16_t);
     if(count * sizeof(uint32_t) > bytes_left)
-        return false;
+        throw std::runtime_error(err_msg);
     bytes_left -= count * sizeof(uint32_t);
     while(count--) {
-        rsn->add_pairwise_cypher((RSNInformation::CypherSuites)*(uint32_t*)buffer);
+        rsn.add_pairwise_cypher((RSNInformation::CypherSuites)*(uint32_t*)buffer);
         buffer += sizeof(uint32_t);
     }
     if(bytes_left < sizeof(uint16_t))
-        return false;
+        throw std::runtime_error(err_msg);
     count = *(uint16_t*)buffer;
     buffer += sizeof(uint16_t);
     bytes_left -= sizeof(uint16_t);
     if(count * sizeof(uint32_t) > bytes_left)
-        return false;
+        throw std::runtime_error(err_msg);
     bytes_left -= count * sizeof(uint32_t);
     while(count--) {
-        rsn->add_akm_cypher((RSNInformation::AKMSuites)*(uint32_t*)buffer);
+        rsn.add_akm_cypher((RSNInformation::AKMSuites)*(uint32_t*)buffer);
         buffer += sizeof(uint32_t);
     }
     if(bytes_left < sizeof(uint16_t))
-        return false;
-    rsn->capabilities(*(uint16_t*)buffer);
-    return true;
+        throw std::runtime_error(err_msg);
+    rsn.capabilities(*(uint16_t*)buffer);
+    return rsn;
 }
 
 string Dot11ManagementFrame::ssid() const {
@@ -1587,32 +1587,33 @@ void RSNInformation::group_suite(CypherSuites group) {
 }
 
 void RSNInformation::version(uint16_t ver) {
-    _version = ver;
+    _version = Utils::host_to_le(ver);
 }
 
 void RSNInformation::capabilities(uint16_t cap) {
-    _capabilities = cap;
+    _capabilities = Utils::host_to_le(cap);
 }
 
-uint8_t *RSNInformation::serialize(uint32_t &size) const {
-    size = sizeof(_version) + sizeof(_capabilities) + sizeof(uint32_t);
+RSNInformation::serialization_type RSNInformation::serialize() const {
+    uint32_t size = sizeof(_version) + sizeof(_capabilities) + sizeof(uint32_t);
     size += (sizeof(uint16_t) << 1); // 2 lists count.
     size += sizeof(uint32_t) * (_akm_cyphers.size() + _pairwise_cyphers.size());
-
-    uint8_t *buffer = new uint8_t[size], *ptr = buffer;
+    
+    serialization_type buffer(size);
+    serialization_type::value_type *ptr = &buffer[0];
     *(uint16_t*)ptr = _version;
     ptr += sizeof(_version);
     *(uint32_t*)ptr = _group_suite;
     ptr += sizeof(uint32_t);
     *(uint16_t*)ptr = _pairwise_cyphers.size();
     ptr += sizeof(uint16_t);
-    for(std::list<CypherSuites>::const_iterator it = _pairwise_cyphers.begin(); it != _pairwise_cyphers.end(); ++it) {
+    for(cyphers_type::const_iterator it = _pairwise_cyphers.begin(); it != _pairwise_cyphers.end(); ++it) {
         *(uint32_t*)ptr = *it;
         ptr += sizeof(uint32_t);
     }
     *(uint16_t*)ptr = _akm_cyphers.size();
     ptr += sizeof(uint16_t);
-    for(std::list<AKMSuites>::const_iterator it = _akm_cyphers.begin(); it != _akm_cyphers.end(); ++it) {
+    for(akm_type::const_iterator it = _akm_cyphers.begin(); it != _akm_cyphers.end(); ++it) {
         *(uint32_t*)ptr = *it;
         ptr += sizeof(uint32_t);
     }

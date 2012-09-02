@@ -99,7 +99,7 @@ TEST_F(Dot11BeaconTest, CopyAssignmentOperator) {
 TEST_F(Dot11BeaconTest, FromBytes) {
     std::auto_ptr<PDU> dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get());
-    const Dot11Beacon *beacon = dot11->find_inner_pdu<Dot11Beacon>();
+    const Dot11Beacon *beacon = dot11->find_pdu<Dot11Beacon>();
     ASSERT_TRUE(beacon);
     test_equals_expected(*beacon);
 }
@@ -353,6 +353,24 @@ TEST_F(Dot11BeaconTest, ChallengeText) {
     Dot11Beacon dot11;
     dot11.challenge_text("libtins ftw");
     EXPECT_EQ(dot11.challenge_text(), "libtins ftw");
+}
+
+TEST_F(Dot11BeaconTest, RSNInformationTest) {
+    Dot11Beacon dot11;
+    RSNInformation rsn_info, found;
+    rsn_info.add_pairwise_cypher(RSNInformation::WEP_40);
+    rsn_info.add_akm_cypher(RSNInformation::PSK);
+    rsn_info.group_suite(RSNInformation::CCMP);
+    rsn_info.version(0x7283);
+    rsn_info.capabilities(0x18ad);
+    dot11.rsn_information(rsn_info);
+    found = dot11.rsn_information();
+    
+    EXPECT_EQ(rsn_info.version(), found.version());
+    EXPECT_EQ(rsn_info.capabilities(), found.capabilities());
+    EXPECT_EQ(rsn_info.group_suite(), found.group_suite());
+    EXPECT_EQ(rsn_info.pairwise_cyphers(), found.pairwise_cyphers());
+    EXPECT_EQ(rsn_info.akm_cyphers(), found.akm_cyphers());
 }
 
 

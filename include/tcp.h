@@ -30,6 +30,7 @@
     #include <endian.h>
 #endif
 #include "pdu.h"
+#include "small_uint.h"
 #include "utils.h"
 
 
@@ -190,7 +191,7 @@ namespace Tins {
          *
          * \return Data offset in an uint8_t.
          */
-        uint8_t data_offset() const { return this->_tcp.doff; }
+        small_uint<4> data_offset() const { return this->_tcp.doff; }
 
         /**
          * \brief Getter for the option list.
@@ -205,7 +206,7 @@ namespace Tins {
          * \param tcp_flag The polled flag.
          * \return The value of the flag.
          */
-        uint8_t get_flag(Flags tcp_flag);
+        small_uint<1> get_flag(Flags tcp_flag);
         
         /* Setters */
 
@@ -263,7 +264,7 @@ namespace Tins {
          *
          * \param new_doff The new data offset pointer.
          */
-        void data_offset(uint8_t new_doff);
+        void data_offset(small_uint<4> new_doff);
 
         /**
          * \brief Set the payload.
@@ -368,7 +369,7 @@ namespace Tins {
          * \param tcp_flag The flag to be set.
          * \param value The new value for this flag. Must be 0 or 1.
          */
-        void set_flag(Flags tcp_flag, uint8_t value);
+        void set_flag(Flags tcp_flag, small_uint<1> value);
 
         /**
          * \brief Adds a TCP option.

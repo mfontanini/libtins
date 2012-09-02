@@ -29,6 +29,7 @@
 #include <utility>
 #include <list>
 #include "pdu.h"
+#include "small_uint.h"
 #include "ipaddress.h"
 #include "utils.h"
 
@@ -159,7 +160,7 @@ namespace Tins {
          *
          * \return The number of dwords the header occupies in an uin8_t.
          */
-        uint8_t head_len() const { return this->_ip.ihl; }
+        small_uint<4> head_len() const { return this->_ip.ihl; }
 
         /**
          * \brief Getter for the type of service field.
@@ -227,7 +228,7 @@ namespace Tins {
          * \brief Getter for the version field.
          * \return The version for this IP PDU.
          */
-        uint8_t version() const  { return _ip.version; }
+        small_uint<4> version() const  { return _ip.version; }
 
         /* Setters */
 
@@ -236,7 +237,7 @@ namespace Tins {
          *
          * \param new_head_len uint8_t with the new header length.
          */
-        void head_len(uint8_t new_head_len);
+        void head_len(small_uint<4> new_head_len);
 
         /**
          * \brief Setter for the type of service field.
@@ -306,7 +307,7 @@ namespace Tins {
          *
          * \param ver The version field to be set.
          */
-        void version(uint8_t ver);
+        void version(small_uint<4> ver);
 
         /**
          * \brief Sets an IP option.

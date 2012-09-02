@@ -24,6 +24,7 @@
 
 
 #include "pdu.h"
+#include "small_uint.h"
 #include "utils.h"
 
 
@@ -170,6 +171,11 @@ namespace Tins {
     class RC4EAPOL : public EAPOL {
     public:
         /**
+         * The type used to store the key.
+         */
+        typedef std::vector<uint8_t> key_type;
+    
+        /**
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::RC4EAPOL;
@@ -185,23 +191,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         RC4EAPOL(const uint8_t *buffer, uint32_t total_sz);
-        
-        /**
-         * \brief Copy constructor.
-         */
-        RC4EAPOL(const RC4EAPOL &other);
-        
-        /**
-         * \brief Copy assignment operator.
-         */
-        RC4EAPOL &operator= (const RC4EAPOL &other);
-        
-        /**
-         * \brief RC4EAPOL destructor
-         * 
-         * Memory allocated for the key field is freed(if any).
-         */
-        ~RC4EAPOL();
         
         /* Getters */
         
@@ -227,13 +216,13 @@ namespace Tins {
          * \brief Getter for the key flag field.
          * \return The key flag field.
          */
-        uint8_t key_flag() const { return _header.key_flag; }
+        small_uint<1> key_flag() const { return _header.key_flag; }
         
         /**
          * \brief Getter for the key index field.
          * \return The key index field.
          */
-        uint8_t key_index() const { return _header.key_index; }
+        small_uint<7> key_index() const { return _header.key_index; }
         
         /**
          * \brief Getter for the key signature field.
@@ -245,7 +234,7 @@ namespace Tins {
          * \brief Getter for the key field.
          * \return The key field.
          */
-        const uint8_t *key() const { return _key; }
+        const key_type &key() const { return _key; }
         
         /* Setters */
         
@@ -271,13 +260,13 @@ namespace Tins {
          * \brief Sets the key flag field.
          * \param new_key_flag The new key flag to be set.
          */
-        void key_flag(bool new_key_flag);
+        void key_flag(small_uint<1> new_key_flag);
         
         /**
          * \brief Sets the key index field.
          * \param new_key_index The new key index to be set.
          */
-        void key_index(uint8_t new_key_index);
+        void key_index(small_uint<7> new_key_index);
         
         /**
          * \brief Sets the key signature field.
@@ -289,7 +278,7 @@ namespace Tins {
          * \brief Sets the key field.
          * \param new_key The new key to be set.
          */
-        void key(const uint8_t *new_key, uint32_t sz);
+        void key(const key_type &new_key);
         
         /* Virtual method override. */
         
@@ -323,7 +312,9 @@ namespace Tins {
          * 
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        RC4EAPOL *clone_pdu() const {
+            return new RC4EAPOL(*this);
+        }
     private:
         struct rc4hdr {
             uint16_t key_length;
@@ -334,12 +325,10 @@ namespace Tins {
             uint8_t key_sign[16];
         } __attribute__((__packed__));
         
-        void copy_fields(const RC4EAPOL *other);
         void write_body(uint8_t *buffer, uint32_t total_sz);
         
         
-        uint8_t *_key;
-        uint32_t _key_size;
+        key_type _key;
         rc4hdr _header;
     };
     
@@ -349,6 +338,11 @@ namespace Tins {
      */
     class RSNEAPOL : public EAPOL {
     public:
+        /**
+         * The type used to store the key.
+         */
+        typedef std::vector<uint8_t> key_type;
+    
         /**
          * \brief This PDU's flag.
          */
@@ -365,23 +359,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         RSNEAPOL(const uint8_t *buffer, uint32_t total_sz);
-        
-        /**
-         * \brief Copy constructor.
-         */
-        RSNEAPOL(const RSNEAPOL &other);
-        
-        /**
-         * \brief Copy assignment operator.
-         */
-        RSNEAPOL &operator= (const RSNEAPOL &other);
-        
-        /**
-         * \brief Destructor.
-         * 
-         * Memory allocated for the key field is freed(if any).
-         */
-        ~RSNEAPOL();
         
         /* Getters */
         
@@ -437,7 +414,7 @@ namespace Tins {
          * \brief Getter for the key field.
          * \return The key field.
          */
-        const uint8_t *key() const { return _key; }
+        const key_type &key() const { return _key; }
         
         /**
          * \brief Returns the header size.
@@ -509,7 +486,7 @@ namespace Tins {
          * \brief Sets the key field.
          * \param new_key The new key to be set.
          */
-        void key(const uint8_t *new_key, uint32_t sz);
+        void key(const key_type &new_key);
         
         /**
          * \brief Sets RSN information for this EAPOL PDU.
@@ -541,7 +518,9 @@ namespace Tins {
          * 
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        RSNEAPOL *clone_pdu() const {
+            return new RSNEAPOL(*this);
+        }
     private:
         struct rsnhdr {
             uint16_t key_mic:1,
@@ -551,7 +530,7 @@ namespace Tins {
                 encrypted:1,
                 reserved:3, 
                 key_descriptor:3,
-                key_type:1,
+                key_t:1,
                 key_index:2,
                 install:1,
                 key_ack:1;       
@@ -563,14 +542,11 @@ namespace Tins {
             uint16_t wpa_length;
         } __attribute__((__packed__));
         
-        
-        void copy_fields(const RSNEAPOL *other);
         void write_body(uint8_t *buffer, uint32_t total_sz);
         
         
         rsnhdr _header;
-        uint8_t *_key;
-        uint32_t _key_size;
+        key_type _key;
     };
 };
 

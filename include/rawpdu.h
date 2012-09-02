@@ -22,9 +22,8 @@
 #ifndef TINS_RAWPDU_H
 #define TINS_RAWPDU_H
 
-
+#include <vector>
 #include "pdu.h"
-
 
 namespace Tins {
 
@@ -36,11 +35,17 @@ namespace Tins {
     class RawPDU : public PDU {
     public:
         /**
-         * \brief This PDU's flag.
+         * The type used to store the payload.
+         */
+        typedef std::vector<uint8_t> payload_type;
+        
+        /**
+         * This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::RAW;
     
-        /** \brief Creates an instance of RawPDU.
+        /** 
+         * \brief Creates an instance of RawPDU.
          *
          * The payload is copied, therefore the original payload's memory
          * must be freed by the user.
@@ -48,34 +53,52 @@ namespace Tins {
          * \param size The size of the payload.
          */
         RawPDU(const uint8_t *pload, uint32_t size);
-        
-        /** \brief Creates an instance of RawPDU.
-         *
-         * The payload is not copied in this constructor, therefore 
-         * it must be manually freed by the user. 
-         * \param pload The payload which the RawPDU will contain.
-         * \param size The size of the payload.
-         */
-        RawPDU(uint8_t *pload, uint32_t size);
 
-        /** \brief RawPDU destructor.
-         * 
-         * Deletes the payload only if it was created setting the copy
-         * flag to true.
+        /**
+         * \brief Setter for the payload field
+         * \param pload The payload to be set.
          */
-        ~RawPDU();
+        void payload(const payload_type &pload);
 
-        /** \brief Getter for the payload.
-         * 
+        /**
+         * \brief Setter for the payload field
+         * \param start The start of the new payload.
+         * \param end The end of the new payload.
+         */
+        template<typename ForwardIterator>
+        void payload(ForwardIterator start, ForwardIterator end) {
+            _payload.assign(start, end);
+        }
+
+        /** 
+         * \brief Const getter for the payload.
          * \return The RawPDU's payload.
          */
-        uint8_t *payload() { return _payload; }
+        const payload_type &payload() const { return _payload; }
         
-        /** \brief Returns the header size.
+        /** 
+         * \brief Non-const getter for the payload.
+         * \return The RawPDU's payload.
+         */
+        payload_type &payload() { return _payload; }
+        
+        /** 
+         * \brief Returns the header size.
+         * 
+         * This returns the same as RawPDU::payload_size().
          *
          * This metod overrides PDU::header_size. \sa PDU::header_size
          */
         uint32_t header_size() const;
+        
+        /** 
+         * \brief Returns the payload size.
+         *
+         * \return uint32_t containing the payload size.
+         */
+        uint32_t payload_size() const {
+            return _payload.size();
+        }
 
         /**
          * \brief Getter for the PDU's type.
@@ -85,9 +108,7 @@ namespace Tins {
     private:
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
-        uint8_t *_payload;
-        uint32_t _payload_size;
-        bool _owns_payload;
+        payload_type _payload;
     };
 };
 
