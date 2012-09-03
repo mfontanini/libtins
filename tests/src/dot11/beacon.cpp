@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdint.h>
 #include "dot11.h"
+#include "rsn_information.h"
 #include "tests/dot11.h"
 
 

@@ -24,6 +24,7 @@
 #include <stdexcept>
 #include "eapol.h"
 #include "dot11.h"
+#include "rsn_information.h"
 
 
 namespace Tins {

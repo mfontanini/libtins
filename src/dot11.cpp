@@ -35,6 +35,7 @@
 #include "radiotap.h"
 #include "sniffer.h"
 #include "utils.h"
+#include "rsn_information.h"
 #include "snap.h"
 
 using std::pair;
@@ -569,46 +570,10 @@ void Dot11ManagementFrame::challenge_text(const std::string &text) {
 // Getters
 
 RSNInformation Dot11ManagementFrame::rsn_information() {
-    const char *err_msg = "Malformed RSN information option";
     const Dot11::Dot11Option *option = search_option(RSN);
     if(!option || option->data_size() < (sizeof(uint16_t) << 1) + sizeof(uint32_t))
         throw std::runtime_error("RSN information not set");
-    RSNInformation rsn;
-    const uint8_t *buffer = option->data_ptr();
-    uint32_t bytes_left = option->data_size();
-    rsn.version(*(uint16_t*)buffer);
-    buffer += sizeof(uint16_t);
-    rsn.group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
-    buffer += sizeof(uint32_t);
-
-    bytes_left -= (sizeof(uint16_t) << 1) + sizeof(uint32_t);
-    if(bytes_left < sizeof(uint16_t))
-        throw std::runtime_error(err_msg);
-    uint16_t count = *(uint16_t*)buffer;
-    buffer += sizeof(uint16_t);
-    if(count * sizeof(uint32_t) > bytes_left)
-        throw std::runtime_error(err_msg);
-    bytes_left -= count * sizeof(uint32_t);
-    while(count--) {
-        rsn.add_pairwise_cypher((RSNInformation::CypherSuites)*(uint32_t*)buffer);
-        buffer += sizeof(uint32_t);
-    }
-    if(bytes_left < sizeof(uint16_t))
-        throw std::runtime_error(err_msg);
-    count = *(uint16_t*)buffer;
-    buffer += sizeof(uint16_t);
-    bytes_left -= sizeof(uint16_t);
-    if(count * sizeof(uint32_t) > bytes_left)
-        throw std::runtime_error(err_msg);
-    bytes_left -= count * sizeof(uint32_t);
-    while(count--) {
-        rsn.add_akm_cypher((RSNInformation::AKMSuites)*(uint32_t*)buffer);
-        buffer += sizeof(uint32_t);
-    }
-    if(bytes_left < sizeof(uint16_t))
-        throw std::runtime_error(err_msg);
-    rsn.capabilities(*(uint16_t*)buffer);
-    return rsn;
+    return RSNInformation(option->data_ptr(), option->data_size());
 }
 
 string Dot11ManagementFrame::ssid() const {
@@ -1568,64 +1533,4 @@ uint32_t Dot11BlockAck::header_size() const {
     return Dot11ControlTA::header_size() + sizeof(_start_sequence) + sizeof(_start_sequence) + sizeof(_bitmap);
 }
 
-/* RSNInformation */
-
-RSNInformation::RSNInformation() : _version(1), _capabilities(0) {
-
-}
-
-void RSNInformation::add_pairwise_cypher(CypherSuites cypher) {
-    _pairwise_cyphers.push_back(cypher);
-}
-
-void RSNInformation::add_akm_cypher(AKMSuites akm) {
-    _akm_cyphers.push_back(akm);
-}
-
-void RSNInformation::group_suite(CypherSuites group) {
-    _group_suite = group;
-}
-
-void RSNInformation::version(uint16_t ver) {
-    _version = Utils::host_to_le(ver);
-}
-
-void RSNInformation::capabilities(uint16_t cap) {
-    _capabilities = Utils::host_to_le(cap);
-}
-
-RSNInformation::serialization_type RSNInformation::serialize() const {
-    uint32_t size = sizeof(_version) + sizeof(_capabilities) + sizeof(uint32_t);
-    size += (sizeof(uint16_t) << 1); // 2 lists count.
-    size += sizeof(uint32_t) * (_akm_cyphers.size() + _pairwise_cyphers.size());
-    
-    serialization_type buffer(size);
-    serialization_type::value_type *ptr = &buffer[0];
-    *(uint16_t*)ptr = _version;
-    ptr += sizeof(_version);
-    *(uint32_t*)ptr = _group_suite;
-    ptr += sizeof(uint32_t);
-    *(uint16_t*)ptr = _pairwise_cyphers.size();
-    ptr += sizeof(uint16_t);
-    for(cyphers_type::const_iterator it = _pairwise_cyphers.begin(); it != _pairwise_cyphers.end(); ++it) {
-        *(uint32_t*)ptr = *it;
-        ptr += sizeof(uint32_t);
-    }
-    *(uint16_t*)ptr = _akm_cyphers.size();
-    ptr += sizeof(uint16_t);
-    for(akm_type::const_iterator it = _akm_cyphers.begin(); it != _akm_cyphers.end(); ++it) {
-        *(uint32_t*)ptr = *it;
-        ptr += sizeof(uint32_t);
-    }
-    *(uint16_t*)ptr = _capabilities;
-    return buffer;
-}
-
-RSNInformation RSNInformation::wpa2_psk() {
-    RSNInformation info;
-    info.group_suite(RSNInformation::CCMP);
-    info.add_pairwise_cypher(RSNInformation::CCMP);
-    info.add_akm_cypher(RSNInformation::PSK);
-    return info;
-}
 }
