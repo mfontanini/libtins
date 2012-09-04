@@ -27,7 +27,7 @@
 #include <string>
 #include "pdu.h"
 #include "ipaddress.h"
-#include "utils.h"
+#include "endianness.h"
 #include "hwaddress.h"
 #include "network_interface.h"
 
@@ -115,14 +115,14 @@ namespace Tins {
          *
          * \return Returns the hardware address' format in an uint16_t.
          */
-        uint16_t hw_addr_format() const { return Utils::be_to_host(_arp.ar_hrd); }
+        uint16_t hw_addr_format() const { return Endian::be_to_host(_arp.ar_hrd); }
 
         /**
          * \brief Getter for the protocol address format.
          *
          * \return Returns the protocol address' format in an uint16_t.
          */
-        uint16_t prot_addr_format() const { return Utils::be_to_host(_arp.ar_pro); }
+        uint16_t prot_addr_format() const { return Endian::be_to_host(_arp.ar_pro); }
 
         /**
          * \brief Getter for the hardware address length.
@@ -143,7 +143,7 @@ namespace Tins {
          *
          * \return Returns the ARP opcode in an uint16_t.
          */
-        uint16_t opcode() const { return Utils::be_to_host(_arp.ar_op); }
+        uint16_t opcode() const { return Endian::be_to_host(_arp.ar_op); }
 
         /** \brief Getter for the header size.
          * \return Returns the ARP header size.

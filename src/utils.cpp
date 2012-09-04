@@ -35,6 +35,7 @@
 #include "ip.h"
 #include "icmp.h"
 #include "arp.h"
+#include "endianness.h"
 
 
 using namespace std;
@@ -163,14 +164,14 @@ uint32_t Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
         padding = *(end - 1) << 8;
     }
     while(ptr < last)
-        checksum += Utils::host_to_be(*(ptr++));
+        checksum += Endian::host_to_be(*(ptr++));
     return checksum + padding;
 }
 
 uint32_t Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
     uint32_t checksum(0);
-    uint32_t source_ip_int = Utils::host_to_be<uint32_t>(source_ip),
-             dest_ip_int = Utils::host_to_be<uint32_t>(dest_ip);
+    uint32_t source_ip_int = Endian::host_to_be<uint32_t>(source_ip),
+             dest_ip_int = Endian::host_to_be<uint32_t>(dest_ip);
     uint16_t *ptr = (uint16_t*)&source_ip_int;
 
     checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));

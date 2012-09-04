@@ -29,7 +29,7 @@
 #include <utility>
 
 #include "pdu.h"
-#include "utils.h"
+#include "endianness.h"
 #include "network_interface.h"
 #include "hwaddress.h"
 #include "small_uint.h"
@@ -290,7 +290,7 @@ namespace Tins {
          *
          * \return The value of the duration/id field in an uint16_t.
          */
-        uint16_t duration_id() const { return Utils::le_to_host(_header.duration_id); }
+        uint16_t duration_id() const { return Endian::le_to_host(_header.duration_id); }
 
         /**
          * \brief Getter for the first address.
@@ -979,7 +979,7 @@ namespace Tins {
          *
          * \return The sequence number as an uint16_t.
          */
-        uint16_t seq_num() const { return Utils::le_to_host(_ext_header.seq_control.seq_number); }
+        uint16_t seq_num() const { return Endian::le_to_host(_ext_header.seq_control.seq_number); }
 
         /**
          * \brief Getter for the fourth address.
@@ -1525,14 +1525,14 @@ namespace Tins {
          *
          * \return Timestamp value in an uint64_t.
          */
-        uint64_t timestamp() const { return Utils::le_to_host(_body.timestamp); }
+        uint64_t timestamp() const { return Endian::le_to_host(_body.timestamp); }
 
         /**
          * \brief Getter for the interval field.
          *
          * \return Timestamp value in an uint16_t.
          */
-        uint16_t interval() const { return Utils::le_to_host(_body.interval); }
+        uint16_t interval() const { return Endian::le_to_host(_body.interval); }
 
         /**
          * \brief Getter for the Capabilities Information structure.
@@ -1644,7 +1644,7 @@ namespace Tins {
          *
          * \return uint16_t with the reason code.
          */
-        uint16_t reason_code() const { return Utils::le_to_host(_body.reason_code); }
+        uint16_t reason_code() const { return Endian::le_to_host(_body.reason_code); }
 
         /**
          * \brief Setter for the reason code.
@@ -1747,7 +1747,7 @@ namespace Tins {
          *
          * \return The listen interval in an uint16_t.
          */
-        uint16_t listen_interval() const { return Utils::le_to_host(_body.listen_interval); }
+        uint16_t listen_interval() const { return Endian::le_to_host(_body.listen_interval); }
 
         /**
          * \brief Setter for the listen interval.
@@ -1851,14 +1851,14 @@ namespace Tins {
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return Utils::le_to_host(_body.status_code); }
+        uint16_t status_code() const { return Endian::le_to_host(_body.status_code); }
 
         /**
          * \brief Getter for the AID field.
          *
          * \return The AID field value in an uint16_t.
          */
-        uint16_t aid() const { return Utils::le_to_host(_body.aid); }
+        uint16_t aid() const { return Endian::le_to_host(_body.aid); }
 
         /**
          * \brief Setter for the status code.
@@ -1970,7 +1970,7 @@ namespace Tins {
          *
          * \return The listen interval in an uint16_t.
          */
-        uint16_t listen_interval() const { return Utils::le_to_host(_body.listen_interval); }
+        uint16_t listen_interval() const { return Endian::le_to_host(_body.listen_interval); }
 
         /**
          * \brief Getter for the current ap field.
@@ -2089,14 +2089,14 @@ namespace Tins {
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return Utils::le_to_host(_body.status_code); }
+        uint16_t status_code() const { return Endian::le_to_host(_body.status_code); }
 
         /**
          * \brief Getter for the AID field.
          *
          * \return The AID field value in an uint16_t.
          */
-        uint16_t aid() const { return Utils::le_to_host(_body.aid); }
+        uint16_t aid() const { return Endian::le_to_host(_body.aid); }
 
         /**
          * \brief Setter for the status code.
@@ -2194,21 +2194,21 @@ namespace Tins {
          *
          * \return The authentication algorithm number in an uint16_t.
          */
-        uint16_t auth_algorithm() const {return Utils::le_to_host(_body.auth_algorithm); }
+        uint16_t auth_algorithm() const {return Endian::le_to_host(_body.auth_algorithm); }
 
         /**
          * \brief Getter for the Authetication Sequence Number.
          *
          * \return The authentication sequence number in an uint16_t.
          */
-        uint16_t auth_seq_number() const {return Utils::le_to_host(_body.auth_seq_number); }
+        uint16_t auth_seq_number() const {return Endian::le_to_host(_body.auth_seq_number); }
 
         /**
          * \brief Getter for the status code.
          *
          * \return The status code in an uint16_t.
          */
-        uint16_t status_code() const { return Utils::le_to_host(_body.status_code); }
+        uint16_t status_code() const { return Endian::le_to_host(_body.status_code); }
 
         /**
          * \brief Setter for the Authetication Algorithm Number.
@@ -2314,7 +2314,7 @@ namespace Tins {
          *
          * \return uint16_t with the reason code.
          */
-        uint16_t reason_code() const { return Utils::le_to_host(_body.reason_code); }
+        uint16_t reason_code() const { return Endian::le_to_host(_body.reason_code); }
 
         /**
          * \brief Setter for the reason code.
@@ -2463,14 +2463,14 @@ namespace Tins {
          *
          * \return Timestamp value in an uint64_t.
          */
-        uint64_t timestamp() const { return Utils::le_to_host(_body.timestamp); }
+        uint64_t timestamp() const { return Endian::le_to_host(_body.timestamp); }
 
         /**
          * \brief Getter for the interval field.
          *
          * \return Timestamp value in an uint16_t.
          */
-        uint16_t interval() const { return Utils::le_to_host(_body.interval); }
+        uint16_t interval() const { return Endian::le_to_host(_body.interval); }
 
         /**
          * \brief Getter for the Capabilities Information.
@@ -2591,7 +2591,7 @@ namespace Tins {
          *
          * \return The sequence number as an uint16_t.
          */
-        uint16_t seq_num() const { return Utils::le_to_host(_ext_header.seq_control.seq_number); }
+        uint16_t seq_num() const { return Endian::le_to_host(_ext_header.seq_control.seq_number); }
 
         /**
          * \brief Getter for the fourth address.
@@ -2725,7 +2725,7 @@ namespace Tins {
          *
          * \return The value of the qos_control field in an uint16_t.
          */
-        uint16_t qos_control() const { return Utils::le_to_host(_qos_control); }
+        uint16_t qos_control() const { return Endian::le_to_host(_qos_control); }
 
         /**
          * \brief Setter for the qos_control field.
@@ -3196,13 +3196,13 @@ namespace Tins {
          * \brief Getter for the bar control field.
          * \return The bar control field.
          */
-        uint16_t bar_control() const { return Utils::le_to_host(_bar_control.tid); }
+        uint16_t bar_control() const { return Endian::le_to_host(_bar_control.tid); }
 
         /**
          * \brief Getter for the start sequence field.
          * \return The bar start sequence.
          */
-        uint16_t start_sequence() const { return Utils::le_to_host(_start_sequence.seq); }
+        uint16_t start_sequence() const { return Endian::le_to_host(_start_sequence.seq); }
         
         /**
          * \brief Getter for the fragment number field.

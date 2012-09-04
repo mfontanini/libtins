@@ -22,7 +22,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <cassert>
-#include "utils.h"
+#include "endianness.h"
 #include "dhcp.h"
 #include "ethernetII.h"
 
@@ -33,8 +33,7 @@ using std::runtime_error;
 namespace Tins {
 const uint32_t DHCP::MAX_DHCP_SIZE = 312;
 
-/* Magic cookie: uint32_t.
- * end of options: 1 byte. */
+// Magic cookie: uint32_t. 
 DHCP::DHCP() : _size(sizeof(uint32_t)) {
     opcode(BOOTREQUEST);
     htype(1); //ethernet
@@ -47,7 +46,7 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
     buffer += BootP::header_size() - vend().size();
     total_sz -= BootP::header_size() - vend().size();
     uint8_t args[2] = {0};
-    if(total_sz < sizeof(uint32_t) || *(uint32_t*)buffer != Utils::host_to_be<uint32_t>(0x63825363))
+    if(total_sz < sizeof(uint32_t) || *(uint32_t*)buffer != Endian::host_to_be<uint32_t>(0x63825363))
         throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);
@@ -115,7 +114,7 @@ bool DHCP::search_server_identifier(ipaddress_type *value) {
 }
 
 bool DHCP::add_lease_time(uint32_t time) {
-    time = Utils::host_to_be(time);
+    time = Endian::host_to_be(time);
     return add_option(DHCP_LEASE_TIME, sizeof(uint32_t), (const uint8_t*)&time);
 }
 
@@ -124,7 +123,7 @@ bool DHCP::search_lease_time(uint32_t *value) {
 }
 
 bool DHCP::add_renewal_time(uint32_t time) {
-    time = Utils::host_to_be(time);
+    time = Endian::host_to_be(time);
     return add_option(DHCP_RENEWAL_TIME, sizeof(uint32_t), (const uint8_t*)&time);
 }
         
@@ -192,7 +191,7 @@ bool DHCP::search_domain_name(std::string *value) {
 }
 
 bool DHCP::add_rebind_time(uint32_t time) {
-    time = Utils::host_to_be(time);
+    time = Endian::host_to_be(time);
     return add_option(DHCP_REBINDING_TIME, sizeof(uint32_t), (uint8_t*)&time);
 }
         
@@ -220,7 +219,7 @@ void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
         result.resize(_size);
         uint8_t *ptr = &result[0] + sizeof(uint32_t);
         // Magic cookie
-        *((uint32_t*)&result[0]) = Utils::host_to_be<uint32_t>(0x63825363);
+        *((uint32_t*)&result[0]) = Endian::host_to_be<uint32_t>(0x63825363);
         for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
             *(ptr++) = it->option;
             *(ptr++) = it->value.size();
@@ -256,7 +255,7 @@ bool DHCP::generic_search(Options opt, std::string *str) {
 
 bool DHCP::generic_search(Options opt, uint32_t *value) {
     if(generic_search<uint32_t>(opt, value)) {
-        *value = Utils::host_to_be(*value);
+        *value = Endian::host_to_be(*value);
         return true;
     }
     return false;
@@ -265,7 +264,7 @@ bool DHCP::generic_search(Options opt, uint32_t *value) {
 bool DHCP::generic_search(Options opt, ipaddress_type *value) {
     uint32_t ip_int;
     if(generic_search(opt, &ip_int)) {
-        *value = IPv4Address(Utils::host_to_be(ip_int));
+        *value = IPv4Address(Endian::host_to_be(ip_int));
         return true;
     }
     return false;

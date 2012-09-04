@@ -34,7 +34,6 @@
 #include "rawpdu.h"
 #include "radiotap.h"
 #include "sniffer.h"
-#include "utils.h"
 #include "rsn_information.h"
 #include "snap.h"
 
@@ -146,7 +145,7 @@ void Dot11::order(small_uint<1> new_value) {
 }
 
 void Dot11::duration_id(uint16_t new_duration_id) {
-    this->_header.duration_id = Utils::host_to_le(new_duration_id);
+    this->_header.duration_id = Endian::host_to_le(new_duration_id);
 }
 
 void Dot11::addr1(const address_type &new_addr1) {
@@ -167,8 +166,8 @@ bool Dot11::send(PacketSender* sender) {
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Utils::host_to_be<uint16_t>(PF_PACKET);
-    addr.sll_protocol = Utils::host_to_be<uint16_t>(ETH_P_ALL);
+    addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
+    addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
     addr.sll_halen = 6;
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _header.addr1, 6);
@@ -316,7 +315,7 @@ void Dot11ManagementFrame::frag_num(uint8_t new_frag_num) {
 }
 
 void Dot11ManagementFrame::seq_num(uint16_t new_seq_num) {
-    this->_ext_header.seq_control.seq_number = Utils::host_to_le(new_seq_num);
+    this->_ext_header.seq_control.seq_number = Endian::host_to_le(new_seq_num);
 }
 
 void Dot11ManagementFrame::addr4(const address_type &new_addr4) {
@@ -402,10 +401,10 @@ void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, ui
     buffer[0] = 0;
     buffer[1] = 0;
     uint32_t* ptr = (uint32_t*)(buffer + 2);
-    *(ptr++) = Utils::host_to_le(ac_be);
-    *(ptr++) = Utils::host_to_le(ac_bk);
-    *(ptr++) = Utils::host_to_le(ac_vi);
-    *(ptr++) = Utils::host_to_le(ac_vo);
+    *(ptr++) = Endian::host_to_le(ac_be);
+    *(ptr++) = Endian::host_to_le(ac_bk);
+    *(ptr++) = Endian::host_to_le(ac_vi);
+    *(ptr++) = Endian::host_to_le(ac_vo);
     add_tagged_option(EDCA, sizeof(buffer), buffer);
 }
 
@@ -418,7 +417,7 @@ void Dot11ManagementFrame::request_information(const request_info_type elements)
 }
 
 void Dot11ManagementFrame::fh_parameter_set(fh_params_set fh_params) {
-    fh_params.dwell_time = Utils::host_to_le(fh_params.dwell_time);
+    fh_params.dwell_time = Endian::host_to_le(fh_params.dwell_time);
     fh_params.hop_set = fh_params.hop_set;
     fh_params.hop_pattern = fh_params.hop_pattern;
     fh_params.hop_index = fh_params.hop_index;
@@ -433,13 +432,13 @@ void Dot11ManagementFrame::ds_parameter_set(uint8_t current_channel) {
 void Dot11ManagementFrame::cf_parameter_set(cf_params_set params) {
     params.cfp_count = params.cfp_count;
     params.cfp_period = params.cfp_period;
-    params.cfp_max_duration = Utils::host_to_le(params.cfp_max_duration);
-    params.cfp_dur_remaining = Utils::host_to_le(params.cfp_dur_remaining);
+    params.cfp_max_duration = Endian::host_to_le(params.cfp_max_duration);
+    params.cfp_dur_remaining = Endian::host_to_le(params.cfp_dur_remaining);
     add_tagged_option(CF_SET, sizeof(params), (uint8_t*)&params);
 }
 
 void Dot11ManagementFrame::ibss_parameter_set(uint16_t atim_window) {
-    atim_window = Utils::host_to_le(atim_window);
+    atim_window = Endian::host_to_le(atim_window);
     add_tagged_option(IBSS_SET, 2, (uint8_t*)&atim_window);
 }
 
@@ -519,8 +518,8 @@ void Dot11ManagementFrame::quiet(const quiet_type &data) {
 
     buffer[0] = data.quiet_count;
     buffer[1] = data.quiet_period;
-    ptr_buffer[0] = Utils::host_to_le(data.quiet_duration);
-    ptr_buffer[1] = Utils::host_to_le(data.quiet_offset);
+    ptr_buffer[0] = Endian::host_to_le(data.quiet_duration);
+    ptr_buffer[1] = Endian::host_to_le(data.quiet_offset);
     add_tagged_option(QUIET, sizeof(buffer), buffer);
 
 }
@@ -540,9 +539,9 @@ void Dot11ManagementFrame::erp_information(uint8_t value) {
 void Dot11ManagementFrame::bss_load(const bss_load_type &data) {
     uint8_t buffer[5];
 
-    *(uint16_t*)buffer = Utils::host_to_le(data.station_count);
+    *(uint16_t*)buffer = Endian::host_to_le(data.station_count);
     buffer[2] = data.channel_utilization;
-    *(uint16_t*)(buffer + 3) = Utils::host_to_le(data.available_capacity);
+    *(uint16_t*)(buffer + 3) = Endian::host_to_le(data.available_capacity);
     add_tagged_option(BSS_LOAD, sizeof(buffer), buffer);
 }
 
@@ -640,7 +639,7 @@ Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() con
     if(!option || option->data_size() != sizeof(fh_params_set))
         throw std::runtime_error("FH parameters set not set");
     fh_params_set output = *reinterpret_cast<const fh_params_set*>(option->data_ptr());
-    output.dwell_time = Utils::le_to_host(output.dwell_time);
+    output.dwell_time = Endian::le_to_host(output.dwell_time);
     output.hop_set = output.hop_set;
     output.hop_pattern = output.hop_pattern;
     output.hop_index = output.hop_index;
@@ -658,7 +657,7 @@ uint16_t Dot11ManagementFrame::ibss_parameter_set() const {
     const Dot11::Dot11Option *option = search_option(IBSS_SET);
     if(!option || option->data_size() != sizeof(uint16_t))
         throw std::runtime_error("IBSS parameters set not set");
-    return Utils::le_to_host(*reinterpret_cast<const uint16_t*>(option->data_ptr()));
+    return Endian::le_to_host(*reinterpret_cast<const uint16_t*>(option->data_ptr()));
 }
 
 Dot11ManagementFrame::ibss_dfs_params Dot11ManagementFrame::ibss_dfs() const {
@@ -751,8 +750,8 @@ Dot11ManagementFrame::quiet_type Dot11ManagementFrame::quiet() const {
     output.quiet_count = *(ptr++);
     output.quiet_period = *(ptr++);
     const uint16_t *ptr_16 = (const uint16_t*)ptr;
-    output.quiet_duration = Utils::le_to_host(*(ptr_16++));
-    output.quiet_offset = Utils::le_to_host(*ptr_16);
+    output.quiet_duration = Endian::le_to_host(*(ptr_16++));
+    output.quiet_offset = Endian::le_to_host(*ptr_16);
     return output;
 }
 
@@ -779,9 +778,9 @@ Dot11ManagementFrame::bss_load_type Dot11ManagementFrame::bss_load() const {
     bss_load_type output;
     
     const uint8_t *ptr = option->data_ptr();
-    output.station_count = Utils::le_to_host(*(uint16_t*)ptr);
+    output.station_count = Endian::le_to_host(*(uint16_t*)ptr);
     output.channel_utilization = ptr[2];
-    output.available_capacity = Utils::le_to_host(*(uint16_t*)(ptr + 3));
+    output.available_capacity = Endian::le_to_host(*(uint16_t*)(ptr + 3));
     return output;
 }
 
@@ -832,11 +831,11 @@ Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot11Beacon::timestamp(uint64_t new_timestamp) {
-    this->_body.timestamp = Utils::host_to_le(new_timestamp);
+    this->_body.timestamp = Endian::host_to_le(new_timestamp);
 }
 
 void Dot11Beacon::interval(uint16_t new_interval) {
-    this->_body.interval = Utils::host_to_le(new_interval);
+    this->_body.interval = Endian::host_to_le(new_interval);
 }
 
 uint32_t Dot11Beacon::header_size() const {
@@ -873,7 +872,7 @@ Dot11Disassoc::Dot11Disassoc(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot11Disassoc::reason_code(uint16_t new_reason_code) {
-    this->_body.reason_code = Utils::host_to_le(new_reason_code);
+    this->_body.reason_code = Endian::host_to_le(new_reason_code);
 }
 
 uint32_t Dot11Disassoc::header_size() const {
@@ -910,7 +909,7 @@ Dot11AssocRequest::Dot11AssocRequest(const uint8_t *buffer, uint32_t total_sz) :
 }
 
 void Dot11AssocRequest::listen_interval(uint16_t new_listen_interval) {
-    this->_body.listen_interval = Utils::host_to_le(new_listen_interval);
+    this->_body.listen_interval = Endian::host_to_le(new_listen_interval);
 }
 
 uint32_t Dot11AssocRequest::header_size() const {
@@ -949,11 +948,11 @@ Dot11AssocResponse::Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot11AssocResponse::status_code(uint16_t new_status_code) {
-    this->_body.status_code = Utils::host_to_le(new_status_code);
+    this->_body.status_code = Endian::host_to_le(new_status_code);
 }
 
 void Dot11AssocResponse::aid(uint16_t new_aid) {
-    this->_body.aid = Utils::host_to_le(new_aid);
+    this->_body.aid = Endian::host_to_le(new_aid);
 }
 
 uint32_t Dot11AssocResponse::header_size() const {
@@ -992,7 +991,7 @@ Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_s
 }
 
 void Dot11ReAssocRequest::listen_interval(uint16_t new_listen_interval) {
-    this->_body.listen_interval = Utils::host_to_le(new_listen_interval);
+    this->_body.listen_interval = Endian::host_to_le(new_listen_interval);
 }
 
 void Dot11ReAssocRequest::current_ap(const address_type &new_current_ap) {
@@ -1034,11 +1033,11 @@ Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total
 }
 
 void Dot11ReAssocResponse::status_code(uint16_t new_status_code) {
-    this->_body.status_code = Utils::host_to_le(new_status_code);
+    this->_body.status_code = Endian::host_to_le(new_status_code);
 }
 
 void Dot11ReAssocResponse::aid(uint16_t new_aid) {
-    this->_body.aid = Utils::host_to_le(new_aid);
+    this->_body.aid = Endian::host_to_le(new_aid);
 }
 
 uint32_t Dot11ReAssocResponse::header_size() const {
@@ -1078,15 +1077,15 @@ Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_s
 }
 
 void Dot11Authentication::auth_algorithm(uint16_t new_auth_algorithm) {
-    this->_body.auth_algorithm = Utils::host_to_le(new_auth_algorithm);
+    this->_body.auth_algorithm = Endian::host_to_le(new_auth_algorithm);
 }
 
 void Dot11Authentication::auth_seq_number(uint16_t new_auth_seq_number) {
-    this->_body.auth_seq_number = Utils::host_to_le(new_auth_seq_number);
+    this->_body.auth_seq_number = Endian::host_to_le(new_auth_seq_number);
 }
 
 void Dot11Authentication::status_code(uint16_t new_status_code) {
-    this->_body.status_code = Utils::host_to_le(new_status_code);
+    this->_body.status_code = Endian::host_to_le(new_status_code);
 }
 
 uint32_t Dot11Authentication::header_size() const {
@@ -1124,7 +1123,7 @@ Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t tot
 }
 
 void Dot11Deauthentication::reason_code(uint16_t new_reason_code) {
-    this->_body.reason_code = Utils::host_to_le(new_reason_code);
+    this->_body.reason_code = Endian::host_to_le(new_reason_code);
 }
 
 uint32_t Dot11Deauthentication::header_size() const {
@@ -1181,11 +1180,11 @@ Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot11ProbeResponse::timestamp(uint64_t new_timestamp) {
-    this->_body.timestamp = Utils::host_to_le(new_timestamp);
+    this->_body.timestamp = Endian::host_to_le(new_timestamp);
 }
 
 void Dot11ProbeResponse::interval(uint16_t new_interval) {
-    this->_body.interval = Utils::host_to_le(new_interval);
+    this->_body.interval = Endian::host_to_le(new_interval);
 }
 
 uint32_t Dot11ProbeResponse::header_size() const {
@@ -1253,7 +1252,7 @@ void Dot11Data::frag_num(uint8_t new_frag_num) {
 }
 
 void Dot11Data::seq_num(uint16_t new_seq_num) {
-    _ext_header.seq_control.seq_number = Utils::host_to_le(new_seq_num);
+    _ext_header.seq_control.seq_number = Endian::host_to_le(new_seq_num);
 }
 
 void Dot11Data::addr4(const address_type &new_addr4) {
@@ -1300,7 +1299,7 @@ Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot11QoSData::qos_control(uint16_t new_qos_control) {
-    this->_qos_control = Utils::host_to_le(new_qos_control);
+    this->_qos_control = Endian::host_to_le(new_qos_control);
 }
 
 uint32_t Dot11QoSData::header_size() const {
@@ -1467,12 +1466,12 @@ uint32_t Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t total_
 
 void Dot11BlockAckRequest::bar_control(uint16_t bar) {
     //std::memcpy(&_bar_control, &bar, sizeof(bar));
-    _bar_control.tid = Utils::host_to_le(bar);
+    _bar_control.tid = Endian::host_to_le(bar);
 }
 
 void Dot11BlockAckRequest::start_sequence(uint16_t seq) {
     //std::memcpy(&_start_sequence, &seq, sizeof(seq));
-    _start_sequence.seq = Utils::host_to_le(seq);
+    _start_sequence.seq = Endian::host_to_le(seq);
 }
 
 void Dot11BlockAckRequest::fragment_number(uint8_t frag) {

@@ -27,7 +27,6 @@
 #include "ip.h"
 #include "ethernetII.h"
 #include "rawpdu.h"
-#include "utils.h"
 #include "constants.h"
 
 
@@ -52,7 +51,7 @@ ARP::ARP(ipaddress_type target_ip, ipaddress_type sender_ip,
 }
 
 ARP::ARP(const uint8_t *buffer, uint32_t total_sz) 
-: PDU(Utils::host_to_be<uint16_t>(Constants::Ethernet::ARP)) 
+: PDU(Endian::host_to_be<uint16_t>(Constants::Ethernet::ARP)) 
 {
     if(total_sz < sizeof(arphdr))
         throw runtime_error("Not enough size for an ARP header in the buffer.");
@@ -79,11 +78,11 @@ void ARP::target_ip_addr(ipaddress_type new_tgt_ip_addr) {
 }
 
 void ARP::hw_addr_format(uint16_t new_hw_addr_fmt) {
-    this->_arp.ar_hrd = Utils::host_to_be(new_hw_addr_fmt);
+    this->_arp.ar_hrd = Endian::host_to_be(new_hw_addr_fmt);
 }
 
 void ARP::prot_addr_format(uint16_t new_prot_addr_fmt) {
-    this->_arp.ar_pro = Utils::host_to_be(new_prot_addr_fmt);
+    this->_arp.ar_pro = Endian::host_to_be(new_prot_addr_fmt);
 }
 
 void ARP::hw_addr_length(uint8_t new_hw_addr_len) {
@@ -95,7 +94,7 @@ void ARP::prot_addr_length(uint8_t new_prot_addr_len) {
 }
 
 void ARP::opcode(Flags new_opcode) {
-    this->_arp.ar_op = Utils::host_to_be<uint16_t>(new_opcode);
+    this->_arp.ar_op = Endian::host_to_be<uint16_t>(new_opcode);
 }
 
 uint32_t ARP::header_size() const {

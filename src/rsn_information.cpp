@@ -19,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
+#include <stdexcept>
 #include "rsn_information.h"
 
 namespace Tins {
@@ -29,7 +29,7 @@ RSNInformation::RSNInformation() : _version(1), _capabilities(0) {
 
 RSNInformation::RSNInformation(const uint8_t *buffer, uint32_t total_sz) {
     const char *err_msg = "Malformed RSN information structure";
-    version(Utils::le_to_host(*(uint16_t*)buffer));
+    version(Endian::le_to_host(*(uint16_t*)buffer));
     buffer += sizeof(uint16_t);
     group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
     buffer += sizeof(uint32_t);
@@ -60,7 +60,7 @@ RSNInformation::RSNInformation(const uint8_t *buffer, uint32_t total_sz) {
     }
     if(total_sz < sizeof(uint16_t))
         throw std::runtime_error(err_msg);
-    capabilities(Utils::le_to_host(*(uint16_t*)buffer));
+    capabilities(Endian::le_to_host(*(uint16_t*)buffer));
 }
 
 void RSNInformation::add_pairwise_cypher(CypherSuites cypher) {
@@ -76,11 +76,11 @@ void RSNInformation::group_suite(CypherSuites group) {
 }
 
 void RSNInformation::version(uint16_t ver) {
-    _version = Utils::host_to_le(ver);
+    _version = Endian::host_to_le(ver);
 }
 
 void RSNInformation::capabilities(uint16_t cap) {
-    _capabilities = Utils::host_to_le(cap);
+    _capabilities = Endian::host_to_le(cap);
 }
 
 RSNInformation::serialization_type RSNInformation::serialize() const {

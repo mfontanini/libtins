@@ -20,14 +20,15 @@
  */
 
 #include <stdexcept>
+#include <sstream>
 #include "ipaddress.h"
-#include "utils.h"
+#include "endianness.h"
 
 using std::string;
 
 namespace Tins{
 IPv4Address::IPv4Address(uint32_t ip) 
-: ip_addr(Utils::be_to_host(ip)) {
+: ip_addr(Endian::be_to_host(ip)) {
     
 }
 
@@ -41,7 +42,7 @@ IPv4Address::IPv4Address(const std::string &ip)
 } 
 
 IPv4Address::operator uint32_t() const { 
-    return Utils::host_to_be(ip_addr); 
+    return Endian::host_to_be(ip_addr); 
 }
 
 std::string IPv4Address::to_string() const {

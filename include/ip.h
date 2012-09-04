@@ -31,7 +31,7 @@
 #include "pdu.h"
 #include "small_uint.h"
 #include "ipaddress.h"
-#include "utils.h"
+#include "endianness.h"
 
 namespace Tins {
 
@@ -174,21 +174,21 @@ namespace Tins {
          *
          * \return The total length of this IP PDU.
          */
-        uint16_t tot_len() const { return Utils::be_to_host(_ip.tot_len); }
+        uint16_t tot_len() const { return Endian::be_to_host(_ip.tot_len); }
 
         /**
          * \brief Getter for the id field.
          *
          * \return The id for this IP PDU.
          */
-        uint16_t id() const { return Utils::be_to_host(_ip.id); }
+        uint16_t id() const { return Endian::be_to_host(_ip.id); }
 
         /**
          * \brief Getter for the fragment offset field.
          *
          * \return The fragment offset for this IP PDU.
          */
-        uint16_t frag_off() const { return Utils::be_to_host(_ip.frag_off); }
+        uint16_t frag_off() const { return Endian::be_to_host(_ip.frag_off); }
 
         /**
          * \brief Getter for the time to live field.
@@ -209,7 +209,7 @@ namespace Tins {
          *
          * \return The checksum for this IP PDU.
          */
-        uint16_t check() const { return Utils::be_to_host(_ip.check); }
+        uint16_t check() const { return Endian::be_to_host(_ip.check); }
 
         /**
          * \brief Getter for the source address field.

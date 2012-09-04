@@ -63,15 +63,15 @@ void BootP::hops(uint8_t new_hops) {
 }
 
 void BootP::xid(uint32_t new_xid) {
-    _bootp.xid = Utils::host_to_be(new_xid);
+    _bootp.xid = Endian::host_to_be(new_xid);
 }
 
 void BootP::secs(uint16_t new_secs) {
-    _bootp.secs = Utils::host_to_be(new_secs);
+    _bootp.secs = Endian::host_to_be(new_secs);
 }
 
 void BootP::padding(uint16_t new_padding) {
-    _bootp.padding = Utils::host_to_be(new_padding);
+    _bootp.padding = Endian::host_to_be(new_padding);
 }
 
 void BootP::ciaddr(ipaddress_type new_ciaddr) {

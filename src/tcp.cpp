@@ -89,31 +89,31 @@ TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void TCP::dport(uint16_t new_dport) {
-    _tcp.dport = Utils::host_to_be(new_dport);
+    _tcp.dport = Endian::host_to_be(new_dport);
 }
 
 void TCP::sport(uint16_t new_sport) {
-    _tcp.sport = Utils::host_to_be(new_sport);
+    _tcp.sport = Endian::host_to_be(new_sport);
 }
 
 void TCP::seq(uint32_t new_seq) {
-    _tcp.seq = Utils::host_to_be(new_seq);
+    _tcp.seq = Endian::host_to_be(new_seq);
 }
 
 void TCP::ack_seq(uint32_t new_ack_seq) {
-    _tcp.ack_seq = Utils::host_to_be(new_ack_seq);
+    _tcp.ack_seq = Endian::host_to_be(new_ack_seq);
 }
 
 void TCP::window(uint16_t new_window) {
-    _tcp.window = Utils::host_to_be(new_window);
+    _tcp.window = Endian::host_to_be(new_window);
 }
 
 void TCP::check(uint16_t new_check) {
-    _tcp.check = Utils::host_to_be(new_check);
+    _tcp.check = Endian::host_to_be(new_check);
 }
 
 void TCP::urg_ptr(uint16_t new_urg_ptr) {
-    _tcp.urg_ptr = Utils::host_to_be(new_urg_ptr);
+    _tcp.urg_ptr = Endian::host_to_be(new_urg_ptr);
 }
 
 void TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
@@ -125,14 +125,14 @@ void TCP::data_offset(small_uint<4> new_doff) {
 }
 
 void TCP::add_mss_option(uint16_t value) {
-    value = Utils::host_to_be(value);
+    value = Endian::host_to_be(value);
     add_option(MSS, 2, (uint8_t*)&value);
 }
 
 bool TCP::search_mss_option(uint16_t *value) {
     if(!generic_search(MSS, value))
         return false;
-    *value = Utils::host_to_be(*value);
+    *value = Endian::host_to_be(*value);
     return true;
 }
 
@@ -158,7 +158,7 @@ void TCP::add_sack_option(const std::list<uint32_t> &edges) {
         value = new uint32_t[edges.size()];
         uint32_t *ptr = value;
         for(std::list<uint32_t>::const_iterator it = edges.begin(); it != edges.end(); ++it)
-            *(ptr++) = Utils::host_to_be(*it);
+            *(ptr++) = Endian::host_to_be(*it);
     }
     add_option(SACK, (uint8_t)(sizeof(uint32_t) * edges.size()), (const uint8_t*)value);
     delete[] value;
@@ -171,13 +171,13 @@ bool TCP::search_sack_option(std::list<uint32_t> *edges) {
     const uint32_t *ptr = (const uint32_t*)&option->value[0];
     const uint32_t *end = ptr + (option->value.size() / sizeof(uint32_t));
     while(ptr < end)
-        edges->push_back(Utils::host_to_be(*(ptr++)));
+        edges->push_back(Endian::host_to_be(*(ptr++)));
     return true;
 }
 
 void TCP::add_timestamp_option(uint32_t value, uint32_t reply) {
     uint64_t buffer = (uint64_t(value) << 32) | reply;
-    buffer = Utils::host_to_be(buffer);
+    buffer = Endian::host_to_be(buffer);
     add_option(TSOPT, 8, (uint8_t*)&buffer);
 }
 
@@ -186,7 +186,7 @@ bool TCP::search_timestamp_option(uint32_t *value, uint32_t *reply) {
     if(!option || option->value.size() != (sizeof(uint32_t) << 1))
         return false;
     uint64_t buffer = *(const uint64_t*)&option->value[0];
-    buffer = Utils::be_to_host(buffer);
+    buffer = Endian::be_to_host(buffer);
     *value = (buffer >> 32) & 0xffffffff;
     *reply = buffer & 0xffffffff;
     return true;
@@ -308,7 +308,7 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
         
-        ((tcphdr*)tcp_start)->check = Utils::host_to_be<uint16_t>(~checksum);
+        ((tcphdr*)tcp_start)->check = Endian::host_to_be<uint16_t>(~checksum);
     }
     _tcp.check = 0;
 }

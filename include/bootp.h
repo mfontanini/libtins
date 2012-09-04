@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <vector>
 #include "pdu.h"
-#include "utils.h"
+#include "endianness.h"
 #include "ipaddress.h"
 #include "hwaddress.h"
 
@@ -114,18 +114,18 @@ namespace Tins {
          * \brief Getter for the xid field.
          * \return The xid field for this BootP PDU.
          */
-        uint32_t xid() const { return Utils::be_to_host(_bootp.xid); }
+        uint32_t xid() const { return Endian::be_to_host(_bootp.xid); }
 
         /** 
          * \brief Getter for the secs field.
          * \return The secs field for this BootP PDU.
          */
-        uint16_t secs() const { return Utils::be_to_host(_bootp.secs); }
+        uint16_t secs() const { return Endian::be_to_host(_bootp.secs); }
 
         /** \brief Getter for the padding field.
          * \return The padding field for this BootP PDU.
          */
-        uint16_t padding() const { return Utils::be_to_host(_bootp.padding); }
+        uint16_t padding() const { return Endian::be_to_host(_bootp.padding); }
 
         /** 
          * \brief Getter for the ciaddr field.

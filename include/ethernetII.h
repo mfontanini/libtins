@@ -26,7 +26,7 @@
 #include <stdexcept>
 
 #include "pdu.h"
-#include "utils.h"
+#include "endianness.h"
 #include "hwaddress.h"
 #include "network_interface.h"
 
@@ -109,7 +109,7 @@ namespace Tins {
          * \brief Getter for the payload_type
          * \return The payload type.
          */
-        uint16_t payload_type() const { return Utils::be_to_host(_eth.payload_type); };
+        uint16_t payload_type() const { return Endian::be_to_host(_eth.payload_type); };
 
         /* Setters */
 

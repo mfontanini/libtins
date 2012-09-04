@@ -66,23 +66,23 @@ void Tins::ICMP::type(Flags new_type) {
 }
 
 void Tins::ICMP::check(uint16_t new_check) {
-    _icmp.check = Utils::host_to_be(new_check);
+    _icmp.check = Endian::host_to_be(new_check);
 }
 
 void Tins::ICMP::id(uint16_t new_id) {
-    _icmp.un.echo.id = Utils::host_to_be(new_id);
+    _icmp.un.echo.id = Endian::host_to_be(new_id);
 }
 
 void Tins::ICMP::sequence(uint16_t new_seq) {
-    _icmp.un.echo.sequence = Utils::host_to_be(new_seq);
+    _icmp.un.echo.sequence = Endian::host_to_be(new_seq);
 }
 
 void Tins::ICMP::gateway(uint32_t new_gw) {
-    _icmp.un.gateway = Utils::host_to_be(new_gw);
+    _icmp.un.gateway = Endian::host_to_be(new_gw);
 }
 
 void Tins::ICMP::mtu(uint16_t new_mtu) {
-    _icmp.un.frag.mtu = Utils::host_to_be(new_mtu);
+    _icmp.un.frag.mtu = Endian::host_to_be(new_mtu);
 }
 
 void Tins::ICMP::pointer(uint8_t new_pointer) {
@@ -171,7 +171,7 @@ void Tins::ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
                             Utils::do_checksum((uint8_t*)&_icmp, ((uint8_t*)&_icmp) + sizeof(icmphdr));
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
-        _icmp.check = Utils::host_to_be<uint16_t>(~checksum);
+        _icmp.check = Endian::host_to_be<uint16_t>(~checksum);
     }
     memcpy(buffer, &_icmp, sizeof(icmphdr));
     _icmp.check = 0;

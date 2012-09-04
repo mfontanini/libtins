@@ -26,7 +26,7 @@
 #include <utility>
 #include <stdint.h>
 #include "pdu.h"
-#include "utils.h"
+#include "endianness.h"
 
 namespace Tins {
 

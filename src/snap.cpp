@@ -35,7 +35,7 @@
 Tins::SNAP::SNAP(PDU *child) : PDU(0xff, child) {
     std::memset(&_snap, 0, sizeof(_snap));
     _snap.dsap = _snap.ssap = 0xaa;
-    _snap.id = 3;
+    _snap.control = 3;
 }
 
 Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
@@ -44,43 +44,37 @@ Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
     std::memcpy(&_snap, buffer, sizeof(_snap));
     buffer += sizeof(_snap);
     total_sz -= sizeof(_snap);
-    switch(eth_type()) {
-        case Tins::Constants::Ethernet::IP:
-            inner_pdu(new Tins::IP(buffer, total_sz));
-            break;
-        case Tins::Constants::Ethernet::ARP:
-            inner_pdu(new Tins::ARP(buffer, total_sz));
-            break;
-        case Tins::Constants::Ethernet::EAPOL:
-            inner_pdu(Tins::EAPOL::from_bytes(buffer, total_sz));
-            break;
-    };
+    if(total_sz) {
+        switch(eth_type()) {
+            case Tins::Constants::Ethernet::IP:
+                inner_pdu(new Tins::IP(buffer, total_sz));
+                break;
+            case Tins::Constants::Ethernet::ARP:
+                inner_pdu(new Tins::ARP(buffer, total_sz));
+                break;
+            case Tins::Constants::Ethernet::EAPOL:
+                inner_pdu(Tins::EAPOL::from_bytes(buffer, total_sz));
+                break;
+        };
+    }
 }
 
-Tins::SNAP::SNAP(const SNAP &other) : PDU(other) {
-    copy_fields(&other);
+void Tins::SNAP::control(uint8_t new_control) {
+    _snap.control = new_control;
 }
 
-Tins::SNAP &Tins::SNAP::operator=(const SNAP &other) {
-    copy_fields(&other);
-    copy_inner_pdu(other);
-    return *this;
-}
-
-void Tins::SNAP::id(uint8_t new_id) {
-    _snap.id = new_id;
-}
-
-void Tins::SNAP::poll(uint8_t new_poll) {
-    _snap.poll = new_poll;
-}
-
-void Tins::SNAP::org_code(uint32_t new_org) {
-    _snap.org_code = new_org;
+void Tins::SNAP::org_code(small_uint<24> new_org) {
+    // little endian fix, it was the only way to make it work.
+    // check on big endian?
+    #ifdef TINS_IS_LITTLE_ENDIAN
+        _snap.org_code = Endian::host_to_be<uint32_t>(new_org) >> 8; 
+    #else
+        _snap.org_code = Endian::host_to_be<uint32_t>(new_org); 
+    #endif
 }
 
 void Tins::SNAP::eth_type(uint16_t new_eth) {
-    _snap.eth_type = Utils::host_to_be(new_eth);
+    _snap.eth_type = Endian::host_to_be(new_eth); 
 }
 
 uint32_t Tins::SNAP::header_size() const {
@@ -104,17 +98,7 @@ void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
             default:
                 type = 0;
         }
-        _snap.eth_type = Utils::host_to_be(type);
+        _snap.eth_type = Endian::host_to_be(type);
     }
     std::memcpy(buffer, &_snap, sizeof(_snap));
-}
-
-void Tins::SNAP::copy_fields(const SNAP *other) {
-    std::memcpy(&_snap, &other->_snap, sizeof(_snap));
-}
-
-Tins::PDU *Tins::SNAP::clone_pdu() const {
-    SNAP *new_pdu = new SNAP();
-    new_pdu->copy_fields(this);
-    return new_pdu;
 }

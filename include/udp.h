@@ -19,12 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef __UDP_H
-#define __UDP_H
+#ifndef TINS_UDP_H
+#define TINS_UDP_H
 
 
 #include "pdu.h"
-#include "utils.h"
+#include "endianness.h"
 
 namespace Tins {
 
@@ -63,19 +63,19 @@ namespace Tins {
          * \brief Getter for the destination port.
          * \return The datagram's destination port.
          */
-        uint16_t dport() const { return Utils::be_to_host(_udp.dport); }
+        uint16_t dport() const { return Endian::be_to_host(_udp.dport); }
 
         /** 
          * \brief Getter for the source port.
          * \return The datagram's source port.
          */
-        uint16_t sport() const { return Utils::be_to_host(_udp.sport); }
+        uint16_t sport() const { return Endian::be_to_host(_udp.sport); }
         
         /**
          * \brief Getter for the length of the datagram.
          * \return The length of the datagram.
          */
-        uint16_t length() const { return Utils::be_to_host(_udp.len); }
+        uint16_t length() const { return Endian::be_to_host(_udp.len); }
 
         /** 
          * \brief Set the destination port.
@@ -95,18 +95,6 @@ namespace Tins {
          */
         void length(uint16_t new_len);
 
-        /** \brief Set the payload.
-         *
-         * Payload is NOT copied. Therefore, pointers provided as
-         * payloads must be freed manually by the user. This actually
-         * creates a RawPDU that holds the payload, and sets it as the
-         * inner_pdu. Therefore, if an inner_pdu was set previously,
-         * a call to UDP::payload will delete it.
-         * \param new_payload New payload.
-         * \param new_payload_size New payload's size
-         */
-        void payload(uint8_t *new_payload, uint32_t new_payload_size);
-
         /** \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. This size includes the
@@ -124,7 +112,7 @@ namespace Tins {
          * \sa PDU::clone_pdu
          */
         PDU *clone_pdu() const {
-            return do_clone_pdu<UDP>();
+            return new UDP(*this);
         }
     private:
         struct udphdr {
@@ -141,4 +129,4 @@ namespace Tins {
     };
 };
 
-#endif
+#endif // TINS_UDP_H

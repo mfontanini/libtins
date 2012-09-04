@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <gtest/gtest.h>
 #include "utils.h"
+#include "endianness.h"
 #include "ipaddress.h"
 
 using namespace Tins;
@@ -62,33 +63,6 @@ TEST_F(UtilsTest, ResolveIp) {
 
     EXPECT_EQ(Utils::resolve_ip("localhost"), localhost_ip);
     EXPECT_THROW(Utils::resolve_ip("www.qwertyuiopasdfg.com.ar.edu.gov"), std::runtime_error);
-
-}
-
-TEST_F(UtilsTest, NetToHostS) {
-    uint16_t a = 0x01FE;
-    uint16_t b = Utils::net_to_host_s(a);
-
-    EXPECT_EQ(b, 0xFE01);
-    EXPECT_EQ(a, Utils::net_to_host_s(b));
-
-}
-
-TEST_F(UtilsTest, NetToHostL) {
-    uint32_t a = 0x0102CDFE;
-    uint32_t b = Utils::net_to_host_l(a);
-
-    EXPECT_EQ(b, 0xFECD0201);
-    EXPECT_EQ(a, Utils::net_to_host_l(b));
-
-}
-
-TEST_F(UtilsTest, NetToHostLL) {
-    uint64_t a = 0x0102030489ABCDFE;
-    uint64_t b = Utils::net_to_host_ll(a);
-
-    EXPECT_EQ(b, 0xFECDAB8904030201);
-    EXPECT_EQ(a, Utils::net_to_host_ll(b));
 
 }
 

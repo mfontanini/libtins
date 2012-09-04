@@ -37,7 +37,9 @@ Tins::RadioTap::RadioTap(const NetworkInterface &iface, PDU *child)
     init();
 }
 
-Tins::RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
+Tins::RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz) 
+: PDU(0xff) 
+{
     static const std::string msg("Not enough size for an RadioTap header in the buffer.");
     if(total_sz < sizeof(_radio))
         throw std::runtime_error(msg);
@@ -130,7 +132,7 @@ void Tins::RadioTap::length(uint8_t new_length) {
 }
 
 void Tins::RadioTap::tsft(uint64_t new_tsft) {
-    _tsft = new_tsft;
+    _tsft = Endian::host_to_le(new_tsft);
     if(!_radio.tsft)
         _options_size += sizeof(_tsft);
     _radio.tsft = 1;
@@ -151,8 +153,8 @@ void Tins::RadioTap::rate(uint8_t new_rate) {
 }
 
 void Tins::RadioTap::channel(uint16_t new_freq, uint16_t new_type) {
-    _channel_freq = new_freq;
-    _channel_type = new_type;
+    _channel_freq = Endian::host_to_le(new_freq);
+    _channel_type = Endian::host_to_le(new_type);
     if(!_radio.channel)
         _options_size += sizeof(_channel_freq) + sizeof(_channel_type);
     _radio.channel = 1;
@@ -172,7 +174,7 @@ void Tins::RadioTap::antenna(uint8_t new_antenna) {
 }
 
 void Tins::RadioTap::rx_flag(uint16_t new_rx_flag) {
-    _rx_flags = new_rx_flag;
+    _rx_flags = Endian::host_to_le(new_rx_flag);
     if(!_radio.rx_flags)
         _options_size += sizeof(_rx_flags);
     _radio.rx_flags = 1;
@@ -197,8 +199,8 @@ bool Tins::RadioTap::send(PacketSender* sender) {
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Utils::host_to_be<uint16_t>(PF_PACKET);
-    addr.sll_protocol = Utils::host_to_be<uint16_t>(ETH_P_ALL);
+    addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
+    addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
     addr.sll_halen = 6;
     addr.sll_ifindex = _iface.id();
     
@@ -206,7 +208,6 @@ bool Tins::RadioTap::send(PacketSender* sender) {
     if(wlan) {
         Dot11::address_type dot11_addr(wlan->addr1());
         std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);
-        //memcpy(&(addr.sll_addr), wlan->addr1(), 6);
     }
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));

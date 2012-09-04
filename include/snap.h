@@ -19,13 +19,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TINS_IEEE8022_H
-#define TINS_IEEE8022_H
+#ifndef TINS_SNAP_H
+#define TINS_SNAP_H
 
 
 #include <stdint.h>
 #include "pdu.h"
-#include "utils.h"
+#include "endianness.h"
+#include "small_uint.h"
 
 namespace Tins {
 
@@ -58,35 +59,19 @@ namespace Tins {
          */
         SNAP(const uint8_t *buffer, uint32_t total_sz);
         
-        /**
-         * \brief Copy constructor.
-         */
-        SNAP(const SNAP &other);
-        
-        /**
-         * \brief Copy assignment operator.
-         */
-        SNAP &operator= (const SNAP &other);
-        
         /* Setters */
         
         /**
-         * \brief Setter for the id field.
-         * \param new_id The new id to be set.
+         * \brief Setter for the control field.
+         * \param new_id The new control to be set.
          */
-        void id(uint8_t new_id);
-        
-        /**
-         * \brief Setter for the poll field.
-         * \param new_poll The new poll to be set.
-         */
-        void poll(uint8_t new_poll);
+        void control(uint8_t new_control);
         
         /**
          * \brief Setter for the org code field.
          * \param new_org The new org code to be set.
          */
-        void org_code(uint32_t new_org);
+        void org_code(small_uint<24> new_org);
         
         /**
          * \brief Setter for the eth type field.
@@ -109,28 +94,28 @@ namespace Tins {
         uint8_t ssap() const { return _snap.ssap; }
         
         /**
-         * \brief Getter for the id field.
-         * \return The id field.
+         * \brief Getter for the control field.
+         * \return The control field.
          */
-        uint8_t id() const { return _snap.id; }
-        
-        /**
-         * \brief Getter for the poll field.
-         * \return The poll field.
-         */
-        uint8_t poll() const { return _snap.poll; }
+        uint8_t control() const { return _snap.control; }
         
         /**
          * \brief Getter for the org code field.
          * \return The org code field.
-         */
-        uint32_t org_code() const { return _snap.org_code; }
+         */        
+        small_uint<24> org_code() const { 
+            #ifdef TINS_IS_LITTLE_ENDIAN
+                return Endian::be_to_host<uint32_t>(_snap.org_code << 8); 
+            #else
+                return Endian::be_to_host(_snap.org_code); 
+            #endif
+        }
         
         /**
          * \brief Getter for the eth type field.
          * \return The eth field.
          */
-        uint16_t eth_type() const { return Utils::be_to_host(_snap.eth_type); }
+        uint16_t eth_type() const { return Endian::be_to_host(_snap.eth_type); } 
         
         /**
          * \brief Returns the SNAP frame's header length.
@@ -151,28 +136,23 @@ namespace Tins {
          * 
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        SNAP *clone_pdu() const {
+            return new SNAP(*this);
+        }    
     private:
         struct snaphdr {
             uint8_t dsap;
             uint8_t ssap;
             #if TINS_IS_LITTLE_ENDIAN
-                uint32_t id:2,
-                    reserved1:2,
-                    poll:2,
-                    reserved2:2,
-                    org_code:24;
+                uint32_t control:8,
+                        org_code:24;
             #elif TINS_IS_BIG_ENDIAN
-                uint32_t reserved1:2,
-                    poll:2,
-                    reserved2:2,
-                    id:2,
-                    org_code:24;
+                uint32_t org_code:24,
+                        control:8;
             #endif
             uint16_t eth_type;
         } __attribute__((__packed__));
         
-        void copy_fields(const SNAP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         snaphdr _snap;
@@ -180,4 +160,4 @@ namespace Tins {
     
 };
 
-#endif // TINS_IEEE8022_H
+#endif // TINS_SNAP_H

@@ -31,7 +31,6 @@
 #include "rawpdu.h"
 #include "ip.h"
 #include "arp.h"
-#include "utils.h"
 
 namespace Tins {
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
@@ -88,7 +87,7 @@ void EthernetII::iface(const NetworkInterface& new_iface) {
 }
 
 void EthernetII::payload_type(uint16_t new_payload_type) {
-    this->_eth.payload_type = Utils::host_to_be(new_payload_type);
+    this->_eth.payload_type = Endian::host_to_be(new_payload_type);
 }
 
 uint32_t EthernetII::header_size() const {
@@ -102,8 +101,8 @@ bool EthernetII::send(PacketSender* sender) {
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Utils::host_to_be<uint16_t>(PF_PACKET);
-    addr.sll_protocol = Utils::host_to_be<uint16_t>(ETH_P_ALL);
+    addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
+    addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
     addr.sll_halen = ADDR_SIZE;
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, ADDR_SIZE);
@@ -139,7 +138,7 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
             default:
                 type = 0;
         }
-        _eth.payload_type = Utils::host_to_be(type);
+        _eth.payload_type = Endian::host_to_be(type);
     }
     memcpy(buffer, &_eth, sizeof(ethhdr));
 }
@@ -148,8 +147,8 @@ PDU *EthernetII::recv_response(PacketSender *sender) {
     struct sockaddr_ll addr;
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Utils::host_to_be<uint16_t>(PF_PACKET);
-    addr.sll_protocol = Utils::host_to_be<uint16_t>(ETH_P_ALL);
+    addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
+    addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
     addr.sll_halen = ADDR_SIZE;
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, ADDR_SIZE);

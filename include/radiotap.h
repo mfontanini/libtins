@@ -24,6 +24,7 @@
 
 #include <stdexcept>
 #include "pdu.h"
+#include "endianness.h"
 #include "network_interface.h"
 
 namespace Tins {
@@ -185,67 +186,67 @@ namespace Tins {
          * \brief Getter for the version field.
          * \return The version field.
          */
-        inline uint8_t version() const { return _radio.it_version; }
+        uint8_t version() const { return _radio.it_version; }
     
         /**
          * \brief Getter for the padding field.
          * \return The padding field.
          */
-        inline uint8_t padding() const { return _radio.it_pad; }
+        uint8_t padding() const { return _radio.it_pad; }
         
         /**
          * \brief Getter for the length field.
          * \return The length field.
          */
-        inline uint8_t length() const { return _radio.it_len; }
+        uint8_t length() const { return _radio.it_len; }
         
         /**
          * \brief Getter for the tsft field.
          * \return The tsft field.
          */
-        inline uint64_t tsft() const { return _tsft; }
+        uint64_t tsft() const { return Endian::le_to_host(_tsft); }
         
         /**
          * \brief Getter for the flags field.
          * \return The flags field.
          */
-        inline FrameFlags flags() const { return (FrameFlags)_flags; }
+        FrameFlags flags() const { return (FrameFlags)_flags; }
         
         /**
          * \brief Getter for the rate field.
          * \return The rate field.
          */
-        inline uint8_t rate() const { return _rate; }
+        uint8_t rate() const { return _rate; }
         
         /**
          * \brief Getter for the channel frequency field.
          * \return The channel frequency field.
          */
-        inline uint16_t channel_freq() const { return _channel_freq; }
+        uint16_t channel_freq() const { return Endian::le_to_host(_channel_freq); }
         
         /**
          * \brief Getter for the channel type field.
          * \return The channel type field.
          */
-        inline uint16_t channel_type() const { return _channel_type; }
+        uint16_t channel_type() const { return Endian::le_to_host(_channel_type); }
         
         /**
          * \brief Getter for the dbm signal field.
          * \return The dbm signal field.
          */
-        inline uint8_t dbm_signal() const { return _dbm_signal; }
+        uint8_t dbm_signal() const { return _dbm_signal; }
         
         /**
          * \brief Getter for the antenna field.
          * \return The antenna field.
          */
-        inline uint8_t antenna() const { return _antenna; }
+        uint8_t antenna() const { return _antenna; }
         
         /**
          * \brief Getter for the rx flags field.
          * \return The rx flags field.
          */
-        inline uint16_t rx_flags() const { return _rx_flags; }
+        uint16_t rx_flags() const { return Endian::le_to_host(_rx_flags); }
         
         /**
          * \brief Getter for the present bit fields.

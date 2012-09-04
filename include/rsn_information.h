@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 #include <vector>
-#include "utils.h"
+#include "endianness.h"
 
 namespace Tins{
     /**
@@ -72,6 +72,12 @@ namespace Tins{
          */
         RSNInformation();
         
+        /**
+         * \brief Constructor from buffer.
+         * 
+         * \param buffer The buffer from which this object will be constructed.
+         * \param total_sz The total size of the buffer.
+         */
         RSNInformation(const uint8_t *buffer, uint32_t total_sz);
 
         /**
@@ -123,13 +129,13 @@ namespace Tins{
          * \brief Getter for the version field.
          * \return The version field.
          */
-        uint16_t version() const { return Utils::le_to_host(_version); }
+        uint16_t version() const { return Endian::le_to_host(_version); }
         
         /**
          * \brief Getter for the capabilities field.
          * \return The version field.
          */
-        uint16_t capabilities() const { return Utils::le_to_host(_capabilities); }
+        uint16_t capabilities() const { return Endian::le_to_host(_capabilities); }
 
         /**
          * \brief Getter for the pairwise cypher suite list.

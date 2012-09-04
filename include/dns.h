@@ -29,7 +29,8 @@
 #include <string>
 #include <map>
 #include "pdu.h"
-#include "utils.h"
+#include "endianness.h"
+#include "ipaddress.h"
 
 namespace Tins {
     class DNS : public PDU {
@@ -175,7 +176,7 @@ namespace Tins {
          * 
          * \return uint16_t containing the value of the id field.
          */
-        uint16_t id() const { return Utils::be_to_host(dns.id); }
+        uint16_t id() const { return Endian::be_to_host(dns.id); }
         
         /**
          * \brief Setter for the query response field.
@@ -258,28 +259,28 @@ namespace Tins {
          * 
          * \return uint16_t containing the value of the questions field.
          */
-        uint16_t questions() const { return Utils::be_to_host(dns.questions); }
+        uint16_t questions() const { return Endian::be_to_host(dns.questions); }
         
         /**
          * \brief Setter for the answers field.
          * 
          * \return uint16_t containing the value of the answers field.
          */
-        uint16_t answers() const { return Utils::be_to_host(dns.answers); }
+        uint16_t answers() const { return Endian::be_to_host(dns.answers); }
         
         /**
          * \brief Setter for the authority field.
          * 
          * \return uint16_t containing the value of the authority field.
          */
-        uint16_t authority() const { return Utils::be_to_host(dns.authority); }
+        uint16_t authority() const { return Endian::be_to_host(dns.authority); }
         
         /**
          * \brief Setter for the additional field.
          * 
          * \return uint16_t containing the value of the additional field.
          */
-        uint16_t additional() const { return Utils::be_to_host(dns.additional); }
+        uint16_t additional() const { return Endian::be_to_host(dns.additional); }
 
         /**
          * \brief Getter for the PDU's type.

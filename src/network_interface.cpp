@@ -28,6 +28,7 @@
 #endif
 #include "network_interface.h"
 #include "utils.h"
+#include "endianness.h"
 
 /** \cond */
 struct InterfaceInfoCollector {
@@ -41,7 +42,7 @@ struct InterfaceInfoCollector {
     : info(res), iface_id(id), iface_name(if_name), found(false) { }
 
     bool operator() (struct ifaddrs *addr) {
-        using Tins::Utils::host_to_be;
+        using Tins::Endian::host_to_be;
         using Tins::IPv4Address;
         const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
         

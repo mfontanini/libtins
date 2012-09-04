@@ -146,15 +146,15 @@ void IP::tos(uint8_t new_tos) {
 }
 
 void IP::tot_len(uint16_t new_tot_len) {
-    _ip.tot_len = Utils::host_to_be(new_tot_len);
+    _ip.tot_len = Endian::host_to_be(new_tot_len);
 }
 
 void IP::id(uint16_t new_id) {
-    _ip.id = Utils::host_to_be(new_id);
+    _ip.id = Endian::host_to_be(new_id);
 }
 
 void IP::frag_off(uint16_t new_frag_off) {
-    _ip.frag_off = Utils::host_to_be(new_frag_off);
+    _ip.frag_off = Endian::host_to_be(new_frag_off);
 }
 
 void IP::ttl(uint8_t new_ttl) {
@@ -166,7 +166,7 @@ void IP::protocol(uint8_t new_protocol) {
 }
 
 void IP::check(uint16_t new_check) {
-    _ip.check = Utils::host_to_be(new_check);
+    _ip.check = Endian::host_to_be(new_check);
 }
 
 
@@ -305,7 +305,7 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
         uint32_t checksum = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
-        ((iphdr*)buffer)->check = Utils::host_to_be<uint16_t>(~checksum);
+        ((iphdr*)buffer)->check = Endian::host_to_be<uint16_t>(~checksum);
         this->check(0);
     }
 }
@@ -333,7 +333,7 @@ PDU *IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
         if((child = PDU::clone_inner_pdu(ptr + sizeof(_ip), total_sz - sizeof(_ip))) == 0)
             return 0;
     }
-    cloned = new IP(ptr, std::min(total_sz, (uint32_t)(Utils::be_to_host(ip_ptr->tot_len) * sizeof(uint32_t))));
+    cloned = new IP(ptr, std::min(total_sz, (uint32_t)(Endian::be_to_host(ip_ptr->tot_len) * sizeof(uint32_t))));
     cloned->inner_pdu(child);
     return cloned;
 }

@@ -27,7 +27,6 @@
 
 #include "pdu.h"
 #include "llc.h"
-#include "utils.h"
 #include "rawpdu.h"
 
 using std::list;
