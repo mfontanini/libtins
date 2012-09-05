@@ -26,6 +26,7 @@
 
 #include <pcap.h>
 #include <string>
+#include <memory>
 #include <stdexcept>
 #include "pdu.h"
 #include "ethernetII.h"
@@ -138,14 +139,13 @@ namespace Tins {
     template<class Functor>
     void Tins::Sniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
         try {
-            PDU *pdu = 0;
+            std::auto_ptr<PDU> pdu;
             LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
             if(data->wired)
-                pdu = new Tins::EthernetII((const uint8_t*)packet, header->caplen);
+                pdu.reset(new Tins::EthernetII((const uint8_t*)packet, header->caplen));
             else
-                pdu = new Tins::RadioTap((const uint8_t*)packet, header->caplen);
-            bool ret_val = data->c_handler(pdu);
-            delete pdu;
+                pdu.reset(new Tins::RadioTap((const uint8_t*)packet, header->caplen));
+            bool ret_val = data->c_handler(pdu.get());
             if(!ret_val)
                 pcap_breakloop(data->handle);
         }

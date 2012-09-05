@@ -23,7 +23,6 @@
 #define TINS_ETHERNET_II_H
 
 #include <stdint.h>
-#include <stdexcept>
 
 #include "pdu.h"
 #include "endianness.h"
@@ -41,11 +40,6 @@ namespace Tins {
          * \brief The hardware address type.
          */
         typedef HWAddress<6> address_type;
-        
-        /**
-         * \brief The hardware address size.
-         */
-        static const size_t ADDR_SIZE;
         
         /**
          * \brief This PDU's flag.
@@ -189,8 +183,8 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<EthernetII>();
+        EthernetII *clone_pdu() const {
+            return new EthernetII(*this);
         }
     private:
         /**

@@ -22,15 +22,12 @@
 #include <stdexcept>
 #include <cstring>
 #include <cassert>
-#include <list>
-#include <utility>
 
 #include "pdu.h"
 #include "llc.h"
 #include "rawpdu.h"
 
 using std::list;
-using std::pair;
 
 namespace Tins {
 const uint8_t LLC::GLOBAL_DSAP_ADDR = 0xFF;
@@ -79,16 +76,6 @@ LLC::LLC(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
 	}
     if(total_sz > 0)
         inner_pdu(new Tins::RawPDU(buffer, total_sz));
-}
-
-LLC::LLC(const LLC &other): PDU(other) {
-    copy_fields(&other);
-}
-
-LLC &LLC::operator= (const LLC &other) {
-    copy_fields(&other);
-    copy_inner_pdu(other);
-    return *this;
 }
 
 void LLC::group(bool value) {
@@ -183,17 +170,12 @@ void LLC::modifier_function(LLC::ModifierFunctions mod_func) {
 }
 
 void LLC::add_xid_information(uint8_t xid_id, uint8_t llc_type_class, uint8_t receive_window) {
-	uint8_t* XID = new uint8_t[3];
-	XID[0] = 0;
-	XID[0] = xid_id;
-	XID[1] = 0;
-	XID[1] = llc_type_class;
-	XID[2] = 0;
-	XID[2] = receive_window & 0x7F;
-
-	information_field_length += 3;
-	information_fields.push_back(std::pair<uint8_t, uint8_t*>(3, XID));
-
+    field_type xid(3);
+    xid[0] = xid_id;
+    xid[1] = llc_type_class;
+    xid[2] = receive_window;
+	information_field_length += xid.size();
+    information_fields.push_back(xid);
 }
 
 uint32_t LLC::header_size() const {
@@ -203,24 +185,6 @@ uint32_t LLC::header_size() const {
 void LLC::clear_information_fields() {
 	information_field_length = 0;
 	information_fields.clear();
-}
-
-Tins::PDU *LLC::clone_pdu() const {
-	LLC *new_pdu = new LLC();
-	new_pdu->copy_fields(this);
-	return new_pdu;
-}
-
-void LLC::copy_fields(const LLC *other) {
-	std::memcpy(&_header, &other->_header, sizeof(_header));
-	control_field_length = other->control_field_length;
-	control_field = other->control_field;
-	information_field_length = other->information_field_length;
-	for (list<pair<uint8_t, uint8_t*> >::const_iterator it = other->information_fields.begin(); it != other->information_fields.end(); it++) {
-		uint8_t* new_info_field = new uint8_t[it->first];
-		std::memcpy(new_info_field, it->second, it->first);
-		information_fields.push_back(pair<uint8_t, uint8_t*>(it->first, new_info_field));
-	}
 }
 
 void LLC::write_serialization(uint8_t *buffer, uint32_t total_sz, const Tins::PDU *parent) {
@@ -242,9 +206,10 @@ void LLC::write_serialization(uint8_t *buffer, uint32_t total_sz, const Tins::PD
 			break;
 	}
 
-	for (list<pair<uint8_t, uint8_t*> >::iterator it = information_fields.begin(); it != information_fields.end(); it++) {
-		std::memcpy(buffer, it->second, it->first);
-		buffer += it->first;
+	for (list<field_type>::const_iterator it = information_fields.begin(); it != information_fields.end(); it++) {
+		//std::memcpy(buffer, it->second, it->first);
+        std::copy(it->begin(), it->end(), buffer);
+		buffer += it->size();
 	}
 }
 

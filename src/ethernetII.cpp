@@ -25,16 +25,17 @@
 #include <algorithm>
 #ifndef WIN32
     #include <net/ethernet.h>
+    #include <netinet/in.h>
     #include <netpacket/packet.h>
 #endif
 #include "ethernetII.h"
+#include "packetsender.h"
 #include "rawpdu.h"
 #include "ip.h"
 #include "arp.h"
 
 namespace Tins {
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
-const size_t EthernetII::ADDR_SIZE(address_type::address_size);
 
 EthernetII::EthernetII(const NetworkInterface& iface, 
   const address_type &dst_hw_addr, const address_type &src_hw_addr, 
@@ -103,9 +104,9 @@ bool EthernetII::send(PacketSender* sender) {
 
     addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
     addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
-    addr.sll_halen = ADDR_SIZE;
+    addr.sll_halen = address_type::address_size;
     addr.sll_ifindex = _iface.id();
-    memcpy(&(addr.sll_addr), _eth.dst_mac, ADDR_SIZE);
+    memcpy(&(addr.sll_addr), _eth.dst_mac, address_type::address_size);
 
     return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
@@ -114,7 +115,7 @@ bool EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(ethhdr))
         return false;
     ethhdr *eth_ptr = (ethhdr*)ptr;
-    if(!memcmp(eth_ptr->dst_mac, _eth.src_mac, ADDR_SIZE)) {
+    if(!memcmp(eth_ptr->dst_mac, _eth.src_mac, address_type::address_size)) {
         // chequear broadcast en destino original...
         return (inner_pdu()) ? inner_pdu()->matches_response(ptr + sizeof(_eth), total_sz - sizeof(_eth)) : true;
     }
@@ -149,9 +150,9 @@ PDU *EthernetII::recv_response(PacketSender *sender) {
 
     addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
     addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
-    addr.sll_halen = ADDR_SIZE;
+    addr.sll_halen = address_type::address_size;
     addr.sll_ifindex = _iface.id();
-    memcpy(&(addr.sll_addr), _eth.dst_mac, ADDR_SIZE);
+    memcpy(&(addr.sll_addr), _eth.dst_mac, address_type::address_size);
 
     return sender->recv_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }

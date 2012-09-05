@@ -23,15 +23,13 @@
 #ifndef TINS_ARP_H
 #define TINS_ARP_H
 
-
-#include <string>
 #include "pdu.h"
-#include "ipaddress.h"
 #include "endianness.h"
 #include "hwaddress.h"
-#include "network_interface.h"
+#include "ipaddress.h"
 
 namespace Tins {
+    class NetworkInterface;
 
     /**
      * \brief Class that represents an ARP PDU.
@@ -274,8 +272,8 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<ARP>();
+        ARP *clone_pdu() const {
+            return new ARP(*this);
         }
     private:
         struct arphdr {

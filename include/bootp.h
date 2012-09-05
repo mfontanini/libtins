@@ -293,8 +293,8 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<BootP>();
+        BootP *clone_pdu() const {
+            return new BootP(*this);
         }
     protected:
         /** 

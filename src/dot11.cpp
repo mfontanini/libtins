@@ -24,7 +24,6 @@
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
-#include <iostream>
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>
@@ -33,8 +32,8 @@
 #include "dot11.h"
 #include "rawpdu.h"
 #include "radiotap.h"
-#include "sniffer.h"
 #include "rsn_information.h"
+#include "packetsender.h"
 #include "snap.h"
 
 using std::pair;

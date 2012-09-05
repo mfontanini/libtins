@@ -34,6 +34,11 @@ namespace Tins {
     class IPv4Address {
     public:
         /**
+         * The address size.
+         */
+        static const size_t address_size = sizeof(uint32_t);
+        
+        /**
          * \brief Constructor taking a const char*.
          * 
          * Constructs an IPv4Address from a dotted-notation address 

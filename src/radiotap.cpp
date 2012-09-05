@@ -21,6 +21,7 @@
 
 #include <cstring>
 #include <cassert>
+#include <stdexcept>
 #ifndef WIN32
     #include <net/ethernet.h>
     #include <netpacket/packet.h>

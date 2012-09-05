@@ -20,10 +20,9 @@
  */
 
 #include <cassert>
-#include <iostream>
-#include "utils.h"
 #include "pdu.h"
 #include "rawpdu.h"
+#include "packetsender.h"
 
 namespace Tins {
 
@@ -59,6 +58,14 @@ uint32_t PDU::size() const {
         ptr = ptr->inner_pdu();
     }
     return sz;
+}
+
+bool PDU::send(PacketSender *) { 
+    return false; 
+}
+
+PDU *PDU::recv_response(PacketSender *) { 
+    return false; 
 }
 
 void PDU::flag(uint32_t new_flag) {

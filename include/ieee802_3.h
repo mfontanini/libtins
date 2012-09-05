@@ -23,7 +23,6 @@
 #define TINS_IEEE802_3_H
 
 #include <stdint.h>
-#include <stdexcept>
 
 #include "pdu.h"
 #include "endianness.h"
@@ -128,13 +127,6 @@ namespace Tins {
         void iface(const NetworkInterface &new_iface_index);
 
         /**
-         * \brief Setter for the interface.
-         *
-         * \param new_iface string reference containing the new interface name.
-         */
-        void iface(const std::string& new_iface) throw (std::runtime_error);
-
-        /**
          * \brief Setter for the length field.
          *
          * \param new_length uint16_t with the new value of the length field.
@@ -189,8 +181,8 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<IEEE802_3>();
+        IEEE802_3 *clone_pdu() const {
+            return new IEEE802_3(*this);
         }
     private:
         /**

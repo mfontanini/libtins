@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <iostream> //borrame
 #include "rawpdu.h"
 #include "tcp_stream.h"
 
@@ -31,7 +30,7 @@ TCPStreamFollower::TCPStreamFollower() : last_identifier(0) {
 
 
 
-TCPSession::SessionInfo::SessionInfo(IPv4Address client, 
+TCPStream::StreamInfo::StreamInfo(IPv4Address client, 
   IPv4Address server, uint16_t cport, uint16_t sport) 
 : client_addr(client), server_addr(server), client_port(cport), 
   server_port(sport)
@@ -42,18 +41,18 @@ TCPSession::SessionInfo::SessionInfo(IPv4Address client,
 
 
 
-TCPSession::TCPSession(IP *ip, TCP *tcp, uint64_t identifier) 
+TCPStream::TCPStream(IP *ip, TCP *tcp, uint64_t identifier) 
 : client_seq(tcp->seq()), info(ip->src_addr(), ip->dst_addr(), 
   tcp->sport(), tcp->dport()), identifier(identifier), fin_sent(false)
 {
     
 }
 
-TCPSession::TCPSession(const TCPSession &rhs) {
+TCPStream::TCPStream(const TCPStream &rhs) {
     *this = rhs;
 }
 
-TCPSession& TCPSession::operator=(const TCPSession &rhs) {
+TCPStream& TCPStream::operator=(const TCPStream &rhs) {
     client_seq = rhs.client_seq;
     server_seq = rhs.server_seq;
     info = rhs.info;
@@ -66,31 +65,31 @@ TCPSession& TCPSession::operator=(const TCPSession &rhs) {
     return *this;
 }
 
-TCPSession::~TCPSession() {
+TCPStream::~TCPStream() {
     free_fragments(client_frags);
     free_fragments(server_frags);
 }
 
-void TCPSession::free_fragments(fragments_type &frags) {
+void TCPStream::free_fragments(fragments_type &frags) {
     for(fragments_type::iterator it = frags.begin(); it != frags.end(); ++it)
         delete it->second;
 }
 
-TCPSession::fragments_type TCPSession::clone_fragments(const fragments_type &frags) {
+TCPStream::fragments_type TCPStream::clone_fragments(const fragments_type &frags) {
     fragments_type new_frags;
     for(fragments_type::const_iterator it = frags.begin(); it != frags.end(); ++it)
         new_frags.insert(std::make_pair(it->first, it->second->clone_pdu()));
     return new_frags;
 }
 
-bool TCPSession::generic_process(uint32_t &my_seq, uint32_t &other_seq, 
+bool TCPStream::generic_process(uint32_t &my_seq, uint32_t &other_seq, 
   payload_type &pload, fragments_type &frags, TCP *tcp, RawPDU *raw) 
 {
     //std::cout << "Entre, my seq: " << std::hex << my_seq << std::endl;
     bool added_some(false);
     if(tcp->get_flag(TCP::SYN))
         other_seq++;
-    if(tcp->get_flag(TCP::FIN))
+    if(tcp->get_flag(TCP::FIN) || tcp->get_flag(TCP::RST))
         fin_sent = true;
     if(raw) {
         frags[tcp->seq()] = static_cast<RawPDU*>(tcp->release_inner_pdu()); 
@@ -113,7 +112,7 @@ bool TCPSession::generic_process(uint32_t &my_seq, uint32_t &other_seq,
     return added_some;
 }
 
-bool TCPSession::update(IP *ip, TCP *tcp) {
+bool TCPStream::update(IP *ip, TCP *tcp) {
     RawPDU *raw = tcp->find_pdu<RawPDU>();
     if(tcp->get_flag(TCP::SYN) && tcp->get_flag(TCP::ACK)) {
         server_seq = tcp->seq() + 1;
@@ -124,39 +123,11 @@ bool TCPSession::update(IP *ip, TCP *tcp) {
         return generic_process(server_seq, client_seq, server_payload_, server_frags, tcp, raw);
 }
 
-void TCPSession::clear_client_payload() {
+void TCPStream::clear_client_payload() {
     client_payload_.clear();
 }
 
-void TCPSession::clear_server_payload() {
+void TCPStream::clear_server_payload() {
     server_payload_.clear();
-}
-
-bool TCPSession::SessionInfo::operator<(const SessionInfo &rhs) const {
-    if(client_addr == rhs.client_addr) {
-        if(server_addr == rhs.server_addr) {
-            if(client_port == rhs.client_port) {
-                return server_port < rhs.server_port;
-            }
-            else
-                return client_port < rhs.client_port;
-        }
-        else
-            return server_addr < rhs.server_addr;
-    }
-    else
-        return client_addr < rhs.client_addr;
-}
-
-bool TCPSession::operator<(const TCPSession &rhs) const {
-    if(client_seq == rhs.client_seq) {
-        if(server_seq == rhs.server_seq) {
-            return info < rhs.info;
-        }
-        else
-            return server_seq < rhs.server_seq;
-    }
-    else
-        return client_seq < rhs.client_seq;
 }
 }

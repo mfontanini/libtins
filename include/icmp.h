@@ -305,8 +305,8 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<ICMP>();
+        ICMP *clone_pdu() const {
+            return new ICMP(*this);
         }
     private:
         static uint16_t global_id, global_seq;

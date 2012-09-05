@@ -26,7 +26,6 @@
 #ifndef WIN32
     #include <endian.h>
 #endif
-#include "small_uint.h"
 
 #define TINS_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
 #define TINS_IS_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)

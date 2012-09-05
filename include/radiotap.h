@@ -22,7 +22,6 @@
 #ifndef TINS_RADIOTAP_H
 #define TINS_RADIOTAP_H
 
-#include <stdexcept>
 #include "pdu.h"
 #include "endianness.h"
 #include "network_interface.h"

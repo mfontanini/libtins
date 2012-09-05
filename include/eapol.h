@@ -22,7 +22,7 @@
 #ifndef TINS_EAPOL_H
 #define TINS_EAPOL_H
 
-
+#include <stdint.h>
 #include "pdu.h"
 #include "small_uint.h"
 #include "endianness.h"
@@ -46,6 +46,9 @@ namespace Tins {
          */
         static const PDU::PDUType pdu_flag = PDU::EAPOL;
     
+        /**
+         * The EAPOL type enum.
+         */
         enum EAPOLTYPE {
             RC4 = 1,
             RSN,

@@ -20,11 +20,12 @@
  */
 
 #include <stdexcept>
-#include <cstring>
 #include <vector>
+#include <cstring>
 #ifndef WIN32
     #include <linux/if_packet.h>
     #include <net/if.h>
+    #include <netinet/in.h>
 #endif
 #include "network_interface.h"
 #include "utils.h"

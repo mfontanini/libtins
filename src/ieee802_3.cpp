@@ -25,9 +25,11 @@
 #include <algorithm>
 #ifndef WIN32
     #include <net/ethernet.h>
+    #include <netinet/in.h>
     #include <netpacket/packet.h>
 #endif
 #include "ieee802_3.h"
+#include "packetsender.h"
 #include "llc.h"
 
 namespace Tins {
@@ -46,17 +48,16 @@ IEEE802_3::IEEE802_3(const NetworkInterface& iface,
 
 }
 
-IEEE802_3::IEEE802_3(const uint8_t *buffer, uint32_t total_sz) : PDU(ETHERTYPE_IP) {
+IEEE802_3::IEEE802_3(const uint8_t *buffer, uint32_t total_sz) 
+: PDU(ETHERTYPE_IP) 
+{
     if(total_sz < sizeof(ethhdr))
         throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
     memcpy(&_eth, buffer, sizeof(ethhdr));
-    PDU *next = 0;
     buffer += sizeof(ethhdr);
     total_sz -= sizeof(ethhdr);
-    if(total_sz) {
-    	next = new Tins::LLC(buffer, total_sz);
-        inner_pdu(next);
-    }
+    if(total_sz)
+        inner_pdu(new Tins::LLC(buffer, total_sz));
 }
 
 void IEEE802_3::dst_addr(const address_type &new_dst_mac) {

@@ -36,52 +36,126 @@ namespace Tins {
 class Sniffer;
 class RawPDU;
 
-class TCPSession {
+/**
+ * \class TCPStream
+ * \brief Represents a TCP stream.
+ */
+class TCPStream {
 public:
-    struct SessionInfo {
+    /**
+     * The stream information.
+     */
+    struct StreamInfo {
         IPv4Address client_addr, server_addr;
         uint16_t client_port, server_port;
         
-        SessionInfo() {}
+        StreamInfo() {}
         
-        SessionInfo(IPv4Address client, IPv4Address server,
+        StreamInfo(IPv4Address client, IPv4Address server,
             uint16_t cport, uint16_t sport);
         
-        bool operator<(const SessionInfo &rhs) const;
+        bool operator<(const StreamInfo &rhs) const;
     };
-
+    
+    /**
+     * The type used to store the payload.
+     */
     typedef std::vector<uint8_t> payload_type;
 
-    TCPSession(IP *ip, TCP *tcp, uint64_t identifier);
-    TCPSession(const TCPSession &rhs);
-    TCPSession& operator=(const TCPSession &rhs);
-    ~TCPSession();
+    /**
+     * \brief TCPStream constructor.
+     * \param ip The IP PDU from which to take the initial parameters.
+     * \param tcp The TCP PDU from which to take the initial parameters.
+     * \param identifier This stream's identifier number
+     */
+    TCPStream(IP *ip, TCP *tcp, uint64_t identifier);
     
+    /**
+     * Copy constructor.
+     */
+    TCPStream(const TCPStream &rhs);
+    
+    /**
+     * Copy assignment operator.
+     */
+    TCPStream& operator=(const TCPStream &rhs);
+    
+    /**
+     * Destructor.
+     */
+    ~TCPStream();
+    
+    /**
+     * \brief Retrieves the client payload.
+     * 
+     * This is the payload that the connection's client has sent so far.
+     * 
+     * \return const payload_type& containing the payload.
+     */
     const payload_type &client_payload() const {
         return client_payload_;
     }
     
+    /**
+     * \brief Retrieves the server payload.
+     * 
+     * This is the payload that the connection's server has sent so far.
+     * 
+     * \return const payload_type& containing the payload.
+     */
     const payload_type &server_payload() const {
         return server_payload_;
     }
-    
+
+    /**
+     * \brief Retrieves this stream's identification number.
+     * \return uint64_t containing the identification number.
+     */
     uint64_t id() const {
         return identifier;
     }
     
-    const SessionInfo &session_info() const {
+    /**
+     * \brief Retrieves the stream information.
+     * \return const StreamInfo& containing the stream information.
+     */
+    const StreamInfo &stream_info() const {
         return info;
     }
-    
+
+    /**
+     * \brief Checks whether this stream is finished.
+     * 
+     * A stream is considered to be finished, if at least one of the 
+     * peers sends a TCP segment containing the FIN bit on.
+     * 
+     * \return bool indicating whether the stream is finished.
+     */
     bool is_finished() const {
         return fin_sent;
     }
     
+    /**
+     * \brief Updates the stream data.
+     * 
+     * This may update both the payload and the expected sequence numbers.
+     * 
+     * \param ip The IP PDU from which to take information.
+     * \param tcp The TCP PDU from which to take information.
+     * \return bool indicating whether any changes have been done to 
+     * any of the stored payloads.
+     */
     bool update(IP *ip, TCP *tcp);
+    
+    /**
+     * Clears the client payload.
+     */
     void clear_client_payload();
+    
+    /**
+     * Clears the server payload.
+     */
     void clear_server_payload();
-
-    bool operator<(const TCPSession &rhs) const;
 private:
     typedef std::map<uint32_t, RawPDU*> fragments_type;
     
@@ -91,22 +165,43 @@ private:
     bool generic_process(uint32_t &my_seq, uint32_t &other_seq, 
       payload_type &pload, fragments_type &frags, TCP *tcp, RawPDU *raw);
 
+
     uint32_t client_seq, server_seq;
-    SessionInfo info;
+    StreamInfo info;
     uint64_t identifier;
     payload_type client_payload_, server_payload_;
     fragments_type client_frags, server_frags;
     bool fin_sent;
 };
 
+
+/**
+ * \class TCPStreamFollower
+ * \brief Follows TCP streams and notifies the user when data is available.
+ */
 class TCPStreamFollower {
 public:
+    /**
+     * \brief Default constructor.
+     */
     TCPStreamFollower();
 
+    /**
+     * \brief Starts following TCP streams.
+     * 
+     * The template functors must accept a TCPStream& as argument, which
+     * will point to the stream which has been modified.
+     * 
+     * \param sniffer The sniffer which will be used to sniff PDUs.
+     * \param data_fun The function which will be called whenever one of
+     * the peers in a connection sends data.
+     * \param end_fun This function will be called when a stream is 
+     * closed.
+     */
     template<typename DataFunctor, typename EndFunctor>
     void follow_streams(Sniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun);
 private:
-    typedef std::map<TCPSession::SessionInfo, TCPSession> sessions_type;
+    typedef std::map<TCPStream::StreamInfo, TCPStream> sessions_type;
     
     template<typename DataFunctor, typename EndFunctor>
     struct proxy_caller {
@@ -138,7 +233,7 @@ bool TCPStreamFollower::callback(PDU *pdu, const DataFunctor &data_fun, const En
     IP *ip = pdu->find_pdu<IP>();
     TCP *tcp = pdu->find_pdu<TCP>();
     if(ip && tcp) {
-        TCPSession::SessionInfo info = { 
+        TCPStream::StreamInfo info = { 
             ip->src_addr(), ip->dst_addr(),
             tcp->sport(), tcp->dport()
         };
@@ -151,7 +246,7 @@ bool TCPStreamFollower::callback(PDU *pdu, const DataFunctor &data_fun, const En
                     sessions.insert(
                         std::make_pair(
                             info,
-                            TCPSession(ip, tcp, last_identifier++)
+                            TCPStream(ip, tcp, last_identifier++)
                         )
                     );
                 }

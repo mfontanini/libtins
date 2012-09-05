@@ -91,11 +91,13 @@ void BootP::giaddr(ipaddress_type new_giaddr) {
 }
 
 void BootP::sname(const uint8_t *new_sname) {
-    std::memcpy(_bootp.sname, new_sname, sizeof(_bootp.sname));
+    //std::memcpy(_bootp.sname, new_sname, sizeof(_bootp.sname));
+    std::copy(new_sname, new_sname + sizeof(_bootp.sname), _bootp.sname);
 }
 
 void BootP::file(const uint8_t *new_file) {
-    std::memcpy(_bootp.file, new_file, sizeof(_bootp.file));
+    //std::memcpy(_bootp.file, new_file, sizeof(_bootp.file));
+    std::copy(new_file, new_file + sizeof(_bootp.file), _bootp.file);
 }
 
 void BootP::vend(const vend_type &new_vend) {

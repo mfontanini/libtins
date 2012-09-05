@@ -23,7 +23,7 @@
 #define TINS_IEEE8022_H
 
 #include <list>
-#include <utility>
+#include <vector>
 #include <stdint.h>
 #include "pdu.h"
 #include "endianness.h"
@@ -101,16 +101,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
     	LLC(const uint8_t *buffer, uint32_t total_sz);
-
-        /**
-         * \brief Copy constructor.
-         */
-    	LLC(const LLC &other);
-
-        /**
-         * \brief Copy assignment operator.
-         */
-    	LLC &operator= (const LLC &other);
 
         /* Setters */
 
@@ -312,7 +302,9 @@ namespace Tins {
          *
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const;
+        LLC *clone_pdu() const {
+            return new LLC(*this);
+        }
     private:
         struct llchdr {
             uint8_t dsap;
@@ -366,6 +358,8 @@ namespace Tins {
             } __attribute__((__packed__));
 
         #endif
+        
+        typedef std::vector<uint8_t> field_type;
 
         void copy_fields(const LLC *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
@@ -379,7 +373,7 @@ namespace Tins {
         } control_field;
         Format _type;
         uint8_t information_field_length;
-        std::list<std::pair<uint8_t,uint8_t*> > information_fields;
+        std::list<field_type> information_fields;
     };
 
 };

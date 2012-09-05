@@ -30,16 +30,24 @@
 #include <map>
 #include "pdu.h"
 #include "endianness.h"
-#include "ipaddress.h"
 
 namespace Tins {
+    class IPv4Address;
+    
+    /**
+     * \class DNS
+     * \brief Represents a DNS PDU.
+     */
     class DNS : public PDU {
     public:
         /**
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DNS;
-    
+        
+        /**
+         * The DNS type.
+         */
         enum QRType {
             QUERY = 0,
             RESPONSE = 1
@@ -475,8 +483,8 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<DNS>();
+        DNS *clone_pdu() const {
+            return new DNS(*this);
         }
     private:
         struct dnshdr {

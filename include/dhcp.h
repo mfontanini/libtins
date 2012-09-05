@@ -27,10 +27,9 @@
 #include <vector>
 #include <string>
 #include "bootp.h"
-#include "ipaddress.h"
-
 
 namespace Tins {
+    class IPv4Address;
     
     /** 
      * \brief Class that represents the DHCP PDU.
@@ -385,8 +384,8 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<DHCP>();
+        DHCP *clone_pdu() const {
+            return new DHCP(*this);
         }
     private:
         static const uint32_t MAX_DHCP_SIZE;

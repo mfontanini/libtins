@@ -35,8 +35,7 @@
 #include "utils.h"
 #include "constants.h"
 
-
-using namespace std;
+using std::list;
 
 namespace Tins {
 

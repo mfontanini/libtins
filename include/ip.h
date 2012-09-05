@@ -22,16 +22,11 @@
 #ifndef TINS_IP_H
 #define TINS_IP_H
 
-#ifndef WIN32
-    #include <endian.h>
-#endif
-#include <string>
-#include <utility>
 #include <list>
 #include "pdu.h"
 #include "small_uint.h"
-#include "ipaddress.h"
 #include "endianness.h"
+#include "ipaddress.h"
 
 namespace Tins {
 
@@ -53,11 +48,6 @@ namespace Tins {
          * The type used to store addresses.
          */
         typedef IPv4Address address_type;
-    
-        /**
-         * \brief IP address size.
-         */
-        static const uint32_t ADDR_SIZE = 4;
 
         /**
          * \brief Enum indicating the option's class.
@@ -103,11 +93,11 @@ namespace Tins {
         struct IPOption {
             friend class IP;
             struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
+            #if TINS_IS_LITTLE_ENDIAN
                 unsigned int number:5;
                 unsigned int op_class:2;
                 unsigned int copied:1;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
+            #elif TINS_IS_BIG_ENDIAN
                 unsigned int copied:1;
                 unsigned int op_class:2;
                 unsigned int number:5;
@@ -398,17 +388,17 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<IP>();
+        IP *clone_pdu() const {
+            return new IP(*this);
         }
     private:
         static const uint8_t DEFAULT_TTL;
 
         struct iphdr {
-        #if __BYTE_ORDER == __LITTLE_ENDIAN
+        #if TINS_IS_LITTLE_ENDIAN
             unsigned int ihl:4;
             unsigned int version:4;
-        #elif __BYTE_ORDER == __BIG_ENDIAN
+        #elif TINS_IS_BIG_ENDIAN
             unsigned int version:4;
             unsigned int ihl:4;
         #else

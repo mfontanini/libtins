@@ -21,7 +21,6 @@
 
 #include <stdexcept>
 #include <sstream>
-#include <stdexcept>
 #include <memory>
 #include <cassert>
 #include <cstring>
@@ -36,6 +35,7 @@
 #include "icmp.h"
 #include "arp.h"
 #include "endianness.h"
+#include "network_interface.h"
 
 
 using namespace std;

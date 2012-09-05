@@ -22,18 +22,20 @@
 #ifndef WIN32
     #include <sys/socket.h>
     #include <sys/select.h>
+    #include <sys/time.h>
     #include <arpa/inet.h>
     #include <unistd.h>
     #include <linux/if_ether.h>
     #include <linux/if_packet.h>
     #include <netdb.h>
+    #include <netinet/in.h>
 #endif
 #include <cassert>
 #include <errno.h>
 #include <cstring>
-#include <vector>
 #include <ctime>
 #include "packetsender.h"
+#include "pdu.h"
 
 
 const int Tins::PacketSender::INVALID_RAW_SOCKET = -1;
@@ -136,7 +138,7 @@ bool Tins::PacketSender::send_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t 
     return ret_val;
 }
 
-Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockaddr* link_addr, socklen_t addrlen) {
+Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockaddr* link_addr, uint32_t addrlen) {
     fd_set readfds;
     struct timeval timeout,  end_time;
     int read;

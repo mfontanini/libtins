@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <string>
 #include <cstring>
 #include <cassert>
 #include <algorithm>
@@ -28,9 +27,9 @@
 #include "ethernetII.h"
 #include "rawpdu.h"
 #include "constants.h"
+#include "network_interface.h"
 
 
-using std::string;
 using std::runtime_error;
 
 namespace Tins {
@@ -42,8 +41,8 @@ ARP::ARP(ipaddress_type target_ip, ipaddress_type sender_ip,
     memset(&_arp, 0, sizeof(arphdr));
     hw_addr_format((uint16_t)Constants::ARP::ETHER);
     prot_addr_format((uint16_t)Constants::Ethernet::IP);
-    hw_addr_length(EthernetII::ADDR_SIZE);
-    prot_addr_length(IP::ADDR_SIZE);
+    hw_addr_length(Tins::EthernetII::address_type::address_size);
+    prot_addr_length(Tins::IP::address_type::address_size);
     sender_ip_addr(sender_ip);
     target_ip_addr(target_ip);
     sender_hw_addr(sender_hw);

@@ -20,11 +20,11 @@
  */
 
 #include <stdexcept>
-#include <cstring>
 #include <cassert>
 #include "endianness.h"
 #include "dhcp.h"
 #include "ethernetII.h"
+#include "ipaddress.h"
 
 using std::string;
 using std::list;
@@ -37,7 +37,7 @@ const uint32_t DHCP::MAX_DHCP_SIZE = 312;
 DHCP::DHCP() : _size(sizeof(uint32_t)) {
     opcode(BOOTREQUEST);
     htype(1); //ethernet
-    hlen(EthernetII::ADDR_SIZE);
+    hlen(EthernetII::address_type::address_size);
 }
 
 DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) 

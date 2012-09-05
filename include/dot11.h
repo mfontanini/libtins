@@ -25,14 +25,13 @@
 #include <list>
 #include <vector>
 #include <stdint.h>
-#include <stdexcept>
 #include <utility>
 
 #include "pdu.h"
 #include "endianness.h"
-#include "network_interface.h"
 #include "hwaddress.h"
 #include "small_uint.h"
+#include "network_interface.h"
 
 namespace Tins {
     class RSNInformation;

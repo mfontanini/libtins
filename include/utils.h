@@ -22,11 +22,8 @@
 #ifndef TINS_UTILS_H
 #define TINS_UTILS_H
 
-#include <stdexcept>
-
 #ifndef WIN32
     #include <ifaddrs.h>
-    #include <endian.h>
 #endif
 #include <string>
 #include <set>
@@ -35,12 +32,10 @@
 #include "packetsender.h"
 #include "ipaddress.h"
 #include "hwaddress.h"
-#include "network_interface.h"
-
-#define TINS_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
-#define TINS_IS_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)
 
 namespace Tins {
+    class NetworkInterface;
+    
     /** 
      * \brief Network utils namespace.
      *

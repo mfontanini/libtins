@@ -26,16 +26,11 @@
 #include <list>
 #include <vector>
 #include <stdint.h>
-#ifndef WIN32
-    #include <endian.h>
-#endif
 #include "pdu.h"
-#include "small_uint.h"
 #include "endianness.h"
-
+#include "small_uint.h"
 
 namespace Tins {
-
     /**
      * \brief Class that represents an TCP PDU.
      *
@@ -416,7 +411,7 @@ namespace Tins {
             uint16_t dport;
             uint32_t seq;
             uint32_t ack_seq;
-        #if __BYTE_ORDER == __LITTLE_ENDIAN
+        #if TINS_IS_LITTLE_ENDIAN
             uint16_t res1:4,
                 doff:4,
                 fin:1,
@@ -427,7 +422,7 @@ namespace Tins {
                 urg:1,
                 ece:1,
                 cwr:1;
-        #elif __BYTE_ORDER == __BIG_ENDIAN
+        #elif TINS_IS_BIG_ENDIAN
             uint16_t doff:4,
                 res1:4,
                 cwr:1,
