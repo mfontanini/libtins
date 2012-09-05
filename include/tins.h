@@ -42,5 +42,6 @@
 #include "udp.h"
 #include "utils.h"
 #include "dns.h"
+#include "tcp_stream.h"
 
 #endif // TINS_TINS_H

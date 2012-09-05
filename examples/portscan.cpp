@@ -45,7 +45,7 @@ typedef std::pair<Sniffer*, std::string> sniffer_data;
  * the scanned port's status.
  */
 bool handler(PDU *pdu) {
-    TCP *tcp = pdu->find_inner_pdu<TCP>();
+    TCP *tcp = pdu->find_pdu<TCP>();
     if(tcp) {
         // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
         if(tcp->get_flag(TCP::RST)) {

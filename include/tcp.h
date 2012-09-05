@@ -407,8 +407,8 @@ namespace Tins {
         /**
          * \sa PDU::clone_pdu
          */
-        PDU *clone_pdu() const {
-            return do_clone_pdu<TCP>();
+        TCP *clone_pdu() const {
+            return new TCP(*this);
         }
     private:
         struct tcphdr {

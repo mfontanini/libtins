@@ -105,6 +105,13 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::RAW; }
+        
+        /**
+         * \sa PDU::clone_pdu
+         */
+        RawPDU *clone_pdu() const {
+            return new RawPDU(*this);
+        }
     private:
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 

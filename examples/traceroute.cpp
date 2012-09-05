@@ -93,15 +93,15 @@ private:
     }
 
     bool sniff_callback(PDU *pdu) {
-        IP *ip = pdu->find_inner_pdu<IP>();
-        RawPDU *raw = pdu->find_inner_pdu<RawPDU>();
+        IP *ip = pdu->find_pdu<IP>();
+        RawPDU *raw = pdu->find_pdu<RawPDU>();
         if(ip && raw) {
             ttl_map::const_iterator iter;
             IP inner_ip;
             // This will fail if its a corrupted packet
             try {
                 // Fetch the IP PDU attached to the ICMP response
-                inner_ip = IP(raw->payload(), raw->header_size());
+                inner_ip = IP(&raw->payload()[0], raw->payload_size());
             }
             catch(std::runtime_error &ex) {
                 return running;
