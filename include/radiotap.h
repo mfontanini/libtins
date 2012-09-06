@@ -27,6 +27,7 @@
 #include "network_interface.h"
 
 namespace Tins {
+    class PacketSender;
     
     /** 
      * \brief Class that represents the IEEE 802.11 radio tap header.

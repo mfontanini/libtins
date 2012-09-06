@@ -29,6 +29,7 @@
 #include "radiotap.h"
 #include "dot11.h"
 #include "utils.h"
+#include "packet_sender.h"
 
 
 Tins::RadioTap::RadioTap(const NetworkInterface &iface, PDU *child)

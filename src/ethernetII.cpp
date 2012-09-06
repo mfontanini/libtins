@@ -29,7 +29,7 @@
     #include <netpacket/packet.h>
 #endif
 #include "ethernetII.h"
-#include "packetsender.h"
+#include "packet_sender.h"
 #include "rawpdu.h"
 #include "ip.h"
 #include "arp.h"

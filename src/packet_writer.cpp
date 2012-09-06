@@ -18,31 +18,41 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
-#ifndef TINS_TINS_H
-#define TINS_TINS_H
-
-#include "arp.h"
-#include "bootp.h"
-#include "dhcp.h"
-#include "eapol.h"
-#include "ethernetII.h"
-#include "ieee802_3.h"
-#include "llc.h"
-#include "icmp.h"
-#include "dot11.h"
-#include "ip.h"
-#include "packet_sender.h"
+ 
+#ifndef WIN32
+    #include <sys/time.h>
+#endif
+#include <stdexcept>
 #include "packet_writer.h"
 #include "pdu.h"
-#include "radiotap.h"
-#include "rawpdu.h"
-#include "snap.h"
-#include "sniffer.h"
-#include "tcp.h"
-#include "udp.h"
-#include "utils.h"
-#include "dns.h"
-#include "tcp_stream.h"
 
-#endif // TINS_TINS_H
+namespace Tins {
+PacketWriter::PacketWriter(const std::string &file_name, LinkType lt) {
+    handle = pcap_open_dead(lt, 65535);
+    if(!handle)
+        throw std::runtime_error("Error creating pcap handle");
+    dumper = pcap_dump_open(handle, file_name.c_str());
+    if(!dumper) {
+        // RAII plx
+        pcap_close(handle);
+        throw std::runtime_error(pcap_geterr(handle));
+    }
+}
+
+PacketWriter::~PacketWriter() {
+    pcap_dump_close(dumper);
+    pcap_close(handle);
+}
+
+void PacketWriter::write(PDU *pdu) {
+    PDU::serialization_type buffer = pdu->serialize();
+    struct timeval tm;
+    gettimeofday(&tm, 0);
+    struct pcap_pkthdr header = { 
+        tm,
+        buffer.size(),
+        buffer.size()
+    };
+    pcap_dump((u_char*)dumper, &header, &buffer[0]);
+}
+}

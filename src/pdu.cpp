@@ -22,7 +22,7 @@
 #include <cassert>
 #include "pdu.h"
 #include "rawpdu.h"
-#include "packetsender.h"
+#include "packet_sender.h"
 
 namespace Tins {
 

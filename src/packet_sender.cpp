@@ -34,8 +34,8 @@
 #include <errno.h>
 #include <cstring>
 #include <ctime>
-#include "packetsender.h"
 #include "pdu.h"
+#include "packet_sender.h"
 
 
 const int Tins::PacketSender::INVALID_RAW_SOCKET = -1;
@@ -101,7 +101,6 @@ Tins::PDU *Tins::PacketSender::send_recv(PDU *pdu) {
 }
 
 bool Tins::PacketSender::send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t len_addr) {
-
     if(!open_l2_socket())
         return false;
 

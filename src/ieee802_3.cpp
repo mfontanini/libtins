@@ -29,7 +29,7 @@
     #include <netpacket/packet.h>
 #endif
 #include "ieee802_3.h"
-#include "packetsender.h"
+#include "packet_sender.h"
 #include "llc.h"
 
 namespace Tins {

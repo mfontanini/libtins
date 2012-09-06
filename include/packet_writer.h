@@ -19,30 +19,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef TINS_TINS_H
-#define TINS_TINS_H
+#ifndef TINS_PACKET_WRITER_H
+#define TINS_PACKET_WRITER_H
 
-#include "arp.h"
-#include "bootp.h"
-#include "dhcp.h"
-#include "eapol.h"
-#include "ethernetII.h"
-#include "ieee802_3.h"
-#include "llc.h"
-#include "icmp.h"
-#include "dot11.h"
-#include "ip.h"
-#include "packet_sender.h"
-#include "packet_writer.h"
-#include "pdu.h"
-#include "radiotap.h"
-#include "rawpdu.h"
-#include "snap.h"
-#include "sniffer.h"
-#include "tcp.h"
-#include "udp.h"
-#include "utils.h"
-#include "dns.h"
-#include "tcp_stream.h"
+#include <pcap.h>
+#include <string>
 
-#endif // TINS_TINS_H
+namespace Tins {
+class PDU;
+    
+class PacketWriter {
+public:
+    enum LinkType {
+        RADIOTAP = DLT_IEEE802_11_RADIO,
+        ETH2 = DLT_EN10MB
+    };
+    
+    PacketWriter(const std::string &file_name, LinkType lt);
+    ~PacketWriter();
+    
+    void write(PDU *pdu);
+    
+    template<typename ForwardIterator>
+    ForwardIterator write(ForwardIterator start, ForwardIterator end) {
+        while(start != end) 
+            write(*start++);
+        return start;
+    }
+private:
+    // You shall not copy
+    PacketWriter(const PacketWriter&);
+    PacketWriter& operator=(const PacketWriter&);
+
+    pcap_t *handle;
+    pcap_dumper_t *dumper; 
+};
+}
+
+#endif // TINS_PACKET_WRITER_H

@@ -33,7 +33,7 @@
 #include "rawpdu.h"
 #include "radiotap.h"
 #include "rsn_information.h"
-#include "packetsender.h"
+#include "packet_sender.h"
 #include "snap.h"
 
 using std::pair;

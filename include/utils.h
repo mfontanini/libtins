@@ -29,12 +29,13 @@
 #include <set>
 #include <fstream>
 #include <stdint.h>
-#include "packetsender.h"
 #include "ipaddress.h"
 #include "hwaddress.h"
 
 namespace Tins {
     class NetworkInterface;
+    class PacketSender;
+    class PDU;
     
     /** 
      * \brief Network utils namespace.
