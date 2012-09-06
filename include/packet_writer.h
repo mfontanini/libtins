@@ -27,19 +27,50 @@
 
 namespace Tins {
 class PDU;
-    
+
+/**
+ * \class PacketWriter
+ * \brief Writes PDUs to a pcap format file.
+ */
 class PacketWriter {
 public:
+    /**
+     * \brief The type of PDUs that will be written to this file.
+     * 
+     * This flag should match the type of the lowest layer PDU to be
+     * written.
+     */
     enum LinkType {
         RADIOTAP = DLT_IEEE802_11_RADIO,
         ETH2 = DLT_EN10MB
     };
     
+    /**
+     * \brief Constructs a PacketWriter.
+     * \param file_name The file in which to store the written PDUs.
+     * \param lt The link type which will be written to this file.
+     * \sa LinkType.
+     */
     PacketWriter(const std::string &file_name, LinkType lt);
+    
+    /**
+     * Destructor.
+     */
     ~PacketWriter();
     
+    /**
+     * \brief Writes a PDU to this file. 
+     */
     void write(PDU *pdu);
     
+    /**
+     * \brief Writes all the PDUs in the range [start, end)
+     * \param start A forward iterator pointing to the first PDU
+     * to be written.
+     * \param end A forward iterator pointing to one past the last
+     * PDU in the range.
+     * \return ForwardIterator which will be a copy of end.
+     */
     template<typename ForwardIterator>
     ForwardIterator write(ForwardIterator start, ForwardIterator end) {
         while(start != end) 

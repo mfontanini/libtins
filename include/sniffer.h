@@ -73,7 +73,8 @@ namespace Tins {
          * 
          * This operator will be called using the sniffed packets 
          * as arguments. The callback object <b>must not</b> delete the
-         * PDU parameter.
+         * PDU parameter. You can modify it as you wish, though. Calling
+         * PDU methods like PDU::release_inner_pdu is perfectly valid.
          * 
          * Note that the Functor object will be copied using its copy
          * constructor, so that object should be some kind of proxy to
