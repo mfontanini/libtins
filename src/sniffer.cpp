@@ -19,41 +19,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include "sniffer.h"
 
 
-using namespace std;
+using std::string;
+using std::runtime_error;
 
-Tins::Sniffer::Sniffer(const string &device, unsigned max_packet_size, 
-bool promisc, const string &filter) 
+namespace Tins {
+BaseSniffer::BaseSniffer() : handle(0), mask(0)
 {
-    char error[PCAP_ERRBUF_SIZE];
-    if (pcap_lookupnet(device.c_str(), &ip, &mask, error) == -1) {
-        ip = 0;
-        mask = 0;
-    }
-    handle = pcap_open_live(device.c_str(), max_packet_size, promisc, 0, error);
-    if(!handle)
-        throw runtime_error(error);
-    wired = (pcap_datalink (handle) != DLT_IEEE802_11_RADIO); //better plx
     actual_filter.bf_insns = 0;
-    if(filter.size() && !set_filter(filter))
-        throw runtime_error("Invalid filter");
 }
-
-Tins::Sniffer::~Sniffer() {
+    
+BaseSniffer::~BaseSniffer() {
     if(actual_filter.bf_insns)
         pcap_freecode(&actual_filter);
     if(handle)
         pcap_close(handle);
 }
 
-bool Tins::Sniffer::compile_set_filter(const string &filter, bpf_program &prog) {
-    return (pcap_compile(handle, &prog, filter.c_str(), 0, ip) != -1 && pcap_setfilter(handle, &prog) != -1);
+void BaseSniffer::init(pcap_t *phandle, const std::string &filter, 
+  bpf_u_int32 if_mask) 
+{
+    handle = phandle;
+    mask = if_mask;
+    
+    wired = (pcap_datalink(handle) != DLT_IEEE802_11_RADIO); //better plx
+    actual_filter.bf_insns = 0;
+    if(!filter.empty() && !set_filter(filter))
+        throw runtime_error("Invalid filter");
 }
 
-Tins::PDU *Tins::Sniffer::next_packet() {
+bool BaseSniffer::compile_set_filter(const string &filter, bpf_program &prog) {
+    return (pcap_compile(handle, &prog, filter.c_str(), 0, mask) != -1 && pcap_setfilter(handle, &prog) != -1);
+}
+
+PDU *BaseSniffer::next_packet() {
     pcap_pkthdr header;
     PDU *ret = 0;
     while(!ret) {
@@ -73,13 +74,42 @@ Tins::PDU *Tins::Sniffer::next_packet() {
     return ret;
 }
 
-void Tins::Sniffer::stop_sniff() {
+void BaseSniffer::stop_sniff() {
     pcap_breakloop(handle);
 }
 
-bool Tins::Sniffer::set_filter(const std::string &filter) {
+bool BaseSniffer::set_filter(const std::string &filter) {
     if(actual_filter.bf_insns)
         pcap_freecode(&actual_filter);
     return compile_set_filter(filter, actual_filter);
 }
 
+// ****************************** Sniffer ******************************
+
+Sniffer::Sniffer(const string &device, unsigned max_packet_size, 
+  bool promisc, const string &filter)
+{
+    char error[PCAP_ERRBUF_SIZE];
+    bpf_u_int32 ip, if_mask;
+    if (pcap_lookupnet(device.c_str(), &ip, &if_mask, error) == -1) {
+        ip = 0;
+        if_mask = 0;
+    }
+    pcap_t *phandle = pcap_open_live(device.c_str(), max_packet_size, promisc, 0, error);
+    if(!phandle)
+        throw runtime_error(error);
+    
+    init(phandle, filter, if_mask);
+}
+
+// **************************** FileSniffer ****************************
+
+FileSniffer::FileSniffer(const string &file_name, const string &filter) {
+    char error[PCAP_ERRBUF_SIZE];
+    pcap_t *phandle = pcap_open_offline(file_name.c_str(), error);
+    if(!phandle)
+        throw std::runtime_error(error);
+    
+    init(phandle, filter, 0);
+}
+}
