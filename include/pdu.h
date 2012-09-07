@@ -143,7 +143,8 @@ namespace Tins {
          * 
          * This method makes this PDU to <b>no longer own</b> the inner
          * PDU. The current inner PDU is returned, and is <b>not</b>
-         * destroyed. 
+         * destroyed. That means after calling this function, you are 
+         * responsible for using operator delete on the returned pointer.
          * 
          * Use this method if you want to somehow re-use a PDU that
          * is already owned by another PDU.

@@ -1,6 +1,6 @@
 src/arp.o: src/arp.cpp ../include/arp.h ../include/pdu.h \
  ../include/endianness.h ../include/hwaddress.h ../include/ipaddress.h \
- ../include/utils.h ../include/packetsender.h ../include/ipaddress.h
+ ../include/utils.h ../include/ipaddress.h
 
 ../include/arp.h:
 
@@ -14,14 +14,12 @@ src/arp.o: src/arp.cpp ../include/arp.h ../include/pdu.h \
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/ipaddress.h:
 src/dhcp.o: src/dhcp.cpp ../include/dhcp.h ../include/bootp.h \
  ../include/pdu.h ../include/endianness.h ../include/ipaddress.h \
- ../include/hwaddress.h ../include/utils.h ../include/packetsender.h \
- ../include/ethernetII.h ../include/network_interface.h \
- ../include/hwaddress.h ../include/ipaddress.h
+ ../include/hwaddress.h ../include/utils.h ../include/ethernetII.h \
+ ../include/network_interface.h ../include/hwaddress.h \
+ ../include/ipaddress.h
 
 ../include/dhcp.h:
 
@@ -37,8 +35,6 @@ src/dhcp.o: src/dhcp.cpp ../include/dhcp.h ../include/bootp.h \
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/ethernetII.h:
 
 ../include/network_interface.h:
@@ -47,8 +43,8 @@ src/dhcp.o: src/dhcp.cpp ../include/dhcp.h ../include/bootp.h \
 
 ../include/ipaddress.h:
 src/dns.o: src/dns.cpp ../include/dns.h ../include/pdu.h \
- ../include/endianness.h ../include/utils.h ../include/packetsender.h \
- ../include/ipaddress.h ../include/hwaddress.h
+ ../include/endianness.h ../include/utils.h ../include/ipaddress.h \
+ ../include/hwaddress.h
 
 ../include/dns.h:
 
@@ -58,15 +54,13 @@ src/dns.o: src/dns.cpp ../include/dns.h ../include/pdu.h \
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/ipaddress.h:
 
 ../include/hwaddress.h:
 src/ethernetII_test.o: src/ethernetII_test.cpp ../include/ethernetII.h \
  ../include/pdu.h ../include/endianness.h ../include/hwaddress.h \
  ../include/network_interface.h ../include/ipaddress.h ../include/utils.h \
- ../include/packetsender.h ../include/network_interface.h
+ ../include/network_interface.h
 
 ../include/ethernetII.h:
 
@@ -82,15 +76,13 @@ src/ethernetII_test.o: src/ethernetII_test.cpp ../include/ethernetII.h \
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/network_interface.h:
 src/hwaddress.o: src/hwaddress.cpp ../include/hwaddress.h
 
 ../include/hwaddress.h:
 src/icmp.o: src/icmp.cpp ../include/icmp.h ../include/pdu.h \
- ../include/endianness.h ../include/utils.h ../include/packetsender.h \
- ../include/ipaddress.h ../include/hwaddress.h
+ ../include/endianness.h ../include/utils.h ../include/ipaddress.h \
+ ../include/hwaddress.h
 
 ../include/icmp.h:
 
@@ -100,28 +92,22 @@ src/icmp.o: src/icmp.cpp ../include/icmp.h ../include/pdu.h \
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/ipaddress.h:
 
 ../include/hwaddress.h:
 src/ipaddress.o: src/ipaddress.cpp ../include/ipaddress.h \
- ../include/utils.h ../include/packetsender.h ../include/ipaddress.h \
- ../include/hwaddress.h
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h
 
 ../include/ipaddress.h:
 
 ../include/utils.h:
-
-../include/packetsender.h:
 
 ../include/ipaddress.h:
 
 ../include/hwaddress.h:
 src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h \
  ../include/small_uint.h ../include/endianness.h ../include/ipaddress.h \
- ../include/ipaddress.h ../include/utils.h ../include/packetsender.h \
- ../include/hwaddress.h
+ ../include/ipaddress.h ../include/utils.h ../include/hwaddress.h
 
 ../include/ip.h:
 
@@ -137,8 +123,6 @@ src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h \
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/hwaddress.h:
 src/llc.o: src/llc.cpp ../include/llc.h ../include/pdu.h \
  ../include/endianness.h
@@ -151,7 +135,7 @@ src/llc.o: src/llc.cpp ../include/llc.h ../include/pdu.h \
 src/main.o: src/main.cpp
 src/network_interface.o: src/network_interface.cpp \
  ../include/network_interface.h ../include/hwaddress.h \
- ../include/ipaddress.h ../include/utils.h ../include/packetsender.h
+ ../include/ipaddress.h ../include/utils.h
 
 ../include/network_interface.h:
 
@@ -160,11 +144,9 @@ src/network_interface.o: src/network_interface.cpp \
 ../include/ipaddress.h:
 
 ../include/utils.h:
-
-../include/packetsender.h:
 src/snap.o: src/snap.cpp ../include/snap.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/utils.h \
- ../include/packetsender.h ../include/ipaddress.h ../include/hwaddress.h
+ ../include/ipaddress.h ../include/hwaddress.h
 
 ../include/snap.h:
 
@@ -176,14 +158,12 @@ src/snap.o: src/snap.cpp ../include/snap.h ../include/pdu.h \
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/ipaddress.h:
 
 ../include/hwaddress.h:
 src/tcp.o: src/tcp.cpp ../include/tcp.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/utils.h \
- ../include/packetsender.h ../include/ipaddress.h ../include/hwaddress.h
+ ../include/ipaddress.h ../include/hwaddress.h
 
 ../include/tcp.h:
 
@@ -194,8 +174,6 @@ src/tcp.o: src/tcp.cpp ../include/tcp.h ../include/pdu.h \
 ../include/small_uint.h:
 
 ../include/utils.h:
-
-../include/packetsender.h:
 
 ../include/ipaddress.h:
 
@@ -211,12 +189,10 @@ src/udp.o: src/udp.cpp ../include/udp.h ../include/pdu.h \
 
 ../include/pdu.h:
 src/utils_test.o: src/utils_test.cpp ../include/utils.h \
- ../include/packetsender.h ../include/ipaddress.h ../include/hwaddress.h \
- ../include/endianness.h ../include/ipaddress.h
+ ../include/ipaddress.h ../include/hwaddress.h ../include/endianness.h \
+ ../include/ipaddress.h
 
 ../include/utils.h:
-
-../include/packetsender.h:
 
 ../include/ipaddress.h:
 
@@ -478,7 +454,7 @@ src/dot11/dot11.o: src/dot11/dot11.cpp ../include/dot11.h \
  ../include/pdu.h ../include/endianness.h ../include/hwaddress.h \
  ../include/small_uint.h ../include/network_interface.h \
  ../include/ipaddress.h include/tests/dot11.h include/tests/dot11.h \
- ../include/utils.h ../include/packetsender.h
+ ../include/utils.h
 
 ../include/dot11.h:
 
@@ -499,8 +475,6 @@ include/tests/dot11.h:
 include/tests/dot11.h:
 
 ../include/utils.h:
-
-../include/packetsender.h:
 src/dot11/probe_request.o: src/dot11/probe_request.cpp ../include/dot11.h \
  ../include/pdu.h ../include/endianness.h ../include/hwaddress.h \
  ../include/small_uint.h ../include/network_interface.h \
@@ -715,7 +689,7 @@ include/tests/dot11.h:
  ../include/endianness.h ../include/hwaddress.h ../include/small_uint.h \
  ../include/network_interface.h ../include/ipaddress.h \
  ../include/rawpdu.h ../include/radiotap.h ../include/rsn_information.h \
- ../include/packetsender.h ../include/snap.h
+ ../include/packet_sender.h ../include/snap.h
 
 ../include/dot11.h:
 
@@ -737,7 +711,7 @@ include/tests/dot11.h:
 
 ../include/rsn_information.h:
 
-../include/packetsender.h:
+../include/packet_sender.h:
 
 ../include/snap.h:
 ../src/eapol.o: ../src/eapol.cpp ../include/eapol.h ../include/pdu.h \
@@ -765,7 +739,7 @@ include/tests/dot11.h:
 ../src/ethernetII.o: ../src/ethernetII.cpp ../include/ethernetII.h \
  ../include/pdu.h ../include/endianness.h ../include/hwaddress.h \
  ../include/network_interface.h ../include/ipaddress.h \
- ../include/packetsender.h ../include/rawpdu.h ../include/ip.h \
+ ../include/packet_sender.h ../include/rawpdu.h ../include/ip.h \
  ../include/small_uint.h ../include/arp.h
 
 ../include/ethernetII.h:
@@ -780,7 +754,7 @@ include/tests/dot11.h:
 
 ../include/ipaddress.h:
 
-../include/packetsender.h:
+../include/packet_sender.h:
 
 ../include/rawpdu.h:
 
@@ -791,7 +765,7 @@ include/tests/dot11.h:
 ../include/arp.h:
 ../src/icmp.o: ../src/icmp.cpp ../include/icmp.h ../include/pdu.h \
  ../include/endianness.h ../include/rawpdu.h ../include/utils.h \
- ../include/packetsender.h ../include/ipaddress.h ../include/hwaddress.h
+ ../include/ipaddress.h ../include/hwaddress.h
 
 ../include/icmp.h:
 
@@ -803,15 +777,13 @@ include/tests/dot11.h:
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/ipaddress.h:
 
 ../include/hwaddress.h:
 ../src/ieee802_3.o: ../src/ieee802_3.cpp ../include/ieee802_3.h \
  ../include/pdu.h ../include/endianness.h ../include/hwaddress.h \
  ../include/network_interface.h ../include/ipaddress.h \
- ../include/packetsender.h ../include/llc.h
+ ../include/packet_sender.h ../include/llc.h
 
 ../include/ieee802_3.h:
 
@@ -825,7 +797,7 @@ include/tests/dot11.h:
 
 ../include/ipaddress.h:
 
-../include/packetsender.h:
+../include/packet_sender.h:
 
 ../include/llc.h:
 ../src/ipaddress.o: ../src/ipaddress.cpp ../include/ipaddress.h \
@@ -837,7 +809,7 @@ include/tests/dot11.h:
 ../src/ip.o: ../src/ip.cpp ../include/ip.h ../include/pdu.h \
  ../include/small_uint.h ../include/endianness.h ../include/ipaddress.h \
  ../include/tcp.h ../include/udp.h ../include/icmp.h ../include/rawpdu.h \
- ../include/utils.h ../include/packetsender.h ../include/hwaddress.h \
+ ../include/utils.h ../include/hwaddress.h ../include/packet_sender.h \
  ../include/constants.h
 
 ../include/ip.h:
@@ -860,9 +832,9 @@ include/tests/dot11.h:
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/hwaddress.h:
+
+../include/packet_sender.h:
 
 ../include/constants.h:
 ../src/llc.o: ../src/llc.cpp ../include/pdu.h ../include/llc.h \
@@ -879,8 +851,7 @@ include/tests/dot11.h:
 ../include/rawpdu.h:
 ../src/network_interface.o: ../src/network_interface.cpp \
  ../include/network_interface.h ../include/hwaddress.h \
- ../include/ipaddress.h ../include/utils.h ../include/packetsender.h \
- ../include/endianness.h
+ ../include/ipaddress.h ../include/utils.h ../include/endianness.h
 
 ../include/network_interface.h:
 
@@ -890,17 +861,21 @@ include/tests/dot11.h:
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/endianness.h:
-../src/packetsender.o: ../src/packetsender.cpp ../include/packetsender.h \
- ../include/pdu.h
+../src/packet_sender.o: ../src/packet_sender.cpp ../include/pdu.h \
+ ../include/packet_sender.h
 
-../include/packetsender.h:
+../include/pdu.h:
+
+../include/packet_sender.h:
+../src/packet_writer.o: ../src/packet_writer.cpp \
+ ../include/packet_writer.h ../include/pdu.h
+
+../include/packet_writer.h:
 
 ../include/pdu.h:
 ../src/pdu.o: ../src/pdu.cpp ../include/pdu.h ../include/rawpdu.h \
- ../include/pdu.h ../include/packetsender.h
+ ../include/pdu.h ../include/packet_sender.h
 
 ../include/pdu.h:
 
@@ -908,11 +883,11 @@ include/tests/dot11.h:
 
 ../include/pdu.h:
 
-../include/packetsender.h:
+../include/packet_sender.h:
 ../src/radiotap.o: ../src/radiotap.cpp ../include/radiotap.h \
  ../include/pdu.h ../include/endianness.h ../include/network_interface.h \
  ../include/hwaddress.h ../include/ipaddress.h ../include/dot11.h \
- ../include/small_uint.h ../include/utils.h ../include/packetsender.h
+ ../include/small_uint.h ../include/utils.h ../include/packet_sender.h
 
 ../include/radiotap.h:
 
@@ -932,7 +907,7 @@ include/tests/dot11.h:
 
 ../include/utils.h:
 
-../include/packetsender.h:
+../include/packet_sender.h:
 ../src/rawpdu.o: ../src/rawpdu.cpp ../include/rawpdu.h ../include/pdu.h
 
 ../include/rawpdu.h:
@@ -991,7 +966,7 @@ include/tests/dot11.h:
 ../src/tcp.o: ../src/tcp.cpp ../include/tcp.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/ip.h \
  ../include/ipaddress.h ../include/constants.h ../include/rawpdu.h \
- ../include/utils.h ../include/packetsender.h ../include/hwaddress.h
+ ../include/utils.h ../include/hwaddress.h
 
 ../include/tcp.h:
 
@@ -1010,8 +985,6 @@ include/tests/dot11.h:
 ../include/rawpdu.h:
 
 ../include/utils.h:
-
-../include/packetsender.h:
 
 ../include/hwaddress.h:
 ../src/tcp_stream.o: ../src/tcp_stream.cpp ../include/rawpdu.h \
@@ -1048,8 +1021,8 @@ include/tests/dot11.h:
 ../include/ip.h:
 ../src/udp.o: ../src/udp.cpp ../include/udp.h ../include/pdu.h \
  ../include/endianness.h ../include/constants.h ../include/utils.h \
- ../include/packetsender.h ../include/ipaddress.h ../include/hwaddress.h \
- ../include/ip.h ../include/small_uint.h ../include/rawpdu.h
+ ../include/ipaddress.h ../include/hwaddress.h ../include/ip.h \
+ ../include/small_uint.h ../include/rawpdu.h
 
 ../include/udp.h:
 
@@ -1061,8 +1034,6 @@ include/tests/dot11.h:
 
 ../include/utils.h:
 
-../include/packetsender.h:
-
 ../include/ipaddress.h:
 
 ../include/hwaddress.h:
@@ -1073,14 +1044,13 @@ include/tests/dot11.h:
 
 ../include/rawpdu.h:
 ../src/utils.o: ../src/utils.cpp ../include/utils.h \
- ../include/packetsender.h ../include/ipaddress.h ../include/hwaddress.h \
- ../include/pdu.h ../include/ip.h ../include/pdu.h \
- ../include/small_uint.h ../include/endianness.h ../include/icmp.h \
- ../include/arp.h ../include/endianness.h ../include/network_interface.h
+ ../include/ipaddress.h ../include/hwaddress.h ../include/pdu.h \
+ ../include/ip.h ../include/pdu.h ../include/small_uint.h \
+ ../include/endianness.h ../include/icmp.h ../include/arp.h \
+ ../include/endianness.h ../include/network_interface.h \
+ ../include/packet_sender.h
 
 ../include/utils.h:
-
-../include/packetsender.h:
 
 ../include/ipaddress.h:
 
@@ -1103,3 +1073,5 @@ include/tests/dot11.h:
 ../include/endianness.h:
 
 ../include/network_interface.h:
+
+../include/packet_sender.h:

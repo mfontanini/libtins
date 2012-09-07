@@ -537,10 +537,16 @@ void Dot11ManagementFrame::erp_information(uint8_t value) {
 
 void Dot11ManagementFrame::bss_load(const bss_load_type &data) {
     uint8_t buffer[5];
+    uint16_t dummy = Endian::host_to_le(data.station_count);
 
-    *(uint16_t*)buffer = Endian::host_to_le(data.station_count);
+    //*(uint16_t*)buffer = Endian::host_to_le(data.station_count);
+    buffer[0] = dummy & 0xff;
+    buffer[1] = (dummy >> 8) & 0xff;
     buffer[2] = data.channel_utilization;
-    *(uint16_t*)(buffer + 3) = Endian::host_to_le(data.available_capacity);
+    dummy = Endian::host_to_le(data.available_capacity);
+    buffer[3] = dummy & 0xff;
+    buffer[4] = (dummy >> 8) & 0xff;
+    //*(uint16_t*)(buffer + 3) = Endian::host_to_le(data.available_capacity);
     add_tagged_option(BSS_LOAD, sizeof(buffer), buffer);
 }
 

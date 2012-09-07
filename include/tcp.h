@@ -26,6 +26,8 @@
 #include <list>
 #include <vector>
 #include <stdint.h>
+#include <stdexcept>
+#include <utility>
 #include "pdu.h"
 #include "endianness.h"
 #include "small_uint.h"
@@ -41,7 +43,7 @@ namespace Tins {
     class TCP : public PDU {
     public:
         /**
-         * \brief This PDU's flag.
+         * This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::TCP;
     
@@ -90,16 +92,60 @@ namespace Tins {
         /**
          * \brief Class that represents a TCP option field.
          */
-        struct TCPOption {
+        class TCPOption {
+        public:
             /**
-             * \brief Creates an instance of a TCPOption.
-             * \param okind The option kind.
-             * \param olength The option's data length.
-             * \param odata The option's data(if any).
+             * \brief Constructs a TCPOption.
+             * \param opt The option type.
+             * \param length The option's data length.
+             * \param data The option's data(if any).
              */
-            TCPOption(uint8_t opt = 0, uint8_t length = 0, const uint8_t *value = 0) 
-            : option(opt), value(value, (value) ? (value + length) : 0) { 
+            TCPOption(uint8_t opt = 0, uint8_t length = 0, const uint8_t *data = 0) 
+            : option_(opt) {
+                value_.push_back(length);
+                if(data)
+                    value_.insert(value_.end(), data, data + length);
+            }
+            
+            /**
+             * Constructs a TCPOption from iterators, which indicate
+             * the data to be stored in it.
+             * \param opt The option type.
+             * \param start The beginning of the option data.
+             * \param end The end of the option data.
+             */
+            template<typename ForwardIterator>
+            TCPOption(uint8_t opt, ForwardIterator start, ForwardIterator end) 
+            : option_(opt), value_(start, end) {
                 
+            }
+            
+            /**
+             * Retrieves this option's type.
+             * \return uint8_t containing this option's size.
+             */
+            uint8_t option() const {
+                return option_;
+            }
+            
+            /**
+             * Retrieves this option's data.
+             * 
+             * If this method is called when data_size() == 0, 
+             * dereferencing the returned pointer will result in undefined
+             * behaviour.
+             * 
+             * \return const value_type& containing this option's value.
+             */
+            const uint8_t *data_ptr() const {
+                return &value_[1];
+            }
+            
+            /**
+             * Retrieves the length of this option's data.
+             */
+            size_t data_size() const {
+                return value_.size() - 1;
             }
 
             /**
@@ -108,9 +154,31 @@ namespace Tins {
              * \return The buffer pointer incremented by the size of this option.
              */
             uint8_t *write(uint8_t *buffer);
-            
-            uint8_t option;
-            std::vector<uint8_t> value;
+        private:
+            typedef std::vector<uint8_t> data_type;
+        
+            uint8_t option_;
+            data_type value_;
+        };
+
+        /**
+         * The type used to store the options.
+         */
+        typedef std::vector<TCPOption> options_type;
+        
+        /**
+         * The type used to store the sack option.
+         */
+        typedef std::vector<uint32_t> sack_type;
+
+        /**
+         * \brief Exception thrown when an option is not found.
+         */
+        class OptionNotFound : public std::exception {
+        public:
+            const char* what() const throw() {
+                return "Option not found";
+            }
         };
 
         /**
@@ -193,7 +261,7 @@ namespace Tins {
          * 
          * \return The options list.
          */
-        const std::list<TCPOption> &options() const { return _options; }
+        const options_type &options() const { return _options; }
 
         /**
          * \brief Gets the value of a flag.
@@ -261,72 +329,60 @@ namespace Tins {
          */
         void data_offset(small_uint<4> new_doff);
 
-        /**
-         * \brief Set the payload.
-         *
-         * Payload is NOT copied. Therefore, pointers provided as
-         * payloads must be freed manually by the user. This actually
-         * creates a RawPDU that holds the payload, and sets it as the
-         * inner_pdu. Therefore, if an inner_pdu was set previously,
-         * a call to TCP::payload will delete it.
-         *
-         * \param new_payload New payload.
-         * \param new_payload_size New payload's size
-         */
-        void payload(uint8_t *new_payload, uint32_t new_payload_size);
+        // Options
 
         /**
          * \brief Add a maximum segment size option.
          *
          * \param value The new maximum segment size.
          */
-        void add_mss_option(uint16_t value);
+        void mss(uint16_t value);
 
         /**
          * \brief Searchs for a maximum segment size option.
          * \param value A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_mss_option(uint16_t *value);
+        uint16_t mss() const;
 
         /**
          * \brief Add a window scale option.
          *
          * \param value The new window scale.
          */
-        void add_winscale_option(uint8_t value);
+        void winscale(uint8_t value);
         
         /**
          * \brief Searchs for a window scale option.
          * \param value A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_winscale_option(uint8_t *value);
+        uint8_t winscale() const;
 
         /**
          * \brief Add a sack permitted option.
          */
-        void add_sack_permitted_option();
+        void sack_permitted();
         
         /**
          * \brief Searchs for a sack permitted option.
          * \return True if the option was found, false otherwise.
          */
-        bool search_sack_permitted_option();
+        bool has_sack_permitted() const;
         
         /**
          * \brief Add a sack option.
          *
          * \param value The new window scale.
          */
-        void add_sack_option(const std::list<uint32_t> &edges);
+        void sack(const sack_type &edges);
         
         /**
          * \brief Searchs for a sack option.
          * \param value A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_sack_option(std::list<uint32_t> *edges);
+        sack_type sack() const;
 
         /**
          * \brief Add a timestamp option.
@@ -334,7 +390,7 @@ namespace Tins {
          * \param value The current value of the timestamp clock.
          * \param reply The echo reply field.
          */
-        void add_timestamp_option(uint32_t value, uint32_t reply);
+        void timestamp(uint32_t value, uint32_t reply);
 
         /**
          * \brief Searchs for a timestamp option.
@@ -342,21 +398,21 @@ namespace Tins {
          * \param reply A pointer in which the option's reply value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_timestamp_option(uint32_t *value, uint32_t *reply);
+        std::pair<uint32_t, uint32_t> timestamp() const;
 
         /**
          * \brief Add a alternate checksum option.
          *
          * \param value The new alternate checksum scale.
          */
-        void add_altchecksum_option(AltChecksums value);
+        void altchecksum(AltChecksums value);
         
         /**
          * \brief Searchs for a alternate checksum option.
          * \param value A pointer in which the option's value will be stored.
          * \return True if the option was found, false otherwise.
          */
-        bool search_altchecksum_option(uint8_t *value);
+        AltChecksums altchecksum() const;
 
         /**
          * \brief Set a TCP flag value.
@@ -443,13 +499,12 @@ namespace Tins {
 
         static const uint16_t DEFAULT_WINDOW;
         
-        template<class T> bool generic_search(Option opt, T *value) {
+        template<class T> 
+        T generic_search(Option opt) const {
             const TCPOption *option = search_option(opt);
-            if(option && option->value.size() == sizeof(T)) {
-                *value = *(const T*)(&option->value[0]);
-                return true;
-            }
-            return false;
+            if(option && option->data_size() == sizeof(T))
+                return *(const T*)(&option->data_ptr()[0]);
+            throw OptionNotFound();
         }
         /** \brief Serialices this TCP PDU.
          * \param buffer The buffer in which the PDU will be serialized.
@@ -459,7 +514,7 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         tcphdr _tcp;
-        std::list<TCPOption> _options;
+        options_type _options;
         uint32_t _options_size, _total_options_size;
     };
 };

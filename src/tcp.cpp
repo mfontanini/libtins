@@ -19,7 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include <stdexcept>
 #include <cstring>
 #include <cassert>
 #include "tcp.h"
@@ -116,89 +115,82 @@ void TCP::urg_ptr(uint16_t new_urg_ptr) {
     _tcp.urg_ptr = Endian::host_to_be(new_urg_ptr);
 }
 
-void TCP::payload(uint8_t *new_payload, uint32_t new_payload_size) {
-    inner_pdu(new RawPDU(new_payload, new_payload_size));
-}
-
 void TCP::data_offset(small_uint<4> new_doff) {
     this->_tcp.doff = new_doff;
 }
 
-void TCP::add_mss_option(uint16_t value) {
+void TCP::mss(uint16_t value) {
     value = Endian::host_to_be(value);
     add_option(MSS, 2, (uint8_t*)&value);
 }
 
-bool TCP::search_mss_option(uint16_t *value) {
-    if(!generic_search(MSS, value))
-        return false;
-    *value = Endian::host_to_be(*value);
-    return true;
+uint16_t TCP::mss() const {
+    return Endian::host_to_be(generic_search<uint16_t>(MSS));
 }
 
-void TCP::add_winscale_option(uint8_t value) {
+void TCP::winscale(uint8_t value) {
     add_option(WSCALE, 1, &value);
 }
 
-bool TCP::search_winscale_option(uint8_t *value) {
-    return generic_search(WSCALE, value);
+uint8_t TCP::winscale() const {
+    return generic_search<uint8_t>(WSCALE);
 }
 
-void TCP::add_sack_permitted_option() {
+void TCP::sack_permitted() {
     add_option(SACK_OK, 0, 0);
 }
 
-bool TCP::search_sack_permitted_option() {
+bool TCP::has_sack_permitted() const {
     return search_option(SACK_OK);
 }
 
-void TCP::add_sack_option(const std::list<uint32_t> &edges) {
+void TCP::sack(const sack_type &edges) {
     uint32_t *value = 0;
     if(edges.size()) {
         value = new uint32_t[edges.size()];
         uint32_t *ptr = value;
-        for(std::list<uint32_t>::const_iterator it = edges.begin(); it != edges.end(); ++it)
+        for(sack_type::const_iterator it = edges.begin(); it != edges.end(); ++it)
             *(ptr++) = Endian::host_to_be(*it);
     }
     add_option(SACK, (uint8_t)(sizeof(uint32_t) * edges.size()), (const uint8_t*)value);
     delete[] value;
 }
 
-bool TCP::search_sack_option(std::list<uint32_t> *edges) {
+TCP::sack_type TCP::sack() const {
     const TCPOption *option = search_option(SACK);
-    if(!option || (option->value.size() % sizeof(uint32_t)) != 0)
-        return false;
-    const uint32_t *ptr = (const uint32_t*)&option->value[0];
-    const uint32_t *end = ptr + (option->value.size() / sizeof(uint32_t));
+    if(!option || (option->data_size() % sizeof(uint32_t)) != 0)
+        throw OptionNotFound();
+    const uint32_t *ptr = (const uint32_t*)option->data_ptr();
+    const uint32_t *end = ptr + (option->data_size() / sizeof(uint32_t));
+    sack_type edges(end - ptr);
+    sack_type::iterator it = edges.begin();
     while(ptr < end)
-        edges->push_back(Endian::host_to_be(*(ptr++)));
-    return true;
+        *it++ = Endian::host_to_be(*(ptr++));
+    return edges;
 }
 
-void TCP::add_timestamp_option(uint32_t value, uint32_t reply) {
+void TCP::timestamp(uint32_t value, uint32_t reply) {
     uint64_t buffer = (uint64_t(value) << 32) | reply;
     buffer = Endian::host_to_be(buffer);
     add_option(TSOPT, 8, (uint8_t*)&buffer);
 }
 
-bool TCP::search_timestamp_option(uint32_t *value, uint32_t *reply) {
+std::pair<uint32_t, uint32_t> TCP::timestamp() const {
     const TCPOption *option = search_option(TSOPT);
-    if(!option || option->value.size() != (sizeof(uint32_t) << 1))
-        return false;
-    uint64_t buffer = *(const uint64_t*)&option->value[0];
+    if(!option || option->data_size() != (sizeof(uint32_t) << 1))
+        throw OptionNotFound();
+    uint64_t buffer = *(const uint64_t*)option->data_ptr();
     buffer = Endian::be_to_host(buffer);
-    *value = (buffer >> 32) & 0xffffffff;
-    *reply = buffer & 0xffffffff;
-    return true;
+    return std::make_pair((buffer >> 32) & 0xffffffff, buffer & 0xffffffff);
 }
 
-void TCP::add_altchecksum_option(AltChecksums value) {
+void TCP::altchecksum(AltChecksums value) {
     uint8_t int_value = value;
     add_option(ALTCHK, 1, &int_value);
 }
 
-bool TCP::search_altchecksum_option(uint8_t *value) {
-    return generic_search(ALTCHK, value);
+TCP::AltChecksums TCP::altchecksum() const {
+    return static_cast<AltChecksums>(generic_search<uint8_t>(ALTCHK));
 }
 
 small_uint<1> TCP::get_flag(Flags tcp_flag) {
@@ -287,7 +279,7 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     uint8_t *tcp_start = buffer;
     buffer += sizeof(tcphdr);
     _tcp.doff = (sizeof(tcphdr) + _total_options_size) / sizeof(uint32_t);
-    for(std::list<TCPOption>::iterator it = _options.begin(); it != _options.end(); ++it)
+    for(options_type::iterator it = _options.begin(); it != _options.end(); ++it)
         buffer = it->write(buffer);
 
     if(_options_size < _total_options_size) {
@@ -314,8 +306,8 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
 }
 
 const TCP::TCPOption *TCP::search_option(Option opt) const {
-    for(std::list<TCPOption>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-        if(it->option == opt)
+    for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+        if(it->option() == opt)
             return &(*it);
     }
     return 0;
@@ -324,15 +316,15 @@ const TCP::TCPOption *TCP::search_option(Option opt) const {
 /* TCPOptions */
 
 uint8_t *TCP::TCPOption::write(uint8_t *buffer) {
-    if(option == 0 || option == 1) {
-        *buffer = option;
+    if(option_ == 0 || option_ == 1) {
+        *buffer = option_;
         return buffer + 1;
     }
     else {
-        buffer[0] = option;
-        buffer[1] = value.size() + (sizeof(uint8_t) << 1);
-        if(!value.empty())
-            std::copy(value.begin(), value.end(), buffer + 2);
+        buffer[0] = option_;
+        buffer[1] = data_size() + (sizeof(uint8_t) << 1);
+        if(!value_.empty())
+            std::copy(value_.begin() + 1, value_.end(), buffer + 2);
         return buffer + buffer[1];
     }
 }
