@@ -27,6 +27,7 @@
 #include "small_uint.h"
 #include "endianness.h"
 #include "ipaddress.h"
+#include "pdu_option.h"
 
 namespace Tins {
 
@@ -65,7 +66,7 @@ namespace Tins {
          *
          * Enum Option indicates the possible IP Options.
          */
-        enum Option {
+        enum OptionNumber {
             END = 0,
             NOOP = 1,
             SEC = 2,
@@ -88,36 +89,105 @@ namespace Tins {
         };
         
         /**
-         * \brief This class represents an IP option. 
+         * \brief The type used to represent an option's type.
          */
-        struct IPOption {
-            friend class IP;
-            struct {
-            #if TINS_IS_LITTLE_ENDIAN
-                unsigned int number:5;
-                unsigned int op_class:2;
-                unsigned int copied:1;
-            #elif TINS_IS_BIG_ENDIAN
-                unsigned int copied:1;
-                unsigned int op_class:2;
-                unsigned int number:5;
-            #endif
-            } __attribute__((__packed__)) type;
-            
-            uint8_t* write(uint8_t* buffer);
+        struct option_identifier {
+        #if TINS_IS_LITTLE_ENDIAN
+            uint8_t number:5,
+                    op_class:2,
+                    copied:1;
+        #elif TINS_IS_BIG_ENDIAN
+            uint8_t copied:1,
+                    op_class:2,
+                    number:5;
+        #endif
+            /**
+             * \brief Default constructor.
+             * 
+             * Initializes every field to 0.
+             */
+            option_identifier() : number(0), op_class(0), copied(0) {}
             
             /**
-             * Getter for IP options' data pointer.
+             * \brief Constructs this option from a single uint8_t value.
+             * 
+             * This parses the value and initializes each field with the
+             * appropriate value.
+             * 
+             * \param value The value to be parsed and used for 
+             * initialization
              */
-            const uint8_t* data_ptr() const;
+            option_identifier(uint8_t value) 
+            : number(value & 0x1f), 
+              op_class((value >> 5) & 0x03), 
+              copied((value >> 7) & 0x01) {}
             
             /**
-             * Getter for the data size field
+             * Constructor using user provided values for each field.
+             * \param number The number field value.
+             * \param op_class The option class field value.
+             * \param copied The copied field value.
              */
-            uint8_t data_size() const;
-        private:
-            std::vector<uint8_t> optional_data;
+            option_identifier(OptionNumber number, OptionClass op_class,
+              small_uint<1> copied) 
+            : number(number), op_class(op_class), copied(copied) {}
+            
+            /**
+             * \brief Equality operator.
+             */
+            bool operator==(const option_identifier &rhs) const {
+                return number == rhs.number && op_class == rhs.op_class && copied == rhs.copied;
+            }
+        } __attribute__((__packed__));
+        
+        /**
+         * The IP options type.
+         */
+        typedef PDUOption<option_identifier> ip_option;
+
+        /**
+         * The type of the security option.
+         */
+        struct security_type {
+            uint16_t security, compartments;
+            uint16_t handling_restrictions;
+            small_uint<24> transmission_control;
+            
+            security_type(uint16_t sec = 0, uint16_t comp = 0,
+              uint16_t hand_res = 0, small_uint<24> tcc = 0)
+            : security(sec), compartments(comp), 
+              handling_restrictions(hand_res), transmission_control(tcc) 
+              {}
         };
+        
+        /**
+         * The type of the Loose Source and Record Route
+         */
+        struct generic_route_option_type {
+            typedef std::vector<address_type> routes_type;
+            
+            uint8_t pointer;
+            routes_type routes;
+            
+            generic_route_option_type(uint8_t ptr = 0, 
+              routes_type rts = routes_type())
+            : pointer(ptr), routes(rts) {}
+        };
+        
+        /**
+         * The type of the Loose Source and Record Route
+         */
+        typedef generic_route_option_type lsrr_type;
+        
+        /**
+         * The type of the Strict Source and Record Route
+         */
+        typedef generic_route_option_type ssrr_type;
+        
+        /**
+         * The type of the Record Route
+         */
+        typedef generic_route_option_type record_route_type;
 
         /**
          * \brief Constructor for building the IP PDU.
@@ -300,42 +370,133 @@ namespace Tins {
         void version(small_uint<4> ver);
 
         /**
-         * \brief Sets an IP option.
-         *
-         * \param copied The copied flag for this option.
-         * \param op_class The option class to be set.
-         * \param number The options number to be set.
-         * \param data The data of this options.
-         * \param data_size The data size.
+         * \brief Adds an IP option.
+         * 
+         * The option is added after the last option in the option 
+         * fields.
+         * 
+         * \param option The option to be added
          */
-        void set_option(uint8_t copied, OptionClass op_class, Option number, const uint8_t* data = 0, uint32_t data_size = 0);
+        void add_option(const ip_option &option);
 
         /**
          * \brief Searchs for an option that matchs the given flag.
-         * \param opt_class The option class to be searched.
-         * \param opt_number The option number to be searched.
-         * \return A pointer to the option, or 0 if it was not found.
+         * \param id The option identifier to be searched.
          */
-        const IPOption *search_option(OptionClass opt_class, Option opt_number) const;
+        const ip_option *search_option(option_identifier id) const;
+
+        // Option setters
+        
+        /**
+         * \brief Adds an End Of List option.
+         */
+        void eol();
 
         /**
-         * \brief Sets the End of List option.
+         * \brief Adds a NOP option.
          */
-        void set_eol_option();
+        void noop();
 
         /**
-         * \brief Sets the NOP option.
-         */
-        void set_noop_option();
-
-        /**
-         * \brief Sets the security option.
+         * \brief Adds a security option.
          *
-         * \param data The data for this option
-         * \param data_len The length of the data.
+         * \param data The data to be stored in this option.
          */
-        void set_sec_option(const uint8_t* data, uint32_t data_len);
-        /* Add more option setters */
+        void security(const security_type &data);
+        
+        /**
+         * \brief Adds a Loose Source and Record Route option.
+         *
+         * \param data The data to be stored in this option.
+         */
+        void lsrr(const lsrr_type &data) {
+            add_route_option(131, data);
+        }
+        
+        /**
+         * \brief Adds a Strict Source and Record Route option.
+         *
+         * \param data The data to be stored in this option.
+         */
+        void ssrr(const ssrr_type &data) {
+            add_route_option(137, data);
+        }
+        
+        /**
+         * \brief Adds a Record Route option.
+         *
+         * \param data The data to be stored in this option.
+         */
+        void record_route(const record_route_type &data) {
+            add_route_option(7, data);
+        }
+        
+        /**
+         * \brief Adds a Stream Identifier option.
+         *
+         * \param stream_id The stream id to be stored in this option.
+         */
+        void stream_identifier(uint16_t stream_id);
+        
+        // Option getters
+        
+        /**
+         * \brief Searchs and returns a security option.
+         * 
+         * If no such option exists, an option_not_found exception
+         * is thrown.
+         * 
+         * \return security_type containing the option found.
+         */
+        security_type security() const;
+        
+        /**
+         * \brief Searchs and returns a Loose Source and Record Route 
+         * option.
+         * 
+         * If no such option exists, an option_not_found exception
+         * is thrown.
+         * 
+         * \return lsrr_type containing the option found.
+         */
+        lsrr_type lsrr() const {
+            return search_route_option(131);
+        }
+        
+        /**
+         * \brief Searchs and returns a Strict Source and Record Route 
+         * option.
+         * 
+         * If no such option exists, an option_not_found exception
+         * is thrown.
+         * 
+         * \return ssrr_type containing the option found.
+         */
+        ssrr_type ssrr() const {
+            return search_route_option(137);
+        }
+        
+        /**
+         * \brief Searchs and returns a Record Route option.
+         * 
+         * If no such option exists, an option_not_found exception
+         * is thrown.
+         * 
+         * \return record_route_type containing the option found.
+         */
+        record_route_type record_route() const {
+            return search_route_option(7);
+        }
+
+        /**
+         * \brief Searchs and returns a Stream Identifier option.
+         * 
+         * If no such option exists, an option_not_found exception
+         * is thrown.
+         * 
+         * \return uint16_t containing the option found.
+         */
+        uint16_t stream_identifier() const;
 
         /* Virtual methods */
 
@@ -418,9 +579,12 @@ namespace Tins {
 
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        uint8_t* write_option(const ip_option &opt, uint8_t* buffer);
+        void add_route_option(option_identifier id, const generic_route_option_type &data);
+        generic_route_option_type search_route_option(option_identifier id) const;
 
         iphdr _ip;
-        std::list<IPOption> _ip_options;
+        std::list<ip_option> _ip_options;
         uint32_t _options_size, _padded_options_size;
     };
 };

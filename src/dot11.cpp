@@ -85,19 +85,14 @@ void Dot11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
     }
 }
 
-Dot11::Dot11Option::Dot11Option(uint8_t opt, uint8_t len, const uint8_t *val) 
-: option_id(opt), value(val, val + len) {
-    
-}
-
 void Dot11::add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val) {
     uint32_t opt_size = len + (sizeof(uint8_t) << 1);
-    _options.push_back(Dot11Option((uint8_t)opt, len, val));
+    _options.push_back(dot11_option((uint8_t)opt, len, val));
     _options_size += opt_size;
 }
 
-const Dot11::Dot11Option *Dot11::search_option(TaggedOption opt) const {
-    for(std::list<Dot11Option>::const_iterator it = _options.begin(); it != _options.end(); ++it)
+const Dot11::dot11_option *Dot11::search_option(TaggedOption opt) const {
+    for(std::list<dot11_option>::const_iterator it = _options.begin(); it != _options.end(); ++it)
         if(it->option() == (uint8_t)opt)
             return &(*it);
     return 0;
@@ -188,7 +183,7 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
     uint32_t child_len = write_fixed_parameters(buffer, total_sz - _options_size);
     buffer += child_len;
     assert(total_sz >= child_len + _options_size);
-    for(std::list<Dot11Option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+    for(std::list<dot11_option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option();
         *(buffer++) = it->data_size();
         std::copy(it->data_ptr(), it->data_ptr() + it->data_size(), buffer);
@@ -255,8 +250,8 @@ void Dot11::copy_80211_fields(const Dot11 *other) {
     std::memcpy(&_header, &other->_header, sizeof(_header));
     _iface = other->_iface;
     _options_size = other->_options_size;
-    for(std::list<Dot11Option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
-        _options.push_back(Dot11Option(it->option(), it->data_size(), it->data_ptr()));
+    for(std::list<dot11_option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
+        _options.push_back(dot11_option(it->option(), it->data_size(), it->data_ptr()));
 }
 
 /* Dot11ManagementFrame */
@@ -352,7 +347,7 @@ uint8_t *Dot11ManagementFrame::serialize_rates(const rates_type &rates) {
     return buffer;
 }
 
-Dot11ManagementFrame::rates_type Dot11ManagementFrame::deserialize_rates(const Dot11Option *option) {
+Dot11ManagementFrame::rates_type Dot11ManagementFrame::deserialize_rates(const dot11_option *option) {
     rates_type output;
     const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
     while(ptr != end) {
@@ -574,49 +569,49 @@ void Dot11ManagementFrame::challenge_text(const std::string &text) {
 // Getters
 
 RSNInformation Dot11ManagementFrame::rsn_information() {
-    const Dot11::Dot11Option *option = search_option(RSN);
+    const Dot11::dot11_option *option = search_option(RSN);
     if(!option || option->data_size() < (sizeof(uint16_t) << 1) + sizeof(uint32_t))
         throw std::runtime_error("RSN information not set");
     return RSNInformation(option->data_ptr(), option->data_size());
 }
 
 string Dot11ManagementFrame::ssid() const {
-    const Dot11::Dot11Option *option = search_option(SSID);
+    const Dot11::dot11_option *option = search_option(SSID);
     if(!option || option->data_size() == 0)
         throw std::runtime_error("SSID not set");
     return string((const char*)option->data_ptr(), option->data_size());
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::supported_rates() const {
-    const Dot11::Dot11Option *option = search_option(SUPPORTED_RATES);
+    const Dot11::dot11_option *option = search_option(SUPPORTED_RATES);
     if(!option || option->data_size() == 0)
         throw std::runtime_error("Supported rates not set");
     return deserialize_rates(option);
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::extended_supported_rates() const {
-    const Dot11::Dot11Option *option = search_option(EXT_SUPPORTED_RATES);
+    const Dot11::dot11_option *option = search_option(EXT_SUPPORTED_RATES);
     if(!option || option->data_size() == 0)
         throw std::runtime_error("Extended supported rates not set");
     return deserialize_rates(option);
 }
 
 uint8_t Dot11ManagementFrame::qos_capability() const {
-    const Dot11::Dot11Option *option = search_option(QOS_CAPABILITY);
+    const Dot11::dot11_option *option = search_option(QOS_CAPABILITY);
     if(!option || option->data_size() != 1)
         throw std::runtime_error("QOS capability not set");
     return *option->data_ptr();
 }
 
 std::pair<uint8_t, uint8_t> Dot11ManagementFrame::power_capability() const {
-    const Dot11::Dot11Option *option = search_option(POWER_CAPABILITY);
+    const Dot11::dot11_option *option = search_option(POWER_CAPABILITY);
     if(!option || option->data_size() != 2)
         throw std::runtime_error("Power capability not set");
     return std::make_pair(*option->data_ptr(), *(option->data_ptr() + 1));
 }
 
 Dot11ManagementFrame::channels_type Dot11ManagementFrame::supported_channels() const {
-    const Dot11::Dot11Option *option = search_option(SUPPORTED_CHANNELS);
+    const Dot11::dot11_option *option = search_option(SUPPORTED_CHANNELS);
     // We need a multiple of two
     if(!option || ((option->data_size() & 0x1) == 1))
         throw std::runtime_error("Supported channels not set");
@@ -630,7 +625,7 @@ Dot11ManagementFrame::channels_type Dot11ManagementFrame::supported_channels() c
 }
 
 Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_information() const {
-    const Dot11::Dot11Option *option = search_option(REQUEST_INFORMATION);
+    const Dot11::dot11_option *option = search_option(REQUEST_INFORMATION);
     if(!option || option->data_size() == 0)
         throw std::runtime_error("Request information not set");
     request_info_type output;
@@ -640,7 +635,7 @@ Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_informatio
 }
 
 Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() const {
-    const Dot11::Dot11Option *option = search_option(FH_SET);
+    const Dot11::dot11_option *option = search_option(FH_SET);
     if(!option || option->data_size() != sizeof(fh_params_set))
         throw std::runtime_error("FH parameters set not set");
     fh_params_set output = *reinterpret_cast<const fh_params_set*>(option->data_ptr());
@@ -652,21 +647,21 @@ Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() con
 }
 
 uint8_t Dot11ManagementFrame::ds_parameter_set() const {
-    const Dot11::Dot11Option *option = search_option(DS_SET);
+    const Dot11::dot11_option *option = search_option(DS_SET);
     if(!option || option->data_size() != sizeof(uint8_t))
         throw std::runtime_error("DS parameters set not set");
     return *option->data_ptr();
 }
 
 uint16_t Dot11ManagementFrame::ibss_parameter_set() const {
-    const Dot11::Dot11Option *option = search_option(IBSS_SET);
+    const Dot11::dot11_option *option = search_option(IBSS_SET);
     if(!option || option->data_size() != sizeof(uint16_t))
         throw std::runtime_error("IBSS parameters set not set");
     return Endian::le_to_host(*reinterpret_cast<const uint16_t*>(option->data_ptr()));
 }
 
 Dot11ManagementFrame::ibss_dfs_params Dot11ManagementFrame::ibss_dfs() const {
-    const Dot11::Dot11Option *option = search_option(IBSS_DFS);
+    const Dot11::dot11_option *option = search_option(IBSS_DFS);
     if(!option || option->data_size() < ibss_dfs_params::minimum_size)
         throw std::runtime_error("IBSS DFS set not set");
     ibss_dfs_params output;
@@ -684,7 +679,7 @@ Dot11ManagementFrame::ibss_dfs_params Dot11ManagementFrame::ibss_dfs() const {
 }
 
 Dot11ManagementFrame::country_params Dot11ManagementFrame::country() const {
-    const Dot11::Dot11Option *option = search_option(COUNTRY);
+    const Dot11::dot11_option *option = search_option(COUNTRY);
     if(!option || option->data_size() < country_params::minimum_size)
         throw std::runtime_error("Country option not set");
     country_params output;
@@ -702,7 +697,7 @@ Dot11ManagementFrame::country_params Dot11ManagementFrame::country() const {
 }
 
 std::pair<uint8_t, uint8_t> Dot11ManagementFrame::fh_parameters() const {
-    const Dot11::Dot11Option *option = search_option(HOPPING_PATTERN_PARAMS);
+    const Dot11::dot11_option *option = search_option(HOPPING_PATTERN_PARAMS);
     if(!option || option->data_size() != sizeof(uint8_t) * 2)
         throw std::runtime_error("FH parameters option not set");
     const uint8_t *ptr = option->data_ptr();
@@ -711,7 +706,7 @@ std::pair<uint8_t, uint8_t> Dot11ManagementFrame::fh_parameters() const {
 }
 
 Dot11ManagementFrame::fh_pattern_type Dot11ManagementFrame::fh_pattern_table() const {
-    const Dot11::Dot11Option *option = search_option(HOPPING_PATTERN_TABLE);
+    const Dot11::dot11_option *option = search_option(HOPPING_PATTERN_TABLE);
     if(!option || option->data_size() < fh_pattern_type::minimum_size)
         throw std::runtime_error("FH pattern option not set");
     fh_pattern_type output;
@@ -727,14 +722,14 @@ Dot11ManagementFrame::fh_pattern_type Dot11ManagementFrame::fh_pattern_table() c
 }
 
 uint8_t Dot11ManagementFrame::power_constraint() const {
-    const Dot11::Dot11Option *option = search_option(POWER_CONSTRAINT);
+    const Dot11::dot11_option *option = search_option(POWER_CONSTRAINT);
     if(!option || option->data_size() != 1)
         throw std::runtime_error("Power constraint option not set");
     return *option->data_ptr();
 }
 
 Dot11ManagementFrame::channel_switch_type Dot11ManagementFrame::channel_switch() const {
-    const Dot11::Dot11Option *option = search_option(CHANNEL_SWITCH);
+    const Dot11::dot11_option *option = search_option(CHANNEL_SWITCH);
     if(!option || option->data_size() != sizeof(uint8_t) * 3)
         throw std::runtime_error("Channel switch option not set");
     const uint8_t *ptr = option->data_ptr();
@@ -746,7 +741,7 @@ Dot11ManagementFrame::channel_switch_type Dot11ManagementFrame::channel_switch()
 }
 
 Dot11ManagementFrame::quiet_type Dot11ManagementFrame::quiet() const {
-    const Dot11::Dot11Option *option = search_option(QUIET);
+    const Dot11::dot11_option *option = search_option(QUIET);
     if(!option || option->data_size() != (sizeof(uint8_t) * 2 + sizeof(uint16_t) * 2))
         throw std::runtime_error("Quiet option not set");
     const uint8_t *ptr = option->data_ptr();
@@ -761,7 +756,7 @@ Dot11ManagementFrame::quiet_type Dot11ManagementFrame::quiet() const {
 }
 
 std::pair<uint8_t, uint8_t> Dot11ManagementFrame::tpc_report() const {
-    const Dot11::Dot11Option *option = search_option(TPC_REPORT);
+    const Dot11::dot11_option *option = search_option(TPC_REPORT);
     if(!option || option->data_size() != sizeof(uint8_t) * 2)
         throw std::runtime_error("TPC Report option not set");
     const uint8_t *ptr = option->data_ptr();
@@ -770,14 +765,14 @@ std::pair<uint8_t, uint8_t> Dot11ManagementFrame::tpc_report() const {
 }
 
 uint8_t Dot11ManagementFrame::erp_information() const {
-    const Dot11::Dot11Option *option = search_option(ERP_INFORMATION);
+    const Dot11::dot11_option *option = search_option(ERP_INFORMATION);
     if(!option || option->data_size() != sizeof(uint8_t))
         throw std::runtime_error("ERP Information option not set");
     return *option->data_ptr();
 }
 
 Dot11ManagementFrame::bss_load_type Dot11ManagementFrame::bss_load() const {
-    const Dot11::Dot11Option *option = search_option(BSS_LOAD);
+    const Dot11::dot11_option *option = search_option(BSS_LOAD);
     if(!option || option->data_size() != sizeof(uint8_t) + 2 * sizeof(uint16_t))
         throw std::runtime_error("BSS Load option not set");
     bss_load_type output;
@@ -790,7 +785,7 @@ Dot11ManagementFrame::bss_load_type Dot11ManagementFrame::bss_load() const {
 }
 
 Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim() const {
-    const Dot11::Dot11Option *option = search_option(TIM);
+    const Dot11::dot11_option *option = search_option(TIM);
     if(!option || option->data_size() < 4 * sizeof(uint8_t))
         throw std::runtime_error("TIM option not set");
     const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
@@ -805,7 +800,7 @@ Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim() const {
 }
 
 std::string Dot11ManagementFrame::challenge_text() const {
-    const Dot11::Dot11Option *option = search_option(CHALLENGE_TEXT);
+    const Dot11::dot11_option *option = search_option(CHALLENGE_TEXT);
     if(!option || option->data_size() == 0)
         throw std::runtime_error("Challenge text option not set");
     return std::string(option->data_ptr(), option->data_ptr() + option->data_size());

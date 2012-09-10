@@ -31,6 +31,7 @@
 #include "endianness.h"
 #include "hwaddress.h"
 #include "small_uint.h"
+#include "pdu_option.h"
 #include "network_interface.h"
 
 namespace Tins {
@@ -158,39 +159,7 @@ namespace Tins {
         /**
          * \brief IEEE 802.11 options struct.
          */
-        struct Dot11Option {
-            friend class Dot11;
-            friend class Dot11Beacon;
-            friend class Dot11ManagementFrame;
-            /**
-             * \brief Creates an instance of Dot11Option.
-             *
-             * The option's value is copied, therefore the user should
-             * manually free any memory pointed by the "val" parameter.
-             * \param opt The option number.
-             * \param len The length of the option's value in bytes.
-             * \param val The option's value.
-             */
-            Dot11Option(uint8_t opt, uint8_t len, const uint8_t *val);
-            
-            /**
-             * \brief Getter for Dot11 options' data pointer.
-             */
-            const uint8_t* data_ptr() const { return &value[0]; }
-            
-            /**
-             * \brief Getter for the data size field
-             */
-            uint8_t data_size() const { return value.size(); }
-            
-            /**
-             * \brief Getter for the data size field
-             */
-            uint8_t option() const { return option_id; }
-        private:
-            uint8_t option_id;
-            std::vector<uint8_t> value;
-        };
+        typedef PDUOption<uint8_t> dot11_option;
         
         /**
          * \brief Constructor for creating an 802.11 PDU
@@ -425,7 +394,7 @@ namespace Tins {
          * \param opt The option identifier.
          * \return The option found, or 0 if no such option has been set.
          */
-        const Dot11Option *search_option(TaggedOption opt) const;
+        const dot11_option *search_option(TaggedOption opt) const;
 
         /**
          * \brief Getter for the PDU's type.
@@ -506,7 +475,7 @@ namespace Tins {
         ieee80211_header _header;
         NetworkInterface _iface;
         uint32_t _options_size;
-        std::list<Dot11Option> _options;
+        std::list<dot11_option> _options;
     };
 
     /**
@@ -1479,7 +1448,7 @@ namespace Tins {
         }
     private:
         static uint8_t *serialize_rates(const rates_type &rates);
-        static rates_type deserialize_rates(const Dot11Option *option);
+        static rates_type deserialize_rates(const dot11_option *option);
     
         ExtendedHeader _ext_header;
         address_type _addr4;

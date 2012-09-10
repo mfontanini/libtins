@@ -186,44 +186,37 @@ TEST_F(DHCPTest, File) {
 }
 
 void DHCPTest::test_option(const DHCP &dhcp, DHCP::Options opt, uint32_t len, uint8_t *value) {
-    const DHCP::DHCPOption *option = dhcp.search_option(opt);
+    const DHCP::dhcp_option *option = dhcp.search_option(opt);
     ASSERT_TRUE(option != 0);
-    EXPECT_EQ(option->option, opt);
-    ASSERT_EQ(option->value.size(), len);
-    if(len)
-        EXPECT_TRUE(std::equal(option->value.begin(), option->value.end(), value));
+    EXPECT_EQ(option->option(), opt);
+    ASSERT_EQ(option->data_size(), len);
+    EXPECT_TRUE(std::equal(option->data_ptr(), option->data_ptr() + option->data_size(), value));
 }
 
 TEST_F(DHCPTest, TypeOption) {
     DHCP dhcp;
-    uint8_t value = DHCP::REQUEST, value_found;
-    dhcp.add_type_option(DHCP::REQUEST);
-    ASSERT_TRUE(dhcp.search_type_option(&value_found));
-    EXPECT_EQ(value, value_found);
+    dhcp.type(DHCP::REQUEST);
+    EXPECT_EQ(dhcp.type(), DHCP::REQUEST);
 }
 
 TEST_F(DHCPTest, ServerIdentifierOption) {
     DHCP dhcp;
-    IPv4Address ip = "192.168.0.1", ip_found;
-    dhcp.add_server_identifier(ip);
-    ASSERT_TRUE(dhcp.search_server_identifier(&ip_found));
-    EXPECT_EQ(ip, ip_found);
+    dhcp.server_identifier("192.168.0.1");
+    EXPECT_EQ(DHCP::ipaddress_type("192.168.0.1"), dhcp.server_identifier());
 }
 
 TEST_F(DHCPTest, LeaseTimeOption) {
     DHCP dhcp;
-    uint32_t ltime = 0x34f1, ltime_found;
-    dhcp.add_lease_time(ltime);
-    ASSERT_TRUE(dhcp.search_lease_time(&ltime_found));
-    EXPECT_EQ(ltime, ltime_found);
+    uint32_t ltime = 0x34f1;
+    dhcp.lease_time(ltime);
+    EXPECT_EQ(ltime, dhcp.lease_time());
 }
 
 TEST_F(DHCPTest, SubnetMaskOption) {
     DHCP dhcp;
     IPv4Address ip = "192.168.0.1", ip_found;
-    dhcp.add_subnet_mask(ip);
-    ASSERT_TRUE(dhcp.search_subnet_mask(&ip_found));
-    EXPECT_EQ(ip, ip_found);
+    dhcp.subnet_mask(ip);
+    EXPECT_EQ(ip, dhcp.subnet_mask());
 }
 
 TEST_F(DHCPTest, RoutersOption) {
@@ -231,10 +224,9 @@ TEST_F(DHCPTest, RoutersOption) {
     list<IPv4Address> routers;
     routers.push_back("192.168.0.253");
     routers.push_back("10.123.45.67");
-    dhcp.add_routers_option(routers);
+    dhcp.routers(routers);
 
-    list<IPv4Address> routers2;
-    ASSERT_TRUE(dhcp.search_routers_option(&routers2));
+    list<IPv4Address> routers2 = dhcp.routers();
     ASSERT_EQ(routers.size(), routers2.size());
     while(routers.size()) {
         EXPECT_EQ(routers.front(), routers2.front());
@@ -248,10 +240,9 @@ TEST_F(DHCPTest, DNSOption) {
     list<IPv4Address> dns;
     dns.push_back("192.168.0.253");
     dns.push_back("10.123.45.67");
-    dhcp.add_dns_option(dns);
+    dhcp.domain_name_servers(dns);
 
-    list<IPv4Address> dns2;
-    ASSERT_TRUE(dhcp.search_dns_option(&dns2));
+    list<IPv4Address> dns2 = dhcp.domain_name_servers();
     ASSERT_EQ(dns.size(), dns2.size());
     while(dns.size()) {
         EXPECT_EQ(dns.front(), dns2.front());
@@ -263,17 +254,15 @@ TEST_F(DHCPTest, DNSOption) {
 TEST_F(DHCPTest, DomainNameOption) {
     DHCP dhcp;
     string domain = "libtins.test.domain", domain_found;
-    dhcp.add_domain_name(domain);
-    ASSERT_TRUE(dhcp.search_domain_name(&domain_found));
-    EXPECT_TRUE(domain == domain_found);
+    dhcp.domain_name(domain);
+    EXPECT_EQ(domain, dhcp.domain_name());
 }
 
 TEST_F(DHCPTest, BroadcastOption) {
     DHCP dhcp;
     IPv4Address ip = "192.168.0.1", ip_found;
-    dhcp.add_broadcast_option(ip);
-    ASSERT_TRUE(dhcp.search_broadcast_option(&ip_found));
-    EXPECT_EQ(ip, ip_found);
+    dhcp.broadcast(ip);
+    EXPECT_EQ(ip, dhcp.broadcast());
 }
 
 void DHCPTest::test_equals(const DHCP &dhcp1, const DHCP &dhcp2) {
@@ -290,23 +279,22 @@ void DHCPTest::test_equals(const DHCP &dhcp1, const DHCP &dhcp2) {
     EXPECT_EQ(dhcp1.chaddr(), dhcp2.chaddr());
     EXPECT_TRUE(memcmp(dhcp1.sname(), dhcp2.sname(), 64) == 0);
     EXPECT_TRUE(memcmp(dhcp1.file(), dhcp2.file(), 128) == 0);
-    const std::list<DHCP::DHCPOption> options1(dhcp1.options());
-    const std::list<DHCP::DHCPOption> options2(dhcp2.options());
+    const DHCP::options_type options1(dhcp1.options());
+    const DHCP::options_type options2(dhcp2.options());
     ASSERT_EQ(options1.size(), options2.size());
-    std::list<DHCP::DHCPOption>::const_iterator it1, it2;
+    DHCP::options_type::const_iterator it1, it2;
     it1 = options1.begin();
     it2 = options2.begin();
     while(it1 != options1.end()) {
-        EXPECT_EQ(it1->option, it2->option);
-        ASSERT_EQ(it1->value.size(), it2->value.size());
-        EXPECT_TRUE(std::equal(it1->value.begin(), it1->value.end(), it2->value.begin()));
+        EXPECT_EQ(it1->option(), it2->option());
+        ASSERT_EQ(it1->data_size(), it2->data_size());
+        EXPECT_TRUE(std::equal(it1->data_ptr(), it1->data_ptr() + it1->data_size(), it2->data_ptr()));
         it1++; it2++;
     }
 }
 
 TEST_F(DHCPTest, ConstructorFromBuffer) {
     DHCP dhcp1(expected_packet, sizeof(expected_packet));
-    IPv4Address ip;
     std::list<IPv4Address> routers;
     IPv4Address expected_routers[] = { "192.168.0.1", "127.0.0.1" };
 
@@ -321,9 +309,8 @@ TEST_F(DHCPTest, ConstructorFromBuffer) {
     EXPECT_EQ(dhcp1.yiaddr(), IPv4Address("243.22.34.98"));
     EXPECT_EQ(dhcp1.giaddr(), IPv4Address("123.43.55.254"));
     EXPECT_EQ(dhcp1.siaddr(), IPv4Address("167.32.11.154"));
-    ASSERT_TRUE(dhcp1.search_server_identifier(&ip));
-    EXPECT_EQ(ip, IPv4Address("192.168.4.2"));
-    ASSERT_TRUE(dhcp1.search_routers_option(&routers));
+    EXPECT_EQ(dhcp1.server_identifier(), IPv4Address("192.168.4.2"));
+    routers = dhcp1.routers();
     ASSERT_EQ(routers.size(), sizeof(expected_routers) / sizeof(IPv4Address));
 
     ASSERT_TRUE(std::equal(routers.begin(), routers.end(), expected_routers));

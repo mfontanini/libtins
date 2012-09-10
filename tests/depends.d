@@ -107,7 +107,8 @@ src/ipaddress.o: src/ipaddress.cpp ../include/ipaddress.h \
 ../include/hwaddress.h:
 src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h \
  ../include/small_uint.h ../include/endianness.h ../include/ipaddress.h \
- ../include/ipaddress.h ../include/utils.h ../include/hwaddress.h
+ ../include/pdu_option.h ../include/ipaddress.h ../include/utils.h \
+ ../include/hwaddress.h
 
 ../include/ip.h:
 
@@ -118,6 +119,8 @@ src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h \
 ../include/endianness.h:
 
 ../include/ipaddress.h:
+
+../include/pdu_option.h:
 
 ../include/ipaddress.h:
 
@@ -162,8 +165,8 @@ src/snap.o: src/snap.cpp ../include/snap.h ../include/pdu.h \
 
 ../include/hwaddress.h:
 src/tcp.o: src/tcp.cpp ../include/tcp.h ../include/pdu.h \
- ../include/endianness.h ../include/small_uint.h ../include/utils.h \
- ../include/ipaddress.h ../include/hwaddress.h
+ ../include/endianness.h ../include/small_uint.h ../include/pdu_option.h \
+ ../include/utils.h ../include/ipaddress.h ../include/hwaddress.h
 
 ../include/tcp.h:
 
@@ -172,6 +175,8 @@ src/tcp.o: src/tcp.cpp ../include/tcp.h ../include/pdu.h \
 ../include/endianness.h:
 
 ../include/small_uint.h:
+
+../include/pdu_option.h:
 
 ../include/utils.h:
 
@@ -612,9 +617,10 @@ include/tests/dot11.h:
 include/tests/dot11.h:
 ../src/arp.o: ../src/arp.cpp ../include/arp.h ../include/pdu.h \
  ../include/endianness.h ../include/hwaddress.h ../include/ipaddress.h \
- ../include/ip.h ../include/small_uint.h ../include/ethernetII.h \
- ../include/network_interface.h ../include/rawpdu.h \
- ../include/constants.h ../include/network_interface.h
+ ../include/ip.h ../include/small_uint.h ../include/pdu_option.h \
+ ../include/ethernetII.h ../include/network_interface.h \
+ ../include/rawpdu.h ../include/constants.h \
+ ../include/network_interface.h
 
 ../include/arp.h:
 
@@ -629,6 +635,8 @@ include/tests/dot11.h:
 ../include/ip.h:
 
 ../include/small_uint.h:
+
+../include/pdu_option.h:
 
 ../include/ethernetII.h:
 
@@ -740,7 +748,7 @@ include/tests/dot11.h:
  ../include/pdu.h ../include/endianness.h ../include/hwaddress.h \
  ../include/network_interface.h ../include/ipaddress.h \
  ../include/packet_sender.h ../include/rawpdu.h ../include/ip.h \
- ../include/small_uint.h ../include/arp.h
+ ../include/small_uint.h ../include/pdu_option.h ../include/arp.h
 
 ../include/ethernetII.h:
 
@@ -761,6 +769,8 @@ include/tests/dot11.h:
 ../include/ip.h:
 
 ../include/small_uint.h:
+
+../include/pdu_option.h:
 
 ../include/arp.h:
 ../src/icmp.o: ../src/icmp.cpp ../include/icmp.h ../include/pdu.h \
@@ -808,9 +818,9 @@ include/tests/dot11.h:
 ../include/endianness.h:
 ../src/ip.o: ../src/ip.cpp ../include/ip.h ../include/pdu.h \
  ../include/small_uint.h ../include/endianness.h ../include/ipaddress.h \
- ../include/tcp.h ../include/udp.h ../include/icmp.h ../include/rawpdu.h \
- ../include/utils.h ../include/hwaddress.h ../include/packet_sender.h \
- ../include/constants.h
+ ../include/pdu_option.h ../include/tcp.h ../include/udp.h \
+ ../include/icmp.h ../include/rawpdu.h ../include/utils.h \
+ ../include/hwaddress.h ../include/packet_sender.h ../include/constants.h
 
 ../include/ip.h:
 
@@ -821,6 +831,8 @@ include/tests/dot11.h:
 ../include/endianness.h:
 
 ../include/ipaddress.h:
+
+../include/pdu_option.h:
 
 ../include/tcp.h:
 
@@ -922,7 +934,7 @@ include/tests/dot11.h:
 ../src/snap.o: ../src/snap.cpp ../include/snap.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/constants.h \
  ../include/arp.h ../include/hwaddress.h ../include/ipaddress.h \
- ../include/ip.h ../include/eapol.h
+ ../include/ip.h ../include/pdu_option.h ../include/eapol.h
 
 ../include/snap.h:
 
@@ -941,6 +953,8 @@ include/tests/dot11.h:
 ../include/ipaddress.h:
 
 ../include/ip.h:
+
+../include/pdu_option.h:
 
 ../include/eapol.h:
 ../src/sniffer.o: ../src/sniffer.cpp ../include/sniffer.h \
@@ -964,9 +978,9 @@ include/tests/dot11.h:
 
 ../include/radiotap.h:
 ../src/tcp.o: ../src/tcp.cpp ../include/tcp.h ../include/pdu.h \
- ../include/endianness.h ../include/small_uint.h ../include/ip.h \
- ../include/ipaddress.h ../include/constants.h ../include/rawpdu.h \
- ../include/utils.h ../include/hwaddress.h
+ ../include/endianness.h ../include/small_uint.h ../include/pdu_option.h \
+ ../include/ip.h ../include/ipaddress.h ../include/constants.h \
+ ../include/rawpdu.h ../include/utils.h ../include/hwaddress.h
 
 ../include/tcp.h:
 
@@ -975,6 +989,8 @@ include/tests/dot11.h:
 ../include/endianness.h:
 
 ../include/small_uint.h:
+
+../include/pdu_option.h:
 
 ../include/ip.h:
 
@@ -992,7 +1008,7 @@ include/tests/dot11.h:
  ../include/ethernetII.h ../include/endianness.h ../include/hwaddress.h \
  ../include/network_interface.h ../include/ipaddress.h \
  ../include/radiotap.h ../include/tcp.h ../include/small_uint.h \
- ../include/ip.h
+ ../include/pdu_option.h ../include/ip.h
 
 ../include/rawpdu.h:
 
@@ -1018,11 +1034,13 @@ include/tests/dot11.h:
 
 ../include/small_uint.h:
 
+../include/pdu_option.h:
+
 ../include/ip.h:
 ../src/udp.o: ../src/udp.cpp ../include/udp.h ../include/pdu.h \
  ../include/endianness.h ../include/constants.h ../include/utils.h \
  ../include/ipaddress.h ../include/hwaddress.h ../include/ip.h \
- ../include/small_uint.h ../include/rawpdu.h
+ ../include/small_uint.h ../include/pdu_option.h ../include/rawpdu.h
 
 ../include/udp.h:
 
@@ -1042,12 +1060,14 @@ include/tests/dot11.h:
 
 ../include/small_uint.h:
 
+../include/pdu_option.h:
+
 ../include/rawpdu.h:
 ../src/utils.o: ../src/utils.cpp ../include/utils.h \
  ../include/ipaddress.h ../include/hwaddress.h ../include/pdu.h \
  ../include/ip.h ../include/pdu.h ../include/small_uint.h \
- ../include/endianness.h ../include/icmp.h ../include/arp.h \
- ../include/endianness.h ../include/network_interface.h \
+ ../include/endianness.h ../include/pdu_option.h ../include/icmp.h \
+ ../include/arp.h ../include/endianness.h ../include/network_interface.h \
  ../include/packet_sender.h
 
 ../include/utils.h:
@@ -1065,6 +1085,8 @@ include/tests/dot11.h:
 ../include/small_uint.h:
 
 ../include/endianness.h:
+
+../include/pdu_option.h:
 
 ../include/icmp.h:
 

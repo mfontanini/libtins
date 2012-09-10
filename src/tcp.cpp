@@ -157,9 +157,9 @@ void TCP::sack(const sack_type &edges) {
 }
 
 TCP::sack_type TCP::sack() const {
-    const TCPOption *option = search_option(SACK);
+    const tcp_option *option = search_option(SACK);
     if(!option || (option->data_size() % sizeof(uint32_t)) != 0)
-        throw OptionNotFound();
+        throw option_not_found();
     const uint32_t *ptr = (const uint32_t*)option->data_ptr();
     const uint32_t *end = ptr + (option->data_size() / sizeof(uint32_t));
     sack_type edges(end - ptr);
@@ -176,9 +176,9 @@ void TCP::timestamp(uint32_t value, uint32_t reply) {
 }
 
 std::pair<uint32_t, uint32_t> TCP::timestamp() const {
-    const TCPOption *option = search_option(TSOPT);
+    const tcp_option *option = search_option(TSOPT);
     if(!option || option->data_size() != (sizeof(uint32_t) << 1))
-        throw OptionNotFound();
+        throw option_not_found();
     uint64_t buffer = *(const uint64_t*)option->data_ptr();
     buffer = Endian::be_to_host(buffer);
     return std::make_pair((buffer >> 32) & 0xffffffff, buffer & 0xffffffff);
@@ -254,13 +254,13 @@ void TCP::set_flag(Flags tcp_flag, small_uint<1> value) {
     };
 }
 
-void TCP::add_option(Option tcp_option, uint8_t length, const uint8_t *data) {
+void TCP::add_option(Option option, uint8_t length, const uint8_t *data) {
     uint8_t padding;
-    _options.push_back(TCPOption(tcp_option, length, data));
+    _options.push_back(tcp_option(option, length, data));
     
     _options_size += sizeof(uint8_t);
     // SACK_OK contains length but not data....
-    if(length || tcp_option == SACK_OK)
+    if(length || option == SACK_OK)
         _options_size += sizeof(uint8_t);
         
     if(data)
@@ -280,7 +280,7 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     buffer += sizeof(tcphdr);
     _tcp.doff = (sizeof(tcphdr) + _total_options_size) / sizeof(uint32_t);
     for(options_type::iterator it = _options.begin(); it != _options.end(); ++it)
-        buffer = it->write(buffer);
+        buffer = write_option(*it, buffer);
 
     if(_options_size < _total_options_size) {
         uint8_t padding = _options_size;
@@ -305,7 +305,7 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     _tcp.check = 0;
 }
 
-const TCP::TCPOption *TCP::search_option(Option opt) const {
+const TCP::tcp_option *TCP::search_option(Option opt) const {
     for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         if(it->option() == opt)
             return &(*it);
@@ -313,18 +313,18 @@ const TCP::TCPOption *TCP::search_option(Option opt) const {
     return 0;
 }
 
-/* TCPOptions */
+/* tcp_options */
 
-uint8_t *TCP::TCPOption::write(uint8_t *buffer) {
-    if(option_ == 0 || option_ == 1) {
-        *buffer = option_;
+uint8_t *TCP::write_option(const tcp_option &opt, uint8_t *buffer) {
+    if(opt.option() == 0 || opt.option() == 1) {
+        *buffer = opt.option();
         return buffer + 1;
     }
     else {
-        buffer[0] = option_;
-        buffer[1] = data_size() + (sizeof(uint8_t) << 1);
-        if(!value_.empty())
-            std::copy(value_.begin() + 1, value_.end(), buffer + 2);
+        buffer[0] = opt.option();
+        buffer[1] = opt.data_size() + (sizeof(uint8_t) << 1);
+        if(opt.data_size() != 0)
+            std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer + 2);
         return buffer + buffer[1];
     }
 }

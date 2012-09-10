@@ -31,6 +31,7 @@
 #include "pdu.h"
 #include "endianness.h"
 #include "small_uint.h"
+#include "pdu_option.h"
 
 namespace Tins {
     /**
@@ -89,97 +90,17 @@ namespace Tins {
             CHK_16FLETCHER
         };
         
-        /**
-         * \brief Class that represents a TCP option field.
-         */
-        class TCPOption {
-        public:
-            /**
-             * \brief Constructs a TCPOption.
-             * \param opt The option type.
-             * \param length The option's data length.
-             * \param data The option's data(if any).
-             */
-            TCPOption(uint8_t opt = 0, uint8_t length = 0, const uint8_t *data = 0) 
-            : option_(opt) {
-                value_.push_back(length);
-                if(data)
-                    value_.insert(value_.end(), data, data + length);
-            }
-            
-            /**
-             * Constructs a TCPOption from iterators, which indicate
-             * the data to be stored in it.
-             * \param opt The option type.
-             * \param start The beginning of the option data.
-             * \param end The end of the option data.
-             */
-            template<typename ForwardIterator>
-            TCPOption(uint8_t opt, ForwardIterator start, ForwardIterator end) 
-            : option_(opt), value_(start, end) {
-                
-            }
-            
-            /**
-             * Retrieves this option's type.
-             * \return uint8_t containing this option's size.
-             */
-            uint8_t option() const {
-                return option_;
-            }
-            
-            /**
-             * Retrieves this option's data.
-             * 
-             * If this method is called when data_size() == 0, 
-             * dereferencing the returned pointer will result in undefined
-             * behaviour.
-             * 
-             * \return const value_type& containing this option's value.
-             */
-            const uint8_t *data_ptr() const {
-                return &value_[1];
-            }
-            
-            /**
-             * Retrieves the length of this option's data.
-             */
-            size_t data_size() const {
-                return value_.size() - 1;
-            }
-
-            /**
-             * \brief Writes the option into a buffer.
-             * \param buffer The buffer in which to write the option.
-             * \return The buffer pointer incremented by the size of this option.
-             */
-            uint8_t *write(uint8_t *buffer);
-        private:
-            typedef std::vector<uint8_t> data_type;
-        
-            uint8_t option_;
-            data_type value_;
-        };
+        typedef PDUOption<uint8_t> tcp_option;
 
         /**
          * The type used to store the options.
          */
-        typedef std::vector<TCPOption> options_type;
+        typedef std::list<tcp_option> options_type;
         
         /**
          * The type used to store the sack option.
          */
         typedef std::vector<uint32_t> sack_type;
-
-        /**
-         * \brief Exception thrown when an option is not found.
-         */
-        class OptionNotFound : public std::exception {
-        public:
-            const char* what() const throw() {
-                return "Option not found";
-            }
-        };
 
         /**
          * \brief TCP constructor.
@@ -425,11 +346,11 @@ namespace Tins {
         /**
          * \brief Adds a TCP option.
          *
-         * \param tcp_option The option type flag to be set.
+         * \param option The option type flag to be set.
          * \param length The length of this option(optional).
          * \param data Pointer to this option's data(optional).
          */
-        void add_option(Option tcp_option, uint8_t length = 0, const uint8_t *data = 0);
+        void add_option(Option option, uint8_t length = 0, const uint8_t *data = 0);
 
         /**
          * \brief Returns the header size.
@@ -453,7 +374,7 @@ namespace Tins {
          * \param opt_flag The flag to be searched.
          * \return A pointer to the option, or 0 if it was not found.
          */
-        const TCPOption *search_option(Option opt) const;
+        const tcp_option *search_option(Option opt) const;
         
         /**
          * \sa PDU::clone_pdu
@@ -501,17 +422,15 @@ namespace Tins {
         
         template<class T> 
         T generic_search(Option opt) const {
-            const TCPOption *option = search_option(opt);
+            const tcp_option *option = search_option(opt);
             if(option && option->data_size() == sizeof(T))
                 return *(const T*)(&option->data_ptr()[0]);
-            throw OptionNotFound();
+            throw option_not_found();
         }
-        /** \brief Serialices this TCP PDU.
-         * \param buffer The buffer in which the PDU will be serialized.
-         * \param total_sz The size available in the buffer.
-         * \param parent The PDU that's one level below this one on the stack.
-         */
+
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        
+        uint8_t *write_option(const tcp_option &opt, uint8_t *buffer);
 
         tcphdr _tcp;
         options_type _options;

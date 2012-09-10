@@ -16,10 +16,12 @@ public:
     void test_equals(const IP &ip1, const IP &ip2);
 };
 
-const uint8_t IPTest::expected_packet[] = { '(', '\x7f', '\x00', ' ', 
-'\x00', 'z', '\x00', 'C', '\x15', '\x01', '\xfb', 'g', 'T', '4', '\xfe', 
-'\x05', '\xc0', '\xa8', '\t', '+', '\x82', '\x0b', 't', 'j', 'g', '\xab', 
-'w', '\xab', 'h', 'e', 'l', '\x00' };
+const uint8_t IPTest::expected_packet[] = { 
+    '(', '\x7f', '\x00', ' ', '\x00', 'z', '\x00', 'C', '\x15', '\x01', 
+    '\xfb', 'g', 'T', '4', '\xfe', '\x05', '\xc0', '\xa8', '\t', '+', 
+    '\x82', '\x0b', 't', 'j', 'g', '\xab', 'w', '\xab', 'h', 'e', 'l', 
+    '\x00' 
+};
 
 
 TEST_F(IPTest, DefaultConstructor) {
@@ -52,19 +54,10 @@ TEST_F(IPTest, NestedCopy) {
     test_equals(ip1, ip2);
 }
 
-TEST_F(IPTest, IPIntConstructor) {
+TEST_F(IPTest, Constructor) {
     IP ip("192.168.0.1", "192.168.0.100");
     EXPECT_EQ(ip.dst_addr(), "192.168.0.1");
     EXPECT_EQ(ip.src_addr(), "192.168.0.100");
-    EXPECT_EQ(ip.version(), 4);
-    EXPECT_EQ(ip.id(), 1);
-}
-
-TEST_F(IPTest, IPStringConstructor) {
-    string ip1 = "154.33.200.55", ip2 = "192.10.11.52";
-    IP ip(ip1, ip2);
-    EXPECT_EQ(ip.dst_addr(), ip1);
-    EXPECT_EQ(ip.src_addr(), ip2);
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
 }
@@ -151,10 +144,60 @@ TEST_F(IPTest, Version) {
 
 TEST_F(IPTest, SecOption) {
     IP ip;
+    ip.security(IP::security_type(0x746a, 26539, 0x77ab, 0x68656c));
+    IP::security_type found = ip.security();
+    EXPECT_EQ(found.security, 0x746a);
+    EXPECT_EQ(found.compartments, 26539);
+    EXPECT_EQ(found.handling_restrictions, 0x77ab);
+    EXPECT_EQ(found.transmission_control, 0x68656c);
+}
+
+TEST_F(IPTest, LSRROption) {
+    IP ip;
+    IP::lsrr_type lsrr(0x2d);
+    lsrr.routes.push_back("192.168.2.3");
+    lsrr.routes.push_back("192.168.5.1");
+    ip.lsrr(lsrr);
+    IP::lsrr_type found = ip.lsrr();
+    EXPECT_EQ(found.pointer, lsrr.pointer);
+    EXPECT_EQ(found.routes, lsrr.routes);
+}
+
+TEST_F(IPTest, SSRROption) {
+    IP ip;
+    IP::ssrr_type ssrr(0x2d);
+    ssrr.routes.push_back("192.168.2.3");
+    ssrr.routes.push_back("192.168.5.1");
+    ip.ssrr(ssrr);
+    IP::ssrr_type found = ip.ssrr();
+    EXPECT_EQ(found.pointer, ssrr.pointer);
+    EXPECT_EQ(found.routes, ssrr.routes);
+}
+
+TEST_F(IPTest, RecordRouteOption) {
+    IP ip;
+    IP::record_route_type record_route(0x2d);
+    record_route.routes.push_back("192.168.2.3");
+    record_route.routes.push_back("192.168.5.1");
+    ip.record_route(record_route);
+    IP::record_route_type found = ip.record_route();
+    EXPECT_EQ(found.pointer, record_route.pointer);
+    EXPECT_EQ(found.routes, record_route.routes);
+}
+
+TEST_F(IPTest, StreamIDOption) {
+    IP ip;
+    ip.stream_identifier(0x91fa);
+    EXPECT_EQ(0x91fa, ip.stream_identifier());
+}
+
+TEST_F(IPTest, AddOption) {
+    IP ip;
     const uint8_t data[] = { 0x15, 0x17, 0x94, 0x66, 0xff };
-    ip.set_sec_option(data, sizeof(data));
-    const IP::IPOption *option;
-    ASSERT_TRUE((option = ip.search_option(IP::CONTROL, IP::SEC)));
+    IP::option_identifier id(IP::SEC, IP::CONTROL, 1);
+    ip.add_option(IP::ip_option(id, data, data + sizeof(data)));
+    const IP::ip_option *option;
+    ASSERT_TRUE((option = ip.search_option(id)));
     ASSERT_EQ(option->data_size(), sizeof(data));
     EXPECT_TRUE(memcmp(option->data_ptr(), data, sizeof(data)) == 0);
 }
@@ -171,23 +214,22 @@ void IPTest::test_equals(const IP &ip1, const IP &ip2) {
 }
 
 TEST_F(IPTest, ConstructorFromBuffer) {
-    IP ip1(expected_packet, sizeof(expected_packet));
-    const uint8_t opt_sec[] = { 't', 'j', 'g', '\xab', 'w', '\xab', 'h', 'e', 'l' };
+    IP ip(expected_packet, sizeof(expected_packet));
     
-    EXPECT_EQ(ip1.dst_addr(), "192.168.9.43");
-    EXPECT_EQ(ip1.src_addr(), "84.52.254.5");
-    EXPECT_EQ(ip1.id(), 0x7a);
-    EXPECT_EQ(ip1.tos(), 0x7f);
-    EXPECT_EQ(ip1.frag_off(), 0x43);
-    EXPECT_EQ(ip1.protocol(), 1);
-    EXPECT_EQ(ip1.ttl(), 0x15);
-    EXPECT_EQ(ip1.version(), 2);
-    const IP::IPOption *option;
-    ASSERT_TRUE((option = ip1.search_option(IP::CONTROL, IP::SEC)));
-    EXPECT_EQ(option->type.number, IP::SEC);
-    EXPECT_EQ(option->type.op_class, IP::CONTROL);
-    ASSERT_EQ(option->data_size(), sizeof(opt_sec));
-    EXPECT_TRUE(std::equal(option->data_ptr(), option->data_ptr() + option->data_size(), opt_sec));
+    EXPECT_EQ(ip.dst_addr(), "192.168.9.43");
+    EXPECT_EQ(ip.src_addr(), "84.52.254.5");
+    EXPECT_EQ(ip.id(), 0x7a);
+    EXPECT_EQ(ip.tos(), 0x7f);
+    EXPECT_EQ(ip.frag_off(), 0x43);
+    EXPECT_EQ(ip.protocol(), 1);
+    EXPECT_EQ(ip.ttl(), 0x15);
+    EXPECT_EQ(ip.version(), 2);
+    
+    IP::security_type sec = ip.security();
+    EXPECT_EQ(sec.security, 0x746a);
+    EXPECT_EQ(sec.compartments, 26539);
+    EXPECT_EQ(sec.handling_restrictions, 0x77ab);
+    EXPECT_EQ(sec.transmission_control, 0x68656c);
 }
 
 TEST_F(IPTest, Serialize) {
