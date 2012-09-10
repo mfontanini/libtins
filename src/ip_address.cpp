@@ -21,7 +21,7 @@
 
 #include <stdexcept>
 #include <sstream>
-#include "ipaddress.h"
+#include "ip_address.h"
 #include "endianness.h"
 
 using std::string;

@@ -24,7 +24,7 @@
 #include <cassert>
 #include <memory>
 #include "dns.h"
-#include "ipaddress.h"
+#include "ip_address.h"
 
 using std::string;
 using std::list;

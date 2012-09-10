@@ -7,8 +7,8 @@
 #include "dhcp.h"
 #include "utils.h"
 #include "ethernetII.h"
-#include "hwaddress.h"
-#include "ipaddress.h"
+#include "hw_address.h"
+#include "ip_address.h"
 
 using namespace std;
 using namespace Tins;

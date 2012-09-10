@@ -26,7 +26,7 @@
 
 #include "pdu.h"
 #include "endianness.h"
-#include "hwaddress.h"
+#include "hw_address.h"
 #include "network_interface.h"
 
 namespace Tins {

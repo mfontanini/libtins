@@ -24,7 +24,6 @@
 #include "endianness.h"
 #include "dhcp.h"
 #include "ethernetII.h"
-#include "ipaddress.h"
 
 using std::string;
 using std::list;

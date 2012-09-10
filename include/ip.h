@@ -26,7 +26,7 @@
 #include "pdu.h"
 #include "small_uint.h"
 #include "endianness.h"
-#include "ipaddress.h"
+#include "ip_address.h"
 #include "pdu_option.h"
 
 namespace Tins {

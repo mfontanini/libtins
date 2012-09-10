@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include "utils.h"
 #include "endianness.h"
-#include "ipaddress.h"
+#include "ip_address.h"
 
 using namespace Tins;
 

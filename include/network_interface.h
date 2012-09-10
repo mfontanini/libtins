@@ -24,8 +24,8 @@
 
 #include <string>
 #include <stdint.h>
-#include "hwaddress.h"
-#include "ipaddress.h"
+#include "hw_address.h"
+#include "ip_address.h"
 
 namespace Tins {
 /**

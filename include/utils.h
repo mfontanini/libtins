@@ -29,8 +29,8 @@
 #include <set>
 #include <fstream>
 #include <stdint.h>
-#include "ipaddress.h"
-#include "hwaddress.h"
+#include "ip_address.h"
+#include "hw_address.h"
 
 namespace Tins {
     class NetworkInterface;

@@ -29,7 +29,7 @@
 
 #include "pdu.h"
 #include "endianness.h"
-#include "hwaddress.h"
+#include "hw_address.h"
 #include "small_uint.h"
 #include "pdu_option.h"
 #include "network_interface.h"

@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 #include <stdint.h>
-#include "hwaddress.h"
+#include "hw_address.h"
 
 using namespace Tins;
 

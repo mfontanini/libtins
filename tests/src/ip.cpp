@@ -3,7 +3,7 @@
 #include <string>
 #include <stdint.h>
 #include "ip.h"
-#include "ipaddress.h"
+#include "ip_address.h"
 #include "utils.h"
 
 using namespace std;

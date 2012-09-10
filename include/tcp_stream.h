@@ -30,7 +30,7 @@
 #include "sniffer.h"
 #include "tcp.h"
 #include "ip.h"
-#include "ipaddress.h"
+#include "ip_address.h"
 
 namespace Tins {
 class Sniffer;

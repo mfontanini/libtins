@@ -29,8 +29,6 @@
 #include "pdu_option.h"
 
 namespace Tins {
-    class IPv4Address;
-    
     /** 
      * \brief Class that represents the DHCP PDU.
      * 

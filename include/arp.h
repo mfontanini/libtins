@@ -25,8 +25,8 @@
 
 #include "pdu.h"
 #include "endianness.h"
-#include "hwaddress.h"
-#include "ipaddress.h"
+#include "hw_address.h"
+#include "ip_address.h"
 
 namespace Tins {
     class NetworkInterface;
