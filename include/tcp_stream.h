@@ -97,6 +97,17 @@ public:
     }
     
     /**
+     * \brief Retrieves the client payload.
+     * 
+     * This is the payload that the connection's client has sent so far.
+     * 
+     * \return payload_type& containing the payload.
+     */
+    payload_type &client_payload() {
+        return client_payload_;
+    }
+    
+    /**
      * \brief Retrieves the server payload.
      * 
      * This is the payload that the connection's server has sent so far.
@@ -104,6 +115,17 @@ public:
      * \return const payload_type& containing the payload.
      */
     const payload_type &server_payload() const {
+        return server_payload_;
+    }
+    
+    /**
+     * \brief Retrieves the server payload.
+     * 
+     * This is the payload that the connection's server has sent so far.
+     * 
+     * \return payload_type& containing the payload.
+     */
+    payload_type &server_payload() {
         return server_payload_;
     }
 
@@ -146,16 +168,6 @@ public:
      * any of the stored payloads.
      */
     bool update(IP *ip, TCP *tcp);
-    
-    /**
-     * Clears the client payload.
-     */
-    void clear_client_payload();
-    
-    /**
-     * Clears the server payload.
-     */
-    void clear_server_payload();
 private:
     typedef std::map<uint32_t, RawPDU*> fragments_type;
     
@@ -171,7 +183,7 @@ private:
     uint64_t identifier;
     payload_type client_payload_, server_payload_;
     fragments_type client_frags, server_frags;
-    bool fin_sent;
+    bool syn_ack_sent, fin_sent;
 };
 
 
@@ -199,7 +211,7 @@ public:
      * closed.
      */
     template<typename DataFunctor, typename EndFunctor>
-    void follow_streams(Sniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun);
+    void follow_streams(BaseSniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun);
 private:
     typedef std::map<TCPStream::StreamInfo, TCPStream> sessions_type;
     
@@ -222,7 +234,7 @@ private:
 };
 
 template<typename DataFunctor, typename EndFunctor>
-void TCPStreamFollower::follow_streams(Sniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun) {
+void TCPStreamFollower::follow_streams(BaseSniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun) {
     typedef proxy_caller<DataFunctor, EndFunctor> proxy_type;
     proxy_type proxy = { this, data_fun, end_fun };
     sniffer.sniff_loop(make_sniffer_handler(&proxy, &proxy_type::callback));
@@ -260,8 +272,8 @@ bool TCPStreamFollower::callback(PDU *pdu, const DataFunctor &data_fun, const En
             end_fun(it->second);
             sessions.erase(it);
         }
-        return true;
     }
+    return true;
 }
 }
 
