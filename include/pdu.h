@@ -228,14 +228,14 @@ namespace Tins {
          * those methods.
          * \param sender The PacketSender which will send the packet.
          */
-        virtual bool send(PacketSender *sender);
+        virtual bool send(PacketSender &sender);
 
         /** \brief Receives a matching response for this packet.
          *
          * This method should act as a proxy for PacketSender::recv_lX methods.
          * \param sender The packet sender which will receive the packet.
          */
-        virtual PDU *recv_response(PacketSender *sender);
+        virtual PDU *recv_response(PacketSender &sender);
 
         /** \brief Check wether ptr points to a valid response for this PDU.
          *

@@ -69,12 +69,12 @@ namespace Tins {
          * The callback object must implement an operator with the 
          * following(or compatible) signature:
          * 
-         * bool operator()(PDU*);
+         * bool operator()(PDU&);
          * 
          * This operator will be called using the sniffed packets 
-         * as arguments. The callback object <b>must not</b> delete the
-         * PDU parameter. You can modify it as you wish, though. Calling
-         * PDU methods like PDU::release_inner_pdu is perfectly valid.
+         * as arguments. You can modify the PDU argument as you wish. 
+         * Calling PDU methods like PDU::release_inner_pdu is perfectly 
+         * valid.
          * 
          * Note that the Functor object will be copied using its copy
          * constructor, so that object should be some kind of proxy to
@@ -127,6 +127,9 @@ namespace Tins {
     
         BaseSniffer(const BaseSniffer&);
         BaseSniffer &operator=(const BaseSniffer&);
+        
+        template<class ConcretePDU, class Functor>
+        static bool call_functor(LoopData<Functor> *data, const u_char *packet, size_t len);
         
         bool compile_set_filter(const std::string &filter, bpf_program &prog);
         
@@ -185,16 +188,26 @@ namespace Tins {
         pcap_loop(handle, max_packets, &BaseSniffer::callback_handler<Functor>, (u_char*)&data);
     }
     
+    template<class ConcretePDU, class Functor>
+    bool Tins::BaseSniffer::call_functor(LoopData<Functor> *data, const u_char *packet, size_t len) {
+        ConcretePDU some_pdu((const uint8_t*)packet, len);
+        return data->c_handler(some_pdu);
+    }
+    
     template<class Functor>
     void Tins::BaseSniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
         try {
             std::auto_ptr<PDU> pdu;
             LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
-            if(data->wired)
-                pdu.reset(new Tins::EthernetII((const uint8_t*)packet, header->caplen));
+            bool ret_val(false);
+            /*if(data->wired)
+                ret_val = data->c_handler(Tins::EthernetII((const uint8_t*)packet, header->caplen));
             else
-                pdu.reset(new Tins::RadioTap((const uint8_t*)packet, header->caplen));
-            bool ret_val = data->c_handler(pdu.get());
+                pdu.reset(new Tins::RadioTap((const uint8_t*)packet, header->caplen));*/
+            if(data->wired)
+                ret_val = call_functor<Tins::EthernetII>(data, packet, header->caplen);
+            else
+                ret_val = call_functor<Tins::RadioTap>(data, packet, header->caplen);
             if(!ret_val)
                 pcap_breakloop(data->handle);
         }
@@ -207,12 +220,12 @@ namespace Tins {
     class HandlerProxy {
     public:
         typedef T* ptr_type;
-        typedef bool (T::*fun_type)(PDU*) ;
+        typedef bool (T::*fun_type)(PDU&) ;
     
         HandlerProxy(ptr_type ptr, fun_type function) 
         : object(ptr), fun(function) {}
         
-        bool operator()(PDU *pdu) {
+        bool operator()(PDU &pdu) {
             return (object->*fun)(pdu);
         }
     private:

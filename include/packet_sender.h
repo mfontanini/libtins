@@ -96,7 +96,7 @@ namespace Tins {
          * \param pdu The PDU to send.
          * \return Returns true if the PDU is sent successfully, false otherwise.
          */
-        bool send(PDU* pdu);
+        bool send(PDU &pdu);
 
         /** \brief Sends a PDU and waits for its response. 
          * 
@@ -108,7 +108,7 @@ namespace Tins {
          * \param pdu The PDU to send.
          * \return Returns the response PDU, 0 if not response was received.
          */
-        PDU *send_recv(PDU *pdu);
+        PDU *send_recv(PDU &pdu);
 
         /** \brief Receives a layer 2 PDU response to a previously sent PDU.
          * 
@@ -120,7 +120,7 @@ namespace Tins {
          * \param len_addr The sockaddr struct length.
          * \return Returns the response PDU. If no response is received, then 0 is returned.
          */
-        PDU *recv_l2(PDU *pdu, struct sockaddr *link_addr, uint32_t len_addr);
+        PDU *recv_l2(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr);
 
         /** \brief Sends a level 2 PDU.
          * 
@@ -132,7 +132,7 @@ namespace Tins {
          * \param len_addr The sockaddr struct length.
          * \return Returns true if the PDU was successfully sent, false otherwise.
          */
-        bool send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t len_addr);
+        bool send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr);
 
         /** \brief Receives a layer 3 PDU response to a previously sent PDU.
          * 
@@ -145,7 +145,7 @@ namespace Tins {
          * \param type The socket protocol type.
          * \return Returns the response PDU. If no response is received, then 0 is returned.
          */
-        PDU *recv_l3(PDU *pdu, struct sockaddr *link_addr, uint32_t len_addr, SocketType type);
+        PDU *recv_l3(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr, SocketType type);
 
         /** \brief Sends a level 3 PDU.
          * 
@@ -158,7 +158,7 @@ namespace Tins {
          * \param type The socket protocol type.
          * \return Returns true if the PDU was successfully sent, false otherwise.
          */
-        bool send_l3(PDU *pdu, struct sockaddr *link_addr, uint32_t len_addr, SocketType type);
+        bool send_l3(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr, SocketType type);
     private:
         static const int INVALID_RAW_SOCKET;
 
@@ -167,7 +167,7 @@ namespace Tins {
         int find_type(SocketType type);
         int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y);
         
-        PDU *recv_match_loop(int sock, PDU *pdu, struct sockaddr* link_addr, uint32_t addrlen);
+        PDU *recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen);
 
         std::vector<int> _sockets;
         SocketTypeMap _types;

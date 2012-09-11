@@ -196,7 +196,7 @@ uint32_t Tins::RadioTap::trailer_size() const {
     return ((_flags & 0x10) != 0) ? sizeof(uint32_t) : 0;
 }
 
-bool Tins::RadioTap::send(PacketSender* sender) {
+bool Tins::RadioTap::send(PacketSender &sender) {
     struct sockaddr_ll addr;
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -212,7 +212,7 @@ bool Tins::RadioTap::send(PacketSender* sender) {
         std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);
     }
 
-    return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 
 void Tins::RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {

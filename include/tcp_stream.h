@@ -217,7 +217,7 @@ private:
     
     template<typename DataFunctor, typename EndFunctor>
     struct proxy_caller {
-        bool callback(PDU *pdu) {
+        bool callback(PDU &pdu) {
             return stream->callback(pdu, data_fun, end_fun);
         }
         
@@ -227,7 +227,7 @@ private:
     };
     
     template<typename DataFunctor, typename EndFunctor>
-    bool callback(PDU *pdu, const DataFunctor &fun, const EndFunctor &end_fun);
+    bool callback(PDU &pdu, const DataFunctor &fun, const EndFunctor &end_fun);
     
     sessions_type sessions;
     uint64_t last_identifier;
@@ -241,9 +241,9 @@ void TCPStreamFollower::follow_streams(BaseSniffer &sniffer, DataFunctor data_fu
 }
 
 template<typename DataFunctor, typename EndFunctor>
-bool TCPStreamFollower::callback(PDU *pdu, const DataFunctor &data_fun, const EndFunctor &end_fun) {
-    IP *ip = pdu->find_pdu<IP>();
-    TCP *tcp = pdu->find_pdu<TCP>();
+bool TCPStreamFollower::callback(PDU &pdu, const DataFunctor &data_fun, const EndFunctor &end_fun) {
+    IP *ip = pdu.find_pdu<IP>();
+    TCP *tcp = pdu.find_pdu<TCP>();
     if(ip && tcp) {
         TCPStream::StreamInfo info = { 
             ip->src_addr(), ip->dst_addr(),

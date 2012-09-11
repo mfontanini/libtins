@@ -92,9 +92,9 @@ private:
         sender.send(&ip);
     }
 
-    bool sniff_callback(PDU *pdu) {
-        IP *ip = pdu->find_pdu<IP>();
-        RawPDU *raw = pdu->find_pdu<RawPDU>();
+    bool sniff_callback(PDU &pdu) {
+        IP *ip = pdu.find_pdu<IP>();
+        RawPDU *raw = pdu.find_pdu<RawPDU>();
         if(ip && raw) {
             ttl_map::const_iterator iter;
             IP inner_ip;

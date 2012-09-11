@@ -90,22 +90,22 @@ bool Tins::PacketSender::close_socket(uint32_t flag) {
     return true;
 }
 
-bool Tins::PacketSender::send(PDU *pdu) {
-    return pdu->send(this);
+bool Tins::PacketSender::send(PDU &pdu) {
+    return pdu.send(*this);
 }
 
-Tins::PDU *Tins::PacketSender::send_recv(PDU *pdu) {
-    if(!pdu->send(this))
+Tins::PDU *Tins::PacketSender::send_recv(PDU &pdu) {
+    if(!pdu.send(*this))
         return 0;
-    return pdu->recv_response(this);
+    return pdu.recv_response(*this);
 }
 
-bool Tins::PacketSender::send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t len_addr) {
+bool Tins::PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr) {
     if(!open_l2_socket())
         return false;
 
     int sock = _sockets[ETHER_SOCKET];
-    PDU::serialization_type buffer = pdu->serialize();
+    PDU::serialization_type buffer = pdu.serialize();
     if(buffer.size() == 0)
         return false;
     bool ret_val = (sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) != -1);
@@ -113,31 +113,31 @@ bool Tins::PacketSender::send_l2(PDU *pdu, struct sockaddr* link_addr, uint32_t 
     return ret_val;
 }
 
-Tins::PDU *Tins::PacketSender::recv_l2(PDU *pdu, struct sockaddr *link_addr, uint32_t len_addr) {
+Tins::PDU *Tins::PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr) {
     if(!open_l2_socket())
         return 0;
     return recv_match_loop(_sockets[ETHER_SOCKET], pdu, link_addr, len_addr);
 }
 
-Tins::PDU *Tins::PacketSender::recv_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
+Tins::PDU *Tins::PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
     if(!open_l3_socket(type))
         return 0;
     return recv_match_loop(_sockets[type], pdu, link_addr, len_addr);
 }
 
-bool Tins::PacketSender::send_l3(PDU *pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
+bool Tins::PacketSender::send_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
     bool ret_val = true;
     if(!open_l3_socket(type))
         ret_val = false;
     if (ret_val) {
         int sock = _sockets[type];
-        PDU::serialization_type buffer = pdu->serialize();
+        PDU::serialization_type buffer = pdu.serialize();
         ret_val = (sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) != -1);
     }
     return ret_val;
 }
 
-Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockaddr* link_addr, uint32_t addrlen) {
+Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen) {
     fd_set readfds;
     struct timeval timeout,  end_time;
     int read;
@@ -153,8 +153,8 @@ Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU *pdu, struct sockad
         }
         if(FD_ISSET(sock, &readfds)) {
             ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);
-            if(pdu->matches_response(buffer, size)) {
-                return pdu->clone_packet(buffer, size);
+            if(pdu.matches_response(buffer, size)) {
+                return pdu.clone_packet(buffer, size);
             }
         }
         struct timeval this_time, diff;

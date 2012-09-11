@@ -102,27 +102,13 @@ IPv4Address Utils::resolve_ip(const string &to_resolve) {
     return IPv4Address(((struct in_addr**)data->h_addr_list)[0]->s_addr);
 }
 
-PDU *Utils::ping_address(IPv4Address ip, PacketSender *sender, IPv4Address ip_src) {
-    if(!ip_src) {
-        try {
-            NetworkInterface iface(ip);
-            ip_src = iface.addresses().ip_addr;
-        } catch(...) {
-            return 0;
-        }
-    }
-    ICMP *icmp = new ICMP(ICMP::ECHO_REQUEST);
-    IP ip_packet(ip, ip_src, icmp);
-    return sender->send_recv(&ip_packet);
-}
-
 bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
-  HWAddress<6> *address, PacketSender *sender) 
+  HWAddress<6> *address, PacketSender &sender) 
 {
     IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
     std::auto_ptr<PDU> packet(ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr));
-    std::auto_ptr<PDU> response(sender->send_recv(packet.get()));
+    std::auto_ptr<PDU> response(sender.send_recv(*packet));
     if(response.get()) {
         ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)

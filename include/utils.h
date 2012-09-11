@@ -79,23 +79,6 @@ namespace Tins {
          * \param to_resolve The domain name/ip address to resolve.
          */
         IPv4Address resolve_ip(const std::string &to_resolve);
-        
-        /**
-         * \brief Pings an ip address.
-         * 
-         * This function pings an IP address and returns the ICMP response.
-         * If no response is received, 0 is returned
-         * 
-         * \param ip The IP address to ping.
-         * \param sender The PacketSender that will send the ping request.
-         * \param ip_src The source IP address that will be used in the packet.
-         * If 0, or no parameter is provided, then that IP address is looked
-         * up using Utils::interface_ip.
-         * 
-         * \return PDU * containing either 0 if no response was received,
-         * or the ICMP response otherwise.
-         */
-        PDU *ping_address(IPv4Address ip, PacketSender *sender, IPv4Address ip_src = 0);
 
         /** \brief Resolves the hardware address for a given ip.
          *
@@ -107,7 +90,7 @@ namespace Tins {
          * false otherwise.
          */
         bool resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
-          HWAddress<6> *address, PacketSender *sender);
+          HWAddress<6> *address, PacketSender &sender);
 
         /** \brief List all network interfaces.
          *

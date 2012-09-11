@@ -377,7 +377,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        bool send(PacketSender* sender);
+        bool send(PacketSender &sender);
 
         /**
          * \brief Adds a new option to this Dot11 PDU.

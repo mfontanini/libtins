@@ -95,7 +95,7 @@ uint32_t EthernetII::header_size() const {
     return sizeof(ethhdr);
 }
 
-bool EthernetII::send(PacketSender* sender) {
+bool EthernetII::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
     struct sockaddr_ll addr;
@@ -108,7 +108,7 @@ bool EthernetII::send(PacketSender* sender) {
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, address_type::address_size);
 
-    return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 
 bool EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
@@ -144,7 +144,7 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     memcpy(buffer, &_eth, sizeof(ethhdr));
 }
 
-PDU *EthernetII::recv_response(PacketSender *sender) {
+PDU *EthernetII::recv_response(PacketSender &sender) {
     struct sockaddr_ll addr;
     memset(&addr, 0, sizeof(struct sockaddr_ll));
 
@@ -154,7 +154,7 @@ PDU *EthernetII::recv_response(PacketSender *sender) {
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, address_type::address_size);
 
-    return sender->recv_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 
 PDU *EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz) {

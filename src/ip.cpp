@@ -320,7 +320,7 @@ uint32_t IP::header_size() const {
     return sizeof(iphdr) + _padded_options_size;
 }
 
-bool IP::send(PacketSender* sender) {
+bool IP::send(PacketSender& sender) {
     struct sockaddr_in link_addr;
     PacketSender::SocketType type = PacketSender::IP_SOCKET;
     link_addr.sin_family = AF_INET;
@@ -329,10 +329,10 @@ bool IP::send(PacketSender* sender) {
     if(inner_pdu() && inner_pdu()->flag() == IPPROTO_ICMP)
         type = PacketSender::ICMP_SOCKET;
 
-    return sender->send_l3(this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+    return sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
-PDU *IP::recv_response(PacketSender *sender) {
+PDU *IP::recv_response(PacketSender &sender) {
     struct sockaddr_in link_addr;
     PacketSender::SocketType type = PacketSender::IP_SOCKET;
     link_addr.sin_family = AF_INET;
@@ -341,7 +341,7 @@ PDU *IP::recv_response(PacketSender *sender) {
     if(inner_pdu() && inner_pdu()->flag() == IPPROTO_ICMP)
         type = PacketSender::ICMP_SOCKET;
 
-    return sender->recv_l3(this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+    return sender.recv_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
 void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {

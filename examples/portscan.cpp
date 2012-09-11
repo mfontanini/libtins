@@ -27,12 +27,12 @@
 #include <pthread.h>
 #include <tins/ip.h>
 #include <tins/tcp.h>
-#include <tins/ipaddress.h>
+#include <tins/ip_address.h>
 #include <tins/ethernetII.h>
 #include <tins/network_interface.h>
 #include <tins/sniffer.h>
 #include <tins/utils.h>
-#include <tins/packetsender.h>
+#include <tins/packet_sender.h>
 
 
 using namespace std;
@@ -44,8 +44,8 @@ typedef std::pair<Sniffer*, std::string> sniffer_data;
 /* Our scan handler. This will receive SYNs and RSTs and inform us
  * the scanned port's status.
  */
-bool handler(PDU *pdu) {
-    TCP *tcp = pdu->find_pdu<TCP>();
+bool handler(PDU &pdu) {
+    TCP *tcp = pdu.find_pdu<TCP>();
     if(tcp) {
         // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
         if(tcp->get_flag(TCP::RST)) {
@@ -77,7 +77,7 @@ void send_syns(const NetworkInterface &iface, IPv4Address dest_ip, const vector<
     for(vector<string>::const_iterator it = ips.begin(); it != ips.end(); ++it) {
         // Set the new port and send the packet!
         tcp->dport(atoi(it->c_str()));
-        sender.send(&ip);
+        sender.send(ip);
     }
     // Wait 1 second.
     sleep(1);
@@ -89,7 +89,7 @@ void send_syns(const NetworkInterface &iface, IPv4Address dest_ip, const vector<
     ip.src_addr(dest_ip);
     // We use an ethernet pdu, otherwise the kernel will drop it.
     EthernetII eth(iface, info.hw_addr, info.hw_addr, ip.clone_pdu());
-    sender.send(&eth);
+    sender.send(eth);
 }
 
 void *thread_proc(void *param) {

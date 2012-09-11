@@ -117,7 +117,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        bool send(PacketSender* sender);
+        bool send(PacketSender &sender);
         
         /**
          * \brief Setter for the version field.

@@ -28,6 +28,7 @@
 #include <tins/network_interface.h>
 #include <tins/utils.h>
 #include <tins/ethernetII.h>
+#include <tins/packet_sender.h>
 
 using namespace std;
 using namespace Tins;
@@ -40,13 +41,13 @@ int do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim,
     EthernetII::address_type gw_hw, victim_hw;
     
     // Resolves gateway's hardware address.
-    if(!Utils::resolve_hwaddr(iface, gw, &gw_hw, &sender)) {
+    if(!Utils::resolve_hwaddr(iface, gw, &gw_hw, sender)) {
         cout << "Could not resolve gateway's ip address.\n";
         return 5;
     }
     
     // Resolves victim's hardware address.
-    if(!Utils::resolve_hwaddr(iface, victim, &victim_hw, &sender)) {
+    if(!Utils::resolve_hwaddr(iface, victim, &victim_hw, sender)) {
         cout << "Could not resolve victim's ip address.\n";
         return 6;
     }
@@ -71,7 +72,7 @@ int do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim,
     EthernetII to_victim(iface, victim_hw, info.hw_addr, victim_arp);
     while(true) {
         // Just send them once every 5 seconds.
-        if(!sender.send(&to_gw) || !sender.send(&to_victim))
+        if(!sender.send(to_gw) || !sender.send(to_victim))
             return 7;
         sleep(5);
     }

@@ -155,7 +155,7 @@ uint32_t Dot11::header_size() const {
     return sz;
 }
 
-bool Dot11::send(PacketSender* sender) {
+bool Dot11::send(PacketSender &sender) {
     struct sockaddr_ll addr;
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -166,7 +166,7 @@ bool Dot11::send(PacketSender* sender) {
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _header.addr1, 6);
 
-    return sender->send_l2(this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 
 void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
