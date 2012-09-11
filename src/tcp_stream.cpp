@@ -80,7 +80,7 @@ void TCPStream::free_fragments(fragments_type &frags) {
 TCPStream::fragments_type TCPStream::clone_fragments(const fragments_type &frags) {
     fragments_type new_frags;
     for(fragments_type::const_iterator it = frags.begin(); it != frags.end(); ++it)
-        new_frags.insert(std::make_pair(it->first, it->second->clone_pdu()));
+        new_frags.insert(std::make_pair(it->first, it->second->clone()));
     return new_frags;
 }
 

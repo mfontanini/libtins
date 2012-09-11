@@ -379,9 +379,9 @@ namespace Tins {
         uint32_t header_size() const;
         
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        DHCP *clone_pdu() const {
+        DHCP *clone() const {
             return new DHCP(*this);
         }
     private:

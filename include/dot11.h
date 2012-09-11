@@ -401,6 +401,13 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return pdu_flag; }
+        
+        /**
+         * \sa PDU::clone
+         */
+        Dot11 *clone() const {
+            return new Dot11(*this);
+        }
 
         /**
          * \brief Check wether this PDU matches the specified flag.
@@ -1550,9 +1557,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11Beacon *clone_pdu() const {
+        Dot11Beacon *clone() const {
             return new Dot11Beacon(*this);
         }
 
@@ -1647,9 +1654,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11Disassoc *clone_pdu() const {
+        Dot11Disassoc *clone() const {
             return new Dot11Disassoc(*this);
         }
     private:
@@ -1750,9 +1757,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11AssocRequest *clone_pdu() const {
+        Dot11AssocRequest *clone() const {
             return new Dot11AssocRequest(*this);
         }
     private:
@@ -1868,9 +1875,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11AssocResponse *clone_pdu() const {
+        Dot11AssocResponse *clone() const {
             return new Dot11AssocResponse(*this);
         }
     private:
@@ -1987,9 +1994,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11ReAssocRequest *clone_pdu() const {
+        Dot11ReAssocRequest *clone() const {
             return new Dot11ReAssocRequest(*this);
         }
     private:
@@ -2106,9 +2113,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11ReAssocResponse *clone_pdu() const {
+        Dot11ReAssocResponse *clone() const {
             return new Dot11ReAssocResponse(*this);
         }
     private:
@@ -2225,9 +2232,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11Authentication *clone_pdu() const {
+        Dot11Authentication *clone() const {
             return new Dot11Authentication(*this);
         }
     private:
@@ -2317,9 +2324,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11Deauthentication *clone_pdu() const {
+        Dot11Deauthentication *clone() const {
             return new Dot11Deauthentication(*this);
         }
     private:
@@ -2384,9 +2391,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu()
+         * \sa PDU::clone()
          */
-        Dot11ProbeRequest* clone_pdu() const {
+        Dot11ProbeRequest* clone() const {
             return new Dot11ProbeRequest(*this);
         }
 
@@ -2479,9 +2486,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu()
+         * \sa PDU::clone()
          */
-        Dot11ProbeResponse* clone_pdu() const {
+        Dot11ProbeResponse* clone() const {
             return new Dot11ProbeResponse(*this);
         }
 
@@ -2629,9 +2636,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11Data *clone_pdu() const {
+        Dot11Data *clone() const {
             return new Dot11Data(*this);
         }
     protected:
@@ -2713,9 +2720,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11QoSData *clone_pdu() const {
+        Dot11QoSData *clone() const {
             return new Dot11QoSData(*this);
         }
 
@@ -2882,9 +2889,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11RTS *clone_pdu() const {
+        Dot11RTS *clone() const {
             return new Dot11RTS(*this);
         }
 
@@ -2938,9 +2945,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11PSPoll *clone_pdu() const {
+        Dot11PSPoll *clone() const {
             return new Dot11PSPoll(*this);
         }
 
@@ -2994,9 +3001,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11CFEnd *clone_pdu() const {
+        Dot11CFEnd *clone() const {
             return new Dot11CFEnd(*this);
         }
 
@@ -3049,9 +3056,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11EndCFAck *clone_pdu() const {
+        Dot11EndCFAck *clone() const {
             return new Dot11EndCFAck(*this);
         }
 
@@ -3103,9 +3110,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11Ack *clone_pdu() const {
+        Dot11Ack *clone() const {
             return new Dot11Ack(*this);
         }
 
@@ -3209,9 +3216,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11BlockAckRequest *clone_pdu() const {
+        Dot11BlockAckRequest *clone() const {
             return new Dot11BlockAckRequest(*this);
         }
 
@@ -3346,9 +3353,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        Dot11BlockAck *clone_pdu() const {
+        Dot11BlockAck *clone() const {
             return new Dot11BlockAck(*this);
         }
     private:

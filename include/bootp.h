@@ -291,9 +291,9 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::BOOTP; }
 
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        BootP *clone_pdu() const {
+        BootP *clone() const {
             return new BootP(*this);
         }
     protected:

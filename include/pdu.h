@@ -205,19 +205,7 @@ namespace Tins {
          * The pointer returned must be deleted by the user.
          * \return A pointer to a clone of this packet.
          */
-        PDU *clone_packet() const;
-
-        /**
-         * \brief Clones this PDU.
-         *
-         * This method does not clone the inner PDUs. \sa PDU::clone_packet
-         * \return A pointer to a copy of this PDU.
-         */
-        virtual PDU *clone_pdu() const {
-            /* Should be pure virtual. It's this way to avoid compiling issues.
-             * Once every pdu has implemented it, make it pure virtual. */
-            return 0;
-        }
+        virtual PDU *clone() const = 0;
 
         /** \brief Send the stack of PDUs through a PacketSender.
          *
@@ -327,7 +315,7 @@ namespace Tins {
          * \brief Generic clone pdu method.
          */
         template<class T>
-        T *do_clone_pdu() const {
+        T *do_clone() const {
             T *new_pdu = new T(*static_cast<const T*>(this));
             //new_pdu->copy_inner_pdu(*this);
             return new_pdu;

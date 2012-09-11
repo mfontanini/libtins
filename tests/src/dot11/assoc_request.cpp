@@ -73,7 +73,7 @@ TEST_F(Dot11AssocRequestTest, ListenInterval) {
 
 TEST_F(Dot11AssocRequestTest, ClonePDU) {
     Dot11AssocRequest dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11AssocRequest> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11AssocRequest> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

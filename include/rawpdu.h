@@ -107,9 +107,9 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::RAW; }
         
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        RawPDU *clone_pdu() const {
+        RawPDU *clone() const {
             return new RawPDU(*this);
         }
     private:

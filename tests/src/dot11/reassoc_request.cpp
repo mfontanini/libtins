@@ -80,7 +80,7 @@ TEST_F(Dot11ReAssocRequestTest, CurrentAP) {
 
 TEST_F(Dot11ReAssocRequestTest, ClonePDU) {
     Dot11ReAssocRequest dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11ReAssocRequest> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11ReAssocRequest> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

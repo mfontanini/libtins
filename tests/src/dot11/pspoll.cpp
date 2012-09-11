@@ -60,7 +60,7 @@ TEST_F(Dot11PSPollTest, CopyAssignmentOperator) {
 
 TEST_F(Dot11PSPollTest, ClonePDU) {
     Dot11PSPoll dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11PSPoll> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11PSPoll> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

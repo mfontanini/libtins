@@ -303,9 +303,9 @@ namespace Tins {
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
         
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        ICMP *clone_pdu() const {
+        ICMP *clone() const {
             return new ICMP(*this);
         }
     private:

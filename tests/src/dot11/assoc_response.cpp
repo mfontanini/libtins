@@ -81,7 +81,7 @@ TEST_F(Dot11AssocResponseTest, AID) {
 
 TEST_F(Dot11AssocResponseTest, ClonePDU) {
     Dot11AssocResponse dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11AssocResponse> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11AssocResponse> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

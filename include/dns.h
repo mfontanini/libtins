@@ -481,9 +481,9 @@ namespace Tins {
         resources_type dns_answers();
         
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        DNS *clone_pdu() const {
+        DNS *clone() const {
             return new DNS(*this);
         }
     private:

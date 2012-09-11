@@ -60,7 +60,7 @@ TEST_F(Dot11RTSTest, CopyAssignmentOperator) {
 
 TEST_F(Dot11RTSTest, ClonePDU) {
     Dot11RTS dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11RTS> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11RTS> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

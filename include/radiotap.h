@@ -274,6 +274,13 @@ namespace Tins {
         uint32_t trailer_size() const;
         
         /**
+         * \sa PDU::clone
+         */
+        RadioTap *clone() const {
+            return new RadioTap(*this);
+        }
+        
+        /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */

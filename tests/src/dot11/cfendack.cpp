@@ -60,7 +60,7 @@ TEST_F(Dot11EndCFAckTest, CopyAssignmentOperator) {
 
 TEST_F(Dot11EndCFAckTest, ClonePDU) {
     Dot11EndCFAck dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11EndCFAck> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11EndCFAck> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

@@ -313,9 +313,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          * 
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        RC4EAPOL *clone_pdu() const {
+        RC4EAPOL *clone() const {
             return new RC4EAPOL(*this);
         }
     private:
@@ -519,9 +519,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          * 
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        RSNEAPOL *clone_pdu() const {
+        RSNEAPOL *clone() const {
             return new RSNEAPOL(*this);
         }
     private:

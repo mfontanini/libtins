@@ -81,7 +81,7 @@ TEST_F(Dot11ProbeResponseTest, Timestamp) {
 
 TEST_F(Dot11ProbeResponseTest, ClonePDU) {
     Dot11ProbeResponse dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11ProbeResponse> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11ProbeResponse> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

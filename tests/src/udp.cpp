@@ -89,7 +89,7 @@ TEST_F(UDPTest, ClonePDU) {
     udp1.sport(sport);
     udp1.length(length);
     
-    UDP *udp2 = static_cast<UDP*>(udp1.clone_pdu());
+    UDP *udp2 = static_cast<UDP*>(udp1.clone());
     ASSERT_TRUE(udp2);
     EXPECT_EQ(udp2->sport(), sport);
     EXPECT_EQ(udp2->dport(), dport);

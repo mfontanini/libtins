@@ -377,9 +377,9 @@ namespace Tins {
         const tcp_option *search_option(Option opt) const;
         
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        TCP *clone_pdu() const {
+        TCP *clone() const {
             return new TCP(*this);
         }
     private:

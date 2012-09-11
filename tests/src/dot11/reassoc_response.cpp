@@ -69,7 +69,7 @@ TEST_F(Dot11ReAssocResponseTest, CopyAssignmentOperator) {
 
 TEST_F(Dot11ReAssocResponseTest, ClonePDU) {
     Dot11ReAssocResponse dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11ReAssocResponse> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11ReAssocResponse> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

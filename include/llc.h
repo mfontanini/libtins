@@ -300,9 +300,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          *
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        LLC *clone_pdu() const {
+        LLC *clone() const {
             return new LLC(*this);
         }
     private:

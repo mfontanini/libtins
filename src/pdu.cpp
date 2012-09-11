@@ -47,7 +47,7 @@ PDU::~PDU() {
 
 void PDU::copy_inner_pdu(const PDU &pdu) {
     if(pdu.inner_pdu())
-        inner_pdu(pdu.inner_pdu()->clone_pdu());
+        inner_pdu(pdu.inner_pdu()->clone());
 }
 
 uint32_t PDU::size() const {
@@ -110,18 +110,5 @@ PDU *PDU::clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz) {
     else
         child = new RawPDU(ptr, total_sz);
     return child;
-}
-
-PDU *PDU::clone_packet() const {
-    PDU *ret = clone_pdu();
-    if(ret) {
-        PDU *ptr = 0, *last = ret;
-        while(last && last->inner_pdu()) {
-            ptr = last->inner_pdu()->clone_pdu();
-            last->inner_pdu(ptr);
-            last = ptr;
-        }
-    }
-    return ret;
 }
 }

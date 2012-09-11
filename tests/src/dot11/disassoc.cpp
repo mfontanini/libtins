@@ -71,7 +71,7 @@ TEST_F(Dot11DisassocTest, ReasonCode) {
 
 TEST_F(Dot11DisassocTest, ClonePDU) {
     Dot11Disassoc dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11Disassoc> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11Disassoc> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

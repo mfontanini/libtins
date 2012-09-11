@@ -179,9 +179,9 @@ namespace Tins {
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
 
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        IEEE802_3 *clone_pdu() const {
+        IEEE802_3 *clone() const {
             return new IEEE802_3(*this);
         }
     private:

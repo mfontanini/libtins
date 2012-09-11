@@ -78,7 +78,7 @@ TEST_F(SNAPTest, ClonePDU) {
     snap1.eth_type(0xfab1);
     snap1.org_code(0xfab1c3);
     snap1.control(0x1);
-    SNAP *snap2 = static_cast<SNAP*>(snap1.clone_pdu());
+    SNAP *snap2 = static_cast<SNAP*>(snap1.clone());
     ASSERT_TRUE(snap2);
     test_equals(snap1, *snap2);
     

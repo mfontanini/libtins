@@ -83,7 +83,7 @@ TEST_F(Dot11AckTest, CopyAssignmentOperator) {
 
 TEST_F(Dot11AckTest, ClonePDU) {
     Dot11Ack dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11Ack> dot2(dot1.clone_pdu());
+    std::auto_ptr<Dot11Ack> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

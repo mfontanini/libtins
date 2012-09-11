@@ -109,9 +109,9 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::UDP; }
         
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        PDU *clone_pdu() const {
+        PDU *clone() const {
             return new UDP(*this);
         }
     private:

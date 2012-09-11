@@ -270,9 +270,9 @@ namespace Tins {
         PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz);
         
         /**
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        ARP *clone_pdu() const {
+        ARP *clone() const {
             return new ARP(*this);
         }
     private:

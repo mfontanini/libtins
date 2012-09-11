@@ -134,9 +134,9 @@ namespace Tins {
         /**
          * \brief Clones this PDU.
          * 
-         * \sa PDU::clone_pdu
+         * \sa PDU::clone
          */
-        SNAP *clone_pdu() const {
+        SNAP *clone() const {
             return new SNAP(*this);
         }    
     private:
