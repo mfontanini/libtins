@@ -44,8 +44,8 @@ PacketWriter::~PacketWriter() {
     pcap_close(handle);
 }
 
-void PacketWriter::write(PDU *pdu) {
-    PDU::serialization_type buffer = pdu->serialize();
+void PacketWriter::write(PDU &pdu) {
+    PDU::serialization_type buffer = pdu.serialize();
     struct timeval tm;
     gettimeofday(&tm, 0);
     struct pcap_pkthdr header = { 

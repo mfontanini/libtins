@@ -22,8 +22,9 @@
 #ifndef TINS_PACKET_WRITER_H
 #define TINS_PACKET_WRITER_H
 
-#include <pcap.h>
 #include <string>
+#include <iterator>
+#include <pcap.h>
 
 namespace Tins {
 class PDU;
@@ -61,7 +62,7 @@ public:
     /**
      * \brief Writes a PDU to this file. 
      */
-    void write(PDU *pdu);
+    void write(PDU &pdu);
     
     /**
      * \brief Writes all the PDUs in the range [start, end)
@@ -69,15 +70,30 @@ public:
      * to be written.
      * \param end A forward iterator pointing to one past the last
      * PDU in the range.
-     * \return ForwardIterator which will be a copy of end.
      */
     template<typename ForwardIterator>
-    ForwardIterator write(ForwardIterator start, ForwardIterator end) {
+    void write(ForwardIterator start, ForwardIterator end) {
+        typedef typename std::iterator_traits<ForwardIterator>::value_type value_type;
+        typedef derefer<value_type> deref_type;
+        
         while(start != end) 
-            write(*start++);
-        return start;
+            write(deref_type::deref(*start++));
     }
 private:
+    template<typename T>
+    struct derefer {
+        static T &deref(T &value) {
+            return value;
+        }
+    };
+    
+    template<typename T>
+    struct derefer<T*> {
+        static T &deref(T *value) {
+            return *value;
+        }
+    };
+
     // You shall not copy
     PacketWriter(const PacketWriter&);
     PacketWriter& operator=(const PacketWriter&);

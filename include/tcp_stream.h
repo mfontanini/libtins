@@ -212,6 +212,20 @@ public:
      */
     template<typename DataFunctor, typename EndFunctor>
     void follow_streams(BaseSniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun);
+    
+    /**
+     * \brief Starts following TCP streams.
+     * 
+     * The template functor must accept a TCPStream& as argument, which
+     * will point to the stream which has been modified.
+     * 
+     * \param sniffer The sniffer which will be used to sniff PDUs.
+     * \param data_fun The function which will be called whenever one of
+     * the peers in a connection sends data.
+     * closed.
+     */
+    template<typename DataFunctor>
+    void follow_streams(BaseSniffer &sniffer, DataFunctor data_fun);
 private:
     typedef std::map<TCPStream::StreamInfo, TCPStream> sessions_type;
     
@@ -228,6 +242,7 @@ private:
     
     template<typename DataFunctor, typename EndFunctor>
     bool callback(PDU &pdu, const DataFunctor &fun, const EndFunctor &end_fun);
+    static void dummy_function(TCPStream&) { }
     
     sessions_type sessions;
     uint64_t last_identifier;
@@ -238,6 +253,11 @@ void TCPStreamFollower::follow_streams(BaseSniffer &sniffer, DataFunctor data_fu
     typedef proxy_caller<DataFunctor, EndFunctor> proxy_type;
     proxy_type proxy = { this, data_fun, end_fun };
     sniffer.sniff_loop(make_sniffer_handler(&proxy, &proxy_type::callback));
+}
+
+template<typename DataFunctor>
+void TCPStreamFollower::follow_streams(BaseSniffer &sniffer, DataFunctor data_fun) {
+    return follow_streams(sniffer, data_fun, dummy_function);
 }
 
 template<typename DataFunctor, typename EndFunctor>

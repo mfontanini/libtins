@@ -32,7 +32,6 @@
 #include "utils.h"
 #include "pdu.h"
 #include "ip.h"
-#include "icmp.h"
 #include "arp.h"
 #include "endianness.h"
 #include "network_interface.h"
@@ -117,6 +116,20 @@ bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
     }
     else
         return false;
+}
+
+HWAddress<6> Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, PacketSender &sender) 
+{
+    IPv4Address my_ip;
+    NetworkInterface::Info info(iface.addresses());
+    std::auto_ptr<PDU> packet(ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr));
+    std::auto_ptr<PDU> response(sender.send_recv(*packet));
+    if(response.get()) {
+        const ARP *arp_resp = response->find_pdu<ARP>();
+        if(arp_resp)
+            return arp_resp->sender_hw_addr();
+    }
+    throw std::runtime_error("Could not resolve hardware address");
 }
 
 bool Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {

@@ -80,7 +80,8 @@ namespace Tins {
          */
         IPv4Address resolve_ip(const std::string &to_resolve);
 
-        /** \brief Resolves the hardware address for a given ip.
+        /** 
+         * \brief Resolves the hardware address for a given ip.
          *
          * \param iface The interface in which the packet will be sent.
          * \param ip The ip to resolve, in integer format.
@@ -91,6 +92,20 @@ namespace Tins {
          */
         bool resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
           HWAddress<6> *address, PacketSender &sender);
+        
+        /** 
+         * \brief Resolves the hardware address for a given ip.
+         *
+         * If the address can't be resolved, a std::runtime_error
+         * exception is thrown.
+         * 
+         * \param iface The interface in which the packet will be sent.
+         * \param ip The ip to resolve, in integer format.
+         * \param sender The sender to use to send and receive the ARP requests.
+         * \return HWAddress<6> containing the resolved hardware address.
+         */
+        HWAddress<6> resolve_hwaddr(const NetworkInterface &iface, 
+          IPv4Address ip, PacketSender &sender);
 
         /** \brief List all network interfaces.
          *
