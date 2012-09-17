@@ -45,14 +45,16 @@ src/dhcp.o: src/dhcp.cpp ../include/dhcp.h ../include/bootp.h \
 
 ../include/ip_address.h:
 src/dns.o: src/dns.cpp ../include/dns.h ../include/pdu.h \
- ../include/endianness.h ../include/utils.h ../include/ip_address.h \
- ../include/hw_address.h
+ ../include/endianness.h ../include/dns_record.h ../include/utils.h \
+ ../include/ip_address.h ../include/hw_address.h
 
 ../include/dns.h:
 
 ../include/pdu.h:
 
 ../include/endianness.h:
+
+../include/dns_record.h:
 
 ../include/utils.h:
 
@@ -728,7 +730,7 @@ include/tests/dot11.h:
 
 ../include/network_interface.h:
 ../src/dns.o: ../src/dns.cpp ../include/dns.h ../include/pdu.h \
- ../include/endianness.h ../include/ip_address.h
+ ../include/endianness.h ../include/dns_record.h ../include/ip_address.h
 
 ../include/dns.h:
 
@@ -736,7 +738,15 @@ include/tests/dot11.h:
 
 ../include/endianness.h:
 
+../include/dns_record.h:
+
 ../include/ip_address.h:
+../src/dns_record.o: ../src/dns_record.cpp ../include/dns_record.h \
+ ../include/endianness.h
+
+../include/dns_record.h:
+
+../include/endianness.h:
 ../src/dot11.o: ../src/dot11.cpp ../include/dot11.h ../include/pdu.h \
  ../include/endianness.h ../include/hw_address.h ../include/small_uint.h \
  ../include/pdu_option.h ../include/network_interface.h \
@@ -1120,8 +1130,8 @@ include/tests/dot11.h:
 ../src/utils.o: ../src/utils.cpp ../include/utils.h \
  ../include/ip_address.h ../include/hw_address.h ../include/pdu.h \
  ../include/ip.h ../include/pdu.h ../include/small_uint.h \
- ../include/endianness.h ../include/pdu_option.h ../include/icmp.h \
- ../include/arp.h ../include/endianness.h ../include/network_interface.h \
+ ../include/endianness.h ../include/pdu_option.h ../include/arp.h \
+ ../include/endianness.h ../include/network_interface.h \
  ../include/packet_sender.h
 
 ../include/utils.h:
@@ -1141,8 +1151,6 @@ include/tests/dot11.h:
 ../include/endianness.h:
 
 ../include/pdu_option.h:
-
-../include/icmp.h:
 
 ../include/arp.h:
 

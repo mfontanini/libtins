@@ -30,6 +30,7 @@
 #include <map>
 #include "pdu.h"
 #include "endianness.h"
+#include "dns_record.h"
 
 namespace Tins {
     class IPv4Address;
@@ -153,11 +154,6 @@ namespace Tins {
         DNS();
         
         /**
-         * \brief Destructor.
-         */
-        ~DNS();
-        
-        /**
          * \brief Constructor which creates a DNS object from a buffer 
          * and adds all identifiable PDUs found in the buffer as 
          * children of this one.
@@ -166,16 +162,6 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         DNS(const uint8_t *buffer, uint32_t total_sz);
-        
-        /**
-         * \brief Copy constructor.
-         */
-        DNS(const DNS& rhs);
-        
-        /**
-         * \brief Copy assignment operator.
-         */
-        DNS& operator=(const DNS& rhs);
         
         // Getters
         
@@ -518,81 +504,12 @@ namespace Tins {
                      authority, additional;
         } __attribute__((packed));
         
-        struct ResourceRecord {
-            struct Info {
-                uint16_t type, qclass;
-                uint32_t ttl;
-            } __attribute__((packed)) info;
-
-            std::vector<uint8_t> data;
-            
-            ResourceRecord(const uint8_t *d = 0, uint16_t len = 0)  {
-                if(d && len)
-                    data.assign(d, d + len);
-            }
-            
-            virtual ~ResourceRecord() {}
-            virtual ResourceRecord *clone() const = 0;
-            uint32_t write(uint8_t *buffer) const;
-            virtual uint32_t do_write(uint8_t *buffer) const = 0;
-            virtual uint32_t size() const = 0;
-            virtual bool matches(const std::string &dname) { return false; }
-            uint32_t data_size() const {
-                return data.size();
-            }
-            const uint8_t *data_pointer() const {
-                return &data[0];
-            }
-            virtual const std::string *dname_pointer() const { return 0; }
-        };
-        
-        struct OffsetedResourceRecord : public ResourceRecord {
-            uint16_t offset;
-            
-            OffsetedResourceRecord(uint16_t off, const uint8_t *data = 0, uint16_t len = 0) 
-              : ResourceRecord(data,len), offset(off | 0xc0) {}
-            
-            uint32_t do_write(uint8_t *buffer) const {
-                std::memcpy(buffer, &offset, sizeof(offset));
-                return sizeof(offset);
-            }
-            uint32_t size() const { 
-                return sizeof(ResourceRecord::info) + sizeof(offset) + data.size() + sizeof(uint16_t); 
-            }
-            ResourceRecord *clone() const;
-        };
-        
-        struct NamedResourceRecord : public ResourceRecord {
-            std::string name;
-            
-            NamedResourceRecord(const std::string &nm,  const uint8_t *data = 0, uint16_t len = 0) 
-              : ResourceRecord(data,len), name(nm) {}
-            
-            uint32_t do_write(uint8_t *buffer) const {
-                std::memcpy(buffer, name.c_str(), name.size() + 1);
-                return name.size() + 1;
-            }
-            
-            uint32_t size() const { 
-                return sizeof(ResourceRecord::info) + name.size() + 1 + data.size() + sizeof(uint16_t); 
-            }
-            
-            bool matches(const std::string &dname) { 
-                return dname == name; 
-            }
-            
-            const std::string *dname_pointer() const {
-                return &name;
-            }
-            ResourceRecord *clone() const;
-        };
-        
         typedef std::map<uint16_t, std::string> SuffixMap;
         typedef std::map<uint16_t, uint16_t> SuffixIndices;
-        typedef std::list<ResourceRecord*> ResourcesType;
+        typedef std::list<DNSResourceRecord> ResourcesType;
         typedef std::list<Query> QueriesType;
         
-        const uint8_t *build_resource_list(std::list<ResourceRecord*> &lst, const uint8_t *ptr, uint32_t &sz, uint16_t nrecs);
+        const uint8_t *build_resource_list(ResourcesType &lst, const uint8_t *ptr, uint32_t &sz, uint16_t nrecs);
         uint32_t find_domain_name(const std::string &dname);
         bool find_domain_name(const std::string &dname, const ResourcesType &lst, uint16_t &out);
         void parse_domain_name(const std::string &dn, std::string &out) const;
@@ -601,23 +518,19 @@ namespace Tins {
         uint8_t *serialize_list(const ResourcesType &lst, uint8_t *buffer) const;
         void compose_name(const uint8_t *ptr, uint32_t sz, std::string &out);
         void convert_resources(const ResourcesType &lst, std::list<Resource> &res);
-        ResourceRecord *make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip);
-        ResourceRecord *make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const std::string &dname);
-        ResourceRecord *make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const uint8_t *ptr, uint32_t len);
+        DNSResourceRecord make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip);
+        DNSResourceRecord make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const std::string &dname);
+        DNSResourceRecord make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const uint8_t *ptr, uint32_t len);
         void add_suffix(uint32_t index, const uint8_t *data, uint32_t sz);
         uint32_t build_suffix_map(uint32_t index, const ResourcesType &lst);
         uint32_t build_suffix_map(uint32_t index, const QueriesType &lst);
         void build_suffix_map();
-        void copy_list(const ResourcesType &from, ResourcesType &to) const;
         bool contains_dname(uint16_t type);
-        void free_list(ResourcesType &lst);
-        
-        void copy_fields(const DNS *other);
         
         dnshdr dns;
         uint32_t extra_size;
         std::list<Query> queries;
-        std::list<ResourceRecord*> ans, arity, addit;
+        ResourcesType ans, arity, addit;
         SuffixMap suffixes;
         SuffixIndices suffix_indices;
     };
