@@ -118,9 +118,15 @@ namespace Tins {
              * initialization
              */
             option_identifier(uint8_t value) 
+            #if TINS_IS_LITTLE_ENDIAN
             : number(value & 0x1f), 
               op_class((value >> 5) & 0x03), 
               copied((value >> 7) & 0x01) {}
+            #elif TINS_IS_BIG_ENDIAN
+            : copied((value >> 7) & 0x01),
+              op_class((value >> 5) & 0x03), 
+              number(value & 0x1f) {}
+            #endif
             
             /**
              * Constructor using user provided values for each field.

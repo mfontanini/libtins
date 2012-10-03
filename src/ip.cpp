@@ -238,6 +238,9 @@ void IP::add_route_option(option_identifier id, const generic_route_option_type 
     opt_data[0] = data.pointer;
     for(size_t i(0); i < data.routes.size(); ++i) {
         uint32_t ip = data.routes[i];
+        #if TINS_IS_BIG_ENDIAN
+            ip = Endian::change_endian(ip);
+        #endif
         opt_data[1 + i * 4] = ip & 0xff;
         opt_data[1 + i * 4 + 1] = (ip >> 8) & 0xff;
         opt_data[1 + i * 4 + 2] = (ip >> 16) & 0xff;
