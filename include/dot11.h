@@ -167,12 +167,10 @@ namespace Tins {
          * Constructor that builds an 802.11 PDU taking the interface index,
          * destination's and source's MAC.
          *
-         * \param iface_index const uint32_t with the interface's index from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(const NetworkInterface &iface = NetworkInterface(), 
-               const address_type &dst_hw_addr = address_type(), 
+        Dot11(const address_type &dst_hw_addr = address_type(), 
                PDU* child = 0);
 
         /**
@@ -263,14 +261,14 @@ namespace Tins {
         /**
          * \brief Getter for the first address.
          *
-         * \return The first address as a constant uint8_t pointer.
+         * \return The first address.
          */
         address_type addr1() const { return _header.addr1; }
 
         /**
-         * \brief Getter for the interface.
+         * \brief Getter for the network interface.
          *
-         * \return The interface's index as an uint32_t.
+         * \return The network interface in which this PDU will be sent.
          */
         const NetworkInterface &iface() const { return _iface; }
 
@@ -354,16 +352,17 @@ namespace Tins {
         /**
          * \brief Setter for the first address.
          *
-         * \param new_addr1 const uint8_t array of 6 bytes containing the new first's address.
+         * \param new_addr1 The new first address.
          */
         void addr1(const address_type &new_addr1);
 
         /**
-         * \brief Setter for the interface.
+         * \brief Setter for the network interface.
          *
-         * \param new_iface_index uint32_t containing the new interface index.
+         * \param new_iface The network interface in which this PDU
+         * will be sent.
          */
-        void iface(const NetworkInterface &new_ifac);
+        void iface(const NetworkInterface &new_iface);
 
         /* Virtual methods */
         /**
@@ -1432,9 +1431,8 @@ namespace Tins {
         } __attribute__((__packed__));
 
         
-        Dot11ManagementFrame(const NetworkInterface &iface = NetworkInterface(), 
-                                const address_type &dst_hw_addr = address_type(), 
-                                const address_type &src_hw_addr = address_type());
+        Dot11ManagementFrame(const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
         
         /**
          * \brief Constructor which creates a Dot11ManagementFrame object from a buffer and adds all identifiable
@@ -1475,16 +1473,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Beacon.
          *
-         * Constructor that builds a 802.11 Beacon taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 Beacon taking destination and source 
+         * hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11Beacon(const NetworkInterface& iface = NetworkInterface(), 
-                     const address_type &dst_hw_addr = address_type(), 
-                     const address_type &src_hw_addr = address_type());
+        Dot11Beacon(const address_type &dst_hw_addr = address_type(), 
+                    const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11Beacon object from a buffer and adds
@@ -1594,16 +1590,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Disassociation.
          *
-         * Constructor that builds a 802.11 Disassociation taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 Disassociation taking the destination
+         * and source hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11Disassoc(const NetworkInterface& iface = NetworkInterface(), 
-                        const address_type &dst_hw_addr = address_type(), 
-                        const address_type &src_hw_addr = address_type());
+        Dot11Disassoc(const address_type &dst_hw_addr = address_type(), 
+                    const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11Disassoc object from a buffer and adds
@@ -1683,16 +1677,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Association Request.
          *
-         * Constructor that builds a 802.11 Association Request taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 Association Request taking the
+         * destination and source hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11AssocRequest(const NetworkInterface& iface = NetworkInterface(), 
-                            const address_type &dst_hw_addr = address_type(), 
-                            const address_type &src_hw_addr = address_type());
+        Dot11AssocRequest(const address_type &dst_hw_addr = address_type(), 
+                        const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11AssocRequest object from a
@@ -1787,16 +1779,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Association Response.
          *
-         * Constructor that builds a 802.11 Association Response taking the interface name,
-         * destination's and source's MAC.
+         * Constructors a 802.11 Association Response taking destination 
+         * and source hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11AssocResponse(const NetworkInterface& iface = NetworkInterface(), 
-                              const address_type &dst_hw_addr = address_type(), 
-                              const address_type &src_hw_addr = address_type());
+        Dot11AssocResponse(const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11AssocResponse object from a
@@ -1906,16 +1896,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 ReAssociation Request.
          *
-         * Constructor that builds a 802.11 Association Request taking the interface name,
-         * destination's and source's MAC.
+         * Constructors a 802.11 Association Request taking the destination 
+         * and source hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11ReAssocRequest(const NetworkInterface& iface = NetworkInterface(), 
-                               const address_type &dst_hw_addr = address_type(), 
-                               const address_type &src_hw_addr = address_type());
+        Dot11ReAssocRequest(const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11AssocRequest object from a
@@ -2025,16 +2013,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Association Response.
          *
-         * Constructor that builds a 802.11 ReAssociation Response taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 ReAssociation Response taking the 
+         * destination and source hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11ReAssocResponse(const NetworkInterface& iface = NetworkInterface(), 
-                                const address_type &dst_hw_addr = address_type(), 
-                                const address_type &src_hw_addr = address_type());
+        Dot11ReAssocResponse(const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11ReAssocResponse object from a
@@ -2144,16 +2130,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Authentication.
          *
-         * Constructor that builds a 802.11 Dot11Authentication taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 Dot11Authentication taking the 
+         * destination and source hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11Authentication(const NetworkInterface& iface = NetworkInterface(), 
-                               const address_type &dst_hw_addr = address_type(), 
-                               const address_type &src_hw_addr = address_type());
+        Dot11Authentication(const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11Authentication object from a
@@ -2264,16 +2248,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Deauthentication.
          *
-         * Constructor that builds a 802.11 Deauthentication taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 Deauthentication taking the 
+         * destination and source hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11Deauthentication(const NetworkInterface& iface = NetworkInterface(), 
-                                 const address_type &dst_hw_addr = address_type(), 
-                                 const address_type &src_hw_addr = address_type());
+        Dot11Deauthentication(const address_type &dst_hw_addr = address_type(), 
+                            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11Deauthentication object from a buffer and adds
@@ -2353,16 +2335,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Probe Request.
          *
-         * Constructor that builds a 802.11 Probe Request taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 Probe Request taking the 
+         * destination and source hardware address.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11ProbeRequest(const NetworkInterface& iface = NetworkInterface(), 
-                            const address_type &dst_hw_addr = address_type(), 
-                            const address_type &src_hw_addr = address_type());
+        Dot11ProbeRequest(const address_type &dst_hw_addr = address_type(), 
+                        const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11ProbeRequest object from a
@@ -2413,16 +2393,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Probe Response.
          *
-         * Constructor that builds a 802.11 Probe Response taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 Probe Response taking the
+         * destination and source hardware addresses.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          */
-        Dot11ProbeResponse(const NetworkInterface& iface = NetworkInterface(), 
-                            const address_type &dst_hw_addr = address_type(), 
-                            const address_type &src_hw_addr = address_type());
+        Dot11ProbeResponse(const address_type &dst_hw_addr = address_type(), 
+                        const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructor which creates a Dot11ProbeResponse object from a
@@ -2527,11 +2505,20 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_DATA;
-                    
-        Dot11Data(const NetworkInterface &iface = NetworkInterface(), 
-                    const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type(), 
-                    PDU* child = 0);
+        
+        /**
+         * \brief Constructor for creating a 802.11 Data frame.
+         *
+         * Constructs a 802.11 Data frame taking the
+         * destination and source hardware addresses.
+         *
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
+         * \param child The inner PDU.
+         */
+        Dot11Data(const address_type &dst_hw_addr = address_type(), 
+                const address_type &src_hw_addr = address_type(), 
+                PDU* child = 0);
                     
         /**
          * \brief Constructor which creates a Dot11Data object from a buffer and adds all identifiable
@@ -2674,18 +2661,16 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 QoS Data PDU
          *
-         * Constructor that builds a 802.11 QoS Data PDU taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 QoS Data PDU taking the
+         * destination and source hardware addresses.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11QoSData(const NetworkInterface& iface = NetworkInterface(), 
-                        const address_type &dst_hw_addr = address_type(), 
-                        const address_type &src_hw_addr = address_type(), 
-                        PDU* child = 0);
+        Dot11QoSData(const address_type &dst_hw_addr = address_type(), 
+                    const address_type &src_hw_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 QoS Data object from a buffer and adds all identifiable
@@ -2760,16 +2745,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 control frame PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 Control PDU taking the destination and 
+         * source hardware addresses.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param dst_addr The destination hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(const NetworkInterface& iface = NetworkInterface(), 
-                        const address_type &dst_addr = address_type(), 
-                        PDU* child = 0);
+        Dot11Control(const address_type &dst_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 control frame object from a buffer and
@@ -2815,18 +2798,16 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 control frame TA PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 PDU taking the destination and source 
+         * hardware addresses.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_addr The destination hardware address.
+         * \param target_addr The source hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11ControlTA(const NetworkInterface& iface = NetworkInterface(), 
-                        const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
+        Dot11ControlTA(const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 control frame object from a buffer and
@@ -2865,18 +2846,16 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 RTS frame PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 RTS PDU taking the destination and source
+         * hardware addresses.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_addr The destination hardware address.
+         * \param target_addr The source hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11RTS(const NetworkInterface& iface = NetworkInterface(), 
-                    const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
+        Dot11RTS(const address_type &dst_addr = address_type(), 
+                const address_type &target_addr = address_type(), 
+                PDU* child = 0);
                     
         /**
          * \brief Constructor which creates an 802.11 RTS frame object from a buffer and
@@ -2921,18 +2900,16 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 PS-Poll frame PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 PDU taking the destination and source 
+         * hardware addresses.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_addr The destination hardware address.
+         * \param target_addr The source hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11PSPoll(const NetworkInterface& iface = NetworkInterface(), 
-                        const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
+        Dot11PSPoll(const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 PS-Poll frame object from a buffer and
@@ -2977,18 +2954,16 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 CF-End frame PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 PDU taking the destination and source 
+         * hardware addresses.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * \param dst_addr The destination hardware address.
+         * \param target_addr The source hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11CFEnd(const NetworkInterface& iface = NetworkInterface(), 
-                    const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
+        Dot11CFEnd(const address_type &dst_addr = address_type(), 
+                const address_type &target_addr = address_type(), 
+                PDU* child = 0);
                     
         /**
          * \brief Constructor which creates an 802.11 CF-End frame object from a buffer and
@@ -3033,17 +3008,16 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 End-CF-Ack frame PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * Constructs a 802.11 PDU taking the destination and source 
+         * hardware addresses.
+         * 
+         * \param dst_addr The destination hardware address.
+         * \param target_addr The source hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11EndCFAck(const NetworkInterface& iface = NetworkInterface(), 
-                        const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
+        Dot11EndCFAck(const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 End-CF-Ack frame object from a buffer and
@@ -3088,16 +3062,14 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Ack frame PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
+         * Constructs a 802.11 PDU taking the destination and source 
+         * hardware addresses.
          *
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
+         * \param dst_addr The destination hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Ack(const NetworkInterface& iface = NetworkInterface(), 
-                    const address_type &dst_addr = address_type(), 
-                    PDU* child = 0);
+        Dot11Ack(const address_type &dst_addr = address_type(), 
+                PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 Ack frame object from a buffer and
@@ -3145,17 +3117,16 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Block Ack request frame PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * Constructs a 802.11 PDU taking the destination and source 
+         * hardware addresses.
+         * 
+         * \param dst_addr The destination hardware address.
+         * \param target_addr The source hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAckRequest(const NetworkInterface& iface = NetworkInterface(), 
-                                const address_type &dst_addr = address_type(), 
-                                const address_type &target_addr = address_type(), 
-                                PDU* child = 0);
+        Dot11BlockAckRequest(const address_type &dst_addr = address_type(), 
+                            const address_type &target_addr = address_type(), 
+                            PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and
@@ -3268,17 +3239,16 @@ namespace Tins {
         /**
          * \brief Constructor for creating a 802.11 Block Ack frame PDU
          *
-         * Constructor that builds a 802.11 PDU taking the interface name,
-         * destination's and source's MAC.
-         * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param target_addr uint8_t array of 6 bytes containing the source's MAC(optional).
+         * Constructs a 802.11 PDU taking the destination and source 
+         * hardware addresses.
+         * 
+         * \param dst_addr The destination hardware address.
+         * \param target_addr The source hardware address.
          * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11BlockAck(const NetworkInterface& iface = NetworkInterface(), 
-                        const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type(), 
-                        PDU* child = 0);
+        Dot11BlockAck(const address_type &dst_addr = address_type(), 
+                    const address_type &target_addr = address_type(), 
+                    PDU* child = 0);
 
         /**
          * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and

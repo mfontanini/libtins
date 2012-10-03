@@ -73,7 +73,7 @@ TEST_F(Dot11Test, ConstructorFromBuffer) {
 }
 
 TEST_F(Dot11Test, SrcAddrConstructor) {
-    Dot11 dot11("lo", hwaddr);
+    Dot11 dot11(hwaddr);
     EXPECT_EQ(dot11.addr1(), hwaddr);
 }
 

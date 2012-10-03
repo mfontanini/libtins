@@ -45,9 +45,8 @@ using std::runtime_error;
 namespace Tins {
 const Dot11::address_type Dot11::BROADCAST = "ff:ff:ff:ff:ff:ff";
 
-Dot11::Dot11(const NetworkInterface &iface, 
-  const address_type &dst_hw_addr, PDU* child) 
-: PDU(ETHERTYPE_IP, child), _iface(iface), _options_size(0)
+Dot11::Dot11(const address_type &dst_hw_addr, PDU* child) 
+: PDU(ETHERTYPE_IP, child), _options_size(0)
 {
     memset(&_header, 0, sizeof(ieee80211_header));
     addr1(dst_hw_addr);
@@ -273,9 +272,9 @@ Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t total
     }
 }
 
-Dot11ManagementFrame::Dot11ManagementFrame(const NetworkInterface &iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11(iface, dst_hw_addr) 
+Dot11ManagementFrame::Dot11ManagementFrame(const address_type &dst_hw_addr, 
+const address_type &src_hw_addr) 
+: Dot11(dst_hw_addr) 
 {
     type(Dot11::MANAGEMENT);
     memset(&_ext_header, 0, sizeof(_ext_header));
@@ -808,9 +807,9 @@ std::string Dot11ManagementFrame::challenge_text() const {
 
 /* Dot11Beacon */
 
-Dot11Beacon::Dot11Beacon(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+Dot11Beacon::Dot11Beacon(const address_type &dst_hw_addr, 
+const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
 {
     subtype(Dot11::BEACON);
     memset(&_body, 0, sizeof(_body));
@@ -851,9 +850,10 @@ uint32_t Dot11Beacon::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz)
 
 /* Diassoc */
 
-Dot11Disassoc::Dot11Disassoc(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr){
+Dot11Disassoc::Dot11Disassoc(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
+{
     this->subtype(Dot11::DISASSOC);
     memset(&_body, 0, sizeof(_body));
 }
@@ -888,9 +888,9 @@ uint32_t Dot11Disassoc::write_fixed_parameters(uint8_t *buffer, uint32_t total_s
 
 /* Assoc request. */
 
-Dot11AssocRequest::Dot11AssocRequest(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+Dot11AssocRequest::Dot11AssocRequest(const address_type &dst_hw_addr, 
+const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
 {
     subtype(Dot11::ASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
@@ -925,9 +925,9 @@ uint32_t Dot11AssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t tot
 
 /* Assoc response. */
 
-Dot11AssocResponse::Dot11AssocResponse(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+Dot11AssocResponse::Dot11AssocResponse(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
 {
     subtype(Dot11::ASSOC_RESP);
     memset(&_body, 0, sizeof(_body));
@@ -968,9 +968,9 @@ uint32_t Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t to
 
 /* ReAssoc request. */
 
-Dot11ReAssocRequest::Dot11ReAssocRequest(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+Dot11ReAssocRequest::Dot11ReAssocRequest(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
 {
     this->subtype(Dot11::REASSOC_REQ);
     memset(&_body, 0, sizeof(_body));
@@ -1011,9 +1011,9 @@ uint32_t Dot11ReAssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t t
 
 /* ReAssoc response. */
 
-Dot11ReAssocResponse::Dot11ReAssocResponse(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr)
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+Dot11ReAssocResponse::Dot11ReAssocResponse(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr)
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
 {
     this->subtype(Dot11::REASSOC_RESP);
     memset(&_body, 0, sizeof(_body));
@@ -1054,9 +1054,9 @@ uint32_t Dot11ReAssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t 
 
 /* Auth */
 
-Dot11Authentication::Dot11Authentication(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+Dot11Authentication::Dot11Authentication(const address_type &dst_hw_addr, 
+const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
 {
     this->subtype(Dot11::AUTH);
     memset(&_body, 0, sizeof(_body));
@@ -1101,9 +1101,9 @@ uint32_t Dot11Authentication::write_fixed_parameters(uint8_t *buffer, uint32_t t
 
 /* Deauth */
 
-Dot11Deauthentication::Dot11Deauthentication(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr)
+Dot11Deauthentication::Dot11Deauthentication(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
 {
     this->subtype(Dot11::DEAUTH);
     memset(&_body, 0, sizeof(_body));
@@ -1139,9 +1139,9 @@ uint32_t Dot11Deauthentication::write_fixed_parameters(uint8_t *buffer, uint32_t
 
 /* Probe Request */
 
-Dot11ProbeRequest::Dot11ProbeRequest(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+Dot11ProbeRequest::Dot11ProbeRequest(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
 {
     this->subtype(Dot11::PROBE_REQ);
 }
@@ -1157,9 +1157,9 @@ Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz)
 
 /* Probe Response */
 
-Dot11ProbeResponse::Dot11ProbeResponse(const NetworkInterface& iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr) 
-: Dot11ManagementFrame(iface, dst_hw_addr, src_hw_addr) 
+Dot11ProbeResponse::Dot11ProbeResponse(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
 {
     this->subtype(Dot11::PROBE_RESP);
     memset(&_body, 0, sizeof(_body));
@@ -1222,10 +1222,9 @@ Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz)
 }
 
 
-Dot11Data::Dot11Data(const NetworkInterface &iface,
-  const address_type &dst_hw_addr, const address_type &src_hw_addr,
-  PDU* child) 
-: Dot11(iface, dst_hw_addr, child) 
+Dot11Data::Dot11Data(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr, PDU* child) 
+: Dot11(dst_hw_addr, child) 
 {
     type(Dot11::DATA);
     memset(&_ext_header, 0, sizeof(_ext_header));
@@ -1273,10 +1272,9 @@ uint32_t Dot11Data::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
 
 /* QoS data. */
 
-Dot11QoSData::Dot11QoSData(const NetworkInterface &iface, 
-  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
-  PDU* child) 
-: Dot11Data(iface, dst_hw_addr, src_hw_addr, child) 
+Dot11QoSData::Dot11QoSData(const address_type &dst_hw_addr, 
+  const address_type &src_hw_addr, PDU* child) 
+: Dot11Data(dst_hw_addr, src_hw_addr, child) 
 {
     subtype(Dot11::QOS_DATA_DATA);
     _qos_control = 0;
@@ -1315,9 +1313,8 @@ uint32_t Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz
 
 /* Dot11Control */
 
-Dot11Control::Dot11Control(const NetworkInterface &iface, 
-  const address_type &dst_addr, PDU* child) 
-: Dot11(iface, dst_addr, child) 
+Dot11Control::Dot11Control(const address_type &dst_addr, PDU* child) 
+: Dot11(dst_addr, child) 
 {
     type(CONTROL);
 }
@@ -1329,9 +1326,9 @@ Dot11Control::Dot11Control(const uint8_t *buffer, uint32_t total_sz)
 
 /* Dot11ControlTA */
 
-Dot11ControlTA::Dot11ControlTA(const NetworkInterface &iface, 
-  const address_type &dst_addr, const address_type &target_address, PDU* child) 
-: Dot11Control(iface, dst_addr, child)
+Dot11ControlTA::Dot11ControlTA(const address_type &dst_addr, 
+  const address_type &target_address, PDU* child) 
+: Dot11Control(dst_addr, child)
 {
     target_addr(target_address);
 }
@@ -1362,9 +1359,9 @@ void Dot11ControlTA::target_addr(const address_type &addr) {
 
 /* Dot11RTS */
 
-Dot11RTS::Dot11RTS(const NetworkInterface &iface, const address_type &dst_addr, 
+Dot11RTS::Dot11RTS(const address_type &dst_addr, 
   const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+: Dot11ControlTA(dst_addr, target_addr, child) 
 {
     subtype(RTS);
 }
@@ -1376,9 +1373,9 @@ Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz)
 
 /* Dot11PSPoll */
 
-Dot11PSPoll::Dot11PSPoll(const NetworkInterface &iface, 
-  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+Dot11PSPoll::Dot11PSPoll(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(dst_addr, target_addr, child) 
 {
     subtype(PS);
 }
@@ -1390,9 +1387,9 @@ Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz)
 
 /* Dot11CFEnd */
 
-Dot11CFEnd::Dot11CFEnd(const NetworkInterface &iface, 
-  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+Dot11CFEnd::Dot11CFEnd(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(dst_addr, target_addr, child) 
 {
     subtype(CF_END);
 }
@@ -1404,9 +1401,9 @@ Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz)
 
 /* Dot11EndCFAck */
 
-Dot11EndCFAck::Dot11EndCFAck(const NetworkInterface &iface, 
-  const address_type &dst_addr, const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+Dot11EndCFAck::Dot11EndCFAck(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child) 
+: Dot11ControlTA(dst_addr, target_addr, child) 
 {
     subtype(CF_END_ACK);
 }
@@ -1418,9 +1415,8 @@ Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz)
 
 /* Dot11Ack */
 
-Dot11Ack::Dot11Ack(const NetworkInterface &iface, 
-  const address_type &dst_addr, PDU* child) 
-: Dot11Control(iface, dst_addr, child) 
+Dot11Ack::Dot11Ack(const address_type &dst_addr, PDU* child) 
+: Dot11Control(dst_addr, child) 
 {
     subtype(ACK);
 }
@@ -1431,9 +1427,9 @@ Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buff
 
 /* Dot11BlockAck */
 
-Dot11BlockAckRequest::Dot11BlockAckRequest(const NetworkInterface &iface, 
-  const address_type &dst_addr, const address_type &target_addr, PDU* child)
-: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+Dot11BlockAckRequest::Dot11BlockAckRequest(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child)
+: Dot11ControlTA(dst_addr, target_addr, child) 
 {
     init_block_ack();
 }
@@ -1484,9 +1480,9 @@ uint32_t Dot11BlockAckRequest::header_size() const {
 
 /* Dot11BlockAck */
 
-Dot11BlockAck::Dot11BlockAck(const NetworkInterface &iface, 
-  const address_type &dst_addr, const address_type &target_addr, PDU* child)
-: Dot11ControlTA(iface, dst_addr, target_addr, child) 
+Dot11BlockAck::Dot11BlockAck(const address_type &dst_addr, 
+  const address_type &target_addr, PDU* child)
+: Dot11ControlTA(dst_addr, target_addr, child) 
 {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));

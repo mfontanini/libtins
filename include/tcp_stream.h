@@ -218,10 +218,15 @@ public:
      * \brief Starts following TCP streams.
      * 
      * This overload takes a range of iterators containing the PDUs 
-     * in which TCP streams will be looked up and followed.
+     * in which TCP streams will be looked up and followed. The iterators
+     * will be dereferenced until a PDU& is found, so iterators can hold
+     * not only PDUs, but also smart pointers, etc.
      * 
      * The template functors must accept a TCPStream& as argument, which
      * will point to the stream which has been modified.
+     * 
+     * The state of the PDUs stored in the iterator range provided might
+     * be modified internally.
      * 
      * \param start The start of the range of PDUs.
      * \param end The start of the range of PDUs.
@@ -252,10 +257,15 @@ public:
      * \brief Starts following TCP streams.
      * 
      * This overload takes a range of iterators containing the PDUs 
-     * in which TCP streams will be looked up and followed.
+     * in which TCP streams will be looked up and followed. The iterators
+     * will be dereferenced until a PDU& is found, so iterators can hold
+     * not only PDUs, but also smart pointers, etc.
      * 
      * The template functors must accept a TCPStream& as argument, which
      * will point to the stream which has been modified.
+     * 
+     * The state of the PDUs stored in the iterator range provided might
+     * be modified internally.
      * 
      * \param start The start of the range of PDUs.
      * \param end The start of the range of PDUs.
