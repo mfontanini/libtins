@@ -24,6 +24,7 @@
 
 #include <map>
 #include <utility>
+#include <iterator>
 #include <vector>
 #include <algorithm>
 #include <stdint.h>
@@ -216,6 +217,26 @@ public:
     /**
      * \brief Starts following TCP streams.
      * 
+     * This overload takes a range of iterators containing the PDUs 
+     * in which TCP streams will be looked up and followed.
+     * 
+     * The template functors must accept a TCPStream& as argument, which
+     * will point to the stream which has been modified.
+     * 
+     * \param start The start of the range of PDUs.
+     * \param end The start of the range of PDUs.
+     * \param data_fun The function which will be called whenever one of
+     * the peers in a connection sends data.
+     * \param end_fun This function will be called when a stream is 
+     * closed.
+     */
+    template<typename ForwardIterator, typename DataFunctor, typename EndFunctor>
+    void follow_streams(ForwardIterator start, ForwardIterator end, 
+      DataFunctor data_fun, EndFunctor end_fun);
+    
+    /**
+     * \brief Starts following TCP streams.
+     * 
      * The template functor must accept a TCPStream& as argument, which
      * will point to the stream which has been modified.
      * 
@@ -226,6 +247,24 @@ public:
      */
     template<typename DataFunctor>
     void follow_streams(BaseSniffer &sniffer, DataFunctor data_fun);
+    
+    /**
+     * \brief Starts following TCP streams.
+     * 
+     * This overload takes a range of iterators containing the PDUs 
+     * in which TCP streams will be looked up and followed.
+     * 
+     * The template functors must accept a TCPStream& as argument, which
+     * will point to the stream which has been modified.
+     * 
+     * \param start The start of the range of PDUs.
+     * \param end The start of the range of PDUs.
+     * \param data_fun The function which will be called whenever one of
+     * the peers in a connection sends data.
+     */
+    template<typename ForwardIterator, typename DataFunctor>
+    void follow_streams(ForwardIterator start, ForwardIterator end, 
+      DataFunctor data_fun);
 private:
     typedef std::map<TCPStream::StreamInfo, TCPStream> sessions_type;
     
@@ -240,6 +279,42 @@ private:
         EndFunctor end_fun;
     };
     
+    template <typename T>
+    struct is_pdu {  
+        template <typename U>
+        static char test(typename U::PDUType*);
+         
+        template <typename U>
+        static long test(...);
+     
+        static const bool value = sizeof(test<T>(0)) == 1;
+    };
+
+    template<bool, typename>
+    struct enable_if {
+        
+    };
+
+    template<typename T>
+    struct enable_if<true, T> {
+        typedef T type;
+    };
+    
+    static PDU& recursive_dereference(PDU &pdu) {
+        return pdu;
+    }
+    
+    template<typename T>
+    static typename enable_if<!is_pdu<T>::value, PDU&>::type 
+    recursive_dereference(T &value) {
+        return recursive_dereference(*value);
+    }
+    
+    void clear_state() {
+        sessions.clear();
+        last_identifier = 0;
+    }
+    
     template<typename DataFunctor, typename EndFunctor>
     bool callback(PDU &pdu, const DataFunctor &fun, const EndFunctor &end_fun);
     static void dummy_function(TCPStream&) { }
@@ -252,7 +327,20 @@ template<typename DataFunctor, typename EndFunctor>
 void TCPStreamFollower::follow_streams(BaseSniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun) {
     typedef proxy_caller<DataFunctor, EndFunctor> proxy_type;
     proxy_type proxy = { this, data_fun, end_fun };
+    clear_state();
     sniffer.sniff_loop(make_sniffer_handler(&proxy, &proxy_type::callback));
+}
+
+template<typename ForwardIterator, typename DataFunctor, typename EndFunctor>
+void TCPStreamFollower::follow_streams(ForwardIterator start, ForwardIterator end, 
+  DataFunctor data_fun, EndFunctor end_fun) 
+{
+    clear_state();
+    while(start != end) {
+        if(!callback(recursive_dereference(start), data_fun, end_fun))
+            return;
+        start++;
+    }
 }
 
 template<typename DataFunctor>
@@ -260,15 +348,22 @@ void TCPStreamFollower::follow_streams(BaseSniffer &sniffer, DataFunctor data_fu
     return follow_streams(sniffer, data_fun, dummy_function);
 }
 
+template<typename ForwardIterator, typename DataFunctor>
+void TCPStreamFollower::follow_streams(ForwardIterator start, ForwardIterator end, 
+  DataFunctor data_fun) 
+{
+    follow_streams(start, end, data_fun, dummy_function);
+}
+
 template<typename DataFunctor, typename EndFunctor>
 bool TCPStreamFollower::callback(PDU &pdu, const DataFunctor &data_fun, const EndFunctor &end_fun) {
     IP *ip = pdu.find_pdu<IP>();
     TCP *tcp = pdu.find_pdu<TCP>();
     if(ip && tcp) {
-        TCPStream::StreamInfo info = { 
+        TCPStream::StreamInfo info( 
             ip->src_addr(), ip->dst_addr(),
             tcp->sport(), tcp->dport()
-        };
+        );
         sessions_type::iterator it = sessions.find(info);
         if(it == sessions.end()) {
             std::swap(info.client_addr, info.server_addr);

@@ -187,6 +187,43 @@ src/tcp.o: src/tcp.cpp ../include/tcp.h ../include/pdu.h \
 ../include/ip_address.h:
 
 ../include/hw_address.h:
+src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
+ ../include/sniffer.h ../include/pdu.h ../include/ethernetII.h \
+ ../include/endianness.h ../include/hw_address.h \
+ ../include/network_interface.h ../include/ip_address.h \
+ ../include/radiotap.h ../include/tcp.h ../include/small_uint.h \
+ ../include/pdu_option.h ../include/ip.h ../include/tcp.h \
+ ../include/utils.h
+
+../include/tcp_stream.h:
+
+../include/sniffer.h:
+
+../include/pdu.h:
+
+../include/ethernetII.h:
+
+../include/endianness.h:
+
+../include/hw_address.h:
+
+../include/network_interface.h:
+
+../include/ip_address.h:
+
+../include/radiotap.h:
+
+../include/tcp.h:
+
+../include/small_uint.h:
+
+../include/pdu_option.h:
+
+../include/ip.h:
+
+../include/tcp.h:
+
+../include/utils.h:
 src/udp.o: src/udp.cpp ../include/udp.h ../include/pdu.h \
  ../include/endianness.h ../include/pdu.h
 

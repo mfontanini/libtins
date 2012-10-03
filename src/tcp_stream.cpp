@@ -88,8 +88,6 @@ bool TCPStream::generic_process(uint32_t &my_seq, uint32_t &other_seq,
   payload_type &pload, fragments_type &frags, TCP *tcp, RawPDU *raw) 
 {
     bool added_some(false);
-    if(tcp->get_flag(TCP::SYN))
-        other_seq++;
     if(tcp->get_flag(TCP::FIN) || tcp->get_flag(TCP::RST))
         fin_sent = true;
     if(raw && tcp->seq() >= my_seq) {
@@ -115,6 +113,7 @@ bool TCPStream::update(IP *ip, TCP *tcp) {
     RawPDU *raw = tcp->find_pdu<RawPDU>();
     if(!syn_ack_sent && tcp->get_flag(TCP::SYN) && tcp->get_flag(TCP::ACK)) {
         server_seq = tcp->seq() + 1;
+        client_seq = tcp->ack_seq();
         syn_ack_sent = true;
         return false;
     }
