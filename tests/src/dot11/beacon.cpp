@@ -35,7 +35,7 @@ void test_equals_expected(const Dot11Beacon &dot11) {
     EXPECT_EQ(dot11.timestamp(), 0x1fad2341289301faLL);
     EXPECT_EQ(dot11.interval(), 0x14fa);
     
-    const Dot11Beacon::CapabilityInformation &info = dot11.capabilities();
+    const Dot11Beacon::capability_information &info = dot11.capabilities();
     EXPECT_EQ(info.ess(), 1);
     EXPECT_EQ(info.ibss(), 0);
     EXPECT_EQ(info.cf_poll(), 1);
