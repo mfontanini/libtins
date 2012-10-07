@@ -33,27 +33,27 @@ void DNSTest::test_equals(const DNS &dns1, const DNS &dns2) {
     EXPECT_EQ(dns1.authenticated_data(), dns2.authenticated_data());
     EXPECT_EQ(dns1.checking_disabled(), dns2.checking_disabled());
     EXPECT_EQ(dns1.rcode(), dns2.rcode());
-    EXPECT_EQ(dns1.questions(), dns2.questions());
-    EXPECT_EQ(dns1.answers(), dns2.answers());
-    EXPECT_EQ(dns1.authority(), dns2.authority());
-    EXPECT_EQ(dns1.additional(), dns2.additional());
+    EXPECT_EQ(dns1.questions_count(), dns2.questions_count());
+    EXPECT_EQ(dns1.answers_count(), dns2.answers_count());
+    EXPECT_EQ(dns1.authority_count(), dns2.authority_count());
+    EXPECT_EQ(dns1.additional_count(), dns2.additional_count());
     EXPECT_EQ(dns1.pdu_type(), dns2.pdu_type());
     EXPECT_EQ(dns1.header_size(), dns2.header_size());
     EXPECT_EQ(bool(dns1.inner_pdu()), bool(dns2.inner_pdu()));
 }
 
 void DNSTest::test_equals(const DNS::Query &q1, const DNS::Query &q2) {
-    EXPECT_EQ(q1.name, q2.name);
-    EXPECT_EQ(q1.type, q2.type);
-    EXPECT_EQ(q1.qclass, q2.qclass);
+    EXPECT_EQ(q1.dname(), q2.dname());
+    EXPECT_EQ(q1.type(), q2.type());
+    EXPECT_EQ(q1.query_class(), q2.query_class());
 }
 
 void DNSTest::test_equals(const DNS::Resource &q1, const DNS::Resource &q2) {
-    EXPECT_EQ(q1.dname, q2.dname);
-    EXPECT_EQ(q1.addr, q2.addr);
-    EXPECT_EQ(q1.type, q2.type);
-    EXPECT_EQ(q1.qclass, q2.qclass);
-    EXPECT_EQ(q1.ttl, q2.ttl);
+    EXPECT_EQ(q1.dname(), q2.dname());
+    EXPECT_EQ(q1.data(), q2.data());
+    EXPECT_EQ(q1.type(), q2.type());
+    EXPECT_EQ(q1.query_class(), q2.query_class());
+    EXPECT_EQ(q1.ttl(), q2.ttl());
 }
 
 TEST_F(DNSTest, ConstructorFromBuffer) {
@@ -68,16 +68,23 @@ TEST_F(DNSTest, ConstructorFromBuffer) {
     EXPECT_EQ(dns.recursion_available(), 1);
     EXPECT_EQ(dns.z(), 0);
     EXPECT_EQ(dns.rcode(), 0xa);
-    EXPECT_EQ(dns.questions(), 1);
-    EXPECT_EQ(dns.answers(), 1);
+    EXPECT_EQ(dns.questions_count(), 1);
+    EXPECT_EQ(dns.answers_count(), 1);
     
-    std::list<DNS::Query> queries = dns.dns_queries();
+    std::list<DNS::Query> queries = dns.queries();
     ASSERT_EQ(queries.size(), 1);
     test_equals(queries.front(), DNS::Query("www.example.com", DNS::A, DNS::IN));
     
-    std::list<DNS::Resource> answers = dns.dns_answers();
+    std::list<DNS::Resource> answers = dns.answers();
     ASSERT_EQ(answers.size(), 1);
     test_equals(answers.front(), DNS::Resource("www.example.com", "192.168.0.1", DNS::A, DNS::IN, 0x1234));
+}
+
+TEST_F(DNSTest, Serialization) {
+    DNS dns(expected_packet, sizeof(expected_packet));
+    DNS::serialization_type buffer = dns.serialize();
+    ASSERT_EQ(buffer.size(), sizeof(expected_packet));
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
 
 TEST_F(DNSTest, CopyConstructor) {
@@ -172,44 +179,44 @@ TEST_F(DNSTest, RCode) {
 
 TEST_F(DNSTest, Question) {
     DNS dns;
-    dns.add_query("www.example.com", DNS::A, DNS::IN);
-    dns.add_query("www.example2.com", DNS::MX, DNS::IN);
-    ASSERT_EQ(dns.questions(), 2);
+    dns.add_query(DNS::Query("www.example.com", DNS::A, DNS::IN));
+    dns.add_query(DNS::Query("www.example2.com", DNS::MX, DNS::IN));
+    ASSERT_EQ(dns.questions_count(), 2);
     
-    DNS::queries_type queries(dns.dns_queries());
+    DNS::queries_type queries(dns.queries());
     for(DNS::queries_type::const_iterator it = queries.begin(); it != queries.end(); ++it) {
-        EXPECT_TRUE(it->name == "www.example.com" || it->name == "www.example2.com");
-        if(it->name == "www.example.com") {
-            EXPECT_EQ(it->type, DNS::A);
-            EXPECT_EQ(it->qclass, DNS::IN);
+        EXPECT_TRUE(it->dname() == "www.example.com" || it->dname() == "www.example2.com");
+        if(it->dname() == "www.example.com") {
+            EXPECT_EQ(it->type(), DNS::A);
+            EXPECT_EQ(it->query_class(), DNS::IN);
         }
-        else if(it->name == "www.example2.com") {
-            EXPECT_EQ(it->type, DNS::MX);
-            EXPECT_EQ(it->qclass, DNS::IN);
+        else if(it->dname() == "www.example2.com") {
+            EXPECT_EQ(it->type(), DNS::MX);
+            EXPECT_EQ(it->query_class(), DNS::IN);
         }
     }
 }
 
 TEST_F(DNSTest, Answers) {
     DNS dns;
-    dns.add_answer("www.example.com", DNS::A, DNS::IN, 0x762, IPv4Address("127.0.0.1"));
-    dns.add_answer("www.example2.com", DNS::MX, DNS::IN, 0x762, IPv4Address("127.0.0.1"));
-    ASSERT_EQ(dns.answers(), 2);
+    dns.add_answer("www.example.com", DNS::make_info(DNS::A, DNS::IN, 0x762), IPv4Address("127.0.0.1"));
+    dns.add_answer("www.example2.com", DNS::make_info(DNS::MX, DNS::IN, 0x762), IPv4Address("127.0.0.1"));
+    ASSERT_EQ(dns.answers_count(), 2);
     
-    DNS::resources_type resources(dns.dns_answers());
+    DNS::resources_type resources = dns.answers();
     for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
-        EXPECT_TRUE(it->dname == "www.example.com" || it->dname == "www.example2.com");
-        if(it->dname == "www.example.com") {
-            EXPECT_EQ(it->type, DNS::A);
-            EXPECT_EQ(it->ttl, 0x762);
-            EXPECT_EQ(it->addr, "127.0.0.1");
-            EXPECT_EQ(it->qclass, DNS::IN);
+        EXPECT_TRUE(it->dname() == "www.example.com" || it->dname() == "www.example2.com");
+        if(it->dname() == "www.example.com") {
+            EXPECT_EQ(it->type(), DNS::A);
+            EXPECT_EQ(it->ttl(), 0x762);
+            EXPECT_EQ(it->data(), "127.0.0.1");
+            EXPECT_EQ(it->query_class(), DNS::IN);
         }
-        else if(it->dname == "www.example2.com") {
-            EXPECT_EQ(it->type, DNS::MX);
-            EXPECT_EQ(it->ttl, 0x762);
-            EXPECT_EQ(it->addr, "127.0.0.1");
-            EXPECT_EQ(it->qclass, DNS::IN);
+        else if(it->dname() == "www.example2.com") {
+            EXPECT_EQ(it->type(), DNS::MX);
+            EXPECT_EQ(it->ttl(), 0x762);
+            EXPECT_EQ(it->data(), "127.0.0.1");
+            EXPECT_EQ(it->query_class(), DNS::IN);
         }
     }
 }

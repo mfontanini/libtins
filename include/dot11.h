@@ -184,168 +184,169 @@ namespace Tins {
         /**
          * \brief Getter for the protocol version.
          *
-         * \return The protocol version in an uint8_t.
+         * \return uint8_t containing the protocol version.
          */
         small_uint<2> protocol() const { return _header.control.protocol; }
 
         /**
          * \brief Getter for the 802.11 frame's type.
          *
-         * \return The type of the 802.11 frame in an uint8_t.
+         * \return uint8_t containing the type of this 802.11 frame.
          */
         small_uint<2> type() const { return _header.control.type; }
 
         /**
          * \brief Getter for the 802.11 frame's subtype.
          *
-         * \return The subtype of the 802.11 frame in an uint8_t.
+         * \return uint8_t cotaining the subtype of this 802.11 frame.
          */
         small_uint<4> subtype() const { return _header.control.subtype; }
 
         /**
-         * \brief Getter for the 802.11 frame's "To DS" bit.
+         * \brief Getter for the 802.11 frame's To-DS field.
          *
-         * \return Boolean indicating if the "To DS" bit is set.
+         * \return small_uint<1> containing the To-DS field.
          */
         small_uint<1> to_ds() const { return _header.control.to_ds; }
 
         /**
-         * \brief Getter for the 802.11 frame's "From DS" bit.
+         * \brief Getter for the 802.11 frame's From-DS field.
          *
-         * \return Boolean indicating if the "From DS" bit is set.
+         * \return small_uint<1> containing the From-DS field.
          */
         small_uint<1> from_ds() const { return _header.control.from_ds; }
 
         /**
-         * \brief Getter for the 802.11 frame's "More Frag" bit.
+         * \brief Getter for the 802.11 frame's More-Frag field.
          *
-         * \return Boolean indicating if the "More Frag" bit is set.
+         * \return small_uint<1> containing the More-Frag field.
          */
         small_uint<1> more_frag() const { return _header.control.more_frag; }
 
         /**
-         * \brief Getter for the 802.11 frame's "Retry" bit.
+         * \brief Getter for the 802.11 frame's Retry field.
          *
-         * \return Boolean indicating if the "Retry" bit is set.
+         * \return small_uint<1> containing the Retry field.
          */
         small_uint<1> retry() const { return _header.control.retry; }
 
         /**
-         * \brief Getter for the 802.11 frame's "Power Management" bit.
+         * \brief Getter for the 802.11 frame's Power-Management field.
          *
-         * \return Boolean indicating if the "Power Management" bit is set.
+         * \return small_uint<1> containing the Power-Management field.
          */
         small_uint<1> power_mgmt() const { return _header.control.power_mgmt; }
 
         /**
-         * \brief Getter for the 802.11 frame's "WEP" bit.
+         * \brief Getter for the 802.11 frame's WEP field.
          *
-         * \return Boolean indicating if the "WEP" bit is set.
+         * \return small_uint<1> containing the WEP field.
          */
         small_uint<1> wep() const { return _header.control.wep; }
 
         /**
-         * \brief Getter for the 802.11 frame's "Order" bit.
+         * \brief Getter for the 802.11 frame's Order field.
          *
-         * \return Boolean indicating if the "Order" bit is set.
+         * \return small_uint<1> containing the Order field.
          */
         small_uint<1> order() const { return _header.control.order; }
 
         /**
-         * \brief Getter for the duration/id field.
+         * \brief Getter for the Duration-ID field.
          *
-         * \return The value of the duration/id field in an uint16_t.
+         * \return uint16_t containing the Duration-ID field.
          */
         uint16_t duration_id() const { return Endian::le_to_host(_header.duration_id); }
 
         /**
          * \brief Getter for the first address.
          *
-         * \return The first address.
+         * \return address_type containing the first address.
          */
         address_type addr1() const { return _header.addr1; }
 
         /**
          * \brief Getter for the network interface.
          *
-         * \return The network interface in which this PDU will be sent.
+         * \return const NetworkInterface& containing the network 
+         * interface in which this PDU will be sent.
          */
         const NetworkInterface &iface() const { return _iface; }
 
         /**
          * \brief Setter for the protocol version.
          *
-         * \param new_proto uint8_t with the new protocol version.
+         * \param new_proto The new protocol version.
          */
         void protocol(small_uint<2> new_proto);
 
         /**
          * \brief Setter for the 802.11 frame's type.
          *
-         * \param new_type uint8_t with the new type of the 802.11 frame.
+         * \param new_type The new type of this 802.11 frame.
          */
         void type(small_uint<2> new_type);
 
         /**
          * \brief Setter for the 802.11 frame's subtype.
          *
-         * \param new_subtype uint8_t with the new subtype of the 802.11 frame.
+         * \param new_subtype The new subtype of this 802.11 frame.
          */
         void subtype(small_uint<4> new_subtype);
 
         /**
-         * \brief Setter for the 802.11 frame's "To DS" bit.
+         * \brief Setter for the 802.11 frame's To-DS field.
          *
-         * \param new_value bool indicating the new value of the flag.
+         * \param new_value The new value of the To-DS field.
          */
         void to_ds(small_uint<1> new_value);
 
         /**
-         * \brief Setter for the 802.11 frame's "From DS" bit.
+         * \brief Setter for the 802.11 frame's From-DS field.
          *
-         * \param new_value bool indicating the new value of the flag.
+         * \param new_value The new value of the From-DS field.
          */
         void from_ds(small_uint<1> new_value);
 
         /**
-         * \brief Setter for the 802.11 frame's "More Frag" bit.
+         * \brief Setter for the 802.11 frame's More-Frag field.
          *
-         * \param new_value bool indicating the new value of the flag.
+         * \param new_value The new value of the More-Frag field.
          */
         void more_frag(small_uint<1> new_value);
 
         /**
-         * \brief Setter for the 802.11 frame's "Retry" bit.
+         * \brief Setter for the 802.11 frame's Retry field.
          *
-         * \param new_value bool indicating the new value of the flag.
+         * \param new_value sThe new value of the Retry field.
          */
         void retry(small_uint<1> new_value);
 
         /**
-         * \brief Setter for the 802.11 frame's "Power Management" bit.
+         * \brief Setter for the 802.11 frame's Power-Management field.
          *
-         * \param new_value bool indicating the new value of the flag.
+         * \param new_value The new value of the Power-Management field.
          */
         void power_mgmt(small_uint<1> new_value);
 
         /**
-         * \brief Setter for the 802.11 frame's "WEP" bit.
+         * \brief Setter for the 802.11 frame's WEP field.
          *
-         * \param new_value bool indicating the new value of the flag.
+         * \param new_value The new value of the WEP field.
          */
         void wep(small_uint<1> new_value);
 
         /**
-         * \brief Setter for the 802.11 frame's "Order" bit.
+         * \brief Setter for the 802.11 frame's Order field.
          *
-         * \param new_value bool indicating the new value of the flag.
+         * \param new_value The new value of the Order field.
          */
         void order(small_uint<1> new_value);
 
         /**
-         * \brief Setter for the duration/id field.
+         * \brief Setter for the Duration-ID field.
          *
-         * \param new_duration_id uint16_t with the new value of the duration/id field.
+         * \param new_duration_id The new value of the Duration-ID field.
          */
         void duration_id(uint16_t new_duration_id);
 
@@ -380,16 +381,15 @@ namespace Tins {
 
         /**
          * \brief Adds a new option to this Dot11 PDU.
-         *
-         * This copies the value buffer.
-         * \param opt The option identifier.
-         * \param len The length of the value field.
-         * \param val The value of this option.
+         * \param opt The option to be added.
          */
-        void add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val);
+        void add_tagged_option(const dot11_option &opt);
 
         /**
          * \brief Looks up a tagged option in the option list.
+         * 
+         * The returned pointer <b>must not</b> be free'd.
+         * 
          * \param opt The option identifier.
          * \return The option found, or 0 if no such option has been set.
          */
@@ -434,7 +434,7 @@ namespace Tins {
         virtual uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz) { return 0; }
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
         void parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz);
-        void copy_80211_fields(const Dot11 *other);
+        void add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val);
     protected:
         /**
          * Struct that represents the 802.11 header
@@ -543,8 +543,11 @@ namespace Tins {
             REQUESTED_BY_STA_TIMEOUT = 39,
             PEER_STA_NOT_SUPPORT_CIPHER = 45
         };
-
-        class CapabilityInformation {
+        
+        /**
+         * Represents the IEEE 802.11 frames' capability information.
+         */
+        class capability_information {
         private:
             #if TINS_IS_LITTLE_ENDIAN
                 uint16_t _ess:1,
@@ -930,70 +933,70 @@ namespace Tins {
         /**
          * \brief Getter for the second address.
          *
-         * \return The second address as a constant uint8_t pointer.
+         * \return address_type containing the second address.
          */
         address_type addr2() const { return _ext_header.addr2; }
 
         /**
          * \brief Getter for the third address.
          *
-         * \return The third address as a constant uint8_t pointer.
+         * \return address_type containing the third address.
          */
         address_type addr3() const { return _ext_header.addr3; }
 
         /**
          * \brief Getter for the fragment number.
          *
-         * \return The fragment number as an uint8_t.
+         * \return uint8_t containing the fragment number.
          */
         uint8_t frag_num() const { return _ext_header.seq_control.frag_number; }
 
         /**
          * \brief Getter for the sequence number.
          *
-         * \return The sequence number as an uint16_t.
+         * \return uint16_t containing the sequence number.
          */
         uint16_t seq_num() const { return Endian::le_to_host(_ext_header.seq_control.seq_number); }
 
         /**
          * \brief Getter for the fourth address.
          *
-         * \return The fourth address as a constant uint8_t pointer.
+         * \return address_type containing the fourth address.
          */
         const address_type &addr4() const { return _addr4; }
 
         /**
          * \brief Setter for the second address.
          *
-         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
+         * \param new_addr2 The new second address to be set.
          */
         void addr2(const address_type &new_addr2);
 
         /**
          * \brief Setter for the third address.
          *
-         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
+         * \param new_addr3 The new third address to be set.
          */
         void addr3(const address_type &new_addr3);
 
         /**
          * \brief Setter for the fragment number.
          *
-         * \param new_frag_num uint8_t with the new fragment number.
+         * \param new_frag_num The new fragment number.
          */
         void frag_num(uint8_t new_frag_num);
 
         /**
          * \brief Setter for the sequence number.
          *
-         * \param new_seq_num uint16_t with the new sequence number.
+         * \param new_seq_num The new sequence number.
          */
         void seq_num(uint16_t new_seq_num);
 
         /**
          * \brief Setter for the fourth address.
          *
-         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
+         * \param new_addr4 The new fourth address to be set.
          */
         void addr4(const address_type &new_addr4);
 
@@ -1445,8 +1448,6 @@ namespace Tins {
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 
-        void copy_ext_header(const Dot11ManagementFrame *other);
-
         uint32_t management_frame_size() { 
             return sizeof(ieee80211_header) + sizeof(_ext_header) + 
                     ((from_ds() && to_ds()) ? address_type::address_size : 0); 
@@ -1460,7 +1461,7 @@ namespace Tins {
     };
 
     /**
-     * \brief Class representing a Beacon in the IEEE 802.11 Protocol.
+     * \brief Class representing an 802.11 Beacon.
      *
      */
     class Dot11Beacon : public Dot11ManagementFrame {
@@ -1494,42 +1495,44 @@ namespace Tins {
         /**
          * \brief Getter for the timestamp field.
          *
-         * \return Timestamp value in an uint64_t.
+         * \return The stored timestamp value.
          */
         uint64_t timestamp() const { return Endian::le_to_host(_body.timestamp); }
 
         /**
          * \brief Getter for the interval field.
          *
-         * \return Timestamp value in an uint16_t.
+         * \return The stored interval value.
          */
         uint16_t interval() const { return Endian::le_to_host(_body.interval); }
 
         /**
          * \brief Getter for the Capabilities Information structure.
          *
-         * \return const CapabilityInformation&.
+         * \return A constant refereence to the stored Capabilities 
+         * Information field.
          */
-        const CapabilityInformation& capabilities() const { return _body.capability; }
+        const capability_information& capabilities() const { return _body.capability; }
 
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation&.
+         * \return A refereence to the stored Capabilities Information 
+         * field.
          */
-        CapabilityInformation& capabilities() { return _body.capability; }
+        capability_information& capabilities() { return _body.capability; }
 
         /**
          * \brief Setter for the timestamp field.
          *
-         * \param new_timestamp uint64_t with the timestamp to set.
+         * \param new_timestamp The timestamp to be set.
          */
         void timestamp(uint64_t new_timestamp);
 
         /**
          * \brief Setter for the interval field.
          *
-         * \param new_interval uint16_t with the interval to set.
+         * \param new_interval The interval to be set.
          */
         void interval(uint16_t new_interval);
 
@@ -1568,7 +1571,7 @@ namespace Tins {
         struct BeaconBody {
             uint64_t timestamp;
             uint16_t interval;
-            CapabilityInformation capability;
+            capability_information capability;
         } __attribute__((__packed__));
 
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
@@ -1609,16 +1612,16 @@ namespace Tins {
         Dot11Disassoc(const uint8_t *buffer, uint32_t total_sz);
 
         /**
-         * \brief Getter for the reason code.
+         * \brief Getter for the reason code field.
          *
-         * \return uint16_t with the reason code.
+         * \return The stored reason code.
          */
         uint16_t reason_code() const { return Endian::le_to_host(_body.reason_code); }
 
         /**
-         * \brief Setter for the reason code.
+         * \brief Setter for the reason code field.
          *
-         * \param new_reason_code uint16_t with the new reason code.
+         * \param new_reason_code The reason code to be set.
          */
         void reason_code(uint16_t new_reason_code);
 
@@ -1698,28 +1701,30 @@ namespace Tins {
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A constant refereence to the stored Capabilities 
+         * Information field.
          */
-        const CapabilityInformation& capabilities() const { return _body.capability;}
+        const capability_information& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A refereence to the stored Capabilities Information 
+         * field.
          */
-        CapabilityInformation& capabilities() { return _body.capability;}
+        capability_information& capabilities() { return _body.capability;}
 
         /**
-         * \brief Getter for the listen interval.
+         * \brief Getter for the listen interval field.
          *
-         * \return The listen interval in an uint16_t.
+         * \return The stored listen interval field.
          */
         uint16_t listen_interval() const { return Endian::le_to_host(_body.listen_interval); }
 
         /**
-         * \brief Setter for the listen interval.
+         * \brief Setter for the listen interval field.
          *
-         * \param new_listen_interval uint16_t with the new listen interval.
+         * \param new_listen_interval The listen interval to be set.
          */
         void listen_interval(uint16_t new_listen_interval);
 
@@ -1756,7 +1761,7 @@ namespace Tins {
         }
     private:
         struct AssocReqBody {
-            CapabilityInformation capability;
+            capability_information capability;
             uint16_t listen_interval;
         };
 
@@ -1798,44 +1803,46 @@ namespace Tins {
         Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz);
 
         /**
-         * \brief Getter for the Capabilities Information.
+         * \brief Getter for the Capabilities Information field.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A constant reference to the stored Capabilities 
+         * Information field.
          */
-        const CapabilityInformation& capabilities() const { return _body.capability;}
+        const capability_information& capabilities() const { return _body.capability;}
 
         /**
-         * \brief Getter for the Capabilities Information.
+         * \brief Getter for the Capabilities Information field.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A reference to the stored Capabilities 
+         * Information field.
          */
-        CapabilityInformation& capabilities() { return _body.capability;}
+        capability_information& capabilities() { return _body.capability;}
 
         /**
-         * \brief Getter for the status code.
+         * \brief Getter for the status code field.
          *
-         * \return The status code in an uint16_t.
+         * \return The stored status code.
          */
         uint16_t status_code() const { return Endian::le_to_host(_body.status_code); }
 
         /**
          * \brief Getter for the AID field.
          *
-         * \return The AID field value in an uint16_t.
+         * \return The stored AID field.
          */
         uint16_t aid() const { return Endian::le_to_host(_body.aid); }
 
         /**
          * \brief Setter for the status code.
          *
-         * \param new_status_code uint16_t with the new status code.
+         * \param new_status_code The status code to be set.
          */
         void status_code(uint16_t new_status_code);
 
         /**
          * \brief Setter for the AID field.
          *
-         * \param new_aid uint16_t with the new AID value.
+         * \param new_aid The AID value to be set.
          */
         void aid(uint16_t new_aid);
 
@@ -1872,7 +1879,7 @@ namespace Tins {
         }
     private:
         struct AssocRespBody {
-            CapabilityInformation capability;
+            capability_information capability;
             uint16_t status_code;
             uint16_t aid;
         };
@@ -1917,42 +1924,44 @@ namespace Tins {
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A constant reference to the stored Capabilities 
+         * Information field.
          */
-        const CapabilityInformation& capabilities() const { return _body.capability;}
+        const capability_information& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A reference to the stored Capabilities Information 
+         * field.
          */
-        CapabilityInformation& capabilities() { return _body.capability;}
+        capability_information& capabilities() { return _body.capability;}
 
         /**
-         * \brief Getter for the listen interval.
+         * \brief Getter for the listen interval field.
          *
-         * \return The listen interval in an uint16_t.
+         * \return The stored listen interval.
          */
         uint16_t listen_interval() const { return Endian::le_to_host(_body.listen_interval); }
 
         /**
          * \brief Getter for the current ap field.
          *
-         * \return The current ap in an array of 6 uint8_t.
+         * \return The current ap.
          */
         address_type current_ap() const { return _body.current_ap; }
 
         /**
-         * \brief Setter for the listen interval.
+         * \brief Setter for the listen interval field.
          *
-         * \param new_listen_interval uint16_t with the new listen interval.
+         * \param new_listen_interval The listen interval to be set.
          */
         void listen_interval(uint16_t new_listen_interval);
 
         /**
          * \brief Setter for the current ap.
          *
-         * \param new_current_ap uint8_t array of 6 bytes with the new current ap.
+         * \param new_current_ap The address of the current ap.
          */
         void current_ap(const address_type &new_current_ap);
 
@@ -1989,7 +1998,7 @@ namespace Tins {
         }
     private:
         struct ReAssocReqBody {
-            CapabilityInformation capability;
+            capability_information capability;
             uint16_t listen_interval;
             uint8_t current_ap[address_type::address_size];
         };
@@ -2034,42 +2043,44 @@ namespace Tins {
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A constant reference to the stored Capabilities 
+         * Information field.
          */
-        const CapabilityInformation& capabilities() const { return _body.capability;}
+        const capability_information& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A reference to the stored Capabilities Information 
+         * field.
          */
-        CapabilityInformation& capabilities() { return _body.capability;}
+        capability_information& capabilities() { return _body.capability;}
 
         /**
-         * \brief Getter for the status code.
+         * \brief Getter for the status code field.
          *
-         * \return The status code in an uint16_t.
+         * \return The stored status code.
          */
         uint16_t status_code() const { return Endian::le_to_host(_body.status_code); }
 
         /**
          * \brief Getter for the AID field.
          *
-         * \return The AID field value in an uint16_t.
+         * \return The stored AID field value.
          */
         uint16_t aid() const { return Endian::le_to_host(_body.aid); }
 
         /**
-         * \brief Setter for the status code.
+         * \brief Setter for the status code field.
          *
-         * \param new_status_code uint16_t with the new status code.
+         * \param new_status_code The status code to be set.
          */
         void status_code(uint16_t new_status_code);
 
         /**
          * \brief Setter for the AID field.
          *
-         * \param new_aid uint16_t with the new AID value.
+         * \param new_aid The AID to be set.
          */
         void aid(uint16_t new_aid);
 
@@ -2106,7 +2117,7 @@ namespace Tins {
         }
     private:
         struct ReAssocRespBody {
-            CapabilityInformation capability;
+            capability_information capability;
             uint16_t status_code;
             uint16_t aid;
         };
@@ -2149,44 +2160,46 @@ namespace Tins {
         Dot11Authentication(const uint8_t *buffer, uint32_t total_sz);
 
         /**
-         * \brief Getter for the Authetication Algorithm Number.
+         * \brief Getter for the Authetication Algorithm Number field.
          *
-         * \return The authentication algorithm number in an uint16_t.
+         * \return The stored authentication algorithm number.
          */
         uint16_t auth_algorithm() const {return Endian::le_to_host(_body.auth_algorithm); }
 
         /**
-         * \brief Getter for the Authetication Sequence Number.
+         * \brief Getter for the Authetication Sequence Number field.
          *
-         * \return The authentication sequence number in an uint16_t.
+         * \return The stored authentication sequence number.
          */
         uint16_t auth_seq_number() const {return Endian::le_to_host(_body.auth_seq_number); }
 
         /**
-         * \brief Getter for the status code.
+         * \brief Getter for the status code field.
          *
-         * \return The status code in an uint16_t.
+         * \return The stored status code.
          */
         uint16_t status_code() const { return Endian::le_to_host(_body.status_code); }
 
         /**
-         * \brief Setter for the Authetication Algorithm Number.
+         * \brief Setter for the Authetication Algorithm Number field.
          *
-         * \param new_auth_algorithm uint16_t with the new value for the Authetication Algorithm Number field.
+         * \param new_auth_algorithm The Authetication Algorithm Number 
+         * to be set.
          */
         void auth_algorithm(uint16_t new_auth_algorithm);
 
         /**
-         * \brief Setter for the Authetication Sequence Number.
+         * \brief Setter for the Authetication Sequence Number field.
          *
-         * \param new_auth_seq_number uint16_t with the new value for the Authetication Sequence Number field.
+         * \param new_auth_seq_number The Authetication Sequence Number 
+         * to be set.
          */
         void auth_seq_number(uint16_t new_auth_seq_number);
 
         /**
-         * \brief Setter for the status code.
+         * \brief Setter for the status code field.
          *
-         * \param new_status_code uint16_t with the new status code.
+         * \param new_status_code The status code to be set.
          */
         void status_code(uint16_t new_status_code);
 
@@ -2267,16 +2280,16 @@ namespace Tins {
         Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz);
 
         /**
-         * \brief Getter for the reason code.
+         * \brief Getter for the reason code field.
          *
-         * \return uint16_t with the reason code.
+         * \return The reason code to be set.
          */
         uint16_t reason_code() const { return Endian::le_to_host(_body.reason_code); }
 
         /**
-         * \brief Setter for the reason code.
+         * \brief Setter for the reason code field.
          *
-         * \param new_reason_code uint16_t with the new reason code.
+         * \param new_reason_code The reason code to be set.
          */
         void reason_code(uint16_t new_reason_code);
 
@@ -2414,42 +2427,44 @@ namespace Tins {
         /**
          * \brief Getter for the timestamp field.
          *
-         * \return Timestamp value in an uint64_t.
+         * \return The stored timestamp value.
          */
         uint64_t timestamp() const { return Endian::le_to_host(_body.timestamp); }
 
         /**
          * \brief Getter for the interval field.
          *
-         * \return Timestamp value in an uint16_t.
+         * \return The stored interval value.
          */
         uint16_t interval() const { return Endian::le_to_host(_body.interval); }
 
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A constant reference to the stored Capabilities 
+         * Information field.
          */
-        const CapabilityInformation& capabilities() const { return _body.capability;}
+        const capability_information& capabilities() const { return _body.capability;}
 
         /**
          * \brief Getter for the Capabilities Information.
          *
-         * \return CapabilityInformation Structure in a CapabilityInformation&.
+         * \return A reference to the stored Capabilities Information 
+         * field.
          */
-        CapabilityInformation& capabilities() { return _body.capability;}
+        capability_information& capabilities() { return _body.capability;}
 
         /**
          * \brief Setter for the timestamp field.
          *
-         * \param new_timestamp uint64_t with the timestamp to set.
+         * \param new_timestamp The timestamp to be set.
          */
         void timestamp(uint64_t new_timestamp);
 
         /**
          * \brief Setter for the interval field.
          *
-         * \param new_interval uint16_t with the interval to set.
+         * \param new_interval The interval to be set.
          */
         void interval(uint16_t new_interval);
 
@@ -2490,7 +2505,7 @@ namespace Tins {
         struct ProbeResp {
             uint64_t timestamp;
             uint16_t interval;
-            CapabilityInformation capability;
+            capability_information capability;
         } __attribute__((__packed__));
 
         ProbeResp _body;
@@ -2527,73 +2542,74 @@ namespace Tins {
          * \param total_sz The total size of the buffer.
          */
         Dot11Data(const uint8_t *buffer, uint32_t total_sz);
+        
         /**
          * \brief Getter for the second address.
          *
-         * \return The second address as a constant uint8_t pointer.
+         * \return The stored second address.
          */
         address_type addr2() const { return _ext_header.addr2; }
 
         /**
          * \brief Getter for the third address.
          *
-         * \return The third address as a constant uint8_t pointer.
+         * \return The stored third address.
          */
         address_type addr3() const { return _ext_header.addr3; }
 
         /**
-         * \brief Getter for the fragment number.
+         * \brief Getter for the fragment number field.
          *
-         * \return The fragment number as an uint8_t.
+         * \return The stored fragment number.
          */
         uint8_t frag_num() const { return _ext_header.seq_control.frag_number; }
 
         /**
-         * \brief Getter for the sequence number.
+         * \brief Getter for the sequence number field.
          *
-         * \return The sequence number as an uint16_t.
+         * \return The stored sequence number.
          */
         uint16_t seq_num() const { return Endian::le_to_host(_ext_header.seq_control.seq_number); }
 
         /**
          * \brief Getter for the fourth address.
          *
-         * \return The fourth address as a constant uint8_t pointer.
+         * \return The fourth address.
          */
         address_type addr4() const { return _addr4; }
 
         /**
          * \brief Setter for the second address.
          *
-         * \param new_addr2 const uint8_t array of 6 bytes containing the new second's address.
+         * \param new_addr2 The second address to be set.
          */
         void addr2(const address_type &new_addr2);
 
         /**
          * \brief Setter for the third address.
          *
-         * \param new_addr3 const uint8_t array of 6 bytes containing the new third address.
+         * \param new_addr3 The third address to be set.
          */
         void addr3(const address_type &new_addr3);
 
         /**
-         * \brief Setter for the fragment number.
+         * \brief Setter for the fragment number field.
          *
-         * \param new_frag_num uint8_t with the new fragment number.
+         * \param new_frag_num The fragment number to be set.
          */
         void frag_num(uint8_t new_frag_num);
 
         /**
-         * \brief Setter for the sequence number.
+         * \brief Setter for the sequence number field.
          *
-         * \param new_seq_num uint16_t with the new sequence number.
+         * \param new_seq_num The sequence number to be set.
          */
         void seq_num(uint16_t new_seq_num);
 
         /**
-         * \brief Setter for the fourth address.
+         * \brief Setter for the fourth address field.
          *
-         * \param new_addr4 const uint8_t array of 6 bytes containing the new fourth address.
+         * \param new_addr4 The fourth address to be set.
          */
         void addr4(const address_type &new_addr4);
 
@@ -2681,16 +2697,16 @@ namespace Tins {
         Dot11QoSData(const uint8_t *buffer, uint32_t total_sz);
         
         /**
-         * \brief Getter for the qos_control field.
+         * \brief Getter for the QOS Control field.
          *
-         * \return The value of the qos_control field in an uint16_t.
+         * \return The stored QOS Control field value.
          */
         uint16_t qos_control() const { return Endian::le_to_host(_qos_control); }
 
         /**
-         * \brief Setter for the qos_control field.
+         * \brief Setter for the QOS Control field.
          *
-         * \param new_qos_control uint16_t with the value to the the qos_control field to.
+         * \param new_qos_control The QOS Control to be set.
          */
         void qos_control(uint16_t new_qos_control);
 
@@ -3140,19 +3156,19 @@ namespace Tins {
 
         /**
          * \brief Getter for the bar control field.
-         * \return The bar control field.
+         * \return The stored bar control field.
          */
         uint16_t bar_control() const { return Endian::le_to_host(_bar_control.tid); }
 
         /**
          * \brief Getter for the start sequence field.
-         * \return The bar start sequence.
+         * \return The stored start sequence.
          */
         uint16_t start_sequence() const { return Endian::le_to_host(_start_sequence.seq); }
         
         /**
          * \brief Getter for the fragment number field.
-         * \return The fragment number field.
+         * \return The stored fragment number field.
          */
         uint8_t fragment_number() const { return _start_sequence.frag; }
         
@@ -3168,19 +3184,19 @@ namespace Tins {
 
         /**
          * \brief Setter for the bar control field.
-         * \param bar The new bar control field.
+         * \param bar The bar control field to be set.
          */
         void bar_control(uint16_t bar);
 
         /**
          * \brief Setter for the start sequence field.
-         * \param bar The new start sequence field.
+         * \param bar The start sequence field to be set.
          */
         void start_sequence(uint16_t seq);
         
         /**
          * \brief Setter for the fragment number field.
-         * \param frag The new fragment number field.
+         * \param frag The fragment number field to be set.
          */
         void fragment_number(uint8_t frag);
 
@@ -3235,6 +3251,11 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::DOT11_BLOCK_ACK;
+        
+        /**
+         * The size of the bitmap field.
+         */
+        static const size_t bitmap_size = 8;
 
         /**
          * \brief Constructor for creating a 802.11 Block Ack frame PDU
@@ -3262,13 +3283,13 @@ namespace Tins {
 
         /**
          * \brief Getter for the bar control field.
-         * \return The bar control field.
+         * \return The stored bar control field.
          */
         uint16_t bar_control() const { return _bar_control.tid; }
 
         /**
          * \brief Getter for the start sequence field.
-         * \return The bar start sequence.
+         * \return The stored bar start sequence.
          */
         uint16_t start_sequence() const { return (_start_sequence.frag << 12) | (_start_sequence.seq); }
         /**
@@ -3283,18 +3304,21 @@ namespace Tins {
 
         /**
          * \brief Setter for the bar control field.
-         * \param bar The new bar control field.
+         * \param bar The bar control to be set.
          */
         void bar_control(uint16_t bar);
 
         /**
          * \brief Setter for the start sequence field.
-         * \param bar The new start sequence field.
+         * \param bar The start sequence  to be set.
          */
         void start_sequence(uint16_t seq);
 
         /**
          * \brief Getter for the bitmap field.
+         * 
+         * The returned pointer <b>must not</b> be free'd.
+         * 
          * \return The bitmap field.
          */
         const uint8_t *bitmap() const { return _bitmap; }
@@ -3345,7 +3369,7 @@ namespace Tins {
 
         BarControl _bar_control;
         StartSequence _start_sequence;
-        uint8_t _bitmap[8];
+        uint8_t _bitmap[bitmap_size];
     };
 };
 

@@ -107,8 +107,6 @@ public:
      */
     const data_type *data_ptr() const {
         return &*(++value_.begin());
-        
-        //return &value_[1];
     }
     
     /**

@@ -84,9 +84,14 @@ void Dot11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 void Dot11::add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val) {
-    uint32_t opt_size = len + (sizeof(uint8_t) << 1);
+    uint32_t opt_size = len + sizeof(uint8_t) * 2;
     _options.push_back(dot11_option((uint8_t)opt, len, val));
     _options_size += opt_size;
+}
+
+void Dot11::add_tagged_option(const dot11_option &opt) {
+    _options.push_back(opt);
+    _options_size += opt.data_size() + sizeof(uint8_t) * 2;
 }
 
 const Dot11::dot11_option *Dot11::search_option(TaggedOption opt) const {
@@ -243,15 +248,6 @@ Dot11 *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
         ret = new Dot11(buffer, total_sz);
     return ret;
 }
-
-void Dot11::copy_80211_fields(const Dot11 *other) {
-    std::memcpy(&_header, &other->_header, sizeof(_header));
-    _iface = other->_iface;
-    _options_size = other->_options_size;
-    for(std::list<dot11_option>::const_iterator it = other->_options.begin(); it != other->_options.end(); ++it)
-        _options.push_back(dot11_option(it->option(), it->data_size(), it->data_ptr()));
-}
-
 /* Dot11ManagementFrame */
 
 Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz) 
@@ -278,13 +274,6 @@ const address_type &src_hw_addr)
     type(Dot11::MANAGEMENT);
     memset(&_ext_header, 0, sizeof(_ext_header));
     addr2(src_hw_addr);
-}
-
-void Dot11ManagementFrame::copy_ext_header(const Dot11ManagementFrame* other) {
-    Dot11::copy_80211_fields(other);
-    std::memcpy(&_ext_header, &other->_ext_header, sizeof(_ext_header));
-    //std::memcpy(_addr4, other->_addr4, 6);
-    _addr4 = other->_addr4;
 }
 
 uint32_t Dot11ManagementFrame::header_size() const {

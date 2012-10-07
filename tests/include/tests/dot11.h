@@ -9,7 +9,7 @@ using Tins::Dot11Data;
 using Tins::Dot11ControlTA;
 
 typedef Dot11::address_type address_type;
-typedef Dot11ManagementFrame::CapabilityInformation CapabilityInformation;
+typedef Dot11ManagementFrame::capability_information capability_information;
 
 inline void test_equals(const Dot11 &dot1, const Dot11 &dot2) {
     EXPECT_EQ(dot1.protocol(), dot2.protocol());
@@ -51,7 +51,7 @@ inline void test_equals(const Dot11ControlTA& b1, const Dot11ControlTA& b2) {
     test_equals(static_cast<const Dot11&>(b1), static_cast<const Dot11&>(b2));
 }
 
-inline void test_equals(const CapabilityInformation &info1, const CapabilityInformation &info2) {
+inline void test_equals(const capability_information &info1, const capability_information &info2) {
      EXPECT_EQ(info1.ess(), info2.ess());
      EXPECT_EQ(info1.ibss(), info2.ibss());
      EXPECT_EQ(info1.cf_poll(), info2.cf_poll());
@@ -145,7 +145,7 @@ inline void test_equals_empty(const Dot11ControlTA &dot11) {
     EXPECT_EQ(dot11.addr1(), empty_addr);
 }
 
-inline void test_equals_empty(const CapabilityInformation &info) {
+inline void test_equals_empty(const capability_information &info) {
     EXPECT_EQ(info.ess(), 0);
     EXPECT_EQ(info.ibss(), 0);
     EXPECT_EQ(info.cf_poll(), 0);
