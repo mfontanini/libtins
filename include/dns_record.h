@@ -37,9 +37,14 @@ public:
     /**
      * \brief The type used to store resource records' information.
      */
-    struct Info {
+    struct info {
         uint16_t type, qclass;
         uint32_t ttl;
+        
+        info(uint16_t tp, uint16_t qc, uint32_t tm) 
+          : type(tp), qclass(qc), ttl(tm) { }
+        
+        info() : type(), qclass(), ttl() {}
     } __attribute__((packed));
     
     /**
@@ -143,14 +148,14 @@ public:
     /**
      * \brief Returns a reference to the info field.
      */
-    Info &info() {
+    info &information() {
         return info_;
     }
     
     /**
      * \brief Returns a const reference to the info field.
      */
-    const Info &info() const {
+    const info &information() const {
         return info_;
     }
     
@@ -165,7 +170,7 @@ private:
     DNSRRImpl *clone_impl() const;
     size_t impl_size() const;
 
-    Info info_;
+    info info_;
     std::vector<uint8_t> data;
     DNSRRImpl *impl;
 };

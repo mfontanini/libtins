@@ -121,30 +121,117 @@ namespace Tins {
         /**
          * \brief Struct that represent DNS queries.
          */
-        struct Query {
-            std::string name;
-            uint16_t type, qclass;
+        class Query {
+        public:
+            /**
+             * \brief Constructs a DNS query.
+             * 
+             * \param nm The name of the domain being resolved.
+             * \param tp The query type.
+             * \param cl The query class.
+             */
+            Query(const std::string &nm, QueryType tp, QueryClass cl) 
+            : name_(nm), type_(tp), qclass_(cl) {}
             
-            Query(const std::string &nm, uint16_t t, uint16_t c) :
-                name(nm), type(t), qclass(c) {}
-            Query() {}
+            /**
+             * \brief Default constructs this Query.
+             */
+            Query() : type_(), qclass_() {}
+            
+            /**
+             * \brief Setter for the name field.
+             * 
+             * \param nm The name to be set.
+             */
+            void dname(const std::string &nm) {
+                name_ = nm;
+            }
+            
+            /**
+             * \brief Setter for the query type field.
+             * 
+             * \param tp The query type to be set.
+             */
+            void type(QueryType tp) {
+                type_ = tp;
+            }
+            
+            /**
+             * \brief Setter for the query class field.
+             * 
+             * \param cl The query class to be set.
+             */
+            void query_class(QueryClass cl) {
+                qclass_ = cl;
+            }
+            
+            /**
+             * \brief Getter for the name field.
+             */
+            const std::string &dname() const { return name_; }
+            
+            /**
+             * \brief Getter for the query type field.
+             */
+            QueryType type() const { return type_; }
+            
+            /**
+             * \brief Getter for the query class field.
+             */
+            QueryClass query_class() const { return qclass_; }
+        private:
+            std::string name_;
+            QueryType type_;
+            QueryClass qclass_;
         };
         
         /**
          * \brief Struct that represent DNS resource records.
          */
-        struct Resource {
-            std::string dname, addr;
-            uint16_t type, qclass;
-            uint32_t ttl;
-            
+        class Resource {
+        public:
             Resource(const std::string &nm, const std::string &ad, 
-                     uint16_t t, uint16_t c, uint32_t tt) :
-                dname(nm), addr(ad), type(t), qclass(c), ttl(tt) {}
+              uint16_t t, uint16_t c, uint32_t tt) 
+            : dname_(nm), addr_(ad), type_(t), qclass_(c), ttl_(tt) {}
+            
+            Resource() : type_(), qclass_(), ttl_() {}
+            
+            /**
+             * \brief Getter for the dname field.
+             * 
+             * This returns the domain name for which this record 
+             * provides an answer.
+             */
+            const std::string &dname() const { return dname_; }
+            
+            /**
+             * Getter for the type field.
+             */
+            const std::string &data() const { return addr_; }
+            
+            /**
+             * Getter for the query type field.
+             */
+            uint16_t type() const { return type_; }
+            
+            /**
+             * Getter for the query class field.
+             */
+            uint16_t query_class() const { return qclass_; }
+            
+            /**
+             * Getter for the type field.
+             */
+            uint32_t ttl() const { return ttl_; }
+        private:
+            std::string dname_, addr_;
+            uint16_t type_, qclass_;
+            uint32_t ttl_;
         };
         
         typedef std::list<Query> queries_type;
         typedef std::list<Resource> resources_type;
+        typedef IPv4Address address_type;
         
         /**
          * \brief Default constructor.
@@ -154,9 +241,7 @@ namespace Tins {
         DNS();
         
         /**
-         * \brief Constructor which creates a DNS object from a buffer 
-         * and adds all identifiable PDUs found in the buffer as 
-         * children of this one.
+         * \brief Constructor which creates a DNS object from a buffer.
          * \param buffer The buffer from which this PDU will be 
          * constructed.
          * \param total_sz The total size of the buffer.
@@ -253,28 +338,28 @@ namespace Tins {
          * 
          * \return uint16_t containing the value of the questions field.
          */
-        uint16_t questions() const { return Endian::be_to_host(dns.questions); }
+        uint16_t questions_count() const { return Endian::be_to_host(dns.questions); }
         
         /**
          * \brief Setter for the answers field.
          * 
          * \return uint16_t containing the value of the answers field.
          */
-        uint16_t answers() const { return Endian::be_to_host(dns.answers); }
+        uint16_t answers_count() const { return Endian::be_to_host(dns.answers); }
         
         /**
          * \brief Setter for the authority field.
          * 
          * \return uint16_t containing the value of the authority field.
          */
-        uint16_t authority() const { return Endian::be_to_host(dns.authority); }
+        uint16_t authority_count() const { return Endian::be_to_host(dns.authority); }
         
         /**
          * \brief Setter for the additional field.
          * 
          * \return uint16_t containing the value of the additional field.
          */
-        uint16_t additional() const { return Endian::be_to_host(dns.additional); }
+        uint16_t additional_count() const { return Endian::be_to_host(dns.additional); }
 
         /**
          * \brief Getter for the PDU's type.
@@ -373,14 +458,6 @@ namespace Tins {
         void rcode(uint8_t new_rcode);
         
         // Methods
-        /**
-         * \brief Add a query to perform.
-         * 
-         * \param name The name to be resolved.
-         * \param type The type of this query.
-         * \param qclass The class of this query.
-         */
-        void add_query(const std::string &name, QueryType type, QueryClass qclass);
         
         /**
          * \brief Add a query to perform.
@@ -398,8 +475,8 @@ namespace Tins {
          * \param ttl The time-to-live of this answer.
          * \param ip The ip address of the resolved name.
          */
-        void add_answer(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, IPv4Address ip);
+        void add_answer(const std::string &name, 
+          const DNSResourceRecord::info &info, address_type ip);
                         
         /**
          * \brief Add a query response.
@@ -410,8 +487,8 @@ namespace Tins {
          * \param ttl The time-to-live of this answer.
          * \param dname The domain of the resolved name.
          */
-        void add_answer(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, const std::string &dname);
+        void add_answer(const std::string &name, 
+          const DNSResourceRecord::info &info, const std::string &dname);
                         
         /**
          * \brief Add a query response.
@@ -423,8 +500,8 @@ namespace Tins {
          * \param data The data of this option.
          * \param sz The size of the data.
          */
-        void add_answer(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, const uint8_t *data, uint32_t sz);
+        void add_answer(const std::string &name, 
+          const DNSResourceRecord::info &info, const uint8_t *data, uint32_t sz);
         
         /**
          * \brief Add an authority record.
@@ -436,8 +513,8 @@ namespace Tins {
          * \param data The data of this option.
          * \param sz The size of the data.
          */
-        void add_authority(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, const uint8_t *data, uint32_t sz);
+        void add_authority(const std::string &name, 
+          const DNSResourceRecord::info &info, const uint8_t *data, uint32_t sz);
         
         /**
          * \brief Add an additional record.
@@ -448,8 +525,8 @@ namespace Tins {
          * \param ttl The time-to-live of this record.
          * \param ip The ip address of the resolved name.
          */
-        void add_additional(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, uint32_t ip);
+        void add_additional(const std::string &name, 
+          const DNSResourceRecord::info &info, uint32_t ip);
                         
         
         /**
@@ -457,20 +534,31 @@ namespace Tins {
          * \return std::list<Query> containing the queries in this
          * record.
          */
-        queries_type dns_queries() const;
+        queries_type queries() const;
         
         /**
          * \brief Getter for this PDU's DNS answers
          * \return std::list<Resource> containing the answers in this
          * record.
          */
-        resources_type dns_answers();
+        resources_type answers() const;
         
         /**
          * \sa PDU::clone
          */
         DNS *clone() const {
             return new DNS(*this);
+        }
+        
+        /**
+         * Helper function to create a resource record information
+         * 
+         * \param type The type of the query.
+         * \param qclass The class of the query.
+         * \param ttl The time-to-live of the query.
+         */
+        static DNSResourceRecord::info make_info(QueryType type, QueryClass qclass, uint32_t ttl) {
+            return DNSResourceRecord::info((uint16_t)type, (uint16_t)qclass, ttl);
         }
     private:
         struct dnshdr {
@@ -516,23 +604,23 @@ namespace Tins {
         void unparse_domain_name(const std::string &dn, std::string &out) const;
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         uint8_t *serialize_list(const ResourcesType &lst, uint8_t *buffer) const;
-        void compose_name(const uint8_t *ptr, uint32_t sz, std::string &out);
-        void convert_resources(const ResourcesType &lst, std::list<Resource> &res);
-        DNSResourceRecord make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip);
-        DNSResourceRecord make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const std::string &dname);
-        DNSResourceRecord make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const uint8_t *ptr, uint32_t len);
-        void add_suffix(uint32_t index, const uint8_t *data, uint32_t sz);
-        uint32_t build_suffix_map(uint32_t index, const ResourcesType &lst);
-        uint32_t build_suffix_map(uint32_t index, const QueriesType &lst);
-        void build_suffix_map();
-        bool contains_dname(uint16_t type);
+        void compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) const;
+        void convert_resources(const ResourcesType &lst, std::list<Resource> &res) const;
+        DNSResourceRecord make_record(const std::string &name, const DNSResourceRecord::info &info, uint32_t ip);
+        DNSResourceRecord make_record(const std::string &name, const DNSResourceRecord::info &info, const std::string &dname);
+        DNSResourceRecord make_record(const std::string &name, const DNSResourceRecord::info &info, const uint8_t *ptr, uint32_t len);
+        void add_suffix(uint32_t index, const uint8_t *data, uint32_t sz) const;
+        uint32_t build_suffix_map(uint32_t index, const ResourcesType &lst) const;
+        uint32_t build_suffix_map(uint32_t index, const QueriesType &lst) const;
+        void build_suffix_map() const ;
+        static bool contains_dname(uint16_t type);
         
         dnshdr dns;
         uint32_t extra_size;
-        std::list<Query> queries;
+        std::list<Query> queries_;
         ResourcesType ans, arity, addit;
-        SuffixMap suffixes;
-        SuffixIndices suffix_indices;
+        mutable SuffixMap suffixes;
+        mutable SuffixIndices suffix_indices;
     };
 };
 
