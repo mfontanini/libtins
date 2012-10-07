@@ -40,7 +40,7 @@ DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : PDU(255), extra_size(0) {
         throw std::runtime_error("Not enough size for a DNS header in the buffer.");
     std::memcpy(&dns, buffer, sizeof(dnshdr));
     const uint8_t *end(buffer + total_sz);
-    uint16_t nquestions(questions());
+    uint16_t nquestions(questions_count());
     buffer += sizeof(dnshdr);
     total_sz -= sizeof(dnshdr);
     for(uint16_t i(0); i < nquestions; ++i) {
@@ -50,19 +50,19 @@ DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : PDU(255), extra_size(0) {
         Query query;
         if((ptr + (sizeof(uint16_t) * 2)) >= end)
             throw std::runtime_error("Not enough size for a given query.");
-        query.name = string(buffer, ptr);
+        query.dname(string(buffer, ptr));
         ptr++;
         const uint16_t *opt_ptr = reinterpret_cast<const uint16_t*>(ptr);
-        query.type = *(opt_ptr++);
-        query.qclass = *(opt_ptr++);
-        queries.push_back(query);
+        query.type((QueryType)*(opt_ptr++));
+        query.query_class((QueryClass)*(opt_ptr++));
+        queries_.push_back(query);
         total_sz -= reinterpret_cast<const uint8_t*>(opt_ptr) - buffer;
         extra_size += reinterpret_cast<const uint8_t*>(opt_ptr) - buffer;
         buffer = reinterpret_cast<const uint8_t*>(opt_ptr);
     }
-    buffer = build_resource_list(ans, buffer, total_sz, answers());
-    buffer = build_resource_list(arity, buffer, total_sz, authority());
-    build_resource_list(addit, buffer, total_sz, additional());
+    buffer = build_resource_list(ans, buffer, total_sz, answers_count());
+    buffer = build_resource_list(arity, buffer, total_sz, authority_count());
+    build_resource_list(addit, buffer, total_sz, additional_count());
 }
 
 const uint8_t *DNS::build_resource_list(ResourcesType &lst, const uint8_t *ptr, uint32_t &sz, uint16_t nrecs) {
@@ -135,68 +135,73 @@ bool DNS::contains_dname(uint16_t type) {
           type == PTR || type == NS;
 }
 
-void DNS::add_query(const string &name, QueryType type, QueryClass qclass) {
+void DNS::add_query(const Query &query) {
     string new_str;
-    parse_domain_name(name, new_str);
+    parse_domain_name(query.dname(), new_str);
     
-    queries.push_back(
-        Query(new_str, 
-        Endian::host_to_be<uint16_t>(type), 
-        Endian::host_to_be<uint16_t>(qclass))
+    queries_.push_back(
+        Query(
+            new_str, 
+            (QueryType)Endian::host_to_be<uint16_t>(query.type()), 
+            (QueryClass)Endian::host_to_be<uint16_t>(query.query_class())
+        )
     );
     extra_size += new_str.size() + 1 + (sizeof(uint16_t) << 1);
-    dns.questions = Endian::host_to_be<uint16_t>(queries.size());
+    dns.questions = Endian::host_to_be<uint16_t>(queries_.size());
 }
 
-void DNS::add_query(const Query &query) {
-    add_query(
-        query.name, 
-        static_cast<QueryType>(query.type), 
-        static_cast<QueryClass>(query.qclass)
-    );
-}
-
-void DNS::add_answer(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, IPv4Address ip) {
-    ans.push_back(make_record(name, type, qclass, ttl, Endian::host_to_be((uint32_t)ip)));
+void DNS::add_answer(const string &name, const DNSResourceRecord::info &info, 
+  address_type ip) 
+{
+    ans.push_back(make_record(name, info, Endian::host_to_be((uint32_t)ip)));
     dns.answers = Endian::host_to_be<uint16_t>(ans.size());
 }
 
-void DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, const std::string &dname) {
+void DNS::add_answer(const std::string &name, const DNSResourceRecord::info &info, 
+  const std::string &dname) 
+{
     string new_str;
     parse_domain_name(dname, new_str);
-    DNSResourceRecord res = make_record(name, type, qclass, ttl, new_str);
+    DNSResourceRecord res = make_record(name, info, new_str);
     ans.push_back(res);
     dns.answers = Endian::host_to_be<uint16_t>(ans.size());
 }
 
-void DNS::add_answer(const std::string &name, QueryType type, QueryClass qclass,
-                        uint32_t ttl, const uint8_t *data, uint32_t sz) {
-    ans.push_back(make_record(name, type, qclass, ttl, data, sz));
+void DNS::add_answer(const std::string &name, const DNSResourceRecord::info &info, 
+  const uint8_t *data, uint32_t sz) 
+{
+    ans.push_back(make_record(name, info, data, sz));
     dns.answers = Endian::host_to_be<uint16_t>(ans.size());
 }
 
-void DNS::add_authority(const string &name, QueryType type, 
-  QueryClass qclass, uint32_t ttl, const uint8_t *data, uint32_t sz) {
-    arity.push_back(make_record(name, type, qclass, ttl, data, sz));
+void DNS::add_authority(const string &name, const DNSResourceRecord::info &info, 
+  const uint8_t *data, uint32_t sz) 
+{
+    arity.push_back(make_record(name, info, data, sz));
     dns.authority = Endian::host_to_be<uint16_t>(arity.size());
 }
 
-void DNS::add_additional(const string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
-    addit.push_back(make_record(name, type, qclass, ttl, ip));
+void DNS::add_additional(const string &name, const DNSResourceRecord::info &info, 
+uint32_t ip) 
+{
+    addit.push_back(make_record(name, info, ip));
     dns.additional = Endian::host_to_be<uint16_t>(addit.size());
 }
 
-DNSResourceRecord DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, uint32_t ip) {
+DNSResourceRecord DNS::make_record(const std::string &name, const DNSResourceRecord::info &info, uint32_t ip) {
     ip = Endian::host_to_be(ip);
-    return make_record(name, type, qclass, ttl, reinterpret_cast<uint8_t*>(&ip), sizeof(ip));
+    return make_record(name, info, reinterpret_cast<uint8_t*>(&ip), sizeof(ip));
 }
 
-DNSResourceRecord DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const std::string &dname) {
-    return make_record(name, type, qclass, ttl, reinterpret_cast<const uint8_t*>(dname.c_str()), dname.size() + 1);
+DNSResourceRecord DNS::make_record(const std::string &name, 
+  const DNSResourceRecord::info &info, const std::string &dname) 
+{
+    return make_record(name, info, reinterpret_cast<const uint8_t*>(dname.c_str()), dname.size() + 1);
 }
 
-DNSResourceRecord DNS::make_record(const std::string &name, QueryType type, QueryClass qclass, uint32_t ttl, const uint8_t *ptr, uint32_t len) {
+DNSResourceRecord DNS::make_record(const std::string &name, 
+  const DNSResourceRecord::info &info, const uint8_t *ptr, uint32_t len) 
+{
     string nm;
     parse_domain_name(name, nm);
     uint16_t index = find_domain_name(nm);
@@ -205,19 +210,19 @@ DNSResourceRecord DNS::make_record(const std::string &name, QueryType type, Quer
         res = make_offseted_record(Endian::host_to_be(index), ptr, len);
     else
         res = make_named_record(nm, ptr, len);
-    res.info().type = Endian::host_to_be<uint16_t>(type);
-    res.info().qclass = Endian::host_to_be<uint16_t>(qclass);
-    res.info().ttl = Endian::host_to_be(ttl);
+    res.information().type = Endian::host_to_be<uint16_t>(info.type);
+    res.information().qclass = Endian::host_to_be<uint16_t>(info.qclass);
+    res.information().ttl = Endian::host_to_be(info.ttl);
     extra_size += res.size();
     return res;
 }
 
 uint32_t DNS::find_domain_name(const std::string &dname) {
     uint16_t index(sizeof(dnshdr));
-    list<Query>::const_iterator it(queries.begin());
-    for(; it != queries.end() && it->name != dname; ++it)
-        index += it->name.size() + 1 + (sizeof(uint16_t) << 1);
-    if(it != queries.end() ||
+    list<Query>::const_iterator it(queries_.begin());
+    for(; it != queries_.end() && it->dname() != dname; ++it)
+        index += it->dname().size() + 1 + (sizeof(uint16_t) << 1);
+    if(it != queries_.end() ||
        find_domain_name(dname, ans, index) || 
        find_domain_name(dname, arity, index) || 
        find_domain_name(dname, addit, index))
@@ -271,12 +276,13 @@ void DNS::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     assert(total_sz >= sizeof(dns) + extra_size);
     std::memcpy(buffer, &dns, sizeof(dns)); 
     buffer += sizeof(dns);
-    for(list<Query>::const_iterator it(queries.begin()); it != queries.end(); ++it) {
-        std::memcpy(buffer, it->name.c_str(), it->name.size() + 1);
-        buffer += it->name.size() + 1;
-        *((uint16_t*)buffer) = it->type;
+    for(list<Query>::const_iterator it(queries_.begin()); it != queries_.end(); ++it) {
+        std::copy(it->dname().begin(), it->dname().end(), buffer);
+        buffer += it->dname().size();
+        *buffer++ = 0;
+        *((uint16_t*)buffer) = it->type();
         buffer += sizeof(uint16_t);
-        *((uint16_t*)buffer) = it->qclass;
+        *((uint16_t*)buffer) = it->query_class();
         buffer += sizeof(uint16_t);
     }
     buffer = serialize_list(ans, buffer);
@@ -290,7 +296,7 @@ uint8_t *DNS::serialize_list(const ResourcesType &lst, uint8_t *buffer) const {
     return buffer;
 }
 
-void DNS::add_suffix(uint32_t index, const uint8_t *data, uint32_t sz) {
+void DNS::add_suffix(uint32_t index, const uint8_t *data, uint32_t sz) const {
     uint32_t i(0), suff_sz(data[0]);
     SuffixMap::iterator it;
     while((i + suff_sz + 1 <= sz || (suff_sz == 0xc0 && i + 1 < sz)) && suff_sz) {
@@ -309,7 +315,7 @@ void DNS::add_suffix(uint32_t index, const uint8_t *data, uint32_t sz) {
     }
 }
 
-uint32_t DNS::build_suffix_map(uint32_t index, const ResourcesType &lst) {
+uint32_t DNS::build_suffix_map(uint32_t index, const ResourcesType &lst) const {
     const string *str;
     for(ResourcesType::const_iterator it(lst.begin()); it != lst.end(); ++it) {
         str = it->dname();
@@ -319,38 +325,38 @@ uint32_t DNS::build_suffix_map(uint32_t index, const ResourcesType &lst) {
         }
         else
             index += sizeof(uint16_t);
-        index += sizeof(DNSResourceRecord::Info) + sizeof(uint16_t);
+        index += sizeof(DNSResourceRecord::info) + sizeof(uint16_t);
         uint32_t sz(it->data_size());
         const uint8_t *ptr = it->data_ptr();
-        if(Endian::be_to_host(it->info().type) == MX) {
+        if(Endian::be_to_host(it->information().type) == MX) {
             ptr += 2;
             sz -= 2;
             index += 2;
         }
-        if(contains_dname(it->info().type))
+        if(contains_dname(it->information().type))
             add_suffix(index, ptr, sz);
         index += sz;
     }
     return index;
 }
 
-uint32_t DNS::build_suffix_map(uint32_t index, const list<Query> &lst) {
+uint32_t DNS::build_suffix_map(uint32_t index, const list<Query> &lst) const {
     for(list<Query>::const_iterator it(lst.begin()); it != lst.end(); ++it) {
-        add_suffix(index, (uint8_t*)it->name.c_str(), it->name.size());
-        index += it->name.size() + 1 + (sizeof(uint16_t) << 1);
+        add_suffix(index, (uint8_t*)it->dname().c_str(), it->dname().size());
+        index += it->dname().size() + 1 + (sizeof(uint16_t) << 1);
     }
     return index;
 }
 
-void DNS::build_suffix_map() {
+void DNS::build_suffix_map() const {
     uint32_t index(sizeof(dnshdr));
-    index = build_suffix_map(index, queries);
+    index = build_suffix_map(index, queries_);
     index = build_suffix_map(index, ans);
     index = build_suffix_map(index, arity);
     build_suffix_map(index, addit);
 }
 
-void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
+void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) const {
     uint32_t i(0);
     while(i < sz) {
         if(i && ptr[i])
@@ -360,7 +366,6 @@ void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
             index &= 0x3fff;
             SuffixMap::iterator it(suffixes.find(index));
             SuffixIndices::iterator suff_it(suffix_indices.find(index));
-            //assert(it != suffixes.end() && suff_it == suffix_indices.end());
             if(it == suffixes.end() || suff_it == suffix_indices.end())
                 throw std::runtime_error("Malformed DNS packet");
             bool first(true);
@@ -391,7 +396,7 @@ void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) {
     }
 }
 
-void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) {
+void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) const {
     if(!suffixes.size())
         build_suffix_map();
     const string *str_ptr;
@@ -410,31 +415,38 @@ void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) 
         if(sz == 4)
             addr = IPv4Address(*(uint32_t*)ptr).to_string();
         else {
-            if(Endian::be_to_host(it->info().type) ==  MX) {
+            if(Endian::be_to_host(it->information().type) ==  MX) {
                 ptr += 2;
                 sz -= 2;
             }
             compose_name(ptr, sz, addr);
         }
         res.push_back(
-            Resource(dname, addr, Endian::be_to_host(it->info().type), 
-              Endian::host_to_be(it->info().qclass), Endian::be_to_host(it->info().ttl)
+            Resource(dname, addr, Endian::be_to_host(it->information().type), 
+              Endian::host_to_be(it->information().qclass), 
+              Endian::be_to_host(it->information().ttl)
             )
         );
     }
 }
 
-DNS::queries_type DNS::dns_queries() const { 
+DNS::queries_type DNS::queries() const { 
     queries_type output;
-    for(std::list<Query>::const_iterator it(queries.begin()); it != queries.end(); ++it) {
+    for(std::list<Query>::const_iterator it(queries_.begin()); it != queries_.end(); ++it) {
         string dn;
-        unparse_domain_name(it->name, dn);
-        output.push_back(Query(dn, Endian::be_to_host(it->type), Endian::be_to_host(it->qclass)));
+        unparse_domain_name(it->dname(), dn);
+        output.push_back(
+            Query(
+                dn, 
+                (QueryType)Endian::be_to_host<uint16_t>(it->type()), 
+                (QueryClass)Endian::be_to_host<uint16_t>(it->query_class())
+            )
+        );
     }
     return output;
 }
 
-DNS::resources_type DNS::dns_answers() {
+DNS::resources_type DNS::answers() const {
     resources_type res;
     convert_resources(ans, res);
     return res;

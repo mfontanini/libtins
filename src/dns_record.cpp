@@ -104,7 +104,7 @@ uint32_t DNSResourceRecord::write(uint8_t *buffer) const {
     buffer += sz;
     std::memcpy(buffer, &info_, sizeof(info_));
     buffer += sizeof(info_);
-    *((uint16_t*)buffer) = Endian::host_to_be(data.size());
+    *((uint16_t*)buffer) = Endian::host_to_be<uint16_t>(data.size());
     buffer += sizeof(uint16_t);
     std::copy(data.begin(), data.end(), buffer);
     return sz + sizeof(info_) + sizeof(uint16_t) + data.size();
