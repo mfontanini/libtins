@@ -32,7 +32,7 @@ namespace Tins {
 const uint16_t TCP::DEFAULT_WINDOW = 32678;
 
 TCP::TCP(uint16_t dport, uint16_t sport) 
-: PDU(Constants::IP::PROTO_TCP), _options_size(0), _total_options_size(0) 
+: _options_size(0), _total_options_size(0) 
 {
     std::memset(&_tcp, 0, sizeof(tcphdr));
     this->dport(dport);
@@ -42,7 +42,6 @@ TCP::TCP(uint16_t dport, uint16_t sport)
 }
 
 TCP::TCP(const uint8_t *buffer, uint32_t total_sz) 
-: PDU(Constants::IP::PROTO_TCP) 
 {
     if(total_sz < sizeof(tcphdr))
         throw std::runtime_error("Not enough size for an TCP header in the buffer.");

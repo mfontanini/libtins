@@ -46,20 +46,19 @@ namespace Tins {
 const Dot11::address_type Dot11::BROADCAST = "ff:ff:ff:ff:ff:ff";
 
 Dot11::Dot11(const address_type &dst_hw_addr, PDU* child) 
-: PDU(ETHERTYPE_IP, child), _options_size(0)
+: PDU(child), _options_size(0)
 {
     memset(&_header, 0, sizeof(ieee80211_header));
     addr1(dst_hw_addr);
 }
 
 Dot11::Dot11(const ieee80211_header *header_ptr) 
-: PDU(ETHERTYPE_IP) 
 {
 
 }
 
 Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz) 
-: PDU(ETHERTYPE_IP), _options_size(0) 
+: _options_size(0) 
 {
     if(total_sz < sizeof(_header))
         throw runtime_error("Not enough size for an Dot11 header in the buffer.");

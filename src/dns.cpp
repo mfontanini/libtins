@@ -31,11 +31,11 @@ using std::list;
 
 namespace Tins {
 
-DNS::DNS() : PDU(255), extra_size(0) {
+DNS::DNS() : extra_size(0) {
     std::memset(&dns, 0, sizeof(dns));
 }
 
-DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : PDU(255), extra_size(0) {
+DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : extra_size(0) {
     if(total_sz < sizeof(dnshdr))
         throw std::runtime_error("Not enough size for a DNS header in the buffer.");
     std::memcpy(&dns, buffer, sizeof(dnshdr));

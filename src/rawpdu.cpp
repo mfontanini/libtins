@@ -26,8 +26,13 @@
 
 namespace Tins {
 RawPDU::RawPDU(const uint8_t *pload, uint32_t size) 
-: PDU(255), _payload(pload, pload + size) 
+: _payload(pload, pload + size) 
 {
+    
+}
+
+RawPDU::RawPDU(const std::string &data) 
+: _payload(data.begin(), data.end()) {
     
 }
 

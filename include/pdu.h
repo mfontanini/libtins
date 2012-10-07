@@ -92,7 +92,8 @@ namespace Tins {
             EAPOL,
             RC4EAPOL,
             RSNEAPOL,
-            DNS
+            DNS,
+            LOOPBACK
         };
 
         /** \brief PDU constructor
@@ -101,7 +102,7 @@ namespace Tins {
          * \param flag The flag identifier for the subclass' PDU.
          * \param next_pdu The child PDU. Can be obviated.
          */
-        PDU(uint32_t flag, PDU *next_pdu = 0);
+        PDU(PDU *next_pdu = 0);
 
         /** \brief PDU destructor.
          *
@@ -127,12 +128,6 @@ namespace Tins {
         uint32_t size() const;
 
         /**
-         * \brief Getter for this PDU's type flag identifier.
-         * \return The type flag identifier.
-         */
-        uint32_t flag() const { return _flag; }
-
-        /**
          * \brief Getter for the inner PDU.
          * \return The current inner PDU. Might be 0.
          */
@@ -152,10 +147,6 @@ namespace Tins {
          * \return The current inner PDU. Might be 0.
          */
         PDU *release_inner_pdu();
-
-        /** \brief Sets the flag identifier.
-         */
-        void flag(uint32_t new_flag);
 
         /**
          * \brief Sets the child PDU.
@@ -310,20 +301,47 @@ namespace Tins {
          * \param parent The PDU that's one level below this one on the stack. Might be 0.
          */
         virtual void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) = 0;
-        
-        /**
-         * \brief Generic clone pdu method.
-         */
-        template<class T>
-        T *do_clone() const {
-            T *new_pdu = new T(*static_cast<const T*>(this));
-            //new_pdu->copy_inner_pdu(*this);
-            return new_pdu;
-        }
     private:
-        uint32_t _flag;
         PDU *_inner_pdu;
     };
+    
+    /**
+     * \brief Concatenation operator.
+     * 
+     * This operator concatenates several PDUs. A copy of the right 
+     * operand is set at the end of the left one's inner PDU chain.
+     * This means that:
+     * 
+     * IP some_ip = IP("127.0.0.1") / TCP(12, 13) / RawPDU("bleh");
+     * 
+     * Works as expected, meaning the output PDU will look like the 
+     * following:
+     * 
+     * IP - TCP - RawPDU
+     * 
+     * \param lop The left operand, which will be the one modified.
+     * \param rop The right operand, the one which will be appended
+     * to lop.
+     */
+    template<typename T>
+    T &operator/= (T &lop, const PDU &rop) {
+        PDU *last = &lop;
+        while(last->inner_pdu())
+            last = last->inner_pdu();
+        last->inner_pdu(rop.clone());
+        return lop;
+    }
+    
+    /**
+     * \brief Concatenation operator.
+     * 
+     * \sa operator/=
+     */
+    template<typename T>
+    T operator/ (T lop, const PDU &rop) {
+        lop /= rop;
+        return lop;
+    }
 };
 
 #endif // TINS_PDU_H

@@ -29,7 +29,7 @@
 #include "rawpdu.h"
 
 Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) 
-: PDU(Constants::IP::PROTO_UDP, child) 
+: PDU(child) 
 {
     this->dport(dport);
     this->sport(sport);
@@ -38,7 +38,6 @@ Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child)
 }
 
 Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) 
-: PDU(Constants::IP::PROTO_UDP) 
 {
     if(total_sz < sizeof(udphdr))
         throw std::runtime_error("Not enough size for an UDP header in the buffer.");

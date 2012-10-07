@@ -43,7 +43,7 @@ namespace Tins {
 const uint8_t IP::DEFAULT_TTL = 128;
 
 IP::IP(address_type ip_dst, address_type ip_src, PDU *child) 
-: PDU(Constants::IP::PROTO_IP, child) 
+: PDU(child) 
 {
     init_ip_fields();
     this->dst_addr(ip_dst);
@@ -51,7 +51,6 @@ IP::IP(address_type ip_dst, address_type ip_src, PDU *child)
 }
 
 IP::IP(const uint8_t *buffer, uint32_t total_sz) 
-: PDU(Constants::IP::PROTO_IP)
 {
     const char *msg = "Not enough size for an IP header in the buffer.";
     if(total_sz < sizeof(iphdr))
@@ -329,7 +328,7 @@ bool IP::send(PacketSender& sender) {
     link_addr.sin_family = AF_INET;
     link_addr.sin_port = 0;
     link_addr.sin_addr.s_addr = _ip.daddr;
-    if(inner_pdu() && inner_pdu()->flag() == IPPROTO_ICMP)
+    if(inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMP)
         type = PacketSender::ICMP_SOCKET;
 
     return sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
@@ -341,7 +340,7 @@ PDU *IP::recv_response(PacketSender &sender) {
     link_addr.sin_family = AF_INET;
     link_addr.sin_port = 0;
     link_addr.sin_addr.s_addr = _ip.daddr;
-    if(inner_pdu() && inner_pdu()->flag() == IPPROTO_ICMP)
+    if(inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMP)
         type = PacketSender::ICMP_SOCKET;
 
     return sender.recv_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
@@ -352,15 +351,28 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     assert(total_sz >= my_sz);
     if(inner_pdu()) {
         uint32_t new_flag;
-        new_flag = inner_pdu()->flag();
-        if(new_flag == IPPROTO_IP)
-            new_flag = IPPROTO_IPIP;
-
-        this->protocol(new_flag);
-        this->flag(new_flag);
+        switch(inner_pdu()->pdu_type()) {
+            case PDU::IP:
+                new_flag = IPPROTO_IPIP;
+                break;
+            case PDU::TCP:
+                new_flag = IPPROTO_TCP;
+                break;
+            case PDU::UDP:
+                new_flag = IPPROTO_UDP;
+                break;
+            case PDU::ICMP:
+                new_flag = IPPROTO_ICMP;
+                break;
+            default:
+                // check for other protos
+                new_flag = 0xff;
+        };
+        protocol(new_flag);
+        //flag(new_flag);
     }
-    this->tot_len(total_sz);
-    this->head_len(my_sz / sizeof(uint32_t));
+    tot_len(total_sz);
+    head_len(my_sz / sizeof(uint32_t));
 
     memcpy(buffer, &_ip, sizeof(_ip));
 

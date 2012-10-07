@@ -32,7 +32,8 @@
 uint16_t Tins::ICMP::global_id = 0, Tins::ICMP::global_seq = 0;
 
 
-Tins::ICMP::ICMP(Flags flag) : PDU(IPPROTO_ICMP) {
+Tins::ICMP::ICMP(Flags flag) 
+{
     std::memset(&_icmp, 0, sizeof(icmphdr));
     switch(flag) {
         case ECHO_REPLY:
@@ -48,7 +49,8 @@ Tins::ICMP::ICMP(Flags flag) : PDU(IPPROTO_ICMP) {
     };
 }
 
-Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) : PDU(IPPROTO_ICMP) {
+Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) 
+{
     if(total_sz < sizeof(icmphdr))
         throw std::runtime_error("Not enough size for an ICMP header in the buffer.");
     std::memcpy(&_icmp, buffer, sizeof(icmphdr));

@@ -23,6 +23,7 @@
 #define TINS_RAWPDU_H
 
 #include <vector>
+#include <string>
 #include "pdu.h"
 
 namespace Tins {
@@ -53,6 +54,13 @@ namespace Tins {
          * \param size The size of the payload.
          */
         RawPDU(const uint8_t *pload, uint32_t size);
+        
+        /** 
+         * \brief Creates an instance of RawPDU from an input string.
+         * 
+         * \param data The content of the payload.
+         */
+        RawPDU(const std::string &data);
 
         /**
          * \brief Setter for the payload field

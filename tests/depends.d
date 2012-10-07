@@ -151,6 +151,28 @@ src/network_interface.o: src/network_interface.cpp \
 ../include/ip_address.h:
 
 ../include/utils.h:
+src/pdu.o: src/pdu.cpp ../include/ip.h ../include/pdu.h \
+ ../include/small_uint.h ../include/endianness.h ../include/ip_address.h \
+ ../include/pdu_option.h ../include/tcp.h ../include/rawpdu.h \
+ ../include/pdu.h
+
+../include/ip.h:
+
+../include/pdu.h:
+
+../include/small_uint.h:
+
+../include/endianness.h:
+
+../include/ip_address.h:
+
+../include/pdu_option.h:
+
+../include/tcp.h:
+
+../include/rawpdu.h:
+
+../include/pdu.h:
 src/snap.o: src/snap.cpp ../include/snap.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/utils.h \
  ../include/ip_address.h ../include/hw_address.h

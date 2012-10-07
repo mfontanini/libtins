@@ -28,14 +28,16 @@
 
 
 namespace Tins {
-EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) : PDU(0xff) {
+EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) 
+{
     std::memset(&_header, 0, sizeof(_header));
     _header.version = 1;
     _header.packet_type = packet_type;
     _header.type = (uint8_t)type;
 }
 
-EAPOL::EAPOL(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
+EAPOL::EAPOL(const uint8_t *buffer, uint32_t total_sz) 
+{
     if(total_sz < sizeof(_header))
         throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
     std::memcpy(&_header, buffer, sizeof(_header));

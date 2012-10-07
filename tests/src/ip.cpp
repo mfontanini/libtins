@@ -3,6 +3,9 @@
 #include <string>
 #include <stdint.h>
 #include "ip.h"
+#include "tcp.h"
+#include "udp.h"
+#include "icmp.h"
 #include "ip_address.h"
 #include "utils.h"
 
@@ -237,4 +240,18 @@ TEST_F(IPTest, Serialize) {
     PDU::serialization_type buffer = ip1.serialize();
     ASSERT_EQ(buffer.size(), sizeof(expected_packet));
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
+}
+
+TEST_F(IPTest, StackedProtocols) {
+    IP ip = IP() / TCP();
+    IP::serialization_type buffer = ip.serialize();
+    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<TCP>());
+    
+    ip = IP() / UDP();
+    buffer = ip.serialize();
+    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<UDP>());
+    
+    ip = IP() / ICMP();
+    buffer = ip.serialize();
+    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<ICMP>());
 }

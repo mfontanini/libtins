@@ -26,12 +26,12 @@
 
 namespace Tins{
 BootP::BootP() 
-: PDU(255), _vend(64) {
+: _vend(64) {
     std::memset(&_bootp, 0, sizeof(bootphdr));
 }
 
 BootP::BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size) 
-: PDU(255), _vend(vend_field_size) 
+: _vend(vend_field_size) 
 {
     if(total_sz < sizeof(bootphdr) + vend_field_size)
         throw std::runtime_error("Not enough size for a BootP header in the buffer.");

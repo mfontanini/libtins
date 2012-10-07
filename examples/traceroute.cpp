@@ -84,12 +84,12 @@ private:
                 ttls[i] = i;
             }
             
-            sender.send(&ip);
+            sender.send(ip);
             // Give him a little time
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         running = false;
-        sender.send(&ip);
+        sender.send(ip);
     }
 
     bool sniff_callback(PDU &pdu) {

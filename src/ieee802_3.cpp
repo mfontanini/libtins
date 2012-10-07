@@ -38,7 +38,7 @@ const IEEE802_3::address_type IEEE802_3::BROADCAST("ff:ff:ff:ff:ff:ff");
 IEEE802_3::IEEE802_3(const NetworkInterface& iface, 
   const address_type &dst_hw_addr, const address_type &src_hw_addr, 
   PDU* child)
-: PDU(ETHERTYPE_IP, child) 
+: PDU(child) 
 {
     memset(&_eth, 0, sizeof(ethhdr));
     this->dst_addr(dst_hw_addr);
@@ -49,7 +49,6 @@ IEEE802_3::IEEE802_3(const NetworkInterface& iface,
 }
 
 IEEE802_3::IEEE802_3(const uint8_t *buffer, uint32_t total_sz) 
-: PDU(ETHERTYPE_IP) 
 {
     if(total_sz < sizeof(ethhdr))
         throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");

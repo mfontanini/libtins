@@ -42,8 +42,8 @@ TCPStream::StreamInfo::StreamInfo(IPv4Address client,
 
 
 TCPStream::TCPStream(IP *ip, TCP *tcp, uint64_t identifier) 
-: client_seq(tcp->seq()), info(ip->src_addr(), ip->dst_addr(), 
-  tcp->sport(), tcp->dport()), identifier(identifier), 
+: client_seq(tcp->seq()), server_seq(0), info(ip->src_addr(), 
+  ip->dst_addr(), tcp->sport(), tcp->dport()), identifier(identifier), 
   syn_ack_sent(false), fin_sent(false)
 {
     

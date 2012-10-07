@@ -44,7 +44,7 @@ void BaseSniffer::init(pcap_t *phandle, const std::string &filter,
     handle = phandle;
     mask = if_mask;
     
-    wired = (pcap_datalink(handle) != DLT_IEEE802_11_RADIO); //better plx
+    iface_type = pcap_datalink(handle);
     actual_filter.bf_insns = 0;
     if(!filter.empty() && !set_filter(filter))
         throw runtime_error("Invalid filter");
@@ -61,10 +61,12 @@ PDU *BaseSniffer::next_packet() {
         const u_char *content = pcap_next(handle, &header);
         if(content) {
             try {
-                if(wired)
+                if(iface_type == DLT_EN10MB)
                     ret = new EthernetII((const uint8_t*)content, header.caplen);
-                else
+                else if(iface_type == DLT_IEEE802_11_RADIO)
                     ret = new RadioTap((const uint8_t*)content, header.caplen);
+                else if(iface_type == DLT_LOOP)
+                    ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
             }
             catch(...) {
                 ret = 0;

@@ -36,7 +36,6 @@ namespace Tins {
 
 ARP::ARP(ipaddress_type target_ip, ipaddress_type sender_ip, 
   const hwaddress_type &target_hw, const hwaddress_type &sender_hw) 
-: PDU(0x0608) 
 {
     memset(&_arp, 0, sizeof(arphdr));
     hw_addr_format((uint16_t)Constants::ARP::ETHER);
@@ -50,7 +49,6 @@ ARP::ARP(ipaddress_type target_ip, ipaddress_type sender_ip,
 }
 
 ARP::ARP(const uint8_t *buffer, uint32_t total_sz) 
-: PDU(Endian::host_to_be<uint16_t>(Constants::Ethernet::ARP)) 
 {
     if(total_sz < sizeof(arphdr))
         throw runtime_error("Not enough size for an ARP header in the buffer.");

@@ -33,14 +33,18 @@ namespace Tins {
 const uint8_t LLC::GLOBAL_DSAP_ADDR = 0xFF;
 const uint8_t LLC::NULL_ADDR = 0x00;
 
-LLC::LLC(PDU *child) : PDU(0xff, child), _type(LLC::INFORMATION) {
+LLC::LLC(PDU *child)
+: PDU(child), _type(LLC::INFORMATION) 
+{
 	memset(&_header, 0, sizeof(llchdr));
 	control_field_length = 2;
 	memset(&control_field, 0, sizeof(control_field));
 	information_field_length = 0;
 }
 
-LLC::LLC(uint8_t dsap, uint8_t ssap, PDU *child) : PDU(0xff, child), _type(LLC::INFORMATION) {
+LLC::LLC(uint8_t dsap, uint8_t ssap, PDU *child) 
+: PDU(child), _type(LLC::INFORMATION) 
+{
 	_header.dsap = dsap;
 	_header.ssap = ssap;
 	control_field_length = 2;
@@ -48,7 +52,7 @@ LLC::LLC(uint8_t dsap, uint8_t ssap, PDU *child) : PDU(0xff, child), _type(LLC::
 	information_field_length = 0;
 }
 
-LLC::LLC(const uint8_t *buffer, uint32_t total_sz) : PDU(0xff) {
+LLC::LLC(const uint8_t *buffer, uint32_t total_sz) {
     // header + 1 info byte
 	if(total_sz < sizeof(_header) + 1)
 		throw std::runtime_error("Not enough size for a LLC header in the buffer.");

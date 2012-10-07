@@ -31,6 +31,7 @@
 #include "pdu.h"
 #include "ethernetII.h"
 #include "radiotap.h"
+#include "loopback.h"
 
 namespace Tins {
     /**
@@ -118,11 +119,11 @@ namespace Tins {
         struct LoopData {
             pcap_t *handle;
             Functor c_handler;
-            bool wired;
+            int iface_type;
             
             LoopData(pcap_t *_handle, const Functor _handler, 
-              bool is_wired) 
-            : handle(_handle), c_handler(_handler), wired(is_wired) { }
+              int if_type) 
+            : handle(_handle), c_handler(_handler), iface_type(if_type) { }
         };
     
         BaseSniffer(const BaseSniffer&);
@@ -139,7 +140,7 @@ namespace Tins {
         pcap_t *handle;
         bpf_u_int32 mask;
         bpf_program actual_filter;
-        bool wired;
+        int iface_type;
     };
     
     /** 
@@ -184,7 +185,7 @@ namespace Tins {
         
     template<class Functor>
     void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
-        LoopData<Functor> data(handle, function, wired);
+        LoopData<Functor> data(handle, function, iface_type);
         pcap_loop(handle, max_packets, &BaseSniffer::callback_handler<Functor>, (u_char*)&data);
     }
     
@@ -200,14 +201,13 @@ namespace Tins {
             std::auto_ptr<PDU> pdu;
             LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
             bool ret_val(false);
-            /*if(data->wired)
-                ret_val = data->c_handler(Tins::EthernetII((const uint8_t*)packet, header->caplen));
-            else
-                pdu.reset(new Tins::RadioTap((const uint8_t*)packet, header->caplen));*/
-            if(data->wired)
+            if(data->iface_type == DLT_EN10MB)
                 ret_val = call_functor<Tins::EthernetII>(data, packet, header->caplen);
-            else
+            else if(data->iface_type == DLT_IEEE802_11_RADIO)
                 ret_val = call_functor<Tins::RadioTap>(data, packet, header->caplen);
+            else if(data->iface_type == DLT_NULL) 
+                ret_val = call_functor<Tins::Loopback>(data, packet, header->caplen);
+                
             if(!ret_val)
                 pcap_breakloop(data->handle);
         }

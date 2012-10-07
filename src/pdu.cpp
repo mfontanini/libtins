@@ -26,17 +26,15 @@
 
 namespace Tins {
 
-PDU::PDU(uint32_t flag, PDU *next_pdu) : _flag(flag), _inner_pdu(next_pdu) {
+PDU::PDU(PDU *next_pdu) : _inner_pdu(next_pdu) {
 
 }
 
 PDU::PDU(const PDU &other) : _inner_pdu(0) {
-    _flag = other.flag();
     copy_inner_pdu(other);
 }
 
 PDU &PDU::operator=(const PDU &other) {
-    _flag = other.flag();
     copy_inner_pdu(other);
     return *this;
 }
@@ -66,10 +64,6 @@ bool PDU::send(PacketSender &) {
 
 PDU *PDU::recv_response(PacketSender &) { 
     return false; 
-}
-
-void PDU::flag(uint32_t new_flag) {
-    _flag = new_flag;
 }
 
 void PDU::inner_pdu(PDU *next_pdu) {
