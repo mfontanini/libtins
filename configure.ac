@@ -1,4 +1,4 @@
-AC_INIT(myconfig, 0.1)
+AC_INIT(myconfig, 0.2)
 
 AC_PROG_CXX()
 AC_LANG(C++)
