@@ -87,6 +87,7 @@ uint32_t IEEE802_3::header_size() const {
     return sizeof(ethhdr);
 }
 
+#ifndef WIN32
 bool IEEE802_3::send(PacketSender &sender) {
     struct sockaddr_ll addr;
 
@@ -100,6 +101,7 @@ bool IEEE802_3::send(PacketSender &sender) {
 
     return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
+#endif // WIN32
 
 bool IEEE802_3::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(ethhdr))
@@ -125,6 +127,7 @@ void IEEE802_3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     	_eth.length = 0;
 }
 
+#ifndef WIN32
 PDU *IEEE802_3::recv_response(PacketSender &sender) {
     struct sockaddr_ll addr;
     memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -137,6 +140,7 @@ PDU *IEEE802_3::recv_response(PacketSender &sender) {
 
     return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
+#endif // WIN32
 
 PDU *IEEE802_3::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(_eth))

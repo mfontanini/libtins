@@ -58,6 +58,7 @@ Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz)
     _family = *reinterpret_cast<const uint32_t*>(buffer);
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);
+    #ifndef WIN32
     if(total_sz) {
         switch(_family) {
             case PF_INET:
@@ -71,6 +72,7 @@ Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz)
                 break;
         };
     }
+    #endif // WIN32
 }
     
 void Loopback::family(uint32_t family_id) {

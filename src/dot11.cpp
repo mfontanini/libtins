@@ -166,6 +166,7 @@ uint32_t Dot11::header_size() const {
     return sz;
 }
 
+#ifndef WIN32
 bool Dot11::send(PacketSender &sender) {
     struct sockaddr_ll addr;
 
@@ -179,6 +180,7 @@ bool Dot11::send(PacketSender &sender) {
 
     return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
+#endif // WIN32
 
 void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t my_sz = header_size();
@@ -299,12 +301,20 @@ void Dot11ManagementFrame::addr3(const address_type &new_addr3) {
     std::copy(new_addr3.begin(), new_addr3.end(), _ext_header.addr3);
 }
 
-void Dot11ManagementFrame::frag_num(uint8_t new_frag_num) {
-    this->_ext_header.seq_control.frag_number = new_frag_num;
+void Dot11ManagementFrame::frag_num(small_uint<4> new_frag_num) {
+    #if TINS_IS_LITTLE_ENDIAN
+    _ext_header.frag_seq = new_frag_num | (_ext_header.frag_seq & 0xfff0);
+    #else
+    _ext_header.frag_seq = (new_frag_num << 8) | (_ext_header.frag_seq & 0xf0ff);
+    #endif
 }
 
-void Dot11ManagementFrame::seq_num(uint16_t new_seq_num) {
-    this->_ext_header.seq_control.seq_number = Endian::host_to_le(new_seq_num);
+void Dot11ManagementFrame::seq_num(small_uint<12> new_seq_num) {
+    #if TINS_IS_LITTLE_ENDIAN
+    _ext_header.frag_seq = (new_seq_num << 4) | (_ext_header.frag_seq & 0xf);
+    #else
+    _ext_header.frag_seq = Endian::host_to_le<uint16_t>(new_seq_num << 4) | (_ext_header.frag_seq & 0xf00);
+    #endif
 }
 
 void Dot11ManagementFrame::addr4(const address_type &new_addr4) {
@@ -530,12 +540,22 @@ void Dot11ManagementFrame::bss_load(const bss_load_type &data) {
     uint16_t dummy = Endian::host_to_le(data.station_count);
 
     //*(uint16_t*)buffer = Endian::host_to_le(data.station_count);
+    #if TINS_IS_LITTLE_ENDIAN
     buffer[0] = dummy & 0xff;
     buffer[1] = (dummy >> 8) & 0xff;
+    #else
+    buffer[0] = (dummy >> 8) & 0xff;
+    buffer[1] = dummy & 0xff;
+    #endif
     buffer[2] = data.channel_utilization;
     dummy = Endian::host_to_le(data.available_capacity);
+    #if TINS_IS_LITTLE_ENDIAN
     buffer[3] = dummy & 0xff;
     buffer[4] = (dummy >> 8) & 0xff;
+    #else
+    buffer[3] = (dummy >> 8) & 0xff;
+    buffer[4] = dummy & 0xff;
+    #endif
     //*(uint16_t*)(buffer + 3) = Endian::host_to_le(data.available_capacity);
     add_tagged_option(BSS_LOAD, sizeof(buffer), buffer);
 }
@@ -1242,12 +1262,20 @@ void Dot11Data::addr3(const address_type &new_addr3) {
     std::copy(new_addr3.begin(), new_addr3.end(), _ext_header.addr3);
 }
 
-void Dot11Data::frag_num(uint8_t new_frag_num) {
-    _ext_header.seq_control.frag_number = new_frag_num;
+void Dot11Data::frag_num(small_uint<4> new_frag_num) {
+    #if TINS_IS_LITTLE_ENDIAN
+    _ext_header.frag_seq = new_frag_num | (_ext_header.frag_seq & 0xfff0);
+    #else
+    _ext_header.frag_seq = (new_frag_num << 8) | (_ext_header.frag_seq & 0xf0ff);
+    #endif
 }
 
-void Dot11Data::seq_num(uint16_t new_seq_num) {
-    _ext_header.seq_control.seq_number = Endian::host_to_le(new_seq_num);
+void Dot11Data::seq_num(small_uint<12> new_seq_num) {
+    #if TINS_IS_LITTLE_ENDIAN
+    _ext_header.frag_seq = (new_seq_num << 4) | (_ext_header.frag_seq & 0xf);
+    #else
+    _ext_header.frag_seq = Endian::host_to_le<uint16_t>(new_seq_num << 4) | (_ext_header.frag_seq & 0xf00);
+    #endif
 }
 
 void Dot11Data::addr4(const address_type &new_addr4) {

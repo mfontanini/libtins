@@ -44,7 +44,7 @@ Tins::SNAP::SNAP(PDU *child) : PDU(child)
 {
     std::memset(&_snap, 0, sizeof(_snap));
     _snap.dsap = _snap.ssap = 0xaa;
-    _snap.control = 3;
+    control(3);
 }
 
 Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) 
@@ -70,16 +70,18 @@ Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Tins::SNAP::control(uint8_t new_control) {
-    _snap.control = new_control;
+    #if TINS_IS_LITTLE_ENDIAN
+    _snap.control_org = (_snap.control_org & 0xffffff00) | (new_control);
+    #else
+    _snap.control_org = (_snap.control_org & 0xffffff) | (new_control << 24);
+    #endif
 }
 
 void Tins::SNAP::org_code(small_uint<24> new_org) {
-    // little endian fix, it was the only way to make it work.
-    // check on big endian?
-    #ifdef TINS_IS_LITTLE_ENDIAN
-        _snap.org_code = Endian::host_to_be<uint32_t>(new_org) >> 8; 
+    #if TINS_IS_LITTLE_ENDIAN
+    _snap.control_org = Endian::host_to_be<uint32_t>(new_org) | control();
     #else
-        _snap.org_code = Endian::host_to_be<uint32_t>(new_org); 
+    _snap.control_org = new_org | (control() << 24);
     #endif
 }
 

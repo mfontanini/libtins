@@ -26,7 +26,6 @@ const uint8_t Dot11DataTest::expected_packet[] = {
 TEST_F(Dot11DataTest, Constructor) {
     Dot11Data dot11;
     test_equals_empty(dot11);
-    
 }
 
 TEST_F(Dot11DataTest, ConstructorFromBuffer) {
@@ -45,6 +44,20 @@ TEST_F(Dot11DataTest, CopyAssignmentOperator) {
     Dot11Data dot2;
     dot2 = dot1;
     test_equals(dot1, dot2);
+}
+
+TEST_F(Dot11DataTest, FragNum) {
+    Dot11Data dot11;
+    dot11.frag_num(0x3);
+    EXPECT_EQ(0x3, dot11.frag_num());
+    EXPECT_EQ(0, dot11.seq_num());
+}
+
+TEST_F(Dot11DataTest, SeqNum) {
+    Dot11Data dot11;
+    dot11.seq_num(0x1f2);
+    EXPECT_EQ(0x1f2, dot11.seq_num());
+    EXPECT_EQ(0, dot11.frag_num());
 }
 
 TEST_F(Dot11DataTest, ClonePDU) {

@@ -381,11 +381,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-
+        
+        #ifndef WIN32
         /**
          * \sa PDU::send()
          */
         bool send(PacketSender &sender);
+        #endif // WIN32
 
         /**
          * \brief Adds a new option to this Dot11 PDU.
@@ -955,16 +957,28 @@ namespace Tins {
         /**
          * \brief Getter for the fragment number.
          *
-         * \return uint8_t containing the fragment number.
+         * \return The stored fragment number.
          */
-        uint8_t frag_num() const { return _ext_header.seq_control.frag_number; }
+        small_uint<4> frag_num() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return _ext_header.frag_seq & 0xf; 
+            #else
+            return (_ext_header.frag_seq >> 8) & 0xf; 
+            #endif
+        }
 
         /**
-         * \brief Getter for the sequence number.
+         * \brief Getter for the sequence number field.
          *
-         * \return uint16_t containing the sequence number.
+         * \return The stored sequence number.
          */
-        uint16_t seq_num() const { return Endian::le_to_host(_ext_header.seq_control.seq_number); }
+        small_uint<12> seq_num() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return (_ext_header.frag_seq >> 4) & 0xfff; 
+            #else
+            return (Endian::le_to_host<uint16_t>(_ext_header.frag_seq) >> 4) & 0xfff; 
+            #endif
+        }
 
         /**
          * \brief Getter for the fourth address.
@@ -992,14 +1006,14 @@ namespace Tins {
          *
          * \param new_frag_num The new fragment number.
          */
-        void frag_num(uint8_t new_frag_num);
+        void frag_num(small_uint<4> new_frag_num);
 
         /**
          * \brief Setter for the sequence number.
          *
          * \param new_seq_num The new sequence number.
          */
-        void seq_num(uint16_t new_seq_num);
+        void seq_num(small_uint<12> new_seq_num);
 
         /**
          * \brief Setter for the fourth address.
@@ -1430,15 +1444,7 @@ namespace Tins {
         struct ExtendedHeader {
             uint8_t addr2[address_type::address_size];
             uint8_t addr3[address_type::address_size];
-            struct {
-            #if __BYTE_ORDER == __LITTLE_ENDIAN
-                uint16_t frag_number:4,
-                         seq_number:12;
-            #elif __BYTE_ORDER == __BIG_ENDIAN
-                uint16_t seq_number:12,
-                         frag_number:4;
-            #endif
-            } __attribute__((__packed__)) seq_control;
+            uint16_t frag_seq;
         } __attribute__((__packed__));
 
         
@@ -2570,14 +2576,26 @@ namespace Tins {
          *
          * \return The stored fragment number.
          */
-        uint8_t frag_num() const { return _ext_header.seq_control.frag_number; }
+        small_uint<4> frag_num() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return _ext_header.frag_seq & 0xf; 
+            #else
+            return (_ext_header.frag_seq >> 8) & 0xf; 
+            #endif
+        }
 
         /**
          * \brief Getter for the sequence number field.
          *
          * \return The stored sequence number.
          */
-        uint16_t seq_num() const { return Endian::le_to_host(_ext_header.seq_control.seq_number); }
+        small_uint<12> seq_num() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return (_ext_header.frag_seq >> 4) & 0xfff; 
+            #else
+            return (Endian::le_to_host<uint16_t>(_ext_header.frag_seq) >> 4) & 0xfff; 
+            #endif
+        }
 
         /**
          * \brief Getter for the fourth address.
@@ -2605,14 +2623,14 @@ namespace Tins {
          *
          * \param new_frag_num The fragment number to be set.
          */
-        void frag_num(uint8_t new_frag_num);
+        void frag_num(small_uint<4> new_frag_num);
 
         /**
          * \brief Setter for the sequence number field.
          *
          * \param new_seq_num The sequence number to be set.
          */
-        void seq_num(uint16_t new_seq_num);
+        void seq_num(small_uint<12> new_seq_num);
 
         /**
          * \brief Setter for the fourth address field.
@@ -2656,15 +2674,7 @@ namespace Tins {
         struct ExtendedHeader {
             uint8_t addr2[address_type::address_size];
             uint8_t addr3[address_type::address_size];
-            struct {
-            #if TINS_IS_LITTLE_ENDIAN
-                uint16_t frag_number:4,
-                         seq_number:12;
-            #elif TINS_IS_BIG_ENDIAN
-                uint16_t frag_number:4,
-                         seq_number:12;
-            #endif
-            } __attribute__((__packed__)) seq_control;
+            uint16_t frag_seq;
         } __attribute__((__packed__));
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);

@@ -32,6 +32,10 @@
 
 #ifndef WIN32
     #include <ifaddrs.h>
+#else
+    #include <winsock2.h>
+    #include <iphlpapi.h>
+    #undef interface
 #endif
 #include <string>
 #include <set>
@@ -187,6 +191,7 @@ namespace Tins {
          * the object to collect data from them.
          * \param functor An instance of an class which implements operator(struct ifaddrs*).
          */
+        #ifndef WIN32
         template<class Functor> 
         void generic_iface_loop(Functor &functor) {
             struct ifaddrs *ifaddrs = 0;
@@ -199,6 +204,22 @@ namespace Tins {
             if(ifaddrs)
                 freeifaddrs(ifaddrs);
         }
+        #else // WIN32
+        template<class Functor> 
+        void generic_iface_loop(Functor &functor) {
+            ULONG size;
+            ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
+            std::vector<uint8_t> buffer(size);
+            if (::GetAdaptersAddresses(AF_INET, 0, 0, (IP_ADAPTER_ADDRESSES *)&buffer[0], &size) == ERROR_SUCCESS) {
+                PIP_ADAPTER_ADDRESSES iface = (IP_ADAPTER_ADDRESSES *)&buffer[0];
+                while(iface) {
+                    if(functor(iface))
+                        break;
+                    iface = iface->Next;
+                }
+            }
+        }
+        #endif // WIN32
         
         namespace Internals {
             void skip_line(std::istream &input);

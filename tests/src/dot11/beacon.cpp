@@ -97,6 +97,20 @@ TEST_F(Dot11BeaconTest, CopyAssignmentOperator) {
     test_equals(dot1, dot2);
 }
 
+TEST_F(Dot11BeaconTest, FragNum) {
+    Dot11Beacon dot11;
+    dot11.frag_num(0x3);
+    EXPECT_EQ(0x3, dot11.frag_num());
+    EXPECT_EQ(0, dot11.seq_num());
+}
+
+TEST_F(Dot11BeaconTest, SeqNum) {
+    Dot11Beacon dot11;
+    dot11.seq_num(0x1f2);
+    EXPECT_EQ(0x1f2, dot11.seq_num());
+    EXPECT_EQ(0, dot11.frag_num());
+}
+
 TEST_F(Dot11BeaconTest, FromBytes) {
     std::auto_ptr<PDU> dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get());

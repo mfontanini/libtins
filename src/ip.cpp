@@ -34,6 +34,8 @@
 #ifndef WIN32
     #include <netdb.h>
     #include <sys/socket.h>
+#else
+    #include <winsock2.h>
 #endif
 #include "ip.h"
 #include "tcp.h"
@@ -128,13 +130,13 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
     total_sz -= head_len() * sizeof(uint32_t);
     if (total_sz) {
         switch(_ip.protocol) {
-            case IPPROTO_TCP:
+            case Constants::IP::PROTO_TCP:
                 inner_pdu(new Tins::TCP(buffer, total_sz));
                 break;
-            case IPPROTO_UDP:
+            case Constants::IP::PROTO_UDP:
                 inner_pdu(new Tins::UDP(buffer, total_sz));
                 break;
-            case IPPROTO_ICMP:
+            case Constants::IP::PROTO_ICMP:
                 inner_pdu(new Tins::ICMP(buffer, total_sz));
                 break;
             default:
@@ -361,16 +363,16 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
         uint32_t new_flag;
         switch(inner_pdu()->pdu_type()) {
             case PDU::IP:
-                new_flag = IPPROTO_IPIP;
+                new_flag = Constants::IP::PROTO_IPIP;
                 break;
             case PDU::TCP:
-                new_flag = IPPROTO_TCP;
+                new_flag = Constants::IP::PROTO_TCP;
                 break;
             case PDU::UDP:
-                new_flag = IPPROTO_UDP;
+                new_flag = Constants::IP::PROTO_UDP;
                 break;
             case PDU::ICMP:
-                new_flag = IPPROTO_ICMP;
+                new_flag = Constants::IP::PROTO_ICMP;
                 break;
             default:
                 // check for other protos

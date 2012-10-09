@@ -114,7 +114,12 @@ namespace Tins {
              * 
              * Initializes every field to 0.
              */
-            option_identifier() : number(0), op_class(0), copied(0) {}
+            option_identifier() 
+            #if TINS_IS_LITTLE_ENDIAN
+            : number(0), op_class(0), copied(0) {}
+            #else
+            : copied(0), op_class(0), number(0) {}
+            #endif
             
             /**
              * \brief Constructs this option from a single uint8_t value.
@@ -144,7 +149,11 @@ namespace Tins {
              */
             option_identifier(OptionNumber number, OptionClass op_class,
               small_uint<1> copied) 
+            #if TINS_IS_LITTLE_ENDIAN
             : number(number), op_class(op_class), copied(copied) {}
+            #else
+            : copied(copied), op_class(op_class), number(number) {}
+            #endif
             
             /**
              * \brief Equality operator.

@@ -16,7 +16,7 @@ public:
 };
 
 const uint8_t SNAPTest::expected_packet[] = {
-    '\xaa', '\xaa', '\x03', '\x00', '\x00', '\x00', '\x08', '\x00'
+    '\xaa', '\xaa', '\x03', '\x00', '\x00', '\x01', '\x08', '\x00'
 };
 
 TEST_F(SNAPTest, DefaultConstructor) {
@@ -52,6 +52,15 @@ TEST_F(SNAPTest, OrgCode) {
     snap.org_code(0xfab1c3); 
     
     EXPECT_EQ(snap.org_code(), 0xfab1c3);
+    EXPECT_EQ(snap.control(), 3);
+}
+
+TEST_F(SNAPTest, Control) {
+    SNAP snap; 
+    snap.control(0xfa); 
+    
+    EXPECT_EQ(snap.control(), 0xfa);
+    EXPECT_EQ(snap.org_code(), 0);
 }
 
 TEST_F(SNAPTest, EthType) {
@@ -89,11 +98,11 @@ TEST_F(SNAPTest, ConstructorFromBuffer) {
     SNAP snap1(expected_packet, sizeof(expected_packet));
     PDU::serialization_type buffer = snap1.serialize();
     
-    EXPECT_EQ(snap1.control(), 3);
-    EXPECT_EQ(snap1.dsap(), 0xaa);
-    EXPECT_EQ(snap1.ssap(), 0xaa);
-    EXPECT_EQ(snap1.eth_type(), 0x0800); 
-    EXPECT_EQ(snap1.org_code(), 0); 
+    EXPECT_EQ(3, snap1.control());
+    EXPECT_EQ(0xaa, snap1.dsap());
+    EXPECT_EQ(0xaa, snap1.ssap());
+    EXPECT_EQ(0x0800, snap1.eth_type()); 
+    EXPECT_EQ(1, snap1.org_code()); 
     
     SNAP snap2(&buffer[0], buffer.size());
     test_equals(snap1, snap2);

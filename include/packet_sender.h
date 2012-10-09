@@ -75,11 +75,13 @@ namespace Tins {
          */
         ~PacketSender();
 
+        #ifndef WIN32
         /** \brief Opens a layer y socket.
          * 
          * \return Returns true if the socket was open successfully, false otherwise.
          */
         bool open_l2_socket();
+        #endif // WIN32
 
         /** \brief Opens a layer 3 socket, using the corresponding protocol
          * for the given flag.
@@ -118,6 +120,7 @@ namespace Tins {
          */
         PDU *send_recv(PDU &pdu);
 
+        #ifndef WIN32
         /** \brief Receives a layer 2 PDU response to a previously sent PDU.
          * 
          * This PacketSender will receive data from a raw socket, open using the corresponding flag,
@@ -141,6 +144,7 @@ namespace Tins {
          * \return Returns true if the PDU was successfully sent, false otherwise.
          */
         bool send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr);
+        #endif // WIN32
 
         /** \brief Receives a layer 3 PDU response to a previously sent PDU.
          * 

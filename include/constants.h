@@ -146,7 +146,7 @@ namespace Tins {
                 IEEE80211_RADIOTAP = 803,	/* IEEE 802.11 + radiotap header.  */
                 IEEE802154 = 804, /* IEEE 802.15.4 header.  */
                 IEEE802154_PHY = 805, /* IEEE 802.15.4 PHY header.  */
-                VOID = 0xFFFF,	     /* Void type, nothing is known.  */
+                VOID_TYPE = 0xFFFF,	     /* Void type, nothing is known.  */
                 NONE = 0xFFFE,	      /* Zero header length.  */  
             };
         };

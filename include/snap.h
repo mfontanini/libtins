@@ -105,17 +105,23 @@ namespace Tins {
          * \brief Getter for the control field.
          * \return The control field.
          */
-        uint8_t control() const { return _snap.control; }
+        uint8_t control() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return (_snap.control_org) & 0xff; 
+            #else
+            return (_snap.control_org >> 24) & 0xff; 
+            #endif
+        }
         
         /**
          * \brief Getter for the org code field.
          * \return The org code field.
          */        
         small_uint<24> org_code() const { 
-            #ifdef TINS_IS_LITTLE_ENDIAN
-                return Endian::be_to_host<uint32_t>(_snap.org_code << 8); 
+            #if TINS_IS_LITTLE_ENDIAN
+            return Endian::be_to_host<uint32_t>(_snap.control_org & 0xffffff00);
             #else
-                return Endian::be_to_host(_snap.org_code); 
+            return _snap.control_org & 0xffffff;
             #endif
         }
         
@@ -151,13 +157,14 @@ namespace Tins {
         struct snaphdr {
             uint8_t dsap;
             uint8_t ssap;
-            #if TINS_IS_LITTLE_ENDIAN
+            /*#if TINS_IS_LITTLE_ENDIAN
                 uint32_t control:8,
                         org_code:24;
             #elif TINS_IS_BIG_ENDIAN
                 uint32_t org_code:24,
                         control:8;
-            #endif
+            #endif*/
+            uint32_t control_org;
             uint16_t eth_type;
         } __attribute__((__packed__));
         

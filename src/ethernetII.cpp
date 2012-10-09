@@ -41,6 +41,7 @@
 #include "rawpdu.h"
 #include "ip.h"
 #include "arp.h"
+#include "constants.h"
 
 namespace Tins {
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
@@ -68,10 +69,10 @@ EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz)
     total_sz -= sizeof(ethhdr);
     if(total_sz) {
         switch(payload_type()) {
-            case ETHERTYPE_IP:
+            case Constants::Ethernet::IP:
                 next = new Tins::IP(buffer, total_sz);
                 break;
-            case ETHERTYPE_ARP:
+            case Constants::Ethernet::ARP:
                 next = new Tins::ARP(buffer, total_sz);
                 break;
             default:
@@ -102,6 +103,7 @@ uint32_t EthernetII::header_size() const {
     return sizeof(ethhdr);
 }
 
+#ifndef WIN32
 bool EthernetII::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
@@ -117,6 +119,7 @@ bool EthernetII::send(PacketSender &sender) {
 
     return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
+#endif // WIN32
 
 bool EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(ethhdr))
@@ -135,13 +138,13 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
 
     /* Inner type defaults to IP */
     if ((_eth.payload_type == 0) && inner_pdu()) {
-        uint16_t type = ETHERTYPE_IP;
+        uint16_t type = Constants::Ethernet::IP;
         switch (inner_pdu()->pdu_type()) {
             case PDU::IP:
-                type = ETHERTYPE_IP;
+                type = Constants::Ethernet::IP;
                 break;
             case PDU::ARP:
-                type = ETHERTYPE_ARP;
+                type = Constants::Ethernet::ARP;
                 break;
             default:
                 type = 0;
@@ -151,6 +154,7 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     memcpy(buffer, &_eth, sizeof(ethhdr));
 }
 
+#ifndef WIN32
 PDU *EthernetII::recv_response(PacketSender &sender) {
     struct sockaddr_ll addr;
     memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -163,6 +167,7 @@ PDU *EthernetII::recv_response(PacketSender &sender) {
 
     return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
+#endif // WIN32
 
 PDU *EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(_eth))

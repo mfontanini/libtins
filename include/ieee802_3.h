@@ -149,11 +149,13 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-
+        
+        #ifndef WIN32
         /**
          * \sa PDU::send()
          */
         bool send(PacketSender &sender);
+        #endif // WIN32
 
         /** \brief Check wether ptr points to a valid response for this PDU.
          *
@@ -163,12 +165,14 @@ namespace Tins {
          */
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
 
+        #ifndef WIN32
         /** \brief Receives a matching response for this packet.
          *
          * \sa PDU::recv_response
          * \param sender The packet sender which will receive the packet.
          */
         PDU *recv_response(PacketSender &sender);
+        #endif // WIN32
 
         /**
          * \brief Getter for the PDU's type.

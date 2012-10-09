@@ -37,6 +37,9 @@
     #include <linux/if_packet.h>
     #include <netdb.h>
     #include <netinet/in.h>
+#else
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
 #endif
 #include <cassert>
 #include <errno.h>
@@ -57,11 +60,16 @@ Tins::PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) :
 
 Tins::PacketSender::~PacketSender() {
     for(unsigned i(0); i < _sockets.size(); ++i) {
-        if(_sockets[i] != INVALID_RAW_SOCKET)
+        if(_sockets[i] != INVALID_RAW_SOCKET) 
+        #ifndef WIN32
             ::close(_sockets[i]);
+        #else
+            ::closesocket(_sockets[i]);
+        #endif
     }
 }
 
+#ifndef WIN32
 bool Tins::PacketSender::open_l2_socket() {
     if (_sockets[ETHER_SOCKET] != INVALID_RAW_SOCKET)
         return true;
@@ -71,6 +79,7 @@ bool Tins::PacketSender::open_l2_socket() {
     _sockets[ETHER_SOCKET] = sock;
     return true;
 }
+#endif // WIN32
 
 bool Tins::PacketSender::open_l3_socket(SocketType type) {
     int socktype = find_type(type);
@@ -84,7 +93,12 @@ bool Tins::PacketSender::open_l3_socket(SocketType type) {
         return false;
 
     const int on = 1;
-    setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL,(const void *)&on,sizeof(on));
+    #ifndef WIN32
+    typedef const void* option_ptr;
+    #else
+    typedef const char* option_ptr;
+    #endif
+    setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL,(option_ptr)&on,sizeof(on));
 
     _sockets[type] = sockfd;
     return true;
@@ -93,7 +107,11 @@ bool Tins::PacketSender::open_l3_socket(SocketType type) {
 bool Tins::PacketSender::close_socket(uint32_t flag) {
     if(flag >= SOCKETS_END || _sockets[flag] == INVALID_RAW_SOCKET)
         return false;
+    #ifndef WIN32
     close(_sockets[flag]);
+    #else
+    closesocket(_sockets[flag]);
+    #endif
     _sockets[flag] = INVALID_RAW_SOCKET;
     return true;
 }
@@ -107,7 +125,7 @@ Tins::PDU *Tins::PacketSender::send_recv(PDU &pdu) {
         return 0;
     return pdu.recv_response(*this);
 }
-
+#ifndef WIN32
 bool Tins::PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr) {
     if(!open_l2_socket())
         return false;
@@ -126,6 +144,7 @@ Tins::PDU *Tins::PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, uin
         return 0;
     return recv_match_loop(_sockets[ETHER_SOCKET], pdu, link_addr, len_addr);
 }
+#endif // WIN32
 
 Tins::PDU *Tins::PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
     if(!open_l3_socket(type))
@@ -140,7 +159,7 @@ bool Tins::PacketSender::send_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t 
     if (ret_val) {
         int sock = _sockets[type];
         PDU::serialization_type buffer = pdu.serialize();
-        ret_val = (sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) != -1);
+        ret_val = (sendto(sock, (const char*)&buffer[0], buffer.size(), 0, link_addr, len_addr) != -1);
     }
     return ret_val;
 }
@@ -160,7 +179,7 @@ Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockad
             return 0;
         }
         if(FD_ISSET(sock, &readfds)) {
-            ssize_t size = recvfrom(sock, buffer, 2048, 0, link_addr, &addrlen);
+            ssize_t size = recvfrom(sock, (char*)buffer, 2048, 0, link_addr, &addrlen);
             if(pdu.matches_response(buffer, size)) {
                 return pdu.clone_packet(buffer, size);
             }
