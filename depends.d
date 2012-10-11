@@ -41,6 +41,34 @@ include/endianness.h:
 include/ip_address.h:
 
 include/hw_address.h:
+src/crypto.o: src/crypto.cpp include/crypto.h include/dot11.h \
+ include/pdu.h include/endianness.h include/hw_address.h \
+ include/small_uint.h include/pdu_option.h include/network_interface.h \
+ include/ip_address.h include/utils.h include/snap.h include/rawpdu.h
+
+include/crypto.h:
+
+include/dot11.h:
+
+include/pdu.h:
+
+include/endianness.h:
+
+include/hw_address.h:
+
+include/small_uint.h:
+
+include/pdu_option.h:
+
+include/network_interface.h:
+
+include/ip_address.h:
+
+include/utils.h:
+
+include/snap.h:
+
+include/rawpdu.h:
 src/dhcp.o: src/dhcp.cpp include/endianness.h include/dhcp.h \
  include/bootp.h include/pdu.h include/endianness.h include/ip_address.h \
  include/hw_address.h include/pdu_option.h include/ethernetII.h \
@@ -141,7 +169,8 @@ include/rsn_information.h:
 src/ethernetII.o: src/ethernetII.cpp include/ethernetII.h include/pdu.h \
  include/endianness.h include/hw_address.h include/network_interface.h \
  include/ip_address.h include/packet_sender.h include/rawpdu.h \
- include/ip.h include/small_uint.h include/pdu_option.h include/arp.h
+ include/ip.h include/small_uint.h include/pdu_option.h include/arp.h \
+ include/constants.h
 
 include/ethernetII.h:
 
@@ -166,6 +195,8 @@ include/small_uint.h:
 include/pdu_option.h:
 
 include/arp.h:
+
+include/constants.h:
 src/icmp.o: src/icmp.cpp include/icmp.h include/pdu.h \
  include/endianness.h include/rawpdu.h include/utils.h \
  include/ip_address.h include/hw_address.h
@@ -251,6 +282,30 @@ include/llc.h:
 include/pdu.h:
 
 include/endianness.h:
+
+include/rawpdu.h:
+src/loopback.o: src/loopback.cpp include/loopback.h include/pdu.h \
+ include/packet_sender.h include/ip.h include/small_uint.h \
+ include/endianness.h include/ip_address.h include/pdu_option.h \
+ include/llc.h include/rawpdu.h
+
+include/loopback.h:
+
+include/pdu.h:
+
+include/packet_sender.h:
+
+include/ip.h:
+
+include/small_uint.h:
+
+include/endianness.h:
+
+include/ip_address.h:
+
+include/pdu_option.h:
+
+include/llc.h:
 
 include/rawpdu.h:
 src/network_interface.o: src/network_interface.cpp \
@@ -353,7 +408,9 @@ include/pdu_option.h:
 include/eapol.h:
 src/sniffer.o: src/sniffer.cpp include/sniffer.h include/pdu.h \
  include/ethernetII.h include/endianness.h include/hw_address.h \
- include/network_interface.h include/ip_address.h include/radiotap.h
+ include/network_interface.h include/ip_address.h include/radiotap.h \
+ include/loopback.h include/dot11.h include/small_uint.h \
+ include/pdu_option.h
 
 include/sniffer.h:
 
@@ -370,6 +427,14 @@ include/network_interface.h:
 include/ip_address.h:
 
 include/radiotap.h:
+
+include/loopback.h:
+
+include/dot11.h:
+
+include/small_uint.h:
+
+include/pdu_option.h:
 src/tcp.o: src/tcp.cpp include/tcp.h include/pdu.h include/endianness.h \
  include/small_uint.h include/pdu_option.h include/ip.h \
  include/ip_address.h include/constants.h include/rawpdu.h \
@@ -399,8 +464,9 @@ include/hw_address.h:
 src/tcp_stream.o: src/tcp_stream.cpp include/rawpdu.h include/pdu.h \
  include/tcp_stream.h include/sniffer.h include/ethernetII.h \
  include/endianness.h include/hw_address.h include/network_interface.h \
- include/ip_address.h include/radiotap.h include/tcp.h \
- include/small_uint.h include/pdu_option.h include/ip.h
+ include/ip_address.h include/radiotap.h include/loopback.h \
+ include/dot11.h include/small_uint.h include/pdu_option.h include/tcp.h \
+ include/ip.h
 
 include/rawpdu.h:
 
@@ -422,11 +488,15 @@ include/ip_address.h:
 
 include/radiotap.h:
 
-include/tcp.h:
+include/loopback.h:
+
+include/dot11.h:
 
 include/small_uint.h:
 
 include/pdu_option.h:
+
+include/tcp.h:
 
 include/ip.h:
 src/udp.o: src/udp.cpp include/udp.h include/pdu.h include/endianness.h \
