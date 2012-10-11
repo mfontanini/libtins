@@ -111,6 +111,16 @@ namespace Tins {
         }
         
         /**
+         * \brief Compare this IPv4Address for less-than inequality.
+         * 
+         * \param rhs The address to be compared.
+         * \return bool indicating whether this address is less-than rhs.
+         */
+        bool operator< (const IPv4Address &rhs) const {
+            return ip_addr < rhs.ip_addr;
+        }
+        
+        /**
          * \brief Writes this address to a std::ostream.
          * 
          * This method writes addr in a dotted-string notation address

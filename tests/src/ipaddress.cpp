@@ -35,3 +35,17 @@ TEST(IPAddressTest, OutputOperator) {
     oss << addr;
     EXPECT_EQ(oss.str(), ip_string);
 }
+
+TEST(IPAddressTest, EqualityOperator) {
+    IPv4Address addr1(ip_string), addr2(ip_string);
+    EXPECT_EQ(addr1, addr2);
+    EXPECT_NE(addr1, "127.0.0.1");
+}
+
+TEST(IPAddressTest, LessThanOperator) {
+    IPv4Address addr1(ip_string), addr2(ip_string);
+    EXPECT_FALSE(addr1 < addr2);
+    EXPECT_LT(addr1, "192.168.1.2");
+    EXPECT_LT(addr1, "192.168.0.226");
+    EXPECT_LT(addr1, "193.0.0.0");
+}

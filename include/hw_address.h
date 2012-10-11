@@ -207,6 +207,17 @@ public:
     }
     
     /**
+     * \brief Compares this HWAddress for less-than inequality.
+     * 
+     * \param rhs The HWAddress to be compared to.
+     * 
+     * \return bool indicating whether this address is less-than rhs.
+     */
+    bool operator<(const HWAddress &rhs) const {
+        return std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
+    }
+    
+    /**
      * \brief Retrieves the size of this address.
      * 
      * This effectively returns the address_size constant.
