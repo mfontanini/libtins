@@ -73,6 +73,8 @@ PDU *BaseSniffer::next_packet() {
                     ret = new EthernetII((const uint8_t*)content, header.caplen);
                 else if(iface_type == DLT_IEEE802_11_RADIO)
                     ret = new RadioTap((const uint8_t*)content, header.caplen);
+                else if(iface_type == DLT_IEEE802_11)
+                    ret = Dot11::from_bytes((const uint8_t*)content, header.caplen);
                 else if(iface_type == DLT_LOOP)
                     ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
             }

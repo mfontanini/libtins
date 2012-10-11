@@ -40,6 +40,7 @@
 #include "ethernetII.h"
 #include "radiotap.h"
 #include "loopback.h"
+#include "dot11.h"
 
 namespace Tins {
     /**
@@ -213,6 +214,11 @@ namespace Tins {
                 ret_val = call_functor<Tins::EthernetII>(data, packet, header->caplen);
             else if(data->iface_type == DLT_IEEE802_11_RADIO)
                 ret_val = call_functor<Tins::RadioTap>(data, packet, header->caplen);
+            else if(data->iface_type == DLT_IEEE802_11) {
+                std::auto_ptr<PDU> pdu(Tins::Dot11::from_bytes((const uint8_t*)packet, header->caplen));
+                if(pdu.get())
+                    ret_val = data->c_handler(*pdu);
+            }
             else if(data->iface_type == DLT_NULL) 
                 ret_val = call_functor<Tins::Loopback>(data, packet, header->caplen);
                 

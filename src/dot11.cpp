@@ -1233,8 +1233,13 @@ Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz)
         buffer += _addr4.size();
         total_sz -= _addr4.size();
     }
-    if(total_sz)
-        inner_pdu(new Tins::SNAP(buffer, total_sz));
+    if(total_sz) {
+        // If the wep bit is on, then just use a RawPDU
+        if(wep())
+            inner_pdu(new Tins::RawPDU(buffer, total_sz));
+        else
+            inner_pdu(new Tins::SNAP(buffer, total_sz));
+    }
 }
 
 
