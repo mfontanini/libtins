@@ -67,18 +67,14 @@ namespace Crypto {
     /**
      * 
      */
-    template<typename Functor>
     class WEPDecrypter {
     public:
         typedef Dot11::address_type address_type;
     
         /**
-         * \brief Constructs a WEPDecrypter from a Functor object.
-         * 
-         * \param func The functor which will be used to handle decrypted
-         * packets.
+         * \brief Constructs a WEPDecrypter object.
          */
-        WEPDecrypter(Functor func);
+        WEPDecrypter();
         
         /**
          * \brief Adds a decryption password.
@@ -102,104 +98,136 @@ namespace Crypto {
          * 
          * A Dot11Data PDU is looked up inside the provided PDU chain.
          * If no such PDU exists or there is no password associated
-         * with the Dot11 packet's BSSID, then the functor is called 
-         * using the pdu parameter as its argument. 
+         * with the Dot11 packet's BSSID, then the PDU is left intact. 
          * 
-         * Otherwise, the packet is decrypted using the given password
-         * and the functor is called using the decrypted packet as its
-         * argument. If the CRC found after decrypting it is invalid,
-         * then the packet is discarded.
+         * Otherwise, the packet is decrypted using the given password. 
+         * If the CRC found after decrypting it is invalid,
+         * then false is returned.
          * 
+         * \return false if decryption failed due to invalid CRC, true
+         * otherwise.
          */
-        bool operator()(PDU &pdu);
+        bool decrypt(PDU &pdu);
     private:
         typedef std::map<address_type, std::string> passwords_type;
     
         PDU *decrypt(RawPDU &raw, const std::string &password);
     
-        Functor functor;
         passwords_type passwords;
         std::vector<uint8_t> key_buffer;
     };
 
+    /**
+     * \brief Pluggable decrypter object which can be used to decrypt
+     * data on sniffing sessions.
+     * 
+     * This class holds a decrypter object and a functor, and implements
+     * a suitable operator() to be used on BaseSniffer::sniff_loop, which
+     * decrypts packets and forwards them to the given functor.
+     */
+    template<typename Functor, typename Decrypter>
+    class DecrypterProxy {
+    public:
+        /**
+         * The type of the functor object.
+         */
+        typedef Functor functor_type;
+    
+        /**
+         * The type of the decrypter object.
+         */
+        typedef Decrypter decrypter_type;
+        
+        /**
+         * \brief Constructs an object from a functor and a decrypter.
+         * \param func The functor to be used to forward decrypted 
+         * packets.
+         * \param decrypter The decrypter which will be used to decrypt
+         * packets
+         */
+        DecrypterProxy(const functor_type &func, 
+          const decrypter_type &decr = decrypter_type());
+        
+        /**
+         * \brief Retrieves a reference to the decrypter object.
+         */
+        decrypter_type &decrypter();
+        
+        /**
+         * \brief Retrieves a const reference to the decrypter object.
+         */
+        const decrypter_type &decrypter() const;
+        
+        /**
+         * \brief The operator() which decrypts packets and forwards
+         * them to the functor.
+         */
+        bool operator() (PDU &pdu);
+    private:
+        Functor functor_;
+        decrypter_type decrypter_;
+    };
+
+    /**
+     * \brief Performs RC4 encription/decryption of the given byte range,
+     * using the provided key.
+     * 
+     * The decrypted range will be copied to the OutputIterator provided.
+     * 
+     * \param start The beginning of the range.
+     * \param start The end of the range.
+     * \param key The key to be used.
+     * \param output The iterator in which to write the output.
+     */
     template<typename ForwardIterator, typename OutputIterator>
     void rc4(ForwardIterator start, ForwardIterator end, RC4Key &key, OutputIterator output);
     
+    /**
+     * \brief Wrapper function to create DecrypterProxyes using a 
+     * WEPDecrypter as the Decrypter template parameter.
+     * 
+     * \param functor The functor to be forwarded to the DecrypterProxy
+     * constructor.
+     */
+    template<typename Functor>
+    DecrypterProxy<Functor, WEPDecrypter> make_wep_decrypter_proxy(const Functor &functor);
     
     // Implementation section
     
-    // WEP Decrypter
+    // DecrypterProxy
     
-    template<typename Functor>
-    WEPDecrypter<Functor>::WEPDecrypter(Functor func) 
-    : functor(func), key_buffer(4) {
+    template<typename Functor, typename Decrypter>
+    DecrypterProxy<Functor, Decrypter>::DecrypterProxy(
+      const functor_type &func, const decrypter_type& decr) 
+    : functor_(func), decrypter_(decr)
+    {
         
     }
-    
-    template<typename Functor>
-    void WEPDecrypter<Functor>::add_password(const address_type &addr, const std::string &password) {
-        passwords[addr] = password;
-        key_buffer.resize(std::max(3 + password.size(), key_buffer.size()));
+
+    template<typename Functor, typename Decrypter>
+    typename DecrypterProxy<Functor, Decrypter>::decrypter_type &
+      DecrypterProxy<Functor, Decrypter>::decrypter() 
+    {
+        return decrypter_;
+    }
+
+    template<typename Functor, typename Decrypter>
+    const typename DecrypterProxy<Functor, Decrypter>::decrypter_type &
+      DecrypterProxy<Functor, Decrypter>::decrypter() const 
+    {
+        return decrypter_;
+    }
+
+    template<typename Functor, typename Decrypter>
+    bool DecrypterProxy<Functor, Decrypter>::operator() (PDU &pdu) 
+    {
+        return decrypter_.decrypt(pdu) ? functor_(pdu) : true;
     }
     
     template<typename Functor>
-    void WEPDecrypter<Functor>::remove_password(const address_type &addr) {
-        passwords.erase(addr);
-    }
-    
-    template<typename Functor>
-    bool WEPDecrypter<Functor>::operator() (PDU &pdu) {
-        Dot11Data *dot11 = pdu.find_pdu<Dot11Data>();
-        if(dot11) {
-            RawPDU *raw = dot11->find_pdu<RawPDU>();
-            if(raw) {
-                address_type addr;
-                if(!dot11->from_ds() && !dot11->to_ds())
-                    addr = dot11->addr3();
-                else if(!dot11->from_ds() && dot11->to_ds())
-                    addr = dot11->addr1();
-                else if(dot11->from_ds() && !dot11->to_ds())
-                    addr = dot11->addr2();
-                else
-                    // ????
-                    addr = dot11->addr3();
-                passwords_type::iterator it = passwords.find(addr);
-                if(it != passwords.end()) {
-                    dot11->inner_pdu(decrypt(*raw, it->second));
-                    // Invalid WEP packet(CRC check failed). Skip it.
-                    if(!dot11->inner_pdu())
-                        return true;
-                }
-            }
-        }
-        return functor(pdu);
-    }
-    
-    template<typename Functor>
-    PDU *WEPDecrypter<Functor>::decrypt(RawPDU &raw, const std::string &password) {
-        RawPDU::payload_type &pload = raw.payload();
-        // We require at least the IV, the encrypted checksum and something to decrypt
-        if(pload.size() <= 8)
-            return 0;
-        std::copy(pload.begin(), pload.begin() + 3, key_buffer.begin());
-        std::copy(password.begin(), password.end(), key_buffer.begin() + 3);
-        
-        // Generate the key
-        RC4Key key(key_buffer.begin(), key_buffer.begin() + password.size() + 3);
-        rc4(pload.begin() + 4, pload.end(), key, pload.begin());
-        uint32_t crc = Utils::crc32(&pload[0], pload.size() - 8);
-        if(pload[pload.size() - 8] != (crc & 0xff) ||
-            pload[pload.size() - 7] != ((crc >> 8) & 0xff) ||
-            pload[pload.size() - 6] != ((crc >> 16) & 0xff) ||
-            pload[pload.size() - 5] != ((crc >> 24) & 0xff))
-            return 0;
-        
-        try {
-            return new SNAP(&pload[0], pload.size() - 8);
-        }
-        catch(std::runtime_error&) {
-            return 0;
-        }
+    DecrypterProxy<Functor, WEPDecrypter> make_wep_decrypter_proxy(const Functor &functor)
+    {
+        return DecrypterProxy<Functor, WEPDecrypter>(functor);
     }
     
     // RC4 stuff

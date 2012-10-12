@@ -52,5 +52,6 @@
 #include "utils.h"
 #include "dns.h"
 #include "tcp_stream.h"
+#include "crypto.h"
 
 #endif // TINS_TINS_H

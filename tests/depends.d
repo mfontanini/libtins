@@ -111,7 +111,8 @@ src/ipaddress.o: src/ipaddress.cpp ../include/ip_address.h \
 ../include/hw_address.h:
 src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h \
  ../include/small_uint.h ../include/endianness.h ../include/ip_address.h \
- ../include/pdu_option.h ../include/ip_address.h ../include/utils.h \
+ ../include/pdu_option.h ../include/tcp.h ../include/udp.h \
+ ../include/icmp.h ../include/ip_address.h ../include/utils.h \
  ../include/hw_address.h
 
 ../include/ip.h:
@@ -125,6 +126,12 @@ src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h \
 ../include/ip_address.h:
 
 ../include/pdu_option.h:
+
+../include/tcp.h:
+
+../include/udp.h:
+
+../include/icmp.h:
 
 ../include/ip_address.h:
 
@@ -213,9 +220,9 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
  ../include/sniffer.h ../include/pdu.h ../include/ethernetII.h \
  ../include/endianness.h ../include/hw_address.h \
  ../include/network_interface.h ../include/ip_address.h \
- ../include/radiotap.h ../include/tcp.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/ip.h ../include/tcp.h \
- ../include/utils.h
+ ../include/radiotap.h ../include/loopback.h ../include/dot11.h \
+ ../include/small_uint.h ../include/pdu_option.h ../include/tcp.h \
+ ../include/ip.h ../include/tcp.h ../include/utils.h
 
 ../include/tcp_stream.h:
 
@@ -235,11 +242,15 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
 
 ../include/radiotap.h:
 
-../include/tcp.h:
+../include/loopback.h:
+
+../include/dot11.h:
 
 ../include/small_uint.h:
 
 ../include/pdu_option.h:
+
+../include/tcp.h:
 
 ../include/ip.h:
 
@@ -269,6 +280,40 @@ src/utils_test.o: src/utils_test.cpp ../include/utils.h \
 ../include/endianness.h:
 
 ../include/ip_address.h:
+src/wep_decrypt.o: src/wep_decrypt.cpp ../include/crypto.h \
+ ../include/dot11.h ../include/pdu.h ../include/endianness.h \
+ ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
+ ../include/network_interface.h ../include/ip_address.h \
+ ../include/utils.h ../include/snap.h ../include/rawpdu.h \
+ ../include/radiotap.h ../include/arp.h
+
+../include/crypto.h:
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/hw_address.h:
+
+../include/small_uint.h:
+
+../include/pdu_option.h:
+
+../include/network_interface.h:
+
+../include/ip_address.h:
+
+../include/utils.h:
+
+../include/snap.h:
+
+../include/rawpdu.h:
+
+../include/radiotap.h:
+
+../include/arp.h:
 src/dot11/ack.o: src/dot11/ack.cpp ../include/dot11.h ../include/pdu.h \
  ../include/endianness.h ../include/hw_address.h ../include/small_uint.h \
  ../include/pdu_option.h ../include/network_interface.h \
@@ -764,6 +809,35 @@ include/tests/dot11.h:
 ../include/ip_address.h:
 
 ../include/hw_address.h:
+../src/crypto.o: ../src/crypto.cpp ../include/crypto.h ../include/dot11.h \
+ ../include/pdu.h ../include/endianness.h ../include/hw_address.h \
+ ../include/small_uint.h ../include/pdu_option.h \
+ ../include/network_interface.h ../include/ip_address.h \
+ ../include/utils.h ../include/snap.h ../include/rawpdu.h
+
+../include/crypto.h:
+
+../include/dot11.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/hw_address.h:
+
+../include/small_uint.h:
+
+../include/pdu_option.h:
+
+../include/network_interface.h:
+
+../include/ip_address.h:
+
+../include/utils.h:
+
+../include/snap.h:
+
+../include/rawpdu.h:
 ../src/dhcp.o: ../src/dhcp.cpp ../include/endianness.h ../include/dhcp.h \
  ../include/bootp.h ../include/pdu.h ../include/endianness.h \
  ../include/ip_address.h ../include/hw_address.h ../include/pdu_option.h \
@@ -867,7 +941,8 @@ include/tests/dot11.h:
  ../include/pdu.h ../include/endianness.h ../include/hw_address.h \
  ../include/network_interface.h ../include/ip_address.h \
  ../include/packet_sender.h ../include/rawpdu.h ../include/ip.h \
- ../include/small_uint.h ../include/pdu_option.h ../include/arp.h
+ ../include/small_uint.h ../include/pdu_option.h ../include/arp.h \
+ ../include/constants.h
 
 ../include/ethernetII.h:
 
@@ -892,6 +967,8 @@ include/tests/dot11.h:
 ../include/pdu_option.h:
 
 ../include/arp.h:
+
+../include/constants.h:
 ../src/icmp.o: ../src/icmp.cpp ../include/icmp.h ../include/pdu.h \
  ../include/endianness.h ../include/rawpdu.h ../include/utils.h \
  ../include/ip_address.h ../include/hw_address.h
@@ -979,6 +1056,30 @@ include/tests/dot11.h:
 ../include/pdu.h:
 
 ../include/endianness.h:
+
+../include/rawpdu.h:
+../src/loopback.o: ../src/loopback.cpp ../include/loopback.h \
+ ../include/pdu.h ../include/packet_sender.h ../include/ip.h \
+ ../include/small_uint.h ../include/endianness.h ../include/ip_address.h \
+ ../include/pdu_option.h ../include/llc.h ../include/rawpdu.h
+
+../include/loopback.h:
+
+../include/pdu.h:
+
+../include/packet_sender.h:
+
+../include/ip.h:
+
+../include/small_uint.h:
+
+../include/endianness.h:
+
+../include/ip_address.h:
+
+../include/pdu_option.h:
+
+../include/llc.h:
 
 ../include/rawpdu.h:
 ../src/network_interface.o: ../src/network_interface.cpp \
@@ -1083,7 +1184,8 @@ include/tests/dot11.h:
 ../src/sniffer.o: ../src/sniffer.cpp ../include/sniffer.h \
  ../include/pdu.h ../include/ethernetII.h ../include/endianness.h \
  ../include/hw_address.h ../include/network_interface.h \
- ../include/ip_address.h ../include/radiotap.h
+ ../include/ip_address.h ../include/radiotap.h ../include/loopback.h \
+ ../include/dot11.h ../include/small_uint.h ../include/pdu_option.h
 
 ../include/sniffer.h:
 
@@ -1100,6 +1202,14 @@ include/tests/dot11.h:
 ../include/ip_address.h:
 
 ../include/radiotap.h:
+
+../include/loopback.h:
+
+../include/dot11.h:
+
+../include/small_uint.h:
+
+../include/pdu_option.h:
 ../src/tcp.o: ../src/tcp.cpp ../include/tcp.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/pdu_option.h \
  ../include/ip.h ../include/ip_address.h ../include/constants.h \
@@ -1130,8 +1240,9 @@ include/tests/dot11.h:
  ../include/pdu.h ../include/tcp_stream.h ../include/sniffer.h \
  ../include/ethernetII.h ../include/endianness.h ../include/hw_address.h \
  ../include/network_interface.h ../include/ip_address.h \
- ../include/radiotap.h ../include/tcp.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/ip.h
+ ../include/radiotap.h ../include/loopback.h ../include/dot11.h \
+ ../include/small_uint.h ../include/pdu_option.h ../include/tcp.h \
+ ../include/ip.h
 
 ../include/rawpdu.h:
 
@@ -1153,11 +1264,15 @@ include/tests/dot11.h:
 
 ../include/radiotap.h:
 
-../include/tcp.h:
+../include/loopback.h:
+
+../include/dot11.h:
 
 ../include/small_uint.h:
 
 ../include/pdu_option.h:
+
+../include/tcp.h:
 
 ../include/ip.h:
 ../src/udp.o: ../src/udp.cpp ../include/udp.h ../include/pdu.h \

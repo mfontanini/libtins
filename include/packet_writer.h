@@ -51,6 +51,7 @@ public:
      */
     enum LinkType {
         RADIOTAP = DLT_IEEE802_11_RADIO,
+        DOT11 = DLT_IEEE802_11,
         ETH2 = DLT_EN10MB
     };
     
