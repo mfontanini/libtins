@@ -115,7 +115,14 @@ Tins::RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
         buffer += sizeof(_rx_flags);
         total_sz -= sizeof(_rx_flags);
     }
-    if(total_sz)
+    if((flags() & FCS) != 0) {
+        if(total_sz <= 4)
+            throw std::runtime_error(msg);
+        else {
+            total_sz -= sizeof(uint32_t);
+        }
+    }
+    if(total_sz) 
         inner_pdu(Dot11::from_bytes(buffer, total_sz));
 }
 

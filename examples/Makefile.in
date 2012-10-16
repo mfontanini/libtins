@@ -1,26 +1,25 @@
 CXX=@CXX@
-CXXFLAGS=-c -Wall @CXXFLAGS@
-LDFLAGS=-lpcap -ltins -lpthread
-SOURCES=arpspoofing.cpp portscan.cpp 
+CXXFLAGS=-Wall @CXXFLAGS@
+LDFLAGS=-ltins
+EXECUTABLES=arpspoof portscan traceroute beacon_display
 
-OBJECTS=$(SOURCES:.cpp=.o)
-INCLUDE=
-EXECUTABLES=arpspoof portscan traceroute
-
-all: $(SOURCES) $(EXECUTABLES)
+all: $(EXECUTABLES)
 
 compile: $(OBJECTS)
 
 recompile: clean all
 
-arpspoof: arpspoofing.o
-	$(CXX) arpspoofing.o $(LDFLAGS) -o arpspoof
+arpspoof: 
+	$(CXX) arpspoofing.cpp -o arpspoofing $(CXXFLAGS) $(LDFLAGS)
 
-portscan: portscan.o
-	$(CXX) portscan.o $(LDFLAGS) -o portscan
+beacon_display: 
+	$(CXX) beacon_display.cpp -o beacon_display $(CXXFLAGS) $(LDFLAGS) 	
+
+portscan:
+	$(CXX) portscan.cpp -o portscan $(CXXFLAGS) $(LDFLAGS) -lpthread
 	
 traceroute: 
-	$(CXX) traceroute.cpp -o traceroute -std=c++0x -Wall $(LDFLAGS) 
+	$(CXX) traceroute.cpp -o traceroute -std=c++0x $(CXXFLAGS) $(LDFLAGS) 
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -o $@

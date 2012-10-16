@@ -189,7 +189,7 @@ namespace Tins {
         T *find_pdu(PDUType type = T::pdu_flag) {
             PDU *pdu = this;
             while(pdu) {
-                if(pdu->pdu_type() == type)
+                if(pdu->matches_flag(type))
                     return static_cast<T*>(pdu);
                 pdu = pdu->inner_pdu();
             }
