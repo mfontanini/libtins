@@ -131,7 +131,7 @@ void Tins::RadioTap::init() {
     flags(FCS);
     tsft(0);
     dbm_signal(0xce);
-    rx_flag(0);
+    rx_flags(0);
     antenna(0);
 }
 
@@ -189,7 +189,7 @@ void Tins::RadioTap::antenna(uint8_t new_antenna) {
     _radio.antenna = 1;
 }
 
-void Tins::RadioTap::rx_flag(uint16_t new_rx_flag) {
+void Tins::RadioTap::rx_flags(uint16_t new_rx_flag) {
     _rx_flags = Endian::host_to_le(new_rx_flag);
     if(!_radio.rx_flags)
         _options_size += sizeof(_rx_flags);
@@ -211,6 +211,9 @@ uint32_t Tins::RadioTap::trailer_size() const {
 }
 
 bool Tins::RadioTap::send(PacketSender &sender) {
+    if(!_iface)
+        throw std::runtime_error("Interface has not been set");
+    
     struct sockaddr_ll addr;
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));

@@ -96,6 +96,7 @@ namespace Tins {
          * \brief Flags used in the RadioTap::flags() method.
          */
         enum FrameFlags {
+        #if TINS_IS_LITTLE_ENDIAN
             CFP           = 1,
             PREAMBLE      = 2,
             WEP           = 4,
@@ -103,6 +104,15 @@ namespace Tins {
             FCS           = 16,
             PADDING       = 32,
             FAILED_FCS    = 64
+        #else
+            CFP           = 64,
+            PREAMBLE      = 32,
+            WEP           = 16,
+            FRAGMENTATION = 8,
+            FCS           = 4,
+            PADDING       = 2,
+            FAILED_FCS    = 1
+        #endif
         };
         
         /**
@@ -110,7 +120,8 @@ namespace Tins {
          * \param iface The interface in which to send this PDU.
          * \param child The child PDU.(optional)
          */
-        RadioTap(const NetworkInterface &iface, PDU *child = 0);
+        RadioTap(const NetworkInterface &iface = NetworkInterface(), 
+          PDU *child = 0);
         
         /**
          * \brief Constructor which creates a RadioTap object from a buffer and adds all
@@ -186,7 +197,7 @@ namespace Tins {
          * \brief Setter for the rx flag field.
          * \param new_rx_flag The antenna signal.
          */
-        void rx_flag(uint16_t new_rx_flag);
+        void rx_flags(uint16_t new_rx_flag);
         
         /* Getters */
         

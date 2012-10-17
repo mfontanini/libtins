@@ -162,6 +162,13 @@ namespace Tins {
          * \return The channel's mhz representation.
          */
         uint16_t channel_to_mhz(uint16_t channel);
+        
+        /**
+         * \brief Converts mhz units to the appropriate channel number.
+         * \param channel The mhz units to be converted.
+         * \return The channel number.
+         */
+        uint16_t mhz_to_channel(uint16_t mhz);
 
         /** \brief Does the 16 bits sum of all 2 bytes elements between start and end.
          *

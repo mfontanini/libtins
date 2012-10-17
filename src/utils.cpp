@@ -164,6 +164,10 @@ uint16_t Utils::channel_to_mhz(uint16_t channel) {
     return 2407 + (channel * 5);
 }
 
+uint16_t Utils::mhz_to_channel(uint16_t mhz) {
+    return (mhz - 2407) / 5;
+}
+
 uint32_t Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
     uint32_t checksum(0);
     uint16_t *ptr = (uint16_t*)start, *last = (uint16_t*)end, padding(0);
