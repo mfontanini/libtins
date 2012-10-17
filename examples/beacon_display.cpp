@@ -1,46 +1,87 @@
+/*
+ * Copyright (c) 2012, Nasel
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above
+ *   copyright notice, this list of conditions and the following disclaimer
+ *   in the documentation and/or other materials provided with the
+ *   distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+ 
 #include <iostream>
-#include <map>
+#include <set>
 #include <string>
 #include <tins/tins.h>
-
+ 
 using namespace Tins;
-
+ 
 class BeaconSniffer {
 public:
     void run(const std::string &iface);
 private:
     typedef Dot11::address_type address_type;
-    typedef std::map<address_type, std::string> ssids_type;
-
+    typedef std::set<address_type> ssids_type;
+ 
     bool callback(PDU &pdu);
-    
+     
     ssids_type ssids;
 };
-
+ 
 void BeaconSniffer::run(const std::string &iface) {
     Sniffer sniffer(iface, 1500, true, "type mgt subtype beacon");
     sniffer.sniff_loop(make_sniffer_handler(this, &BeaconSniffer::callback));
 }
-
+ 
 bool BeaconSniffer::callback(PDU &pdu) {
+    // Get the Dot11 layer
     Dot11Beacon *beacon = pdu.find_pdu<Dot11Beacon>();
+    // All beacons must have from_ds == to_ds == 0
     if(beacon && !beacon->from_ds() && !beacon->to_ds()) {
+        // Get the AP address
         address_type addr = beacon->addr2();
+        // Look it up in our set
         ssids_type::iterator it = ssids.find(addr);
         if(it == ssids.end()) {
+            // First time we encounter this BSSID.
             try {
-                it = ssids.insert(std::make_pair(addr, beacon->ssid())).first;
-                std::cout << it->first << " - " << it->second << std::endl;
+                /* If no ssid option is set, then Dot11::ssid will throw 
+                 * a std::runtime_error.
+                 */
+                std::string ssid = beacon->ssid();
+                // Save it so we don't show it again.
+                ssids.insert(addr);
+                // Display the tuple "address - ssid".
+                std::cout << addr << " - " << ssid << std::endl;
             }
             catch(std::runtime_error&) {
-                // no ssid, just ignore it.
+                // No ssid, just ignore it.
             }
         }
     }
     return true;
 }
-
+ 
 int main(int argc, char* argv[]) {
+    // By default, sniff wlan0
     std::string interface = "wlan0";
     if(argc == 2)
         interface = argv[1];
