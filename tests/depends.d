@@ -197,6 +197,23 @@ src/radiotap.o: src/radiotap.cpp ../include/radiotap.h ../include/pdu.h \
 ../include/ip_address.h:
 
 ../include/utils.h:
+src/rc4eapol.o: src/rc4eapol.cpp ../include/eapol.h ../include/pdu.h \
+ ../include/small_uint.h ../include/endianness.h ../include/utils.h \
+ ../include/ip_address.h ../include/hw_address.h
+
+../include/eapol.h:
+
+../include/pdu.h:
+
+../include/small_uint.h:
+
+../include/endianness.h:
+
+../include/utils.h:
+
+../include/ip_address.h:
+
+../include/hw_address.h:
 src/snap.o: src/snap.cpp ../include/snap.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/utils.h \
  ../include/ip_address.h ../include/hw_address.h

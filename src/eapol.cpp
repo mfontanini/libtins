@@ -80,7 +80,7 @@ void EAPOL::packet_type(uint8_t new_ptype) {
 }
 
 void EAPOL::length(uint16_t new_length) {
-    _header.length = new_length;
+    _header.length = Endian::host_to_be(new_length);
 }
 
 void EAPOL::type(uint8_t new_type) {
@@ -127,7 +127,7 @@ void RC4EAPOL::key_length(uint16_t new_key_length) {
     _header.key_length = Endian::host_to_be(new_key_length);
 }
         
-void RC4EAPOL::replay_counter(uint16_t new_replay_counter) {
+void RC4EAPOL::replay_counter(uint64_t new_replay_counter) {
     _header.replay_counter = Endian::host_to_be(new_replay_counter);
 }
 

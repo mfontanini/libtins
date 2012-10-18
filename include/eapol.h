@@ -187,9 +187,19 @@ namespace Tins {
         typedef std::vector<uint8_t> key_type;
     
         /**
-         * \brief This PDU's flag.
+         * This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::RC4EAPOL;
+        
+        /**
+         * The length of the key IV field
+         */
+        static const size_t key_iv_size = 16;
+        
+        /**
+         * The length of the key sign field
+         */
+        static const size_t key_sign_size = 16;
     
         /**
          * \brief Creates an instance of RC4EAPOL
@@ -259,7 +269,7 @@ namespace Tins {
          * \brief Sets the replay counter field.
          * \param new_replay_counter The new replay counter to be set.
          */
-        void replay_counter(uint16_t new_replay_counter);
+        void replay_counter(uint64_t new_replay_counter);
         
         /**
          * \brief Sets the key IV field.
@@ -330,7 +340,7 @@ namespace Tins {
         struct rc4hdr {
             uint16_t key_length;
             uint64_t replay_counter;
-            uint8_t key_iv[16];
+            uint8_t key_iv[key_iv_size];
             uint8_t key_index:7,
                     key_flag:1;
             uint8_t key_sign[16];

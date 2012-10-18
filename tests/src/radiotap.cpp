@@ -11,8 +11,6 @@ using namespace Tins;
 class RadioTapTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
-    
-    void test_equals(const RadioTap &radio1, const RadioTap &radio2);
 };
 
 const uint8_t RadioTapTest::expected_packet[] = {
@@ -55,7 +53,6 @@ TEST_F(RadioTapTest, ConstructorFromBuffer) {
     EXPECT_EQ(radio.dbm_signal(), 0xda);
     EXPECT_EQ(radio.dbm_noise(), 0xa0);
     EXPECT_EQ(radio.antenna(), 2);
-    EXPECT_EQ(radio.rx_flags(), 0);
 }
 
 TEST_F(RadioTapTest, Serialize) {
