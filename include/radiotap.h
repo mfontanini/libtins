@@ -188,6 +188,12 @@ namespace Tins {
         void dbm_signal(uint8_t new_dbm_signal);
         
         /**
+         * \brief Setter for the dbm noise field.
+         * \param new_dbm_noise The new dbm noise.
+         */
+        void dbm_noise(uint8_t new_dbm_noise);
+        
+        /**
          * \brief Setter for the antenna field.
          * \param new_antenna The antenna signal.
          */
@@ -256,10 +262,22 @@ namespace Tins {
         uint8_t dbm_signal() const { return _dbm_signal; }
         
         /**
+         * \brief Getter for the dbm noise field.
+         * \return The dbm noise field.
+         */
+        uint8_t dbm_noise() const { return _dbm_noise; }
+        
+        /**
          * \brief Getter for the antenna field.
          * \return The antenna field.
          */
         uint8_t antenna() const { return _antenna; }
+        
+        /**
+         * \brief Getter for the channel+ field.
+         * \return The channel+ field.
+         */
+        uint32_t channel_plus() const { return Endian::le_to_host(_channel_type); }
         
         /**
          * \brief Getter for the rx flags field.
@@ -336,14 +354,11 @@ namespace Tins {
         
         radiotap_hdr _radio;
         NetworkInterface _iface;
-        uint32_t _options_size;
         // present fields...
         uint64_t _tsft;
-        uint8_t _flags, _rate;
-        uint16_t _channel_freq, _channel_type;
-        uint8_t _dbm_signal;
-        uint8_t _antenna;
-        uint16_t _rx_flags;
+        uint32_t _channel_type;
+        uint16_t _channel_freq, _rx_flags;
+        uint8_t _antenna, _flags, _rate, _dbm_signal, _dbm_noise, _channel, _max_power;
     };
 };
 

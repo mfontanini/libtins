@@ -180,6 +180,23 @@ src/pdu.o: src/pdu.cpp ../include/ip.h ../include/pdu.h \
 ../include/rawpdu.h:
 
 ../include/pdu.h:
+src/radiotap.o: src/radiotap.cpp ../include/radiotap.h ../include/pdu.h \
+ ../include/endianness.h ../include/network_interface.h \
+ ../include/hw_address.h ../include/ip_address.h ../include/utils.h
+
+../include/radiotap.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/network_interface.h:
+
+../include/hw_address.h:
+
+../include/ip_address.h:
+
+../include/utils.h:
 src/snap.o: src/snap.cpp ../include/snap.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/utils.h \
  ../include/ip_address.h ../include/hw_address.h

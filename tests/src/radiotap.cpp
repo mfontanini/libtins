@@ -16,7 +16,24 @@ public:
 };
 
 const uint8_t RadioTapTest::expected_packet[] = {
-    '\x1f', '\x00', ' ', '\x00', 'g', '\x08', '\x04', '\x00', '\x80', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 'd', '\x00', '\x00', '\x00'
+    '\x00', '\x00', ' ', '\x00', 'g', '\x08', '\x04', '\x00', 'T', '\xc6', 
+    '\xb8', '$', '\x00', '\x00', '\x00', '\x00', '"', '\x0c', '\xda', 
+    '\xa0', '\x02', '\x00', '\x00', '\x00', '@', '\x01', '\x00', '\x00', 
+    '<', '\x14', '$', '\x11', '\x80', '\x00', '\x00', '\x00', '\xff', 
+    '\xff', '\xff', '\xff', '\xff', '\xff', '\x06', '\x03', '\x7f', 
+    '\x07', '\xa0', '\x16', '\x06', '\x03', '\x7f', '\x07', '\xa0', 
+    '\x16', '\xb0', 'w', ':', '@', '\xcb', '&', '\x00', '\x00', '\x00', 
+    '\x00', 'd', '\x00', '\x01', '\x05', '\x00', '\n', 'f', 'r', 'e', 
+    'e', 'b', 's', 'd', '-', 'a', 'p', '\x01', '\x08', '\x8c', '\x12', 
+    '\x98', '$', '\xb0', 'H', '`', 'l', '\x03', '\x01', '$', '\x05', 
+    '\x04', '\x00', '\x01', '\x00', '\x00', '\x07', '*', 'U', 'S', ' ', 
+    '$', '\x01', '\x11', '(', '\x01', '\x11', ',', '\x01', '\x11', '0', 
+    '\x01', '\x11', '4', '\x01', '\x17', '8', '\x01', '\x17', '<', '\x01', 
+    '\x17', '@', '\x01', '\x17', '\x95', '\x01', '\x1e', '\x99', '\x01', 
+    '\x1e', '\x9d', '\x01', '\x1e', '\xa1', '\x01', '\x1e', '\xa5', '\x01', 
+    '\x1e', ' ', '\x01', '\x00', '\xdd', '\x18', '\x00', 'P', '\xf2', 
+    '\x02', '\x01', '\x01', '\x00', '\x00', '\x03', '\xa4', '\x00', '\x00', 
+    '\'', '\xa4', '\x00', '\x00', 'B', 'C', '^', '\x00', 'b', '2', '/', '\x00'
 };
 
 TEST_F(RadioTapTest, DefaultConstructor) {
@@ -30,16 +47,23 @@ TEST_F(RadioTapTest, DefaultConstructor) {
     EXPECT_EQ(radio.rx_flags(), 0);
 }
 
-//version=0x1f, pad=0x3a, present="TSFT+Antenna"
 TEST_F(RadioTapTest, ConstructorFromBuffer) {
     RadioTap radio(expected_packet, sizeof(expected_packet));
-    EXPECT_EQ(radio.version(), 0x1f);
-    EXPECT_EQ(radio.padding(), 0);
-    EXPECT_EQ(radio.antenna(), 2);
-    EXPECT_EQ(radio.rate(), 6);
-    EXPECT_EQ(radio.rx_flags(), 0);
-    EXPECT_EQ(radio.channel_freq(), 5180);
+    EXPECT_EQ(radio.version(), 0);
     EXPECT_EQ(radio.channel_type(), 0x140);
+    EXPECT_EQ(radio.tsft(), 616089172);
+    EXPECT_EQ(radio.dbm_signal(), 0xda);
+    EXPECT_EQ(radio.dbm_noise(), 0xa0);
+    EXPECT_EQ(radio.antenna(), 2);
+    EXPECT_EQ(radio.rx_flags(), 0);
+}
+
+TEST_F(RadioTapTest, Serialize) {
+    RadioTap radio(expected_packet, sizeof(expected_packet));
+    RadioTap::serialization_type buffer = radio.serialize();
+    
+    ASSERT_EQ(buffer.size(), sizeof(expected_packet));
+    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
 
 TEST_F(RadioTapTest, Channel) {
@@ -77,6 +101,12 @@ TEST_F(RadioTapTest, DBMSignal) {
     RadioTap radio;
     radio.dbm_signal(0x7a);
     EXPECT_EQ(radio.dbm_signal(), 0x7a);
+}
+
+TEST_F(RadioTapTest, DBMNoise) {
+    RadioTap radio;
+    radio.dbm_noise(0x7a);
+    EXPECT_EQ(radio.dbm_noise(), 0x7a);
 }
 
 TEST_F(RadioTapTest, RXFlags) {
