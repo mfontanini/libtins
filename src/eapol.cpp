@@ -90,8 +90,8 @@ void EAPOL::type(uint8_t new_type) {
 void EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     uint32_t sz = header_size();
     assert(total_sz >= sz);
-    if(!_header.length)
-        length(sz - sizeof(_header.version) - sizeof(_header.length) - sizeof(_header.type));
+    //if(!_header.length)
+    //    length(sz - sizeof(_header.version) - sizeof(_header.length) - sizeof(_header.type));
     std::memcpy(buffer, &_header, sizeof(_header));
     write_body(buffer + sizeof(_header), total_sz - sizeof(_header));
 }
@@ -132,7 +132,7 @@ void RC4EAPOL::replay_counter(uint64_t new_replay_counter) {
 }
 
 void RC4EAPOL::key_iv(const uint8_t *new_key_iv) {
-    std::memcpy(_header.key_iv, new_key_iv, sizeof(_header.key_iv));
+    std::copy(new_key_iv, new_key_iv + sizeof(_header.key_iv), _header.key_iv);
 }
 
 void RC4EAPOL::key_flag(small_uint<1> new_key_flag) {
@@ -175,7 +175,7 @@ RSNEAPOL::RSNEAPOL()
 }
 
 RSNEAPOL::RSNEAPOL(const uint8_t *buffer, uint32_t total_sz) 
-: EAPOL(0x03, RSN)
+: EAPOL(buffer, total_sz)
 {
     buffer += sizeof(eapolhdr);
     total_sz -= sizeof(eapolhdr);
@@ -189,23 +189,35 @@ RSNEAPOL::RSNEAPOL(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void RSNEAPOL::RSNEAPOL::nonce(const uint8_t *new_nonce) {
-    std::memcpy(_header.nonce, new_nonce, sizeof(_header.nonce));
+    std::copy(new_nonce, new_nonce + nonce_size, _header.nonce);
 }
 
-void RSNEAPOL::rsc(uint64_t new_rsc) {
-    _header.rsc = Endian::host_to_be(new_rsc);
+void RSNEAPOL::rsc(const uint8_t *new_rsc) {
+    std::copy(new_rsc, new_rsc + rsc_size, _header.rsc);
 }
 
-void RSNEAPOL::id(uint64_t new_id) {
-    _header.id = Endian::host_to_be(new_id);
+void RSNEAPOL::id(const uint8_t *new_id) {
+    std::copy(new_id, new_id + id_size, _header.id);
+}
+
+void RSNEAPOL::replay_counter(uint64_t new_replay_counter) {
+    _header.replay_counter = Endian::host_to_be(new_replay_counter);
 }
 
 void RSNEAPOL::mic(const uint8_t *new_mic) {
-    std::memcpy(_header.mic, new_mic, sizeof(_header.mic));
+    std::copy(new_mic, new_mic + mic_size, _header.mic);
 }
 
 void RSNEAPOL::wpa_length(uint16_t new_wpa_length) {
     _header.wpa_length = Endian::host_to_be(new_wpa_length);
+}
+
+void RSNEAPOL::key_iv(const uint8_t *new_key_iv) {
+    std::copy(new_key_iv, new_key_iv + sizeof(_header.key_iv), _header.key_iv);
+}
+
+void RSNEAPOL::key_length(uint16_t new_key_length) {
+    _header.key_length = Endian::host_to_be(new_key_length);
 }
 
 void RSNEAPOL::key(const key_type &new_key) {
@@ -213,16 +225,48 @@ void RSNEAPOL::key(const key_type &new_key) {
     _header.key_t = 0;
 }
 
-void RSNEAPOL::rsn_information(const RSNInformation &rsn) {
-    _key = rsn.serialize();
-    _header.key_t = 1;
+void RSNEAPOL::key_mic(small_uint<1> new_key_mic) {
+    _header.key_mic = new_key_mic;
+}
+
+void RSNEAPOL::secure(small_uint<1> new_secure) {
+    _header.secure = new_secure;
+}
+
+void RSNEAPOL::error(small_uint<1> new_error) {
+    _header.error = new_error;
+}
+
+void RSNEAPOL::request(small_uint<1> new_request) {
+    _header.request = new_request;
+}
+
+void RSNEAPOL::encrypted(small_uint<1 > new_encrypted) {
+    _header.encrypted = new_encrypted;
+}
+
+void RSNEAPOL::key_descriptor(small_uint<3> new_key_descriptor) {
+    _header.key_descriptor = new_key_descriptor;
+}
+
+void RSNEAPOL::key_t(small_uint<1> new_key_t) {
+    _header.key_t = new_key_t;
+}
+
+void RSNEAPOL::key_index(small_uint<2> new_key_index) {
+    _header.key_index = new_key_index;
+}
+
+void RSNEAPOL::install(small_uint<1> new_install) {
+    _header.install = new_install;
+}
+
+void RSNEAPOL::key_ack(small_uint<1> new_key_ack) {
+    _header.key_ack = new_key_ack;
 }
 
 uint32_t RSNEAPOL::header_size() const {
-    uint32_t padding(0);
-    if(_header.key_t && _key.size())
-        padding = 2;
-    return sizeof(eapolhdr) + sizeof(_header) + _key.size() + padding;
+    return sizeof(eapolhdr) + sizeof(_header) + _key.size();
 }
 
 void RSNEAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
@@ -234,18 +278,11 @@ void RSNEAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
             wpa_length(_key.size());
         }
         else if(_key.size()) {
-            _header.key_length = 0;
-            wpa_length(_key.size() + 2);
+            wpa_length(_key.size());
         }
-        else
-            wpa_length(0);
     }
     std::memcpy(buffer, &_header, sizeof(_header));
     buffer += sizeof(_header);
-    if(_header.key_t && _key.size()) {
-        *(buffer++) = Dot11::RSN;
-        *(buffer++) = _key.size();
-    }
     std::copy(_key.begin(), _key.end(), buffer);
 }
 }

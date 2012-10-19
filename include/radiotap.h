@@ -96,23 +96,14 @@ namespace Tins {
          * \brief Flags used in the RadioTap::flags() method.
          */
         enum FrameFlags {
-        #if TINS_IS_LITTLE_ENDIAN
             CFP           = 1,
             PREAMBLE      = 2,
             WEP           = 4,
             FRAGMENTATION = 8,
             FCS           = 16,
             PADDING       = 32,
-            FAILED_FCS    = 64
-        #else
-            CFP           = 64,
-            PREAMBLE      = 32,
-            WEP           = 16,
-            FRAGMENTATION = 8,
-            FCS           = 4,
-            PADDING       = 2,
-            FAILED_FCS    = 1
-        #endif
+            FAILED_FCS    = 64,
+            SHORT_GI      = 128
         };
         
         /**
@@ -154,7 +145,7 @@ namespace Tins {
          * \brief Setter for the length field.
          * \param new_length The new length.
          */
-        void length(uint8_t new_length);
+        void length(uint16_t new_length);
         
         /**
          * \brief Setter for the TSFT field.
@@ -223,7 +214,7 @@ namespace Tins {
          * \brief Getter for the length field.
          * \return The length field.
          */
-        uint8_t length() const { return _radio.it_len; }
+        uint16_t length() const { return Endian::le_to_host(_radio.it_len); }
         
         /**
          * \brief Getter for the tsft field.
@@ -324,6 +315,7 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::RADIOTAP; }
     private:
         struct radiotap_hdr {
+        #if TINS_IS_LITTLE_ENDIAN
             uint8_t it_version;	
             uint8_t it_pad;
             uint16_t it_len;
@@ -346,6 +338,32 @@ namespace Tins {
                 channel_plus:1,
                 reserved2:12,
                 ext:1;
+        #else
+            uint8_t it_pad;
+            uint8_t it_version;	
+            uint16_t it_len;
+            uint32_t lock_quality:1,
+                dbm_noise:1,
+                dbm_signal:1,
+                fhss:1,
+                channel:1,
+                rate:1,
+                flags:1,
+                tsft:1,
+                reserved3:1,
+                tx_attenuation:1,
+                db_tx_attenuation:1,
+                dbm_tx_attenuation:1,
+                antenna:1,
+                db_signal:1,
+                db_noise:1,
+                rx_flags:1,
+                reserved2:5,
+                channel_plus:1,
+                reserved1:2,
+                reserved4:7,
+                ext:1;
+        #endif
         } __attribute__((__packed__));
         
         void init();

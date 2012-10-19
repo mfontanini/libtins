@@ -214,6 +214,26 @@ src/rc4eapol.o: src/rc4eapol.cpp ../include/eapol.h ../include/pdu.h \
 ../include/ip_address.h:
 
 ../include/hw_address.h:
+src/rsn_eapol.o: src/rsn_eapol.cpp ../include/eapol.h ../include/pdu.h \
+ ../include/small_uint.h ../include/endianness.h ../include/utils.h \
+ ../include/ip_address.h ../include/hw_address.h \
+ ../include/rsn_information.h
+
+../include/eapol.h:
+
+../include/pdu.h:
+
+../include/small_uint.h:
+
+../include/endianness.h:
+
+../include/utils.h:
+
+../include/ip_address.h:
+
+../include/hw_address.h:
+
+../include/rsn_information.h:
 src/snap.o: src/snap.cpp ../include/snap.h ../include/pdu.h \
  ../include/endianness.h ../include/small_uint.h ../include/utils.h \
  ../include/ip_address.h ../include/hw_address.h
@@ -319,7 +339,7 @@ src/wep_decrypt.o: src/wep_decrypt.cpp ../include/crypto.h \
  ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
  ../include/network_interface.h ../include/ip_address.h \
  ../include/utils.h ../include/snap.h ../include/rawpdu.h \
- ../include/radiotap.h ../include/arp.h
+ ../include/arp.h
 
 ../include/crypto.h:
 
@@ -344,8 +364,6 @@ src/wep_decrypt.o: src/wep_decrypt.cpp ../include/crypto.h \
 ../include/snap.h:
 
 ../include/rawpdu.h:
-
-../include/radiotap.h:
 
 ../include/arp.h:
 src/dot11/ack.o: src/dot11/ack.cpp ../include/dot11.h ../include/pdu.h \
@@ -917,9 +935,8 @@ include/tests/dot11.h:
 ../src/dot11.o: ../src/dot11.cpp ../include/dot11.h ../include/pdu.h \
  ../include/endianness.h ../include/hw_address.h ../include/small_uint.h \
  ../include/pdu_option.h ../include/network_interface.h \
- ../include/ip_address.h ../include/rawpdu.h ../include/radiotap.h \
- ../include/rsn_information.h ../include/packet_sender.h \
- ../include/snap.h
+ ../include/ip_address.h ../include/rawpdu.h ../include/rsn_information.h \
+ ../include/packet_sender.h ../include/snap.h
 
 ../include/dot11.h:
 
@@ -938,8 +955,6 @@ include/tests/dot11.h:
 ../include/ip_address.h:
 
 ../include/rawpdu.h:
-
-../include/radiotap.h:
 
 ../include/rsn_information.h:
 

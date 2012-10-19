@@ -81,6 +81,14 @@ namespace Tins{
         RSNInformation();
         
         /**
+         * \brief Creates an instance of RSNInformation from a 
+         * serialization_type object.
+         * 
+         * \param buffer The buffer from which to construct this object.
+         */
+        RSNInformation(const serialization_type &buffer);
+        
+        /**
          * \brief Constructor from buffer.
          * 
          * \param buffer The buffer from which this object will be constructed.
@@ -163,6 +171,8 @@ namespace Tins{
          */
          serialization_type serialize() const;
     private:
+        void init(const uint8_t *buffer, uint32_t total_sz);
+    
         uint16_t _version, _capabilities;
         CypherSuites _group_suite;
         akm_type _akm_cyphers;

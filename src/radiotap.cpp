@@ -141,8 +141,8 @@ void RadioTap::padding(uint8_t new_padding) {
     _radio.it_pad = new_padding;
 }
 
-void RadioTap::length(uint8_t new_length) {
-    _radio.it_len = new_length;
+void RadioTap::length(uint16_t new_length) {
+    _radio.it_len = Endian::host_to_le(new_length);
 }
 
 void RadioTap::tsft(uint64_t new_tsft) {
@@ -162,7 +162,7 @@ void RadioTap::rate(uint8_t new_rate) {
 
 void RadioTap::channel(uint16_t new_freq, uint16_t new_type) {
     _channel_freq = Endian::host_to_le(new_freq);
-    _channel_type = Endian::host_to_le(new_type);
+    _channel_type = Endian::host_to_le<uint32_t>(new_type);
     _radio.channel = 1;
 }
 void RadioTap::dbm_signal(uint8_t new_dbm_signal) {
@@ -309,6 +309,8 @@ void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
         buffer += sizeof(_max_power);
     }
     if((_flags & 0x10) != 0 && inner_pdu())
-        *(uint32_t*)(buffer + inner_pdu()->size()) = Utils::crc32(buffer, inner_pdu()->size());
+        *(uint32_t*)(buffer + inner_pdu()->size()) = Endian::host_to_le(
+            Utils::crc32(buffer, inner_pdu()->size())
+        );
 }
 }

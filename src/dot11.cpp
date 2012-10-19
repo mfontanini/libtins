@@ -39,7 +39,6 @@
 #endif
 #include "dot11.h"
 #include "rawpdu.h"
-#include "radiotap.h"
 #include "rsn_information.h"
 #include "packet_sender.h"
 #include "snap.h"

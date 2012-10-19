@@ -368,7 +368,32 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::RSNEAPOL;
+        
+        /**
+         * The length of the key IV field
+         */
+        static const size_t key_iv_size = 16;
+        
+        /**
+         * The length of the nonce field
+         */
+        static const size_t nonce_size = 32;
     
+        /**
+         * The length of the mic field
+         */
+        static const size_t mic_size = 16;
+        
+        /**
+         * The length of the rsc field
+         */
+        static const size_t rsc_size = 8;
+        
+        /**
+         * The length of the id field
+         */
+        static const size_t id_size = 8;
+        
         /**
          * \brief Creates an instance of RSNEAPOL.
          */
@@ -411,13 +436,13 @@ namespace Tins {
          * \brief Getter for the rsc field.
          * \return The rsc field.
          */
-        uint64_t rsc() const { return Endian::be_to_host(_header.rsc); }
+        const uint8_t *rsc() const { return _header.rsc; }
         
         /**
          * \brief Getter for the id field.
          * \return The id field.
          */
-        uint64_t id() const { return Endian::be_to_host(_header.id); }
+        const uint8_t *id() const { return _header.id; }
         
         /**
          * \brief Getter for the mic field.
@@ -436,6 +461,66 @@ namespace Tins {
          * \return The key field.
          */
         const key_type &key() const { return _key; }
+        
+        /**
+         * \brief Getter for the key_mic field.
+         * \return The key_mic field.
+         */
+        small_uint<1> key_mic() const { return _header.key_mic; };
+
+        /**
+         * \brief Getter for the secure field.
+         * \return The secure field.
+         */
+        small_uint<1> secure() const { return _header.secure; };
+
+        /**
+         * \brief Getter for the error field.
+         * \return The error field.
+         */
+        small_uint<1> error() const { return _header.error; };
+
+        /**
+         * \brief Getter for the request field.
+         * \return The request field.
+         */
+        small_uint<1> request() const { return _header.request; };
+
+        /**
+         * \brief Getter for the encrypted field.
+         * \return The encrypted field.
+         */
+        small_uint<1 > encrypted() const { return _header.encrypted; };
+
+        /**
+         * \brief Getter for the key_descriptor field.
+         * \return The key_descriptor field.
+         */
+        small_uint<3> key_descriptor() const { return _header.key_descriptor; };
+
+        /**
+         * \brief Getter for the key_t field.
+         * \return The key_t field.
+         */
+        small_uint<1> key_t() const { return _header.key_t; };
+
+        /**
+         * \brief Getter for the key_index field.
+         * \return The key_index field.
+         */
+        small_uint<2> key_index() const { return _header.key_index; };
+
+        /**
+         * \brief Getter for the install field.
+         * \return The install field.
+         */
+        small_uint<1> install() const { return _header.install; };
+
+        /**
+         * \brief Getter for the key_ack field.
+         * \return The key_ack field.
+         */
+        small_uint<1> key_ack() const { return _header.key_ack; };
         
         /**
          * \brief Returns the header size.
@@ -459,7 +544,7 @@ namespace Tins {
          * \brief Sets the replay counter field.
          * \param new_replay_counter The new replay counter to be set.
          */
-        void replay_counter(uint16_t new_replay_counter);
+        void replay_counter(uint64_t new_replay_counter);
         
         /**
          * \brief Sets the key IV field.
@@ -480,13 +565,13 @@ namespace Tins {
          * \brief Sets the rsc field.
          * \param new_rsc The new rsc to be set.
          */
-        void rsc(uint64_t new_rsc);
+        void rsc(const uint8_t *new_rsc);
         
         /**
          * \brief Sets the id field.
          * \param new_id The new id to be set.
          */
-        void id(uint64_t new_id);
+        void id(const uint8_t *new_id);
         
         /**
          * \brief Sets the mic field.
@@ -510,14 +595,64 @@ namespace Tins {
         void key(const key_type &new_key);
         
         /**
-         * \brief Sets RSN information for this EAPOL PDU.
-         * 
-         * This method copies the RSN information and copies it in the
-         * key field. Therefore, if a key has been set, this will remove it.
-         * \param rsn The RSN information to be set.
-         * \sa RSNInformation.
+         * \brief Setter for the key_mic field.
+         * \param new_key_mic The new to be set.
          */
-        void rsn_information(const RSNInformation &rsn);
+        void key_mic(small_uint<1> new_key_mic);
+
+        /**
+         * \brief Setter for the secure field.
+         * \param new_secure The new to be set.
+         */
+        void secure(small_uint<1> new_secure);
+
+        /**
+         * \brief Setter for the error field.
+         * \param new_error The new to be set.
+         */
+        void error(small_uint<1> new_error);
+
+        /**
+         * \brief Setter for the request field.
+         * \param new_request The new to be set.
+         */
+        void request(small_uint<1> new_request);
+
+        /**
+         * \brief Setter for the encrypted field.
+         * \param new_encrypted The new to be set.
+         */
+        void encrypted(small_uint<1 > new_encrypted);
+
+        /**
+         * \brief Setter for the key_descriptor field.
+         * \param new_key_descriptor The new to be set.
+         */
+        void key_descriptor(small_uint<3> new_key_descriptor);
+
+        /**
+         * \brief Setter for the key_t field.
+         * \param new_key_t The new to be set.
+         */
+        void key_t(small_uint<1> new_key_t);
+
+        /**
+         * \brief Setter for the key_index field.
+         * \param new_key_index The new to be set.
+         */
+        void key_index(small_uint<2> new_key_index);
+
+        /**
+         * \brief Setter for the install field.
+         * \param new_install The new to be set.
+         */
+        void install(small_uint<1> new_install);
+
+        /**
+         * \brief Setter for the key_ack field.
+         * \param new_key_ack The new to be set.
+         */
+        void key_ack(small_uint<1> new_key_ack);
         
         /**
          * \brief Getter for the PDU's type.
@@ -544,6 +679,7 @@ namespace Tins {
         }
     private:
         struct rsnhdr {
+        #if TINS_IS_LITTLE_ENDIAN
             uint16_t key_mic:1,
                 secure:1,
                 error:1,
@@ -557,10 +693,29 @@ namespace Tins {
                 key_ack:1;       
             uint16_t key_length;
             uint64_t replay_counter;
-            uint8_t nonce[32], key_iv[16];
-            uint64_t rsc, id;
-            uint8_t mic[16];
+            uint8_t nonce[nonce_size], key_iv[key_iv_size];
+            uint8_t rsc[rsc_size], id[id_size];
+            uint8_t mic[mic_size];
             uint16_t wpa_length;
+        #else
+            uint16_t reserved:3,
+                encrypted:1,
+                request:1,
+                error:1,
+                secure:1,
+                key_mic:1,
+                key_ack:1,
+                install:1,
+                key_index:2,
+                key_t:1,
+                key_descriptor:3;
+            uint16_t key_length;
+            uint64_t replay_counter;
+            uint8_t nonce[nonce_size], key_iv[key_iv_size];
+            uint8_t rsc[rsc_size], id[id_size];
+            uint8_t mic[mic_size];
+            uint16_t wpa_length;
+        #endif
         } __attribute__((__packed__));
         
         void write_body(uint8_t *buffer, uint32_t total_sz);

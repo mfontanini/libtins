@@ -15,7 +15,7 @@ public:
 
 const uint8_t RadioTapTest::expected_packet[] = {
     '\x00', '\x00', ' ', '\x00', 'g', '\x08', '\x04', '\x00', 'T', '\xc6', 
-    '\xb8', '$', '\x00', '\x00', '\x00', '\x00', '"', '\x0c', '\xda', 
+    '\xb8', '$', '\x00', '\x00', '\x00', '\x00', '\x10', '\x0c', '\xda', 
     '\xa0', '\x02', '\x00', '\x00', '\x00', '@', '\x01', '\x00', '\x00', 
     '<', '\x14', '$', '\x11', '\x80', '\x00', '\x00', '\x00', '\xff', 
     '\xff', '\xff', '\xff', '\xff', '\xff', '\x06', '\x03', '\x7f', 
@@ -31,7 +31,8 @@ const uint8_t RadioTapTest::expected_packet[] = {
     '\x1e', '\x9d', '\x01', '\x1e', '\xa1', '\x01', '\x1e', '\xa5', '\x01', 
     '\x1e', ' ', '\x01', '\x00', '\xdd', '\x18', '\x00', 'P', '\xf2', 
     '\x02', '\x01', '\x01', '\x00', '\x00', '\x03', '\xa4', '\x00', '\x00', 
-    '\'', '\xa4', '\x00', '\x00', 'B', 'C', '^', '\x00', 'b', '2', '/', '\x00'
+    '\'', '\xa4', '\x00', '\x00', 'B', 'C', '^', '\x00', 'b', '2', '/', '\x00',
+    '\xe5', '\x2d', '\x92', '\x11'
 };
 
 TEST_F(RadioTapTest, DefaultConstructor) {
@@ -48,6 +49,10 @@ TEST_F(RadioTapTest, DefaultConstructor) {
 TEST_F(RadioTapTest, ConstructorFromBuffer) {
     RadioTap radio(expected_packet, sizeof(expected_packet));
     EXPECT_EQ(radio.version(), 0);
+    EXPECT_EQ(radio.length(), 32);
+    EXPECT_EQ(radio.rate(), 0xc);
+    EXPECT_EQ(radio.flags(), 0x10);
+    EXPECT_TRUE(radio.flags() & RadioTap::FCS);
     EXPECT_EQ(radio.channel_type(), 0x140);
     EXPECT_EQ(radio.tsft(), 616089172);
     EXPECT_EQ(radio.dbm_signal(), 0xda);
@@ -60,6 +65,7 @@ TEST_F(RadioTapTest, Serialize) {
     RadioTap::serialization_type buffer = radio.serialize();
     
     ASSERT_EQ(buffer.size(), sizeof(expected_packet));
+    
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
 

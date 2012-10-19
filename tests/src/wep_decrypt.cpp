@@ -3,7 +3,6 @@
 #include <string>
 #include <stdint.h>
 #include "crypto.h"
-#include "radiotap.h"
 #include "arp.h"
 
 using namespace Tins;

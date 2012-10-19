@@ -14,7 +14,7 @@ compile: $(OBJECTS)
 
 recompile: clean all
 
-depends: $(SOURCES) $(DEPS)
+depends: $(SOURCES)
 	rm -f ./depends.d
 	make do_make_deps
 
