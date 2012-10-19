@@ -53,5 +53,6 @@
 #include "dns.h"
 #include "tcp_stream.h"
 #include "crypto.h"
+#include "pdu_cacher.h"
 
 #endif // TINS_TINS_H
