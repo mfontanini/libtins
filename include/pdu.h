@@ -215,7 +215,7 @@ namespace Tins {
          * those methods.
          * \param sender The PacketSender which will send the packet.
          */
-        virtual bool send(PacketSender &sender);
+        virtual void send(PacketSender &sender);
 
         /** \brief Receives a matching response for this packet.
          *

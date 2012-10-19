@@ -80,8 +80,8 @@ int do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim,
     EthernetII to_victim(iface, victim_hw, info.hw_addr, victim_arp);
     while(true) {
         // Just send them once every 5 seconds.
-        if(!sender.send(to_gw) || !sender.send(to_victim))
-            return 7;
+        sender.send(to_gw);
+        sender.send(to_victim);
         sleep(5);
     }
 }
@@ -114,6 +114,12 @@ int main(int argc, char *argv[]) {
         cout << ex.what() << endl;
         return 3;
     }
-    return do_arp_spoofing(iface, gw, victim, info);
+    try {
+        return do_arp_spoofing(iface, gw, victim, info);
+    }
+    catch(std::runtime_error &ex) {
+        std::cout << "Runtime error: " << ex.what() << std::endl;
+        return 7;
+    }
 }
 

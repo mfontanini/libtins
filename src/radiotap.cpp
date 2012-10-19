@@ -222,7 +222,7 @@ uint32_t RadioTap::trailer_size() const {
     return ((_flags & 0x10) != 0) ? sizeof(uint32_t) : 0;
 }
 
-bool RadioTap::send(PacketSender &sender) {
+void RadioTap::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
     
@@ -241,7 +241,7 @@ bool RadioTap::send(PacketSender &sender) {
         std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);
     }
 
-    return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 
 void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {

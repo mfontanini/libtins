@@ -38,6 +38,7 @@
 
 namespace Tins {
     class NetworkInterface;
+    class EthernetII;
 
     /**
      * \brief Class that represents an ARP PDU.
@@ -91,63 +92,63 @@ namespace Tins {
         /**
          * \brief Getter for the sender's hardware address.
          *
-         * \return Returns the sender's hardware address in an uint8_t*.
+         * \return The sender hardware address.
          */
         hwaddress_type sender_hw_addr() const { return _arp.ar_sha; }
 
         /**
          * \brief Getter for the sender's IP address.
          *
-         * \return Returns the sender's IP address in an uint32_t.
+         * \return The sender IP address.
          */
         ipaddress_type sender_ip_addr() const { return ipaddress_type(_arp.ar_sip); }
 
         /**
          * \brief Getter for the target's hardware address.
          *
-         * \return Returns the target's hardware address in an uint8_t*.
+         * \return The target hardware address.
          */
         hwaddress_type target_hw_addr() const { return _arp.ar_tha; }
 
         /**
          * \brief Getter for the target's IP address.
          *
-         * \return Returns the target's IP address in an uint32_t.
+         * \return The target IP address.
          */
         ipaddress_type target_ip_addr() const { return ipaddress_type(_arp.ar_tip); }
 
         /**
          * \brief Getter for the hardware address format.
          *
-         * \return Returns the hardware address' format in an uint16_t.
+         * \return The hardware address format.
          */
         uint16_t hw_addr_format() const { return Endian::be_to_host(_arp.ar_hrd); }
 
         /**
          * \brief Getter for the protocol address format.
          *
-         * \return Returns the protocol address' format in an uint16_t.
+         * \return The protocol address format.
          */
         uint16_t prot_addr_format() const { return Endian::be_to_host(_arp.ar_pro); }
 
         /**
          * \brief Getter for the hardware address length.
          *
-         * \return Returns the hardware address' length in an uint8_t.
+         * \return The hardware address length.
          */
         uint8_t hw_addr_length() const { return _arp.ar_hln; }
 
         /**
          * \brief Getter for the protocol address length.
          *
-         * \return Returns the protocol address' length in an uint8_t.
+         * \return The protocol address length.
          */
         uint8_t prot_addr_length() const { return _arp.ar_pln; }
 
         /**
          * \brief Getter for the ARP opcode.
          *
-         * \return Returns the ARP opcode in an uint16_t.
+         * \return The ARP opcode.
          */
         uint16_t opcode() const { return Endian::be_to_host(_arp.ar_op); }
 
@@ -161,56 +162,56 @@ namespace Tins {
         /**
          * \brief Setter for the sender's hardware address.
          *
-         * \param new_snd_hw_addr uint8_t array containing the new sender's hardware address.
+         * \param new_snd_hw_addr The new sender hardware address.
          */
         void sender_hw_addr(const hwaddress_type &new_snd_hw_addr);
 
         /**
          * \brief Setter for the sender's IP address.
          *
-         * \param new_snd_ip_addr IPv4Address containing the new sender's IP address.
+         * \param new_snd_ip_addr The new sender IP address.
          */
         void sender_ip_addr(ipaddress_type new_snd_ip_addr);
 
         /**
          * \brief Setter for the target's hardware address.
          *
-         * \param new_tgt_hw_addr uint8_t array containing the new target's hardware address.
+         * \param new_tgt_hw_addr The new target hardware address.
          */
         void target_hw_addr(const hwaddress_type &new_tgt_hw_addr);
 
         /**
          * \brief Setter for the target's IP address.
          *
-         * \param new_tgt_ip_addr IPv4Address containing the new target's IP address.
+         * \param new_tgt_ip_addr The new target IP address.
          */
         void target_ip_addr(ipaddress_type new_tgt_ip_addr);
 
         /**
          * \brief Setter for the hardware address format.
          *
-         * \param new_hw_addr_fmt uint16_t with the new hardware address' format.
+         * \param new_hw_addr_fmt The new hardware address format.
          */
         void hw_addr_format(uint16_t new_hw_addr_fmt);
 
         /**
          * \brief Setter for the protocol address format.
          *
-         * \param new_prot_addr_fmt uint16_t with the new protocol address' format.
+         * \param new_prot_addr_fmt The new protocol address format.
          */
         void prot_addr_format(uint16_t new_prot_addr_fmt);
 
         /**
          * \brief Setter for the hardware address length.
          *
-         * \param new_hw_addr_len uint8_t with the new hardware address' length.
+         * \param new_hw_addr_len The new hardware address length.
          */
         void hw_addr_length(uint8_t new_hw_addr_len);
 
         /**
          * \brief Setter for the protocol address length.
          *
-         * \param new_prot_addr_len uint8_t with the new protocol address' length.
+         * \param new_prot_addr_len The new protocol address length.
          */
         void prot_addr_length(uint8_t new_prot_addr_len);
 
@@ -237,9 +238,9 @@ namespace Tins {
          * \param target IPv4Address with the target's IP.
          * \param sender IPv4Address with the sender's IP.
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
-         * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Request.
+         * \return Returns a EthernetII containing the ARP Request.
          */
-        static PDU* make_arp_request(const NetworkInterface& iface, ipaddress_type target, 
+        static EthernetII make_arp_request(const NetworkInterface& iface, ipaddress_type target, 
           ipaddress_type sender, const hwaddress_type &hw_snd = hwaddress_type());
 
         /**
@@ -253,9 +254,9 @@ namespace Tins {
          * \param sender IPv4Address with the sender's IP.
          * \param hw_tgt uint8_t array of 6 bytes containing the target's hardware address.
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
-         * \return Returns a PDU* to the new Layer 2 PDU containing the ARP Replay.
+         * \return Returns an EthetnetII containing the ARP Replay.
          */
-        static PDU* make_arp_reply(const NetworkInterface& iface, ipaddress_type target, 
+        static EthernetII make_arp_reply(const NetworkInterface& iface, ipaddress_type target, 
           ipaddress_type sender, const hwaddress_type &hw_tgt = hwaddress_type(), 
           const hwaddress_type &hw_snd = hwaddress_type());
 

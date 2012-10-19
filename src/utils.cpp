@@ -39,8 +39,8 @@
 #endif
 #include "utils.h"
 #include "pdu.h"
-#include "ip.h"
 #include "arp.h"
+#include "ethernetII.h"
 #include "endianness.h"
 #include "network_interface.h"
 #include "packet_sender.h"
@@ -114,8 +114,8 @@ bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
 {
     IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
-    std::auto_ptr<PDU> packet(ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr));
-    std::auto_ptr<PDU> response(sender.send_recv(*packet));
+    EthernetII packet = ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr);
+    std::auto_ptr<PDU> response(sender.send_recv(packet));
     if(response.get()) {
         ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)
@@ -130,8 +130,8 @@ HWAddress<6> Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip
 {
     IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
-    std::auto_ptr<PDU> packet(ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr));
-    std::auto_ptr<PDU> response(sender.send_recv(*packet));
+    EthernetII packet = ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr);
+    std::auto_ptr<PDU> response(sender.send_recv(packet));
     if(response.get()) {
         const ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)

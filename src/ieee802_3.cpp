@@ -88,7 +88,10 @@ uint32_t IEEE802_3::header_size() const {
 }
 
 #ifndef WIN32
-bool IEEE802_3::send(PacketSender &sender) {
+void IEEE802_3::send(PacketSender &sender) {
+    if(!_iface)
+        throw std::runtime_error("Interface has not been set");
+    
     struct sockaddr_ll addr;
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -99,7 +102,7 @@ bool IEEE802_3::send(PacketSender &sender) {
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
 
-    return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 #endif // WIN32
 

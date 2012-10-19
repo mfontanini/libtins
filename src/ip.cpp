@@ -332,7 +332,7 @@ uint32_t IP::header_size() const {
     return sizeof(iphdr) + _padded_options_size;
 }
 
-bool IP::send(PacketSender& sender) {
+void IP::send(PacketSender& sender) {
     struct sockaddr_in link_addr;
     PacketSender::SocketType type = PacketSender::IP_SOCKET;
     link_addr.sin_family = AF_INET;
@@ -341,7 +341,7 @@ bool IP::send(PacketSender& sender) {
     if(inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMP)
         type = PacketSender::ICMP_SOCKET;
 
-    return sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+    sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
 PDU *IP::recv_response(PacketSender &sender) {

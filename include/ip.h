@@ -318,7 +318,7 @@ namespace Tins {
         /**
          * \brief Setter for the header length field.
          *
-         * \param new_head_len uint8_t with the new header length.
+         * \param new_head_len The new header length.
          */
         void head_len(small_uint<4> new_head_len);
 
@@ -533,7 +533,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        bool send(PacketSender &sender);
+        void send(PacketSender &sender);
 
         /**
          * \brief Check wether ptr points to a valid response for this PDU.

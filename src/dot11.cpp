@@ -166,7 +166,10 @@ uint32_t Dot11::header_size() const {
 }
 
 #ifndef WIN32
-bool Dot11::send(PacketSender &sender) {
+void Dot11::send(PacketSender &sender) {
+    if(!_iface)
+        throw std::runtime_error("Interface has not been set");
+    
     struct sockaddr_ll addr;
 
     memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -177,7 +180,7 @@ bool Dot11::send(PacketSender &sender) {
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _header.addr1, 6);
 
-    return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 #endif // WIN32
 

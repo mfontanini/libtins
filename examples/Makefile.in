@@ -19,7 +19,7 @@ portscan:
 	$(CXX) portscan.cpp -o portscan $(CXXFLAGS) $(LDFLAGS) -lpthread
 	
 traceroute: 
-	$(CXX) traceroute.cpp -o traceroute -std=c++0x $(CXXFLAGS) $(LDFLAGS) 
+	$(CXX) traceroute.cpp -o traceroute -std=c++0x $(CXXFLAGS) $(LDFLAGS) -lpthread
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -o $@

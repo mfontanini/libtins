@@ -66,11 +66,11 @@ namespace Tins {
          * destination's and source's MAC.
          *
          * \param iface string containing the interface's name from where to send the packet.
-         * \param dst_hw_addr uint8_t array of 6 bytes containing the destination's MAC(optional).
-         * \param src_hw_addr uint8_t array of 6 bytes containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the ethernet PDU (optional).
+         * \param dst_hw_addr The destination hardware address.
+         * \param src_hw_addr The source hardware address.
+         * \param child The PDU which will be set as the inner PDU.
          */
-        IEEE802_3(const NetworkInterface& iface, 
+        IEEE802_3(const NetworkInterface& iface = NetworkInterface(), 
                   const address_type &dst_hw_addr = address_type(), 
                   const address_type &src_hw_addr = address_type(), 
                   PDU* child = 0);
@@ -85,23 +85,23 @@ namespace Tins {
 
         /* Getters */
         /**
-         * \brief Getter for the destination's mac address.
+         * \brief Getter for the destination hardware address.
          *
-         * \return Returns the destination's mac address as a constant uint8_t pointer.
+         * \return The destination hardware address.
          */
         address_type dst_addr() const { return _eth.dst_mac; }
 
         /**
-         * \brief Getter for the source's mac address.
+         * \brief Getter for the source hardware address.
          *
-         * \return Returns the source's mac address as a constant uint8_t pointer.
+         * \return The source hardware address.
          */
         address_type src_addr() const { return _eth.src_mac; }
 
         /**
          * \brief Getter for the interface.
          *
-         * \return Returns the interface's index as an uint32_t.
+         * \return The network interface.
          */
         const NetworkInterface &iface() const { return this->_iface; }
 
@@ -114,25 +114,25 @@ namespace Tins {
         /* Setters */
 
         /**
-         * \brief Setter for the destination's MAC.
+         * \brief Setter for the destination hardware address.
          *
-         * \param new_dst_mac uint8_t array of 6 bytes containing the new destination's MAC.
+         * \param new_dst_mac The new destination hardware address.
          */
         void dst_addr(const address_type &new_dst_mac);
 
         /**
-         * \brief Setter for the source's MAC.
+         * \brief Setter for the source hardware address.
          *
-         * \param new_src_mac uint8_t array of 6 bytes containing the new source's MAC.
+         * \param new_src_mac The new source hardware address.
          */
         void src_addr(const address_type &new_src_mac);
 
         /**
          * \brief Setter for the interface.
          *
-         * \param new_iface_index uint32_t containing the new interface index.
+         * \param new_iface The interface in which to send this PDU.
          */
-        void iface(const NetworkInterface &new_iface_index);
+        void iface(const NetworkInterface &new_iface);
 
         /**
          * \brief Setter for the length field.
@@ -154,7 +154,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        bool send(PacketSender &sender);
+        void send(PacketSender &sender);
         #endif // WIN32
 
         /** \brief Check wether ptr points to a valid response for this PDU.
@@ -180,7 +180,8 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::IEEE802_3; }
 
-        /** \brief Clones this pdu, filling the corresponding header with data
+        /** 
+         * \brief Clones this pdu, filling the corresponding header with data
          * extracted from a buffer.
          *
          * \param ptr The pointer to the from from which the data will be extracted.

@@ -104,7 +104,7 @@ uint32_t EthernetII::header_size() const {
 }
 
 #ifndef WIN32
-bool EthernetII::send(PacketSender &sender) {
+void EthernetII::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
     struct sockaddr_ll addr;
@@ -117,7 +117,7 @@ bool EthernetII::send(PacketSender &sender) {
     addr.sll_ifindex = _iface.id();
     memcpy(&(addr.sll_addr), _eth.dst_mac, address_type::address_size);
 
-    return sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
 }
 #endif // WIN32
 

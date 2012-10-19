@@ -31,6 +31,8 @@
 #define TINS_PACKET_SENDER_H
 
 
+#include <string>
+#include <stdexcept>
 #include <vector>
 #include <stdint.h>
 #include <map>
@@ -48,11 +50,13 @@ namespace Tins {
      */
     class PacketSender {
     public:
-        /** \brief The default timeout for receive actions.
+        /** 
+         * The default timeout for receive actions.
          */
         static const uint32_t DEFAULT_TIMEOUT;
     
-        /** \brief Flags to indicate the socket type.
+        /** 
+         * Flags to indicate the socket type.
          */
         enum SocketType {
             ETHER_SOCKET,
@@ -69,46 +73,62 @@ namespace Tins {
          */
         PacketSender(uint32_t recv_timeout = DEFAULT_TIMEOUT, uint32_t usec = 0);
         
-        /** \brief PacketSender destructor.
+        /** 
+         * \brief PacketSender destructor.
          * 
          * This gracefully closes all open sockets.
          */
         ~PacketSender();
 
         #ifndef WIN32
-        /** \brief Opens a layer y socket.
+        /** 
+         * \brief Opens a layer 2 socket.
          * 
-         * \return Returns true if the socket was open successfully, false otherwise.
+         * If this operation fails, then a SocketOpenError will be thrown.
          */
-        bool open_l2_socket();
+        void open_l2_socket();
         #endif // WIN32
 
-        /** \brief Opens a layer 3 socket, using the corresponding protocol
+        /** 
+         * \brief Opens a layer 3 socket, using the corresponding protocol
          * for the given flag.
+         * 
+         * If this operation fails, then a SocketOpenError will be thrown.
+         * If the provided socket type is not valid, a InvalidSocketTypeError
+         * will be throw.
          * 
          * \param type The type of socket which will be used to pick the protocol flag
          * for this socket.
-         * \return Returns true if the socket was open successfully, false otherwise.
          */
-        bool open_l3_socket(SocketType type);
+        void open_l3_socket(SocketType type);
 
-        /** \brief Closes the socket associated with the given flag.
+        /** 
+         * \brief Closes the socket associated with the given flag.
          * 
-         * \param flag
-         * \return Returns true if the socket was closed successfully, false otherwise.
+         * If the provided type is invalid, meaning no such open socket
+         * exists, a InvalidSocketTypeError is thrown.
+         * 
+         * If any socket close errors are encountered, a SocketCloseError
+         * is thrown.
+         * 
+         * \param type The type of the socket to be closed.
          */
-        bool close_socket(uint32_t flag);
+        void close_socket(SocketType type);
 
-        /** \brief Sends a PDU. 
+        /** 
+         * \brief Sends a PDU. 
          * 
-         * This method is used to send PDUs. It opens the required socket(if it's not open yet).
+         * This method opens the appropriate socket, if it's not open yet, 
+         * and sends the PDU on the open socket.
          * 
-         * \param pdu The PDU to send.
-         * \return Returns true if the PDU is sent successfully, false otherwise.
+         * If any send error occurs, then a SocketWriteError is thrown.
+         * 
+         * \param pdu The PDU to be sent.
          */
-        bool send(PDU &pdu);
+        void send(PDU &pdu);
 
-        /** \brief Sends a PDU and waits for its response. 
+        /** 
+         * \brief Sends a PDU and waits for its response. 
          * 
          * This method is used to send PDUs and receive their response. 
          * It opens the required socket(if it's not open yet). This can be used
@@ -121,7 +141,8 @@ namespace Tins {
         PDU *send_recv(PDU &pdu);
 
         #ifndef WIN32
-        /** \brief Receives a layer 2 PDU response to a previously sent PDU.
+        /** 
+         * \brief Receives a layer 2 PDU response to a previously sent PDU.
          * 
          * This PacketSender will receive data from a raw socket, open using the corresponding flag,
          * according to the given type of protocol, until a match for the given PDU is received. 
@@ -133,20 +154,24 @@ namespace Tins {
          */
         PDU *recv_l2(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr);
 
-        /** \brief Sends a level 2 PDU.
+        /** 
+         * \brief Sends a level 2 PDU.
          * 
-         * This method sends a layer 2 PDU, using a raw socket, open using the corresponding flag,
-         * according to the given type of protocol. 
+         * This method sends a layer 2 PDU, using a raw socket, open 
+         * using the corresponding flag, according to the given type of 
+         * protocol. 
+         * 
+         * If any socket write error occurs, a SocketWriteError is thrown.
          * 
          * \param pdu The PDU to send.
          * \param link_addr The sockaddr struct which will be used to send the PDU.
          * \param len_addr The sockaddr struct length.
-         * \return Returns true if the PDU was successfully sent, false otherwise.
          */
-        bool send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr);
+        void send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr);
         #endif // WIN32
 
-        /** \brief Receives a layer 3 PDU response to a previously sent PDU.
+        /** 
+         * \brief Receives a layer 3 PDU response to a previously sent PDU.
          * 
          * This PacketSender will receive data from a raw socket, open using the corresponding flag,
          * according to the given type of protocol, until a match for the given PDU is received. 
@@ -159,18 +184,20 @@ namespace Tins {
          */
         PDU *recv_l3(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr, SocketType type);
 
-        /** \brief Sends a level 3 PDU.
+        /** 
+         * \brief Sends a level 3 PDU.
          * 
          * This method sends a layer 3 PDU, using a raw socket, open using the corresponding flag,
          * according to the given type of protocol.
+         * 
+         * If any socket write error occurs, a SocketWriteError is thrown.
          * 
          * \param pdu The PDU to send.
          * \param link_addr The sockaddr struct which will be used to send the PDU.
          * \param len_addr The sockaddr struct length.
          * \param type The socket protocol type.
-         * \return Returns true if the PDU was successfully sent, false otherwise.
          */
-        bool send_l3(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr, SocketType type);
+        void send_l3(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr, SocketType type);
     private:
         static const int INVALID_RAW_SOCKET;
 
@@ -184,6 +211,32 @@ namespace Tins {
         std::vector<int> _sockets;
         SocketTypeMap _types;
         uint32_t _timeout, _timeout_usec;
+    };
+    
+    
+    class SocketOpenError : public std::runtime_error {
+    public:
+        SocketOpenError(const std::string &msg) 
+        : std::runtime_error(msg) { }
+    };
+    
+    class SocketCloseError : public std::runtime_error {
+    public:
+        SocketCloseError(const std::string &msg) 
+        : std::runtime_error(msg) { }
+    };
+    
+    class SocketWriteError : public std::runtime_error {
+    public:
+        SocketWriteError(const std::string &msg) 
+        : std::runtime_error(msg) { }
+    };
+    
+    class InvalidSocketTypeError : public std::exception {
+    public:
+        const char *what() const throw() {
+            return "The provided socket type is invalid";
+        }
     };
 };
 

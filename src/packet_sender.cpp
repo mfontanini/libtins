@@ -37,28 +37,39 @@
     #include <linux/if_packet.h>
     #include <netdb.h>
     #include <netinet/in.h>
+    #include <errno.h>
 #else
     #include <winsock2.h>
     #include <ws2tcpip.h>
 #endif
 #include <cassert>
-#include <errno.h>
 #include <cstring>
 #include <ctime>
 #include "pdu.h"
 #include "packet_sender.h"
 
 
-const int Tins::PacketSender::INVALID_RAW_SOCKET = -1;
-const uint32_t Tins::PacketSender::DEFAULT_TIMEOUT = 2;
+namespace Tins {
+const int PacketSender::INVALID_RAW_SOCKET = -1;
+const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
 
-Tins::PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) : 
-    _sockets(SOCKETS_END, INVALID_RAW_SOCKET), _timeout(recv_timeout), _timeout_usec(usec) {
+#ifndef WIN32
+    const char *make_error_string() {
+        return strerror(errno);
+    }
+#else
+
+#endif
+
+PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) : 
+  _sockets(SOCKETS_END, INVALID_RAW_SOCKET), _timeout(recv_timeout), 
+  _timeout_usec(usec)
+{
     _types[IP_SOCKET] = IPPROTO_RAW;
     _types[ICMP_SOCKET] = IPPROTO_ICMP;
 }
 
-Tins::PacketSender::~PacketSender() {
+PacketSender::~PacketSender() {
     for(unsigned i(0); i < _sockets.size(); ++i) {
         if(_sockets[i] != INVALID_RAW_SOCKET) 
         #ifndef WIN32
@@ -70,101 +81,95 @@ Tins::PacketSender::~PacketSender() {
 }
 
 #ifndef WIN32
-bool Tins::PacketSender::open_l2_socket() {
-    if (_sockets[ETHER_SOCKET] != INVALID_RAW_SOCKET)
-        return true;
-    int sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    if (sock == -1)
-        return false;
-    _sockets[ETHER_SOCKET] = sock;
-    return true;
+void PacketSender::open_l2_socket() {
+    if (_sockets[ETHER_SOCKET] == INVALID_RAW_SOCKET) {
+        int sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+        if (sock == -1)
+            throw SocketOpenError(make_error_string());
+        _sockets[ETHER_SOCKET] = sock;
+    }
 }
 #endif // WIN32
 
-bool Tins::PacketSender::open_l3_socket(SocketType type) {
+void PacketSender::open_l3_socket(SocketType type) {
     int socktype = find_type(type);
     if(socktype == -1)
-        return false;
-    if(_sockets[type] != INVALID_RAW_SOCKET)
-        return true;
-    int sockfd;
-    sockfd = socket(AF_INET, SOCK_RAW, socktype);
-    if (sockfd < 0)
-        return false;
+        throw InvalidSocketTypeError();
+    if(_sockets[type] == INVALID_RAW_SOCKET) {
+        int sockfd;
+        sockfd = socket(AF_INET, SOCK_RAW, socktype);
+        if (sockfd < 0)
+            throw SocketOpenError(make_error_string());
 
-    const int on = 1;
+        const int on = 1;
+        #ifndef WIN32
+        typedef const void* option_ptr;
+        #else
+        typedef const char* option_ptr;
+        #endif
+        setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL,(option_ptr)&on,sizeof(on));
+
+        _sockets[type] = sockfd;
+    }
+}
+
+void PacketSender::close_socket(SocketType type) {
+    if(type >= SOCKETS_END || _sockets[type] == INVALID_RAW_SOCKET)
+        throw InvalidSocketTypeError();
     #ifndef WIN32
-    typedef const void* option_ptr;
+    if(close(_sockets[type]) == -1)
+        throw SocketCloseError(make_error_string());
     #else
-    typedef const char* option_ptr;
+    closesocket(_sockets[type]);
     #endif
-    setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL,(option_ptr)&on,sizeof(on));
-
-    _sockets[type] = sockfd;
-    return true;
+    _sockets[type] = INVALID_RAW_SOCKET;
 }
 
-bool Tins::PacketSender::close_socket(uint32_t flag) {
-    if(flag >= SOCKETS_END || _sockets[flag] == INVALID_RAW_SOCKET)
-        return false;
-    #ifndef WIN32
-    close(_sockets[flag]);
-    #else
-    closesocket(_sockets[flag]);
-    #endif
-    _sockets[flag] = INVALID_RAW_SOCKET;
-    return true;
+void PacketSender::send(PDU &pdu) {
+    pdu.send(*this);
 }
 
-bool Tins::PacketSender::send(PDU &pdu) {
-    return pdu.send(*this);
-}
-
-Tins::PDU *Tins::PacketSender::send_recv(PDU &pdu) {
-    if(!pdu.send(*this))
+PDU *PacketSender::send_recv(PDU &pdu) {
+    try {
+        pdu.send(*this);
+    }
+    catch(std::runtime_error&) {
         return 0;
+    }
     return pdu.recv_response(*this);
 }
 #ifndef WIN32
-bool Tins::PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr) {
-    if(!open_l2_socket())
-        return false;
+void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr) {
+    open_l2_socket();
 
     int sock = _sockets[ETHER_SOCKET];
     PDU::serialization_type buffer = pdu.serialize();
-    if(buffer.size() == 0)
-        return false;
-    bool ret_val = (sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) != -1);
-
-    return ret_val;
+    if(!buffer.empty()) {
+        if(sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
+            throw SocketWriteError(make_error_string());
+    }
 }
 
-Tins::PDU *Tins::PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr) {
-    if(!open_l2_socket())
-        return 0;
+PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr) {
+    open_l2_socket();
     return recv_match_loop(_sockets[ETHER_SOCKET], pdu, link_addr, len_addr);
 }
 #endif // WIN32
 
-Tins::PDU *Tins::PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
-    if(!open_l3_socket(type))
-        return 0;
+PDU *PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
+    open_l3_socket(type);
     return recv_match_loop(_sockets[type], pdu, link_addr, len_addr);
 }
 
-bool Tins::PacketSender::send_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
-    bool ret_val = true;
-    if(!open_l3_socket(type))
-        ret_val = false;
-    if (ret_val) {
-        int sock = _sockets[type];
-        PDU::serialization_type buffer = pdu.serialize();
-        ret_val = (sendto(sock, (const char*)&buffer[0], buffer.size(), 0, link_addr, len_addr) != -1);
-    }
-    return ret_val;
+void PacketSender::send_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
+    open_l3_socket(type);
+    int sock = _sockets[type];
+    PDU::serialization_type buffer = pdu.serialize();
+    if(sendto(sock, (const char*)&buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
+        throw SocketWriteError(make_error_string());
 }
 
-Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen) {
+PDU *PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen) {
     fd_set readfds;
     struct timeval timeout,  end_time;
     int read;
@@ -195,7 +200,7 @@ Tins::PDU *Tins::PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockad
     return 0;
 }
 
-int Tins::PacketSender::timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y) {
+int PacketSender::timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y) {
     /* Perform the carry for the later subtraction by updating y. */
     if (x->tv_usec < y->tv_usec) {
         int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
@@ -218,10 +223,11 @@ int Tins::PacketSender::timeval_subtract (struct timeval *result, struct timeval
     return x->tv_sec < y->tv_sec;
 }
 
-int Tins::PacketSender::find_type(SocketType type) {
+int PacketSender::find_type(SocketType type) {
     SocketTypeMap::iterator it = _types.find(type);
     if(it == _types.end())
         return -1;
     else
         return it->second;
+}
 }

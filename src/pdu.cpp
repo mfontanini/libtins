@@ -66,8 +66,8 @@ uint32_t PDU::size() const {
     return sz;
 }
 
-bool PDU::send(PacketSender &) { 
-    return false; 
+void PDU::send(PacketSender &) { 
+    
 }
 
 PDU *PDU::recv_response(PacketSender &) { 

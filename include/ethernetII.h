@@ -157,7 +157,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        bool send(PacketSender &sender);
+        void send(PacketSender &sender);
         #endif // WIN32
 
         /** \brief Check wether ptr points to a valid response for this PDU.

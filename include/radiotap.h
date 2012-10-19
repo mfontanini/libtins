@@ -127,7 +127,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        bool send(PacketSender &sender);
+        void send(PacketSender &sender);
         
         /**
          * \brief Setter for the version field.
@@ -280,12 +280,14 @@ namespace Tins {
          * \brief Getter for the present bit fields.
          * 
          * Use this method and masks created from the values taken from 
-         * the PresentFlags enum to find out which fields are set. If any 
-         * getter is used for a non-initialized field, the return value 
+         * the PresentFlags enum to find out which fields are set. 
+         * Accessing non-initialized fields, the behaviour is undefined
          * will be undefined. It is only safe to use the getter of a field 
          * if its corresponding bit flag is set in the present field.
          */
-        PresentFlags present() const { return (PresentFlags)*(uint32_t*)(&_radio.it_len + 1); }
+        PresentFlags present() const { 
+            return (PresentFlags)*(uint32_t*)(&_radio.it_len + 1); 
+        }
         
         /**
          * \brief Returns the RadioTap frame's header length.
