@@ -66,26 +66,22 @@ public:
     /**
      * Default constructs the cached PDU.
      */
-    PDUCacher() {}
+    PDUCacher() : cached_size() {}
     
     /**
      * Constructor from a cached_type.
      * \param pdu The PDU to be copy constructed.
      */
-    PDUCacher(const cached_type &pdu) : cached(pdu) {}
+    PDUCacher(const cached_type &pdu) : cached(pdu),
+      cached_size()  {}
     
     /**
      * Forwards the call to the cached PDU. \sa PDU::header_size.
      */
     uint32_t header_size() const {
-        return cached.header_size();
-    }
-    
-    /**
-     * Forwards the call to the cached PDU. \sa PDU::trailer_size.
-     */
-    uint32_t trailer_size() const {
-        return cached.trailer_size();
+        if(cached_serialization.empty())
+            cached_size = cached.size();
+        return cached_size;
     }
     
     /**
@@ -98,8 +94,8 @@ public:
     /**
      * Forwards the call to the cached PDU. \sa PDU::send.
      */
-    bool send(PacketSender &sender) {
-        return cached.send(sender);
+    void send(PacketSender &sender) {
+        cached.send(sender);
     }
     
     /**
@@ -138,13 +134,15 @@ public:
     }
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-        if(cached_serialization.size() != total_sz)
+        if(cached_serialization.size() != total_sz) {
             cached_serialization = cached.serialize();
+        }
         std::copy(cached_serialization.begin(), cached_serialization.end(), buffer);
     }
 
     cached_type cached;
     PDU::serialization_type cached_serialization;
+    mutable uint32_t cached_size;
 };
 }
 

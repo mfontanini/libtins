@@ -51,21 +51,20 @@ RSNInformation::RSNInformation(const uint8_t *buffer, uint32_t total_sz) {
 
 void RSNInformation::init(const uint8_t *buffer, uint32_t total_sz) {
     const char *err_msg = "Malformed RSN information structure";
-    check_size<uint16_t>(total_sz, err_msg);
+    if(total_sz <= sizeof(uint16_t) * 2 + sizeof(uint32_t))
+        throw std::runtime_error(err_msg);
     version(Endian::le_to_host(*(uint16_t*)buffer));
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
-    group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
     
-    check_size<uint32_t>(total_sz, err_msg);
+    group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);
-
-    check_size<uint16_t>(total_sz, err_msg);
 
     uint16_t count = *(uint16_t*)buffer;
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
+    
     if(count * sizeof(uint32_t) > total_sz)
         throw std::runtime_error(err_msg);
     total_sz -= count * sizeof(uint32_t);

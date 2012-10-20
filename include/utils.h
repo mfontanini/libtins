@@ -228,9 +228,57 @@ namespace Tins {
         }
         #endif // WIN32
         
+        /**
+         * \cond
+         */
         namespace Internals {
             void skip_line(std::istream &input);
             bool from_hex(const std::string &str, uint32_t &result);
+            
+            template<bool, typename>
+            struct enable_if {
+                
+            };
+
+            template<typename T>
+            struct enable_if<true, T> {
+                typedef T type;
+            };
+        }
+        /**
+         * \endcond
+         */
+        
+        template <typename T>
+        struct is_pdu {  
+            template <typename U>
+            static char test(typename U::PDUType*);
+             
+            template <typename U>
+            static long test(...);
+         
+            static const bool value = sizeof(test<T>(0)) == 1;
+        };
+
+        /**
+         * Returns the argument.
+         */
+        inline PDU& dereference_until_pdu(PDU &pdu) {
+            return pdu;
+        }
+        
+        /**
+         * \brief Dereferences the parameter until a PDU is found.
+         * 
+         * This function dereferences the parameter until a PDU object
+         * is found. When it's found, it is returned. 
+         * 
+         * \param value The parameter to be dereferenced.
+         */
+        template<typename T> 
+        inline typename Internals::enable_if<!is_pdu<T>::value, PDU&>::type 
+        dereference_until_pdu(T &value) {
+            return dereference_until_pdu(*value);
         }
     }
 }

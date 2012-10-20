@@ -34,6 +34,20 @@
 #include <stdexcept>
 
 namespace Tins {
+class value_too_large : public std::exception {
+public:
+    const char *what() const throw() {
+        return "Value is too large";
+    }
+};
+
+/**
+ * \class small_uint
+ * \brief Represents a field of <i>n</i> bits.
+ * 
+ * This finds the best integral type of at least <i>n</i> bits and
+ * uses it to store the wrapped value.
+ */
 template<size_t n>
 class small_uint {
 private:
@@ -74,24 +88,38 @@ private:
         static const uint64_t value = 1;
     };
 public:
-    class value_to_large : public std::exception {
-    public:
-        const char *what() const throw() {
-            return "Value is too large";
-        }
-    };
-
+    /**
+     * The type used to store the value.
+     */
     typedef typename best_type<n>::type repr_type;
+    
+    /**
+     * The maximum value this class can hold.
+     */
     static const repr_type max_value = power<2, n>::value - 1;
     
+    /**
+     * Value initializes the value.
+     */
     small_uint() : value() {}
     
+    /**
+     * \brief Copy constructs the stored value.
+     * 
+     * This throws a value_too_large exception if the value provided
+     * is larger than max_value.
+     * 
+     * \param val The parameter from which to copy construct.
+     */
     small_uint(repr_type val) {
         if(val > max_value)
-            throw value_to_large();
+            throw value_too_large();
         value = val;
     }
     
+    /**
+     * User defined conversion to repr_type.
+     */
     operator repr_type() const {
         return value;
     }

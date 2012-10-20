@@ -33,6 +33,7 @@
 #include <string>
 #include <iterator>
 #include <pcap.h>
+#include "utils.h"
 
 namespace Tins {
 class PDU;
@@ -82,27 +83,10 @@ public:
      */
     template<typename ForwardIterator>
     void write(ForwardIterator start, ForwardIterator end) {
-        typedef typename std::iterator_traits<ForwardIterator>::value_type value_type;
-        typedef derefer<value_type> deref_type;
-        
         while(start != end) 
-            write(deref_type::deref(*start++));
+            write(Utils::dereference_until_pdu(*start++));
     }
 private:
-    template<typename T>
-    struct derefer {
-        static T &deref(T &value) {
-            return value;
-        }
-    };
-    
-    template<typename T>
-    struct derefer<T*> {
-        static T &deref(T *value) {
-            return *value;
-        }
-    };
-
     // You shall not copy
     PacketWriter(const PacketWriter&);
     PacketWriter& operator=(const PacketWriter&);

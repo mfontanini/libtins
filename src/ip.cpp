@@ -77,7 +77,7 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
     buffer += head_len() * sizeof(uint32_t);
     
     _options_size = 0;
-    _padded_options_size = head_len() * sizeof(uint32_t) - sizeof(iphdr);
+    //_padded_options_size = head_len() * sizeof(uint32_t) - sizeof(iphdr);
     /* While the end of the options is not reached read an option */
     while (ptr_buffer < buffer && (*ptr_buffer != 0)) {
         //ip_option opt_to_add;
@@ -126,6 +126,8 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
         }
         _options_size += _ip_options.back().data_size() + 2;
     }
+    uint8_t padding = _options_size % 4;
+    _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
     // check this line PLX
     total_sz -= head_len() * sizeof(uint32_t);
     if (total_sz) {
@@ -304,7 +306,7 @@ uint16_t IP::stream_identifier() const {
 void IP::add_option(const ip_option &option) {
     _ip_options.push_back(option);
     _options_size += 1 + option.data_size();
-    uint8_t padding = _options_size & 3;
+    uint8_t padding = _options_size % 4;
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
 }
 

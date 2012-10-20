@@ -54,5 +54,6 @@
 #include "tcp_stream.h"
 #include "crypto.h"
 #include "pdu_cacher.h"
+#include "rsn_information.h"
 
 #endif // TINS_TINS_H

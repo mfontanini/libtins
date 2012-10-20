@@ -29,6 +29,7 @@
 
 #include <cstring>
 #include <stdexcept>
+#include <memory>
 #include <typeinfo>
 #include "dns_record.h"
 #include "endianness.h"
@@ -50,10 +51,11 @@ DNSResourceRecord::DNSResourceRecord(DNSRRImpl *impl,
 DNSResourceRecord::DNSResourceRecord(const uint8_t *buffer, uint32_t size) 
 {
     const uint8_t *buffer_end = buffer + size;
+    std::auto_ptr<DNSRRImpl> tmp_impl;
     if((*buffer & 0xc0)) {
         uint16_t offset(*reinterpret_cast<const uint16_t*>(buffer));
         offset = Endian::be_to_host(offset) & 0x3fff;
-        impl = new OffsetedDNSRRImpl(Endian::host_to_be(offset));
+        tmp_impl.reset(new OffsetedDNSRRImpl(Endian::host_to_be(offset)));
         buffer += sizeof(uint16_t);
     }
     else {
@@ -63,7 +65,7 @@ DNSResourceRecord::DNSResourceRecord(const uint8_t *buffer, uint32_t size)
         if(str_end == buffer_end)
             throw std::runtime_error("Not enough size for a resource domain name.");
         //str_end++;
-        impl = new NamedDNSRRImpl(buffer, str_end);
+        tmp_impl.reset(new NamedDNSRRImpl(buffer, str_end));
         buffer = ++str_end;
     }
     if(buffer + sizeof(info_) > buffer_end)
@@ -86,6 +88,7 @@ DNSResourceRecord::DNSResourceRecord(const uint8_t *buffer, uint32_t size)
         *(uint32_t*)&data[0] = *(uint32_t*)buffer;
     else
         throw std::runtime_error("Not enough size for resource data");
+    impl = tmp_impl.release();
 }
 
 DNSResourceRecord::DNSResourceRecord(const DNSResourceRecord &rhs) 

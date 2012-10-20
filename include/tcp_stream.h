@@ -38,6 +38,7 @@
 #include <stdint.h>
 #include "sniffer.h"
 #include "tcp.h"
+#include "utils.h"
 #include "ip.h"
 #include "ip_address.h"
 
@@ -297,37 +298,6 @@ private:
         EndFunctor end_fun;
     };
     
-    template <typename T>
-    struct is_pdu {  
-        template <typename U>
-        static char test(typename U::PDUType*);
-         
-        template <typename U>
-        static long test(...);
-     
-        static const bool value = sizeof(test<T>(0)) == 1;
-    };
-
-    template<bool, typename>
-    struct enable_if {
-        
-    };
-
-    template<typename T>
-    struct enable_if<true, T> {
-        typedef T type;
-    };
-    
-    static PDU& recursive_dereference(PDU &pdu) {
-        return pdu;
-    }
-    
-    template<typename T>
-    static typename enable_if<!is_pdu<T>::value, PDU&>::type 
-    recursive_dereference(T &value) {
-        return recursive_dereference(*value);
-    }
-    
     void clear_state() {
         sessions.clear();
         last_identifier = 0;
@@ -355,7 +325,7 @@ void TCPStreamFollower::follow_streams(ForwardIterator start, ForwardIterator en
 {
     clear_state();
     while(start != end) {
-        if(!callback(recursive_dereference(start), data_fun, end_fun))
+        if(!callback(Utils::dereference_until_pdu(start), data_fun, end_fun))
             return;
         start++;
     }
