@@ -68,7 +68,8 @@ namespace Tins {
          * sniffer's filter, or the first sniffed packet if no filter has
          * been set.
          * \return The captured packet, matching the given filter, 0 if an
-         * error occured(probably compiling the filter).
+         * error occured(probably compiling the filter). Caller takes
+         * ownership of the packet.
          */
         PDU *next_packet();
         

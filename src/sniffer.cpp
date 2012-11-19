@@ -65,23 +65,16 @@ bool BaseSniffer::compile_set_filter(const string &filter, bpf_program &prog) {
 PDU *BaseSniffer::next_packet() {
     pcap_pkthdr header;
     PDU *ret = 0;
-    while(!ret) {
-        const u_char *content = pcap_next(handle, &header);
-        if(content) {
-            try {
-                if(iface_type == DLT_EN10MB)
-                    ret = new EthernetII((const uint8_t*)content, header.caplen);
-                else if(iface_type == DLT_IEEE802_11_RADIO)
-                    ret = new RadioTap((const uint8_t*)content, header.caplen);
-                else if(iface_type == DLT_IEEE802_11)
-                    ret = Dot11::from_bytes((const uint8_t*)content, header.caplen);
-                else if(iface_type == DLT_LOOP)
-                    ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
-            }
-            catch(...) {
-                ret = 0;
-            }
-        }
+    const u_char *content = pcap_next(handle, &header);
+    if(content) {
+        if(iface_type == DLT_EN10MB)
+            ret = new EthernetII((const uint8_t*)content, header.caplen);
+        else if(iface_type == DLT_IEEE802_11_RADIO)
+            ret = new RadioTap((const uint8_t*)content, header.caplen);
+        else if(iface_type == DLT_IEEE802_11)
+            ret = Dot11::from_bytes((const uint8_t*)content, header.caplen);
+        else if(iface_type == DLT_LOOP)
+            ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
     }
     return ret;
 }
