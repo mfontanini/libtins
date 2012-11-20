@@ -226,7 +226,7 @@ namespace Tins {
             if(!ret_val)
                 pcap_breakloop(data->handle);
         }
-        catch(...) {
+        catch(std::runtime_error&) {
             
         }
     }
