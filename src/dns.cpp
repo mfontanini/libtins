@@ -326,7 +326,7 @@ void DNS::add_suffix(uint32_t index, const uint8_t *data, uint32_t sz) const {
 uint32_t DNS::build_suffix_map(uint32_t index, const ResourcesType &lst) const {
     const string *str;
     for(ResourcesType::const_iterator it(lst.begin()); it != lst.end(); ++it) {
-        str = it->dname();
+        str = it->has_domain_name() ? it->dname() : 0;
         if(str) {
             add_suffix(index, (uint8_t*)str->c_str(), str->size());
             index += str->size() + 1;
@@ -374,7 +374,9 @@ void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) const 
             index &= 0x3fff;
             SuffixMap::iterator it(suffixes.find(index));
             SuffixIndices::iterator suff_it(suffix_indices.find(index));
-            if(it == suffixes.end() || suff_it == suffix_indices.end())
+            // We need at least a suffix or a suffix index to compose 
+            // the domain name
+            if(it == suffixes.end() && suff_it == suffix_indices.end())
                 throw std::runtime_error("Malformed DNS packet");
             bool first(true);
             do {

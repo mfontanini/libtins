@@ -1,12 +1,26 @@
+BASENAME=libtins.so
+MAJOR=0
+MINOR=2
+
+SONAME=$(BASENAME).$(MAJOR)
+
 CXX=@CXX@
 CFLAGS=-c -Wall -fPIC @CFLAGS@ -DTINS_VERSION=@PACKAGE_VERSION@
-LDFLAGS=-lpcap -shared -Wl,-soname,libtins.so -Wl,-z,defs
+LDFLAGS=-lpcap -shared -Wl,-soname,$(SONAME) -Wl,-z,defs
 SOURCES=$(wildcard src/*.cpp)
 
 OBJECTS=$(SOURCES:.cpp=.o)
 INCLUDE=-Iinclude/
-EXECUTABLE=libtins.so
+EXECUTABLE=$(BASENAME).$(MAJOR).$(MINOR)
 DEPS = $(SOURCES:.cpp=.d)
+
+prefix = /usr/local
+exec_prefix = $(prefix)
+
+bindir = $(exec_prefix)/bin
+libdir = $(exec_prefix)/lib
+includedir = $(prefix)/include
+
 
 all: $(SOURCES) $(EXECUTABLE)
 
@@ -30,15 +44,22 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -MG -MM -MP -MT"$(<:.cpp=.o)" $< >> depends.d
 
 clean:
-	rm $(OBJECTS) $(EXECUTABLE)
+	rm -f $(OBJECTS) $(EXECUTABLE)
 
 install:
-	install -d /usr/include/tins/
-	install -t /usr/include/tins/ include/*
-	install $(EXECUTABLE) /usr/lib/
+	install -d $(DESTDIR)$(includedir)/tins/
+	install -m 644 -t $(DESTDIR)$(includedir)/tins/ include/*
+	install -d $(DESTDIR)$(libdir)
+	install -m 644 $(EXECUTABLE) $(DESTDIR)$(libdir)/
+	if [ -f $(DESTDIR)$(libdir)/$(BASENAME) ]; then rm $(DESTDIR)$(libdir)/$(BASENAME); fi
+	if [ -f $(DESTDIR)$(libdir)/$(SONAME) ]; then rm $(DESTDIR)$(libdir)/$(SONAME); fi
+	ln -s $(EXECUTABLE) $(DESTDIR)$(libdir)/$(BASENAME)
+	ln -s $(EXECUTABLE) $(DESTDIR)$(libdir)/$(SONAME)
 
 uninstall:
-	rm -r /usr/include/tins/
-	rm /usr/lib/$(EXECUTABLE)
+	rm -r $(DESTDIR)$(includedir)/tins/
+	rm $(DESTDIR)$(libdir)/$(EXECUTABLE)
+	rm $(DESTDIR)$(libdir)/$(BASENAME)
+	rm $(DESTDIR)$(libdir)/$(SONAME)
 
 -include depends.d

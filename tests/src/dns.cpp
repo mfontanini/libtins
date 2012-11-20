@@ -221,4 +221,17 @@ TEST_F(DNSTest, Answers) {
     }
 }
 
-
+TEST_F(DNSTest, AnswersWithSameName) {
+    DNS dns;
+    dns.add_answer("www.example.com", DNS::make_info(DNS::A, DNS::IN, 0x762), IPv4Address("127.0.0.1"));
+    dns.add_answer("www.example.com", DNS::make_info(DNS::A, DNS::IN, 0x762), IPv4Address("127.0.0.2"));
+    ASSERT_EQ(dns.answers_count(), 2);
+    DNS::resources_type resources = dns.answers();
+    for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
+        EXPECT_TRUE(it->data() == "127.0.0.1" || it->data() == "127.0.0.2");
+        EXPECT_EQ(it->dname(), "www.example.com");
+        EXPECT_EQ(it->type(), DNS::A);
+        EXPECT_EQ(it->ttl(), 0x762);
+        EXPECT_EQ(it->query_class(), DNS::IN);
+    }
+}
