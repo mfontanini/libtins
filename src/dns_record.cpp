@@ -84,12 +84,10 @@ DNSResourceRecord::DNSResourceRecord(const uint8_t *buffer, uint32_t size)
     buffer += sizeof(uint16_t);
     if(buffer + data.size() > buffer_end)
         throw std::runtime_error("Not enough size for resource data");
-    if(contains_dname(info_.type))
+    if(contains_dname(info_.type) || data.size() != sizeof(uint32_t))
         std::copy(buffer, buffer + data.size(), data.begin());
     else if(data.size() == sizeof(uint32_t))
         *(uint32_t*)&data[0] = *(uint32_t*)buffer;
-    else
-        throw std::runtime_error("Not enough size for resource data");
     impl = tmp_impl.release();
 }
 
