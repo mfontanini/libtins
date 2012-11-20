@@ -37,8 +37,10 @@
 namespace Tins {
 bool contains_dname(uint16_t type) {
     type = Endian::be_to_host(type);
-    return type == 15 || type == 5 ||
-          type == 12 || type == 2;
+    return type == 1 || type == 2 || 
+            type == 5 ||  type == 6 || 
+            type == 12 || type == 15 || 
+            type == 28 || type == 41;
 }
     
 DNSResourceRecord::DNSResourceRecord(DNSRRImpl *impl, 
