@@ -42,6 +42,7 @@
 
 namespace Tins {
     class IPv4Address;
+    class IPv6Address;
     
     /**
      * \class DNS
@@ -240,6 +241,7 @@ namespace Tins {
         typedef std::list<Query> queries_type;
         typedef std::list<Resource> resources_type;
         typedef IPv4Address address_type;
+        typedef IPv6Address address_v6_type;
         
         /**
          * \brief Default constructor.
@@ -485,6 +487,18 @@ namespace Tins {
          */
         void add_answer(const std::string &name, 
           const DNSResourceRecord::info &info, address_type ip);
+          
+        /**
+         * \brief Add a query response.
+         * 
+         * \param name The resolved name.
+         * \param type The type of this answer.
+         * \param qclass The class of this answer.
+         * \param ttl The time-to-live of this answer.
+         * \param ip The ip address of the resolved name.
+         */
+        void add_answer(const std::string &name, 
+          const DNSResourceRecord::info &info, address_v6_type ip);
                         
         /**
          * \brief Add a query response.

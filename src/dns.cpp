@@ -34,6 +34,7 @@
 #include <memory>
 #include "dns.h"
 #include "ip_address.h"
+#include "ipv6_address.h"
 
 using std::string;
 using std::list;
@@ -163,6 +164,13 @@ void DNS::add_answer(const string &name, const DNSResourceRecord::info &info,
   address_type ip) 
 {
     ans.push_back(make_record(name, info, Endian::host_to_be((uint32_t)ip)));
+    dns.answers = Endian::host_to_be<uint16_t>(ans.size());
+}
+
+void DNS::add_answer(const string &name, const DNSResourceRecord::info &info, 
+  address_v6_type ip) 
+{
+    ans.push_back(make_record(name, info, ip.begin(), address_v6_type::address_size));
     dns.answers = Endian::host_to_be<uint16_t>(ans.size());
 }
 
@@ -433,14 +441,7 @@ void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) 
             if(Endian::be_to_host(it->information().type) == DNS::AAAA) {
                 if(sz != 16)
                     throw std::runtime_error("Malformed IPv6 address");
-                std::ostringstream oss;
-                oss << std::hex;
-                for(size_t i = 0; i < 16; i += 2) {
-                    oss << (int)ptr[i] << (int)ptr[i+1];
-                    if(i != 14)
-                        oss << ':';
-                }
-                addr = oss.str();
+                addr = IPv6Address(ptr).to_string();
             }
             else
                 compose_name(ptr, sz, addr);

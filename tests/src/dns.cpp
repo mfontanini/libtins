@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 #include "dns.h"
+#include "ipv6_address.h"
 #include "utils.h"
 
 using namespace Tins;
@@ -232,6 +233,22 @@ TEST_F(DNSTest, AnswersWithSameName) {
         EXPECT_EQ(it->dname(), "www.example.com");
         EXPECT_EQ(it->type(), DNS::A);
         EXPECT_EQ(it->ttl(), 0x762);
+        EXPECT_EQ(it->query_class(), DNS::IN);
+    }
+}
+
+TEST_F(DNSTest, AnswersV6) {
+    DNS dns;
+    dns.add_answer("www.example.com", DNS::make_info(DNS::AAAA, DNS::IN, 0x762), IPv6Address("f9a8:239::1:1"));
+    dns.add_answer("www.example.com", DNS::make_info(DNS::AAAA, DNS::IN, 0x762), IPv6Address("f9a8:239::1:1"));
+    ASSERT_EQ(dns.answers_count(), 2);
+    
+    DNS::resources_type resources = dns.answers();
+    for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
+        EXPECT_EQ(it->dname(), "www.example.com");
+        EXPECT_EQ(it->type(), DNS::AAAA);
+        EXPECT_EQ(it->ttl(), 0x762);
+        EXPECT_EQ(it->data(), "f9a8:239::1:1");
         EXPECT_EQ(it->query_class(), DNS::IN);
     }
 }

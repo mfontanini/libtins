@@ -73,6 +73,15 @@ public:
     IPv6Address(const std::string &addr);
     
     /**
+     * \brief Constructor from a buffer.
+     * 
+     * The ptr parameter must be at least address_size bytes long.
+     * 
+     * \param ptr The buffer from which to construct this object.
+     */
+    IPv6Address(const_iterator ptr);
+    
+    /**
      * \brief Retrieve the string representation of this address.
      * 
      * \return std::string containing the representation of this address.
