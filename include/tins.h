@@ -55,5 +55,7 @@
 #include "crypto.h"
 #include "pdu_cacher.h"
 #include "rsn_information.h"
+#include "ipv6_address.h"
+#include "ip_address.h"
 
 #endif // TINS_TINS_H
