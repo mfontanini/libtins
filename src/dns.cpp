@@ -30,6 +30,7 @@
 #include <utility>
 #include <stdexcept>
 #include <cassert>
+#include <sstream>
 #include <memory>
 #include "dns.h"
 #include "ip_address.h"
@@ -429,7 +430,20 @@ void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) 
                 ptr += 2;
                 sz -= 2;
             }
-            compose_name(ptr, sz, addr);
+            if(Endian::be_to_host(it->information().type) == DNS::AAAA) {
+                if(sz != 16)
+                    throw std::runtime_error("Malformed IPv6 address");
+                std::ostringstream oss;
+                oss << std::hex;
+                for(size_t i = 0; i < 16; i += 2) {
+                    oss << (int)ptr[i] << (int)ptr[i+1];
+                    if(i != 14)
+                        oss << ':';
+                }
+                addr = oss.str();
+            }
+            else
+                compose_name(ptr, sz, addr);
         }
         res.push_back(
             Resource(dname, addr, Endian::be_to_host(it->information().type), 
