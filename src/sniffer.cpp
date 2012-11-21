@@ -34,7 +34,7 @@ using std::string;
 using std::runtime_error;
 
 namespace Tins {
-BaseSniffer::BaseSniffer() : handle(0), mask(0)
+BaseSniffer::BaseSniffer() : handle(0), mask(0), timestamp_()
 {
     actual_filter.bf_insns = 0;
 }
@@ -66,6 +66,7 @@ PDU *BaseSniffer::next_packet() {
     pcap_pkthdr header;
     PDU *ret = 0;
     const u_char *content = pcap_next(handle, &header);
+    timestamp_ = header.ts;
     if(content) {
         if(iface_type == DLT_EN10MB)
             ret = new EthernetII((const uint8_t*)content, header.caplen);

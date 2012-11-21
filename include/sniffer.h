@@ -108,6 +108,17 @@ namespace Tins {
          * \brief Stops sniffing loops.
          */
         void stop_sniff();
+        
+        /**
+         * \brief Retrieves the timestamp taken from the last packet
+         * captured in the sniffing session.
+         * 
+         * This timestamp will be modified each time a packet is captured
+         * using both BaseSniffer::sniff_loop and BaseSniffer::next_packet.
+         */
+        const struct timeval &timestamp() const {
+            return timestamp_;
+        }
     protected:
         /**
          * Default constructor.
@@ -130,10 +141,12 @@ namespace Tins {
             pcap_t *handle;
             Functor c_handler;
             int iface_type;
+            timeval &timestamp;
             
             LoopData(pcap_t *_handle, const Functor _handler, 
-              int if_type) 
-            : handle(_handle), c_handler(_handler), iface_type(if_type) { }
+              int if_type, timeval &ts) 
+            : handle(_handle), c_handler(_handler), iface_type(if_type),
+              timestamp(ts) { }
         };
     
         BaseSniffer(const BaseSniffer&);
@@ -151,6 +164,7 @@ namespace Tins {
         bpf_u_int32 mask;
         bpf_program actual_filter;
         int iface_type;
+        timeval timestamp_;
     };
     
     /** 
@@ -195,7 +209,7 @@ namespace Tins {
         
     template<class Functor>
     void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
-        LoopData<Functor> data(handle, function, iface_type);
+        LoopData<Functor> data(handle, function, iface_type, timestamp_);
         pcap_loop(handle, max_packets, &BaseSniffer::callback_handler<Functor>, (u_char*)&data);
     }
     
@@ -211,6 +225,7 @@ namespace Tins {
             std::auto_ptr<PDU> pdu;
             LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
             bool ret_val(false);
+            data->timestamp = header->ts;
             if(data->iface_type == DLT_EN10MB)
                 ret_val = call_functor<Tins::EthernetII>(data, packet, header->caplen);
             else if(data->iface_type == DLT_IEEE802_11_RADIO)
