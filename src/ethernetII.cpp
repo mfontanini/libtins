@@ -40,6 +40,7 @@
 #include "packet_sender.h"
 #include "rawpdu.h"
 #include "ip.h"
+#include "ipv6.h"
 #include "arp.h"
 #include "constants.h"
 
@@ -71,6 +72,9 @@ EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz)
         switch(payload_type()) {
             case Constants::Ethernet::IP:
                 next = new Tins::IP(buffer, total_sz);
+                break;
+            case Constants::Ethernet::IPV6:
+                next = new Tins::IPv6(buffer, total_sz);
                 break;
             case Constants::Ethernet::ARP:
                 next = new Tins::ARP(buffer, total_sz);
@@ -142,6 +146,9 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
         switch (inner_pdu()->pdu_type()) {
             case PDU::IP:
                 type = Constants::Ethernet::IP;
+                break;
+            case PDU::IPv6:
+                type = Constants::Ethernet::IPV6;
                 break;
             case PDU::ARP:
                 type = Constants::Ethernet::ARP;

@@ -73,7 +73,7 @@ namespace Tins {
         
         struct Ethernet {
             enum e {
-                PUP = 0x0200,     /* Xerox PUP */
+                //~ PUP = 0x0200,     /* Xerox PUP */
                 SPRITE = 0x0500,  /* Sprite */
                 IP = 0x0800,      /* IP */
                 ARP = 0x0806,     /* Address resolution */

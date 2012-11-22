@@ -63,6 +63,7 @@ namespace Tins {
             IP_SOCKET,
             ARP_SOCKET,
             ICMP_SOCKET,
+            IPV6_SOCKET,
             SOCKETS_END
         };
 

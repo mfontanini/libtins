@@ -66,7 +66,14 @@ public:
     IPv6Address();
     
     /**
-     * \brief Constructor from a text representation.
+     * \brief Constructor from a text representation char*.
+     * \param addr The text representation from which to construct this
+     * object.
+     */
+    IPv6Address(const char *addr);
+    
+    /**
+     * \brief Constructor from a text representation std::string.
      * \param addr The text representation from which to construct this
      * object.
      */
@@ -181,6 +188,8 @@ public:
         return os << addr.to_string();
     }
 private:
+    void init(const char *addr);
+
     uint8_t address[address_size];
 };
 }

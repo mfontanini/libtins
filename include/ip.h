@@ -49,7 +49,7 @@ namespace Tins {
     class IP : public PDU {
     public:
         /**
-         * his PDU's flag.
+         * This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::IP;
     

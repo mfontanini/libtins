@@ -40,6 +40,7 @@
 #include "icmp.h"
 #include "dot11.h"
 #include "ip.h"
+#include "ipv6.h"
 #include "packet_sender.h"
 #include "packet_writer.h"
 #include "pdu.h"

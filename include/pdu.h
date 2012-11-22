@@ -101,7 +101,8 @@ namespace Tins {
             RC4EAPOL,
             RSNEAPOL,
             DNS,
-            LOOPBACK
+            LOOPBACK,
+            IPv6
         };
 
         /** \brief PDU constructor

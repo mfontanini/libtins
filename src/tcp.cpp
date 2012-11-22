@@ -31,6 +31,7 @@
 #include <cassert>
 #include "tcp.h"
 #include "ip.h"
+#include "ipv6.h"
 #include "constants.h"
 #include "rawpdu.h"
 #include "utils.h"
@@ -297,18 +298,35 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
         }
     }
 
-    const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
     memcpy(tcp_start, &_tcp, sizeof(tcphdr));
-    if(!_tcp.check && ip_packet) {
-        uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(),  
-                                                         ip_packet->dst_addr(), 
-                                                         size(), Constants::IP::PROTO_TCP) +
-                            Utils::do_checksum(tcp_start, tcp_start + total_sz);
-        while (checksum >> 16)
-            checksum = (checksum & 0xffff) + (checksum >> 16);
-        
-        ((tcphdr*)tcp_start)->check = Endian::host_to_be<uint16_t>(~checksum);
+
+    if(!_tcp.check) {
+        const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
+        if(ip_packet) {
+            uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(),  
+                                                             ip_packet->dst_addr(), 
+                                                             size(), Constants::IP::PROTO_TCP) +
+                                Utils::do_checksum(tcp_start, tcp_start + total_sz);
+            while (checksum >> 16)
+                checksum = (checksum & 0xffff) + (checksum >> 16);
+            
+            ((tcphdr*)tcp_start)->check = Endian::host_to_be<uint16_t>(~checksum);
+        }
+        else {
+            const Tins::IPv6 *ipv6_packet = dynamic_cast<const Tins::IPv6*>(parent);
+            if(ipv6_packet) {
+                uint32_t checksum = Utils::pseudoheader_checksum(ipv6_packet->src_addr(),  
+                                                             ipv6_packet->dst_addr(), 
+                                                             size(), Constants::IP::PROTO_TCP) +
+                                            Utils::do_checksum(tcp_start, tcp_start + total_sz);
+                while (checksum >> 16)
+                    checksum = (checksum & 0xffff) + (checksum >> 16);
+                
+                ((tcphdr*)tcp_start)->check = Endian::host_to_be<uint16_t>(~checksum);
+            }
+        }
     }
+    
     _tcp.check = 0;
 }
 

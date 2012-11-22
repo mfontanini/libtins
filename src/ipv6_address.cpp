@@ -41,12 +41,20 @@ namespace Tins {
         std::fill(address, address + address_size, 0);
     }
     
+    IPv6Address::IPv6Address(const char *addr) {
+        init(addr);
+    }
+    
     IPv6Address::IPv6Address(const_iterator ptr) {
         std::copy(ptr, ptr + address_size, address);
     }
     
     IPv6Address::IPv6Address(const std::string &addr) {
-        if(inet_pton(AF_INET6, addr.c_str(), address) == 0)
+        init(addr.c_str());
+    }
+    
+    void IPv6Address::init(const char *addr) {
+        if(inet_pton(AF_INET6, addr, address) == 0)
             throw malformed_address();
     }
 

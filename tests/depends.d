@@ -151,6 +151,37 @@ src/ipv6address.o: src/ipv6address.cpp ../include/ipv6_address.h \
 ../include/ip_address.h:
 
 ../include/hw_address.h:
+src/ipv6.o: src/ipv6.cpp ../include/ipv6.h ../include/pdu.h \
+ ../include/endianness.h ../include/small_uint.h \
+ ../include/ipv6_address.h ../include/tcp.h ../include/pdu_option.h \
+ ../include/udp.h ../include/icmp.h ../include/ipv6_address.h \
+ ../include/utils.h ../include/ip_address.h ../include/hw_address.h
+
+../include/ipv6.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
+
+../include/ipv6_address.h:
+
+../include/tcp.h:
+
+../include/pdu_option.h:
+
+../include/udp.h:
+
+../include/icmp.h:
+
+../include/ipv6_address.h:
+
+../include/utils.h:
+
+../include/ip_address.h:
+
+../include/hw_address.h:
 src/llc.o: src/llc.cpp ../include/llc.h ../include/pdu.h \
  ../include/endianness.h
 
@@ -1114,6 +1145,19 @@ include/tests/dot11.h:
 
 ../include/constants.h:
 ../src/ipv6_address.o: ../src/ipv6_address.cpp ../include/ipv6_address.h
+
+../include/ipv6_address.h:
+../src/ipv6.o: ../src/ipv6.cpp ../include/ipv6.h ../include/pdu.h \
+ ../include/endianness.h ../include/small_uint.h \
+ ../include/ipv6_address.h
+
+../include/ipv6.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
 
 ../include/ipv6_address.h:
 ../src/llc.o: ../src/llc.cpp ../include/pdu.h ../include/llc.h \

@@ -193,6 +193,17 @@ uint32_t Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip
     return checksum;
 }
 
+uint32_t Utils::pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip, uint32_t len, uint32_t flag) {
+    uint32_t checksum = 0;
+    IPv6Address::const_iterator it;
+    for(it = source_ip.begin(); it != source_ip.end(); ++it)
+        checksum += *it;
+    for(it = dest_ip.begin(); it != dest_ip.end(); ++it)
+        checksum += *it;
+    checksum += flag + len;
+    return checksum;
+}
+
 uint32_t Utils::crc32(const uint8_t* data, uint32_t data_size) {
     uint32_t i, crc = 0;
     static uint32_t crc_table[] = {

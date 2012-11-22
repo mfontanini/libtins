@@ -275,6 +275,18 @@ include/constants.h:
 src/ipv6_address.o: src/ipv6_address.cpp include/ipv6_address.h
 
 include/ipv6_address.h:
+src/ipv6.o: src/ipv6.cpp include/ipv6.h include/pdu.h \
+ include/endianness.h include/small_uint.h include/ipv6_address.h
+
+include/ipv6.h:
+
+include/pdu.h:
+
+include/endianness.h:
+
+include/small_uint.h:
+
+include/ipv6_address.h:
 src/llc.o: src/llc.cpp include/pdu.h include/llc.h include/pdu.h \
  include/endianness.h include/rawpdu.h
 
