@@ -404,6 +404,11 @@ namespace Tins {
 
         /**
          * \brief Searchs for an option that matchs the given flag.
+         * 
+         * If the option is not found, a null pointer is returned. 
+         * Deleting the returned pointer will result in <b>undefined 
+         * behaviour</b>.
+         * 
          * \param id The option identifier to be searched.
          */
         const ip_option *search_option(option_identifier id) const;

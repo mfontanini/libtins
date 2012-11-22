@@ -4,6 +4,7 @@
     #include <netinet/in.h>
     #include <sys/socket.h>
 #endif
+#include <iostream> //borrame
 #include "ipv6.h"
 #include "constants.h"
 #include "packet_sender.h"
@@ -15,35 +16,66 @@
 
 namespace Tins {
 
-IPv6::IPv6(address_type ip_dst, address_type ip_src, PDU *child) {
+IPv6::IPv6(address_type ip_dst, address_type ip_src, PDU *child) 
+: headers_size(0)
+{
     std::memset(&_header, 0, sizeof(_header));
     version(6);
     dst_addr(ip_dst);
     src_addr(ip_src);
 }
 
-IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz) {
+IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz) 
+: headers_size(0) {
     if(total_sz < sizeof(_header))
         throw std::runtime_error("Not enough size for an IPv6 PDU");
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
-    if (total_sz) {
-        switch(_header.next_header) {
-            case Constants::IP::PROTO_TCP:
-                inner_pdu(new Tins::TCP(buffer, total_sz));
-                break;
-            case Constants::IP::PROTO_UDP:
-                inner_pdu(new Tins::UDP(buffer, total_sz));
-                break;
-            case Constants::IP::PROTO_ICMP:
-                inner_pdu(new Tins::ICMP(buffer, total_sz));
-                break;
-            default:
-                inner_pdu(new Tins::RawPDU(buffer, total_sz));
-                break;
+    uint8_t current_header = _header.next_header;
+    while(total_sz) {
+        if(is_extension_header(current_header)) {
+            if(total_sz < 8)
+                throw header_size_error();
+            // every ext header is at least 8 bytes long
+            // minus one, from the next_header field.
+            uint8_t size = buffer[1] + 8;
+            // -1 -> next header identifier
+            if(total_sz < size) 
+                throw header_size_error();
+            // minus one, from the size field
+            add_ext_header(
+                ipv6_ext_header(buffer[0], size - sizeof(uint8_t)*2, buffer + 2)
+            );
+            current_header = buffer[0];
+            buffer += size;
+            total_sz -= size;
+        }
+        else {
+            switch(current_header) {
+                case Constants::IP::PROTO_TCP:
+                    inner_pdu(new Tins::TCP(buffer, total_sz));
+                    break;
+                case Constants::IP::PROTO_UDP:
+                    inner_pdu(new Tins::UDP(buffer, total_sz));
+                    break;
+                case Constants::IP::PROTO_ICMP:
+                    inner_pdu(new Tins::ICMP(buffer, total_sz));
+                    break;
+                default:
+                    inner_pdu(new Tins::RawPDU(buffer, total_sz));
+                    break;
+            }
+            total_sz = 0;
         }
     }
+}
+
+bool IPv6::is_extension_header(uint8_t header_id) {
+    return header_id == HOP_BY_HOP || header_id == DESTINATION_ROUTING_OPTIONS
+        || header_id == ROUTING || header_id == FRAGMENT || header_id == AUTHENTICATION
+        || header_id == SECURITY_ENCAPSULATION || header_id == DESTINATION_OPTIONS
+        || header_id == MOBILITY || header_id == NO_NEXT_HEADER;
 }
 
 void IPv6::version(small_uint<4> new_version) {
@@ -91,13 +123,15 @@ void IPv6::dst_addr(const address_type &new_dst_addr) {
 }
 
 uint32_t IPv6::header_size() const {
-    return sizeof(_header);
+    return sizeof(_header) + headers_size;
 }
 
 void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    assert(total_sz >= sizeof(_header));
+    #ifdef DEBUG
+    assert(total_sz >= header_size());
+    #endif
     if(inner_pdu()) {
-        uint8_t new_flag;
+        uint8_t new_flag = 0xff;
         switch(inner_pdu()->pdu_type()) {
             case PDU::IP:
                 new_flag = Constants::IP::PROTO_IPIP;
@@ -112,13 +146,17 @@ void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
                 new_flag = Constants::IP::PROTO_ICMP;
                 break;
             default:
-                // check for other protos
-                new_flag = 0xff;
+                break;
         };
-        next_header(new_flag);
+        if(new_flag != 0xff)
+            set_last_next_header(new_flag);
     }
     payload_length(total_sz - sizeof(_header));
     std::memcpy(buffer, &_header, sizeof(_header));
+    buffer += sizeof(_header);
+    for(headers_type::const_iterator it = ext_headers.begin(); it != ext_headers.end(); ++it) {
+        buffer = write_header(*it, buffer);
+    }
 }
 
 void IPv6::send(PacketSender &sender) {
@@ -131,6 +169,36 @@ void IPv6::send(PacketSender &sender) {
         type = PacketSender::ICMP_SOCKET;
 
     sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+}
+
+void IPv6::add_ext_header(const ipv6_ext_header &header) {
+    ext_headers.push_back(header);
+    headers_size += header.data_size() + sizeof(uint8_t) * 2;
+}
+
+const IPv6::ipv6_ext_header *IPv6::search_option(ExtensionHeader id) const {
+    uint8_t current_header = _header.next_header;
+    headers_type::const_iterator it = ext_headers.begin();
+    while(it != ext_headers.end() && current_header != id) {
+        current_header = it->option();
+        ++it;
+    }
+    if(it == ext_headers.end())
+        return 0;
+    return &*it;
+}
+
+void IPv6::set_last_next_header(uint8_t value) {
+    if(ext_headers.empty())
+        _header.next_header = value;
+    else 
+        ext_headers.back().option(value);
+}
+
+uint8_t *IPv6::write_header(const ipv6_ext_header &header, uint8_t *buffer) {
+    *buffer++ = header.option();
+    *buffer++ = (header.data_size() > 8) ? (header.data_size() - 8) : 0;
+    return std::copy(header.data_ptr(), header.data_ptr() + header.data_size(), buffer);
 }
 
 }

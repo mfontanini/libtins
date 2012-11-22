@@ -38,6 +38,7 @@
     #include <winsock2.h>
 #endif
 #include "ip.h"
+#include "ipv6.h"
 #include "tcp.h"
 #include "udp.h"
 #include "icmp.h"
@@ -140,6 +141,9 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
                 break;
             case Constants::IP::PROTO_ICMP:
                 inner_pdu(new Tins::ICMP(buffer, total_sz));
+                break;
+            case Constants::IP::PROTO_IPV6:
+                inner_pdu(new Tins::IPv6(buffer, total_sz));
                 break;
             default:
                 inner_pdu(new Tins::RawPDU(buffer, total_sz));

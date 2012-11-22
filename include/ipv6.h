@@ -30,9 +30,12 @@
 #ifndef TINS_IPV6_h
 #define TINS_IPV6_h
 
+#include <list>
+#include <stdexcept>
 #include "pdu.h"
 #include "endianness.h"
 #include "small_uint.h"
+#include "pdu_option.h"
 #include "ipv6_address.h"
 
 namespace Tins {
@@ -49,6 +52,42 @@ public:
      * The type used to store addresses.
      */
     typedef IPv6Address address_type;
+    
+    /**
+     * The type used to represent IPv6 extension headers.
+     */
+    typedef PDUOption<uint8_t> ipv6_ext_header;
+    
+    /**
+     * The type used to store the extension headers.
+     */
+    typedef std::list<ipv6_ext_header> headers_type;
+
+    /**
+     * The values used to identify extension headers.
+     */
+    enum ExtensionHeader {
+        HOP_BY_HOP = 0,
+        DESTINATION_ROUTING_OPTIONS = 60,
+        ROUTING = 43,
+        FRAGMENT = 44,
+        AUTHENTICATION = 51,
+        SECURITY_ENCAPSULATION = 50,
+        DESTINATION_OPTIONS = 60,
+        MOBILITY = 135,
+        NO_NEXT_HEADER = 59
+    };
+
+    /**
+     * Exception thrown when an invalid extension header size is 
+     * encountered.
+     */
+    class header_size_error : public std::exception {
+    public:
+        const char *what() const throw() {
+            return "Not enough size for an extension header";
+        }
+    };
 
     /**
      * \brief Constructs an IPv6 object.
@@ -223,8 +262,30 @@ public:
      * \sa PDU::send()
      */
     void send(PacketSender &sender);
+    
+    /**
+     * Adds an extension header.
+     * 
+     * \param header The extension header to be added.
+     */
+    void add_ext_header(const ipv6_ext_header &header);
+    
+    /**
+     * \brief Searchs for an extension header that matchs the given 
+     * flag.
+     * 
+     * If the header is not found, a null pointer is returned. 
+     * Deleting the returned pointer will result in <b>undefined 
+     * behaviour</b>.
+     * 
+     * \param id The header identifier to be searched.
+     */
+    const ipv6_ext_header *search_option(ExtensionHeader id) const;
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    void set_last_next_header(uint8_t value);
+    static uint8_t *write_header(const ipv6_ext_header &header, uint8_t *buffer);
+    static bool is_extension_header(uint8_t header_id);
 
     struct ipv6_header {
         #if TINS_IS_BIG_ENDIAN
@@ -246,6 +307,8 @@ private:
     } __attribute__((packed));
 
     ipv6_header _header;
+    headers_type ext_headers;
+    uint32_t headers_size;
 };
 }
 

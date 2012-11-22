@@ -105,13 +105,21 @@ public:
     }
     
     /**
+     * Sets this option's type
+     * \param opt The option type to be set.
+     */
+    void option(option_type opt) {
+        option_ = opt;
+    }
+    
+    /**
      * Retrieves this option's data.
      * 
      * If this method is called when data_size() == 0, 
      * dereferencing the returned pointer will result in undefined
      * behaviour.
      * 
-     * \return const value_type& containing this option's value.
+     * \return const data_type& containing this option's value.
      */
     const data_type *data_ptr() const {
         return &*(++value_.begin());
