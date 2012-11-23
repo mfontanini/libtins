@@ -39,6 +39,7 @@
 #include "pdu.h"
 #include "ethernetII.h"
 #include "radiotap.h"
+#include "packet.h"
 #include "loopback.h"
 #include "dot11.h"
 
@@ -67,25 +68,48 @@ namespace Tins {
          * This method returns the first sniffed packet that matches the 
          * sniffer's filter, or the first sniffed packet if no filter has
          * been set.
-         * \return The captured packet, matching the given filter, 0 if an
-         * error occured(probably compiling the filter). Caller takes
-         * ownership of the packet.
+         * 
+         * The return type is a thin wrapper over a PDU* and a Timestamp
+         * object. This wrapper can be both implicitly converted to a 
+         * PDU* and a Packet object. So doing this:
+         * 
+         * Sniffer s(...);
+         * // smart pointer? :D
+         * PDU *pdu = s.next_packet();
+         * // Packet takes care of the PDU*. \sa Packet::release_pdu
+         * Packet packet = s.next_packet();
+         * 
+         * Is fine, but this:
+         * 
+         * PtrPacket p = s.next_packet();
+         * 
+         * Is not, since PtrPacket can't be copy constructed. 
+         * 
+         * \return The captured packet, matching the given filter.
+         * If an error occured(probably compiling the filter), PtrPacket::pdu
+         * will return 0. Caller takes ownership of the PDU * stored in
+         * the PtrPacket.
          */
-        PDU *next_packet();
+        PtrPacket next_packet();
         
         /**
          * \brief Starts a sniffing loop, using a callback object for every
          * sniffed packet.
          * 
-         * The callback object must implement an operator with the 
-         * following(or compatible) signature:
+         * The callback object must implement an operator with some of
+         * the following(or compatible) signatures:
          * 
          * bool operator()(PDU&);
+         * bool operator()(RefPacket&);
          * 
          * This operator will be called using the sniffed packets 
-         * as arguments. You can modify the PDU argument as you wish. 
+         * as arguments. You can modify the parameter argument as you wish. 
          * Calling PDU methods like PDU::release_inner_pdu is perfectly 
          * valid.
+         * 
+         * The callback taking a RefPacket will contain a timestamp
+         * indicating the moment in which the packet was taken out of 
+         * the wire/pcap file. \sa RefPacket
          * 
          * Note that the Functor object will be copied using its copy
          * constructor, so that object should be some kind of proxy to
@@ -108,17 +132,6 @@ namespace Tins {
          * \brief Stops sniffing loops.
          */
         void stop_sniff();
-        
-        /**
-         * \brief Retrieves the timestamp taken from the last packet
-         * captured in the sniffing session.
-         * 
-         * This timestamp will be modified each time a packet is captured
-         * using both BaseSniffer::sniff_loop and BaseSniffer::next_packet.
-         */
-        const struct timeval &timestamp() const {
-            return timestamp_;
-        }
     protected:
         /**
          * Default constructor.
@@ -141,19 +154,18 @@ namespace Tins {
             pcap_t *handle;
             Functor c_handler;
             int iface_type;
-            timeval &timestamp;
             
             LoopData(pcap_t *_handle, const Functor _handler, 
-              int if_type, timeval &ts) 
-            : handle(_handle), c_handler(_handler), iface_type(if_type),
-              timestamp(ts) { }
+              int if_type) 
+            : handle(_handle), c_handler(_handler), iface_type(if_type)
+            { }
         };
     
         BaseSniffer(const BaseSniffer&);
         BaseSniffer &operator=(const BaseSniffer&);
         
         template<class ConcretePDU, class Functor>
-        static bool call_functor(LoopData<Functor> *data, const u_char *packet, size_t len);
+        static bool call_functor(LoopData<Functor> *data, const u_char *packet, const struct pcap_pkthdr *header);
         
         bool compile_set_filter(const std::string &filter, bpf_program &prog);
         
@@ -164,7 +176,6 @@ namespace Tins {
         bpf_u_int32 mask;
         bpf_program actual_filter;
         int iface_type;
-        timeval timestamp_;
     };
     
     /** 
@@ -209,14 +220,18 @@ namespace Tins {
         
     template<class Functor>
     void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
-        LoopData<Functor> data(handle, function, iface_type, timestamp_);
+        LoopData<Functor> data(handle, function, iface_type);
         pcap_loop(handle, max_packets, &BaseSniffer::callback_handler<Functor>, (u_char*)&data);
     }
     
     template<class ConcretePDU, class Functor>
-    bool Tins::BaseSniffer::call_functor(LoopData<Functor> *data, const u_char *packet, size_t len) {
-        ConcretePDU some_pdu((const uint8_t*)packet, len);
-        return data->c_handler(some_pdu);
+    bool Tins::BaseSniffer::call_functor(LoopData<Functor> *data, const u_char *packet, 
+      const struct pcap_pkthdr *header) 
+    {
+        ConcretePDU some_pdu((const uint8_t*)packet, header->caplen);
+        Timestamp ts(header->ts);
+        RefPacket pck(some_pdu, ts);
+        return data->c_handler(pck);
     }
     
     template<class Functor>
@@ -225,18 +240,19 @@ namespace Tins {
             std::auto_ptr<PDU> pdu;
             LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
             bool ret_val(false);
-            data->timestamp = header->ts;
             if(data->iface_type == DLT_EN10MB)
-                ret_val = call_functor<Tins::EthernetII>(data, packet, header->caplen);
+                ret_val = call_functor<Tins::EthernetII>(data, packet, header);
             else if(data->iface_type == DLT_IEEE802_11_RADIO)
-                ret_val = call_functor<Tins::RadioTap>(data, packet, header->caplen);
+                ret_val = call_functor<Tins::RadioTap>(data, packet, header);
             else if(data->iface_type == DLT_IEEE802_11) {
                 std::auto_ptr<PDU> pdu(Tins::Dot11::from_bytes((const uint8_t*)packet, header->caplen));
-                if(pdu.get())
-                    ret_val = data->c_handler(*pdu);
+                if(pdu.get()) {
+                    RefPacket pck(*pdu, header->ts);
+                    ret_val = data->c_handler(pck);
+                }
             }
             else if(data->iface_type == DLT_NULL) 
-                ret_val = call_functor<Tins::Loopback>(data, packet, header->caplen);
+                ret_val = call_functor<Tins::Loopback>(data, packet, header);
                 
             if(!ret_val)
                 pcap_breakloop(data->handle);
