@@ -122,15 +122,6 @@ public:
     : pdu_(pck.pdu()), ts(pck.timestamp()) { }
     
     /**
-     * \brief Constructs a Packet from a PtrPacket object.
-     */
-    Packet& operator=(const PtrPacket &pck) {
-        pdu_ = pck.pdu();
-        ts = pck.timestamp();
-        return *this;
-    }
-    
-    /**
      * \brief Packet destructor.
      * 
      * This calls operator delete on the stored PDU*.

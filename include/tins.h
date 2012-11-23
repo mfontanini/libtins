@@ -58,5 +58,7 @@
 #include "rsn_information.h"
 #include "ipv6_address.h"
 #include "ip_address.h"
+#include "packet.h"
+#include "timestamp.h"
 
 #endif // TINS_TINS_H

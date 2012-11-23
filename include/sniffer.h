@@ -77,7 +77,7 @@ namespace Tins {
          * // smart pointer? :D
          * PDU *pdu = s.next_packet();
          * // Packet takes care of the PDU*. \sa Packet::release_pdu
-         * Packet packet = s.next_packet();
+         * Packet packet(s.next_packet());
          * 
          * Is fine, but this:
          * 
