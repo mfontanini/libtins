@@ -44,7 +44,7 @@
 #include "endianness.h"
 #include "network_interface.h"
 #include "packet_sender.h"
-
+#include "cxxstd.h"
 
 using namespace std;
 
@@ -115,7 +115,11 @@ bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
     IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
     EthernetII packet = ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr);
-    std::auto_ptr<PDU> response(sender.send_recv(packet));
+    #if TINS_IS_CXX11
+        std::unique_ptr<PDU> response(sender.send_recv(packet));
+    #else
+        std::auto_ptr<PDU> response(sender.send_recv(packet));
+    #endif
     if(response.get()) {
         ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)

@@ -27,57 +27,15 @@
  *
  */
 
-#ifndef TINS_TIMESTAMP_H
-#define TINS_TIMESTAMP_H
+#ifndef TINS_CXXSTD_H
+#define TINS_CXXSTD_H
 
-#include <sys/time.h>
-#include "cxxstd.h"
-#if TINS_IS_CXX11
-    #include <chrono>
-#endif
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    #define TINS_CXXSTD_GCC_FIX 1
+#else
+    #define TINS_CXXSTD_GCC_FIX 0
+#endif // __GXX_EXPERIMENTAL_CXX0X__
 
-namespace Tins {
-/**
- * \brief Represents a packet timestamp.
- */
-class Timestamp {
-public:
-    /**
-     * Default constructs the timestamp.
-     */
-    Timestamp() : tv() {}
-    
-    /**
-     * Constructs a timestamp from a timeval object.
-     * \param time_val The timeval object.
-     */
-    Timestamp(const timeval &time_val) : tv(time_val) {}
-    
-    /**
-     * Returns the amount of seconds in this timestamp.
-     */
-    time_t seconds() const {
-        return tv.tv_sec;
-    }
-    
-    /**
-     * Returns the amount of microseconds in this timestamp.
-     */
-    suseconds_t microseconds() const {
-        return tv.tv_usec;
-    }
-    
-    #if TINS_IS_CXX11
-        /**
-         * Converts this Timestamp to a std::chrono::microseconds
-         */
-        operator std::chrono::microseconds() const {
-            return std::chrono::microseconds(seconds() * 1000000 + microseconds());
-        }
-    #endif
-private:
-    timeval tv;
-};
-}
+#define TINS_IS_CXX11 (__cplusplus > 199711L || TINS_CXXSTD_GCC_FIX == 1)
 
-#endif // TINS_TIMESTAMP_H
+#endif // TINS_CXXSTD_H

@@ -27,6 +27,7 @@
  *
  */
 
+#include <algorithm>
 #include "sniffer.h"
 
 
@@ -38,6 +39,24 @@ BaseSniffer::BaseSniffer() : handle(0), mask(0)
 {
     actual_filter.bf_insns = 0;
 }
+
+#if TINS_IS_CXX11
+BaseSniffer::BaseSniffer(BaseSniffer &&rhs) 
+{
+    *this = std::move(rhs);
+}
+
+BaseSniffer& BaseSniffer::operator=(BaseSniffer &&rhs) 
+{
+    handle = 0;
+    mask = rhs.mask;
+    iface_type = rhs.iface_type;
+    actual_filter.bf_insns = 0;
+    std::swap(handle, rhs.handle);
+    std::swap(actual_filter, rhs.actual_filter);
+    return *this;
+}
+#endif
     
 BaseSniffer::~BaseSniffer() {
     if(actual_filter.bf_insns)

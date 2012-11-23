@@ -58,8 +58,8 @@ void PacketWriter::write(PDU &pdu) {
     gettimeofday(&tm, 0);
     struct pcap_pkthdr header = { 
         tm,
-        buffer.size(),
-        buffer.size()
+        static_cast<bpf_u_int32>(buffer.size()),
+        static_cast<bpf_u_int32>(buffer.size())
     };
     pcap_dump((u_char*)dumper, &header, &buffer[0]);
 }

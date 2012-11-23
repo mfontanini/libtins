@@ -42,6 +42,7 @@
 #include "packet.h"
 #include "loopback.h"
 #include "dot11.h"
+#include "cxxstd.h"
 
 namespace Tins {
     /**
@@ -56,6 +57,20 @@ namespace Tins {
      */
     class BaseSniffer {
     public:
+        #if TINS_IS_CXX11
+            /**
+             * \brief Move constructor.
+             * This constructor is available only in C++11.
+             */
+            BaseSniffer(BaseSniffer &&rhs);
+            
+            /**
+             * \brief Move assignment operator.
+             * This opeartor is available only in C++11.
+             */
+            BaseSniffer& operator=(BaseSniffer &&rhs);
+        #endif
+    
         /**
          * \brief Sniffer destructor.
          * This frees all memory used by the pcap handle.

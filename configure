@@ -652,6 +652,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_c__11
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1269,6 +1270,12 @@ if test -n "$ac_init_help"; then
      short | recursive ) echo "Configuration of myconfig 0.2:";;
    esac
   cat <<\_ACEOF
+
+Optional Features:
+  --disable-option-checking  ignore unrecognized --enable/--with options
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+  --enable-c++11          enable C++11 features
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -2513,6 +2520,15 @@ then
 else
     CFLAGS="-O3"
 fi
+
+# Check whether --enable-c++11 was given.
+if test "${enable_c__11+set}" = set; then :
+  enableval=$enable_c__11; CFLAGS="$CFLAGS -std=c++0x"
+
+fi
+
+
+
 
 
 ac_ext=cpp
