@@ -114,6 +114,26 @@ src/icmp.o: src/icmp.cpp ../include/icmp.h ../include/pdu.h \
 ../include/ipv6_address.h:
 
 ../include/hw_address.h:
+src/icmpv6.o: src/icmpv6.cpp ../include/icmpv6.h ../include/pdu.h \
+ ../include/endianness.h ../include/small_uint.h ../include/utils.h \
+ ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/hw_address.h
+
+../include/icmpv6.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
+
+../include/utils.h:
+
+../include/ip_address.h:
+
+../include/ipv6_address.h:
+
+../include/hw_address.h:
 src/ipaddress.o: src/ipaddress.cpp ../include/ip_address.h \
  ../include/utils.h ../include/ip_address.h ../include/ipv6_address.h \
  ../include/hw_address.h
@@ -357,10 +377,10 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
  ../include/endianness.h ../include/hw_address.h \
  ../include/network_interface.h ../include/ip_address.h \
  ../include/radiotap.h ../include/packet.h ../include/timestamp.h \
- ../include/loopback.h ../include/dot11.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/tcp.h ../include/utils.h \
- ../include/ipv6_address.h ../include/ip.h ../include/tcp.h \
- ../include/utils.h
+ ../include/cxxstd.h ../include/loopback.h ../include/dot11.h \
+ ../include/small_uint.h ../include/pdu_option.h ../include/tcp.h \
+ ../include/utils.h ../include/ipv6_address.h ../include/ip.h \
+ ../include/tcp.h ../include/utils.h
 
 ../include/tcp_stream.h:
 
@@ -383,6 +403,8 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
 ../include/packet.h:
 
 ../include/timestamp.h:
+
+../include/cxxstd.h:
 
 ../include/loopback.h:
 
@@ -1147,6 +1169,16 @@ include/tests/dot11.h:
 ../include/ipv6_address.h:
 
 ../include/hw_address.h:
+../src/icmpv6.o: ../src/icmpv6.cpp ../include/icmpv6.h ../include/pdu.h \
+ ../include/endianness.h ../include/small_uint.h
+
+../include/icmpv6.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
 ../src/ieee802_3.o: ../src/ieee802_3.cpp ../include/ieee802_3.h \
  ../include/pdu.h ../include/endianness.h ../include/hw_address.h \
  ../include/network_interface.h ../include/ip_address.h \
@@ -1400,8 +1432,8 @@ include/tests/dot11.h:
  ../include/pdu.h ../include/ethernetII.h ../include/endianness.h \
  ../include/hw_address.h ../include/network_interface.h \
  ../include/ip_address.h ../include/radiotap.h ../include/packet.h \
- ../include/timestamp.h ../include/loopback.h ../include/dot11.h \
- ../include/small_uint.h ../include/pdu_option.h
+ ../include/timestamp.h ../include/cxxstd.h ../include/loopback.h \
+ ../include/dot11.h ../include/small_uint.h ../include/pdu_option.h
 
 ../include/sniffer.h:
 
@@ -1422,6 +1454,8 @@ include/tests/dot11.h:
 ../include/packet.h:
 
 ../include/timestamp.h:
+
+../include/cxxstd.h:
 
 ../include/loopback.h:
 
@@ -1466,9 +1500,9 @@ include/tests/dot11.h:
  ../include/ethernetII.h ../include/endianness.h ../include/hw_address.h \
  ../include/network_interface.h ../include/ip_address.h \
  ../include/radiotap.h ../include/packet.h ../include/timestamp.h \
- ../include/loopback.h ../include/dot11.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/tcp.h ../include/utils.h \
- ../include/ipv6_address.h ../include/ip.h
+ ../include/cxxstd.h ../include/loopback.h ../include/dot11.h \
+ ../include/small_uint.h ../include/pdu_option.h ../include/tcp.h \
+ ../include/utils.h ../include/ipv6_address.h ../include/ip.h
 
 ../include/rawpdu.h:
 
@@ -1493,6 +1527,8 @@ include/tests/dot11.h:
 ../include/packet.h:
 
 ../include/timestamp.h:
+
+../include/cxxstd.h:
 
 ../include/loopback.h:
 
@@ -1543,7 +1579,8 @@ include/tests/dot11.h:
  ../include/hw_address.h ../include/pdu.h ../include/arp.h \
  ../include/pdu.h ../include/endianness.h ../include/ethernetII.h \
  ../include/network_interface.h ../include/endianness.h \
- ../include/network_interface.h ../include/packet_sender.h
+ ../include/network_interface.h ../include/packet_sender.h \
+ ../include/cxxstd.h
 
 ../include/utils.h:
 
@@ -1570,3 +1607,5 @@ include/tests/dot11.h:
 ../include/network_interface.h:
 
 ../include/packet_sender.h:
+
+../include/cxxstd.h:

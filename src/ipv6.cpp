@@ -12,6 +12,7 @@
 #include "tcp.h"
 #include "udp.h"
 #include "icmp.h"
+#include "icmpv6.h"
 #include "rawpdu.h"
 
 namespace Tins {
@@ -61,6 +62,9 @@ IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz)
                     break;
                 case Constants::IP::PROTO_ICMP:
                     inner_pdu(new Tins::ICMP(buffer, total_sz));
+                    break;
+                case Constants::IP::PROTO_ICMPV6:
+                    inner_pdu(new Tins::ICMPv6(buffer, total_sz));
                     break;
                 default:
                     inner_pdu(new Tins::RawPDU(buffer, total_sz));
@@ -176,7 +180,7 @@ void IPv6::add_ext_header(const ipv6_ext_header &header) {
     headers_size += header.data_size() + sizeof(uint8_t) * 2;
 }
 
-const IPv6::ipv6_ext_header *IPv6::search_option(ExtensionHeader id) const {
+const IPv6::ipv6_ext_header *IPv6::search_header(ExtensionHeader id) const {
     uint8_t current_header = _header.next_header;
     headers_type::const_iterator it = ext_headers.begin();
     while(it != ext_headers.end() && current_header != id) {

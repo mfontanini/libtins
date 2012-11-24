@@ -5,7 +5,7 @@ AC_LANG(C++)
 
 if test -n "$debug"
 then
-    CFLAGS="-DDEBUG -g"
+    CFLAGS="-DTINS_DEBUG -g"
 else
     CFLAGS="-O3"
 fi

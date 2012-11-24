@@ -6,7 +6,7 @@
 #include "tcp.h"
 #include "udp.h"
 #include "icmp.h"
-#include "rawpdu.h"
+#include "icmpv6.h"
 #include "ipv6_address.h"
 #include "utils.h"
 
@@ -54,20 +54,20 @@ void IPv6Test::test_equals(IPv6 &ip1, IPv6 &ip2) {
     EXPECT_EQ(ip1.dst_addr(), ip2.dst_addr());
     EXPECT_EQ(ip1.src_addr(), ip2.src_addr());
     
-    EXPECT_EQ(bool(ip1.search_option(IPv6::HOP_BY_HOP)), bool(ip2.search_option(IPv6::HOP_BY_HOP)));
-    const IPv6::ipv6_ext_header *header1 = ip1.search_option(IPv6::HOP_BY_HOP),
-                                    *header2 = ip2.search_option(IPv6::HOP_BY_HOP);
+    EXPECT_EQ(bool(ip1.search_header(IPv6::HOP_BY_HOP)), bool(ip2.search_header(IPv6::HOP_BY_HOP)));
+    const IPv6::ipv6_ext_header *header1 = ip1.search_header(IPv6::HOP_BY_HOP),
+                                    *header2 = ip2.search_header(IPv6::HOP_BY_HOP);
     if(header1 && header2) {
         EXPECT_EQ(header1->data_size(), header2->data_size());
     }
     
     EXPECT_EQ(bool(ip1.inner_pdu()), bool(ip2.inner_pdu()));
     
-    const RawPDU *raw1 = ip1.find_pdu<RawPDU>(), *raw2 = ip2.find_pdu<RawPDU>();
-    ASSERT_EQ(bool(raw1), bool(raw2));
+    const ICMPv6 *icmp1 = ip1.find_pdu<ICMPv6>(), *icmp2 = ip2.find_pdu<ICMPv6>();
+    ASSERT_EQ(bool(icmp1), bool(icmp2));
     
-    if(raw1) {
-        EXPECT_EQ(raw1->payload(), raw2->payload());
+    if(icmp1 && icmp2) {
+        EXPECT_EQ(icmp1->checksum(), icmp2->checksum());
     }
 }
 
@@ -111,12 +111,15 @@ TEST_F(IPv6Test, ConstructorFromBuffer2) {
     EXPECT_EQ(ipv6.hop_limit(), 1);
     EXPECT_EQ(ipv6.dst_addr(), "ff02::16");
     EXPECT_EQ(ipv6.src_addr(), "fe80::2d0:9ff:fee3:e8de");
-    // This will have to be changed when ICMPv6 is implemented
-    RawPDU *pdu = ipv6.find_pdu<RawPDU>();
-    ASSERT_TRUE(pdu);
-    EXPECT_EQ(pdu->payload_size(), 28);
     
-    const IPv6::ipv6_ext_header *header = ipv6.search_option(IPv6::HOP_BY_HOP);
+    ICMPv6 *pdu = ipv6.find_pdu<ICMPv6>();
+    ASSERT_TRUE(pdu);
+    EXPECT_EQ(pdu->type(), 143);
+    EXPECT_EQ(pdu->code(), 0);
+    EXPECT_EQ(pdu->checksum(), 0x74fe);
+    EXPECT_EQ(pdu->checksum(), 0x74fe);
+    
+    const IPv6::ipv6_ext_header *header = ipv6.search_header(IPv6::HOP_BY_HOP);
     ASSERT_TRUE(header);
     EXPECT_EQ(header->data_size(), 6);
 }

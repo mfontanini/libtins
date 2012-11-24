@@ -38,6 +38,7 @@
 #include "ieee802_3.h"
 #include "llc.h"
 #include "icmp.h"
+#include "icmpv6.h"
 #include "dot11.h"
 #include "ip.h"
 #include "ipv6.h"

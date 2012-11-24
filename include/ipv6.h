@@ -41,6 +41,9 @@
 namespace Tins {
 class PacketSender;
     
+/**
+ * Represents an IPv6 PDU.
+ */
 class IPv6 : public PDU {
 public:
     /**
@@ -280,7 +283,7 @@ public:
      * 
      * \param id The header identifier to be searched.
      */
-    const ipv6_ext_header *search_option(ExtensionHeader id) const;
+    const ipv6_ext_header *search_header(ExtensionHeader id) const;
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     void set_last_next_header(uint8_t value);

@@ -2516,7 +2516,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 if test -n "$debug"
 then
-    CFLAGS="-DDEBUG -g"
+    CFLAGS="-DTINS_DEBUG -g"
 else
     CFLAGS="-O3"
 fi
