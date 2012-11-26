@@ -30,6 +30,8 @@
 #ifndef TINS_PACKET_H
 #define TINS_PACKET_H
 
+#include <algorithm>
+#include "cxxstd.h"
 #include "pdu.h"
 #include "timestamp.h"
 
@@ -109,17 +111,74 @@ private:
 /**
  * \brief Represents a sniffed packet.
  * 
- * A Packet contains a PDU pointer and a Timestamp object. Packets can't
- * be copied and <b>will delete</b> the stored PDU* unless you call 
- * release_pdu at some point before destruction.
+ * A Packet contains a PDU pointer and a Timestamp object. Packets
+ * <b>will delete</b> the stored PDU* unless you call release_pdu at 
+ * some point before destruction. 
  */
 class Packet {
 public:
+    /**
+     * \brief Default constructs a Packet.
+     * 
+     * The PDU* will be set to a null pointer.
+     */
+    Packet() 
+    : pdu_(0) { }
+    
+    /**
+     * \brief Constructs a Packet from a RefPacket.
+     * 
+     * This calls PDU::clone on the RefPacket's PDU.
+     * 
+     */
+    Packet(const RefPacket &pck) 
+    : pdu_(pck.pdu().clone()), ts(pck.timestamp()) { }
+
     /**
      * \brief Constructs a Packet from a PtrPacket object.
      */
     Packet(const PtrPacket &pck)
     : pdu_(pck.pdu()), ts(pck.timestamp()) { }
+    
+    /**
+     * \brief Copy constructor.
+     * 
+     * This calls PDU::clone on the rhs's PDU* member.
+     */
+    Packet(const Packet &rhs) : ts(rhs.timestamp()) {
+        if(rhs.pdu())
+            pdu_ = rhs.pdu()->clone();
+    }
+    
+    /**
+     * \brief Copy assignment operator.
+     * 
+     * This calls PDU::clone on the rhs's PDU* member.
+     */
+    Packet& operator=(const Packet &rhs) {
+        ts = rhs.timestamp();
+        if(rhs.pdu())
+            pdu_ = rhs.pdu()->clone();
+        return *this;
+    }
+    
+    #if TINS_IS_CXX11
+    /**
+     * Move constructor.
+     */
+    Packet(Packet &&rhs) : pdu_(rhs.pdu()), ts(rhs.timestamp()) {
+        rhs.pdu_ = nullptr;
+    }
+    
+    /**
+     * Move assignment operator.
+     */
+    Packet& operator=(Packet &&rhs){ 
+        std::swap(pdu_, rhs.pdu_);
+        ts = rhs.timestamp();
+        return *this;
+    }
+    #endif
     
     /**
      * \brief Packet destructor.
@@ -170,9 +229,6 @@ public:
         return some_pdu;
     }
 private:
-    Packet(const Packet &);
-    Packet& operator=(const Packet &);
-
     PDU *pdu_;
     Timestamp ts;
 };
