@@ -156,9 +156,11 @@ public:
      * This calls PDU::clone on the rhs's PDU* member.
      */
     Packet& operator=(const Packet &rhs) {
-        ts = rhs.timestamp();
-        if(rhs.pdu())
-            pdu_ = rhs.pdu()->clone();
+        if(this != &rhs) {
+            delete pdu_;
+            ts = rhs.timestamp();
+            pdu_ = rhs.pdu() ? rhs.pdu()->clone() : 0;
+        }
         return *this;
     }
     
@@ -174,8 +176,10 @@ public:
      * Move assignment operator.
      */
     Packet& operator=(Packet &&rhs){ 
-        std::swap(pdu_, rhs.pdu_);
-        ts = rhs.timestamp();
+        if(this != &rhs) {
+            std::swap(pdu_, rhs.pdu_);
+            ts = rhs.timestamp();
+        }
         return *this;
     }
     #endif

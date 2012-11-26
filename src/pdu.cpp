@@ -71,7 +71,7 @@ void PDU::send(PacketSender &) {
 }
 
 PDU *PDU::recv_response(PacketSender &) { 
-    return false; 
+    return 0; 
 }
 
 void PDU::inner_pdu(PDU *next_pdu) {
