@@ -423,7 +423,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag;
         }
 
@@ -1437,7 +1437,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11::matches_flag(flag);
         }
     protected:
@@ -1563,7 +1563,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -1658,7 +1658,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -1761,7 +1761,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -1879,7 +1879,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -1998,7 +1998,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -2117,7 +2117,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -2236,7 +2236,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -2326,7 +2326,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -2391,7 +2391,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
 
@@ -2510,7 +2510,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
         }
     protected:
@@ -2658,7 +2658,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11::matches_flag(flag);
         }
 
@@ -2756,7 +2756,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == PDU::DOT11_QOS_DATA || Dot11Data::matches_flag(flag);
         }
     private:
@@ -2807,7 +2807,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == PDU::DOT11_CONTROL || Dot11::matches_flag(flag);
         }
     };
@@ -2919,7 +2919,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
@@ -2973,7 +2973,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
@@ -3027,7 +3027,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
@@ -3081,7 +3081,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
@@ -3133,7 +3133,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     };
@@ -3238,7 +3238,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
     protected:
@@ -3358,7 +3358,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == pdu_flag || Dot11Control::matches_flag(flag);
         }
 

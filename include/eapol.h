@@ -324,7 +324,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == PDU::RC4EAPOL || EAPOL::matches_flag(flag);
         }
         
@@ -665,7 +665,7 @@ namespace Tins {
          * \param flag The flag to match
          * \sa PDU::matches_flag
          */
-        bool matches_flag(PDUType flag) {
+        bool matches_flag(PDUType flag) const {
            return flag == PDU::RSNEAPOL || EAPOL::matches_flag(flag);
         }
         

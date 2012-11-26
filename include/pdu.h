@@ -197,6 +197,16 @@ namespace Tins {
             }
             return 0;
         }
+        
+        /**
+         * \brief Find and returns the first PDU that matches the given flag.
+         *
+         * \param flag The flag which being searched.
+         */
+        template<class T> 
+        const T *find_pdu(PDUType type = T::pdu_flag) const {
+            return const_cast<PDU*>(this)->find_pdu<T>();
+        }
 
         /**
          * \brief Clones this packet.
@@ -245,7 +255,7 @@ namespace Tins {
          * classes' flag.
          * \param flag The flag to match.
          */
-        virtual bool matches_flag(PDUType flag) {
+        virtual bool matches_flag(PDUType flag) const {
            return flag == pdu_type();
         }
 

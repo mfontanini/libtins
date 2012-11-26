@@ -115,7 +115,7 @@ public:
     /**
      * Forwards the call to the cached PDU. \sa PDU::matches_flag.
      */
-    bool matches_flag(PDUType flag) {
+    bool matches_flag(PDUType flag) const {
         return cached.matches_flag(flag);
     }
     
