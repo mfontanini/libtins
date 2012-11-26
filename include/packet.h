@@ -126,6 +126,14 @@ public:
     : pdu_(0) { }
     
     /**
+     * \brief Constructs a Packet from a PDU* and a Timestamp.
+     * 
+     * The PDU* is cloned using PDU::clone.
+     */
+    Packet(PDU *apdu, const Timestamp &tstamp) 
+    : pdu_(apdu->clone()), ts(tstamp) {}
+    
+    /**
      * \brief Constructs a Packet from a RefPacket.
      * 
      * This calls PDU::clone on the RefPacket's PDU.
