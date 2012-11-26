@@ -30,7 +30,10 @@
 #include <cassert>
 #include <cstring>
 #include "icmpv6.h"
+#include "ipv6.h"
 #include "rawpdu.h"
+#include "utils.h"
+#include "constants.h"
 
 namespace Tins {
 
@@ -159,13 +162,30 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     #ifdef TINS_DEBUG
     assert(total_sz >= header_size());
     #endif
+    icmp6hdr* ptr_header = (icmp6hdr*)buffer;
     std::memcpy(buffer, &_header, sizeof(_header));
+    buffer += sizeof(_header);
+    total_sz -= sizeof(_header);
     for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         #ifdef TINS_DEBUG
         assert(total_sz >= it->data_size() + sizeof(uint8_t) * 2);
         total_sz -= it->data_size() + sizeof(uint8_t) * 2;
         #endif
         buffer = write_option(*it, buffer);
+    }
+    if(!_header.cksum) {
+        const Tins::IPv6 *ipv6 = dynamic_cast<const Tins::IPv6*>(parent);
+        if(ipv6) {
+            uint32_t checksum = Utils::pseudoheader_checksum(
+                                    ipv6->src_addr(),  
+                                    ipv6->dst_addr(), 
+                                    size(), 
+                                    Constants::IP::PROTO_ICMPV6
+                                ) + Utils::do_checksum((uint8_t*)ptr_header, buffer);
+            while (checksum >> 16) 
+                checksum = (checksum & 0xffff) + (checksum >> 16);
+            ptr_header->cksum = Endian::host_to_be<uint16_t>(~checksum);
+        }
     }
 }
 

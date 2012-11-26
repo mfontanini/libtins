@@ -149,6 +149,9 @@ void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
             case PDU::ICMP:
                 new_flag = Constants::IP::PROTO_ICMP;
                 break;
+            case PDU::ICMPv6:
+                new_flag = Constants::IP::PROTO_ICMPV6;
+                break;
             default:
                 break;
         };

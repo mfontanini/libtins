@@ -49,7 +49,7 @@ public:
     /**
      * This PDU's flag.
      */
-    static const PDU::PDUType pdu_flag = PDU::IP;
+    static const PDU::PDUType pdu_flag = PDU::IPv6;
     
     /**
      * The type used to store addresses.
