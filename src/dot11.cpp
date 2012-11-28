@@ -188,7 +188,7 @@ void Dot11::send(PacketSender &sender) {
         memcpy(&(addr.sll_addr), _header.addr1, 6);
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        sender.send_l2(*this, 0, 0);
+        sender.send_l2(*this, 0, 0, _iface);
     #endif
 }
 #endif // WIN32

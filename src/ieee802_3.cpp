@@ -110,7 +110,7 @@ void IEEE802_3::send(PacketSender &sender) {
 
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        sender.send_l2(*this, 0, 0);
+        sender.send_l2(*this, 0, 0, _iface);
     #endif
 }
 #endif // WIN32
@@ -141,6 +141,8 @@ void IEEE802_3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
 
 #ifndef WIN32
 PDU *IEEE802_3::recv_response(PacketSender &sender) {
+    if(!_iface)
+        throw std::runtime_error("Interface has not been set");
     #ifndef BSD
         struct sockaddr_ll addr;
         memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -153,7 +155,7 @@ PDU *IEEE802_3::recv_response(PacketSender &sender) {
 
         return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        return sender.recv_l2(*this, 0, 0);
+        return sender.recv_l2(*this, 0, 0, _iface);
     #endif
 }
 #endif // WIN32

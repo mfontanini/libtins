@@ -37,8 +37,10 @@
 #include <stdint.h>
 #include <map>
 #include "network_interface.h"
+#include "arch.h"
 
 struct timeval;
+struct sockaddr;
 
 namespace Tins {
     class PDU;
@@ -115,7 +117,7 @@ namespace Tins {
          * 
          * \param type The type of the socket to be closed.
          */
-        void close_socket(SocketType type);
+        void close_socket(SocketType type, const NetworkInterface &iface = NetworkInterface());
 
         /** 
          * \brief Sends a PDU. 
@@ -154,7 +156,8 @@ namespace Tins {
          * \param len_addr The sockaddr struct length.
          * \return Returns the response PDU. If no response is received, then 0 is returned.
          */
-        PDU *recv_l2(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr);
+        PDU *recv_l2(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr,
+          const NetworkInterface &iface = NetworkInterface());
 
         /** 
          * \brief Sends a level 2 PDU.
@@ -169,7 +172,8 @@ namespace Tins {
          * \param link_addr The sockaddr struct which will be used to send the PDU.
          * \param len_addr The sockaddr struct length.
          */
-        void send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr);
+        void send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, 
+          const NetworkInterface &iface = NetworkInterface());
         #endif // WIN32
 
         /** 
@@ -207,10 +211,22 @@ namespace Tins {
 
         int find_type(SocketType type);
         int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y);
+        #ifndef WIN32
+        bool ether_socket_initialized(const NetworkInterface& iface = NetworkInterface()) const;
+        int get_ether_socket(const NetworkInterface& iface = NetworkInterface());
+        #endif
         
         PDU *recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen);
 
         std::vector<int> _sockets;
+        #ifndef WIN32
+            #ifdef BSD
+            typedef std::map<uint32_t, int> BSDEtherSockets;
+            BSDEtherSockets _ether_socket;
+            #else
+            int _ether_socket;
+            #endif
+        #endif
         SocketTypeMap _types;
         uint32_t _timeout, _timeout_usec;
     };
