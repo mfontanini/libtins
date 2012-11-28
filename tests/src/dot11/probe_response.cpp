@@ -36,7 +36,7 @@ void test_equals(const Dot11ProbeResponse &dot1, const Dot11ProbeResponse &dot2)
 
 void test_equals_expected(const Dot11ProbeResponse &dot11) {
     test_equals_expected(static_cast<const Dot11ManagementFrame&>(dot11));
-    EXPECT_EQ(dot11.timestamp(), 0x17a698df27838a91);
+    EXPECT_EQ(dot11.timestamp(), 0x17a698df27838a91LL);
     EXPECT_EQ(dot11.interval(), 0x928d);
     EXPECT_EQ(dot11.subtype(), Dot11::PROBE_RESP);
 }
@@ -75,8 +75,8 @@ TEST_F(Dot11ProbeResponseTest, Interval) {
 
 TEST_F(Dot11ProbeResponseTest, Timestamp) {
     Dot11ProbeResponse dot11;
-    dot11.timestamp(0x92af8a72df928a7c);
-    EXPECT_EQ(dot11.timestamp(), 0x92af8a72df928a7c);
+    dot11.timestamp(0x92af8a72df928a7cLL);
+    EXPECT_EQ(dot11.timestamp(), 0x92af8a72df928a7cLL);
 }
 
 TEST_F(Dot11ProbeResponseTest, ClonePDU) {

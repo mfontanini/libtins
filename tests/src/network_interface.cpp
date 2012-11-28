@@ -2,6 +2,7 @@
 #include <string>
 #include "network_interface.h"
 #include "utils.h"
+#include "arch.h"
 
 using namespace Tins;
 
@@ -10,9 +11,13 @@ public:
     static const std::string iface_name, iface_addr;
 };
 
+#ifdef BSD
+const std::string NetworkInterfaceTest::iface_name("lo0"),
+                  NetworkInterfaceTest::iface_addr("");
+#else
 const std::string NetworkInterfaceTest::iface_name("lo"),
                   NetworkInterfaceTest::iface_addr("");
-
+#endif
 
 TEST_F(NetworkInterfaceTest, ConstructorFromString) {
     // just test this doesn't throw
@@ -29,7 +34,7 @@ TEST_F(NetworkInterfaceTest, ConstructorFromString) {
 
 TEST_F(NetworkInterfaceTest, ConstructorFromIp) {
     NetworkInterface iface(IPv4Address("127.0.0.1"));
-    EXPECT_EQ(iface.name(), "lo");
+    EXPECT_EQ(iface.name(), iface_name);
 }
 
 TEST_F(NetworkInterfaceTest, Id) {
@@ -51,7 +56,7 @@ TEST_F(NetworkInterfaceTest, EqualsOperator) {
 }
 
 TEST_F(NetworkInterfaceTest, DistinctOperator) {
-    NetworkInterface iface1(iface_name), iface2("eth0");
+    NetworkInterface iface1(iface_name), iface2;
     EXPECT_NE(iface1, iface2);
 }
 

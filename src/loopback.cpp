@@ -36,7 +36,13 @@
 #include "packet_sender.h"
 #include "ip.h"
 #include "llc.h"
+#include "arch.h"
 #include "rawpdu.h"
+
+#if defined(BSD) && !defined(PF_LLC)
+    // compilation fix, check if it works xD
+    #define PF_LLC 26
+#endif
 
 namespace Tins {
 Loopback::Loopback()

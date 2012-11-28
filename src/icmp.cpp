@@ -37,24 +37,10 @@
 #include "rawpdu.h"
 #include "utils.h"
 
-uint16_t Tins::ICMP::global_id = 0, Tins::ICMP::global_seq = 0;
-
-
 Tins::ICMP::ICMP(Flags flag) 
 {
     std::memset(&_icmp, 0, sizeof(icmphdr));
-    switch(flag) {
-        case ECHO_REPLY:
-            break;
-        case ECHO_REQUEST:
-            set_echo_request();
-            break;
-        case DEST_UNREACHABLE:
-            set_dest_unreachable();
-            break;
-        default:
-            break;
-    };
+    type(flag);
 }
 
 Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) 
@@ -109,26 +95,10 @@ void Tins::ICMP::set_echo_request(uint16_t id, uint16_t seq) {
     sequence(seq);
 }
 
-void Tins::ICMP::set_echo_request() {
-    set_echo_request(global_id++, global_seq++);
-    if(global_id == 0xffff)
-        global_id = 0;
-    if(global_seq == 0xffff)
-        global_seq = 0;
-}
-
 void Tins::ICMP::set_echo_reply(uint16_t id, uint16_t seq) {
     type(ECHO_REPLY);
     this->id(id);
     sequence(seq);
-}
-
-void Tins::ICMP::set_echo_reply() {
-    set_echo_reply(global_id++, global_seq++);
-    if(global_id == 0xffff)
-        global_id = 0;
-    if(global_seq == 0xffff)
-        global_seq = 0;
 }
 
 void Tins::ICMP::set_info_request(uint16_t id, uint16_t seq) {

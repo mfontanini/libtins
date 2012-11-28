@@ -30,9 +30,14 @@
 #include <cstring>
 #include <cassert>
 #include <stdexcept>
+#include "arch.h"
 #ifndef WIN32
+    #ifdef BSD
+        #include <net/if_dl.h>
+    #else
+        #include <netpacket/packet.h>
+    #endif
     #include <net/ethernet.h>
-    #include <netpacket/packet.h>
 #endif
 #include "radiotap.h"
 #include "dot11.h"
@@ -226,22 +231,26 @@ void RadioTap::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
     
-    struct sockaddr_ll addr;
+    #ifndef BSD
+        struct sockaddr_ll addr;
 
-    memset(&addr, 0, sizeof(struct sockaddr_ll));
+        memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
-    addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
-    addr.sll_halen = 6;
-    addr.sll_ifindex = _iface.id();
-    
-    Tins::Dot11 *wlan = dynamic_cast<Tins::Dot11*>(inner_pdu());
-    if(wlan) {
-        Tins::Dot11::address_type dot11_addr(wlan->addr1());
-        std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);
-    }
+        addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
+        addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
+        addr.sll_halen = 6;
+        addr.sll_ifindex = _iface.id();
+        
+        Tins::Dot11 *wlan = dynamic_cast<Tins::Dot11*>(inner_pdu());
+        if(wlan) {
+            Tins::Dot11::address_type dot11_addr(wlan->addr1());
+            std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);
+        }
 
-    sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    #else
+        sender.send_l2(*this, 0, 0);
+    #endif
 }
 
 void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {

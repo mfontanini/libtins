@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include "ethernetII.h"
 #include "utils.h"
+#include "arch.h"
 #include "network_interface.h"
 
 using namespace Tins;
@@ -33,7 +34,11 @@ address_type EthernetIITest::d_addr("aa:bb:cc:dd:ee:ff");
 
 address_type EthernetIITest::empty_addr;
 
+#ifdef BSD
+const NetworkInterface EthernetIITest::iface("lo0");
+#else
 const NetworkInterface EthernetIITest::iface("lo");
+#endif
 
 const uint16_t EthernetIITest::p_type = 0xd0ab;
 

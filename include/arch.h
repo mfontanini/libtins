@@ -27,47 +27,11 @@
  *
  */
 
-#include <algorithm>
-#include "arch.h"
-#ifndef WIN32
-    #include <arpa/inet.h>
-    #ifdef BSD
-        #include <sys/socket.h>
-    #endif
+#ifndef TINS_MACROS_H
+#define TINS_MACROS_H
+
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    #include <sys/param.h>
 #endif
-#include <limits>
-#include <iostream> // borrame
-#include <sstream>
-#include "ipv6_address.h"
 
-namespace Tins {
-    IPv6Address::IPv6Address() {
-        std::fill(address, address + address_size, 0);
-    }
-    
-    IPv6Address::IPv6Address(const char *addr) {
-        init(addr);
-    }
-    
-    IPv6Address::IPv6Address(const_iterator ptr) {
-        std::copy(ptr, ptr + address_size, address);
-    }
-    
-    IPv6Address::IPv6Address(const std::string &addr) {
-        init(addr.c_str());
-    }
-    
-    void IPv6Address::init(const char *addr) {
-        if(inet_pton(AF_INET6, addr, address) == 0)
-            throw malformed_address();
-    }
-
-    std::string IPv6Address::to_string() const {
-        char buffer[INET6_ADDRSTRLEN];
-        if(inet_ntop(AF_INET6, address, buffer, sizeof(buffer)) == 0)
-            throw malformed_address();
-        return buffer;
-    }
-    
-}
-
+#endif

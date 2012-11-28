@@ -29,8 +29,6 @@ TEST_F(ICMPTest, DefaultConstructor) {
     EXPECT_EQ(icmp.type(), ICMP::ECHO_REQUEST);
     EXPECT_EQ(icmp.id(), 0);
     EXPECT_EQ(icmp.check(), 0);
-    EXPECT_EQ(icmp.gateway(), 0);
-    EXPECT_EQ(icmp.mtu(), 0);
 }
 
 TEST_F(ICMPTest, CopyConstructor) {

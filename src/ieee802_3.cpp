@@ -31,10 +31,15 @@
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
+#include "arch.h"
 #ifndef WIN32
+    #ifdef BSD
+        #include <net/if_dl.h>
+    #else
+        #include <netpacket/packet.h>
+    #endif
     #include <net/ethernet.h>
     #include <netinet/in.h>
-    #include <netpacket/packet.h>
 #endif
 #include "ieee802_3.h"
 #include "packet_sender.h"
@@ -91,18 +96,22 @@ uint32_t IEEE802_3::header_size() const {
 void IEEE802_3::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
-    
-    struct sockaddr_ll addr;
+        
+    #ifndef BSD
+        struct sockaddr_ll addr;
 
-    memset(&addr, 0, sizeof(struct sockaddr_ll));
+        memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
-    addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
-    addr.sll_halen = address_type::address_size;
-    addr.sll_ifindex = _iface.id();
-    memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
+        addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
+        addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
+        addr.sll_halen = address_type::address_size;
+        addr.sll_ifindex = _iface.id();
+        memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
 
-    sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    #else
+        sender.send_l2(*this, 0, 0);
+    #endif
 }
 #endif // WIN32
 
@@ -132,16 +141,20 @@ void IEEE802_3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
 
 #ifndef WIN32
 PDU *IEEE802_3::recv_response(PacketSender &sender) {
-    struct sockaddr_ll addr;
-    memset(&addr, 0, sizeof(struct sockaddr_ll));
+    #ifndef BSD
+        struct sockaddr_ll addr;
+        memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
-    addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_802_3);
-    addr.sll_halen = address_type::address_size;
-    addr.sll_ifindex = _iface.id();
-    memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
+        addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
+        addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_802_3);
+        addr.sll_halen = address_type::address_size;
+        addr.sll_ifindex = _iface.id();
+        memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
 
-    return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    #else
+        return sender.recv_l2(*this, 0, 0);
+    #endif
 }
 #endif // WIN32
 

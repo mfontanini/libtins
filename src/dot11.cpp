@@ -32,9 +32,15 @@
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
+#include "arch.h"
+
 #ifndef WIN32
+    #ifdef BSD
+        #include <net/if_dl.h>
+    #else
+        #include <netpacket/packet.h>
+    #endif
     #include <net/ethernet.h>
-    #include <netpacket/packet.h>
     #include <netinet/in.h>
 #endif
 #include "dot11.h"
@@ -170,17 +176,20 @@ void Dot11::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
     
-    struct sockaddr_ll addr;
+    #ifndef BSD
+        sockaddr_ll addr;
 
-    memset(&addr, 0, sizeof(struct sockaddr_ll));
+        memset(&addr, 0, sizeof(struct sockaddr_ll));
 
-    addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
-    addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
-    addr.sll_halen = 6;
-    addr.sll_ifindex = _iface.id();
-    memcpy(&(addr.sll_addr), _header.addr1, 6);
-
-    sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
+        addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
+        addr.sll_halen = 6;
+        addr.sll_ifindex = _iface.id();
+        memcpy(&(addr.sll_addr), _header.addr1, 6);
+        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+    #else
+        sender.send_l2(*this, 0, 0);
+    #endif
 }
 #endif // WIN32
 
@@ -208,7 +217,9 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
 
 Dot11 *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     // We only need the control field, the length of the PDU will depend on the flags set.
-    if(total_sz < sizeof(ieee80211_header::control))
+    
+    // This should be sizeof(ieee80211_header::control), but gcc 4.2 complains
+    if(total_sz < 2)
         throw runtime_error("Not enough size for a IEEE 802.11 header in the buffer.");
     const ieee80211_header *hdr = (const ieee80211_header*)buffer;
     Dot11 *ret = 0;

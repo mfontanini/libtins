@@ -32,9 +32,16 @@
 #include <memory>
 #include <cassert>
 #include <cstring>
+#include "arch.h"
 #ifndef WIN32
+    #ifdef BSD
+        #include <sys/socket.h>
+        #include <netinet/in.h>
+        #include <net/if_dl.h>
+    #else
+        #include <netpacket/packet.h>
+    #endif
     #include <netdb.h>
-    #include <linux/if_packet.h>
     #include <net/if.h>
 #endif
 #include "utils.h"

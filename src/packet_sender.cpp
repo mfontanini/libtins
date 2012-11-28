@@ -33,8 +33,18 @@
     #include <sys/time.h>
     #include <arpa/inet.h>
     #include <unistd.h>
-    #include <linux/if_ether.h>
-    #include <linux/if_packet.h>
+    #include "arch.h"
+    #ifdef BSD
+        #include <sys/ioctl.h>
+        #include <sys/types.h>
+        #include <sys/stat.h>
+        #include <fcntl.h>
+        #include <net/if.h>
+        #include <net/bpf.h>
+    #else
+        #include <linux/if_ether.h>
+        #include <linux/if_packet.h>
+    #endif
     #include <netdb.h>
     #include <netinet/in.h>
     #include <errno.h>
@@ -46,7 +56,9 @@
 #include <cstring>
 #include <ctime>
 #include "pdu.h"
+#include "arch.h"
 #include "packet_sender.h"
+#include "network_interface.h"
 
 
 namespace Tins {
@@ -61,8 +73,8 @@ const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
 
 #endif
 
-PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) : 
-  _sockets(SOCKETS_END, INVALID_RAW_SOCKET), _timeout(recv_timeout), 
+PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) 
+: _sockets(SOCKETS_END, INVALID_RAW_SOCKET), _timeout(recv_timeout), 
   _timeout_usec(usec)
 {
     _types[IP_SOCKET] = IPPROTO_RAW;
@@ -81,9 +93,14 @@ PacketSender::~PacketSender() {
 }
 
 #ifndef WIN32
-void PacketSender::open_l2_socket() {
+void PacketSender::open_l2_socket(const NetworkInterface& iface) {
     if (_sockets[ETHER_SOCKET] == INVALID_RAW_SOCKET) {
-        int sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+        int sock;
+        #ifdef BSD
+            // FIXME
+        #else
+            sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+        #endif
         if (sock == -1)
             throw SocketOpenError(make_error_string());
         _sockets[ETHER_SOCKET] = sock;
@@ -145,7 +162,11 @@ void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_ad
     int sock = _sockets[ETHER_SOCKET];
     PDU::serialization_type buffer = pdu.serialize();
     if(!buffer.empty()) {
+        #ifdef BSD
+        if(write(sock, &buffer[0], buffer.size()) == -1)
+        #else
         if(sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
+        #endif
             throw SocketWriteError(make_error_string());
     }
 }

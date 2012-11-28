@@ -58,14 +58,14 @@ const uint8_t UtilsTest::data[] = {
     };
 const uint32_t UtilsTest::data_len = 500;
 
-TEST_F(UtilsTest, ResolveIp) {
+/*TEST_F(UtilsTest, ResolveIp) {
     IPv4Address localhost_ip("127.0.0.1");
 
     EXPECT_EQ(Utils::resolve_ip("localhost"), localhost_ip);
     EXPECT_THROW(Utils::resolve_ip("www.qwertyuiopasdfg.com.ar.edu.gov"), std::runtime_error);
 
 }
-
+*/
 TEST_F(UtilsTest, Crc32) {
 
     uint32_t crc = Utils::crc32(data, data_len);

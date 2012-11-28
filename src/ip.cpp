@@ -34,6 +34,7 @@
 #ifndef WIN32
     #include <netdb.h>
     #include <sys/socket.h>
+    #include <netinet/in.h>
 #else
     #include <winsock2.h>
 #endif
@@ -168,7 +169,12 @@ void IP::tos(uint8_t new_tos) {
 }
 
 void IP::tot_len(uint16_t new_tot_len) {
+    // BSD wants this in host byte order............
+    #ifdef BSD
+    _ip.tot_len = new_tot_len;
+    #else
     _ip.tot_len = Endian::host_to_be(new_tot_len);
+    #endif
 }
 
 void IP::id(uint16_t new_id) {

@@ -36,6 +36,7 @@
 #include "endianness.h"
 #include "ip_address.h"
 #include "pdu_option.h"
+#include "arch.h"
 
 namespace Tins {
 
@@ -257,7 +258,14 @@ namespace Tins {
          *
          * \return The total length of this IP PDU.
          */
-        uint16_t tot_len() const { return Endian::be_to_host(_ip.tot_len); }
+        uint16_t tot_len() const { 
+            // BSD wants this in host byte order............
+            #ifdef BSD
+            return _ip.tot_len; 
+            #else
+            return Endian::be_to_host(_ip.tot_len); 
+            #endif
+        }
 
         /**
          * \brief Getter for the id field.

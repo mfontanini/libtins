@@ -36,12 +36,13 @@
 #include <vector>
 #include <stdint.h>
 #include <map>
+#include "network_interface.h"
 
 struct timeval;
 
 namespace Tins {
     class PDU;
-
+    
     /**
      * \brief Class that enables sending the created PDUs
      *
@@ -87,7 +88,7 @@ namespace Tins {
          * 
          * If this operation fails, then a SocketOpenError will be thrown.
          */
-        void open_l2_socket();
+        void open_l2_socket(const NetworkInterface& iface = NetworkInterface());
         #endif // WIN32
 
         /** 

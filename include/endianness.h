@@ -31,12 +31,19 @@
 #define TINS_ENDIANNESS_H
 
 #include <stdint.h>
-#ifndef WIN32
+#include "arch.h"
+
+#ifdef BSD
+    #include <sys/endian.h>
+    #define TINS_IS_LITTLE_ENDIAN (_BYTE_ORDER == _LITTLE_ENDIAN)
+    #define TINS_IS_BIG_ENDIAN (_BYTE_ORDER == _BIG_ENDIAN)
+#elif !defined(WIN32)
     #include <endian.h>
+    #define TINS_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
+    #define TINS_IS_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)
 #endif
 
-#define TINS_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
-#define TINS_IS_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)
+
 
 namespace Tins {
 namespace Endian {

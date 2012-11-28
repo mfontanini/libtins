@@ -142,28 +142,12 @@ namespace Tins {
         void set_echo_request(uint16_t id, uint16_t seq);
 
         /**
-         * \brief Sets echo request flag for this PDU.
-         *
-         * This uses a global id and sequence number to fill the request's
-         * fields.
-         */
-        void set_echo_request();
-
-        /**
          * \brief Sets echo reply flag for this PDU.
          *
          * \param id The identifier for this request.
          * \param seq The sequence number for this request.
          */
         void set_echo_reply(uint16_t id, uint16_t seq);
-
-        /**
-         * \brief Sets echo reply flag for this PDU.
-         *
-         * This uses a global id and sequence number to fill the request's
-         * fields.
-         */
-        void set_echo_reply();
 
         /**
          * \brief Sets information request flag for this PDU.
@@ -317,8 +301,6 @@ namespace Tins {
             return new ICMP(*this);
         }
     private:
-        static uint16_t global_id, global_seq;
-
         struct icmphdr {
             uint8_t	type;
             uint8_t	code;
@@ -330,7 +312,7 @@ namespace Tins {
                 } echo;
                 uint32_t gateway;
                 struct {
-                    uint16_t __unused;
+                    uint16_t unused;
                     uint16_t mtu;
                 } frag;
                 uint8_t pointer;

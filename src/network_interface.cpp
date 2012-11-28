@@ -30,10 +30,17 @@
 #include <stdexcept>
 #include <vector>
 #include <cstring>
+#include "arch.h"
 #ifndef WIN32
-    #include <linux/if_packet.h>
-    #include <net/if.h>
     #include <netinet/in.h>
+    #ifdef BSD
+        #include <ifaddrs.h>
+        #include <net/if_dl.h>
+        #include <sys/socket.h>
+    #else
+        #include <linux/if_packet.h>
+    #endif
+    #include <net/if.h>
 #else
     #include <winsock2.h>
 #endif
@@ -55,21 +62,38 @@ struct InterfaceInfoCollector {
     #ifndef WIN32
     bool operator() (const struct ifaddrs *addr) {
         using Tins::Endian::host_to_be;
-        using Tins::IPv4Address;
-        const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
-        
-        if(addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id)
-            info->hw_addr = addr_ptr->sll_addr;
-        else if(addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
-            info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
-            info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
-            if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
-                info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
-            else
-                info->bcast_addr = 0;
-            found = true;
-        }
-        return found;
+            using Tins::IPv4Address;
+        #ifdef BSD
+            const struct sockaddr_dl* addr_ptr = ((struct sockaddr_dl*)addr->ifa_addr);
+            
+            if(addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id)
+                info->hw_addr = (const uint8_t*)LLADDR(addr_ptr); // mmmm
+            else if(addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
+                info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
+                info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
+                if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
+                    info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_dstaddr)->sin_addr.s_addr);
+                else
+                    info->bcast_addr = 0;
+                found = true;
+            }
+            return found;
+        #else
+            const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
+            
+            if(addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id)
+                info->hw_addr = addr_ptr->sll_addr;
+            else if(addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
+                info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
+                info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
+                if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
+                    info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
+                else
+                    info->bcast_addr = 0;
+                found = true;
+            }
+            return found;
+        #endif
     }
     #else // WIN32
     bool operator() (const IP_ADAPTER_ADDRESSES *iface) {
@@ -116,7 +140,11 @@ NetworkInterface::NetworkInterface(IPv4Address ip) : iface_id(0) {
     typedef std::vector<Utils::RouteEntry> entries_type;
     
     if(ip == "127.0.0.1")
+        #ifdef BSD
+        iface_id = resolve_index("lo0");
+        #else
         iface_id = resolve_index("lo");
+        #endif
     else {
         Utils::RouteEntry *best_match = 0;
         entries_type entries;
