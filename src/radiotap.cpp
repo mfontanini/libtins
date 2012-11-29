@@ -249,7 +249,7 @@ void RadioTap::send(PacketSender &sender) {
 
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        sender.send_l2(*this, 0, 0);
+        sender.send_l2(*this, 0, 0, _iface);
     #endif
 }
 

@@ -27,13 +27,13 @@
  *
  */
 
+#include "packet_sender.h"
 #ifndef WIN32
     #include <sys/socket.h>
     #include <sys/select.h>
     #include <sys/time.h>
     #include <arpa/inet.h>
     #include <unistd.h>
-    #include "arch.h"
     #ifdef BSD
         #include <sys/ioctl.h>
         #include <sys/types.h>
@@ -57,7 +57,6 @@
 #include <ctime>
 #include "pdu.h"
 #include "arch.h"
-#include "packet_sender.h"
 #include "network_interface.h"
 
 
@@ -74,7 +73,11 @@ const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
 #endif
 
 PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) 
-: _sockets(SOCKETS_END, INVALID_RAW_SOCKET), _timeout(recv_timeout), 
+: _sockets(SOCKETS_END, INVALID_RAW_SOCKET), 
+#ifndef BSD
+  _ether_socket(INVALID_RAW_SOCKET),
+#endif
+  _timeout(recv_timeout), 
   _timeout_usec(usec)
 {
     _types[IP_SOCKET] = IPPROTO_RAW;
@@ -90,21 +93,62 @@ PacketSender::~PacketSender() {
             ::closesocket(_sockets[i]);
         #endif
     }
+    #ifdef BSD
+    for(BSDEtherSockets::iterator it = _ether_socket.begin(); it != _ether_socket.end(); ++it)
+        ::close(it->second);
+    #else
+    if(_ether_socket != INVALID_RAW_SOCKET)
+        ::close(_ether_socket);
+    #endif
 }
 
 #ifndef WIN32
+bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const {
+    #ifdef BSD
+    return _ether_socket.count(iface.id());
+    #else
+    return _ether_socket != INVALID_RAW_SOCKET;
+    #endif
+}
+
+int PacketSender::get_ether_socket(const NetworkInterface& iface) {
+    if(!ether_socket_initialized(iface))
+        open_l2_socket(iface);
+    #ifdef BSD
+    return _ether_socket[iface.id()];
+    #else
+    return _ether_socket;
+    #endif
+}
+
 void PacketSender::open_l2_socket(const NetworkInterface& iface) {
-    if (_sockets[ETHER_SOCKET] == INVALID_RAW_SOCKET) {
-        int sock;
-        #ifdef BSD
-            // FIXME
-        #else
-            sock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-        #endif
-        if (sock == -1)
+    #ifdef BSD
+        int sock = -1;
+        // At some point, there should be an available device
+        for (int i = 0; sock == -1;i++) {
+            std::ostringstream oss;
+            oss << "/dev/bpf" << i;
+
+            sock = open(oss.str().c_str(), O_RDWR);
+        }
+        if(sock == -1) 
             throw SocketOpenError(make_error_string());
-        _sockets[ETHER_SOCKET] = sock;
+        
+        struct ifreq ifr;
+        strncpy(ifr.ifr_name, iface.name().c_str(), sizeof(ifr.ifr_name) - 1);
+        if(ioctl(sock, BIOCSETIF, (caddr_t)&ifr) < 0) {
+            ::close(sock);
+            throw SocketOpenError(make_error_string());
+        }
+        _ether_socket[iface.id()] = sock;
+    #else
+    if (_ether_socket == INVALID_RAW_SOCKET) {
+        _ether_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+        
+        if (_ether_socket == -1)
+            throw SocketOpenError(make_error_string());
     }
+    #endif
 }
 #endif // WIN32
 
@@ -130,16 +174,34 @@ void PacketSender::open_l3_socket(SocketType type) {
     }
 }
 
-void PacketSender::close_socket(SocketType type) {
-    if(type >= SOCKETS_END || _sockets[type] == INVALID_RAW_SOCKET)
-        throw InvalidSocketTypeError();
-    #ifndef WIN32
-    if(close(_sockets[type]) == -1)
-        throw SocketCloseError(make_error_string());
-    #else
-    closesocket(_sockets[type]);
-    #endif
-    _sockets[type] = INVALID_RAW_SOCKET;
+void PacketSender::close_socket(SocketType type, const NetworkInterface &iface) {
+    if(type == ETHER_SOCKET) {
+        #ifdef BSD
+        BSDEtherSockets::iterator it = _ether_socket.find(iface.id());
+        if(it == _ether_socket.end())
+            throw InvalidSocketTypeError();
+        if(::close(it->second) == -1)
+            throw SocketCloseError(make_error_string());
+        _ether_socket.erase(it);
+        #else
+        if(_ether_socket == INVALID_RAW_SOCKET)
+            throw InvalidSocketTypeError();
+        if(::close(_ether_socket) == -1)
+            throw SocketCloseError(make_error_string());
+        _ether_socket = INVALID_RAW_SOCKET;
+        #endif
+    }
+    else {
+        if(type >= SOCKETS_END || _sockets[type] == INVALID_RAW_SOCKET)
+            throw InvalidSocketTypeError();
+        #ifndef WIN32
+        if(close(_sockets[type]) == -1)
+            throw SocketCloseError(make_error_string());
+        #else
+        closesocket(_sockets[type]);
+        #endif
+        _sockets[type] = INVALID_RAW_SOCKET;
+    }
 }
 
 void PacketSender::send(PDU &pdu) {
@@ -156,24 +218,24 @@ PDU *PacketSender::send_recv(PDU &pdu) {
     return pdu.recv_response(*this);
 }
 #ifndef WIN32
-void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr) {
-    open_l2_socket();
-
-    int sock = _sockets[ETHER_SOCKET];
+void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, 
+  uint32_t len_addr, const NetworkInterface &iface) {
+    int sock = get_ether_socket(iface);
     PDU::serialization_type buffer = pdu.serialize();
     if(!buffer.empty()) {
         #ifdef BSD
-        if(write(sock, &buffer[0], buffer.size()) == -1)
+        if(::write(sock, &buffer[0], buffer.size()) == -1)
         #else
-        if(sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
+        if(::sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
         #endif
             throw SocketWriteError(make_error_string());
     }
 }
 
-PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, uint32_t len_addr) {
-    open_l2_socket();
-    return recv_match_loop(_sockets[ETHER_SOCKET], pdu, link_addr, len_addr);
+PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, 
+  uint32_t len_addr, const NetworkInterface &iface) {
+    int sock = get_ether_socket(iface);
+    return recv_match_loop(sock, pdu, link_addr, len_addr);
 }
 #endif // WIN32
 

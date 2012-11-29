@@ -130,7 +130,7 @@ void EthernetII::send(PacketSender &sender) {
 
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        sender.send_l2(*this, 0, 0);
+        sender.send_l2(*this, 0, 0, _iface);
     #endif
 }
 #endif // WIN32
@@ -185,7 +185,7 @@ PDU *EthernetII::recv_response(PacketSender &sender) {
 
         return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        return sender.recv_l2(*this, 0, 0);
+        return sender.recv_l2(*this, 0, 0, _iface);
     #endif
 }
 #endif // WIN32
