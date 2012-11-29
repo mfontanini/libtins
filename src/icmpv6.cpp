@@ -52,12 +52,19 @@ ICMPv6::ICMPv6(const uint8_t *buffer, uint32_t total_sz)
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
-    if(type() == NEIGHBOUR_SOLICIT || type() == NEIGHBOUR_ADVERT || type() == REDIRECT) {
-        if(total_sz < address_type::address_size)
+    if(has_target_addr()) {
+        if(total_sz < ipaddress_type::address_size)
             throw std::runtime_error("Not enough size for the target address");
         target_addr(buffer);
-        buffer += address_type::address_size;
-        total_sz -= address_type::address_size;
+        buffer += ipaddress_type::address_size;
+        total_sz -= ipaddress_type::address_size;
+    }
+    if(has_dest_addr()) {
+        if(total_sz < ipaddress_type::address_size)
+            throw std::runtime_error("Not enough size for the destination address");
+        dest_addr(buffer);
+        buffer += ipaddress_type::address_size;
+        total_sz -= ipaddress_type::address_size;
     }
     if(type() == ROUTER_ADVERT) {
         if(total_sz < sizeof(uint32_t) * 2)
@@ -150,12 +157,18 @@ void ICMPv6::retransmit_timer(uint32_t new_retrans_timer) {
     retrans_timer = Endian::host_to_be(new_retrans_timer);
 }
 
-void ICMPv6::target_addr(const address_type &new_target_addr) {
+void ICMPv6::target_addr(const ipaddress_type &new_target_addr) {
     _target_address = new_target_addr;
 }
 
+void ICMPv6::dest_addr(const ipaddress_type &new_dest_addr) {
+    _dest_address = new_dest_addr;
+}
+
 uint32_t ICMPv6::header_size() const {
-    return sizeof(_header) + _options_size;
+    return sizeof(_header) + _options_size + 
+        (has_target_addr() ? ipaddress_type::address_size : 0) +
+        (has_dest_addr() ? ipaddress_type::address_size : 0);
 }
 
 void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
@@ -166,6 +179,14 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     std::memcpy(buffer, &_header, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
+    if(has_target_addr()) {
+        buffer = _target_address.copy(buffer);
+        total_sz -= sizeof(ipaddress_type::address_size);
+    }
+    if(has_dest_addr()) {
+        buffer = _dest_address.copy(buffer);
+        total_sz -= sizeof(ipaddress_type::address_size);
+    }
     for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         #ifdef TINS_DEBUG
         assert(total_sz >= it->data_size() + sizeof(uint8_t) * 2);
@@ -202,7 +223,7 @@ void ICMPv6::add_option(const icmpv6_option &option) {
 
 uint8_t *ICMPv6::write_option(const icmpv6_option &opt, uint8_t *buffer) {
     *buffer++ = opt.option();
-    *buffer++ = opt.data_size();
+    *buffer++ = (opt.data_size() + sizeof(uint8_t) * 2) / 8;
     return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
 }
 
@@ -212,6 +233,126 @@ const ICMPv6::icmpv6_option *ICMPv6::search_option(Options id) const {
             return &*it;
     }
     return 0;
+}
+
+// Option setters
+
+void ICMPv6::source_link_layer_addr(const hwaddress_type &addr) {
+    add_option(icmpv6_option(SOURCE_ADDRESS, addr.begin(), addr.end()));
+}
+
+void ICMPv6::target_link_layer_addr(const hwaddress_type &addr) {
+    add_option(icmpv6_option(TARGET_ADDRESS, addr.begin(), addr.end()));
+}
+
+void ICMPv6::prefix_info(prefix_info_type info) {
+    info.valid_lifetime = Endian::host_to_be(info.valid_lifetime);
+    info.preferred_lifetime = Endian::host_to_be(info.preferred_lifetime);
+    add_option(
+        icmpv6_option(PREFIX_INFO, sizeof(prefix_info_type), (const uint8_t*)&info)
+    );
+}
+
+void ICMPv6::redirect_header(PDU::serialization_type data) {
+    // Reserved fields
+    data.insert(data.begin(), 6, 0);
+    // Padding(if necessary)
+    uint8_t padding = 8 - (data.size() + sizeof(uint8_t) * 2) % 8;
+    if(padding == 8)
+        padding = 0;
+    data.insert(data.end(), padding, 0);
+    add_option(icmpv6_option(REDIRECT_HEADER, data.begin(), data.end()));
+}
+
+void ICMPv6::mtu(uint32_t value) {
+    uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
+    *((uint32_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value);
+    add_option(icmpv6_option(MTU, sizeof(buffer), buffer));
+}
+
+void ICMPv6::shortcut_limit(uint8_t value) {
+    uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
+    buffer[0] = value;
+    add_option(icmpv6_option(NBMA_SHORT_LIMIT, sizeof(buffer), buffer));
+}
+
+void ICMPv6::new_advert_interval(uint32_t value) {
+    uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
+    *((uint32_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value);
+    add_option(icmpv6_option(ADVERT_INTERVAL, sizeof(buffer), buffer));
+}
+
+void ICMPv6::new_home_agent_info(const new_ha_info_type &value) {
+    uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
+    *((uint16_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value.first);
+    *((uint16_t*)(buffer + sizeof(uint16_t) * 2)) = Endian::host_to_be(value.second);
+    add_option(icmpv6_option(HOME_AGENT_INFO, sizeof(buffer), buffer));
+}
+
+// Option getters
+
+ICMPv6::hwaddress_type ICMPv6::source_link_layer_addr() const {
+    const icmpv6_option *opt = search_option(SOURCE_ADDRESS);
+    if(!opt || opt->data_size() != hwaddress_type::address_size)
+        throw option_not_found();
+    return hwaddress_type(opt->data_ptr());
+}
+
+ICMPv6::hwaddress_type ICMPv6::target_link_layer_addr() const {
+    const icmpv6_option *opt = search_option(TARGET_ADDRESS);
+    if(!opt || opt->data_size() != hwaddress_type::address_size)
+        throw option_not_found();
+    return hwaddress_type(opt->data_ptr());
+}
+
+ICMPv6::prefix_info_type ICMPv6::prefix_info() const {
+    const icmpv6_option *opt = search_option(PREFIX_INFO);
+    if(!opt || opt->data_size() != sizeof(prefix_info_type))
+        throw option_not_found();
+    prefix_info_type output;
+    std::memcpy(&output, opt->data_ptr(), sizeof(prefix_info_type));
+    output.valid_lifetime = Endian::be_to_host(output.valid_lifetime);
+    output.preferred_lifetime = Endian::be_to_host(output.preferred_lifetime);
+    return output;
+}
+
+PDU::serialization_type ICMPv6::redirect_header() const {
+    const icmpv6_option *opt = search_option(REDIRECT_HEADER);
+    if(!opt || opt->data_size() < 6)
+        throw option_not_found();
+    const uint8_t *ptr = opt->data_ptr() + 6;
+    return serialization_type(ptr, ptr + opt->data_size() - 6);
+}
+
+uint32_t ICMPv6::mtu() const {
+    const icmpv6_option *opt = search_option(MTU);
+    if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
+        throw option_not_found();
+    return Endian::be_to_host(*(const uint32_t*)(opt->data_ptr() + sizeof(uint16_t)));
+}
+
+uint8_t ICMPv6::shortcut_limit() const {
+    const icmpv6_option *opt = search_option(NBMA_SHORT_LIMIT);
+    if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
+        throw option_not_found();
+    return *opt->data_ptr();
+}
+
+uint32_t ICMPv6::new_advert_interval() const {
+    const icmpv6_option *opt = search_option(ADVERT_INTERVAL);
+    if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
+        throw option_not_found();
+    return Endian::be_to_host(*(const uint32_t*)(opt->data_ptr() + sizeof(uint16_t)));
+}
+
+ICMPv6::new_ha_info_type ICMPv6::new_home_agent_info() const {
+    const icmpv6_option *opt = search_option(HOME_AGENT_INFO);
+    if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
+        throw option_not_found();
+    return std::make_pair(
+        Endian::be_to_host(*(const uint16_t*)(opt->data_ptr() + sizeof(uint16_t))),
+        Endian::be_to_host(*(const uint16_t*)(opt->data_ptr() + sizeof(uint16_t) * 2))
+    );
 }
 }
 

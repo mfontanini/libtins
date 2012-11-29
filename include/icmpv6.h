@@ -36,6 +36,7 @@
 #include "pdu_option.h"
 #include "endianness.h"
 #include "small_uint.h"
+#include "hw_address.h"
 
 namespace Tins {
 /**
@@ -120,7 +121,12 @@ public:
     /**
      * The type used to store addresses.
      */
-    typedef IPv6Address address_type;
+    typedef IPv6Address ipaddress_type;
+    
+    /**
+     * The type used to store addresses.
+     */
+    typedef HWAddress<6> hwaddress_type;
     
     /**
      * The type used to represent ICMPv6 options.
@@ -131,6 +137,49 @@ public:
      * The type used to store options.
      */
     typedef std::list<icmpv6_option> options_type;
+    
+    /**
+     * \brief The type used to store the new home agent information 
+     * option data.
+     * 
+     * The first member contains the home agent preference field, while
+     * the second one contains the home agent lifetime.
+     */
+    typedef std::pair<uint16_t, uint16_t> new_ha_info_type;
+    
+    /**
+     * Type type used to store the prefix information option data.
+     */
+    struct prefix_info_type {
+        uint8_t prefix_len;
+        #if TINS_IS_LITTLE_ENDIAN
+            uint8_t reserved1:6,
+                    A:1,
+                    L:1;
+        #else
+            uint8_t L:1,
+                    A:1,
+                    reserved1:6;
+        #endif
+        uint32_t valid_lifetime,
+                preferred_lifetime,
+                reserved2;
+        uint8_t prefix[ipaddress_type::address_size];
+        
+        prefix_info_type(uint8_t prefix_len=0, small_uint<1> A=0, small_uint<1> L=0,
+            uint32_t valid_lifetime=0, uint32_t preferred_lifetime=0,
+            const ipaddress_type &addr = ipaddress_type())
+        : prefix_len(prefix_len), reserved1(0), 
+        #if TINS_IS_LITTLE_ENDIAN
+        A(A), L(L), 
+        #else
+        L(L), A(A), 
+        #endif
+        valid_lifetime(valid_lifetime), preferred_lifetime(preferred_lifetime)
+        {
+            addr.copy(prefix);
+        }
+    } __attribute__((packed));
     
     /**
      * \brief Constructs an ICMPv6 object.
@@ -285,8 +334,16 @@ public:
      *  \brief Getter for the target address field.
      *  \return The stored target address field value.
      */
-    const address_type &target_addr() const {
+    const ipaddress_type &target_addr() const {
         return _target_address;
+    }
+    
+    /**
+     *  \brief Getter for the destination address field.
+     *  \return The stored destination address field value.
+     */
+    const ipaddress_type &dest_addr() const {
+        return _dest_address;
     }
 
     // Setters
@@ -379,7 +436,13 @@ public:
      *  \brief Setter for the target address field.
      *  \param new_target_addr The new target address field value.
      */
-    void target_addr(const address_type &new_target_addr);
+    void target_addr(const ipaddress_type &new_target_addr);
+    
+    /**
+     *  \brief Setter for the destination address field.
+     *  \param new_dest_addr The new destination address field value.
+     */
+    void dest_addr(const ipaddress_type &new_dest_addr);
 
     /**
      *  \brief Setter for the reachable_time field.
@@ -409,6 +472,15 @@ public:
         return type() == NEIGHBOUR_SOLICIT || 
                 type() == NEIGHBOUR_ADVERT || 
                 type() == REDIRECT;
+    }
+    
+    /**
+     * \brief Checks whether this ICMPv6 object has a target_addr field.
+     * 
+     * This depends on the type field.
+     */
+    bool has_dest_addr() const {
+        return type() == REDIRECT;
     }
     
     /**
@@ -446,6 +518,133 @@ public:
     ICMPv6 *clone() const {
         return new ICMPv6(*this);
     }
+    
+    // Option setters
+    
+    /**
+     * \brief Setter for the source link layer address option.
+     * 
+     * \param addr The source link layer address.
+     */
+    void source_link_layer_addr(const hwaddress_type &addr);
+    
+    /**
+     * \brief Setter for the target link layer address option.
+     * 
+     * \param addr The target link layer address.
+     */
+    void target_link_layer_addr(const hwaddress_type &addr);
+    
+    /**
+     * \brief Setter for the prefix information option.
+     * 
+     * \param info The prefix information.
+     */
+    void prefix_info(prefix_info_type info);
+    
+    /**
+     * \brief Setter for the redirect header option.
+     * 
+     * This method appends the 6 reserved bytes and inserts the 
+     * necessary padding at the end.
+     * 
+     * \param data The redirect header option data.
+     */
+    void redirect_header(PDU::serialization_type data);
+    
+    /**
+     * \brief Setter for the MTU option.
+     * 
+     * \param value The MTU option data.
+     */
+    void mtu(uint32_t value);
+    
+    /**
+     * \brief Setter for the shortcut limit option.
+     * 
+     * \param value The shortcut limit option data.
+     */
+    void shortcut_limit(uint8_t value);
+    
+    /**
+     * \brief Setter for the new advertisement interval option.
+     * 
+     * \param value The new advertisement interval option data.
+     */
+    void new_advert_interval(uint32_t value);
+    
+    /**
+     * \brief Setter for the new home agent information option.
+     * 
+     * \param value The new home agent information option data.
+     */
+    void new_home_agent_info(const new_ha_info_type &value);
+    
+    // Option getters
+    
+    /**
+     * \brief Getter for the source link layer address option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    hwaddress_type source_link_layer_addr() const;
+    
+    /**
+     * \brief Getter for the target link layer address option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    hwaddress_type target_link_layer_addr() const;
+        
+    /**
+     * \brief Getter for the prefix information option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    prefix_info_type prefix_info() const;
+    
+    /**
+     * \brief Getter for the redirect header option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    PDU::serialization_type redirect_header() const;
+    
+    /**
+     * \brief Getter for the MTU option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    uint32_t mtu() const;
+    
+    /**
+     * \brief Getter for the shortcut limit option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    uint8_t shortcut_limit() const;
+    
+    /**
+     * \brief Getter for the new advertisement interval option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    uint32_t new_advert_interval() const;
+    
+    /**
+     * \brief Getter for the new home agent information option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    new_ha_info_type new_home_agent_info() const;
 private:
     struct icmp6hdr {
         uint8_t	type;
@@ -498,7 +697,7 @@ private:
 
 
     icmp6hdr _header;
-    address_type _target_address;
+    ipaddress_type _target_address, _dest_address;
     options_type _options;
     uint32_t _options_size;
     uint32_t reach_time, retrans_timer;

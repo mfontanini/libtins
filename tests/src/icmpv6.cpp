@@ -3,6 +3,8 @@
 #include <string>
 #include <stdint.h>
 #include "icmpv6.h"
+#include "ip.h"
+#include "tcp.h"
 #include "utils.h"
 #include "hw_address.h"
 
@@ -177,4 +179,64 @@ TEST_F(ICMPv6Test, RTLifetime) {
     ICMPv6 icmp;
     icmp.router_lifetime(0x827f);
     EXPECT_EQ(icmp.router_lifetime(), 0x827f);
+}
+
+TEST_F(ICMPv6Test, SourceLinkLayerAddress) {
+    ICMPv6 icmp;
+    icmp.source_link_layer_addr("09:fe:da:fe:22:33");
+    EXPECT_EQ(icmp.source_link_layer_addr(), "09:fe:da:fe:22:33");
+}
+
+TEST_F(ICMPv6Test, TargetLinkLayerAddress) {
+    ICMPv6 icmp;
+    icmp.target_link_layer_addr("09:fe:da:fe:22:33");
+    EXPECT_EQ(icmp.target_link_layer_addr(), "09:fe:da:fe:22:33");
+}
+
+TEST_F(ICMPv6Test, PrefixInformation) {
+    ICMPv6 icmp;
+    ICMPv6::prefix_info_type result, info(0x8, 1, 0, 0x92038fad, 
+        0x918273fa, "827d:adae::1");
+    icmp.prefix_info(info);
+    result = icmp.prefix_info();
+    EXPECT_EQ(result.prefix_len, info.prefix_len);
+    EXPECT_EQ(result.A, info.A);
+    EXPECT_EQ(result.L, info.L);
+    EXPECT_EQ(result.valid_lifetime, info.valid_lifetime);
+    EXPECT_EQ(result.preferred_lifetime, info.preferred_lifetime);
+    EXPECT_EQ(IPv6Address(result.prefix), IPv6Address(result.prefix));
+    EXPECT_EQ(IPv6Address(result.prefix), "827d:adae::1");
+}
+
+TEST_F(ICMPv6Test, RedirectHeader) {
+    ICMPv6 icmp;
+    IP ip = IP("127.0.0.1") / TCP(22);
+    PDU::serialization_type buffer = ip.serialize();
+    icmp.redirect_header(buffer);
+    EXPECT_EQ(buffer, icmp.redirect_header());
+}
+
+TEST_F(ICMPv6Test, MTU) {
+    ICMPv6 icmp;
+    icmp.mtu(0x9a8df7);
+    EXPECT_EQ(icmp.mtu(), 0x9a8df7);
+}
+
+TEST_F(ICMPv6Test, ShortcutLimit) {
+    ICMPv6 icmp;
+    icmp.shortcut_limit(123);
+    EXPECT_EQ(icmp.shortcut_limit(), 123);
+}
+
+TEST_F(ICMPv6Test, NewAdvertisementInterval) {
+    ICMPv6 icmp;
+    icmp.new_advert_interval(0x9a8df7);
+    EXPECT_EQ(icmp.new_advert_interval(), 0x9a8df7);
+}
+
+TEST_F(ICMPv6Test, NewHomeAgentInformation) {
+    ICMPv6 icmp;
+    ICMPv6::new_ha_info_type data(0x92fa, 0xaab3);
+    icmp.new_home_agent_info(data);
+    EXPECT_EQ(icmp.new_home_agent_info(), data);
 }
