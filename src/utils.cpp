@@ -194,11 +194,12 @@ uint32_t Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip
     uint32_t checksum(0);
     uint32_t source_ip_int = Endian::host_to_be<uint32_t>(source_ip),
              dest_ip_int = Endian::host_to_be<uint32_t>(dest_ip);
-    uint16_t *ptr = (uint16_t*)&source_ip_int;
-
-    checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
-    ptr = (uint16_t*)&dest_ip_int;
-    checksum += (uint32_t)(*ptr) + (uint32_t)(*(ptr+1));
+    char buffer[sizeof(uint32_t) * 2];
+    uint16_t *ptr = (uint16_t*)buffer, *end = (uint16_t*)(buffer + sizeof(buffer));
+    std::memcpy(buffer, &source_ip_int, sizeof(source_ip_int));
+    std::memcpy(buffer + sizeof(uint32_t), &dest_ip_int, sizeof(dest_ip_int));
+    while(ptr < end) 
+        checksum += (uint32_t)*ptr++;
     checksum += flag + len;
     return checksum;
 }

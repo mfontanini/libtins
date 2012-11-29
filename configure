@@ -600,6 +600,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+SOURCE_FILES
 CFLAGS
 EGREP
 GREP
@@ -2528,7 +2529,7 @@ if test "${enable_c__11+set}" = set; then :
 fi
 
 
-
+SOURCE_FILES=$(ls src/*cpp | tr '\n' ' ')
 
 
 ac_ext=cpp
@@ -2982,6 +2983,7 @@ _ACEOF
 else
   as_fn_error $? "pcap library is needed!" "$LINENO" 5
 fi
+
 
 
 ac_config_files="$ac_config_files Makefile"

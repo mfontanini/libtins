@@ -16,9 +16,10 @@ AC_ARG_ENABLE(
     [CFLAGS="$CFLAGS -std=c++0x"]
 )
 
-
+SOURCE_FILES=$(ls src/*cpp | tr '\n' ' ')
 
 AC_CHECK_HEADERS([pcap.h])
 AC_CHECK_LIB(pcap, pcap_loop, [], [AC_MSG_ERROR([pcap library is needed!])])
 AC_SUBST(CFLAGS)
+AC_SUBST(SOURCE_FILES)
 AC_OUTPUT(Makefile)

@@ -600,6 +600,7 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+SOURCE_FILES
 CFLAGS
 EGREP
 GREP
@@ -2523,6 +2524,8 @@ if test "${enable_c__11+set}" = set; then :
 fi
 
 
+SOURCE_FILES=$(ls ../src/*cpp src/*cpp src/dot11/*cpp | tr '\n' ' ')
+
 
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -2978,6 +2981,7 @@ else
 fi
 
 #AC_CHECK_LIB([gtest_main], [main], [], [AC_MSG_ERROR([gtest library is needed!])])
+
 
 ac_config_files="$ac_config_files Makefile"
 

@@ -7,14 +7,14 @@ SONAME=$(BASENAME).$(MAJOR)
 CXX=@CXX@
 CFLAGS=-c -Wall -fPIC @CFLAGS@ -DTINS_VERSION=@PACKAGE_VERSION@
 LDFLAGS=-lpcap -shared -Wl,-soname,$(SONAME) -Wl,-z,defs
-SOURCES=$(wildcard src/*.cpp)
+SOURCES=@SOURCE_FILES@
 
 OBJECTS=$(SOURCES:.cpp=.o)
 INCLUDE=-Iinclude/
 EXECUTABLE=$(BASENAME).$(MAJOR).$(MINOR)
 DEPS = $(SOURCES:.cpp=.d)
 
-prefix = /usr/local
+prefix = /usr
 exec_prefix = $(prefix)
 
 bindir = $(exec_prefix)/bin
@@ -48,7 +48,7 @@ clean:
 
 install:
 	install -d $(DESTDIR)$(includedir)/tins/
-	install -m 644 -t $(DESTDIR)$(includedir)/tins/ include/*
+	install -m 644 include/* $(DESTDIR)$(includedir)/tins/
 	install -d $(DESTDIR)$(libdir)
 	install -m 644 $(EXECUTABLE) $(DESTDIR)$(libdir)/
 	if [ -f $(DESTDIR)$(libdir)/$(BASENAME) ]; then rm $(DESTDIR)$(libdir)/$(BASENAME); fi
@@ -62,4 +62,4 @@ uninstall:
 	rm $(DESTDIR)$(libdir)/$(BASENAME)
 	rm $(DESTDIR)$(libdir)/$(SONAME)
 
--include depends.d
+include depends.d

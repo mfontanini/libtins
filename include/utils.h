@@ -302,49 +302,49 @@ namespace Tins {
         dereference_until_pdu(T &value) {
             return dereference_until_pdu(*value);
         }
+        #ifdef BSD
+        inline std::vector<char> query_route_table() {
+            int mib[6];
+            std::vector<char> buf;
+            size_t len;
+
+            mib[0] = CTL_NET;
+            mib[1] = AF_ROUTE;
+            mib[2] = 0;
+            mib[3] = AF_INET;
+            mib[4] = NET_RT_DUMP;
+            mib[5] = 0;	
+            if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0)
+                throw std::runtime_error("sysctl failed");
+
+            buf.resize(len);
+            if (sysctl(mib, 6, &buf[0], &len, NULL, 0) < 0) {
+                throw std::runtime_error("sysctl failed");
+            }
+
+            return buf;
+        }
+
+        template<typename ForwardIterator>
+        void parse_header(struct rt_msghdr *rtm, ForwardIterator iter)
+        {
+            char *ptr = (char *)(rtm + 1);
+            sockaddr *sa = 0;
+
+            for (int i = 0; i < RTAX_MAX; i++) {
+                if (rtm->rtm_addrs & (1 << i)) {
+                    sa = (struct sockaddr *)ptr;
+                    ptr += sa->sa_len;
+                    if (sa->sa_family == 0)
+                        sa = 0;
+                } 
+                *iter++ = sa;
+            }
+        }
+        #endif
     }
 }
 #ifdef BSD
-inline std::vector<char> query_route_table()
-{
-	int mib[6];
-	std::vector<char> buf;
-    size_t len;
-
-	mib[0] = CTL_NET;
-	mib[1] = AF_ROUTE;
-	mib[2] = 0;
-	mib[3] = AF_INET;
-    mib[4] = NET_RT_DUMP;
-	mib[5] = 0;	
-	if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0)
-		throw std::runtime_error("Failed to ioctl");
-
-	buf.resize(len);
-	if (sysctl(mib, 6, &buf[0], &len, NULL, 0) < 0) {
-		throw std::runtime_error("Failed to ioctl");
-	}
-
-	return buf;
-}
-
-template<typename ForwardIterator>
-void parse_header(struct rt_msghdr *rtm, ForwardIterator iter)
-{
-    char *ptr = (char *)(rtm + 1);
-    sockaddr *sa;
-
-    for (int i = 0; i < RTAX_MAX; i++) {
-        if (rtm->rtm_addrs & (1 << i)) {
-            sa = (struct sockaddr *)ptr;
-            ptr += sa->sa_len;
-            if (sa->sa_family == 0)
-                sa = 0;
-        } 
-        *iter++ = sa;
-    }
-}
-
 template<class ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
     std::vector<char> buffer = query_route_table();
