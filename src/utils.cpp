@@ -32,7 +32,7 @@
 #include <memory>
 #include <cassert>
 #include <cstring>
-#include "arch.h"
+#include "utils.h"
 #ifndef WIN32
     #ifdef BSD
         #include <sys/socket.h>
@@ -44,7 +44,6 @@
     #include <netdb.h>
     #include <net/if.h>
 #endif
-#include "utils.h"
 #include "pdu.h"
 #include "arp.h"
 #include "ethernetII.h"

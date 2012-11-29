@@ -146,18 +146,20 @@ NetworkInterface::NetworkInterface(IPv4Address ip) : iface_id(0) {
         iface_id = resolve_index("lo");
         #endif
     else {
-        Utils::RouteEntry *best_match = 0;
+        const Utils::RouteEntry *best_match = 0;
         entries_type entries;
         uint32_t ip_int = ip;
         Utils::route_entries(std::back_inserter(entries));
         for(entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
             if((ip_int & it->mask) == it->destination) {
-                if(!best_match || it->mask > best_match->mask) 
-                    iface_id = resolve_index(it->interface.c_str());
+                if(!best_match || it->mask > best_match->mask) {
+                    best_match = &*it;
+                }
             }
         }
-        if(best_match)
+        if(!best_match)
             throw std::runtime_error("Error looking up interface");
+        iface_id = resolve_index(best_match->interface.c_str());
     }
 }
 

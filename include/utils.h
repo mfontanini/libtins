@@ -37,9 +37,20 @@
     #include <iphlpapi.h>
     #undef interface
 #endif
+#include "arch.h"
+#ifdef BSD
+    #include <sys/file.h>
+    #include <sys/socket.h>
+    #include <sys/sysctl.h>
+
+    #include <net/if.h>
+    #include <net/route.h>
+    #include <netinet/in.h>
+#endif
 #include <string>
 #include <set>
 #include <fstream>
+#include <vector>
 #include <stdint.h>
 #include "ip_address.h"
 #include "ipv6_address.h"
@@ -293,7 +304,72 @@ namespace Tins {
         }
     }
 }
+#ifdef BSD
+inline std::vector<char> query_route_table()
+{
+	int mib[6];
+	std::vector<char> buf;
+    size_t len;
 
+	mib[0] = CTL_NET;
+	mib[1] = AF_ROUTE;
+	mib[2] = 0;
+	mib[3] = AF_INET;
+    mib[4] = NET_RT_DUMP;
+	mib[5] = 0;	
+	if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0)
+		throw std::runtime_error("Failed to ioctl");
+
+	buf.resize(len);
+	if (sysctl(mib, 6, &buf[0], &len, NULL, 0) < 0) {
+		throw std::runtime_error("Failed to ioctl");
+	}
+
+	return buf;
+}
+
+template<typename ForwardIterator>
+void parse_header(struct rt_msghdr *rtm, ForwardIterator iter)
+{
+    char *ptr = (char *)(rtm + 1);
+    sockaddr *sa;
+
+    for (int i = 0; i < RTAX_MAX; i++) {
+        if (rtm->rtm_addrs & (1 << i)) {
+            sa = (struct sockaddr *)ptr;
+            ptr += sa->sa_len;
+            if (sa->sa_family == 0)
+                sa = 0;
+        } 
+        *iter++ = sa;
+    }
+}
+
+template<class ForwardIterator>
+void Tins::Utils::route_entries(ForwardIterator output) {
+    std::vector<char> buffer = query_route_table();
+    char *next = &buffer[0], *end = &buffer[buffer.size()];
+    rt_msghdr *rtm;
+    std::vector<sockaddr*> sa(RTAX_MAX);
+    char iface_name[IF_NAMESIZE];
+    while(next < end) {
+        rtm = (rt_msghdr*)next;
+        parse_header(rtm, sa.begin());
+        if (sa[RTAX_DST] && sa[RTAX_GATEWAY] && if_indextoname(rtm->rtm_index, iface_name)) {
+            RouteEntry entry;
+            entry.destination = IPv4Address(((struct sockaddr_in *)sa[RTAX_DST])->sin_addr.s_addr);
+            entry.gateway = IPv4Address(((struct sockaddr_in *)sa[RTAX_GATEWAY])->sin_addr.s_addr);
+            if(sa[RTAX_GENMASK])
+                entry.mask = IPv4Address(((struct sockaddr_in *)sa[RTAX_GENMASK])->sin_addr.s_addr);
+            else
+                entry.mask = IPv4Address(uint32_t());
+            entry.interface = iface_name;
+            *output++ = entry;
+        }
+        next += rtm->rtm_msglen;
+    }
+}
+#else
 template<class ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
     using namespace Utils::Internals;
@@ -316,5 +392,6 @@ void Tins::Utils::route_entries(ForwardIterator output) {
         ++output;
     }
 }
+#endif
 
 #endif // TINS_UTILS_H
