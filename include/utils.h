@@ -55,6 +55,7 @@
 #include "ip_address.h"
 #include "ipv6_address.h"
 #include "hw_address.h"
+#include "internals.h"
 
 namespace Tins {
     class NetworkInterface;
@@ -250,27 +251,6 @@ namespace Tins {
         }
         #endif // WIN32
         
-        /**
-         * \cond
-         */
-        namespace Internals {
-            void skip_line(std::istream &input);
-            bool from_hex(const std::string &str, uint32_t &result);
-            
-            template<bool, typename>
-            struct enable_if {
-                
-            };
-
-            template<typename T>
-            struct enable_if<true, T> {
-                typedef T type;
-            };
-        }
-        /**
-         * \endcond
-         */
-        
         template <typename T>
         struct is_pdu {  
             template <typename U>
@@ -372,7 +352,7 @@ void Tins::Utils::route_entries(ForwardIterator output) {
 #else
 template<class ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
-    using namespace Utils::Internals;
+    using namespace Tins::Internals;
     std::ifstream input("/proc/net/route");
     std::string destination, mask, gw;
     uint32_t dummy;

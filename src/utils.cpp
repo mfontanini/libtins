@@ -83,29 +83,6 @@ struct IPv4Collector {
 
 namespace Tins {
 
-bool Utils::Internals::from_hex(const string &str, uint32_t &result) {
-    unsigned i(0);
-    result = 0;
-    while(i < str.size()) {
-        uint8_t tmp;
-        if(str[i] >= 'A' && str[i] <= 'F')
-            tmp = (str[i] - 'A' + 10);
-        else if(str[i] >= '0' && str[i] <= '9')
-            tmp = (str[i] - '0');
-        else
-            return false;
-        result = (result << 4) | tmp;
-        i++;
-    }
-    return true;
-}
-
-void Utils::Internals::skip_line(istream &input) {
-    int c = 0;
-    while(c != '\n' && input)
-         c = input.get();
-}
-
 /** \endcond */
 
 IPv4Address Utils::resolve_ip(const string &to_resolve) {
