@@ -84,10 +84,10 @@ ICMPv6::ICMPv6(const uint8_t *buffer, uint32_t total_sz)
 
 void ICMPv6::parse_options(const uint8_t *&buffer, uint32_t &total_sz) {
     while(total_sz > 0) {
-        if(total_sz < 8 || (static_cast<uint32_t>(buffer[1]) * 8) > total_sz) 
+        if(total_sz < 8 || (static_cast<uint32_t>(buffer[1]) * 8) > total_sz || buffer[1] < 1) 
             throw std::runtime_error("Not enough size for options");
         // size(option) = option_size - identifier_size - length_identifier_size
-        add_option(icmpv6_option(buffer[0], buffer[1] * 8 - sizeof(uint8_t) * 2, buffer + 2));
+        add_option(icmpv6_option(buffer[0], static_cast<uint32_t>(buffer[1]) * 8 - sizeof(uint8_t) * 2, buffer + 2));
         total_sz -= buffer[1] * 8;
         buffer += buffer[1] * 8;
     }

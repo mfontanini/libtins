@@ -40,7 +40,7 @@ IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz)
                 throw header_size_error();
             // every ext header is at least 8 bytes long
             // minus one, from the next_header field.
-            uint8_t size = buffer[1] + 8;
+            uint32_t size = static_cast<uint32_t>(buffer[1]) + 8;
             // -1 -> next header identifier
             if(total_sz < size) 
                 throw header_size_error();
