@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include "cxxstd.h"
 
 namespace Tins {
 class DNSRRImpl;
@@ -96,6 +97,18 @@ public:
      * \param rhs The record which will be copied.
      */
     DNSResourceRecord& operator=(const DNSResourceRecord &rhs);
+    
+    #if TINS_IS_CXX11
+        /**
+         * Move constructor.
+         */
+        DNSResourceRecord(DNSResourceRecord &&rhs);
+        
+        /**
+         * Move assignment operator.
+         */
+        DNSResourceRecord& operator=(DNSResourceRecord &&rhs);
+    #endif // TINS_IS_CXX11
     
     /**
      * \brief Destructor.
