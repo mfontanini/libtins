@@ -32,7 +32,6 @@
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
-#include "arch.h"
 
 #ifndef WIN32
     #ifdef BSD

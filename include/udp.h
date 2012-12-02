@@ -30,7 +30,7 @@
 #ifndef TINS_UDP_H
 #define TINS_UDP_H
 
-
+#include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
 
@@ -123,12 +123,13 @@ namespace Tins {
             return new UDP(*this);
         }
     private:
+        TINS_BEGIN_PACK
         struct udphdr {
             uint16_t sport;
             uint16_t dport;
             uint16_t len;
             uint16_t check;
-        } __attribute__((packed));
+        } TINS_END_PACK;
 
         void copy_fields(const UDP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

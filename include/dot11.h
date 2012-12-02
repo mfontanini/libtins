@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include <utility>
 
+#include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
 #include "hw_address.h"
@@ -449,38 +450,40 @@ namespace Tins {
         /**
          * Struct that represents the 802.11 header
          */
+        TINS_BEGIN_PACK
         struct ieee80211_header {
+            TINS_BEGIN_PACK
             struct {
             #if TINS_IS_LITTLE_ENDIAN
-                unsigned int protocol:2;
-                unsigned int type:2;
-                unsigned int subtype:4;
-                unsigned int to_ds:1;
-                unsigned int from_ds:1;
-                unsigned int more_frag:1;
-                unsigned int retry:1;
-                unsigned int power_mgmt:1;
-                unsigned int more_data:1;
-                unsigned int wep:1;
-                unsigned int order:1;
+                uint16_t protocol:2,
+                        type:2,
+                        subtype:4,
+                        to_ds:1,
+                        from_ds:1,
+                        more_frag:1,
+                        retry:1,
+                        power_mgmt:1,
+                        more_data:1,
+                        wep:1,
+                        order:1;
             #elif TINS_IS_BIG_ENDIAN
-                unsigned int subtype:4;
-                unsigned int type:2;
-                unsigned int protocol:2;
-                unsigned int order:1;
-                unsigned int wep:1;
-                unsigned int more_data:1;
-                unsigned int power_mgmt:1;
-                unsigned int retry:1;
-                unsigned int more_frag:1;
-                unsigned int from_ds:1;
-                unsigned int to_ds:1;
+                uint16_t subtype:4,
+                        type:2,
+                        protocol:2,
+                        order:1,
+                        wep:1,
+                        more_data:1,
+                        power_mgmt:1,
+                        retry:1,
+                        more_frag:1,
+                        from_ds:1,
+                        to_ds:1;
             #endif
-            } __attribute__((__packed__)) control;
+            } TINS_END_PACK control;
             uint16_t duration_id;
             uint8_t addr1[address_type::address_size];
 
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         private:
 
         Dot11(const ieee80211_header *header_ptr);
@@ -557,6 +560,7 @@ namespace Tins {
         /**
          * Represents the IEEE 802.11 frames' capability information.
          */
+        TINS_BEGIN_PACK
         class capability_information {
         private:
             #if TINS_IS_LITTLE_ENDIAN
@@ -819,8 +823,9 @@ namespace Tins {
              */
             void immediate_block_ack(bool new_value) { _immediate_block_ack = new_value; }
 
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
+        TINS_BEGIN_PACK
         struct fh_params_set {
             uint16_t dwell_time;
             uint8_t hop_set, hop_pattern, hop_index;
@@ -831,8 +836,9 @@ namespace Tins {
               uint8_t hop_pattern, uint8_t hop_index) 
             : dwell_time(dwell_time), hop_set(hop_set), 
               hop_pattern(hop_pattern), hop_index(hop_index) {}
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
+        TINS_BEGIN_PACK
         struct cf_params_set {
             uint8_t cfp_count, cfp_period;
             uint16_t cfp_max_duration, cfp_dur_remaining;
@@ -844,7 +850,7 @@ namespace Tins {
             : cfp_count(cfp_count), cfp_period(cfp_period), 
               cfp_max_duration(cfp_max_duration), 
               cfp_dur_remaining(cfp_dur_remaining) {}
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         struct ibss_dfs_params {
             static const size_t minimum_size = address_type::address_size + sizeof(uint8_t) + 2 * sizeof(uint8_t);
@@ -1441,11 +1447,12 @@ namespace Tins {
            return flag == pdu_flag || Dot11::matches_flag(flag);
         }
     protected:
+        TINS_BEGIN_PACK
         struct ExtendedHeader {
             uint8_t addr2[address_type::address_size];
             uint8_t addr3[address_type::address_size];
             uint16_t frag_seq;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         
         Dot11ManagementFrame(const address_type &dst_hw_addr = address_type(), 
@@ -1582,11 +1589,12 @@ namespace Tins {
          */
         PDUType pdu_type() const { return pdu_flag; }
     private:
+        TINS_BEGIN_PACK
         struct BeaconBody {
             uint64_t timestamp;
             uint16_t interval;
             capability_information capability;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
 
@@ -2516,11 +2524,12 @@ namespace Tins {
     protected:
 
     private:
+        TINS_BEGIN_PACK
         struct ProbeResp {
             uint64_t timestamp;
             uint16_t interval;
             capability_information capability;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         ProbeResp _body;
 
@@ -2671,11 +2680,12 @@ namespace Tins {
             return new Dot11Data(*this);
         }
     protected:
+        TINS_BEGIN_PACK
         struct ExtendedHeader {
             uint8_t addr2[address_type::address_size];
             uint8_t addr3[address_type::address_size];
             uint16_t frag_seq;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 
@@ -3244,15 +3254,17 @@ namespace Tins {
     protected:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
+        TINS_BEGIN_PACK
         struct BarControl {
             uint16_t reserved:12,
                 tid:4;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
+        TINS_BEGIN_PACK
         struct StartSequence {
             uint16_t frag:4,
                 seq:12;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         void init_block_ack();
 
@@ -3371,15 +3383,17 @@ namespace Tins {
             return new Dot11BlockAck(*this);
         }
     private:
+        TINS_BEGIN_PACK
         struct BarControl {
             uint16_t reserved:12,
                 tid:4;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
+        TINS_BEGIN_PACK
         struct StartSequence {
             uint16_t frag:4,
                 seq:12;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         void init_block_ack();
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);

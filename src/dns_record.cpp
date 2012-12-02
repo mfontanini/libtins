@@ -207,7 +207,8 @@ uint32_t NamedDNSRRImpl::size() const {
 }
 
 uint32_t NamedDNSRRImpl::do_write(uint8_t *buffer) const {
-    std::copy(name.begin(), name.end() + 1, buffer);
+    buffer = std::copy(name.begin(), name.end(), buffer);
+    *buffer = 0;
     return name.size() + 1;
 }
 

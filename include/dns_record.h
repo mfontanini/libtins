@@ -34,6 +34,7 @@
 #include <vector>
 #include <stdint.h>
 #include "cxxstd.h"
+#include "macros.h"
 
 namespace Tins {
 class DNSRRImpl;
@@ -46,6 +47,7 @@ public:
     /**
      * \brief The type used to store resource records' information.
      */
+    TINS_BEGIN_PACK
     struct info {
         uint16_t type, qclass;
         uint32_t ttl;
@@ -54,7 +56,7 @@ public:
           : type(tp), qclass(qc), ttl(tm) { }
         
         info() : type(), qclass(), ttl() {}
-    } __attribute__((packed));
+    } TINS_END_PACK;
     
     /**
      * \brief Constructs a record.

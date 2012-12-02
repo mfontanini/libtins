@@ -28,7 +28,7 @@
  */
 
 #include <algorithm>
-#include "arch.h"
+#include "macros.h"
 #ifndef WIN32
     #include <arpa/inet.h>
     #ifdef BSD
@@ -62,11 +62,17 @@ namespace Tins {
     
     void IPv6Address::init(const char *addr) {
         #ifdef WIN32
-            ULONG dummy1;
-            USHORT dummy2;
-            // Maybe change this, mingw doesn't have any other conversion function
-            if(RtlIpv6StringToAddressExA(addr, (IN6_ADDR*)address, &dummy1, &dummy2) != NO_ERROR)
-                throw malformed_address();
+            // mingw on linux somehow doesn't have InetPton
+            #ifdef _MSC_VER
+                if(InetPtonA(AF_INET6, addr, address) != 1)
+                    throw malformed_address();
+			#else
+                ULONG dummy1;
+                USHORT dummy2;
+                // Maybe change this, mingw doesn't have any other conversion function
+                if(RtlIpv6StringToAddressExA(addr, (IN6_ADDR*)address, &dummy1, &dummy2) != NO_ERROR)
+                    throw malformed_address();
+            #endif
         #else
             if(inet_pton(AF_INET6, addr, address) == 0)
                 throw malformed_address();
@@ -76,9 +82,15 @@ namespace Tins {
     std::string IPv6Address::to_string() const {
         char buffer[INET6_ADDRSTRLEN];
         #ifdef WIN32
-            ULONG sz = sizeof(buffer);
-            if(RtlIpv6AddressToStringExA((const IN6_ADDR*)address, 0, 0, buffer, &sz) != NO_ERROR)
-                throw malformed_address();
+            // mingw on linux somehow doesn't have InetNtop
+            #ifdef _MSC_VER
+				if(InetNtopA(AF_INET6, (PVOID)address, buffer, sizeof(buffer)) != 0)
+					throw malformed_address();
+			#else
+                ULONG sz = sizeof(buffer);
+                if(RtlIpv6AddressToStringExA((const IN6_ADDR*)address, 0, 0, buffer, &sz) != NO_ERROR)
+                    throw malformed_address();
+            #endif
         #else
             if(inet_ntop(AF_INET6, address, buffer, sizeof(buffer)) == 0)
                 throw malformed_address();

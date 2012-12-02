@@ -32,6 +32,7 @@
 
 #include <list>
 #include <stdexcept>
+#include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
 #include "small_uint.h"
@@ -290,6 +291,7 @@ private:
     static uint8_t *write_header(const ipv6_ext_header &header, uint8_t *buffer);
     static bool is_extension_header(uint8_t header_id);
 
+    TINS_BEGIN_PACK
     struct ipv6_header {
         #if TINS_IS_BIG_ENDIAN
         uint32_t version:4,
@@ -299,7 +301,7 @@ private:
                 next_header:8,
                 hop_limit:8;
         #else
-        uint32_t traffic_class:4,
+        uint8_t traffic_class:4,
                 version:4;
         uint8_t flow_label[3];
         uint16_t payload_length;
@@ -307,7 +309,7 @@ private:
         uint8_t hop_limit;
         #endif
         uint8_t src_addr[16], dst_addr[16];
-    } __attribute__((packed));
+    } TINS_END_PACK;
 
     ipv6_header _header;
     headers_type ext_headers;

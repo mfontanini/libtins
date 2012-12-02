@@ -114,7 +114,7 @@ bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
         ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)
             *address = arp_resp->sender_hw_addr();
-        return arp_resp;
+        return arp_resp != 0;
     }
     else
         return false;

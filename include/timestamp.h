@@ -30,7 +30,12 @@
 #ifndef TINS_TIMESTAMP_H
 #define TINS_TIMESTAMP_H
 
-#include <sys/time.h>
+#ifdef WIN32
+    #define NOMINMAX
+    #include <winsock2.h>
+#else
+    #include <sys/time.h>
+#endif
 #include "cxxstd.h"
 #if TINS_IS_CXX11
     #include <chrono>

@@ -31,7 +31,7 @@
 #define TINS_ETHERNET_II_H
 
 #include <stdint.h>
-
+#include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
 #include "hw_address.h"
@@ -203,11 +203,12 @@ namespace Tins {
         /**
          * Struct that represents the Ethernet II header
          */
+        TINS_BEGIN_PACK
         struct ethhdr {
             uint8_t dst_mac[address_type::address_size];
             uint8_t src_mac[address_type::address_size];
             uint16_t payload_type;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 

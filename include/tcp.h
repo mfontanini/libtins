@@ -37,6 +37,7 @@
 #include <stdexcept>
 #include <utility>
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "small_uint.h"
 #include "pdu_option.h"
@@ -391,6 +392,7 @@ namespace Tins {
             return new TCP(*this);
         }
     private:
+        TINS_BEGIN_PACK
         struct tcphdr {
             uint16_t sport;
             uint16_t dport;
@@ -424,7 +426,7 @@ namespace Tins {
             uint16_t	window;
             uint16_t	check;
             uint16_t	urg_ptr;
-        } __attribute__((packed));
+        } TINS_END_PACK;
 
         static const uint16_t DEFAULT_WINDOW;
         

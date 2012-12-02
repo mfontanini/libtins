@@ -31,7 +31,7 @@
 #define TINS_ENDIANNESS_H
 
 #include <stdint.h>
-#include "arch.h"
+#include "macros.h"
 
 #if defined(BSD)
     #if defined(__APPLE__)

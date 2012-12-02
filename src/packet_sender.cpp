@@ -49,6 +49,7 @@
     #include <netinet/in.h>
     #include <errno.h>
 #else
+    #define NOMINMAX
     #include <winsock2.h>
     #include <ws2tcpip.h>
 #endif
@@ -56,7 +57,7 @@
 #include <cstring>
 #include <ctime>
 #include "pdu.h"
-#include "arch.h"
+#include "macros.h"
 #include "network_interface.h"
 
 
@@ -272,10 +273,12 @@ PDU *PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_add
         if(FD_ISSET(sock, &readfds)) {
             #ifdef WIN32
                 int length = addrlen;
+                int size;
             #else
                 socklen_t length = addrlen;
+                ssize_t size;
             #endif
-            ssize_t size = recvfrom(sock, (char*)buffer, 2048, 0, link_addr, &length);
+            size = recvfrom(sock, (char*)buffer, 2048, 0, link_addr, &length);
             if(pdu.matches_response(buffer, size)) {
                 return pdu.clone_packet(buffer, size);
             }

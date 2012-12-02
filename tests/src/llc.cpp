@@ -10,7 +10,6 @@ using namespace std;
 
 class LLCTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[];
     static const uint8_t from_buffer_unnumbered[];
     static const uint8_t from_buffer_info[];
     static const uint8_t from_buffer_super[];
@@ -18,7 +17,6 @@ public:
     //void test_equals(const IP &ip1, const IP &ip2);
 };
 
-const uint8_t LLCTest::expected_packet[] = {};
 const uint8_t LLCTest::from_buffer_info[] = {'\xfe', '\x48', '\x3c', '\x3b'};
 const uint8_t LLCTest::from_buffer_super[] = {'\x4b', '\x19', '\x05', '\x3a'};
 const uint8_t LLCTest::from_buffer_unnumbered[] = {'\xaa', '\x17', '\xcf'};

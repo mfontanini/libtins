@@ -246,7 +246,7 @@ public:
      * \return true if pdu() == nullptr, false otherwise.
      */
     operator bool() const {
-        return pdu_;
+        return bool(pdu_);
     }
 private:
     PDU *pdu_;

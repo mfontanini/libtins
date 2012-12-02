@@ -34,4 +34,15 @@
     #include <sys/param.h>
 #endif
 
+// Packing directives....
+#ifdef _MSC_VER
+    #define TINS_BEGIN_PACK __pragma( pack(push, 1) )
+    #define TINS_END_PACK __pragma( pack(pop) )
+    #define TINS_PACKED(DECLARATION) __pragma( pack(push, 1) ) DECLARATION __pragma( pack(pop) )
+#else
+    #define TINS_BEGIN_PACK 
+    #define TINS_END_PACK __attribute__((packed))
+    #define TINS_PACKED(DECLARATION) DECLARATION __attribute__((packed))
+#endif
+
 #endif

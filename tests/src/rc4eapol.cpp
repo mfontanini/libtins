@@ -10,12 +10,9 @@ using namespace Tins;
 
 class RC4EAPOLTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[];
-};
-
-const uint8_t RC4EAPOLTest::expected_packet[] = {
     
 };
+
 
 TEST_F(RC4EAPOLTest, DefaultConstructor) {
     uint8_t empty_iv[RC4EAPOL::key_iv_size] = { 0 };

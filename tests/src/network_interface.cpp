@@ -2,7 +2,7 @@
 #include <string>
 #include "network_interface.h"
 #include "utils.h"
-#include "arch.h"
+#include "macros.h"
 
 using namespace Tins;
 
@@ -13,6 +13,10 @@ public:
 
 #ifdef BSD
 const std::string NetworkInterfaceTest::iface_name("lo0"),
+                  NetworkInterfaceTest::iface_addr("");
+#elif defined(WIN32)
+// modify me on every windows environment :D
+const std::string NetworkInterfaceTest::iface_name("{INSERT-SOME-INTERFACE-NAME}"),
                   NetworkInterfaceTest::iface_addr("");
 #else
 const std::string NetworkInterfaceTest::iface_name("lo"),

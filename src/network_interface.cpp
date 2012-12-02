@@ -30,7 +30,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cstring>
-#include "arch.h"
+#include "macros.h"
 #ifndef WIN32
     #include <netinet/in.h>
     #ifdef BSD
@@ -42,6 +42,7 @@
     #endif
     #include <net/if.h>
 #else
+    #define NOMINMAX
     #include <winsock2.h>
 #endif
 #include "network_interface.h"
@@ -98,19 +99,16 @@ struct InterfaceInfoCollector {
     #else // WIN32
     bool operator() (const IP_ADAPTER_ADDRESSES *iface) {
         using Tins::IPv4Address;
-        // This surely doesn't work
+        using Tins::Endian::host_to_be;
         if(iface_id == uint32_t(iface->IfIndex)) {
             std::copy(iface->PhysicalAddress, iface->PhysicalAddress + 6, info->hw_addr.begin());
-            const IP_ADAPTER_PREFIX *prefix_ptr = iface->FirstPrefix;
-            for(size_t i = 0; prefix_ptr; prefix_ptr = prefix_ptr->Next, i++) {
-                if(i == 0)
-                    info->ip_addr = IPv4Address(((const struct sockaddr_in *)prefix_ptr->Address.lpSockaddr)->sin_addr.s_addr);
-                else if(i == 2)
-                    info->bcast_addr = IPv4Address(((const struct sockaddr_in *)prefix_ptr->Address.lpSockaddr)->sin_addr.s_addr);
+            const IP_ADAPTER_UNICAST_ADDRESS *unicast = iface->FirstUnicastAddress;
+            if(unicast) {
+                info->ip_addr = IPv4Address(((const struct sockaddr_in *)unicast->Address.lpSockaddr)->sin_addr.s_addr);
+                info->netmask = IPv4Address(host_to_be<uint32_t>(0xffffffff << (32 - unicast->OnLinkPrefixLength)));
+                info->bcast_addr = IPv4Address((info->ip_addr & info->netmask) | ~info->netmask);
+                found = true;
             }
-            // (?????)
-            info->netmask = IPv4Address(info->ip_addr - info->bcast_addr);
-            found = true;
         }
         return found;
     }
@@ -185,26 +183,9 @@ NetworkInterface::Info NetworkInterface::addresses() const {
 }
 
 NetworkInterface::id_type NetworkInterface::resolve_index(const char *name) {
-    #ifndef WIN32
     id_type id = if_nametoindex(name);
     if(!id)
-        throw std::runtime_error("Invalid interface error");
-    #else // WIN32
-    id_type id;
-    ULONG size;
-    GetAdaptersInfo(0, &size);
-    std::vector<uint8_t> buffer(size);
-    if ( GetAdaptersInfo((IP_ADAPTER_INFO *)&buffer[0], &size) == ERROR_SUCCESS) {
-        PIP_ADAPTER_INFO iface = (IP_ADAPTER_INFO *)&buffer[0];
-        while(iface) {
-            if(!strcmp(iface->AdapterName, name)) {
-                id = iface->Index;
-                break;
-            }
-            iface = iface->Next;
-        }
-    }
-    #endif // WIN32
+        throw std::runtime_error("Invalid interface");
     return id;
 }
 }

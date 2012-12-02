@@ -149,7 +149,7 @@ void TCP::sack_permitted() {
 }
 
 bool TCP::has_sack_permitted() const {
-    return search_option(SACK_OK);
+    return bool(search_option(SACK_OK));
 }
 
 void TCP::sack(const sack_type &edges) {
@@ -189,7 +189,7 @@ std::pair<uint32_t, uint32_t> TCP::timestamp() const {
         throw option_not_found();
     uint64_t buffer = *(const uint64_t*)option->data_ptr();
     buffer = Endian::be_to_host(buffer);
-    return std::make_pair((buffer >> 32) & 0xffffffff, buffer & 0xffffffff);
+    return std::make_pair(static_cast<uint32_t>(buffer >> 32), buffer & 0xffffffff);
 }
 
 void TCP::altchecksum(AltChecksums value) {

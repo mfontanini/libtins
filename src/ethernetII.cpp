@@ -31,7 +31,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
-#include "arch.h"
+#include "macros.h"
 #ifndef WIN32
     #ifdef BSD
         #include <net/if_dl.h>

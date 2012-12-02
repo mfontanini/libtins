@@ -30,6 +30,7 @@
 #ifndef TINS_RADIOTAP_H
 #define TINS_RADIOTAP_H
 
+#include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
 #include "network_interface.h"
@@ -318,6 +319,7 @@ namespace Tins {
          */
         PDUType pdu_type() const { return PDU::RADIOTAP; }
     private:
+        TINS_BEGIN_PACK
         struct radiotap_hdr {
         #if TINS_IS_LITTLE_ENDIAN
             uint8_t it_version;	
@@ -368,7 +370,7 @@ namespace Tins {
                 reserved4:7,
                 ext:1;
         #endif
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         void init();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

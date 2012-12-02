@@ -32,6 +32,7 @@
 
 #include <stdint.h>
 #include "pdu.h"
+#include "macros.h"
 #include "small_uint.h"
 #include "endianness.h"
 
@@ -148,11 +149,12 @@ namespace Tins {
         
         void copy_eapol_fields(const EAPOL *other);
         
+        TINS_BEGIN_PACK
         struct eapolhdr {
             uint8_t version, packet_type;
             uint16_t length;
             uint8_t type;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         /**
          * \brief Virtual method which should serialize the subclass specific
@@ -337,6 +339,7 @@ namespace Tins {
             return new RC4EAPOL(*this);
         }
     private:
+        TINS_BEGIN_PACK
         struct rc4hdr {
             uint16_t key_length;
             uint64_t replay_counter;
@@ -344,7 +347,7 @@ namespace Tins {
             uint8_t key_index:7,
                     key_flag:1;
             uint8_t key_sign[16];
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         void write_body(uint8_t *buffer, uint32_t total_sz);
         
@@ -678,6 +681,7 @@ namespace Tins {
             return new RSNEAPOL(*this);
         }
     private:
+        TINS_BEGIN_PACK
         struct rsnhdr {
         #if TINS_IS_LITTLE_ENDIAN
             uint16_t key_mic:1,
@@ -716,7 +720,7 @@ namespace Tins {
             uint8_t mic[mic_size];
             uint16_t wpa_length;
         #endif
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         void write_body(uint8_t *buffer, uint32_t total_sz);
         

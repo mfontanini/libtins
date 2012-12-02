@@ -31,6 +31,7 @@
 #ifndef TINS_ARP_H
 #define TINS_ARP_H
 
+#include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
 #include "hw_address.h"
@@ -285,6 +286,7 @@ namespace Tins {
             return new ARP(*this);
         }
     private:
+        TINS_BEGIN_PACK
         struct arphdr {
             uint16_t ar_hrd;	/* format of hardware address	*/
             uint16_t ar_pro;	/* format of protocol address	*/
@@ -300,7 +302,7 @@ namespace Tins {
             uint8_t ar_tha[hwaddress_type::address_size];	
             /* target IP address		*/
             uint32_t ar_tip;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 

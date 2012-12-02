@@ -36,7 +36,7 @@
 #include "packet_sender.h"
 #include "ip.h"
 #include "llc.h"
-#include "arch.h"
+#include "macros.h"
 #include "rawpdu.h"
 
 #if defined(BSD) && !defined(PF_LLC)

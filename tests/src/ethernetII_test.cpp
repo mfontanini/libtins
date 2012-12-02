@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 #include "ethernetII.h"
 #include "utils.h"
-#include "arch.h"
+#include "macros.h"
 #include "network_interface.h"
 
 using namespace Tins;
@@ -12,8 +12,8 @@ typedef EthernetII::address_type address_type;
 class EthernetIITest : public ::testing::Test {
 public:
     static const uint8_t expected_packet[];
-    static address_type s_addr;
-    static address_type d_addr;
+    static address_type src_addr;
+    static address_type dst_addr;
     static address_type empty_addr;
     static const NetworkInterface iface;
     static const uint16_t p_type;
@@ -28,9 +28,9 @@ const uint8_t EthernetIITest::expected_packet[] = {
 '\xd0', '\xab'
 };
 
-address_type EthernetIITest::s_addr("8a:8b:8c:8d:8e:8f");
+address_type EthernetIITest::src_addr("8a:8b:8c:8d:8e:8f");
 
-address_type EthernetIITest::d_addr("aa:bb:cc:dd:ee:ff");
+address_type EthernetIITest::dst_addr("aa:bb:cc:dd:ee:ff");
 
 address_type EthernetIITest::empty_addr;
 
@@ -83,14 +83,14 @@ TEST_F(EthernetIITest, NestedCopy) {
 
 TEST_F(EthernetIITest, SourceAddress) {
     EthernetII eth;
-    eth.src_addr(s_addr);
-    ASSERT_EQ(eth.src_addr(), s_addr);
+    eth.src_addr(src_addr);
+    ASSERT_EQ(eth.src_addr(), src_addr);
 }
 
 TEST_F(EthernetIITest, DestinationAddress) {
     EthernetII eth;
-    eth.dst_addr(d_addr);
-    ASSERT_EQ(eth.dst_addr(), d_addr);
+    eth.dst_addr(dst_addr);
+    ASSERT_EQ(eth.dst_addr(), dst_addr);
 }
 
 TEST_F(EthernetIITest, PayloadType) {
@@ -107,16 +107,16 @@ TEST_F(EthernetIITest, Interface) {
 
 TEST_F(EthernetIITest, CompleteConstructor) {
     EthernetII* eth2 = new EthernetII();
-    EthernetII eth(iface, d_addr, s_addr, eth2);
-    EXPECT_EQ(eth.dst_addr(), d_addr);
-    EXPECT_EQ(eth.src_addr(), s_addr);
+    EthernetII eth(iface, dst_addr, src_addr, eth2);
+    EXPECT_EQ(eth.dst_addr(), dst_addr);
+    EXPECT_EQ(eth.src_addr(), src_addr);
     EXPECT_TRUE(eth.inner_pdu() == eth2);
     EXPECT_EQ(eth.payload_type(), 0);
     EXPECT_EQ(eth.iface(), iface);
 }
 
 TEST_F(EthernetIITest, Serialize) {
-    EthernetII eth(iface, d_addr, s_addr);
+    EthernetII eth(iface, dst_addr, src_addr);
     eth.payload_type(p_type);
     PDU::serialization_type serialized = eth.serialize();
     ASSERT_EQ(serialized.size(), sizeof(expected_packet));
@@ -125,8 +125,8 @@ TEST_F(EthernetIITest, Serialize) {
 
 TEST_F(EthernetIITest, ConstructorFromBuffer) {
     EthernetII eth(expected_packet, sizeof(expected_packet));
-    EXPECT_EQ(eth.src_addr(), s_addr);
-    EXPECT_EQ(eth.dst_addr(), d_addr);
+    EXPECT_EQ(eth.src_addr(), src_addr);
+    EXPECT_EQ(eth.dst_addr(), dst_addr);
     EXPECT_EQ(eth.payload_type(), p_type);
 }
 

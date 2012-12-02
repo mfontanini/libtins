@@ -31,6 +31,7 @@
 #define TINS_ICMPV6_H
 
 #include <list>
+#include "macros.h"
 #include "pdu.h"
 #include "ipv6_address.h"
 #include "pdu_option.h"
@@ -150,6 +151,7 @@ public:
     /**
      * Type type used to store the prefix information option data.
      */
+    TINS_BEGIN_PACK
     struct prefix_info_type {
         uint8_t prefix_len;
         #if TINS_IS_LITTLE_ENDIAN
@@ -179,7 +181,7 @@ public:
         {
             addr.copy(prefix);
         }
-    } __attribute__((packed));
+    } TINS_END_PACK;
     
     /**
      * \brief Constructs an ICMPv6 object.
@@ -646,6 +648,7 @@ public:
      */
     new_ha_info_type new_home_agent_info() const;
 private:
+    TINS_BEGIN_PACK
     struct icmp6hdr {
         uint8_t	type;
         uint8_t code;
@@ -688,7 +691,7 @@ private:
                 uint16_t router_lifetime;
             } u_nd_ra;
         };
-    } __attribute__((packed));
+    } TINS_END_PACK;
     
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     bool has_options() const;

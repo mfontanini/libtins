@@ -30,7 +30,7 @@
 #include <cstring>
 #include <cassert>
 #include <stdexcept>
-#include "arch.h"
+#include "macros.h"
 #ifndef WIN32
     #ifdef BSD
         #include <net/if_dl.h>

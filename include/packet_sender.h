@@ -37,7 +37,7 @@
 #include <stdint.h>
 #include <map>
 #include "network_interface.h"
-#include "arch.h"
+#include "macros.h"
 
 struct timeval;
 struct sockaddr;

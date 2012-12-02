@@ -36,6 +36,7 @@
 #include <cstring>
 #include <string>
 #include <map>
+#include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
 #include "dns_record.h"
@@ -583,6 +584,7 @@ namespace Tins {
             return DNSResourceRecord::info((uint16_t)type, (uint16_t)qclass, ttl);
         }
     private:
+        TINS_BEGIN_PACK
         struct dnshdr {
             uint16_t id;
             #if TINS_IS_LITTLE_ENDIAN
@@ -612,7 +614,7 @@ namespace Tins {
             #endif
             uint16_t questions, answers,
                      authority, additional;
-        } __attribute__((packed));
+        } TINS_END_PACK;
         
         typedef std::map<uint16_t, std::string> SuffixMap;
         typedef std::map<uint16_t, uint16_t> SuffixIndices;

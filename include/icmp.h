@@ -30,7 +30,7 @@
 #ifndef TINS_ICMP_H
 #define TINS_ICMP_H
 
-
+#include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
 
@@ -301,6 +301,7 @@ namespace Tins {
             return new ICMP(*this);
         }
     private:
+        TINS_BEGIN_PACK
         struct icmphdr {
             uint8_t	type;
             uint8_t	code;
@@ -317,7 +318,7 @@ namespace Tins {
                 } frag;
                 uint8_t pointer;
             } un;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         /** \brief Serialices this ICMP PDU.
          * \param buffer The buffer in which the PDU will be serialized.

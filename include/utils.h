@@ -33,11 +33,12 @@
 #ifndef WIN32
     #include <ifaddrs.h>
 #else
+    #define NOMINMAX
     #include <winsock2.h>
     #include <iphlpapi.h>
     #undef interface
 #endif
-#include "arch.h"
+#include "macros.h"
 #ifdef BSD
     #include <sys/file.h>
     #include <sys/socket.h>
@@ -347,6 +348,30 @@ void Tins::Utils::route_entries(ForwardIterator output) {
             *output++ = entry;
         }
         next += rtm->rtm_msglen;
+    }
+}
+#elif defined(WIN32)
+template<class ForwardIterator>
+void Tins::Utils::route_entries(ForwardIterator output) {
+    MIB_IPFORWARDTABLE *table;
+    ULONG size = 0;
+    char iface_name[256];
+    GetIpForwardTable(0, &size, 0);
+    std::vector<uint8_t> buffer(size);
+    table = (MIB_IPFORWARDTABLE*)&buffer[0];
+    GetIpForwardTable(table, &size, 0);
+    
+    for (DWORD i = 0; i < table->dwNumEntries; i++) {
+        MIB_IPFORWARDROW *row = &table->table[i];
+        if(row->dwForwardType == MIB_IPROUTE_TYPE_INDIRECT) {
+            if_indextoname(row->dwForwardIfIndex, iface_name);
+            RouteEntry entry;
+            entry.interface = iface_name;
+            entry.destination = IPv4Address(row->dwForwardDest);
+            entry.mask = IPv4Address(row->dwForwardMask);
+            entry.gateway = IPv4Address(row->dwForwardNextHop);
+            *output++ = entry;
+        }
     }
 }
 #else

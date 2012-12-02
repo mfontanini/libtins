@@ -36,7 +36,7 @@
 #include "endianness.h"
 #include "ip_address.h"
 #include "pdu_option.h"
-#include "arch.h"
+#include "macros.h"
 
 namespace Tins {
 
@@ -100,6 +100,7 @@ namespace Tins {
         /**
          * \brief The type used to represent an option's type.
          */
+        TINS_BEGIN_PACK
         struct option_identifier {
         #if TINS_IS_LITTLE_ENDIAN
             uint8_t number:5,
@@ -162,7 +163,7 @@ namespace Tins {
             bool operator==(const option_identifier &rhs) const {
                 return number == rhs.number && op_class == rhs.op_class && copied == rhs.copied;
             }
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         /**
          * The IP options type.
@@ -591,15 +592,14 @@ namespace Tins {
     private:
         static const uint8_t DEFAULT_TTL;
 
+        TINS_BEGIN_PACK
         struct iphdr {
         #if TINS_IS_LITTLE_ENDIAN
-            unsigned int ihl:4;
-            unsigned int version:4;
-        #elif TINS_IS_BIG_ENDIAN
-            unsigned int version:4;
-            unsigned int ihl:4;
+            uint8_t ihl:4,
+                    version:4;
         #else
-        # error "Endian is not LE nor BE..."
+            uint8_t version:4,
+                    ihl:4;
         #endif
             uint8_t tos;
             uint16_t tot_len;
@@ -611,7 +611,7 @@ namespace Tins {
             uint32_t saddr;
             uint32_t daddr;
             /*The options start here. */
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

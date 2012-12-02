@@ -33,6 +33,7 @@
 
 #include <stdint.h>
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "small_uint.h"
 
@@ -154,19 +155,13 @@ namespace Tins {
             return new SNAP(*this);
         }    
     private:
+        TINS_BEGIN_PACK
         struct snaphdr {
             uint8_t dsap;
             uint8_t ssap;
-            /*#if TINS_IS_LITTLE_ENDIAN
-                uint32_t control:8,
-                        org_code:24;
-            #elif TINS_IS_BIG_ENDIAN
-                uint32_t org_code:24,
-                        control:8;
-            #endif*/
             uint32_t control_org;
             uint16_t eth_type;
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
         
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         

@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <vector>
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "ip_address.h"
 #include "hw_address.h"
@@ -320,6 +321,7 @@ namespace Tins {
         /**
          * Struct that represents the Bootp datagram.
          */
+        TINS_BEGIN_PACK
         struct bootphdr {
             uint8_t opcode;
             uint8_t htype;
@@ -335,7 +337,7 @@ namespace Tins {
             uint8_t chaddr[16];
             uint8_t sname[64];
             uint8_t file[128];
-        } __attribute__((__packed__));
+        } TINS_END_PACK;
 
         bootphdr _bootp;
         vend_type _vend;

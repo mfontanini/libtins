@@ -188,7 +188,7 @@ RSNEAPOL::RSNEAPOL(const uint8_t *buffer, uint32_t total_sz)
         _key.assign(buffer, buffer + total_sz);
 }
 
-void RSNEAPOL::RSNEAPOL::nonce(const uint8_t *new_nonce) {
+void RSNEAPOL::nonce(const uint8_t *new_nonce) {
     std::copy(new_nonce, new_nonce + nonce_size, _header.nonce);
 }
 
