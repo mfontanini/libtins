@@ -96,7 +96,7 @@ uint32_t Tins::SNAP::header_size() const {
 void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= sizeof(_snap));
     if (!_snap.eth_type && inner_pdu()) {
-        uint16_t type = ETHERTYPE_IP;
+        uint16_t type = Tins::Constants::Ethernet::IP;
         switch (inner_pdu()->pdu_type()) {
             case PDU::IP:
                 type = Tins::Constants::Ethernet::IP;

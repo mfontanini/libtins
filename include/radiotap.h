@@ -124,10 +124,12 @@ namespace Tins {
         
         /* Setters */
         
+        #ifndef WIN32
         /**
          * \sa PDU::send()
          */
         void send(PacketSender &sender);
+        #endif
         
         /**
          * \brief Setter for the version field.

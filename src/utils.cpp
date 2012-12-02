@@ -58,14 +58,21 @@ using namespace std;
 /** \cond */
 struct InterfaceCollector {
     set<string> ifaces;
-
+    
+    #ifdef WIN32
+    bool operator() (PIP_ADAPTER_ADDRESSES addr) {
+        ifaces.insert(addr->AdapterName);
+        return true;
+    }
+    #else
     bool operator() (struct ifaddrs *addr) {
         ifaces.insert(addr->ifa_name);
         return true;
     }
+    #endif
 };
 
-struct IPv4Collector {
+/*struct IPv4Collector {
     uint32_t ip;
     bool found;
     const char *iface;
@@ -79,7 +86,7 @@ struct IPv4Collector {
         }
         return found;
     }
-};
+};*/
 
 namespace Tins {
 

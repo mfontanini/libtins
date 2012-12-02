@@ -54,8 +54,13 @@ PacketWriter::~PacketWriter() {
 
 void PacketWriter::write(PDU &pdu) {
     PDU::serialization_type buffer = pdu.serialize();
-    struct timeval tm;
-    gettimeofday(&tm, 0);
+    timeval tm;
+    #ifndef WIN32
+        gettimeofday(&tm, 0);
+    #else
+        // fixme
+        tm = timeval();
+    #endif
     struct pcap_pkthdr header = { 
         tm,
         static_cast<bpf_u_int32>(buffer.size()),

@@ -99,7 +99,7 @@ struct InterfaceInfoCollector {
     bool operator() (const IP_ADAPTER_ADDRESSES *iface) {
         using Tins::IPv4Address;
         // This surely doesn't work
-        if(iface_id == iface->IfIndex) {
+        if(iface_id == uint32_t(iface->IfIndex)) {
             std::copy(iface->PhysicalAddress, iface->PhysicalAddress + 6, info->hw_addr.begin());
             const IP_ADAPTER_PREFIX *prefix_ptr = iface->FirstPrefix;
             for(size_t i = 0; prefix_ptr; prefix_ptr = prefix_ptr->Next, i++) {

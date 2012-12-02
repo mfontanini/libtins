@@ -34,6 +34,9 @@
     #ifdef BSD
         #include <sys/socket.h>
     #endif
+#else
+    #include <ws2tcpip.h>
+    #include <mstcpip.h>
 #endif
 #include <limits>
 #include <iostream> // borrame
@@ -58,14 +61,28 @@ namespace Tins {
     }
     
     void IPv6Address::init(const char *addr) {
-        if(inet_pton(AF_INET6, addr, address) == 0)
-            throw malformed_address();
+        #ifdef WIN32
+            ULONG dummy1;
+            USHORT dummy2;
+            // Maybe change this, mingw doesn't have any other conversion function
+            if(RtlIpv6StringToAddressExA(addr, (IN6_ADDR*)address, &dummy1, &dummy2) != NO_ERROR)
+                throw malformed_address();
+        #else
+            if(inet_pton(AF_INET6, addr, address) == 0)
+                throw malformed_address();
+        #endif            
     }
 
     std::string IPv6Address::to_string() const {
         char buffer[INET6_ADDRSTRLEN];
-        if(inet_ntop(AF_INET6, address, buffer, sizeof(buffer)) == 0)
-            throw malformed_address();
+        #ifdef WIN32
+            ULONG sz = sizeof(buffer);
+            if(RtlIpv6AddressToStringExA((const IN6_ADDR*)address, 0, 0, buffer, &sz) != NO_ERROR)
+                throw malformed_address();
+        #else
+            if(inet_ntop(AF_INET6, address, buffer, sizeof(buffer)) == 0)
+                throw malformed_address();
+        #endif
         return buffer;
     }
     

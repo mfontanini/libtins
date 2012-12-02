@@ -42,6 +42,14 @@ namespace Tins {
  */
 class Timestamp {
 public:
+    #ifdef WIN32
+        typedef long seconds_type;
+        typedef long microseconds_type;
+    #else
+        typedef time_t seconds_type;
+        typedef suseconds_t microseconds_type;
+    #endif
+    
     /**
      * Default constructs the timestamp.
      */
@@ -56,14 +64,14 @@ public:
     /**
      * Returns the amount of seconds in this timestamp.
      */
-    time_t seconds() const {
+    seconds_type seconds() const {
         return tv.tv_sec;
     }
     
     /**
      * Returns the amount of microseconds in this timestamp.
      */
-    suseconds_t microseconds() const {
+    microseconds_type microseconds() const {
         return tv.tv_usec;
     }
     

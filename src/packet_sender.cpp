@@ -69,12 +69,15 @@ const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
         return strerror(errno);
     }
 #else
-
+    // fixme
+    const char *make_error_string() {
+        return "error";
+    }
 #endif
 
 PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) 
 : _sockets(SOCKETS_END, INVALID_RAW_SOCKET), 
-#ifndef BSD
+#if !defined(BSD) && !defined(WIN32)
   _ether_socket(INVALID_RAW_SOCKET),
 #endif
   _timeout(recv_timeout), 
@@ -96,7 +99,7 @@ PacketSender::~PacketSender() {
     #ifdef BSD
     for(BSDEtherSockets::iterator it = _ether_socket.begin(); it != _ether_socket.end(); ++it)
         ::close(it->second);
-    #else
+    #elif !defined(WIN32)
     if(_ether_socket != INVALID_RAW_SOCKET)
         ::close(_ether_socket);
     #endif
@@ -183,7 +186,7 @@ void PacketSender::close_socket(SocketType type, const NetworkInterface &iface) 
         if(::close(it->second) == -1)
             throw SocketCloseError(make_error_string());
         _ether_socket.erase(it);
-        #else
+        #elif !defined(WIN32)
         if(_ether_socket == INVALID_RAW_SOCKET)
             throw InvalidSocketTypeError();
         if(::close(_ether_socket) == -1)
@@ -267,16 +270,24 @@ PDU *PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_add
             return 0;
         }
         if(FD_ISSET(sock, &readfds)) {
-            ssize_t size = recvfrom(sock, (char*)buffer, 2048, 0, link_addr, &addrlen);
+            #ifdef WIN32
+                int length = addrlen;
+            #else
+                socklen_t length = addrlen;
+            #endif
+            ssize_t size = recvfrom(sock, (char*)buffer, 2048, 0, link_addr, &length);
             if(pdu.matches_response(buffer, size)) {
                 return pdu.clone_packet(buffer, size);
             }
         }
         struct timeval this_time, diff;
-        gettimeofday(&this_time, 0);
-        if(timeval_subtract(&diff, &end_time, &this_time)) {
+        #ifdef WIN32
+            // fixme
+        #else
+            gettimeofday(&this_time, 0);
+        #endif // WIN32
+        if(timeval_subtract(&diff, &end_time, &this_time))
             return 0;
-        }
         timeout.tv_sec = diff.tv_sec;
         timeout.tv_usec = diff.tv_usec;
     }

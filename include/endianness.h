@@ -43,7 +43,11 @@
         #define TINS_IS_LITTLE_ENDIAN (_BYTE_ORDER == _LITTLE_ENDIAN)
         #define TINS_IS_BIG_ENDIAN (_BYTE_ORDER == _BIG_ENDIAN)
     #endif
-#elif !defined(WIN32)
+#elif defined(WIN32)
+    // Assume windows == little endian. fixme later
+    #define TINS_IS_LITTLE_ENDIAN 1
+    #define TINS_IS_BIG_ENDIAN 0
+#else
     #include <endian.h>
     #define TINS_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
     #define TINS_IS_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)

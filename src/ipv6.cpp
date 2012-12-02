@@ -3,6 +3,8 @@
 #ifndef WIN32
     #include <netinet/in.h>
     #include <sys/socket.h>
+#else
+    #include <ws2tcpip.h>
 #endif
 #include <iostream> //borrame
 #include "ipv6.h"

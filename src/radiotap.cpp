@@ -227,6 +227,7 @@ uint32_t RadioTap::trailer_size() const {
     return ((_flags & 0x10) != 0) ? sizeof(uint32_t) : 0;
 }
 
+#ifndef WIN32
 void RadioTap::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
@@ -252,6 +253,7 @@ void RadioTap::send(PacketSender &sender) {
         sender.send_l2(*this, 0, 0, _iface);
     #endif
 }
+#endif
 
 void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t sz = header_size();
