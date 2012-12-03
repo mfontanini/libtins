@@ -170,8 +170,8 @@ void IP::tos(uint8_t new_tos) {
 }
 
 void IP::tot_len(uint16_t new_tot_len) {
-    // BSD wants this in host byte order............
-    #ifdef BSD
+    // FreeBSD wants this in host byte order............
+    #ifdef __FreeBSD__
     _ip.tot_len = new_tot_len;
     #else
     _ip.tot_len = Endian::host_to_be(new_tot_len);
