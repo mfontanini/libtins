@@ -32,9 +32,11 @@
 #include <stdexcept>
 #include <algorithm>
 #include <utility>
+#include "macros.h"
 
 #ifndef WIN32
-    #ifdef BSD
+    #if defined(BSD) || defined(__APPLE__)
+        #include <sys/types.h>
         #include <net/if_dl.h>
     #else
         #include <netpacket/packet.h>

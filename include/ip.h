@@ -260,12 +260,7 @@ namespace Tins {
          * \return The total length of this IP PDU.
          */
         uint16_t tot_len() const { 
-            // FreeBSD wants this in host byte order............
-            #ifdef __FreeBSD__
-            return _ip.tot_len; 
-            #else
             return Endian::be_to_host(_ip.tot_len); 
-            #endif
         }
 
         /**

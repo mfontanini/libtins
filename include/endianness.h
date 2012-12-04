@@ -33,16 +33,14 @@
 #include <stdint.h>
 #include "macros.h"
 
-#if defined(BSD)
-    #if defined(__APPLE__)
-        #include <sys/types.h>
-        #define TINS_IS_LITTLE_ENDIAN (BYTE_ORDER == LITTLE_ENDIAN)
-        #define TINS_IS_BIG_ENDIAN (BYTE_ORDER == BIG_ENDIAN)
-    #else
-        #include <sys/endian.h>
-        #define TINS_IS_LITTLE_ENDIAN (_BYTE_ORDER == _LITTLE_ENDIAN)
-        #define TINS_IS_BIG_ENDIAN (_BYTE_ORDER == _BIG_ENDIAN)
-    #endif
+#if defined(__APPLE__)
+    #include <sys/types.h>
+    #define TINS_IS_LITTLE_ENDIAN (BYTE_ORDER == LITTLE_ENDIAN)
+    #define TINS_IS_BIG_ENDIAN (BYTE_ORDER == BIG_ENDIAN)
+#elif defined(BSD)
+    #include <sys/endian.h>
+    #define TINS_IS_LITTLE_ENDIAN (_BYTE_ORDER == _LITTLE_ENDIAN)
+    #define TINS_IS_BIG_ENDIAN (_BYTE_ORDER == _BIG_ENDIAN)
 #elif defined(WIN32)
     // Assume windows == little endian. fixme later
     #define TINS_IS_LITTLE_ENDIAN 1

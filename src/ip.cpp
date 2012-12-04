@@ -170,12 +170,7 @@ void IP::tos(uint8_t new_tos) {
 }
 
 void IP::tot_len(uint16_t new_tot_len) {
-    // FreeBSD wants this in host byte order............
-    #ifdef __FreeBSD__
-    _ip.tot_len = new_tot_len;
-    #else
     _ip.tot_len = Endian::host_to_be(new_tot_len);
-    #endif
 }
 
 void IP::id(uint16_t new_id) {
@@ -394,6 +389,11 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
         protocol(new_flag);
         //flag(new_flag);
     }
+    
+    #ifdef __FreeBSD__
+        if(!parent)
+            total_sz = Endian::host_to_be<uint16_t>(total_sz);
+    #endif
     tot_len(total_sz);
     head_len(my_sz / sizeof(uint32_t));
 
