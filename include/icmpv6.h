@@ -31,6 +31,7 @@
 #define TINS_ICMPV6_H
 
 #include <list>
+#include <vector>
 #include "macros.h"
 #include "pdu.h"
 #include "ipv6_address.h"
@@ -149,6 +150,55 @@ public:
     typedef std::pair<uint16_t, uint16_t> new_ha_info_type;
     
     /**
+     * The type used to store the source/target address list options.
+     */
+    typedef std::vector<ipaddress_type> addr_list_type;
+    
+    /**
+     * The type used to store the nonce option data.
+     */
+    typedef std::vector<uint8_t> nonce_type;
+    
+    /**
+     * \brief The type used to store the link layer address option data.
+     */
+    struct lladdr_type {
+        typedef std::vector<uint8_t> address_type;
+        
+        uint8_t option_code;
+        address_type address;
+        
+        /**
+         * Constructor taking an option code and an address.
+         * 
+         * \param option_code The option code.
+         * \param address The address to be stored.
+         */
+        lladdr_type(uint8_t option_code = 0, 
+          const address_type &address = address_type())
+        : option_code(option_code), address(address) 
+        {
+            
+        }
+        
+        /**
+         * \brief Constructor taking an option code and hwaddress_type.
+         * 
+         * This is a helper constructor, since it'll be common to use
+         * hwaddress_type as the link layer address.
+         * 
+         * \param option_code The option code.
+         * \param address The address to be stored.
+         */
+        lladdr_type(uint8_t option_code, 
+          const hwaddress_type &address)
+        : option_code(option_code), address(address.begin(), address.end()) 
+        {
+            
+        }
+    };
+    
+    /**
      * Type type used to store the prefix information option data.
      */
     TINS_BEGIN_PACK
@@ -182,6 +232,83 @@ public:
             addr.copy(prefix);
         }
     } TINS_END_PACK;
+    
+    /**
+     * The type used to store the RSA signature option.
+     */
+    struct rsa_sign_type {
+        typedef std::vector<uint8_t> signature_type;
+        
+        uint8_t key_hash[16];
+        signature_type signature;
+        
+        /**
+         * \brief Constructs a rsa_sign_type object.
+         * 
+         * The first parameter must be a random access iterator
+         * which will be used to initialize the key_hash member. 
+         * It is assumed that std::distance(hash, end_of_hash) >= 16.
+         * 
+         * The second and third arguments indicate the start and end of 
+         * the sequence which will be used to initialize the signature
+         * member.
+         * 
+         * \param hash A random access iterator used to initialize the
+         * key_hash member.
+         * \param start A forward iterator pointing to the start of the 
+         * sequence which will be used to initialize the signature member.
+         * \param end A forward iterator pointing to the end of the 
+         * sequence used to initialize signature.
+         */
+        template<typename RAIterator, typename ForwardIterator>
+        rsa_sign_type(RAIterator hash, ForwardIterator start, ForwardIterator end)
+        : signature(start, end)
+        {
+            std::copy(hash, hash + sizeof(key_hash), key_hash);
+        }
+        
+        /**
+         * \brief Constructs a rsa_sign_type object.
+         * 
+         * The first parameter must be a random access iterator
+         * which will be used to initialize the key_hash member. 
+         * It is assumed that std::distance(hash, end_of_hash) >= 16.
+         * 
+         * 
+         * \param hash A random access iterator used to initialize the
+         * key_hash member.
+         * \param sign The signature to be set.
+         */
+        template<typename RAIterator>
+        rsa_sign_type(RAIterator hash, const signature_type &sign)
+        : signature(sign)
+        {
+            std::copy(hash, hash + sizeof(key_hash), key_hash);
+        }
+        
+        /**
+         * \brief Default constructs a rsa_sign_type.
+         * 
+         * The key_hash member will be 0-initialized.
+         */
+        rsa_sign_type()
+        {
+            std::fill(key_hash, key_hash + sizeof(key_hash), 0);
+        }
+    };
+    
+    /**
+     * The type used to store IP address/preffix option.
+     */
+    struct ip_prefix_type {
+        uint8_t option_code, prefix_len;
+        ipaddress_type address;
+        
+        ip_prefix_type(uint8_t option_code = 0, uint8_t prefix_len = 0,
+          const ipaddress_type &address = ipaddress_type())
+        : option_code(option_code), prefix_len(prefix_len), address(address)
+        {}
+    };
     
     /**
      * \brief Constructs an ICMPv6 object.
@@ -582,6 +709,55 @@ public:
      */
     void new_home_agent_info(const new_ha_info_type &value);
     
+    /**
+     * \brief Setter for the new source address list option.
+     * 
+     * \param value The new source address list option data.
+     */
+    void source_addr_list(const addr_list_type &value);
+    
+    /**
+     * \brief Setter for the new target address list option.
+     * 
+     * \param value The new target address list option data.
+     */
+    void target_addr_list(const addr_list_type &value);
+    
+    /**
+     * \brief Setter for the new RSA signature option.
+     * 
+     * \param value The new RSA signature option data.
+     */
+    void rsa_signature(const rsa_sign_type &value);
+    
+    /**
+     * \brief Setter for the new timestamp option.
+     * 
+     * \param value The new timestamp option data.
+     */
+    void timestamp(uint64_t value);
+    
+    /**
+     * \brief Setter for the new nonce option.
+     * 
+     * \param value The new nonce option data.
+     */
+    void nonce(const nonce_type &value);
+    
+    /**
+     * \brief Setter for the new IP address/prefix option.
+     * 
+     * \param value The new IP address/prefix option data.
+     */
+    void ip_prefix(const ip_prefix_type &value);
+
+    /**
+     * \brief Setter for the new link layer address option.
+     * 
+     * \param value The new link layer address option data.
+     */
+    void link_layer_addr(lladdr_type value);
+
     // Option getters
     
     /**
@@ -647,6 +823,62 @@ public:
      * option is not found.
      */
     new_ha_info_type new_home_agent_info() const;
+    
+    /**
+     * \brief Getter for the new source address list option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    addr_list_type source_addr_list() const;
+    
+    /**
+     * \brief Getter for the new target address list option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    addr_list_type target_addr_list() const;
+    
+    /**
+     * \brief Getter for the new RSA signature option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    rsa_sign_type rsa_signature() const;
+    
+    /**
+     * \brief Getter for the new timestamp option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    uint64_t timestamp() const;
+    
+    /**
+     * \brief Getter for the new nonce option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    nonce_type nonce() const;
+    
+    /**
+     * \brief Getter for the new IP address/prefix option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    ip_prefix_type ip_prefix() const;
+    
+    /**
+     * \brief Getter for the new link layer address option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    lladdr_type link_layer_addr() const;
 private:
     TINS_BEGIN_PACK
     struct icmp6hdr {
@@ -697,6 +929,8 @@ private:
     bool has_options() const;
     uint8_t *write_option(const icmpv6_option &opt, uint8_t *buffer);
     void parse_options(const uint8_t *&buffer, uint32_t &total_sz);
+    void add_addr_list(uint8_t type, const addr_list_type &value);
+    addr_list_type search_addr_list(Options type) const;
 
 
     icmp6hdr _header;

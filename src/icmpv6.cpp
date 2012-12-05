@@ -289,6 +289,68 @@ void ICMPv6::new_home_agent_info(const new_ha_info_type &value) {
     add_option(icmpv6_option(HOME_AGENT_INFO, sizeof(buffer), buffer));
 }
 
+void ICMPv6::source_addr_list(const addr_list_type &value) {
+    add_addr_list(S_ADDRESS_LIST, value);
+}
+
+void ICMPv6::target_addr_list(const addr_list_type &value) {
+    add_addr_list(T_ADDRESS_LIST, value);
+}
+
+void ICMPv6::add_addr_list(uint8_t type, const addr_list_type &value) {
+    std::vector<uint8_t> buffer;
+    buffer.reserve(value.size() + 6);
+    buffer.insert(buffer.end(), 6, 0);
+    for(addr_list_type::const_iterator it(value.begin()); it != value.end(); ++it)
+        buffer.insert(buffer.end(), it->begin(), it->end());
+    add_option(icmpv6_option(type, buffer.begin(), buffer.end()));
+}
+
+void ICMPv6::rsa_signature(const rsa_sign_type &value) {
+    uint32_t total_sz =  2 + sizeof(value.key_hash) + value.signature.size();
+    uint8_t padding = 8 - total_sz % 8;
+    if(padding == 8)
+        padding = 0;
+    std::vector<uint8_t> buffer;
+    buffer.reserve(total_sz + padding);
+    buffer.insert(buffer.end(), 2, 0);
+    buffer.insert(buffer.end(), value.key_hash, value.key_hash + sizeof(value.key_hash));
+    buffer.insert(buffer.end(), value.signature.begin(), value.signature.end());
+    buffer.insert(buffer.end(), padding, 0);
+    add_option(icmpv6_option(RSA_SIGN, buffer.begin(), buffer.end()));
+}
+
+void ICMPv6::timestamp(uint64_t value) {
+    std::vector<uint8_t> buffer(6 + sizeof(uint64_t));
+    buffer.insert(buffer.begin(), 6, 0);
+    *((uint64_t*)&buffer[6]) = Endian::host_to_be(value);
+    add_option(icmpv6_option(TIMESTAMP, buffer.begin(), buffer.end()));
+}
+
+void ICMPv6::nonce(const nonce_type &value) {
+    add_option(icmpv6_option(NONCE, value.begin(), value.end()));
+}
+
+void ICMPv6::ip_prefix(const ip_prefix_type &value) {
+    std::vector<uint8_t> buffer;
+    buffer.reserve(6 + ipaddress_type::address_size);
+    buffer.push_back(value.option_code);
+    buffer.push_back(value.prefix_len);
+    // reserved
+    buffer.insert(buffer.end(), sizeof(uint32_t), 0);
+    buffer.insert(buffer.end(), value.address.begin(), value.address.end());
+    add_option(icmpv6_option(IP_PREFIX, buffer.begin(), buffer.end()));
+}
+
+void ICMPv6::link_layer_addr(lladdr_type value) {
+    value.address.insert(value.address.begin(), value.option_code);
+    uint8_t padding = 8 - value.address.size() % 8;
+    if(padding == 8)
+        padding = 0;
+    value.address.insert(value.address.end(), padding, 0);
+    add_option(icmpv6_option(LINK_ADDRESS, value.address.begin(), value.address.end()));
+}
+
 // Option getters
 
 ICMPv6::hwaddress_type ICMPv6::source_link_layer_addr() const {
@@ -353,6 +415,83 @@ ICMPv6::new_ha_info_type ICMPv6::new_home_agent_info() const {
         Endian::be_to_host(*(const uint16_t*)(opt->data_ptr() + sizeof(uint16_t))),
         Endian::be_to_host(*(const uint16_t*)(opt->data_ptr() + sizeof(uint16_t) * 2))
     );
+}
+
+ICMPv6::addr_list_type ICMPv6::source_addr_list() const {
+    return search_addr_list(S_ADDRESS_LIST);
+}
+
+ICMPv6::addr_list_type ICMPv6::target_addr_list() const {
+    return search_addr_list(T_ADDRESS_LIST);
+}
+
+ICMPv6::addr_list_type ICMPv6::search_addr_list(Options type) const {
+    const icmpv6_option *opt = search_option(type);
+    if(!opt || opt->data_size() < 6 + ipaddress_type::address_size)
+        throw option_not_found();
+    addr_list_type output;
+    const uint8_t *ptr = opt->data_ptr() + 6, *end = opt->data_ptr() + opt->data_size();
+    while(ptr < end) {
+        if(ptr + ipaddress_type::address_size > end)
+            throw option_not_found();
+        output.push_back(ipaddress_type(ptr));
+        ptr += ipaddress_type::address_size;
+    }
+    return output;
+}
+
+ICMPv6::rsa_sign_type ICMPv6::rsa_signature() const {
+    const icmpv6_option *opt = search_option(RSA_SIGN);
+    // 2 bytes reserved + at least 1 byte signature.
+    if(!opt || opt->data_size() < 2 + sizeof(rsa_sign_type::key_hash) + 1)
+        throw option_not_found();
+    const uint8_t *ptr = opt->data_ptr() + 2;
+    rsa_sign_type output;
+    std::copy(ptr, ptr + sizeof(output.key_hash), output.key_hash);
+    ptr += sizeof(output.key_hash);
+    output.signature.assign(ptr, opt->data_ptr() + opt->data_size());
+    return output;
+}
+
+uint64_t ICMPv6::timestamp() const {
+    const icmpv6_option *opt = search_option(TIMESTAMP);
+    // 6 bytes reserved
+    if(!opt || opt->data_size() < 6 + sizeof(uint64_t))
+        throw option_not_found();
+    return Endian::be_to_host(*(uint64_t*)(opt->data_ptr() + 6));
+}
+
+ICMPv6::nonce_type ICMPv6::nonce() const {
+    const icmpv6_option *opt = search_option(NONCE);
+    // at least a one byte nonce(though it should be 8byte-padded as per the RFC).
+    if(!opt || opt->data_size() == 0)
+        throw option_not_found();
+    return nonce_type(opt->data_ptr(), opt->data_ptr() + opt->data_size());
+}
+
+ICMPv6::ip_prefix_type ICMPv6::ip_prefix() const {
+    const icmpv6_option *opt = search_option(IP_PREFIX);
+    if(!opt || opt->data_size() != 6 + ipaddress_type::address_size)
+        throw option_not_found();
+    const uint8_t *ptr = opt->data_ptr();
+    ip_prefix_type output;
+    output.option_code = *ptr++;
+    output.prefix_len = *ptr++;
+    // skip padding
+    ptr += sizeof(uint32_t);
+    output.address = ipaddress_type(ptr);
+    return output;
+}   
+
+ICMPv6::lladdr_type ICMPv6::link_layer_addr() const {
+    const icmpv6_option *opt = search_option(LINK_ADDRESS);
+    // at least the option_code and 1 byte from the link layer address
+    if(!opt || opt->data_size() < 2)
+        throw option_not_found();
+    const uint8_t *ptr = opt->data_ptr();
+    lladdr_type output(*ptr++);
+    output.address.assign(ptr, opt->data_ptr() + opt->data_size());
+    return output;
 }
 }
 

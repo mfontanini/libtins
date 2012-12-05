@@ -240,3 +240,79 @@ TEST_F(ICMPv6Test, NewHomeAgentInformation) {
     icmp.new_home_agent_info(data);
     EXPECT_EQ(icmp.new_home_agent_info(), data);
 }
+
+TEST_F(ICMPv6Test, SourceAddressList) {
+    ICMPv6 icmp;
+    ICMPv6::addr_list_type data;
+    data.push_back("827d:adae::1");
+    data.push_back("2929:1234:fefe::2");
+    icmp.source_addr_list(data);
+    EXPECT_EQ(icmp.source_addr_list(), data);
+}
+
+TEST_F(ICMPv6Test, TargetAddressList) {
+    ICMPv6 icmp;
+    ICMPv6::addr_list_type data;
+    data.push_back("827d:adae::1");
+    data.push_back("2929:1234:fefe::2");
+    icmp.target_addr_list(data);
+    EXPECT_EQ(icmp.target_addr_list(), data);
+}
+
+TEST_F(ICMPv6Test, RSASignature) {
+    ICMPv6 icmp;
+    ICMPv6::rsa_sign_type data, result;
+    // can i haz std::iota?
+    const uint8_t arr[16] = {
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+    };
+    std::copy(arr, arr + sizeof(arr), data.key_hash);
+    data.signature.push_back(12);
+    data.signature.push_back(15);
+    data.signature.push_back(221);
+    icmp.rsa_signature(data);
+    result = icmp.rsa_signature();
+    EXPECT_TRUE(std::equal(data.key_hash, data.key_hash + sizeof(data.key_hash), result.key_hash));
+    // There might be some padding(in this case, there is).
+    ASSERT_LE(data.signature.size(), result.signature.size());
+    EXPECT_TRUE(std::equal(data.signature.begin(), data.signature.end(), result.signature.begin()));
+}
+
+TEST_F(ICMPv6Test, Timestamp) {
+    ICMPv6 icmp;
+    icmp.timestamp(0x2837d6aaa231L);
+    EXPECT_EQ(icmp.timestamp(), 0x2837d6aaa231L);
+}
+
+TEST_F(ICMPv6Test, Nonce) {
+    ICMPv6 icmp;
+    ICMPv6::nonce_type data;
+    data.push_back(22);
+    data.push_back(211);
+    data.push_back(67);
+    icmp.nonce(data);
+    EXPECT_EQ(icmp.nonce(), data);
+}
+
+TEST_F(ICMPv6Test, IPPrefix) {
+    ICMPv6 icmp;
+    ICMPv6::ip_prefix_type data(67, 198, "ff00:0928:ddfa::"), output;
+    icmp.ip_prefix(data);
+    output = icmp.ip_prefix();
+    EXPECT_EQ(output.option_code, data.option_code);
+    EXPECT_EQ(output.prefix_len, data.prefix_len);
+    EXPECT_EQ(output.address, data.address);
+}
+
+TEST_F(ICMPv6Test, LinkLayerAddress) {
+    ICMPv6 icmp;
+    ICMPv6::lladdr_type data(67), output;
+    data.address.push_back(87);
+    data.address.push_back(22);
+    data.address.push_back(185);
+    icmp.link_layer_addr(data);
+    output = icmp.link_layer_addr();
+    EXPECT_EQ(output.option_code, data.option_code);
+    ASSERT_LE(data.address.size(), output.address.size());
+    EXPECT_TRUE(std::equal(data.address.begin(), data.address.end(), output.address.begin()));
+}
