@@ -56,6 +56,20 @@ public:
     #endif
     
     /**
+     * \brief Constructs a Timestamp which will hold the current time.
+     */
+    static Timestamp current_time() {
+        #ifdef WIN32
+            //fixme
+            return Timestamp();
+        #else
+            timeval tv;
+            gettimeofday(&tv, 0);
+            return tv;
+        #endif
+    }
+    
+    /**
      * Default constructs the timestamp.
      */
     Timestamp() : tv() {}

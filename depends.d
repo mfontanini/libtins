@@ -135,11 +135,13 @@ include/cxxstd.h:
 include/macros.h:
 
 include/endianness.h:
-src/dot11.o: src/dot11.cpp include/dot11.h include/macros.h include/pdu.h \
- include/endianness.h include/hw_address.h include/small_uint.h \
- include/pdu_option.h include/network_interface.h include/ip_address.h \
- include/rawpdu.h include/rsn_information.h include/packet_sender.h \
- include/snap.h
+src/dot11.o: src/dot11.cpp include/macros.h include/dot11.h \
+ include/macros.h include/pdu.h include/endianness.h include/hw_address.h \
+ include/small_uint.h include/pdu_option.h include/network_interface.h \
+ include/ip_address.h include/rawpdu.h include/rsn_information.h \
+ include/packet_sender.h include/snap.h
+
+include/macros.h:
 
 include/dot11.h:
 

@@ -6,6 +6,7 @@
 #include "tcp.h"
 #include "rawpdu.h"
 #include "pdu.h"
+#include "packet.h"
 
 using namespace std;
 using namespace Tins;
@@ -30,3 +31,26 @@ TEST_F(PDUTest, OperatorConcat) {
     EXPECT_TRUE(std::equal(raw_payload.begin(), raw_payload.end(), raw->payload().begin()));
 }
 
+TEST_F(PDUTest, OperatorConcatOnPointers) {
+    std::string raw_payload = "Test";
+    IP ip = IP("192.168.0.1") / TCP(22, 52);
+    TCP *tcp = ip.find_pdu<TCP>();
+    ASSERT_TRUE(tcp);
+    tcp /= RawPDU(raw_payload);
+    RawPDU *raw = ip.find_pdu<RawPDU>();
+    ASSERT_TRUE(raw);
+    ASSERT_EQ(raw->payload_size(), raw_payload.size());
+    EXPECT_TRUE(std::equal(raw->payload().begin(), raw->payload().end(), raw_payload.begin()));
+}
+
+TEST_F(PDUTest, OperatorConcatOnPacket) {
+    std::string raw_payload = "Test";
+    Packet packet = IP("192.168.0.1") / TCP(22, 52);
+    TCP *tcp = packet.pdu()->find_pdu<TCP>();
+    ASSERT_TRUE(tcp);
+    tcp /= RawPDU(raw_payload);
+    RawPDU *raw = packet.pdu()->find_pdu<RawPDU>();
+    ASSERT_TRUE(raw);
+    ASSERT_EQ(raw->payload_size(), raw_payload.size());
+    EXPECT_TRUE(std::equal(raw->payload().begin(), raw->payload().end(), raw_payload.begin()));
+}

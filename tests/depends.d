@@ -139,12 +139,14 @@
 ../include/macros.h:
 
 ../include/endianness.h:
-../src/dot11.o: ../src/dot11.cpp ../include/dot11.h ../include/macros.h \
- ../include/pdu.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
+../src/dot11.o: ../src/dot11.cpp ../include/macros.h ../include/dot11.h \
+ ../include/macros.h ../include/pdu.h ../include/endianness.h \
+ ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
  ../include/network_interface.h ../include/ip_address.h \
  ../include/rawpdu.h ../include/rsn_information.h \
  ../include/packet_sender.h ../include/snap.h
+
+../include/macros.h:
 
 ../include/dot11.h:
 
@@ -1655,7 +1657,8 @@ src/network_interface.o: src/network_interface.cpp \
 src/pdu.o: src/pdu.cpp ../include/ip.h ../include/pdu.h \
  ../include/small_uint.h ../include/endianness.h ../include/macros.h \
  ../include/ip_address.h ../include/pdu_option.h ../include/tcp.h \
- ../include/rawpdu.h ../include/pdu.h
+ ../include/rawpdu.h ../include/pdu.h ../include/packet.h \
+ ../include/cxxstd.h ../include/timestamp.h
 
 ../include/ip.h:
 
@@ -1676,6 +1679,12 @@ src/pdu.o: src/pdu.cpp ../include/ip.h ../include/pdu.h \
 ../include/rawpdu.h:
 
 ../include/pdu.h:
+
+../include/packet.h:
+
+../include/cxxstd.h:
+
+../include/timestamp.h:
 src/radiotap.o: src/radiotap.cpp ../include/radiotap.h \
  ../include/macros.h ../include/pdu.h ../include/endianness.h \
  ../include/network_interface.h ../include/hw_address.h \

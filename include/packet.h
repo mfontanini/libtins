@@ -130,8 +130,19 @@ public:
      * 
      * The PDU* is cloned using PDU::clone.
      */
-    Packet(PDU *apdu, const Timestamp &tstamp) 
-    : pdu_(apdu->clone()), ts(tstamp) {}
+    Packet(const PDU *apdu, const Timestamp &tstamp) 
+    : pdu_(apdu->clone()), ts(tstamp) { }
+    
+    /**
+     * \brief Constructs a Packet from a const PDU&.
+     * 
+     * The timestamp will be set to the current time.
+     * 
+     * This calls PDU::clone on the PDU parameter.
+     * 
+     */
+    Packet(const PDU &rhs) 
+    : pdu_(rhs.clone()), ts(Timestamp::current_time()) { }
     
     /**
      * \brief Constructs a Packet from a RefPacket.
@@ -247,6 +258,19 @@ public:
      */
     operator bool() const {
         return bool(pdu_);
+    }
+    
+    /**
+     * 
+     * \brief Concatenation operator.
+     * 
+     * Adds the PDU at the end of the PDU stack. 
+     * 
+     * \param rhs The PDU to be appended.
+     */
+    Packet &operator/=(const PDU &rhs) {
+        pdu_ /= rhs;
+        return *this;
     }
 private:
     PDU *pdu_;

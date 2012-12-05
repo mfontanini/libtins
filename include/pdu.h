@@ -362,6 +362,17 @@ namespace Tins {
         lop /= rop;
         return lop;
     }
+    
+    /**
+     * \brief Concatenation operator on PDU pointers.
+     * 
+     * \sa operator/=
+     */
+    template<typename T>
+    T *operator/= (T* lop, const PDU &rop) {
+        *lop /= rop;
+        return lop;
+    }
 };
 
 #endif // TINS_PDU_H
