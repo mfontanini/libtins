@@ -246,10 +246,15 @@ void ICMPv6::target_link_layer_addr(const hwaddress_type &addr) {
 }
 
 void ICMPv6::prefix_info(prefix_info_type info) {
-    info.valid_lifetime = Endian::host_to_be(info.valid_lifetime);
-    info.preferred_lifetime = Endian::host_to_be(info.preferred_lifetime);
+    uint8_t buffer[2 + sizeof(uint32_t) * 3 + ipaddress_type::address_size];
+    buffer[0] = info.prefix_len;
+    buffer[1] = (info.L << 7) | (info.A << 6);
+    *(uint32_t*)(buffer + 2) = Endian::host_to_be(info.valid_lifetime);
+    *(uint32_t*)(buffer + 2 + sizeof(uint32_t)) = Endian::host_to_be(info.preferred_lifetime);
+    *(uint32_t*)(buffer + 2 + sizeof(uint32_t) * 2) = 0;
+    info.prefix.copy(buffer + 2 + sizeof(uint32_t) * 3);
     add_option(
-        icmpv6_option(PREFIX_INFO, sizeof(prefix_info_type), (const uint8_t*)&info)
+        icmpv6_option(PREFIX_INFO, buffer, buffer + sizeof(buffer))
     );
 }
 
@@ -351,6 +356,39 @@ void ICMPv6::link_layer_addr(lladdr_type value) {
     add_option(icmpv6_option(LINK_ADDRESS, value.address.begin(), value.address.end()));
 }
 
+void ICMPv6::naack(const naack_type &value) {
+    uint8_t buffer[6];
+    buffer[0] = value.first;
+    buffer[1] = value.second;
+    add_option(icmpv6_option(NAACK, buffer, buffer + sizeof(buffer)));
+}
+
+void ICMPv6::map(const map_type &value) {
+    uint8_t buffer[sizeof(uint8_t) * 2 + sizeof(uint32_t) + ipaddress_type::address_size];
+    buffer[0] = value.dist << 4 | value.pref;
+    buffer[1] = value.r << 7;
+    *(uint32_t*)(buffer + 2) = Endian::host_to_be(value.valid_lifetime);
+    value.address.copy(buffer + 2 + sizeof(uint32_t));
+    add_option(icmpv6_option(MAP, buffer, buffer + sizeof(buffer)));
+}
+
+void ICMPv6::route_info(const route_info_type &value) {
+    uint8_t padding = 8 - value.prefix.size() % 8;
+    if(padding == 8)
+        padding = 0;
+    std::vector<uint8_t> buffer(2 + sizeof(uint32_t) + value.prefix.size() + padding);
+    buffer[0] = value.prefix_len;
+    buffer[1] = value.pref << 3;
+    *(uint32_t*)&buffer[2] = Endian::host_to_be(value.route_lifetime);
+    // copy the prefix and then fill with padding
+    buffer.insert(
+        std::copy(value.prefix.begin(), value.prefix.end(), buffer.begin() + 2 + sizeof(uint32_t)),
+        padding, 
+        0
+    );
+    add_option(icmpv6_option(ROUTE_INFO, buffer.begin(), buffer.end()));
+}
+
 // Option getters
 
 ICMPv6::hwaddress_type ICMPv6::source_link_layer_addr() const {
@@ -369,12 +407,17 @@ ICMPv6::hwaddress_type ICMPv6::target_link_layer_addr() const {
 
 ICMPv6::prefix_info_type ICMPv6::prefix_info() const {
     const icmpv6_option *opt = search_option(PREFIX_INFO);
-    if(!opt || opt->data_size() != sizeof(prefix_info_type))
+    if(!opt || opt->data_size() != 2 + sizeof(uint32_t) * 3 + ipaddress_type::address_size)
         throw option_not_found();
+    const uint8_t *ptr = opt->data_ptr();
     prefix_info_type output;
-    std::memcpy(&output, opt->data_ptr(), sizeof(prefix_info_type));
-    output.valid_lifetime = Endian::be_to_host(output.valid_lifetime);
-    output.preferred_lifetime = Endian::be_to_host(output.preferred_lifetime);
+    output.prefix_len = *ptr++;
+    output.L = (*ptr >> 7) & 0x1;
+    output.A = (*ptr++ >> 6) & 0x1;
+    output.valid_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    ptr += sizeof(uint32_t);
+    output.preferred_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    output.prefix = ptr + sizeof(uint32_t) * 2;
     return output;
 }
 
@@ -491,6 +534,43 @@ ICMPv6::lladdr_type ICMPv6::link_layer_addr() const {
     const uint8_t *ptr = opt->data_ptr();
     lladdr_type output(*ptr++);
     output.address.assign(ptr, opt->data_ptr() + opt->data_size());
+    return output;
+}
+
+ICMPv6::naack_type ICMPv6::naack() const {
+    const icmpv6_option *opt = search_option(NAACK);
+    if(!opt || opt->data_size() != 6)
+        throw option_not_found();
+    const uint8_t *ptr = opt->data_ptr();
+    return naack_type(ptr[0], ptr[1]);
+}
+
+ICMPv6::map_type ICMPv6::map() const {
+    const icmpv6_option *opt = search_option(MAP);
+    if(!opt || opt->data_size() != 2 + sizeof(uint32_t) + ipaddress_type::address_size)
+        throw option_not_found();
+    const uint8_t *ptr = opt->data_ptr();
+    map_type output;
+    output.dist = (*ptr >> 4) & 0x0f;
+    output.pref = *ptr++ & 0x0f;
+    output.r = (*ptr++ >> 7) & 0x01;
+    output.valid_lifetime = *(uint32_t*)ptr;
+    ptr += sizeof(uint32_t);
+    output.address = ptr;
+    return output;
+}
+
+ICMPv6::route_info_type ICMPv6::route_info() const {
+    const icmpv6_option *opt = search_option(ROUTE_INFO);
+    if(!opt || opt->data_size() < 2 + sizeof(uint32_t))
+        throw option_not_found();
+    const uint8_t *ptr = opt->data_ptr();
+    route_info_type output;
+    output.prefix_len = *ptr++;
+    output.pref = (*ptr++ >> 3) & 0x3;
+    output.route_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    ptr += sizeof(uint32_t);
+    output.prefix.assign(ptr, opt->data_ptr() + opt->data_size());
     return output;
 }
 }

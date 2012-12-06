@@ -316,3 +316,36 @@ TEST_F(ICMPv6Test, LinkLayerAddress) {
     ASSERT_LE(data.address.size(), output.address.size());
     EXPECT_TRUE(std::equal(data.address.begin(), data.address.end(), output.address.begin()));
 }
+
+TEST_F(ICMPv6Test, NAACK) {
+    ICMPv6 icmp;
+    ICMPv6::naack_type data(0x92, 0xb3);
+    icmp.naack(data);
+    EXPECT_EQ(icmp.naack(), data);
+}
+
+TEST_F(ICMPv6Test, MAP) {
+    ICMPv6 icmp;
+    ICMPv6::map_type data(0x9, 0xb, 1, 0x9283719, "f029:adde::1"), output;
+    icmp.map(data);
+    output = icmp.map();
+    EXPECT_EQ(output.dist, data.dist);
+    EXPECT_EQ(output.pref, data.pref);
+    EXPECT_EQ(output.r, data.r);
+    EXPECT_EQ(output.address, data.address);
+}
+
+TEST_F(ICMPv6Test, RouteInfo) {
+    ICMPv6 icmp;
+    ICMPv6::route_info_type data(0x92, 2, 0xf23a8823), output;
+    data.prefix.push_back(98);
+    data.prefix.push_back(52);
+    data.prefix.push_back(44);
+    icmp.route_info(data);
+    output = icmp.route_info();
+    EXPECT_EQ(output.prefix_len, data.prefix_len);
+    EXPECT_EQ(output.pref, data.pref);
+    EXPECT_EQ(output.route_lifetime, data.route_lifetime);
+    ASSERT_LE(data.prefix.size(), output.prefix.size());
+    EXPECT_TRUE(std::equal(data.prefix.begin(), data.prefix.end(), output.prefix.begin()));
+}

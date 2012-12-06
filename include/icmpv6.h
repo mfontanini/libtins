@@ -39,6 +39,7 @@
 #include "endianness.h"
 #include "small_uint.h"
 #include "hw_address.h"
+#include "small_uint.h"
 
 namespace Tins {
 /**
@@ -102,7 +103,7 @@ public:
         IP_PREFIX,
         NEW_ROUTER_PREFIX,
         LINK_ADDRESS,
-        NEIGHBOUR_ADVERT_ACK,
+        NAACK,
         MAP = 23,
         ROUTE_INFO,
         RECURSIVE_DNS_SERV,
@@ -160,6 +161,15 @@ public:
     typedef std::vector<uint8_t> nonce_type;
     
     /**
+     * \brief The type used to store the neighbour advertisement 
+     * acknowledgement option data.
+     * 
+     * The first member contains the option code field, while
+     * the second one contains the status.
+     */
+    typedef std::pair<uint8_t, uint8_t> naack_type;
+    
+    /**
      * \brief The type used to store the link layer address option data.
      */
     struct lladdr_type {
@@ -201,37 +211,21 @@ public:
     /**
      * Type type used to store the prefix information option data.
      */
-    TINS_BEGIN_PACK
     struct prefix_info_type {
         uint8_t prefix_len;
-        #if TINS_IS_LITTLE_ENDIAN
-            uint8_t reserved1:6,
-                    A:1,
-                    L:1;
-        #else
-            uint8_t L:1,
-                    A:1,
-                    reserved1:6;
-        #endif
+        small_uint<1> A, L;
         uint32_t valid_lifetime,
                 preferred_lifetime,
                 reserved2;
-        uint8_t prefix[ipaddress_type::address_size];
+        ipaddress_type prefix;
         
         prefix_info_type(uint8_t prefix_len=0, small_uint<1> A=0, small_uint<1> L=0,
-            uint32_t valid_lifetime=0, uint32_t preferred_lifetime=0,
-            const ipaddress_type &addr = ipaddress_type())
-        : prefix_len(prefix_len), reserved1(0), 
-        #if TINS_IS_LITTLE_ENDIAN
-        A(A), L(L), 
-        #else
-        L(L), A(A), 
-        #endif
-        valid_lifetime(valid_lifetime), preferred_lifetime(preferred_lifetime)
-        {
-            addr.copy(prefix);
-        }
-    } TINS_END_PACK;
+          uint32_t valid_lifetime=0, uint32_t preferred_lifetime=0,
+          const ipaddress_type &prefix = ipaddress_type())
+        : prefix_len(prefix_len), A(A), L(L), 
+          valid_lifetime(valid_lifetime), preferred_lifetime(preferred_lifetime),
+          prefix(prefix) { }
+    };
     
     /**
      * The type used to store the RSA signature option.
@@ -308,6 +302,39 @@ public:
           const ipaddress_type &address = ipaddress_type())
         : option_code(option_code), prefix_len(prefix_len), address(address)
         {}
+    };
+    
+    /**
+     * The type used to store the map option.
+     */
+    struct map_type {
+        small_uint<4> dist, pref;
+        small_uint<1> r;
+        uint32_t valid_lifetime;
+        ipaddress_type address;
+        
+        map_type(small_uint<4> dist = 0, small_uint<4> pref = 0, 
+          small_uint<1> r = 0, uint32_t valid_lifetime = 0, 
+          const ipaddress_type &address = ipaddress_type())
+        : dist(dist), pref(pref), r(r), valid_lifetime(valid_lifetime),
+          address(address) { }
+    };
+    
+    /**
+     * The type used to store the route information option.
+     */
+    struct route_info_type {
+        typedef std::vector<uint8_t> prefix_type;
+        
+        uint8_t prefix_len;
+        small_uint<2> pref;
+        uint32_t route_lifetime;
+        prefix_type prefix;
+        
+        route_info_type(uint8_t prefix_len = 0, small_uint<2> pref = 0, 
+          uint32_t route_lifetime = 0, const prefix_type &prefix = prefix_type())
+        : prefix_len(prefix_len), pref(pref), route_lifetime(route_lifetime),
+          prefix(prefix) { }
     };
     
     /**
@@ -758,6 +785,27 @@ public:
      */
     void link_layer_addr(lladdr_type value);
 
+    /**
+     * \brief Setter for the neighbour advertisement acknowledgement option.
+     * 
+     * \param value The new naack option data.
+     */
+    void naack(const naack_type &value);
+    
+    /**
+     * \brief Setter for the map option.
+     * 
+     * \param value The new map option data.
+     */
+    void map(const map_type &value);
+    
+    /**
+     * \brief Setter for the route information option.
+     * 
+     * \param value The new route information option data.
+     */
+    void route_info(const route_info_type &value);
+    
     // Option getters
     
     /**
@@ -825,7 +873,7 @@ public:
     new_ha_info_type new_home_agent_info() const;
     
     /**
-     * \brief Getter for the new source address list option.
+     * \brief Getter for the source address list option.
      * 
      * This method will throw an option_not_found exception if the
      * option is not found.
@@ -833,7 +881,7 @@ public:
     addr_list_type source_addr_list() const;
     
     /**
-     * \brief Getter for the new target address list option.
+     * \brief Getter for the target address list option.
      * 
      * This method will throw an option_not_found exception if the
      * option is not found.
@@ -841,7 +889,7 @@ public:
     addr_list_type target_addr_list() const;
     
     /**
-     * \brief Getter for the new RSA signature option.
+     * \brief Getter for the RSA signature option.
      * 
      * This method will throw an option_not_found exception if the
      * option is not found.
@@ -849,7 +897,7 @@ public:
     rsa_sign_type rsa_signature() const;
     
     /**
-     * \brief Getter for the new timestamp option.
+     * \brief Getter for the timestamp option.
      * 
      * This method will throw an option_not_found exception if the
      * option is not found.
@@ -857,7 +905,7 @@ public:
     uint64_t timestamp() const;
     
     /**
-     * \brief Getter for the new nonce option.
+     * \brief Getter for the nonce option.
      * 
      * This method will throw an option_not_found exception if the
      * option is not found.
@@ -865,7 +913,7 @@ public:
     nonce_type nonce() const;
     
     /**
-     * \brief Getter for the new IP address/prefix option.
+     * \brief Getter for the IP address/prefix option.
      * 
      * This method will throw an option_not_found exception if the
      * option is not found.
@@ -873,12 +921,37 @@ public:
     ip_prefix_type ip_prefix() const;
     
     /**
-     * \brief Getter for the new link layer address option.
+     * \brief Getter for the link layer address option.
      * 
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     lladdr_type link_layer_addr() const;
+    
+    /**
+     * \brief Getter for the neighbour advertisement acknowledgement
+     * option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    naack_type naack() const;
+    
+    /**
+     * \brief Getter for the map option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    map_type map() const;
+    
+    /**
+     * \brief Getter for the map option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    route_info_type route_info() const;
 private:
     TINS_BEGIN_PACK
     struct icmp6hdr {
