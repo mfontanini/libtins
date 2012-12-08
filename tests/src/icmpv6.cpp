@@ -349,3 +349,74 @@ TEST_F(ICMPv6Test, RouteInfo) {
     ASSERT_LE(data.prefix.size(), output.prefix.size());
     EXPECT_TRUE(std::equal(data.prefix.begin(), data.prefix.end(), output.prefix.begin()));
 }
+
+TEST_F(ICMPv6Test, RecursiveDNSServer) {
+    ICMPv6 icmp;
+    ICMPv6::recursive_dns_type data(0x9283712), output;
+    data.servers.push_back("827d:adae::1");
+    data.servers.push_back("2929:1234:fefe::2");
+    icmp.recursive_dns_servers(data);
+    output = icmp.recursive_dns_servers();
+    EXPECT_EQ(output.lifetime, data.lifetime);
+    EXPECT_EQ(output.servers, data.servers);
+}
+
+TEST_F(ICMPv6Test, HandoverKeyRequest) {
+    ICMPv6 icmp;
+    ICMPv6::handover_key_req_type data(2), output;
+    data.key.push_back(98);
+    data.key.push_back(52);
+    data.key.push_back(44);
+    icmp.handover_key_request(data);
+    output = icmp.handover_key_request();
+    EXPECT_EQ(output.AT, data.AT);
+    EXPECT_EQ(data.key, output.key);
+}
+
+TEST_F(ICMPv6Test, HandoverKeyReply) {
+    ICMPv6 icmp;
+    ICMPv6::handover_key_reply_type data(0x9283, 2), output;
+    data.key.push_back(98);
+    data.key.push_back(52);
+    data.key.push_back(44);
+    icmp.handover_key_reply(data);
+    output = icmp.handover_key_reply();
+    EXPECT_EQ(output.AT, data.AT);
+    EXPECT_EQ(output.lifetime, data.lifetime);
+    EXPECT_EQ(data.key, output.key);
+}
+
+TEST_F(ICMPv6Test, HandoverAssistInfo) {
+    ICMPv6 icmp;
+    ICMPv6::handover_assist_info_type data(0x92), output;
+    data.hai.push_back(98);
+    data.hai.push_back(52);
+    data.hai.push_back(44);
+    icmp.handover_assist_info(data);
+    output = icmp.handover_assist_info();
+    EXPECT_EQ(output.option_code, data.option_code);
+    EXPECT_EQ(data.hai, output.hai);
+}
+
+TEST_F(ICMPv6Test, MobileNodeIdentifier) {
+    ICMPv6 icmp;
+    ICMPv6::mobile_node_id_type data(0x92), output;
+    data.mn.push_back(98);
+    data.mn.push_back(52);
+    data.mn.push_back(44);
+    icmp.mobile_node_identifier(data);
+    output = icmp.mobile_node_identifier();
+    EXPECT_EQ(output.option_code, data.option_code);
+    EXPECT_EQ(data.mn, output.mn);
+}
+
+TEST_F(ICMPv6Test, DNSSearchList) {
+    ICMPv6 icmp;
+    ICMPv6::dns_search_list_type data(0x9283fd1), output;
+    data.domains.push_back("libtins.sourceforge.net");
+    data.domains.push_back("www.example.com");
+    icmp.dns_search_list(data);
+    output = icmp.dns_search_list();
+    EXPECT_EQ(output.lifetime, data.lifetime);
+    EXPECT_EQ(data.domains, output.domains);
+}

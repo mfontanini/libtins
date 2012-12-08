@@ -338,6 +338,87 @@ public:
     };
     
     /**
+     * The type used to store the recursive DNS servers option.
+     */
+    struct recursive_dns_type {
+        typedef std::vector<ipaddress_type> servers_type;
+        
+        uint32_t lifetime;
+        servers_type servers;
+        
+        recursive_dns_type(uint32_t lifetime = 0, 
+          const servers_type &servers = servers_type())
+        : lifetime(lifetime), servers(servers) {}
+    };
+    
+    /**
+     * The type used to store the handover key request option.
+     */
+    struct handover_key_req_type {
+        typedef std::vector<uint8_t> key_type;
+        
+        small_uint<4> AT;
+        key_type key;
+        
+        handover_key_req_type(small_uint<4> AT = 0,
+          const key_type &key = key_type())
+        : AT(AT), key(key) { }
+    };
+    
+    /**
+     * The type used to store the handover key reply option.
+     */
+    struct handover_key_reply_type : handover_key_req_type {
+        uint16_t lifetime;
+        
+        handover_key_reply_type(uint16_t lifetime = 0, small_uint<4> AT = 0,
+          const key_type &key = key_type())
+        : handover_key_req_type(AT, key), lifetime(lifetime) { }
+    };
+    
+    /**
+     * The type used to store the handover assist information option.
+     */
+    struct handover_assist_info_type {
+        typedef std::vector<uint8_t> hai_type;
+        
+        uint8_t option_code;
+        hai_type hai;
+        
+        handover_assist_info_type(uint8_t option_code=0, 
+          const hai_type &hai = hai_type())
+        : option_code(option_code), hai(hai) { }
+    };
+    
+    /**
+     * The type used to store the mobile node identifier option.
+     */
+    struct mobile_node_id_type {
+        typedef std::vector<uint8_t> mn_type;
+        
+        uint8_t option_code;
+        mn_type mn;
+        
+        mobile_node_id_type(uint8_t option_code=0, 
+          const mn_type &mn = mn_type())
+        : option_code(option_code), mn(mn) { }
+    };
+    
+    /**
+     * The type used to store the DNS search list option.
+     */
+    struct dns_search_list_type {
+        typedef std::vector<std::string> domains_type;
+        
+        uint32_t lifetime;
+        domains_type domains;
+        
+        dns_search_list_type(uint32_t lifetime = 0,
+          const domains_type &domains = domains_type())
+        : lifetime(lifetime), domains(domains) { }
+    };
+    
+    /**
      * \brief Constructs an ICMPv6 object.
      * 
      * The type of the constructed object will be an echo request, unless
@@ -675,7 +756,9 @@ public:
         return new ICMPv6(*this);
     }
     
-    // Option setters
+    // ****************************************************************
+    //                          Option setters
+    // ****************************************************************
     
     /**
      * \brief Setter for the source link layer address option.
@@ -806,7 +889,51 @@ public:
      */
     void route_info(const route_info_type &value);
     
-    // Option getters
+    /**
+     * \brief Setter for the recursive DNS servers option.
+     * 
+     * \param value The new recursive DNS servers option data.
+     */
+    void recursive_dns_servers(const recursive_dns_type &value);
+    
+    /**
+     * \brief Setter for the handover key request option.
+     * 
+     * \param value The new handover key request option data.
+     */
+    void handover_key_request(const handover_key_req_type &value);
+    
+    /**
+     * \brief Setter for the handover key reply option.
+     * 
+     * \param value The new handover key reply option data.
+     */
+    void handover_key_reply(const handover_key_reply_type &value);
+    
+    /**
+     * \brief Setter for the handover assist info option.
+     * 
+     * \param value The new handover assist info option data.
+     */
+    void handover_assist_info(const handover_assist_info_type &value);
+    
+    /**
+     * \brief Setter for the mobile node identifier option.
+     * 
+     * \param value The new mobile node identifier option data.
+     */
+    void mobile_node_identifier(const mobile_node_id_type &value);
+    
+    /**
+     * \brief Setter for the DNS search list option.
+     * 
+     * \param value The new DNS search list option data.
+     */
+    void dns_search_list(const dns_search_list_type &value);
+    
+    // ****************************************************************
+    //                          Option getters
+    // ****************************************************************
     
     /**
      * \brief Getter for the source link layer address option.
@@ -946,12 +1073,60 @@ public:
     map_type map() const;
     
     /**
-     * \brief Getter for the map option.
+     * \brief Getter for the route information option.
      * 
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     route_info_type route_info() const;
+    
+    /**
+     * \brief Getter for the recursive dns servers option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    recursive_dns_type recursive_dns_servers() const;
+    
+    /**
+     * \brief Getter for the handover key request option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    handover_key_req_type handover_key_request() const;
+    
+    /**
+     * \brief Getter for the handover key reply option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    handover_key_reply_type handover_key_reply() const;
+    
+    /**
+     * \brief Getter for the handover key reply option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    handover_assist_info_type handover_assist_info() const;
+    
+    /**
+     * \brief Getter for the mobile node identifier option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    mobile_node_id_type mobile_node_identifier() const;
+    
+    /**
+     * \brief Getter for the mobile node identifier option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    dns_search_list_type dns_search_list() const;
 private:
     TINS_BEGIN_PACK
     struct icmp6hdr {
@@ -1004,7 +1179,13 @@ private:
     void parse_options(const uint8_t *&buffer, uint32_t &total_sz);
     void add_addr_list(uint8_t type, const addr_list_type &value);
     addr_list_type search_addr_list(Options type) const;
-
+    template<template <typename> class Functor>
+    const icmpv6_option *safe_search_option(Options opt, uint32_t size) const {
+        const icmpv6_option *option = search_option(opt);
+        if(!option || Functor<uint32_t>()(option->data_size(), size))
+            throw option_not_found();
+        return option;
+    }
 
     icmp6hdr _header;
     ipaddress_type _target_address, _dest_address;
