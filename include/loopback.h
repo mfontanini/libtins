@@ -31,6 +31,8 @@
 #define TINS_LOOPBACK_H
 
 #include "pdu.h"
+#include "macros.h"
+#include "network_interface.h"
 
 namespace Tins {
 class Loopback : public PDU {
@@ -50,10 +52,13 @@ public:
     /**
      * \brief Construct a Loopback object.
      * 
-     * \param family_id The family id to be used.
+     * The NetworkInterface object will only be used in *BSD, where
+     * Null/Loopback PDUs can actually be sent.
+     * 
+     * \param iface The network interface in which to send this PDU.
      * \param inner_pdu The inner pdu to be set.
      */
-    Loopback(uint32_t family_id, PDU *inner_pdu = 0);
+    Loopback(const NetworkInterface &iface, PDU *inner_pdu = 0);
     
     /**
      * \brief Construct a Loopback object from a buffer.
@@ -87,15 +92,35 @@ public:
     PDUType pdu_type() const { return PDU::IP; }
     
     /**
+     * \brief Getter for the interface member.
+     */
+    const NetworkInterface &iface() const { return _iface; }
+    
+    /**
+     * \brief Setter for the interface member.
+     * 
+     * \param new_iface The new interface to be set.
+     */
+    void iface(const NetworkInterface &new_iface);
+    
+    /**
      * \sa PDU::clone
      */
     Loopback *clone() const {
         return new Loopback(*this);
     }
+    // Null/Loopback can only be sent in *BSD
+    #ifdef BSD
+    /**
+     * \sa PDU::send()
+     */
+    void send(PacketSender &sender);
+    #endif // BSD
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
     uint32_t _family;
+    NetworkInterface _iface;
 };
 }
 

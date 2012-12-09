@@ -29,14 +29,19 @@
 
 #ifndef WIN32
     #include <sys/socket.h>
+    #ifdef BSD
+        #include <net/if_dl.h>
+        #include <netinet/in.h>
+        #include <net/ethernet.h>
+    #endif
 #endif
 #include <stdexcept>
 #include <cassert>
+#include <cstring>
 #include "loopback.h"
 #include "packet_sender.h"
 #include "ip.h"
 #include "llc.h"
-#include "macros.h"
 #include "rawpdu.h"
 
 #if defined(BSD) && !defined(PF_LLC)
@@ -51,8 +56,8 @@ Loopback::Loopback()
     
 }
     
-Loopback::Loopback(uint32_t family_id, PDU *inner_pdu)
-: PDU(inner_pdu), _family(family_id)
+Loopback::Loopback(const NetworkInterface &iface, PDU *inner_pdu)
+: PDU(inner_pdu), _family(), _iface(iface)
 {
     
 }
@@ -85,6 +90,10 @@ void Loopback::family(uint32_t family_id) {
     _family = family_id;
 }
 
+void Loopback::iface(const NetworkInterface &new_iface) {
+    _iface = new_iface;
+}
+
 uint32_t Loopback::header_size() const {
     return sizeof(_family);
 }
@@ -92,6 +101,18 @@ uint32_t Loopback::header_size() const {
 void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
 {
     assert(total_sz >= sizeof(_family));
+    if(dynamic_cast<const Tins::IP*>(inner_pdu()))
+        _family = PF_INET;
+    else if(dynamic_cast<const Tins::LLC*>(inner_pdu()))
+        _family = PF_LLC;
     *reinterpret_cast<uint32_t*>(buffer) = _family;
 }
+#ifdef BSD
+void Loopback::send(PacketSender &sender) {
+    if(!_iface)
+        throw std::runtime_error("Interface has not been set");
+    
+    sender.send_l2(*this, 0, 0, _iface);
+}
+#endif // WIN32
 }
