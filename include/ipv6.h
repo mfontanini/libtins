@@ -262,10 +262,12 @@ public:
      */
     PDUType pdu_type() const { return pdu_flag; }
     
+    #ifndef BSD
     /**
      * \sa PDU::send()
      */
     void send(PacketSender &sender);
+    #endif
     
     /**
      * Adds an extension header.

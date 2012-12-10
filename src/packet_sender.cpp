@@ -85,6 +85,7 @@ PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec)
   _timeout_usec(usec)
 {
     _types[IP_SOCKET] = IPPROTO_RAW;
+    _types[IPV6_SOCKET] = IPPROTO_RAW;
     _types[ICMP_SOCKET] = IPPROTO_ICMP;
 }
 
@@ -162,7 +163,7 @@ void PacketSender::open_l3_socket(SocketType type) {
         throw InvalidSocketTypeError();
     if(_sockets[type] == INVALID_RAW_SOCKET) {
         int sockfd;
-        sockfd = socket(AF_INET, SOCK_RAW, socktype);
+        sockfd = socket((type == IPV6_SOCKET) ? AF_INET6 : AF_INET, SOCK_RAW, socktype);
         if (sockfd < 0)
             throw SocketOpenError(make_error_string());
 
