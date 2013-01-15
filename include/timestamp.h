@@ -99,7 +99,8 @@ public:
          * Converts this Timestamp to a std::chrono::microseconds
          */
         operator std::chrono::microseconds() const {
-            return std::chrono::microseconds(seconds() * 1000000 + microseconds());
+            return std::chrono::seconds(seconds()) +
+                std::chrono::microseconds(microseconds());
         }
     #endif
 private:
