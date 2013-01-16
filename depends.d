@@ -108,6 +108,14 @@ include/pdu_option.h:
 include/ethernetII.h:
 
 include/network_interface.h:
+src/dhcpv6.o: src/dhcpv6.cpp include/dhcpv6.h include/pdu.h \
+ include/small_uint.h
+
+include/dhcpv6.h:
+
+include/pdu.h:
+
+include/small_uint.h:
 src/dns.o: src/dns.cpp include/dns.h include/macros.h include/pdu.h \
  include/endianness.h include/dns_record.h include/cxxstd.h \
  include/ip_address.h include/ipv6_address.h

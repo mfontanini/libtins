@@ -104,7 +104,8 @@ namespace Tins {
             LOOPBACK,
             IPv6,
             ICMPv6,
-            SLL
+            SLL,
+            DHCPv6
         };
 
         /** \brief PDU constructor
