@@ -48,6 +48,7 @@
 #include "ipv6.h"
 #include "arp.h"
 #include "constants.h"
+#include "internals.h"
 
 namespace Tins {
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
@@ -70,25 +71,16 @@ EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz)
     if(total_sz < sizeof(ethhdr))
         throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
     memcpy(&_eth, buffer, sizeof(ethhdr));
-    PDU *next = 0;
     buffer += sizeof(ethhdr);
     total_sz -= sizeof(ethhdr);
     if(total_sz) {
-        switch(payload_type()) {
-            case Constants::Ethernet::IP:
-                next = new Tins::IP(buffer, total_sz);
-                break;
-            case Constants::Ethernet::IPV6:
-                next = new Tins::IPv6(buffer, total_sz);
-                break;
-            case Constants::Ethernet::ARP:
-                next = new Tins::ARP(buffer, total_sz);
-                break;
-            default:
-                next = new Tins::RawPDU(buffer, total_sz);
-            // Other protos plz
-        }
-        inner_pdu(next);
+        inner_pdu(
+            Internals::pdu_from_flag(
+                (Constants::Ethernet::e)payload_type(), 
+                buffer, 
+                total_sz
+            )
+        );
     }
 }
 
@@ -152,21 +144,10 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
 
     /* Inner type defaults to IP */
     if ((_eth.payload_type == 0) && inner_pdu()) {
-        uint16_t type = Constants::Ethernet::IP;
-        switch (inner_pdu()->pdu_type()) {
-            case PDU::IP:
-                type = Constants::Ethernet::IP;
-                break;
-            case PDU::IPv6:
-                type = Constants::Ethernet::IPV6;
-                break;
-            case PDU::ARP:
-                type = Constants::Ethernet::ARP;
-                break;
-            default:
-                type = 0;
-        }
-        _eth.payload_type = Endian::host_to_be(type);
+        Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
+            inner_pdu()->pdu_type()
+        );
+        payload_type(static_cast<uint16_t>(flag));
     }
     memcpy(buffer, &_eth, sizeof(ethhdr));
 }

@@ -42,6 +42,7 @@
 #include "packet.h"
 #include "loopback.h"
 #include "dot11.h"
+#include "sll.h"
 #include "cxxstd.h"
 
 namespace Tins {
@@ -268,6 +269,8 @@ namespace Tins {
             }
             else if(data->iface_type == DLT_NULL) 
                 ret_val = call_functor<Tins::Loopback>(data, packet, header);
+            else if(data->iface_type == DLT_LINUX_SLL)
+                ret_val = call_functor<Tins::SLL>(data, packet, header);
                 
             if(!ret_val)
                 pcap_breakloop(data->handle);

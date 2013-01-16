@@ -3,6 +3,8 @@
 #include "ethernetII.h"
 #include "utils.h"
 #include "macros.h"
+#include "ipv6.h"
+#include "ip.h"
 #include "network_interface.h"
 
 using namespace Tins;
@@ -11,7 +13,7 @@ typedef EthernetII::address_type address_type;
 
 class EthernetIITest : public ::testing::Test {
 public:
-    static const uint8_t expected_packet[];
+    static const uint8_t expected_packet[], ip_packet[], ipv6_packet[];
     static address_type src_addr;
     static address_type dst_addr;
     static address_type empty_addr;
@@ -22,10 +24,24 @@ public:
 };
 
 const uint8_t EthernetIITest::expected_packet[] = {
-'\xaa', '\xbb', '\xcc', '\xdd',
-'\xee', '\xff', '\x8a', '\x8b',
-'\x8c', '\x8d', '\x8e', '\x8f',
-'\xd0', '\xab'
+    '\xaa', '\xbb', '\xcc', '\xdd',
+    '\xee', '\xff', '\x8a', '\x8b',
+    '\x8c', '\x8d', '\x8e', '\x8f',
+    '\xd0', '\xab'
+},
+EthernetIITest::ip_packet[] = {
+    '\xff', '\xff', '\xff', '\xff', '\xff', '\xff', '\x00', '\x00', '\x00', 
+    '\x00', '\x00', '\x00', '\x08', '\x00', 'E', '\x00', '\x00', '\x14', 
+    '\x00', '\x01', '\x00', '\x00', '@', '\x00', '|', '\xe7', '\x7f', '\x00', 
+    '\x00', '\x01', '\x7f', '\x00', '\x00', '\x01'
+},
+EthernetIITest::ipv6_packet[] = {
+    '\xff', '\xff', '\xff', '\xff', '\xff', '\xff', '\x00', '\x00', '\x00', 
+    '\x00', '\x00', '\x00', '\x86', '\xdd', '`', '\x00', '\x00', '\x00', 
+    '\x00', '\x00', ';', '@', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
+    '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
+    '\x01', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', 
+    '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x01'
 };
 
 address_type EthernetIITest::src_addr("8a:8b:8c:8d:8e:8f");
@@ -130,4 +146,15 @@ TEST_F(EthernetIITest, ConstructorFromBuffer) {
     EXPECT_EQ(eth.payload_type(), p_type);
 }
 
+TEST_F(EthernetIITest, ConstructorFromIPBuffer) {
+    EthernetII eth(ip_packet, sizeof(ip_packet));
+    ASSERT_TRUE(eth.inner_pdu());
+    EXPECT_EQ(eth.find_pdu<IP>(), eth.inner_pdu());
+}
+
+TEST_F(EthernetIITest, ConstructorFromIPv6Buffer) {
+    EthernetII eth(ipv6_packet, sizeof(ipv6_packet));
+    ASSERT_TRUE(eth.inner_pdu());
+    EXPECT_EQ(eth.find_pdu<IPv6>(), eth.inner_pdu());
+}
 

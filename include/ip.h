@@ -231,8 +231,9 @@ namespace Tins {
             PDU *child = 0);
 
         /**
-         * \brief Constructor which creates an IP object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructor which constructs an IP object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */

@@ -38,6 +38,7 @@
 #include "arp.h"
 #include "ip.h"
 #include "eapol.h"
+#include "internals.h"
 
 
 Tins::SNAP::SNAP(PDU *child) : PDU(child) 
@@ -55,7 +56,7 @@ Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz)
     buffer += sizeof(_snap);
     total_sz -= sizeof(_snap);
     if(total_sz) {
-        switch(eth_type()) {
+        /*switch(eth_type()) {
             case Tins::Constants::Ethernet::IP:
                 inner_pdu(new Tins::IP(buffer, total_sz));
                 break;
@@ -65,7 +66,14 @@ Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz)
             case Tins::Constants::Ethernet::EAPOL:
                 inner_pdu(Tins::EAPOL::from_bytes(buffer, total_sz));
                 break;
-        };
+        };*/
+        inner_pdu(
+            Internals::pdu_from_flag(
+                (Constants::Ethernet::e)eth_type(), 
+                buffer, 
+                total_sz
+            )
+        );
     }
 }
 

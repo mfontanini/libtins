@@ -30,6 +30,7 @@
 #ifndef TINS_TINS_H
 #define TINS_TINS_H
 
+#include "dns.h"
 #include "arp.h"
 #include "bootp.h"
 #include "dhcp.h"
@@ -52,7 +53,6 @@
 #include "tcp.h"
 #include "udp.h"
 #include "utils.h"
-#include "dns.h"
 #include "tcp_stream.h"
 #include "crypto.h"
 #include "pdu_cacher.h"
@@ -61,5 +61,6 @@
 #include "ip_address.h"
 #include "packet.h"
 #include "timestamp.h"
+#include "sll.h"
 
 #endif // TINS_TINS_H

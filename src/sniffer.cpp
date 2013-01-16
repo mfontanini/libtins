@@ -95,6 +95,8 @@ PtrPacket BaseSniffer::next_packet() {
             ret = Dot11::from_bytes((const uint8_t*)content, header.caplen);
         else if(iface_type == DLT_LOOP)
             ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
+        else if(iface_type == DLT_LINUX_SLL)
+            ret = new Tins::SLL((const uint8_t*)content, header.caplen);
     }
     return PtrPacket(ret, header.ts);
 }

@@ -33,6 +33,8 @@
 #include <sstream>
 #include <string>
 #include <stdint.h>
+#include "constants.h"
+#include "pdu.h"
 
 /**
  * \cond
@@ -52,15 +54,10 @@ namespace Internals {
         typedef T type;
     };
     
-    template<typename T1, typename T2>
-    struct is_same {
-        static const bool value = false;
-    };
+    PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer, 
+      uint32_t size, bool rawpdu_on_no_match = true);
     
-    template<typename T1>
-    struct is_same<T1, T1> {
-        static const bool value = true;
-    };
+    Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
 }
 }
 /**

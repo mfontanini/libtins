@@ -28,6 +28,11 @@
  */
 
 #include "internals.h"
+#include "ip.h"
+#include "ipv6.h"
+#include "arp.h"
+#include "eapol.h"
+#include "rawpdu.h"
 
 using std::string;
 
@@ -54,6 +59,36 @@ void skip_line(std::istream &input) {
     int c = 0;
     while(c != '\n' && input)
          c = input.get();
+}
+
+Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer, 
+  uint32_t size, bool rawpdu_on_no_match) 
+{
+    switch(flag) {
+        case Tins::Constants::Ethernet::IP:
+            return new Tins::IP(buffer, size);
+        case Constants::Ethernet::IPV6:
+            return new Tins::IPv6(buffer, size);
+        case Tins::Constants::Ethernet::ARP:
+            return new Tins::ARP(buffer, size);
+        case Tins::Constants::Ethernet::EAPOL:
+            return Tins::EAPOL::from_bytes(buffer, size);
+        default:
+            return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
+    };
+}
+
+Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
+    switch (flag) {
+        case PDU::IP:
+            return Constants::Ethernet::IP;
+        case PDU::IPv6:
+            return Constants::Ethernet::IPV6;
+        case PDU::ARP:
+            return Constants::Ethernet::ARP;
+        default:
+            return Constants::Ethernet::UNKNOWN;
+    }
 }
 }
 }

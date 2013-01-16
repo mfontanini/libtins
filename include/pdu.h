@@ -103,7 +103,8 @@ namespace Tins {
             DNS,
             LOOPBACK,
             IPv6,
-            ICMPv6
+            ICMPv6,
+            SLL
         };
 
         /** \brief PDU constructor
