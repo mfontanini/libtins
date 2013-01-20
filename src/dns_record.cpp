@@ -107,12 +107,14 @@ DNSResourceRecord& DNSResourceRecord::operator=(const DNSResourceRecord &rhs)
 }
 
 #if TINS_IS_CXX11
-    DNSResourceRecord::DNSResourceRecord(DNSResourceRecord &&rhs) 
+    DNSResourceRecord::DNSResourceRecord(DNSResourceRecord &&rhs) noexcept
     : info_(rhs.info_), data(std::move(rhs.data)), impl(0) {
         std::swap(impl, rhs.impl);
     }
         
-    DNSResourceRecord& DNSResourceRecord::operator=(DNSResourceRecord &&rhs) {
+    DNSResourceRecord& DNSResourceRecord::operator=(DNSResourceRecord &&rhs) 
+    noexcept 
+    {
         info_ = rhs.info_;
         data = std::move(rhs.data);
         delete impl;

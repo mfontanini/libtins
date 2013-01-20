@@ -41,12 +41,12 @@ BaseSniffer::BaseSniffer() : handle(0), mask(0)
 }
 
 #if TINS_IS_CXX11
-BaseSniffer::BaseSniffer(BaseSniffer &&rhs) 
+BaseSniffer::BaseSniffer(BaseSniffer &&rhs) noexcept
 {
     *this = std::move(rhs);
 }
 
-BaseSniffer& BaseSniffer::operator=(BaseSniffer &&rhs) 
+BaseSniffer& BaseSniffer::operator=(BaseSniffer &&rhs) noexcept
 {
     handle = 0;
     mask = rhs.mask;

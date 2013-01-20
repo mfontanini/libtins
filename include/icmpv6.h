@@ -1179,6 +1179,7 @@ private:
     void parse_options(const uint8_t *&buffer, uint32_t &total_sz);
     void add_addr_list(uint8_t type, const addr_list_type &value);
     addr_list_type search_addr_list(Options type) const;
+    
     template<template <typename> class Functor>
     const icmpv6_option *safe_search_option(Options opt, uint32_t size) const {
         const icmpv6_option *option = search_option(opt);

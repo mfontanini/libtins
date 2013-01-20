@@ -63,13 +63,13 @@ namespace Tins {
              * \brief Move constructor.
              * This constructor is available only in C++11.
              */
-            BaseSniffer(BaseSniffer &&rhs);
+            BaseSniffer(BaseSniffer &&rhs) noexcept;
             
             /**
              * \brief Move assignment operator.
              * This opeartor is available only in C++11.
              */
-            BaseSniffer& operator=(BaseSniffer &&rhs);
+            BaseSniffer& operator=(BaseSniffer &&rhs) noexcept;
         #endif
     
         /**

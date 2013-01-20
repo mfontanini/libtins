@@ -104,12 +104,12 @@ public:
         /**
          * Move constructor.
          */
-        DNSResourceRecord(DNSResourceRecord &&rhs);
+        DNSResourceRecord(DNSResourceRecord &&rhs) noexcept;
         
         /**
          * Move assignment operator.
          */
-        DNSResourceRecord& operator=(DNSResourceRecord &&rhs);
+        DNSResourceRecord& operator=(DNSResourceRecord &&rhs) noexcept;
     #endif // TINS_IS_CXX11
     
     /**
