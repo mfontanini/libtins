@@ -418,6 +418,6 @@ namespace Tins {
         options_type _options;
         uint32_t _size;
     };
-};
+}
 
 #endif // TINS_DHCP_H

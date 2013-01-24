@@ -619,6 +619,6 @@ namespace Tins {
         std::list<ip_option> _ip_options;
         uint32_t _options_size, _padded_options_size;
     };
-};
+}
 
 #endif // TINS_IP_H

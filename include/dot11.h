@@ -3405,8 +3405,6 @@ namespace Tins {
         StartSequence _start_sequence;
         uint8_t _bitmap[bitmap_size];
     };
-};
-
-
+}
 
 #endif // TINS_DOT_11

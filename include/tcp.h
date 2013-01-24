@@ -446,6 +446,6 @@ namespace Tins {
         options_type _options;
         uint32_t _options_size, _total_options_size;
     };
-};
+}
 
 #endif // TINS_TCP_H

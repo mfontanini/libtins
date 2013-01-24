@@ -136,6 +136,6 @@ namespace Tins {
 
         udphdr _udp;
     };
-};
+}
 
 #endif // TINS_UDP_H

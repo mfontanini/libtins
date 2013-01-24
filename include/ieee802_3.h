@@ -214,8 +214,7 @@ namespace Tins {
         ethhdr _eth;
         NetworkInterface _iface;
     };
-
-};
+}
 
 
 #endif // TINS_IEEE802_3_H

@@ -136,7 +136,7 @@ namespace Tins {
     
         uint32_t ip_addr;
     };
-};
+}
 
 
 #endif // TINS_IPADDRESS_H

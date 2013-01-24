@@ -308,5 +308,5 @@ namespace Tins {
 
         arphdr _arp;
     };
-};
+}
 #endif //TINS_ARP_H

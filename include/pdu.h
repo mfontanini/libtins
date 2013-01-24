@@ -375,6 +375,6 @@ namespace Tins {
         *lop /= rop;
         return lop;
     }
-};
+}
 
 #endif // TINS_PDU_H

@@ -728,6 +728,6 @@ namespace Tins {
         rsnhdr _header;
         key_type _key;
     };
-};
+}
 
 #endif // TINS_EAPOL_H

@@ -391,6 +391,6 @@ namespace Tins {
         std::list<field_type> information_fields;
     };
 
-};
+}
 
 #endif // TINS_IEEE8022_H

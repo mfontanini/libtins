@@ -302,6 +302,6 @@ namespace Tins {
     {
         return HandlerProxy<T>(ptr, function);
     }
-};
+}
     
 #endif // TINS_SNIFFER_H

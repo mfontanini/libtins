@@ -646,7 +646,7 @@ namespace Tins {
         mutable SuffixMap suffixes;
         mutable SuffixIndices suffix_indices;
     };
-};
+}
 
 #endif // TINS_DNS_H
 

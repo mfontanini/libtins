@@ -384,6 +384,6 @@ namespace Tins {
         uint16_t _channel_freq, _rx_flags;
         uint8_t _antenna, _flags, _rate, _dbm_signal, _dbm_noise, _channel, _max_power;
     };
-};
+}
 
 #endif // TINS_RADIOTAP_H

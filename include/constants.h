@@ -148,11 +148,11 @@ namespace Tins {
                 IEEE802154 = 804, /* IEEE 802.15.4 header.  */
                 IEEE802154_PHY = 805, /* IEEE 802.15.4 PHY header.  */
                 VOID_TYPE = 0xFFFF,	     /* Void type, nothing is known.  */
-                NONE = 0xFFFE,	      /* Zero header length.  */  
+                NONE = 0xFFFE	      /* Zero header length.  */  
             };
         };
-    };
-};
+    }
+}
 
 
 #endif // TINS_CONSTANTS_H

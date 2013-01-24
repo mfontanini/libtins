@@ -342,6 +342,6 @@ namespace Tins {
         bootphdr _bootp;
         vend_type _vend;
     };
-};
+}
 
 #endif // TINS_BOOTP_H

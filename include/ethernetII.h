@@ -216,7 +216,7 @@ namespace Tins {
         NetworkInterface _iface;
     };
 
-};
+}
 
 
 #endif // TINS_ETHERNET_II_H

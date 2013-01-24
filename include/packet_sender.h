@@ -256,6 +256,6 @@ namespace Tins {
             return "The provided socket type is invalid";
         }
     };
-};
+}
 
 #endif // TINS_PACKET_SENDER_H

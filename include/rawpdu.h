@@ -133,7 +133,7 @@ namespace Tins {
 
         payload_type _payload;
     };
-};
+}
 
 
 #endif // TINS_RAWPDU_H

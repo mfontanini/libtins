@@ -329,6 +329,6 @@ namespace Tins {
 
         icmphdr _icmp;
     };
-};
+}
 
 #endif // TINS_ICMP_H

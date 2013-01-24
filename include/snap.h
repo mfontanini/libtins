@@ -167,7 +167,6 @@ namespace Tins {
         
         snaphdr _snap;
     };
-    
-};
+}
 
 #endif // TINS_SNAP_H
