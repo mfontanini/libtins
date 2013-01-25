@@ -606,7 +606,9 @@ ICMPv6::addr_list_type ICMPv6::search_addr_list(Options type) const {
 ICMPv6::rsa_sign_type ICMPv6::rsa_signature() const {
     const icmpv6_option *opt = search_option(RSA_SIGN);
     // 2 bytes reserved + at least 1 byte signature.
-    if(!opt || opt->data_size() < 2 + sizeof(rsa_sign_type::key_hash) + 1)
+    // 16 == sizeof(rsa_sign_type::key_hash), removed the sizeof
+    // expression since gcc 4.2 doesn't like it
+    if(!opt || opt->data_size() < 2 + 16 + 1)
         throw option_not_found();
     const uint8_t *ptr = opt->data_ptr() + 2;
     rsa_sign_type output;

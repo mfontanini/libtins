@@ -95,7 +95,6 @@ const DHCPv6::dhcpv6_option *DHCPv6::search_option(Option id) const {
 uint8_t* DHCPv6::write_option(const dhcpv6_option &option, uint8_t* buffer) const {
     *(uint16_t*)buffer = Endian::host_to_be(option.option());
     *(uint16_t*)&buffer[sizeof(uint16_t)] = Endian::host_to_be(option.data_size());
-    std::cout << "Size: " << option.data_size() << std::endl;
     return std::copy(
         option.data_ptr(), 
         option.data_ptr() + option.data_size(), 

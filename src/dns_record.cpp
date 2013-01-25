@@ -174,7 +174,7 @@ bool DNSResourceRecord::matches(const std::string &dname) const {
 // OffsetedRecord
 
 OffsetedDNSRRImpl::OffsetedDNSRRImpl(uint16_t off) 
-: offset_(off | 0xc0) 
+: offset_(off | Endian::host_to_be<uint16_t>(0xc000)) 
 {
     
 }
