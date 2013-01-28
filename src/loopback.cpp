@@ -44,8 +44,8 @@
 #include "llc.h"
 #include "rawpdu.h"
 
-#if defined(BSD) && !defined(PF_LLC)
-    // compilation fix, check if it works xD
+#if !defined(PF_LLC)
+    // compilation fix, nasty but at least works on BSD
     #define PF_LLC 26
 #endif
 

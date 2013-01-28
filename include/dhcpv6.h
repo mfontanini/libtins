@@ -352,6 +352,88 @@ public:
         : enterprise_number(enterprise_number), 
         vendor_class_data(vendor_class_data) { }
     };
+    
+    /**
+     * The type used to represent DUIDs Based on Link-layer Address Plus
+     * Time. 
+     */
+    struct duid_llt {
+        static const uint16_t duid_id = 1;
+        typedef std::vector<uint8_t> lladdress_type;
+        
+        uint16_t hw_type;
+        uint32_t time;
+        lladdress_type lladdress;
+        
+        duid_llt(uint16_t hw_type = 0, uint32_t time = 0,
+          const lladdress_type &lladdress = lladdress_type())
+        : hw_type(hw_type), time(time), lladdress(lladdress) {}
+        
+        PDU::serialization_type serialize() const;
+        
+        static duid_llt from_bytes(const uint8_t *buffer, uint32_t total_sz);
+    };
+    
+    /**
+     * The type used to represent DUIDs Based on Enterprise Number
+     */
+    struct duid_en {
+        static const uint16_t duid_id = 2;
+        typedef std::vector<uint8_t> identifier_type;
+        
+        uint32_t enterprise_number;
+        identifier_type identifier;
+        
+        duid_en(uint32_t enterprise_number = 0,
+          const identifier_type &identifier = identifier_type())
+        : enterprise_number(enterprise_number), identifier(identifier) {}
+        
+        PDU::serialization_type serialize() const;
+        
+        static duid_en from_bytes(const uint8_t *buffer, uint32_t total_sz);
+    };
+    
+    /**
+     * The type used to represent DUIDs Based on Link-layer Address.
+     */
+    struct duid_ll {
+        static const uint16_t duid_id = 3;
+        typedef std::vector<uint8_t> lladdress_type;
+        
+        uint16_t hw_type;
+        lladdress_type lladdress;
+        
+        duid_ll(uint16_t hw_type = 0, 
+          const lladdress_type &lladdress = lladdress_type())
+        : hw_type(hw_type), lladdress(lladdress) {}
+        
+        PDU::serialization_type serialize() const;
+        
+        static duid_ll from_bytes(const uint8_t *buffer, uint32_t total_sz);
+    };
+    
+    /**
+     * Type type used to represent DUIDs. This will be stored as the 
+     * value for the Client/Server Identifier options.
+     */
+    struct duid_type {
+        typedef PDU::serialization_type data_type;
+        
+        uint16_t id;
+        data_type data;
+        
+        duid_type(uint16_t id = 0, const data_type &data = data_type())
+        : id(id), data(data) {}
+        
+        duid_type(const duid_llt &identifier)
+        : id(duid_llt::duid_id), data(identifier.serialize()) {}
+        
+        duid_type(const duid_en &identifier)
+        : id(duid_en::duid_id), data(identifier.serialize()) {}
+        
+        duid_type(const duid_ll &identifier)
+        : id(duid_en::duid_id), data(identifier.serialize()) {}
+    };
         
     /**
      * The type used to store the Option Request option.
@@ -599,6 +681,22 @@ public:
      */
     bool has_reconfigure_accept() const;
     
+    /**
+     * \brief Getter for the Client Identifier option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    duid_type client_id() const;
+    
+    /**
+     * \brief Getter for the Server Identifier option.
+     * 
+     * This method will throw an option_not_found exception if the
+     * option is not found.
+     */
+    duid_type server_id() const;
+    
     // Option setters
     
     /**
@@ -717,6 +815,20 @@ public:
      * \brief Adds a Reconfigure Accept option.
      */
     void reconfigure_accept();
+    
+    /**
+     * \brief Setter for the Client Identifier option.
+     * 
+     * \param value The new Client Identifier option data.
+     */
+    void client_id(const duid_type &value);
+    
+    /**
+     * \brief Setter for the Server Identifier option.
+     * 
+     * \param value The new Server Identifier option data.
+     */
+    void server_id(const duid_type &value);
     
     // Other stuff
     

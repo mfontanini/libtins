@@ -275,3 +275,65 @@ TEST_F(DHCPv6Test, ReconfigureAccept) {
     dhcp.reconfigure_accept();
     EXPECT_EQ(true, dhcp.has_reconfigure_accept());
 }
+
+TEST_F(DHCPv6Test, Client_Server_ID_DUIDLL) {
+    DHCPv6 dhcp;
+    DHCPv6::duid_ll data, output;
+    DHCPv6::duid_type tmp, tmp2;
+    data.hw_type = 0x5f;
+    data.lladdress.push_back(78);
+    data.lladdress.push_back(66);
+    data.lladdress.push_back(209);
+    dhcp.client_id(data);
+    tmp = dhcp.client_id();
+    output = DHCPv6::duid_ll::from_bytes(&tmp.data[0], tmp.data.size());
+    EXPECT_EQ(data.hw_type, output.hw_type);
+    EXPECT_EQ(data.lladdress, output.lladdress);
+    
+    dhcp.server_id(data);
+    tmp2 = dhcp.server_id();
+    EXPECT_EQ(tmp.id, tmp2.id);
+    EXPECT_EQ(tmp.data, tmp2.data);
+}
+
+TEST_F(DHCPv6Test, Client_Server_ID_DUIDLLT) {
+    DHCPv6 dhcp;
+    DHCPv6::duid_llt data, output;
+    DHCPv6::duid_type tmp, tmp2;
+    data.hw_type = 0x5f;
+    data.time = 0x92837af;
+    data.lladdress.push_back(78);
+    data.lladdress.push_back(66);
+    data.lladdress.push_back(209);
+    dhcp.client_id(data);
+    tmp = dhcp.client_id();
+    output = DHCPv6::duid_llt::from_bytes(&tmp.data[0], tmp.data.size());
+    EXPECT_EQ(data.hw_type, output.hw_type);
+    EXPECT_EQ(data.time, output.time);
+    EXPECT_EQ(data.lladdress, output.lladdress);
+    
+    dhcp.server_id(data);
+    tmp2 = dhcp.server_id();
+    EXPECT_EQ(tmp.id, tmp2.id);
+    EXPECT_EQ(tmp.data, tmp2.data);
+}
+
+TEST_F(DHCPv6Test, Client_Server_ID_DUIDEN) {
+    DHCPv6 dhcp;
+    DHCPv6::duid_en data, output;
+    DHCPv6::duid_type tmp, tmp2;
+    data.enterprise_number = 0x5faa23da;
+    data.identifier.push_back(78);
+    data.identifier.push_back(66);
+    data.identifier.push_back(209);
+    dhcp.client_id(data);
+    tmp = dhcp.client_id();
+    output = DHCPv6::duid_en::from_bytes(&tmp.data[0], tmp.data.size());
+    EXPECT_EQ(data.enterprise_number, output.enterprise_number);
+    EXPECT_EQ(data.identifier, output.identifier);
+    
+    dhcp.server_id(data);
+    tmp2 = dhcp.server_id();
+    EXPECT_EQ(tmp.id, tmp2.id);
+    EXPECT_EQ(tmp.data, tmp2.data);
+}

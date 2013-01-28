@@ -332,6 +332,32 @@ bool DHCPv6::has_reconfigure_accept() const {
     return search_option(RECONF_ACCEPT);
 }
 
+DHCPv6::duid_type DHCPv6::client_id() const {
+    const dhcpv6_option *opt = safe_search_option<std::less>(
+        CLIENTID, sizeof(uint16_t) + 1
+    );
+    return duid_type(
+        Endian::be_to_host(*(const uint16_t*)opt->data_ptr()),
+        serialization_type(
+            opt->data_ptr() + sizeof(uint16_t),
+            opt->data_ptr() + opt->data_size()
+        )
+    );
+}
+
+DHCPv6::duid_type DHCPv6::server_id() const {
+    const dhcpv6_option *opt = safe_search_option<std::less>(
+        SERVERID, sizeof(uint16_t) + 1
+    );
+    return duid_type(
+        Endian::be_to_host(*(const uint16_t*)opt->data_ptr()),
+        serialization_type(
+            opt->data_ptr() + sizeof(uint16_t),
+            opt->data_ptr() + opt->data_size()
+        )
+    );
+}
+
 // ********************************************************************
 //                          Option setters
 // ********************************************************************
@@ -512,4 +538,109 @@ void DHCPv6::reconfigure_msg(uint8_t value) {
 void DHCPv6::reconfigure_accept() {
     add_option(RECONF_ACCEPT);
 }
+
+
+// DUIDs
+
+DHCPv6::duid_llt DHCPv6::duid_llt::from_bytes(const uint8_t *buffer, uint32_t total_sz) 
+{
+    // at least one byte for lladdress
+    if(total_sz < sizeof(uint16_t) + sizeof(uint32_t) + 1)
+        throw std::runtime_error("Not enough size for a DUID_LLT identifier");
+    duid_llt output;
+    output.hw_type = Endian::be_to_host(*(const uint16_t*)buffer);
+    buffer += sizeof(uint16_t);
+    output.time = Endian::be_to_host(*(const uint32_t*)buffer);
+    buffer += sizeof(uint32_t);
+    total_sz -= sizeof(uint16_t) + sizeof(uint32_t);
+    output.lladdress.assign(buffer, buffer + total_sz);
+    return output;
+}
+
+PDU::serialization_type DHCPv6::duid_llt::serialize() const {
+    serialization_type output(sizeof(uint16_t) + sizeof(uint32_t) + lladdress.size());
+    *(uint16_t*)&output[0] = Endian::host_to_be(hw_type);
+    *(uint32_t*)&output[sizeof(uint16_t)] = Endian::host_to_be(time);
+    std::copy(
+        lladdress.begin(),
+        lladdress.end(),
+        output.begin() + sizeof(uint16_t) + sizeof(uint32_t)
+    );
+    return output;
+}
+
+DHCPv6::duid_en DHCPv6::duid_en::from_bytes(const uint8_t *buffer, uint32_t total_sz) 
+{
+    // at least one byte for identifier
+    if(total_sz < sizeof(uint32_t) + 1)
+        throw std::runtime_error("Not enough size for a DUID_en identifier");
+    duid_en output;
+    output.enterprise_number = Endian::be_to_host(*(const uint32_t*)buffer);
+    buffer += sizeof(uint32_t);
+    total_sz -= sizeof(uint32_t);
+    output.identifier.assign(buffer, buffer + total_sz);
+    return output;
+}
+
+PDU::serialization_type DHCPv6::duid_en::serialize() const {
+    serialization_type output(sizeof(uint32_t) + identifier.size());
+    *(uint32_t*)&output[0] = Endian::host_to_be(enterprise_number);
+    std::copy(
+        identifier.begin(),
+        identifier.end(),
+        output.begin() + sizeof(uint32_t)
+    );
+    return output;
+}
+
+DHCPv6::duid_ll DHCPv6::duid_ll::from_bytes(const uint8_t *buffer, uint32_t total_sz) 
+{
+    // at least one byte for lladdress
+    if(total_sz < sizeof(uint16_t) + 1)
+        throw std::runtime_error("Not enough size for a DUID_en identifier");
+    duid_ll output;
+    output.hw_type = Endian::be_to_host(*(const uint16_t*)buffer);
+    buffer += sizeof(uint16_t);
+    total_sz -= sizeof(uint16_t);
+    output.lladdress.assign(buffer, buffer + total_sz);
+    return output;
+}
+
+PDU::serialization_type DHCPv6::duid_ll::serialize() const {
+    serialization_type output(sizeof(uint16_t) + lladdress.size());
+    *(uint16_t*)&output[0] = Endian::host_to_be(hw_type);
+    std::copy(
+        lladdress.begin(),
+        lladdress.end(),
+        output.begin() + sizeof(uint16_t)
+    );
+    return output;
+}
+
+void DHCPv6::client_id(const duid_type &value) {
+    serialization_type buffer(sizeof(uint16_t) + value.data.size());
+    *(uint16_t*)&buffer[0] = Endian::host_to_be(value.id);
+    std::copy(
+        value.data.begin(),
+        value.data.end(),
+        buffer.begin() + sizeof(uint16_t)
+    );
+    add_option(
+        dhcpv6_option(CLIENTID, buffer.begin(), buffer.end())
+    );
+}
+
+void DHCPv6::server_id(const duid_type &value) {
+    serialization_type buffer(sizeof(uint16_t) + value.data.size());
+    *(uint16_t*)&buffer[0] = Endian::host_to_be(value.id);
+    std::copy(
+        value.data.begin(),
+        value.data.end(),
+        buffer.begin() + sizeof(uint16_t)
+    );
+    add_option(
+        dhcpv6_option(SERVERID, buffer.begin(), buffer.end())
+    );
+}
+
 } // namespace Tins
