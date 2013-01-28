@@ -47,9 +47,25 @@ PacketWriter::PacketWriter(const std::string &file_name, LinkType lt) {
     }
 }
 
+#if TINS_IS_CXX11
+PacketWriter::PacketWriter(PacketWriter &&rhs) noexcept {
+    *this = std::move(rhs);
+}
+
+PacketWriter& PacketWriter::operator=(PacketWriter &&rhs) noexcept {
+    handle = 0;
+    dumper = 0;
+    std::swap(handle, rhs.handle);
+    std::swap(dumper, rhs.dumper);
+    return *this;
+}
+#endif
+
 PacketWriter::~PacketWriter() {
-    pcap_dump_close(dumper);
-    pcap_close(handle);
+    if(dumper && handle) {
+        pcap_dump_close(dumper);
+        pcap_close(handle);
+    }
 }
 
 void PacketWriter::write(PDU &pdu) {

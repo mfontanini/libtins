@@ -62,5 +62,6 @@
 #include "packet.h"
 #include "timestamp.h"
 #include "sll.h"
+#include "dhcpv6.h"
 
 #endif // TINS_TINS_H

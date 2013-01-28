@@ -34,6 +34,7 @@
 #include <iterator>
 #include <pcap.h>
 #include "utils.h"
+#include "cxxstd.h"
 
 namespace Tins {
 class PDU;
@@ -64,6 +65,28 @@ public:
      * \sa LinkType.
      */
     PacketWriter(const std::string &file_name, LinkType lt);
+    
+    #if TINS_IS_CXX11
+        /**
+         * \brief Move constructor.
+         * 
+         * Note that calling PacketWriter::write on an previously moved
+         * object will lead to undefined behaviour.
+         * 
+         * \param rhs The PacketWriter to be moved.
+         */
+        PacketWriter(PacketWriter &&rhs) noexcept;
+        
+        /**
+         * \brief Move assignment operator.
+         * 
+         * Note that calling PacketWriter::write on an previously moved
+         * object will lead to undefined behaviour.
+         * 
+         * \param rhs The PacketWriter to be moved.
+         */
+        PacketWriter& operator=(PacketWriter &&rhs) noexcept;
+    #endif
     
     /**
      * Destructor.
