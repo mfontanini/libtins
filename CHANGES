@@ -1,0 +1,39 @@
+v0.3 - Mon Jan 28 16:20:24 ART 2013
+
+- Added IPv6, ICMPv6 and DHCPv6 classes.
+
+- Added support for Loopback interfaces and the Linux Crooked Capture
+pseudo protocol.
+
+- Added support for IPv6 records in DNS.
+
+- Added Packet/RefPacket class.
+
+- Added support for FreeBSD, OSX and Windows.
+
+- Added C++11 move semantics to several classes.
+
+- Done a complete rewrite of the build system; it now uses libtool.
+
+- Fixed several bugs in DNS.
+
+
+v0.2 - Sat Oct 20 11:26:40 2012
+
+- Added support for big endian architectures. 
+
+- Simplified several interfaces.
+
+- Added IPv4Address and HWAddress class to simplify handling IP and hardware addresses.
+
+- Added NetworkInterface class to abstract network interfaces.
+
+- Added TCPStreamFollower class to follow TCP streams on the fly.
+
+- Added WEPDecrypter class to decrypt WEP-encrypted 802.11 data frames on the fly.
+
+- Added several new PDUs: Loopback, IEEE802_3, LLC, DNS.
+
+- Added support for reading and writing pcap files.
+
+- Moved to BSD-2 license.

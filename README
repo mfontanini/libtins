@@ -1,0 +1,58 @@
+------------------------------------------------------------------------
+       libtins v0.3
+------------------------------------------------------------------------
+
+
+-------------------------------- About ---------------------------------
+
+libtins is a C++ library for crafting, sending, sniffing and 
+interpreting raw network packets.
+
+Its main purpose is to provide the C++ developer an easy, efficient, 
+platform and endianess-independent way to create tools which need to 
+send, receive and manipulate specially crafted packets. 
+
+In order to read tutorials, examples and checkout some benchmarks which 
+show libtins' actual performance, please visit:
+
+http://libtins.sourceforge.net 
+
+------------------------------- Compiling ------------------------------
+
+In order to compile, execute:
+
+./configure
+make
+
+Note that by default, only the shared object is compiled. If you would
+like to generate a static library file as well, run:
+
+./configure --enable-static
+
+The generated static/shared library files will be located in the .libs
+directory.
+
+If you want to enable C++11 features, such as move semantics, use the
+--enable-c++11 switch:
+
+./configure --enable-c++11
+
+------------------------------ Installing-------------------------------
+
+Once you're done, if you want to install the header files and the 
+shared object, execute as root:
+
+make install
+
+This will install the shared object typically in /usr/local/lib. Note
+that you might have to update ldconfig's cache before using it, so 
+in order to invalidate it, you should run(as root):
+
+ldconfig
+
+------------------------------ Examples --------------------------------
+
+You might want to have a look at the examples located  in the "examples"
+directory. The same samples can be found online at:
+
+http://libtins.sourceforge.net/index.php?page=examples
