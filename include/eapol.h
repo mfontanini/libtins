@@ -136,18 +136,11 @@ namespace Tins {
         EAPOL(uint8_t packet_type, EAPOLTYPE type);
         
         /**
-         * \brief Copy constructor.
-         */
-        EAPOL(const EAPOL &other);
-        
-        /**
          * \brief Constructor which creates an EAPOL object from a buffer.
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         EAPOL(const uint8_t *buffer, uint32_t total_sz);
-        
-        void copy_eapol_fields(const EAPOL *other);
         
         TINS_BEGIN_PACK
         struct eapolhdr {

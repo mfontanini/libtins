@@ -89,17 +89,24 @@ namespace Tins {
          * object. This wrapper can be both implicitly converted to a 
          * PDU* and a Packet object. So doing this:
          * 
+         * \code
          * Sniffer s(...);
-         * // smart pointer? :D
-         * PDU *pdu = s.next_packet();
-         * // Packet takes care of the PDU*. \sa Packet::release_pdu
+         * std::unique_ptr<PDU> pdu(s.next_packet());
+         * // Packet takes care of the PDU*. 
          * Packet packet(s.next_packet());
+         * \endcode
          * 
          * Is fine, but this:
          * 
+         * \code
+         * // bad!!
          * PtrPacket p = s.next_packet();
          * 
+         * \endcode
+         * 
          * Is not, since PtrPacket can't be copy constructed. 
+         * 
+         * \sa Packet::release_pdu
          * 
          * \return The captured packet, matching the given filter.
          * If an error occured(probably compiling the filter), PtrPacket::pdu
@@ -115,8 +122,10 @@ namespace Tins {
          * The callback object must implement an operator with some of
          * the following(or compatible) signatures:
          * 
+         * \code
          * bool operator()(PDU&);
          * bool operator()(RefPacket&);
+         * \endcode
          * 
          * This operator will be called using the sniffed packets 
          * as arguments. You can modify the parameter argument as you wish. 
@@ -125,11 +134,13 @@ namespace Tins {
          * 
          * The callback taking a RefPacket will contain a timestamp
          * indicating the moment in which the packet was taken out of 
-         * the wire/pcap file. \sa RefPacket
+         * the wire/pcap file. 
          * 
          * Note that the Functor object will be copied using its copy
          * constructor, so that object should be some kind of proxy to
          * another object which will process the packets(e.g. std::bind).
+         * 
+         * \sa RefPacket
          * 
          * \param cback_handler The callback handler object which should process packets.
          * \param max_packets The maximum amount of packets to sniff. 0 == infinite.

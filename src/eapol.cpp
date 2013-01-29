@@ -51,10 +51,6 @@ EAPOL::EAPOL(const uint8_t *buffer, uint32_t total_sz)
     std::memcpy(&_header, buffer, sizeof(_header));
 }
 
-EAPOL::EAPOL(const EAPOL &other) : PDU(other) {
-    copy_eapol_fields(&other);
-}
-
 EAPOL *EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz < sizeof(eapolhdr))
         throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
@@ -94,11 +90,6 @@ void EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
     //    length(sz - sizeof(_header.version) - sizeof(_header.length) - sizeof(_header.type));
     std::memcpy(buffer, &_header, sizeof(_header));
     write_body(buffer + sizeof(_header), total_sz - sizeof(_header));
-}
-
-void EAPOL::copy_eapol_fields(const EAPOL *other) {
-    std::memcpy(&_header, &other->_header, sizeof(_header));
-    
 }
 
 /* RC4EAPOL */

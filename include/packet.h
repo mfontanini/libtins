@@ -35,11 +35,22 @@
 #include "pdu.h"
 #include "timestamp.h"
 
+/**
+ * \namespace Tins
+ */
 namespace Tins {
 template<typename WrappedType, typename TimestampType>
 class PacketWrapper;
-    
+
+
+/**
+ * \brief Thin wrapper over a PDU and Timestamp reference.
+ */
 typedef PacketWrapper<PDU&, const Timestamp&> RefPacket;
+
+/**
+ * \brief Thin wrapper over a PDU pointer and a Timestamp.
+ */
 typedef PacketWrapper<PDU*, Timestamp> PtrPacket;
 
 /**
@@ -109,7 +120,7 @@ private:
 };
 
 /**
- * \brief Represents a sniffed packet.
+ * \class Represents a sniffed packet.
  * 
  * A Packet contains a PDU pointer and a Timestamp object. Packets
  * <b>will delete</b> the stored PDU* unless you call release_pdu at 
