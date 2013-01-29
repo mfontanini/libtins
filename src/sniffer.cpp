@@ -105,6 +105,10 @@ void BaseSniffer::stop_sniff() {
     pcap_breakloop(handle);
 }
 
+int BaseSniffer::get_fd() {
+    return pcap_get_selectable_fd(handle);
+}
+
 bool BaseSniffer::set_filter(const std::string &filter) {
     if(actual_filter.bf_insns)
         pcap_freecode(&actual_filter);

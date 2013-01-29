@@ -159,6 +159,11 @@ namespace Tins {
          * \brief Stops sniffing loops.
          */
         void stop_sniff();
+
+        /**
+         * \brief Gets the file descriptor associated with the sniffer.
+         */
+        int get_fd();
     protected:
         /**
          * Default constructor.
