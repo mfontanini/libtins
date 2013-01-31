@@ -504,6 +504,14 @@ public:
      * \return The stored link address field.
      */
     const ipaddress_type &link_address() const { return link_addr; }
+    
+    /**
+     * \brief Getter for the DHCPv6 options.
+     *
+     * \return The stored options.
+     */
+    const options_type &options() const { return options_; }
+ ;
 
     // Setters
     /**

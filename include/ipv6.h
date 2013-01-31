@@ -192,6 +192,14 @@ public:
         return _header.dst_addr;
     }
 
+    /**
+     * \brief Getter for the IPv6 extension headers.
+     *  \return The stored headers.
+     */
+    const headers_type& headers() const {
+        return ext_headers;
+    }
+
     // Setters
 
     /**

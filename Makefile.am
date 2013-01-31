@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS=subdir-objects
-ACLOCAL_AMFLAGS=${ACLOCAL_FLAGS}
+ACLOCAL_AMFLAGS=${ACLOCAL_FLAGS} -I m4
 
 # pkg-config stuff
 pkgconfigdir = $(libdir)/pkgconfig

@@ -624,6 +624,9 @@ CXXDEPMODE
 ac_ct_CXX
 CXXFLAGS
 CXX
+MAINT
+MAINTAINER_MODE_FALSE
+MAINTAINER_MODE_TRUE
 CPP
 OTOOL64
 OTOOL
@@ -743,6 +746,7 @@ enable_dependency_tracking
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+enable_maintainer_mode
 enable_c__11
 with_pcap_include_path
 with_pcap_lib_path
@@ -1387,6 +1391,8 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --disable-maintainer-mode  disable make rules and dependencies not useful
+			  (and sometimes confusing) to the casual installer
   --enable-c++11          enable C++11 features
 
 Optional Packages:
@@ -11402,6 +11408,30 @@ CC="$lt_save_CC"
 
 
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
+$as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
+    # Check whether --enable-maintainer-mode was given.
+if test "${enable_maintainer_mode+set}" = set; then :
+  enableval=$enable_maintainer_mode; USE_MAINTAINER_MODE=$enableval
+else
+  USE_MAINTAINER_MODE=yes
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $USE_MAINTAINER_MODE" >&5
+$as_echo "$USE_MAINTAINER_MODE" >&6; }
+   if test $USE_MAINTAINER_MODE = yes; then
+  MAINTAINER_MODE_TRUE=
+  MAINTAINER_MODE_FALSE='#'
+else
+  MAINTAINER_MODE_TRUE='#'
+  MAINTAINER_MODE_FALSE=
+fi
+
+  MAINT=$MAINTAINER_MODE_TRUE
+
+
+
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -15012,9 +15042,9 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 if test -n "$debug"
 then
-    CXXFLAGS="-DTINS_DEBUG -g"
+    CXXFLAGS="$CXXFLAGS -DTINS_DEBUG -g"
 else
-    CXXFLAGS="-O3"
+    CXXFLAGS="$CXXFLAGS -O3"
 fi
 
 CXXFLAGS="$CXXFLAGS -Iinclude"
@@ -15092,6 +15122,7 @@ else
 fi
 
 
+old_cppflags=$CPPFLAGS
 CPPFLAGS=""
 
 # Headers
@@ -15112,6 +15143,8 @@ fi
 
 done
 
+
+CPPFLAGS=$old_cppflags
 
 # Substitute options
 
@@ -15281,6 +15314,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
+  as_fn_error $? "conditional \"MAINTAINER_MODE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then

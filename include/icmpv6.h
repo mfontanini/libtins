@@ -583,6 +583,14 @@ public:
         return _dest_address;
     }
 
+    /**
+     *  \brief Getter for the ICMPv6 options.
+     *  \return The stored options.
+     */
+    const options_type &options() const {
+        return _options;
+    }
+
     // Setters
 
     /**

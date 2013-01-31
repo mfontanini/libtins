@@ -1,6 +1,8 @@
 AC_INIT([libtins], [0.3], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 LT_INIT([disable-static])
+AC_CONFIG_MACRO_DIR([m4])
+AM_MAINTAINER_MODE([enable])
 
 AC_PROG_CXX
 AC_LANG(C++)
@@ -9,9 +11,9 @@ AC_PROG_LIBTOOL
 
 if test -n "$debug"
 then
-    CXXFLAGS="-DTINS_DEBUG -g"
+    CXXFLAGS="$CXXFLAGS -DTINS_DEBUG -g"
 else
-    CXXFLAGS="-O3"
+    CXXFLAGS="$CXXFLAGS -O3"
 fi
 
 CXXFLAGS="$CXXFLAGS -Iinclude"
@@ -37,12 +39,15 @@ AC_ARG_WITH([pcap-lib-path],
 
 AC_CHECK_LIB(pcap, pcap_loop, [], [AC_MSG_ERROR([pcap library is missing!])])
 
+old_cppflags=$CPPFLAGS
 CPPFLAGS=""
 
 # Headers
 
 LIBTINS_INCLUDE_DIR="include"
 AC_CHECK_HEADERS([pcap.h], [], [AC_MSG_ERROR([libpcap headers are missing!])])
+
+CPPFLAGS=$old_cppflags
 
 # Substitute options
 

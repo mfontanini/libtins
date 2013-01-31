@@ -215,6 +215,11 @@ namespace Tins {
         typedef generic_route_option_type record_route_type;
 
         /**
+         * The type used to store IP options.
+         */
+        typedef std::list<ip_option> options_type;
+
+        /**
          * \brief Constructor for building the IP PDU.
          *
          * Both the destination and source IP address can be supplied.
@@ -317,6 +322,12 @@ namespace Tins {
          * \return The version for this IP PDU.
          */
         small_uint<4> version() const  { return _ip.version; }
+
+        /** 
+         * \brief Getter for the IP options.
+         * \return The stored options.
+         */
+        const options_type &options() const  { return _ip_options; }
 
         /* Setters */
 
@@ -616,7 +627,7 @@ namespace Tins {
         generic_route_option_type search_route_option(option_identifier id) const;
 
         iphdr _ip;
-        std::list<ip_option> _ip_options;
+        options_type _ip_options;
         uint32_t _options_size, _padded_options_size;
     };
 }
