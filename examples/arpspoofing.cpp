@@ -32,6 +32,7 @@
 #include <string>
 #include <stdexcept>
 #include <cstdlib>
+#include <unistd.h>
 #include <tins/arp.h>
 #include <tins/network_interface.h>
 #include <tins/utils.h>

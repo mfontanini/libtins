@@ -33,6 +33,7 @@
 #include <string>
 #include <cstdlib>
 #include <pthread.h>
+#include <unistd.h>
 #include <tins/ip.h>
 #include <tins/tcp.h>
 #include <tins/ip_address.h>
