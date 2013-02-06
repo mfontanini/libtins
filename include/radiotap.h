@@ -199,6 +199,13 @@ namespace Tins {
          */
         void rx_flags(uint16_t new_rx_flag);
         
+        /**
+         * \brief Setter for the interface.
+         *
+         * \param new_iface the interface to be set.
+         */
+        void iface(const NetworkInterface& new_iface);
+        
         /* Getters */
         
         /**
@@ -291,6 +298,13 @@ namespace Tins {
         PresentFlags present() const { 
             return (PresentFlags)*(uint32_t*)(&_radio.it_len + 1); 
         }
+        
+        /**
+         * \brief Getter for the interface.
+         *
+         * \return Returns the interface in which this PDU will be sent.
+         */
+        const NetworkInterface &iface() const { return _iface; }
         
         /**
          * \brief Returns the RadioTap frame's header length.

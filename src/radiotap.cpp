@@ -190,6 +190,10 @@ void RadioTap::rx_flags(uint16_t new_rx_flag) {
     _radio.rx_flags = 1;
 }
 
+void RadioTap::iface(const NetworkInterface& new_iface) {
+    _iface = new_iface;
+}
+
 uint32_t RadioTap::header_size() const {
     uint32_t total_bytes = 0;
     if(_radio.tsft)
