@@ -3,6 +3,7 @@
 #include <string>
 #include <stdint.h>
 #include "radiotap.h"
+#include "dot11.h"
 #include "utils.h"
 
 using namespace std;
@@ -10,7 +11,7 @@ using namespace Tins;
 
 class RadioTapTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[];
+    static const uint8_t expected_packet[], expected_packet1[];
 };
 
 const uint8_t RadioTapTest::expected_packet[] = {
@@ -33,6 +34,10 @@ const uint8_t RadioTapTest::expected_packet[] = {
     '\x02', '\x01', '\x01', '\x00', '\x00', '\x03', '\xa4', '\x00', '\x00', 
     '\'', '\xa4', '\x00', '\x00', 'B', 'C', '^', '\x00', 'b', '2', '/', '\x00',
     '\xe5', '\x2d', '\x92', '\x11'
+};
+
+const uint8_t RadioTapTest::expected_packet1[] = {
+    '\x00', '\x00', '\x1a', '\x00', '/', 'H', '\x00', '\x00', '\x07', '\xd6', 'n', '\xa6', '\x00', '\x00', '\x00', '\x00', '\x10', '\x02', 'l', '\t', '\xa0', '\x00', '\xb0', '\x01', '\x00', '\x00', '\x80', '\x00', '\x00', '\x00', '\xff', '\xff', '\xff', '\xff', '\xff', '\xff', '|', 'O', '\xb5', '\x93', 'r', '\\', '|', 'O', '\xb5', '\x93', 'r', '\\', '\x80', 'h', 'G', 'Q', '8', '=', '\x91', '\x08', '\x00', '\x00', 'd', '\x00', '\x11', '\x04', '\x00', '\r', 'A', 'R', 'V', '7', '5', '1', '9', '9', '3', '7', '2', '5', 'C', '\x01', '\x08', '\x82', '\x84', '\x8b', '\x96', '\x12', '$', 'H', 'l', '\x03', '\x01', '\x01', '2', '\x04', '\x0c', '\x18', '0', '`', '\x07', '\x06', 'N', 'L', ' ', '\x01', '\r', '\x14', '3', '\x08', ' ', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x07', '3', '\x08', '!', '\x05', '\x06', '\x07', '\x08', '\t', '\n', '\x0b', '\xdd', '\x0e', '\x00', 'P', '\xf2', '\x04', '\x10', 'J', '\x00', '\x01', '\x10', '\x10', 'D', '\x00', '\x01', '\x02', '\x05', '\x04', '\x00', '\x01', '\x00', '\x00', '*', '\x01', '\x04', '-', '\x1a', 'l', '\x00', '\x17', '\xff', '\xff', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '=', '\x16', '\x01', '\x03', '\x01', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x7f', '\x01', '\x01', '\xdd', '\x18', '\x00', 'P', '\xf2', '\x01', '\x01', '\x00', '\x00', 'P', '\xf2', '\x02', '\x01', '\x00', '\x00', 'P', '\xf2', '\x02', '\x01', '\x00', '\x00', 'P', '\xf2', '\x02', '\x00', '\x00', '0', '\x14', '\x01', '\x00', '\x00', '\x0f', '\xac', '\x02', '\x01', '\x00', '\x00', '\x0f', '\xac', '\x04', '\x01', '\x00', '\x00', '\x0f', '\xac', '\x02', '\x01', '\x00', '\xdd', '\x18', '\x00', 'P', '\xf2', '\x02', '\x01', '\x01', '\x00', '\x00', '\x03', '\xa4', '\x00', '\x00', '\'', '\xa4', '\x00', '\x00', 'B', 'C', '^', '\x00', 'b', '2', '/', '\x00', '\x0b', '\x05', '\x00', '\x00', '\'', 'z', '\x12', '\xdd', '\x1e', '\x00', '\x90', 'L', '3', 'l', '\x00', '\x17', '\xff', '\xff', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\xdd', '\x1a', '\x00', '\x90', 'L', '4', '\x01', '\x03', '\x01', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x00', '\x91', '\x8b', '<', '\xb2'
 };
 
 TEST_F(RadioTapTest, DefaultConstructor) {
@@ -58,6 +63,17 @@ TEST_F(RadioTapTest, ConstructorFromBuffer) {
     EXPECT_EQ(radio.dbm_signal(), 0xda);
     EXPECT_EQ(radio.dbm_noise(), 0xa0);
     EXPECT_EQ(radio.antenna(), 2);
+}
+
+TEST_F(RadioTapTest, ConstructorFromBuffer2) {
+    RadioTap radio(expected_packet1, sizeof(expected_packet1));
+    EXPECT_EQ(radio.version(), 0);
+    EXPECT_EQ(radio.length(), 26);
+    EXPECT_EQ(radio.rate(), 2);
+    EXPECT_EQ(radio.flags(), 0x10);
+    EXPECT_TRUE(radio.flags() & RadioTap::FCS);
+    EXPECT_EQ(radio.antenna(), 1);
+    EXPECT_TRUE(radio.find_pdu<Dot11Beacon>());
 }
 
 TEST_F(RadioTapTest, Serialize) {

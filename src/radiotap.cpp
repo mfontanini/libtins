@@ -264,7 +264,7 @@ void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     uint8_t *buffer_start = buffer;
     assert(total_sz >= sz);
     if(!_radio.it_len)
-        _radio.it_len = sz;
+        _radio.it_len = Endian::host_to_le<uint16_t>(sz);
     memcpy(buffer, &_radio, sizeof(_radio));
     buffer += sizeof(_radio);
     if(_radio.tsft) {
