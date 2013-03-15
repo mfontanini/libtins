@@ -31,6 +31,7 @@
 #include <sstream>
 #include <memory>
 #include <cassert>
+#include <iostream> //borrame
 #include <cstring>
 #include "utils.h"
 #ifndef WIN32
@@ -72,34 +73,45 @@ struct InterfaceCollector {
     #endif
 };
 
-/*struct IPv4Collector {
-    uint32_t ip;
-    bool found;
-    const char *iface;
-
-    IPv4Collector(const char *interface) : ip(0), found(false), iface(interface) { }
-
-    bool operator() (struct ifaddrs *addr) {
-        if(!found && addr->ifa_addr->sa_family == AF_INET && !strcmp(addr->ifa_name, iface)) {
-            ip = ((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr;
-            found = true;
-        }
-        return found;
+addrinfo *resolve_domain(const std::string &to_resolve, int family) {
+    addrinfo *result, hints = addrinfo();
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+    hints.ai_family = family;
+    if(!getaddrinfo(to_resolve.c_str(), 0, &hints, &result)) 
+        return result;
+    else {
+        throw std::runtime_error("Could not resolve address");
     }
-};*/
+}
 
 namespace Tins {
 
 /** \endcond */
-
-IPv4Address Utils::resolve_ip(const string &to_resolve) {
+namespace Utils {
+    
+IPv4Address resolve_ip(const string &to_resolve) {
     struct hostent *data = gethostbyname(to_resolve.c_str());
     if(!data)
         throw std::runtime_error("Could not resolve IP");
     return IPv4Address(((struct in_addr**)data->h_addr_list)[0]->s_addr);
 }
 
-bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
+IPv4Address resolve_domain(const std::string &to_resolve) {
+    addrinfo *result = ::resolve_domain(to_resolve, AF_INET);
+    IPv4Address addr(((sockaddr_in*)result->ai_addr)->sin_addr.s_addr);
+    freeaddrinfo(result);
+    return addr;
+}
+
+IPv6Address resolve_domain6(const std::string &to_resolve) {
+    addrinfo *result = ::resolve_domain(to_resolve, AF_INET6);
+    IPv6Address addr((const uint8_t*)&((sockaddr_in6*)result->ai_addr)->sin6_addr);
+    freeaddrinfo(result);
+    return addr;
+}
+
+bool resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
   HWAddress<6> *address, PacketSender &sender) 
 {
     IPv4Address my_ip;
@@ -120,12 +132,17 @@ bool Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
         return false;
 }
 
-HWAddress<6> Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, PacketSender &sender) 
+HWAddress<6> resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, PacketSender &sender) 
 {
     IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
     EthernetII packet = ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr);
-    std::auto_ptr<PDU> response(sender.send_recv(packet));
+    #if TINS_IS_CXX11
+    std::unique_ptr<PDU> 
+    #else
+    std::auto_ptr<PDU> 
+    #endif
+        response(sender.send_recv(packet));
     if(response.get()) {
         const ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)
@@ -134,7 +151,7 @@ HWAddress<6> Utils::resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip
     throw std::runtime_error("Could not resolve hardware address");
 }
 
-bool Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
+bool gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
     typedef std::vector<RouteEntry> entries_type;
     entries_type entries;
     uint32_t ip_int = ip;
@@ -148,21 +165,21 @@ bool Utils::gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
     return false;
 }
 
-set<string> Utils::network_interfaces() {
+set<string> network_interfaces() {
     InterfaceCollector collector;
     generic_iface_loop(collector);
     return collector.ifaces;
 }
 
-uint16_t Utils::channel_to_mhz(uint16_t channel) {
+uint16_t channel_to_mhz(uint16_t channel) {
     return 2407 + (channel * 5);
 }
 
-uint16_t Utils::mhz_to_channel(uint16_t mhz) {
+uint16_t mhz_to_channel(uint16_t mhz) {
     return (mhz - 2407) / 5;
 }
 
-uint32_t Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
+uint32_t do_checksum(const uint8_t *start, const uint8_t *end) {
     uint32_t checksum(0);
     uint16_t *ptr = (uint16_t*)start, *last = (uint16_t*)end, padding(0);
     if(((end - start) & 1) == 1) {
@@ -174,7 +191,7 @@ uint32_t Utils::do_checksum(const uint8_t *start, const uint8_t *end) {
     return checksum + padding;
 }
 
-uint32_t Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
+uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
     uint32_t checksum(0);
     uint32_t source_ip_int = Endian::host_to_be<uint32_t>(source_ip),
              dest_ip_int = Endian::host_to_be<uint32_t>(dest_ip);
@@ -188,7 +205,7 @@ uint32_t Utils::pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip
     return checksum;
 }
 
-uint32_t Utils::pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip, uint32_t len, uint32_t flag) {
+uint32_t pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip, uint32_t len, uint32_t flag) {
     uint32_t checksum = 0;
     IPv6Address::const_iterator it;
     for(it = source_ip.begin(); it != source_ip.end(); ++it)
@@ -199,7 +216,7 @@ uint32_t Utils::pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip
     return checksum;
 }
 
-uint32_t Utils::crc32(const uint8_t* data, uint32_t data_size) {
+uint32_t crc32(const uint8_t* data, uint32_t data_size) {
     uint32_t i, crc = 0;
     static uint32_t crc_table[] = {
         0x4DBDF21C, 0x500AE278, 0x76D3D2D4, 0x6B64C2B0,
@@ -214,5 +231,6 @@ uint32_t Utils::crc32(const uint8_t* data, uint32_t data_size) {
     }
 
     return crc;
+}
 }
 }

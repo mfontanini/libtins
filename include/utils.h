@@ -105,6 +105,26 @@ namespace Tins {
          * \param to_resolve The domain name/ip address to resolve.
          */
         IPv4Address resolve_ip(const std::string &to_resolve);
+        
+        /** 
+         * \brief Resolves a domain name and returns its corresponding ip address.
+         *
+         * If an ip address is given, its integer representation is returned.
+         * Otherwise, the domain name is resolved and its ip address is returned.
+         *
+         * \param to_resolve The domain name/ip address to resolve.
+         */
+        IPv4Address resolve_domain(const std::string &to_resolve);
+        
+        /** 
+         * \brief Resolves a domain name and returns its corresponding ip address.
+         *
+         * If an ip address is given, its integer representation is returned.
+         * Otherwise, the domain name is resolved and its ip address is returned.
+         *
+         * \param to_resolve The domain name/ip address to resolve.
+         */
+        IPv6Address resolve_domain6(const std::string &to_resolve);
 
         /** 
          * \brief Resolves the hardware address for a given ip.

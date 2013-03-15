@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "endianness.h"
 #include "ip_address.h"
+#include "ipv6_address.h"
 
 using namespace Tins;
 
@@ -72,6 +73,18 @@ TEST_F(UtilsTest, Crc32) {
 
     EXPECT_EQ(crc, 0x78840f54);
 
+}
+
+TEST_F(UtilsTest, ResolveDomain) {
+    IPv4Address localhost_ip("127.0.0.1");
+
+    EXPECT_EQ(Utils::resolve_domain("localhost"), localhost_ip);
+}
+
+TEST_F(UtilsTest, ResolveDomain6) {
+    IPv6Address localhost_ip("2001:500:88:200::10");
+
+    EXPECT_EQ(Utils::resolve_domain6("example.com"), localhost_ip);
 }
 
 // FIXME
