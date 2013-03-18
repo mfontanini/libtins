@@ -27,7 +27,6 @@ const uint8_t Dot1QTest::expected_packet[] = {
     '\x00'
 };
 
-
 TEST_F(Dot1QTest, DefaultConstructor) {
     Dot1Q dot1;
     EXPECT_EQ(0, dot1.payload_type());
@@ -49,6 +48,15 @@ TEST_F(Dot1QTest, ConstructorFromBuffer) {
     ASSERT_TRUE(arp);
     // just to check it the offset's OK
     EXPECT_EQ(ARP::hwaddress_type("00:19:06:ea:b8:c1"), arp->sender_hw_addr());
+}
+
+TEST_F(Dot1QTest, Serialize) {
+    EthernetII eth(expected_packet, sizeof(expected_packet));
+    PDU::serialization_type buffer = eth.serialize();
+    EXPECT_EQ(
+        PDU::serialization_type(expected_packet, expected_packet + sizeof(expected_packet)),
+        buffer
+    );
 }
 
 TEST_F(Dot1QTest, PayloadType) {
