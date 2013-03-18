@@ -192,6 +192,23 @@
 ../include/packet_sender.h:
 
 ../include/snap.h:
+../src/dot1q.o: ../src/dot1q.cpp ../include/dot1q.h ../include/pdu.h \
+ ../include/endianness.h ../include/macros.h ../include/small_uint.h \
+ ../include/internals.h ../include/constants.h
+
+../include/dot1q.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/macros.h:
+
+../include/small_uint.h:
+
+../include/internals.h:
+
+../include/constants.h:
 ../src/eapol.o: ../src/eapol.cpp ../include/eapol.h ../include/pdu.h \
  ../include/macros.h ../include/small_uint.h ../include/endianness.h \
  ../include/dot11.h ../include/hw_address.h ../include/pdu_option.h \
@@ -1563,6 +1580,18 @@ src/dot11/rts.o: src/dot11/rts.cpp ../include/dot11.h ../include/macros.h \
 include/tests/dot11.h:
 
 include/tests/dot11.h:
+src/dot1q.o: src/dot1q.cpp ../include/dot1q.h ../include/pdu.h \
+ ../include/endianness.h ../include/macros.h ../include/small_uint.h
+
+../include/dot1q.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/macros.h:
+
+../include/small_uint.h:
 src/ethernetII.o: src/ethernetII.cpp ../include/ethernetII.h \
  ../include/macros.h ../include/pdu.h ../include/endianness.h \
  ../include/hw_address.h ../include/network_interface.h \

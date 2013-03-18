@@ -33,6 +33,7 @@
 #include "arp.h"
 #include "eapol.h"
 #include "rawpdu.h"
+#include "dot1q.h"
 
 using std::string;
 
@@ -73,6 +74,8 @@ Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
             return new Tins::ARP(buffer, size);
         case Tins::Constants::Ethernet::EAPOL:
             return Tins::EAPOL::from_bytes(buffer, size);
+        case Tins::Constants::Ethernet::VLAN:
+            return new Tins::Dot1Q(buffer, size);
         default:
             return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
     };

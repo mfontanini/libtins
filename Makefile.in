@@ -57,7 +57,8 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(libtins_include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libtins.pc.in $(top_srcdir)/configure AUTHORS THANKS \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+	TODO config.guess config.sub depcomp install-sh ltmain.sh \
+	missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -101,13 +102,14 @@ libtins_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo src/crypto.lo \
 	src/dhcp.lo src/dhcpv6.lo src/dns.lo src/dns_record.lo \
-	src/dot11.lo src/eapol.lo src/ethernetII.lo src/icmp.lo \
-	src/icmpv6.lo src/ieee802_3.lo src/internals.lo src/ip.lo \
-	src/ip_address.lo src/ipv6.lo src/ipv6_address.lo src/llc.lo \
-	src/loopback.lo src/network_interface.lo src/packet_sender.lo \
-	src/packet_writer.lo src/pdu.lo src/radiotap.lo src/rawpdu.lo \
-	src/rsn_information.lo src/sll.lo src/snap.lo src/sniffer.lo \
-	src/tcp.lo src/tcp_stream.lo src/udp.lo src/utils.lo
+	src/dot11.lo src/dot1q.lo src/eapol.lo src/ethernetII.lo \
+	src/icmp.lo src/icmpv6.lo src/ieee802_3.lo src/internals.lo \
+	src/ip.lo src/ip_address.lo src/ipv6.lo src/ipv6_address.lo \
+	src/llc.lo src/loopback.lo src/network_interface.lo \
+	src/packet_sender.lo src/packet_writer.lo src/pdu.lo \
+	src/radiotap.lo src/rawpdu.lo src/rsn_information.lo \
+	src/sll.lo src/snap.lo src/sniffer.lo src/tcp.lo \
+	src/tcp_stream.lo src/udp.lo src/utils.lo
 libtins_la_OBJECTS = $(am_libtins_la_OBJECTS)
 libtins_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -289,6 +291,7 @@ libtins_la_SOURCES = src/arp.cpp \
                     src/dns.cpp \
                     src/dns_record.cpp \
                     src/dot11.cpp \
+                    src/dot1q.cpp \
                     src/eapol.cpp \
                     src/ethernetII.cpp \
                     src/icmp.cpp \
@@ -319,6 +322,7 @@ libtins_includedir = $(includedir)/tins
 libtins_include_HEADERS = include/internals.h \
 							include/dhcpv6.h \
 							include/dot11.h \
+							include/dot1q.h \
 							include/small_uint.h \
 							include/ip.h \
 							include/dns_record.h \
@@ -448,6 +452,7 @@ src/dhcpv6.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dns.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dns_record.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dot11.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/dot1q.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/eapol.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/ethernetII.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/icmp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -499,6 +504,8 @@ mostlyclean-compile:
 	-rm -f src/dns_record.lo
 	-rm -f src/dot11.$(OBJEXT)
 	-rm -f src/dot11.lo
+	-rm -f src/dot1q.$(OBJEXT)
+	-rm -f src/dot1q.lo
 	-rm -f src/eapol.$(OBJEXT)
 	-rm -f src/eapol.lo
 	-rm -f src/ethernetII.$(OBJEXT)
@@ -563,6 +570,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dns.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dns_record.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dot11.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dot1q.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/eapol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ethernetII.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/icmp.Plo@am__quote@

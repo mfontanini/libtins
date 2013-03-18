@@ -105,7 +105,8 @@ namespace Tins {
             IPv6,
             ICMPv6,
             SLL,
-            DHCPv6
+            DHCPv6,
+            DOT1Q
         };
 
         /** \brief PDU constructor

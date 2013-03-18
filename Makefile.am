@@ -19,6 +19,7 @@ libtins_la_SOURCES=src/arp.cpp \
                     src/dns.cpp \
                     src/dns_record.cpp \
                     src/dot11.cpp \
+                    src/dot1q.cpp \
                     src/eapol.cpp \
                     src/ethernetII.cpp \
                     src/icmp.cpp \
@@ -49,6 +50,7 @@ libtins_includedir = $(includedir)/tins
 libtins_include_HEADERS = include/internals.h \
 							include/dhcpv6.h \
 							include/dot11.h \
+							include/dot1q.h \
 							include/small_uint.h \
 							include/ip.h \
 							include/dns_record.h \
