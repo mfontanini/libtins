@@ -16,7 +16,9 @@ public:
     void test_equals(const UDP& udp1, const UDP& udp2);
 };
 
-const uint8_t UDPTest::expected_packet[] = {'\xf5', '\x1a', 'G', '\xf1', '\x04', 'S', '\x00', '\x00'};
+const uint8_t UDPTest::expected_packet[] = {
+    245, 26, 71, 241, 4, 83, 0, 0
+};
 
 
 void UDPTest::test_equals(const UDP& udp1, const UDP& udp2) {

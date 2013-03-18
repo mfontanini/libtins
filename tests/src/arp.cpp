@@ -29,10 +29,8 @@ const address_type ARPTest::empty_addr;
 const address_type ARPTest::hw_addr1("13:da:de:f1:01:85");
 const address_type ARPTest::hw_addr2("7a:1f:f4:39:ab:0d");
 const uint8_t ARPTest::expected_packet[] = {
-    '\x00', '\x01', '\x08', '\x00', '\x06', '\x04', '\x00', '\x02', 
-    '\x03', '\xde', '\xf5', '\x12', '\t', '\xfa', '\xc0', '\xa8', '-', 
-    '\xe7', '\xf5', '\x12', '\xda', 'g', '\xbd', '\r', ' ', '\x9b', 'Q', 
-    '\xfe'
+    0, 1, 8, 0, 6, 4, 0, 2, 3, 222, 245, 18, 9, 250, 192, 168, 45, 231, 
+    245, 18, 218, 103, 189, 13, 32, 155, 81, 254
 };
 const IPv4Address ARPTest::addr1(0x1234), ARPTest::addr2(0xa3f1);
 

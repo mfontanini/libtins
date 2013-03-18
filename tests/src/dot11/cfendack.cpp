@@ -18,8 +18,7 @@ public:
 };
 
 const uint8_t Dot11EndCFAckTest::expected_packet[] = { 
-    '\xf5', '\x01', 'O', '#', '\x00', '\x01', '\x02', '\x03', '\x04', 
-    '\x05', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06'
+    245, 1, 79, 35, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6
 };
 
 void test_equals(const Dot11EndCFAck &dot1, const Dot11EndCFAck &dot2) {

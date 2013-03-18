@@ -18,8 +18,7 @@ public:
 };
 
 const uint8_t Dot11PSPollTest::expected_packet[] = { 
-    '\xa5', '\x01', 'O', '#', '\x00', '\x01', '\x02', '\x03', '\x04', 
-    '\x05', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06'
+    165, 1, 79, 35, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6
 };
 
 void test_equals(const Dot11PSPoll &dot1, const Dot11PSPoll &dot2) {

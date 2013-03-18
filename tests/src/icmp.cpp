@@ -17,8 +17,8 @@ public:
 };
 
 const uint8_t ICMPTest::expected_packets[][8] = {
-    {'\x08', '\x01', '\xad', '{', 'V', '\xd1', '\xf3', '\xb1' },
-    {'\x0c', '\x00', 't', '\xff', '\x7f', '\x00', '\x00', '\x00'}
+    { 8, 1, 173, 123, 86, 209, 243, 177 },
+    { 12, 0, 116, 255, 127, 0, 0, 0 }
 };
 const uint32_t ICMPTest::expected_packet_count = 1;
 

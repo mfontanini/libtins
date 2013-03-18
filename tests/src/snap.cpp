@@ -16,7 +16,7 @@ public:
 };
 
 const uint8_t SNAPTest::expected_packet[] = {
-    '\xaa', '\xaa', '\x03', '\x00', '\x00', '\x01', '\x08', '\x00'
+    170, 170, 3, 0, 0, 1, 8, 0
 };
 
 TEST_F(SNAPTest, DefaultConstructor) {

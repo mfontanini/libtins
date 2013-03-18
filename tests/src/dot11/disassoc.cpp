@@ -19,9 +19,8 @@ public:
 };
 
 const uint8_t Dot11DisassocTest::expected_packet[] = { 
-    '\xa1', '\x01', 'O', '#', '\x00', '\x01', '\x02', '\x03', '\x04', 
-    '\x05', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x02', 
-    '\x03', '\x04', '\x05', '\x06', '\x07', '\x00', '\x00', '\x12', '#'
+    161, 1, 79, 35, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6, 2, 3, 4, 5, 6, 
+    7, 0, 0, 18, 35
 };
 
 void test_equals(const Dot11Disassoc &dot1, const Dot11Disassoc &dot2) {

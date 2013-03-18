@@ -17,9 +17,15 @@ public:
     //void test_equals(const IP &ip1, const IP &ip2);
 };
 
-const uint8_t LLCTest::from_buffer_info[] = {'\xfe', '\x48', '\x3c', '\x3b'};
-const uint8_t LLCTest::from_buffer_super[] = {'\x4b', '\x19', '\x05', '\x3a'};
-const uint8_t LLCTest::from_buffer_unnumbered[] = {'\xaa', '\x17', '\xcf'};
+const uint8_t LLCTest::from_buffer_info[] = {
+    254, 72, 60, 59
+};
+const uint8_t LLCTest::from_buffer_super[] = {
+    75, 25, 5, 58
+};
+const uint8_t LLCTest::from_buffer_unnumbered[] = {
+    170, 23, 207
+};
 
 
 TEST_F(LLCTest, DefaultConstructor) {

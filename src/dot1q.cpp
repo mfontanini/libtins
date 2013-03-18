@@ -68,7 +68,6 @@ void Dot1Q::cfi(small_uint<1> new_cfi) {
 }
 
 void Dot1Q::id(small_uint<12> new_id) {
-    uint16_t value = new_id;
     _header.idL = new_id & 0xff;
     _header.idH = new_id >> 8;
 }

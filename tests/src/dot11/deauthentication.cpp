@@ -18,10 +18,8 @@ public:
 };
 
 const uint8_t Dot11DeauthenticationTest::expected_packet[] = { 
-    '\xc1', '\x01', 'O', '#', '\x00', '\x01', '\x02', '\x03', '\x04', 
-    '\x05', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x02', 
-    '\x03', '\x04', '\x05', '\x06', '\x07', '\x00', '\x00', '\xf3', 
-    '\x92'
+    193, 1, 79, 35, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6, 2, 3, 4, 5, 6, 
+    7, 0, 0, 243, 146
 };
 
 void test_equals(const Dot11Deauthentication &dot1, const Dot11Deauthentication &dot2) {

@@ -23,7 +23,7 @@ const address_type Dot11Test::empty_addr,
 
 
 const uint8_t Dot11Test::expected_packet[] = { 
-    '5', '\x01', 'O', '#', '\x00', '\x01', '\x02', '\x03', '\x04', '\x05' 
+    53, 1, 79, 35, 0, 1, 2, 3, 4, 5
 };
 
 TEST_F(Dot11Test, DefaultConstructor) {

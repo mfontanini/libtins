@@ -16,11 +16,11 @@ public:
     void test_equals(const TCP &tcp1, const TCP &tcp2);
 };
 
-const uint8_t TCPTest::expected_packet[] = {'\x7f', 'M', 'O', '\x1d', '\xf1', '\xda', '\xe5', 
-'F', '_', '\xae', '\xd1', '#', '\xd0', '\x02', 'q', '\xda', '\x00', '\x00', '\x1f', '\xae', 
-'\x02', '\x04', '\x98', '\xfa', '\x08', '\n', 'O', '\xd2', ':', '\xcb', '\x89', '\xfe', 
-'\x12', '4', '\x03', '\x03', 'z', '\x04', '\x02', '\x05', '\n', '\x00', '\x01', '\x02', 
-'\x03', '\x04', '\x05', '\x06', '\x07', '\x00', '\x00', '\x00'};
+const uint8_t TCPTest::expected_packet[] = {
+    127, 77, 79, 29, 241, 218, 229, 70, 95, 174, 209, 35, 208, 2, 113, 
+    218, 0, 0, 31, 174, 2, 4, 152, 250, 8, 10, 79, 210, 58, 203, 137, 254, 
+    18, 52, 3, 3, 122, 4, 2, 5, 10, 0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0
+};
 
 
 TEST_F(TCPTest, DefaultConstructor) {

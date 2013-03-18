@@ -18,10 +18,8 @@ public:
 };
 
 const uint8_t Dot11ReAssocRequestTest::expected_packet[] = { 
-    '!', '\x01', 'O', '#', '\x00', '\x01', '\x02', '\x03', '\x04', 
-    '\x05', '\x01', '\x02', '\x03', '\x04', '\x05', '\x06', '\x02', 
-    '\x03', '\x04', '\x05', '\x06', '\x07', '\x00', '\x00', '\x15', 
-    ' ', '\xf3', '\x92', '\x03', '\x04', '\x05', '\x06', '\x07', '\x08'
+    33, 1, 79, 35, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6, 2, 3, 4, 5, 6, 7, 
+    0, 0, 21, 32, 243, 146, 3, 4, 5, 6, 7, 8
 };
 
 void test_equals(const Dot11ReAssocRequest &dot1, const Dot11ReAssocRequest &dot2) {
