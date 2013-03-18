@@ -2874,7 +2874,7 @@ namespace Tins {
         /**
          * \brief Getter for the control ta additional fields size.
          */
-        uint32_t controlta_size() const { return sizeof(_taddr) + sizeof(ieee80211_header); }
+        uint32_t controlta_size() const { return _taddr.size() + sizeof(ieee80211_header); }
 
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
@@ -3258,8 +3258,8 @@ namespace Tins {
     private:
         TINS_BEGIN_PACK
         struct BarControl {
-            uint16_t reserved:12,
-                tid:4;
+            uint16_t tid:4,
+                reserved:12;
         } TINS_END_PACK;
 
         TINS_BEGIN_PACK

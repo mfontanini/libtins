@@ -1464,7 +1464,9 @@ Dot11Ack::Dot11Ack(const address_type &dst_addr, PDU* child)
     subtype(ACK);
 }
 
-Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) {
+Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11Control(buffer, total_sz)
+{
 
 }
 
@@ -1477,7 +1479,9 @@ Dot11BlockAckRequest::Dot11BlockAckRequest(const address_type &dst_addr,
     init_block_ack();
 }
 
-Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
+Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ControlTA(buffer, total_sz) 
+{
     uint32_t padding = controlta_size();
     buffer += padding;
     total_sz -= padding;
