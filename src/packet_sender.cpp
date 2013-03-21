@@ -59,6 +59,12 @@
 #include "pdu.h"
 #include "macros.h"
 #include "network_interface.h"
+// PDUs required by PacketSender::send(PDU&, NetworkInterface)
+#include "ethernetII.h"
+#include "radiotap.h"
+#include "dot11.h"
+#include "radiotap.h"
+#include "ieee802_3.h"
 
 
 namespace Tins {
@@ -211,6 +217,26 @@ void PacketSender::close_socket(SocketType type, const NetworkInterface &iface) 
 
 void PacketSender::send(PDU &pdu) {
     pdu.send(*this);
+}
+
+void PacketSender::send(PDU &pdu, const NetworkInterface &iface) {
+    PDU::PDUType type = pdu.pdu_type();
+    switch(type) {
+        case PDU::ETHERNET_II:
+            send<Tins::EthernetII>(pdu, iface);
+            break;
+        case PDU::DOT11:
+            send<Tins::Dot11>(pdu, iface);
+            break;
+        case PDU::RADIOTAP:
+            send<Tins::RadioTap>(pdu, iface);
+            break;
+        case PDU::IEEE802_3:
+            send<Tins::IEEE802_3>(pdu, iface);
+            break;
+        default:
+            send(pdu);
+    };
 }
 
 PDU *PacketSender::send_recv(PDU &pdu) {

@@ -130,6 +130,23 @@ namespace Tins {
          * \param pdu The PDU to be sent.
          */
         void send(PDU &pdu);
+        
+        /** 
+         * \brief Sends a PDU. 
+         * 
+         * \sa PacketSender::send
+         * 
+         * This overload takes a NetworkInterface. The packet is sent
+         * through that interface if a link-layer PDU is present, 
+         * otherwise this call is equivalent to send(PDU&).
+         * 
+         * The interface stored in the link layer PDU(if any), is restored
+         * after this method ends.
+         * 
+         * \param pdu The PDU to be sent.
+         * \param iface The network interface to use.
+         */
+        void send(PDU &pdu, const NetworkInterface &iface);
 
         /** 
          * \brief Sends a PDU and waits for its response. 
@@ -212,9 +229,17 @@ namespace Tins {
         int find_type(SocketType type);
         int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y);
         #ifndef WIN32
-        bool ether_socket_initialized(const NetworkInterface& iface = NetworkInterface()) const;
-        int get_ether_socket(const NetworkInterface& iface = NetworkInterface());
+            bool ether_socket_initialized(const NetworkInterface& iface = NetworkInterface()) const;
+            int get_ether_socket(const NetworkInterface& iface = NetworkInterface());
         #endif
+        template<typename T>
+        void send(PDU &pdu, const NetworkInterface &iface) {
+            T *actual_pdu = static_cast<T*>(&pdu);
+            NetworkInterface old_iface = actual_pdu->iface();
+            actual_pdu->iface(iface);
+            send(*actual_pdu);
+            actual_pdu->iface(old_iface);
+        }
         
         PDU *recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen);
 
