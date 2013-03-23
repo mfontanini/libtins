@@ -264,7 +264,8 @@ void TCP::set_flag(Flags tcp_flag, small_uint<1> value) {
 
 void TCP::add_option(Option option, uint8_t length, const uint8_t *data) {
     uint8_t padding;
-    _options.push_back(tcp_option(option, length, data));
+    //_options.push_back(tcp_option(option, length, data));
+    _options.push_back(tcp_option(option, data, data + length));
     
     _options_size += sizeof(uint8_t);
     // SACK_OK contains length but not data....

@@ -443,8 +443,8 @@ namespace Tins {
         uint8_t *write_option(const tcp_option &opt, uint8_t *buffer);
 
         tcphdr _tcp;
+        uint16_t _options_size, _total_options_size;
         options_type _options;
-        uint32_t _options_size, _total_options_size;
     };
 }
 

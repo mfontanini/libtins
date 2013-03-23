@@ -75,10 +75,8 @@ public:
      * \param data The option's data(if any).
      */
     PDUOption(option_type opt = option_type(), size_t length = 0, const data_type *data = 0) 
-    : option_(opt) {
-        value_.push_back(length);
-        if(data)
-            value_.insert(value_.end(), data, data + length);
+    : option_(opt), size_(length), value_(data, data + (data ? length : 0)) {
+        
     }
     
     /**
@@ -91,9 +89,8 @@ public:
      */
     template<typename ForwardIterator>
     PDUOption(option_type opt, ForwardIterator start, ForwardIterator end) 
-    : option_(opt) {
-        value_.push_back(std::distance(start, end));
-        value_.insert(value_.end(), start, end);
+    : option_(opt), size_(std::distance(start, end)), value_(start, end) {
+        
     }
     
     /**
@@ -122,17 +119,18 @@ public:
      * \return const data_type& containing this option's value.
      */
     const data_type *data_ptr() const {
-        return &*(++value_.begin());
+        return &*value_.begin();
     }
     
     /**
      * Retrieves the length of this option's data.
      */
     size_t data_size() const {
-        return value_.empty() ? 0 : (value_.size() - 1);
+        return size_;
     }
 private:
     option_type option_;
+    uint16_t size_;
     container_type value_;
 };
 } // namespace Tins

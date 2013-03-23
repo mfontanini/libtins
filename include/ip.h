@@ -627,8 +627,8 @@ namespace Tins {
         generic_route_option_type search_route_option(option_identifier id) const;
 
         iphdr _ip;
+        uint16_t _options_size, _padded_options_size;
         options_type _ip_options;
-        uint32_t _options_size, _padded_options_size;
     };
 }
 
