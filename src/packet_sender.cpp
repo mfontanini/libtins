@@ -65,6 +65,7 @@
 #include "dot11.h"
 #include "radiotap.h"
 #include "ieee802_3.h"
+#include "internals.h"
 
 
 namespace Tins {
@@ -307,7 +308,8 @@ PDU *PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_add
             #endif
             size = recvfrom(sock, (char*)buffer, 2048, 0, link_addr, &length);
             if(pdu.matches_response(buffer, size)) {
-                return pdu.clone_packet(buffer, size);
+                return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
+                //return pdu.clone_packet(buffer, size);
             }
         }
         struct timeval this_time, diff;

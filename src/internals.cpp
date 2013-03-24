@@ -29,6 +29,10 @@
 
 #include "internals.h"
 #include "ip.h"
+#include "ethernetII.h"
+#include "ieee802_3.h"
+#include "radiotap.h"
+#include "dot11.h"
 #include "ipv6.h"
 #include "arp.h"
 #include "eapol.h"
@@ -78,6 +82,49 @@ Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
             return new Tins::Dot1Q(buffer, size);
         default:
             return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
+    };
+}
+
+Tins::PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size) 
+{
+    switch(type) {
+        case Tins::PDU::ETHERNET_II:
+            return new Tins::EthernetII(buffer, size);
+        case Tins::PDU::IP:
+            return new Tins::IP(buffer, size);
+        case Tins::PDU::IPv6:
+            return new Tins::IPv6(buffer, size);
+        case Tins::PDU::ARP:
+            return new Tins::ARP(buffer, size);
+        case Tins::PDU::IEEE802_3:
+            return new Tins::IEEE802_3(buffer, size);
+        case Tins::PDU::RADIOTAP:
+            return new Tins::RadioTap(buffer, size);
+        case Tins::PDU::DOT11:
+        case Tins::PDU::DOT11_ACK:
+        case Tins::PDU::DOT11_ASSOC_REQ:
+        case Tins::PDU::DOT11_ASSOC_RESP:
+        case Tins::PDU::DOT11_AUTH:
+        case Tins::PDU::DOT11_BEACON:
+        case Tins::PDU::DOT11_BLOCK_ACK:
+        case Tins::PDU::DOT11_BLOCK_ACK_REQ:
+        case Tins::PDU::DOT11_CF_END:
+        case Tins::PDU::DOT11_DATA:
+        case Tins::PDU::DOT11_CONTROL:
+        case Tins::PDU::DOT11_DEAUTH:
+        case Tins::PDU::DOT11_DIASSOC:
+        case Tins::PDU::DOT11_END_CF_ACK:
+        case Tins::PDU::DOT11_MANAGEMENT:
+        case Tins::PDU::DOT11_PROBE_REQ:
+        case Tins::PDU::DOT11_PROBE_RESP:
+        case Tins::PDU::DOT11_PS_POLL:
+        case Tins::PDU::DOT11_REASSOC_REQ:
+        case Tins::PDU::DOT11_REASSOC_RESP:
+        case Tins::PDU::DOT11_RTS:
+        case Tins::PDU::DOT11_QOS_DATA:
+            return Tins::Dot11::from_bytes(buffer, size);
+        default:
+            return 0;
     };
 }
 

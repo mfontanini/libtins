@@ -119,17 +119,7 @@ bool ARP::matches_response(uint8_t *ptr, uint32_t total_sz) {
 }
 
 PDU *ARP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    if(total_sz < sizeof(arphdr))
-        return 0;
-    PDU *child = 0, *cloned;
-    if(total_sz > sizeof(arphdr)) {
-        child = PDU::clone_inner_pdu(ptr + sizeof(arphdr), total_sz - sizeof(arphdr));
-        if(!child)
-            return 0;
-    }
-    cloned = new ARP(ptr, std::min(total_sz, (uint32_t)sizeof(_arp)));
-    cloned->inner_pdu(child);
-    return cloned;
+    return new ARP(ptr, total_sz);
 }
 
 EthernetII ARP::make_arp_request(const NetworkInterface& iface, 

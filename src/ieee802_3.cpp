@@ -161,15 +161,6 @@ PDU *IEEE802_3::recv_response(PacketSender &sender) {
 #endif // WIN32
 
 PDU *IEEE802_3::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    if(total_sz < sizeof(_eth))
-        return 0;
-    PDU *child = 0, *cloned;
-    if(total_sz > sizeof(_eth)) {
-        if((child = PDU::clone_inner_pdu(ptr + sizeof(_eth), total_sz - sizeof(_eth))) == 0)
-            return 0;
-    }
-    cloned = new IEEE802_3(ptr, std::min(total_sz, (uint32_t)sizeof(_eth)));
-    cloned->inner_pdu(child);
-    return cloned;
+    return new IEEE802_3(ptr, total_sz);
 }
 }

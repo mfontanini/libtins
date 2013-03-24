@@ -113,4 +113,8 @@ PDU *PDU::clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz) {
         child = new RawPDU(ptr, total_sz);
     return child;
 }
+
+PDU *PDU::clone_packet(const uint8_t *ptr, uint32_t total_sz) { 
+    return 0; 
+}
 }

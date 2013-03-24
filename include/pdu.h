@@ -33,6 +33,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include "macros.h"
 
 /** \brief The Tins namespace.
  */
@@ -272,11 +273,13 @@ namespace Tins {
         /** \brief Clones this pdu, filling the corresponding header with data
          * extracted from a buffer.
          *
+         * \deprecated This method is obsolete.
+         * 
          * \param ptr The pointer to the from from which the data will be extracted.
          * \param total_sz The size of the buffer.
          * \return The cloned PDU.
          */
-        virtual PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz) { return 0; }
+        TINS_DEPRECATED(virtual PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz));
     protected:
         /**
          * \brief Copy constructor.

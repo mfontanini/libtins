@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include "pdu.h"
+#include "macros.h"
 
 namespace Tins {
 /**
@@ -129,9 +130,11 @@ public:
     /**
      * Forwards the call to the cached PDU. \sa PDU::clone_packet.
      */
-    PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-        return cached.clone_packet(ptr, total_sz);
-    }
+    TINS_DEPRECATED(
+        PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz) {
+            return 0;
+        }
+    )
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
         if(cached_serialization.size() != total_sz) {

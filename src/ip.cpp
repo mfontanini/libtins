@@ -436,19 +436,6 @@ bool IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
 }
 
 PDU *IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    if(total_sz < sizeof(iphdr))
-        return 0;
-    const iphdr *ip_ptr = (iphdr*)ptr;
-    uint32_t sz = ip_ptr->ihl * sizeof(uint32_t);
-    if(total_sz < sz)
-        return 0;
-    PDU *child = 0, *cloned;
-    if(total_sz > sz) {
-        if((child = PDU::clone_inner_pdu(ptr + sizeof(_ip), total_sz - sizeof(_ip))) == 0)
-            return 0;
-    }
-    cloned = new IP(ptr, std::min(total_sz, (uint32_t)(Endian::be_to_host(ip_ptr->tot_len) * sizeof(uint32_t))));
-    cloned->inner_pdu(child);
-    return cloned;
+    return new IP(ptr, total_sz);
 }
 }

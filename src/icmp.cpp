@@ -169,14 +169,5 @@ bool Tins::ICMP::matches_response(uint8_t *ptr, uint32_t total_sz) {
 }
 
 Tins::PDU *Tins::ICMP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    if(total_sz < sizeof(icmphdr))
-        return 0;
-    PDU *child = 0, *cloned;
-    if(total_sz > sizeof(icmphdr)) {
-        if((child = PDU::clone_inner_pdu(ptr + sizeof(icmphdr), total_sz - sizeof(icmphdr))) == 0)
-            return 0;
-    }
-    cloned = new ICMP(ptr, std::min(total_sz, (uint32_t)sizeof(_icmp)));
-    cloned->inner_pdu(child);
-    return cloned;
+    return new ICMP(ptr, total_sz);
 }
