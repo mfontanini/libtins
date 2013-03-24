@@ -80,13 +80,13 @@ TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
                 if(header_end - index < args[1])
                     throw std::runtime_error("Not enough size for a TCP header in the buffer.");                        
                 if(args[1])
-                    add_option((Option)args[0], args[1], buffer + index);
+                    add_option(tcp_option((Option)args[0], buffer + index, buffer + index + args[1]));
                 else
-                    add_option((Option)args[0], args[1], 0);
+                    add_option(tcp_option((Option)args[0], args[1], 0));
                 index += args[1];
             }
             else
-                add_option((Option)args[0], 0, 0);
+                add_option(tcp_option((Option)args[0], 0));
         }
         buffer += index;
         total_sz -= index;
@@ -129,7 +129,7 @@ void TCP::data_offset(small_uint<4> new_doff) {
 
 void TCP::mss(uint16_t value) {
     value = Endian::host_to_be(value);
-    add_option(MSS, 2, (uint8_t*)&value);
+    add_option(tcp_option(MSS, 2, (uint8_t*)&value));
 }
 
 uint16_t TCP::mss() const {
@@ -137,7 +137,7 @@ uint16_t TCP::mss() const {
 }
 
 void TCP::winscale(uint8_t value) {
-    add_option(WSCALE, 1, &value);
+    add_option(tcp_option(WSCALE, 1, &value));
 }
 
 uint8_t TCP::winscale() const {
@@ -145,7 +145,7 @@ uint8_t TCP::winscale() const {
 }
 
 void TCP::sack_permitted() {
-    add_option(SACK_OK, 0, 0);
+    add_option(tcp_option(SACK_OK, 0));
 }
 
 bool TCP::has_sack_permitted() const {
@@ -160,7 +160,13 @@ void TCP::sack(const sack_type &edges) {
         for(sack_type::const_iterator it = edges.begin(); it != edges.end(); ++it)
             *(ptr++) = Endian::host_to_be(*it);
     }
-    add_option(SACK, (uint8_t)(sizeof(uint32_t) * edges.size()), (const uint8_t*)value);
+    add_option(
+        tcp_option(
+            SACK, 
+            (uint8_t)(sizeof(uint32_t) * edges.size()), 
+            (const uint8_t*)value
+        )
+    );
     delete[] value;
 }
 
@@ -180,7 +186,7 @@ TCP::sack_type TCP::sack() const {
 void TCP::timestamp(uint32_t value, uint32_t reply) {
     uint64_t buffer = (uint64_t(value) << 32) | reply;
     buffer = Endian::host_to_be(buffer);
-    add_option(TSOPT, 8, (uint8_t*)&buffer);
+    add_option(tcp_option(TSOPT, 8, (uint8_t*)&buffer));
 }
 
 std::pair<uint32_t, uint32_t> TCP::timestamp() const {
@@ -194,7 +200,7 @@ std::pair<uint32_t, uint32_t> TCP::timestamp() const {
 
 void TCP::altchecksum(AltChecksums value) {
     uint8_t int_value = value;
-    add_option(ALTCHK, 1, &int_value);
+    add_option(tcp_option(ALTCHK, 1, &int_value));
 }
 
 TCP::AltChecksums TCP::altchecksum() const {
@@ -263,20 +269,12 @@ void TCP::set_flag(Flags tcp_flag, small_uint<1> value) {
 }
 
 void TCP::add_option(Option option, uint8_t length, const uint8_t *data) {
-    uint8_t padding;
-    //_options.push_back(tcp_option(option, length, data));
-    _options.push_back(tcp_option(option, data, data + length));
-    
-    _options_size += sizeof(uint8_t);
-    // SACK_OK contains length but not data....
-    if(length || option == SACK_OK)
-        _options_size += sizeof(uint8_t);
-        
-    if(data)
-        _options_size += length;
-    
-    padding = _options_size & 3;
-    _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
+    add_option(tcp_option(option, data, data + length));
+}
+
+void TCP::add_option(const tcp_option &option) {
+    _options.push_back(option);
+    internal_add_option(option);
 }
 
 uint32_t TCP::header_size() const {
@@ -355,4 +353,26 @@ uint8_t *TCP::write_option(const tcp_option &opt, uint8_t *buffer) {
     }
 }
 
+#if TINS_IS_CXX11
+void TCP::add_option(tcp_option &&option) {
+    internal_add_option(option);
+    _options.push_back(std::move(option));
 }
+#endif
+
+void TCP::internal_add_option(const tcp_option &option) {
+    uint8_t padding;
+    
+    _options_size += sizeof(uint8_t);
+    // SACK_OK contains length but not data....
+    if(option.data_size() || option.option() == SACK_OK)
+        _options_size += sizeof(uint8_t);
+        
+    _options_size += option.data_size();
+    
+    padding = _options_size & 3;
+    _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
+}
+
+}
+

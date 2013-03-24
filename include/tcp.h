@@ -41,6 +41,7 @@
 #include "endianness.h"
 #include "small_uint.h"
 #include "pdu_option.h"
+#include "cxxstd.h"
 
 namespace Tins {
     /**
@@ -355,11 +356,32 @@ namespace Tins {
         /**
          * \brief Adds a TCP option.
          *
+         * \deprecated This function is deprecated. The overloads taking
+         * tcp_option should be used.
+         * 
          * \param option The option type flag to be set.
          * \param length The length of this option(optional).
          * \param data Pointer to this option's data(optional).
          */
-        void add_option(Option option, uint8_t length = 0, const uint8_t *data = 0);
+        TINS_DEPRECATED(void add_option(Option option, uint8_t length = 0, const uint8_t *data = 0));
+        
+        /**
+         * \brief Adds a TCP option.
+         *
+         * \param option The option to be added.
+         */
+        void add_option(const tcp_option &option);
+        
+        #if TINS_IS_CXX11
+            /**
+             * \brief Adds a TCP option.
+             *
+             * This move-constructs the option.
+             * 
+             * \param option The option to be added.
+             */
+            void add_option(tcp_option &&option);
+        #endif
 
         /**
          * \brief Returns the header size.
@@ -437,7 +459,8 @@ namespace Tins {
                 return *(const T*)(&option->data_ptr()[0]);
             throw option_not_found();
         }
-
+        
+        void internal_add_option(const tcp_option &option);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         uint8_t *write_option(const tcp_option &opt, uint8_t *buffer);

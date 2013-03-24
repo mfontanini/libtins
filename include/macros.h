@@ -39,10 +39,12 @@
     #define TINS_BEGIN_PACK __pragma( pack(push, 1) )
     #define TINS_END_PACK __pragma( pack(pop) )
     #define TINS_PACKED(DECLARATION) __pragma( pack(push, 1) ) DECLARATION __pragma( pack(pop) )
+    #define TINS_DEPRECATED(func) __declspec(deprecated) func
 #else
     #define TINS_BEGIN_PACK 
     #define TINS_END_PACK __attribute__((packed))
     #define TINS_PACKED(DECLARATION) DECLARATION __attribute__((packed))
+    #define TINS_DEPRECATED(func) func __attribute__ ((deprecated))
 #endif
 
 #endif

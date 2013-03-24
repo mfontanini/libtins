@@ -103,9 +103,20 @@ void Dot11::add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val)
     _options_size += opt_size;
 }
 
-void Dot11::add_tagged_option(const dot11_option &opt) {
-    _options.push_back(opt);
+#if TINS_IS_CXX11
+void Dot11::add_tagged_option(dot11_option &&opt) {
+    internal_add_option(opt);
+    _options.push_back(std::move(opt));
+}
+#endif
+
+void Dot11::internal_add_option(const dot11_option &opt) {
     _options_size += opt.data_size() + sizeof(uint8_t) * 2;
+}
+
+void Dot11::add_tagged_option(const dot11_option &opt) {
+    internal_add_option(opt);
+    _options.push_back(opt);
 }
 
 const Dot11::dot11_option *Dot11::search_option(TaggedOption opt) const {

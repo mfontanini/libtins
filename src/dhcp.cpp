@@ -75,7 +75,18 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void DHCP::add_option(const dhcp_option &option) {
+    internal_add_option(option);
     _options.push_back(option);
+}
+
+#if TINS_IS_CXX11
+void DHCP::add_option(dhcp_option &&option) {
+    internal_add_option(option);
+    _options.push_back(std::move(option));
+}
+#endif
+
+void DHCP::internal_add_option(const dhcp_option &option) {
     _size += option.data_size() + (sizeof(uint8_t) << 1);
 }
 

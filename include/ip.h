@@ -37,6 +37,7 @@
 #include "ip_address.h"
 #include "pdu_option.h"
 #include "macros.h"
+#include "cxxstd.h"
 
 namespace Tins {
 
@@ -417,6 +418,17 @@ namespace Tins {
          * \param option The option to be added
          */
         void add_option(const ip_option &option);
+        
+        #if TINS_IS_CXX11
+            /**
+             * \brief Adds an IP option.
+             * 
+             * The option is move-constructed.
+             * 
+             * \param option The option to be added.
+             */
+            void add_option(ip_option &&option);
+        #endif
 
         /**
          * \brief Searchs for an option that matchs the given flag.
@@ -620,6 +632,7 @@ namespace Tins {
             /*The options start here. */
         } TINS_END_PACK;
 
+        void internal_add_option(const ip_option &option);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         uint8_t* write_option(const ip_option &opt, uint8_t* buffer);

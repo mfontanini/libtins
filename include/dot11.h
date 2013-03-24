@@ -42,6 +42,7 @@
 #include "small_uint.h"
 #include "pdu_option.h"
 #include "network_interface.h"
+#include "cxxstd.h"
 
 namespace Tins {
     class RSNInformation;
@@ -395,6 +396,17 @@ namespace Tins {
          * \param opt The option to be added.
          */
         void add_tagged_option(const dot11_option &opt);
+        
+        #if TINS_IS_CXX11
+            /**
+             * \brief Adds a new option to this Dot11 PDU.
+             * 
+             * The option is move-constructed
+             * 
+             * \param opt The option to be added.
+             */
+            void add_tagged_option(dot11_option &&opt);
+        #endif
 
         /**
          * \brief Looks up a tagged option in the option list.
@@ -484,10 +496,10 @@ namespace Tins {
             uint8_t addr1[address_type::address_size];
 
         } TINS_END_PACK;
-        private:
-
+    private:
         Dot11(const ieee80211_header *header_ptr);
-
+        
+        void internal_add_option(const dot11_option &opt);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
 

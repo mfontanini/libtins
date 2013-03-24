@@ -40,6 +40,7 @@
 #include "small_uint.h"
 #include "hw_address.h"
 #include "small_uint.h"
+#include "cxxstd.h"
 
 namespace Tins {
 /**
@@ -737,6 +738,17 @@ public:
      * \param option The option to be added
      */
     void add_option(const icmpv6_option &option);
+    
+    #if TINS_IS_CXX11
+        /**
+         * \brief Adds an ICMPv6 option.
+         * 
+         * The option is move-constructed.
+         * 
+         * \param option The option to be added.
+         */
+        void add_option(icmpv6_option &&option);
+    #endif
 
     /**
      * \brief Returns the header size.
@@ -1181,6 +1193,7 @@ private:
         };
     } TINS_END_PACK;
     
+    void internal_add_option(const icmpv6_option &option);
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     bool has_options() const;
     uint8_t *write_option(const icmpv6_option &opt, uint8_t *buffer);

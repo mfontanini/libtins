@@ -35,6 +35,7 @@
 #include <string>
 #include "bootp.h"
 #include "pdu_option.h"
+#include "cxxstd.h"
 
 namespace Tins {
     /** 
@@ -171,6 +172,17 @@ namespace Tins {
          * \param option The option to be added.
          */
         void add_option(const dhcp_option &option);
+        
+        #if TINS_IS_CXX11
+            /** 
+             * \brief Adds a new option to this DHCP PDU.
+             * 
+             * The option is move-constructed.
+             * 
+             * \param option The option to be added.
+             */
+            void add_option(dhcp_option &&option);
+        #endif 
     
         /**
          * \brief Searchs for an option that matchs the given flag.
@@ -409,6 +421,7 @@ namespace Tins {
                 throw option_not_found();
         }
         
+        void internal_add_option(const dhcp_option &option);
         std::list<ipaddress_type> generic_search(Options opt, type2type<std::list<ipaddress_type> >) const;
         std::string generic_search(Options opt, type2type<std::string>) const;
         ipaddress_type generic_search(Options opt, type2type<ipaddress_type>) const;

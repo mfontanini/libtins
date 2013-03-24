@@ -309,8 +309,19 @@ uint16_t IP::stream_identifier() const {
     return Endian::be_to_host(*(const uint16_t*)option->data_ptr());
 }
 
+#if TINS_IS_CXX11
+void IP::add_option(ip_option &&option) {
+    internal_add_option(option);
+    _ip_options.push_back(std::move(option));
+}
+#endif
+
 void IP::add_option(const ip_option &option) {
+    internal_add_option(option);
     _ip_options.push_back(option);
+}
+
+void IP::internal_add_option(const ip_option &option) {
     _options_size += 1 + option.data_size();
     uint8_t padding = _options_size % 4;
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
