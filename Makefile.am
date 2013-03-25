@@ -19,12 +19,12 @@ libtins_la_SOURCES=src/arp.cpp \
                     src/dns.cpp \
                     src/dns_record.cpp \
                     src/dot11.cpp \
+                    src/dot3.cpp \
                     src/dot1q.cpp \
                     src/eapol.cpp \
                     src/ethernetII.cpp \
                     src/icmp.cpp \
                     src/icmpv6.cpp \
-                    src/ieee802_3.cpp \
                     src/internals.cpp \
                     src/ip.cpp src/ip_address.cpp \
                     src/ipv6.cpp \
@@ -51,6 +51,7 @@ libtins_include_HEADERS = include/internals.h \
 							include/dhcpv6.h \
 							include/dot11.h \
 							include/dot1q.h \
+							include/dot3.h \
 							include/small_uint.h \
 							include/ip.h \
 							include/dns_record.h \
@@ -61,7 +62,6 @@ libtins_include_HEADERS = include/internals.h \
 							include/endianness.h \
 							include/rsn_information.h \
 							include/loopback.h \
-							include/ieee802_3.h \
 							include/ethernetII.h \
 							include/crypto.h \
 							include/packet.h \

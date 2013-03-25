@@ -41,14 +41,14 @@
     #include <net/ethernet.h>
     #include <netinet/in.h>
 #endif
-#include "ieee802_3.h"
+#include "dot3.h"
 #include "packet_sender.h"
 #include "llc.h"
 
 namespace Tins {
-const IEEE802_3::address_type IEEE802_3::BROADCAST("ff:ff:ff:ff:ff:ff");
+const Dot3::address_type Dot3::BROADCAST("ff:ff:ff:ff:ff:ff");
 
-IEEE802_3::IEEE802_3(const NetworkInterface& iface, 
+Dot3::Dot3(const NetworkInterface& iface, 
   const address_type &dst_hw_addr, const address_type &src_hw_addr, 
   PDU* child)
 : PDU(child) 
@@ -61,7 +61,7 @@ IEEE802_3::IEEE802_3(const NetworkInterface& iface,
 
 }
 
-IEEE802_3::IEEE802_3(const uint8_t *buffer, uint32_t total_sz) 
+Dot3::Dot3(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(ethhdr))
         throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
@@ -72,28 +72,28 @@ IEEE802_3::IEEE802_3(const uint8_t *buffer, uint32_t total_sz)
         inner_pdu(new Tins::LLC(buffer, total_sz));
 }
 
-void IEEE802_3::dst_addr(const address_type &new_dst_mac) {
+void Dot3::dst_addr(const address_type &new_dst_mac) {
     std::copy(new_dst_mac.begin(), new_dst_mac.end(), _eth.dst_mac);
 }
 
-void IEEE802_3::src_addr(const address_type &new_src_mac) {
+void Dot3::src_addr(const address_type &new_src_mac) {
     std::copy(new_src_mac.begin(), new_src_mac.end(), _eth.src_mac);
 }
 
-void IEEE802_3::iface(const NetworkInterface &new_iface) {
+void Dot3::iface(const NetworkInterface &new_iface) {
     _iface = new_iface;
 }
 
-void IEEE802_3::length(uint16_t new_length) {
+void Dot3::length(uint16_t new_length) {
     this->_eth.length = Endian::host_to_be(new_length);
 }
 
-uint32_t IEEE802_3::header_size() const {
+uint32_t Dot3::header_size() const {
     return sizeof(ethhdr);
 }
 
 #ifndef WIN32
-void IEEE802_3::send(PacketSender &sender) {
+void Dot3::send(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
         
@@ -115,7 +115,7 @@ void IEEE802_3::send(PacketSender &sender) {
 }
 #endif // WIN32
 
-bool IEEE802_3::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool Dot3::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(ethhdr))
         return false;
     ethhdr *eth_ptr = (ethhdr*)ptr;
@@ -125,7 +125,7 @@ bool IEEE802_3::matches_response(uint8_t *ptr, uint32_t total_sz) {
     return false;
 }
 
-void IEEE802_3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t my_sz = header_size();
     bool set_length = _eth.length == 0;
     assert(total_sz >= my_sz);
@@ -140,7 +140,7 @@ void IEEE802_3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
 }
 
 #ifndef WIN32
-PDU *IEEE802_3::recv_response(PacketSender &sender) {
+PDU *Dot3::recv_response(PacketSender &sender) {
     if(!_iface)
         throw std::runtime_error("Interface has not been set");
     #ifndef BSD
@@ -160,7 +160,7 @@ PDU *IEEE802_3::recv_response(PacketSender &sender) {
 }
 #endif // WIN32
 
-PDU *IEEE802_3::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    return new IEEE802_3(ptr, total_sz);
+PDU *Dot3::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
+    return new Dot3(ptr, total_sz);
 }
 }

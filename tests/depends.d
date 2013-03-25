@@ -218,6 +218,30 @@
 ../include/internals.h:
 
 ../include/constants.h:
+../src/dot3.o: ../src/dot3.cpp ../include/macros.h ../include/dot3.h \
+ ../include/macros.h ../include/pdu.h ../include/endianness.h \
+ ../include/hw_address.h ../include/network_interface.h \
+ ../include/ip_address.h ../include/packet_sender.h ../include/llc.h
+
+../include/macros.h:
+
+../include/dot3.h:
+
+../include/macros.h:
+
+../include/pdu.h:
+
+../include/endianness.h:
+
+../include/hw_address.h:
+
+../include/network_interface.h:
+
+../include/ip_address.h:
+
+../include/packet_sender.h:
+
+../include/llc.h:
 ../src/eapol.o: ../src/eapol.cpp ../include/eapol.h ../include/pdu.h \
  ../include/macros.h ../include/small_uint.h ../include/endianness.h \
  ../include/dot11.h ../include/hw_address.h ../include/pdu_option.h \
@@ -359,37 +383,12 @@
 ../include/constants.h:
 
 ../include/constants.h:
-../src/ieee802_3.o: ../src/ieee802_3.cpp ../include/macros.h \
- ../include/ieee802_3.h ../include/macros.h ../include/pdu.h \
- ../include/endianness.h ../include/hw_address.h \
- ../include/network_interface.h ../include/ip_address.h \
- ../include/packet_sender.h ../include/llc.h
-
-../include/macros.h:
-
-../include/ieee802_3.h:
-
-../include/macros.h:
-
-../include/pdu.h:
-
-../include/endianness.h:
-
-../include/hw_address.h:
-
-../include/network_interface.h:
-
-../include/ip_address.h:
-
-../include/packet_sender.h:
-
-../include/llc.h:
 ../src/internals.o: ../src/internals.cpp ../include/internals.h \
  ../include/constants.h ../include/pdu.h ../include/macros.h \
  ../include/ip.h ../include/small_uint.h ../include/endianness.h \
  ../include/ip_address.h ../include/pdu_option.h ../include/cxxstd.h \
  ../include/ethernetII.h ../include/hw_address.h \
- ../include/network_interface.h ../include/ieee802_3.h \
+ ../include/network_interface.h ../include/ieee802_3.h ../include/dot3.h \
  ../include/radiotap.h ../include/dot11.h ../include/ipv6.h \
  ../include/ipv6_address.h ../include/arp.h ../include/eapol.h \
  ../include/rawpdu.h ../include/dot1q.h
@@ -421,6 +420,8 @@
 ../include/network_interface.h:
 
 ../include/ieee802_3.h:
+
+../include/dot3.h:
 
 ../include/radiotap.h:
 
@@ -632,7 +633,7 @@
  ../include/ethernetII.h ../include/pdu.h ../include/endianness.h \
  ../include/radiotap.h ../include/dot11.h ../include/small_uint.h \
  ../include/pdu_option.h ../include/cxxstd.h ../include/ieee802_3.h \
- ../include/internals.h ../include/constants.h
+ ../include/dot3.h ../include/internals.h ../include/constants.h
 
 ../include/packet_sender.h:
 
@@ -667,6 +668,8 @@
 ../include/cxxstd.h:
 
 ../include/ieee802_3.h:
+
+../include/dot3.h:
 
 ../include/internals.h:
 
