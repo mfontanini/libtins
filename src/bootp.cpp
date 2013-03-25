@@ -117,4 +117,11 @@ void BootP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
     std::memcpy(buffer, &_bootp, sizeof(bootphdr));
     std::copy(_vend.begin(), _vend.end(), buffer + sizeof(bootphdr));
 }
+
+bool BootP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(bootphdr))
+        return false;
+    const bootphdr *bootp_ptr = (const bootphdr *)ptr;
+    return bootp_ptr->xid == _bootp.xid;
+}
 }

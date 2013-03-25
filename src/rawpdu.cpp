@@ -56,4 +56,8 @@ void RawPDU::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
 void RawPDU::payload(const payload_type &pload) {
     _payload = pload;
 }
+
+bool RawPDU::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    return true;
+}
 }

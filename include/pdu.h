@@ -297,6 +297,20 @@ namespace Tins {
          */
         void copy_inner_pdu(const PDU &pdu);
 
+        /**
+         * \brief Prepares this PDU for serialization.
+         * 
+         * This method is called before the inner PDUs are serialized.
+         * It's useful in situations such as when serializing IP PDUs,
+         * which don't contain any link layer encapsulation, and therefore
+         * require to set the source IP address before the TCP/UDP checksum
+         * is calculated.
+         * 
+         * By default, this method does nothing
+         * 
+         * \param parent The parent PDU.
+         */
+        virtual void prepare_for_serialize(const PDU *parent) { }
 
         /** 
          * \brief Serializes this PDU and propagates this action to child PDUs.
@@ -306,16 +320,6 @@ namespace Tins {
          * \param parent The parent PDU. Will be 0 if there's the parent does not exist.
          */
         void serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-
-        /** 
-         * \brief Clones the inner pdu(if any).
-         *
-         * This method clones the inner pdu using data from a buffer.
-         * \param ptr The pointer from which the child PDU must be cloned.
-         * \param total_sz The total size of the buffer.
-         * \return Returns the cloned PDU. Will be 0 if cloning failed.
-         */
-        PDU *clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz);
 
         /** 
          * \brief Serializes this TCP PDU.

@@ -120,16 +120,16 @@
 
 ../include/network_interface.h:
 ../src/dhcpv6.o: ../src/dhcpv6.cpp ../include/dhcpv6.h ../include/pdu.h \
- ../include/endianness.h ../include/macros.h ../include/small_uint.h \
+ ../include/macros.h ../include/endianness.h ../include/small_uint.h \
  ../include/ipv6_address.h ../include/pdu_option.h
 
 ../include/dhcpv6.h:
 
 ../include/pdu.h:
 
-../include/endianness.h:
-
 ../include/macros.h:
+
+../include/endianness.h:
 
 ../include/small_uint.h:
 
@@ -202,16 +202,16 @@
 
 ../include/snap.h:
 ../src/dot1q.o: ../src/dot1q.cpp ../include/dot1q.h ../include/pdu.h \
- ../include/endianness.h ../include/macros.h ../include/small_uint.h \
+ ../include/macros.h ../include/endianness.h ../include/small_uint.h \
  ../include/internals.h ../include/constants.h
 
 ../include/dot1q.h:
 
 ../include/pdu.h:
 
-../include/endianness.h:
-
 ../include/macros.h:
+
+../include/endianness.h:
 
 ../include/small_uint.h:
 
@@ -385,12 +385,14 @@
 
 ../include/llc.h:
 ../src/internals.o: ../src/internals.cpp ../include/internals.h \
- ../include/constants.h ../include/pdu.h ../include/ip.h \
- ../include/small_uint.h ../include/endianness.h ../include/macros.h \
+ ../include/constants.h ../include/pdu.h ../include/macros.h \
+ ../include/ip.h ../include/small_uint.h ../include/endianness.h \
  ../include/ip_address.h ../include/pdu_option.h ../include/cxxstd.h \
- ../include/ipv6.h ../include/ipv6_address.h ../include/arp.h \
- ../include/hw_address.h ../include/eapol.h ../include/rawpdu.h \
- ../include/dot1q.h
+ ../include/ethernetII.h ../include/hw_address.h \
+ ../include/network_interface.h ../include/ieee802_3.h \
+ ../include/radiotap.h ../include/dot11.h ../include/ipv6.h \
+ ../include/ipv6_address.h ../include/arp.h ../include/eapol.h \
+ ../include/rawpdu.h ../include/dot1q.h
 
 ../include/internals.h:
 
@@ -398,13 +400,13 @@
 
 ../include/pdu.h:
 
+../include/macros.h:
+
 ../include/ip.h:
 
 ../include/small_uint.h:
 
 ../include/endianness.h:
-
-../include/macros.h:
 
 ../include/ip_address.h:
 
@@ -412,13 +414,23 @@
 
 ../include/cxxstd.h:
 
+../include/ethernetII.h:
+
+../include/hw_address.h:
+
+../include/network_interface.h:
+
+../include/ieee802_3.h:
+
+../include/radiotap.h:
+
+../include/dot11.h:
+
 ../include/ipv6.h:
 
 ../include/ipv6_address.h:
 
 ../include/arp.h:
-
-../include/hw_address.h:
 
 ../include/eapol.h:
 
@@ -426,23 +438,24 @@
 
 ../include/dot1q.h:
 ../src/ip.o: ../src/ip.cpp ../include/ip.h ../include/pdu.h \
- ../include/small_uint.h ../include/endianness.h ../include/macros.h \
+ ../include/macros.h ../include/small_uint.h ../include/endianness.h \
  ../include/ip_address.h ../include/pdu_option.h ../include/cxxstd.h \
  ../include/ipv6.h ../include/ipv6_address.h ../include/tcp.h \
  ../include/udp.h ../include/icmp.h ../include/rawpdu.h \
  ../include/utils.h ../include/hw_address.h ../include/internals.h \
  ../include/constants.h ../include/packet_sender.h \
- ../include/network_interface.h ../include/constants.h
+ ../include/network_interface.h ../include/constants.h \
+ ../include/network_interface.h
 
 ../include/ip.h:
 
 ../include/pdu.h:
 
+../include/macros.h:
+
 ../include/small_uint.h:
 
 ../include/endianness.h:
-
-../include/macros.h:
 
 ../include/ip_address.h:
 
@@ -475,6 +488,8 @@
 ../include/network_interface.h:
 
 ../include/constants.h:
+
+../include/network_interface.h:
 ../src/ip_address.o: ../src/ip_address.cpp ../include/ip_address.h \
  ../include/endianness.h ../include/macros.h
 
@@ -534,15 +549,15 @@
 ../include/macros.h:
 
 ../include/ipv6_address.h:
-../src/llc.o: ../src/llc.cpp ../include/pdu.h ../include/llc.h \
- ../include/macros.h ../include/pdu.h ../include/endianness.h \
+../src/llc.o: ../src/llc.cpp ../include/pdu.h ../include/macros.h \
+ ../include/llc.h ../include/pdu.h ../include/endianness.h \
  ../include/rawpdu.h
 
 ../include/pdu.h:
 
-../include/llc.h:
-
 ../include/macros.h:
+
+../include/llc.h:
 
 ../include/pdu.h:
 
@@ -616,7 +631,8 @@
  ../include/pdu.h ../include/macros.h ../include/network_interface.h \
  ../include/ethernetII.h ../include/pdu.h ../include/endianness.h \
  ../include/radiotap.h ../include/dot11.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/cxxstd.h ../include/ieee802_3.h
+ ../include/pdu_option.h ../include/cxxstd.h ../include/ieee802_3.h \
+ ../include/internals.h ../include/constants.h
 
 ../include/packet_sender.h:
 
@@ -651,6 +667,10 @@
 ../include/cxxstd.h:
 
 ../include/ieee802_3.h:
+
+../include/internals.h:
+
+../include/constants.h:
 ../src/packet_writer.o: ../src/packet_writer.cpp \
  ../include/packet_writer.h ../include/utils.h ../include/macros.h \
  ../include/ip_address.h ../include/ipv6_address.h \
@@ -678,12 +698,14 @@
 ../include/cxxstd.h:
 
 ../include/pdu.h:
-../src/pdu.o: ../src/pdu.cpp ../include/pdu.h ../include/rawpdu.h \
- ../include/pdu.h ../include/packet_sender.h \
+../src/pdu.o: ../src/pdu.cpp ../include/pdu.h ../include/macros.h \
+ ../include/rawpdu.h ../include/pdu.h ../include/packet_sender.h \
  ../include/network_interface.h ../include/hw_address.h \
- ../include/ip_address.h ../include/macros.h
+ ../include/ip_address.h
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/rawpdu.h:
 
@@ -696,8 +718,6 @@
 ../include/hw_address.h:
 
 ../include/ip_address.h:
-
-../include/macros.h:
 ../src/radiotap.o: ../src/radiotap.cpp ../include/macros.h \
  ../include/radiotap.h ../include/macros.h ../include/pdu.h \
  ../include/endianness.h ../include/network_interface.h \
@@ -739,11 +759,14 @@
 ../include/constants.h:
 
 ../include/packet_sender.h:
-../src/rawpdu.o: ../src/rawpdu.cpp ../include/rawpdu.h ../include/pdu.h
+../src/rawpdu.o: ../src/rawpdu.cpp ../include/rawpdu.h ../include/pdu.h \
+ ../include/macros.h
 
 ../include/rawpdu.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 ../src/rsn_information.o: ../src/rsn_information.cpp \
  ../include/rsn_information.h ../include/endianness.h ../include/macros.h
 
@@ -753,16 +776,16 @@
 
 ../include/macros.h:
 ../src/sll.o: ../src/sll.cpp ../include/sll.h ../include/pdu.h \
- ../include/endianness.h ../include/macros.h ../include/hw_address.h \
+ ../include/macros.h ../include/endianness.h ../include/hw_address.h \
  ../include/internals.h ../include/constants.h
 
 ../include/sll.h:
 
 ../include/pdu.h:
 
-../include/endianness.h:
-
 ../include/macros.h:
+
+../include/endianness.h:
 
 ../include/hw_address.h:
 
@@ -806,7 +829,7 @@
 
 ../include/constants.h:
 ../src/sniffer.o: ../src/sniffer.cpp ../include/sniffer.h \
- ../include/pdu.h ../include/ethernetII.h ../include/macros.h \
+ ../include/pdu.h ../include/macros.h ../include/ethernetII.h \
  ../include/endianness.h ../include/hw_address.h \
  ../include/network_interface.h ../include/ip_address.h \
  ../include/radiotap.h ../include/packet.h ../include/cxxstd.h \
@@ -817,9 +840,9 @@
 
 ../include/pdu.h:
 
-../include/ethernetII.h:
-
 ../include/macros.h:
+
+../include/ethernetII.h:
 
 ../include/endianness.h:
 
@@ -887,8 +910,8 @@
 
 ../include/constants.h:
 ../src/tcp_stream.o: ../src/tcp_stream.cpp ../include/rawpdu.h \
- ../include/pdu.h ../include/tcp_stream.h ../include/sniffer.h \
- ../include/ethernetII.h ../include/macros.h ../include/endianness.h \
+ ../include/pdu.h ../include/macros.h ../include/tcp_stream.h \
+ ../include/sniffer.h ../include/ethernetII.h ../include/endianness.h \
  ../include/hw_address.h ../include/network_interface.h \
  ../include/ip_address.h ../include/radiotap.h ../include/packet.h \
  ../include/cxxstd.h ../include/timestamp.h ../include/loopback.h \
@@ -901,13 +924,13 @@
 
 ../include/pdu.h:
 
+../include/macros.h:
+
 ../include/tcp_stream.h:
 
 ../include/sniffer.h:
 
 ../include/ethernetII.h:
-
-../include/macros.h:
 
 ../include/endianness.h:
 
@@ -1094,16 +1117,16 @@ src/dhcp.o: src/dhcp.cpp ../include/dhcp.h ../include/bootp.h \
 
 ../include/ip_address.h:
 src/dhcpv6.o: src/dhcpv6.cpp ../include/dhcpv6.h ../include/pdu.h \
- ../include/endianness.h ../include/macros.h ../include/small_uint.h \
+ ../include/macros.h ../include/endianness.h ../include/small_uint.h \
  ../include/ipv6_address.h ../include/pdu_option.h
 
 ../include/dhcpv6.h:
 
 ../include/pdu.h:
 
-../include/endianness.h:
-
 ../include/macros.h:
+
+../include/endianness.h:
 
 ../include/small_uint.h:
 
@@ -1684,7 +1707,7 @@ include/tests/dot11.h:
 
 include/tests/dot11.h:
 src/dot1q.o: src/dot1q.cpp ../include/dot1q.h ../include/pdu.h \
- ../include/endianness.h ../include/macros.h ../include/small_uint.h \
+ ../include/macros.h ../include/endianness.h ../include/small_uint.h \
  ../include/arp.h ../include/hw_address.h ../include/ip_address.h \
  ../include/ethernetII.h ../include/network_interface.h
 
@@ -1692,9 +1715,9 @@ src/dot1q.o: src/dot1q.cpp ../include/dot1q.h ../include/pdu.h \
 
 ../include/pdu.h:
 
-../include/endianness.h:
-
 ../include/macros.h:
+
+../include/endianness.h:
 
 ../include/small_uint.h:
 
@@ -1815,22 +1838,22 @@ src/icmpv6.o: src/icmpv6.cpp ../include/icmpv6.h ../include/macros.h \
 ../include/constants.h:
 
 ../include/hw_address.h:
-src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h \
- ../include/small_uint.h ../include/endianness.h ../include/macros.h \
- ../include/ip_address.h ../include/pdu_option.h ../include/cxxstd.h \
- ../include/tcp.h ../include/udp.h ../include/icmp.h \
- ../include/ip_address.h ../include/utils.h ../include/ipv6_address.h \
- ../include/hw_address.h ../include/internals.h ../include/constants.h
+src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h ../include/macros.h \
+ ../include/small_uint.h ../include/endianness.h ../include/ip_address.h \
+ ../include/pdu_option.h ../include/cxxstd.h ../include/tcp.h \
+ ../include/udp.h ../include/icmp.h ../include/ip_address.h \
+ ../include/utils.h ../include/ipv6_address.h ../include/hw_address.h \
+ ../include/internals.h ../include/constants.h
 
 ../include/ip.h:
 
 ../include/pdu.h:
 
+../include/macros.h:
+
 ../include/small_uint.h:
 
 ../include/endianness.h:
-
-../include/macros.h:
 
 ../include/ip_address.h:
 
@@ -1979,7 +2002,7 @@ src/network_interface.o: src/network_interface.cpp \
 
 ../include/macros.h:
 src/pdu.o: src/pdu.cpp ../include/ip.h ../include/pdu.h \
- ../include/small_uint.h ../include/endianness.h ../include/macros.h \
+ ../include/macros.h ../include/small_uint.h ../include/endianness.h \
  ../include/ip_address.h ../include/pdu_option.h ../include/cxxstd.h \
  ../include/tcp.h ../include/rawpdu.h ../include/pdu.h \
  ../include/packet.h ../include/timestamp.h
@@ -1988,11 +2011,11 @@ src/pdu.o: src/pdu.cpp ../include/ip.h ../include/pdu.h \
 
 ../include/pdu.h:
 
+../include/macros.h:
+
 ../include/small_uint.h:
 
 ../include/endianness.h:
-
-../include/macros.h:
 
 ../include/ip_address.h:
 
@@ -2101,7 +2124,7 @@ src/rsn_eapol.o: src/rsn_eapol.cpp ../include/eapol.h ../include/pdu.h \
 
 ../include/rsn_information.h:
 src/sll.o: src/sll.cpp ../include/sll.h ../include/pdu.h \
- ../include/endianness.h ../include/macros.h ../include/hw_address.h \
+ ../include/macros.h ../include/endianness.h ../include/hw_address.h \
  ../include/hw_address.h ../include/constants.h ../include/ip.h \
  ../include/small_uint.h ../include/ip_address.h ../include/pdu_option.h \
  ../include/cxxstd.h
@@ -2110,9 +2133,9 @@ src/sll.o: src/sll.cpp ../include/sll.h ../include/pdu.h \
 
 ../include/pdu.h:
 
-../include/endianness.h:
-
 ../include/macros.h:
+
+../include/endianness.h:
 
 ../include/hw_address.h:
 
@@ -2187,8 +2210,8 @@ src/tcp.o: src/tcp.cpp ../include/tcp.h ../include/pdu.h \
 
 ../include/constants.h:
 src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
- ../include/sniffer.h ../include/pdu.h ../include/ethernetII.h \
- ../include/macros.h ../include/endianness.h ../include/hw_address.h \
+ ../include/sniffer.h ../include/pdu.h ../include/macros.h \
+ ../include/ethernetII.h ../include/endianness.h ../include/hw_address.h \
  ../include/network_interface.h ../include/ip_address.h \
  ../include/radiotap.h ../include/packet.h ../include/cxxstd.h \
  ../include/timestamp.h ../include/loopback.h ../include/dot11.h \
@@ -2203,9 +2226,9 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
 
 ../include/pdu.h:
 
-../include/ethernetII.h:
-
 ../include/macros.h:
+
+../include/ethernetII.h:
 
 ../include/endianness.h:
 

@@ -36,7 +36,8 @@
 #include "ip.h"
 #include "rawpdu.h"
 
-Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) 
+namespace Tins {
+UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) 
 : PDU(child) 
 {
     this->dport(dport);
@@ -45,7 +46,7 @@ Tins::UDP::UDP(uint16_t dport, uint16_t sport, PDU *child)
     _udp.len = 0;
 }
 
-Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz) 
+UDP::UDP(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(udphdr))
         throw std::runtime_error("Not enough size for an UDP header in the buffer.");
@@ -55,27 +56,31 @@ Tins::UDP::UDP(const uint8_t *buffer, uint32_t total_sz)
         inner_pdu(new RawPDU(buffer + sizeof(udphdr), total_sz));
 }
 
-void Tins::UDP::dport(uint16_t new_dport) {
+void UDP::dport(uint16_t new_dport) {
     _udp.dport = Endian::host_to_be(new_dport);
 }
 
-void Tins::UDP::sport(uint16_t new_sport) {
+void UDP::sport(uint16_t new_sport) {
     _udp.sport = Endian::host_to_be(new_sport);
 }
 
-void Tins::UDP::length(uint16_t new_len) {
+void UDP::length(uint16_t new_len) {
     _udp.len = Endian::host_to_be(new_len);
 }
 
-uint32_t Tins::UDP::header_size() const {
+uint32_t UDP::header_size() const {
     return sizeof(udphdr);
 }
 
-void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+    #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(udphdr));
+    #endif
     const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
     if(inner_pdu())
         length(sizeof(udphdr) + inner_pdu()->size());
+    else
+        length(sizeof(udphdr));
     std::memcpy(buffer, &_udp, sizeof(udphdr));
     if(!_udp.check && ip_packet) {
         uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(), ip_packet->dst_addr(), size(), Constants::IP::PROTO_UDP) +
@@ -87,6 +92,21 @@ void Tins::UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PD
     _udp.check = 0;
 }
 
-void Tins::UDP::copy_fields(const UDP *other) {
-    std::memcpy(&_udp, &other->_udp, sizeof(_udp));
+bool UDP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(udphdr))
+        return false;
+    const udphdr *udp_ptr = (const udphdr*)ptr;
+    if(udp_ptr->sport == _udp.dport && udp_ptr->dport == _udp.sport) {
+        return inner_pdu() 
+                ? 
+                inner_pdu()->matches_response(
+                    ptr + sizeof(udphdr), 
+                    total_sz - sizeof(udphdr)
+                ) 
+                : 
+                0;
+    }
+    return false;
+}
+
 }

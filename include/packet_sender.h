@@ -63,7 +63,9 @@ namespace Tins {
          */
         enum SocketType {
             ETHER_SOCKET,
-            IP_SOCKET,
+            IP_TCP_SOCKET,
+            IP_UDP_SOCKET,
+            IP_RAW_SOCKET,
             ARP_SOCKET,
             ICMP_SOCKET,
             IPV6_SOCKET,

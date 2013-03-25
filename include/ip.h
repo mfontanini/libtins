@@ -634,6 +634,7 @@ namespace Tins {
             /*The options start here. */
         } TINS_END_PACK;
 
+        void prepare_for_serialize(const PDU *parent);
         void internal_add_option(const ip_option &option);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);

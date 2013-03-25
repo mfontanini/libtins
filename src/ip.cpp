@@ -48,6 +48,7 @@
 #include "utils.h"
 #include "packet_sender.h"
 #include "constants.h"
+#include "network_interface.h"
 
 using std::list;
 
@@ -351,28 +352,46 @@ uint32_t IP::header_size() const {
     return sizeof(iphdr) + _padded_options_size;
 }
 
+PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
+    switch(type) {
+        case PDU::TCP:
+            return PacketSender::IP_TCP_SOCKET;
+        case PDU::UDP:
+            return PacketSender::IP_UDP_SOCKET;
+        case PDU::ICMP:
+            return PacketSender::ICMP_SOCKET;
+        default:
+            return PacketSender::IP_RAW_SOCKET;
+    }
+}
+
 void IP::send(PacketSender& sender) {
-    struct sockaddr_in link_addr;
-    PacketSender::SocketType type = PacketSender::IP_SOCKET;
+    sockaddr_in link_addr;
+    PacketSender::SocketType type = PacketSender::IP_RAW_SOCKET;
     link_addr.sin_family = AF_INET;
     link_addr.sin_port = 0;
     link_addr.sin_addr.s_addr = _ip.daddr;
-    if(inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMP)
-        type = PacketSender::ICMP_SOCKET;
+    if(inner_pdu())
+        type = pdu_type_to_sender_type(inner_pdu()->pdu_type());
 
     sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
 PDU *IP::recv_response(PacketSender &sender) {
-    struct sockaddr_in link_addr;
-    PacketSender::SocketType type = PacketSender::IP_SOCKET;
-    link_addr.sin_family = AF_INET;
-    link_addr.sin_port = 0;
-    link_addr.sin_addr.s_addr = _ip.daddr;
-    if(inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMP)
-        type = PacketSender::ICMP_SOCKET;
+    sockaddr_in link_addr;
+    PacketSender::SocketType type = PacketSender::IP_RAW_SOCKET;
+    std::memset(&link_addr, 0, sizeof(link_addr));
+    if(inner_pdu())
+        type = pdu_type_to_sender_type(inner_pdu()->pdu_type());
 
-    return sender.recv_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+    return sender.recv_l3(*this, 0, sizeof(link_addr), type);
+}
+
+void IP::prepare_for_serialize(const PDU *parent) {
+    if(!parent && _ip.saddr == 0) {
+        NetworkInterface iface(dst_addr());
+        src_addr(iface.addresses().ip_addr);
+    }
 }
 
 void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
@@ -429,7 +448,7 @@ bool IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
         return false;
     iphdr *ip_ptr = (iphdr*)ptr;
     if(_ip.daddr == ip_ptr->saddr && _ip.saddr == ip_ptr->daddr) {
-        uint32_t sz = _ip.ihl * sizeof(uint32_t);
+        uint32_t sz = std::min(_ip.ihl * sizeof(uint32_t), total_sz);
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
     return false;

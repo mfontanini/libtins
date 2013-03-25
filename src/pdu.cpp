@@ -96,22 +96,13 @@ PDU::serialization_type PDU::serialize() {
 void PDU::serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t sz = header_size() + trailer_size();
     /* Must not happen... */
+    #ifdef TINS_DEBUG
     assert(total_sz >= sz);
+    #endif
+    prepare_for_serialize(parent);
     if(_inner_pdu)
         _inner_pdu->serialize(buffer + header_size(), total_sz - sz, this);
     write_serialization(buffer, total_sz, parent);
-}
-
-PDU *PDU::clone_inner_pdu(const uint8_t *ptr, uint32_t total_sz) {
-    PDU *child = 0;
-    if(inner_pdu()) {
-        child = inner_pdu()->clone_packet(ptr, total_sz);
-        if(!child)
-            return 0;
-    }
-    else
-        child = new RawPDU(ptr, total_sz);
-    return child;
 }
 
 PDU *PDU::clone_packet(const uint8_t *ptr, uint32_t total_sz) { 

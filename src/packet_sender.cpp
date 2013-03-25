@@ -91,7 +91,9 @@ PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec)
   _timeout(recv_timeout), 
   _timeout_usec(usec)
 {
-    _types[IP_SOCKET] = IPPROTO_RAW;
+    _types[IP_TCP_SOCKET] = IPPROTO_TCP;
+    _types[IP_UDP_SOCKET] = IPPROTO_UDP;
+    _types[IP_RAW_SOCKET] = IPPROTO_RAW;
     _types[IPV6_SOCKET] = IPPROTO_RAW;
     _types[ICMP_SOCKET] = IPPROTO_ICMP;
 }
@@ -309,7 +311,6 @@ PDU *PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_add
             size = recvfrom(sock, (char*)buffer, 2048, 0, link_addr, &length);
             if(pdu.matches_response(buffer, size)) {
                 return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
-                //return pdu.clone_packet(buffer, size);
             }
         }
         struct timeval this_time, diff;

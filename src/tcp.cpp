@@ -374,5 +374,17 @@ void TCP::internal_add_option(const tcp_option &option) {
     _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
 }
 
+bool TCP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(tcphdr))
+        return false;
+    const tcphdr *tcp_ptr = (const tcphdr*)ptr;
+    if(tcp_ptr->sport == _tcp.dport && tcp_ptr->dport == _tcp.sport) {
+        uint32_t sz = std::min(total_sz, tcp_ptr->doff * sizeof(uint32_t));
+        return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
+    }
+    else
+        return false;
+}
+
 }
 

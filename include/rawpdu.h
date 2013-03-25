@@ -117,6 +117,18 @@ namespace Tins {
         }
 
         /**
+         * \brief Check wether ptr points to a valid response for this PDU.
+         *
+         * This always returns true, since we don't know what this 
+         * RawPDU is holding.
+         * 
+         * \sa PDU::matches_response
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+
+        /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */

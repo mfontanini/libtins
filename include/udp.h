@@ -103,6 +103,18 @@ namespace Tins {
          */
         void length(uint16_t new_len);
 
+        /**
+         * \brief Check wether ptr points to a valid response for this PDU.
+         *
+         * This compares the source and destination ports in the provided
+         * response with those stored in this PDU.
+         * 
+         * \sa PDU::matches_response
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+
         /** \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. This size includes the
@@ -131,7 +143,6 @@ namespace Tins {
             uint16_t check;
         } TINS_END_PACK;
 
-        void copy_fields(const UDP *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         udphdr _udp;
