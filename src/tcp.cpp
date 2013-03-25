@@ -379,7 +379,7 @@ bool TCP::matches_response(uint8_t *ptr, uint32_t total_sz) {
         return false;
     const tcphdr *tcp_ptr = (const tcphdr*)ptr;
     if(tcp_ptr->sport == _tcp.dport && tcp_ptr->dport == _tcp.sport) {
-        uint32_t sz = std::min(total_sz, tcp_ptr->doff * sizeof(uint32_t));
+        uint32_t sz = std::min<uint32_t>(total_sz, tcp_ptr->doff * sizeof(uint32_t));
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
     else

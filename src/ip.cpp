@@ -448,7 +448,7 @@ bool IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
         return false;
     iphdr *ip_ptr = (iphdr*)ptr;
     if(_ip.daddr == ip_ptr->saddr && _ip.saddr == ip_ptr->daddr) {
-        uint32_t sz = std::min(_ip.ihl * sizeof(uint32_t), total_sz);
+        uint32_t sz = std::min<uint32_t>(_ip.ihl * sizeof(uint32_t), total_sz);
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
     return false;
