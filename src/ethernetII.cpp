@@ -130,7 +130,7 @@ void EthernetII::send(PacketSender &sender) {
 bool EthernetII::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(ethhdr))
         return false;
-    ethhdr *eth_ptr = (ethhdr*)ptr;
+    const ethhdr *eth_ptr = (const ethhdr*)ptr;
     if(!memcmp(eth_ptr->dst_mac, _eth.src_mac, address_type::address_size)) {
         // chequear broadcast en destino original...
         return (inner_pdu()) ? inner_pdu()->matches_response(ptr + sizeof(_eth), total_sz - sizeof(_eth)) : true;
