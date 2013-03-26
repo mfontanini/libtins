@@ -476,4 +476,11 @@ DNS::resources_type DNS::answers() const {
     convert_resources(ans, res);
     return res;
 }
+
+bool DNS::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(dnshdr))
+        return false;
+    const dnshdr *hdr = (const dnshdr*)ptr;
+    return hdr->id == dns.id;
+}
 }

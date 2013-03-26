@@ -566,6 +566,15 @@ namespace Tins {
          */
         resources_type answers() const;
         
+        /** 
+         * \brief Check wether ptr points to a valid response for this PDU.
+         *
+         * \sa PDU::matches_response
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+        
         /**
          * \sa PDU::clone
          */

@@ -92,7 +92,11 @@ public:
      *  \return The stored id field value.
      */
     small_uint<12> id() const {
-        return _header.idL | (_header.idH << 8);
+        #if TINS_IS_LITTLE_ENDIAN
+            return _header.idL | (_header.idH << 8);
+        #else
+            return _header.id;
+        #endif
     }
 
     /**
@@ -141,6 +145,15 @@ public:
      *  \param new_type The new type field value.
      */
     void payload_type(uint16_t new_type);
+    
+    /** 
+     * \brief Check wether ptr points to a valid response for this PDU.
+     *
+     * \sa PDU::matches_response
+     * \param ptr The pointer to the buffer.
+     * \param total_sz The size of the buffer.
+     */
+    bool matches_response(uint8_t *ptr, uint32_t total_sz);
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
@@ -158,6 +171,8 @@ private:
             uint16_t type;
         #endif
     };
+    
+    static uint16_t get_id(const dot1q_hdr *hdr);
     
     dot1q_hdr _header;
 };

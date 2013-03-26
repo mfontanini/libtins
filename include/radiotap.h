@@ -306,6 +306,14 @@ namespace Tins {
          */
         const NetworkInterface &iface() const { return _iface; }
         
+        /** \brief Check wether ptr points to a valid response for this PDU.
+         *
+         * \sa PDU::matches_response
+         * \param ptr The pointer to the buffer.
+         * \param total_sz The size of the buffer.
+         */
+        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+        
         /**
          * \brief Returns the RadioTap frame's header length.
          *

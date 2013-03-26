@@ -160,7 +160,8 @@ namespace Tins {
         void send(PacketSender &sender);
         #endif // WIN32
 
-        /** \brief Check wether ptr points to a valid response for this PDU.
+        /** 
+         * \brief Check wether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.

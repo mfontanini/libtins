@@ -68,8 +68,12 @@ void Dot1Q::cfi(small_uint<1> new_cfi) {
 }
 
 void Dot1Q::id(small_uint<12> new_id) {
+    #if TINS_IS_LITTLE_ENDIAN
     _header.idL = new_id & 0xff;
     _header.idH = new_id >> 8;
+    #else
+    _header.id = new_id;
+    #endif
 }
 
 void Dot1Q::payload_type(uint16_t new_type) {
@@ -102,5 +106,28 @@ void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
     
     buffer += sizeof(_header) + inner_pdu()->size();
     std::fill(buffer, buffer + trailer, 0);
+}
+
+#if TINS_IS_LITTLE_ENDIAN
+    uint16_t Dot1Q::get_id(const dot1q_hdr *hdr) {
+        return hdr->idL | (hdr->idH << 8);
+    }
+#else
+    uint16_t Dot1Q::get_id(const dot1q_hdr *hdr) {
+        return hdr->id;
+    }
+#endif
+
+bool Dot1Q::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(_header))
+        return false;
+    const dot1q_hdr *dot1q_ptr = (const dot1q_hdr*)ptr;
+    if(get_id(dot1q_ptr) == get_id(&_header)) {
+        ptr += sizeof(_header);
+        total_sz -= sizeof(_header);
+        return inner_pdu() ? inner_pdu()->matches_response(ptr, total_sz) : true;
+    }
+    return false;
+    
 }
 }

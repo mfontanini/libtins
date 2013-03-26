@@ -118,11 +118,15 @@ void Dot3::send(PacketSender &sender) {
 bool Dot3::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(ethhdr))
         return false;
+    const size_t addr_sz = address_type::address_size;
     const ethhdr *eth_ptr = (const ethhdr*)ptr;
-    if(!memcmp(eth_ptr->dst_mac, _eth.src_mac, sizeof(_eth.src_mac))) {
-        ptr += sizeof(ethhdr);
-        total_sz -= sizeof(ethhdr);
-        return inner_pdu() ? inner_pdu()->matches_response(ptr, total_sz) : true;
+    if(std::equal(_eth.src_mac, _eth.src_mac + addr_sz, eth_ptr->dst_mac)) {
+        if(std::equal(_eth.src_mac, _eth.src_mac + addr_sz, eth_ptr->dst_mac) || dst_addr() == BROADCAST)
+        {
+            ptr += sizeof(ethhdr);
+            total_sz -= sizeof(ethhdr);
+            return inner_pdu() ? inner_pdu()->matches_response(ptr, total_sz) : true;
+        }
     }
     return false;
 }

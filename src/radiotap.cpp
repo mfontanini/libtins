@@ -259,6 +259,18 @@ void RadioTap::send(PacketSender &sender) {
 }
 #endif
 
+bool RadioTap::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(sizeof(_radio) < total_sz)
+        return false;
+    const radiotap_hdr *radio_ptr = (const radiotap_hdr*)ptr;
+    if(radio_ptr->it_len <= total_sz) {
+        ptr += radio_ptr->it_len;
+        total_sz -= radio_ptr->it_len;
+        return inner_pdu() ? inner_pdu()->matches_response(ptr, total_sz) : true;
+    }
+    return false;
+}
+
 void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t sz = header_size();
     uint8_t *buffer_start = buffer;
