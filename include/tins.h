@@ -41,6 +41,8 @@
 #include "icmp.h"
 #include "icmpv6.h"
 #include "dot11.h"
+#include "dot1q.h"
+#include "dot3.h"
 #include "ip.h"
 #include "ipv6.h"
 #include "packet_sender.h"

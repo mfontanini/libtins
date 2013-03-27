@@ -136,6 +136,8 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
             return Constants::Ethernet::IPV6;
         case PDU::ARP:
             return Constants::Ethernet::ARP;
+        case PDU::DOT1Q:
+            return Constants::Ethernet::VLAN;
         default:
             return Constants::Ethernet::UNKNOWN;
     }

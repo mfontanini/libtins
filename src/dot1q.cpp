@@ -35,10 +35,10 @@
 
 namespace Tins {
 
-Dot1Q::Dot1Q() 
-: _header() 
+Dot1Q::Dot1Q(small_uint<12> tag_id, bool append_pad) 
+: _header(), _append_padding(append_pad)
 {
-    
+    id(tag_id);
 }
 
 Dot1Q::Dot1Q(const uint8_t *buffer, uint32_t total_sz) {
@@ -85,10 +85,14 @@ uint32_t Dot1Q::header_size() const {
 }
 
 uint32_t Dot1Q::trailer_size() const {
-    uint32_t total_size = sizeof(_header);
-    if(inner_pdu())
-        total_size += inner_pdu()->size();
-    return (total_size > 50) ? 0 : (50 - total_size);
+    if(_append_padding) {
+        uint32_t total_size = sizeof(_header);
+        if(inner_pdu())
+            total_size += inner_pdu()->size();
+        return (total_size > 50) ? 0 : (50 - total_size);
+    }
+    else
+        return 0;
 }
 
 void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
@@ -117,6 +121,10 @@ void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
         return hdr->id;
     }
 #endif
+
+void Dot1Q::append_padding(bool value) {
+    _append_padding = value;
+}
 
 bool Dot1Q::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(_header))

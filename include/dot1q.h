@@ -44,7 +44,7 @@ public:
     /**
      * Default constructor
      */
-    Dot1Q();
+    Dot1Q(small_uint<12> tag_id = 0, bool append_pad = true);
 
     /**
      * \brief Constructor which creates an Dot1Q object from a buffer and 
@@ -120,6 +120,14 @@ public:
         return new Dot1Q(*this);
     }
 
+    /**
+     * \brief Retrieves the flag indicating whether padding will be
+     * appended at the end of this packet.
+     */
+    bool append_padding() const {
+        return _append_padding;
+    }
+
     // Setters
 
     /**
@@ -145,6 +153,18 @@ public:
      *  \param new_type The new type field value.
      */
     void payload_type(uint16_t new_type);
+    
+    /**
+     *  \brief Indicates whether the appropriate padding will be 
+     * at the end of the packet.
+     * 
+     * This flag could be disabled in case two or more contiguous Dot1Q 
+     * PDUs are added to a packet. In that case, only the Dot1Q which is 
+     * closer to the link layer should add the padding at the end.
+     * 
+     * \param value A boolean indicating whether padding will be appended.
+     */
+    void append_padding(bool value);
     
     /** 
      * \brief Check wether ptr points to a valid response for this PDU.
@@ -175,6 +195,7 @@ private:
     static uint16_t get_id(const dot1q_hdr *hdr);
     
     dot1q_hdr _header;
+    bool _append_padding;
 };
 }
 
