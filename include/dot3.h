@@ -157,7 +157,8 @@ namespace Tins {
         void send(PacketSender &sender);
         #endif // WIN32
 
-        /** \brief Check wether ptr points to a valid response for this PDU.
+        /** 
+         * \brief Check wether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
@@ -166,7 +167,8 @@ namespace Tins {
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
 
         #ifndef WIN32
-        /** \brief Receives a matching response for this packet.
+        /** 
+         * \brief Receives a matching response for this packet.
          *
          * \sa PDU::recv_response
          * \param sender The packet sender which will receive the packet.

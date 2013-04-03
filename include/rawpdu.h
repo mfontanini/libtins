@@ -135,6 +135,15 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::RAW; }
         
         /**
+         * \brief Constructs the given PDU type from the raw data stored
+         * in this RawPDU.
+         */
+        template<typename T>
+        T to() const {
+            return T(&_payload[0], _payload.size());
+        }
+        
+        /**
          * \sa PDU::clone
          */
         RawPDU *clone() const {

@@ -161,9 +161,9 @@ void Tins::ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
 bool Tins::ICMP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(icmphdr))
         return false;
-    icmphdr *icmp_ptr = (icmphdr*)ptr;
-    if(_icmp.type == ECHO_REQUEST) {
-        return icmp_ptr->type == ECHO_REPLY && icmp_ptr->un.echo.id == _icmp.un.echo.id && icmp_ptr->un.echo.sequence == _icmp.un.echo.sequence;
+    const icmphdr *icmp_ptr = (const icmphdr*)ptr;
+    if(_icmp.type == ECHO_REQUEST && icmp_ptr->type == ECHO_REPLY) {
+        return icmp_ptr->un.echo.id == _icmp.un.echo.id && icmp_ptr->un.echo.sequence == _icmp.un.echo.sequence;
     }
     return false;
 }

@@ -136,8 +136,10 @@ namespace Tins {
          * \return Returns true if the hardware address was resolved successfully,
          * false otherwise.
          */
+        TINS_DEPRECATED(
         bool resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
-          HWAddress<6> *address, PacketSender &sender);
+          HWAddress<6> *address, PacketSender &sender)
+        );
         
         /** 
          * \brief Resolves the hardware address for a given ip.

@@ -165,11 +165,21 @@ namespace Tins {
         /**
          * \brief Sets the child PDU.
          *
-         * \param next_pdu The new child PDU.
          * When setting a new inner_pdu, the instance takesownership of
          * the object, therefore deleting it when it's no longer required.
+         * 
+         * \param next_pdu The new child PDU.
          */
         void inner_pdu(PDU *next_pdu);
+        
+        /**
+         * \brief Sets the child PDU.
+         *
+         * The PDU parameter is cloned using PDU::clone.
+         * 
+         * \param next_pdu The new child PDU.
+         */
+        void inner_pdu(const PDU &next_pdu);
 
 
         /** 

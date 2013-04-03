@@ -174,6 +174,16 @@ uint32_t ICMPv6::header_size() const {
         (has_dest_addr() ? ipaddress_type::address_size : 0);
 }
 
+bool ICMPv6::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(icmp6hdr))
+        return false;
+    const icmp6hdr *hdr_ptr = (const icmp6hdr*)ptr;
+    if(type() == ECHO_REQUEST && hdr_ptr->type == ECHO_REPLY)
+        return hdr_ptr->u_echo.identifier == _header.u_echo.identifier &&
+                hdr_ptr->u_echo.sequence == _header.u_echo.sequence;
+    return false;
+}
+
 void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     #ifdef TINS_DEBUG
     assert(total_sz >= header_size());

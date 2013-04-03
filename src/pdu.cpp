@@ -79,6 +79,10 @@ void PDU::inner_pdu(PDU *next_pdu) {
     _inner_pdu = next_pdu;
 }
 
+void PDU::inner_pdu(const PDU &next_pdu) {
+    inner_pdu(next_pdu.clone());
+}
+
 PDU *PDU::release_inner_pdu() {
     PDU *result = 0;
     std::swap(result, _inner_pdu);

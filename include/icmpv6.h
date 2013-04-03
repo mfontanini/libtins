@@ -757,6 +757,15 @@ public:
      * payload and options size. \sa PDU::header_size
      */
     uint32_t header_size() const;
+    
+    /** 
+     * \brief Check wether ptr points to a valid response for this PDU.
+     *
+     * \sa PDU::matches_response
+     * \param ptr The pointer to the buffer.
+     * \param total_sz The size of the buffer.
+     */
+    bool matches_response(uint8_t *ptr, uint32_t total_sz);
 
     /**
      * \brief Searchs for an option that matchs the given flag.

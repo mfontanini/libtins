@@ -35,7 +35,7 @@
 #else
     #include <ws2tcpip.h>
 #endif
-#include <iostream> //borrame
+#include <algorithm> 
 #include "ipv6.h"
 #include "constants.h"
 #include "packet_sender.h"
@@ -159,6 +159,33 @@ void IPv6::dst_addr(const address_type &new_dst_addr) {
 
 uint32_t IPv6::header_size() const {
     return sizeof(_header) + headers_size;
+}
+
+bool IPv6::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(total_sz < sizeof(ipv6_header))
+        return false;
+    const ipv6_header *hdr_ptr = (const ipv6_header*)ptr;
+    // checks for ff02 multicast
+    if(src_addr() == hdr_ptr->dst_addr && 
+        (dst_addr() == hdr_ptr->src_addr || (_header.dst_addr[0] == 0xff && _header.dst_addr[1] == 0x02))) {
+        // is this OK? there's no inner pdu, simple dst/src addr match should suffice
+        if(!inner_pdu())
+            return true;
+        ptr += sizeof(ipv6_header);
+        total_sz -= sizeof(ipv6_header);
+        uint8_t current = hdr_ptr->next_header;
+        // 8 == minimum header size
+        while(total_sz > 8 && is_extension_header(current)) {
+            if(static_cast<uint32_t>(ptr[1] + 1) * 8 > total_sz)
+                return false;
+            current = ptr[0];
+            total_sz -= (ptr[1] + 1) * 8;
+            ptr += (ptr[1] + 1) * 8;
+        }
+        if(!is_extension_header(current)) 
+            return inner_pdu()->matches_response(ptr, total_sz);
+    }
+    return false;
 }
 
 void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {

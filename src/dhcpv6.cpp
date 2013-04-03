@@ -27,7 +27,6 @@
  *
  */
 
-#include <iostream>  //borrame
 #include <vector>
 #include <algorithm>
 #include "dhcpv6.h"
@@ -131,6 +130,15 @@ bool DHCPv6::is_relay_message() const {
 
 uint32_t DHCPv6::header_size() const {
     return (is_relay_message() ? (2 + ipaddress_type::address_size * 2) : 4) + options_size;
+}
+
+bool DHCPv6::matches_response(uint8_t *ptr, uint32_t total_sz) {
+    if(!is_relay_message()) {
+        if(total_sz < 4 || (ptr[0] == 12 || ptr[0] == 13))
+            return false;
+        return std::equal(header_data + 1, header_data + 4, ptr + 1);
+    }
+    return false;
 }
 
 void DHCPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
