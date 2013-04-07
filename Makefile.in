@@ -100,16 +100,16 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtins_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo src/crypto.lo \
-	src/dhcp.lo src/dhcpv6.lo src/dns.lo src/dns_record.lo \
-	src/dot11.lo src/dot3.lo src/dot1q.lo src/eapol.lo \
-	src/ethernetII.lo src/icmp.lo src/icmpv6.lo src/internals.lo \
-	src/ip.lo src/ip_address.lo src/ipv6.lo src/ipv6_address.lo \
-	src/llc.lo src/loopback.lo src/network_interface.lo \
-	src/packet_sender.lo src/packet_writer.lo src/pdu.lo \
-	src/radiotap.lo src/rawpdu.lo src/rsn_information.lo \
-	src/sll.lo src/snap.lo src/sniffer.lo src/tcp.lo \
-	src/tcp_stream.lo src/udp.lo src/utils.lo
+am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo src/pppoe.lo \
+	src/crypto.lo src/dhcp.lo src/dhcpv6.lo src/dns.lo \
+	src/dns_record.lo src/dot11.lo src/dot3.lo src/dot1q.lo \
+	src/eapol.lo src/ethernetII.lo src/icmp.lo src/icmpv6.lo \
+	src/internals.lo src/ip.lo src/ip_address.lo src/ipv6.lo \
+	src/ipv6_address.lo src/llc.lo src/loopback.lo \
+	src/network_interface.lo src/packet_sender.lo \
+	src/packet_writer.lo src/pdu.lo src/radiotap.lo src/rawpdu.lo \
+	src/rsn_information.lo src/sll.lo src/snap.lo src/sniffer.lo \
+	src/tcp.lo src/tcp_stream.lo src/udp.lo src/utils.lo
 libtins_la_OBJECTS = $(am_libtins_la_OBJECTS)
 libtins_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -285,6 +285,7 @@ libtins_la_LDFLAGS = -version-info @LIBTINS_VERSION@
 AM_CXXFLAGS = -Wall -pedantic -I@LIBTINS_INCLUDE_DIR@
 libtins_la_SOURCES = src/arp.cpp \
                     src/bootp.cpp \
+                    src/pppoe.cpp \
                     src/crypto.cpp \
                     src/dhcp.cpp \
                     src/dhcpv6.cpp \
@@ -329,6 +330,7 @@ libtins_include_HEADERS = include/internals.h \
 							include/dns_record.h \
 							include/eapol.h \
 							include/tcp_stream.h \
+							include/pppoe.h \
 							include/ipv6.h \
 							include/icmpv6.h \
 							include/endianness.h \
@@ -446,6 +448,7 @@ src/$(DEPDIR)/$(am__dirstamp):
 	@: > src/$(DEPDIR)/$(am__dirstamp)
 src/arp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/bootp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/pppoe.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/crypto.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dhcp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dhcpv6.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -538,6 +541,8 @@ mostlyclean-compile:
 	-rm -f src/packet_writer.lo
 	-rm -f src/pdu.$(OBJEXT)
 	-rm -f src/pdu.lo
+	-rm -f src/pppoe.$(OBJEXT)
+	-rm -f src/pppoe.lo
 	-rm -f src/radiotap.$(OBJEXT)
 	-rm -f src/radiotap.lo
 	-rm -f src/rawpdu.$(OBJEXT)
@@ -587,6 +592,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/packet_sender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/packet_writer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/pdu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/pppoe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/radiotap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/rawpdu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/rsn_information.Plo@am__quote@

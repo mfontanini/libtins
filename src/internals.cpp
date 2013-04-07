@@ -38,6 +38,7 @@
 #include "eapol.h"
 #include "rawpdu.h"
 #include "dot1q.h"
+#include "pppoe.h"
 
 using std::string;
 
@@ -76,6 +77,8 @@ Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
             return new Tins::IPv6(buffer, size);
         case Tins::Constants::Ethernet::ARP:
             return new Tins::ARP(buffer, size);
+        case Tins::Constants::Ethernet::PPPOED:
+            return new Tins::PPPoE(buffer, size);
         case Tins::Constants::Ethernet::EAPOL:
             return Tins::EAPOL::from_bytes(buffer, size);
         case Tins::Constants::Ethernet::VLAN:
@@ -100,6 +103,8 @@ Tins::PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size
             return new Tins::IEEE802_3(buffer, size);
         case Tins::PDU::RADIOTAP:
             return new Tins::RadioTap(buffer, size);
+        case Tins::PDU::PPPOE:
+            return new Tins::PPPoE(buffer, size);
         case Tins::PDU::DOT11:
         case Tins::PDU::DOT11_ACK:
         case Tins::PDU::DOT11_ASSOC_REQ:
@@ -138,6 +143,8 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
             return Constants::Ethernet::ARP;
         case PDU::DOT1Q:
             return Constants::Ethernet::VLAN;
+        case PDU::PPPOE:
+            return Constants::Ethernet::PPPOED;
         default:
             return Constants::Ethernet::UNKNOWN;
     }

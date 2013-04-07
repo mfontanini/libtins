@@ -721,6 +721,23 @@
 ../include/hw_address.h:
 
 ../include/ip_address.h:
+../src/pppoe.o: ../src/pppoe.cpp ../include/pppoe.h ../include/pdu.h \
+ ../include/macros.h ../include/endianness.h ../include/small_uint.h \
+ ../include/pdu_option.h ../include/cxxstd.h
+
+../include/pppoe.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
+
+../include/pdu_option.h:
+
+../include/cxxstd.h:
 ../src/radiotap.o: ../src/radiotap.cpp ../include/macros.h \
  ../include/radiotap.h ../include/macros.h ../include/pdu.h \
  ../include/endianness.h ../include/network_interface.h \
@@ -2074,6 +2091,23 @@ src/pdu.o: src/pdu.cpp ../include/ip.h ../include/pdu.h \
 ../include/packet.h:
 
 ../include/timestamp.h:
+src/pppoe.o: src/pppoe.cpp ../include/pppoe.h ../include/pdu.h \
+ ../include/macros.h ../include/endianness.h ../include/small_uint.h \
+ ../include/pdu_option.h ../include/cxxstd.h
+
+../include/pppoe.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
+
+../include/pdu_option.h:
+
+../include/cxxstd.h:
 src/radiotap.o: src/radiotap.cpp ../include/radiotap.h \
  ../include/macros.h ../include/pdu.h ../include/endianness.h \
  ../include/network_interface.h ../include/hw_address.h \

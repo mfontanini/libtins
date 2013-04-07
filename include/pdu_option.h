@@ -94,6 +94,25 @@ public:
     }
     
     /**
+     * \brief Constructs a PDUOption from iterators, which 
+     * indicate the data to be stored in it.
+     * 
+     * The length parameter indicates the contents of the length field
+     * when this option is serialized. Note that this can be different
+     * to std::distance(start, end).
+     * 
+     * \param opt The option type.
+     * \param length The length of this option.
+     * \param start The beginning of the option data.
+     * \param end The end of the option data.
+     */
+    template<typename ForwardIterator>
+    PDUOption(option_type opt, size_t length, ForwardIterator start, ForwardIterator end) 
+    : option_(opt), size_(length), value_(start, end) {
+        
+    }
+    
+    /**
      * Retrieves this option's type.
      * \return uint8_t containing this option's size.
      */
@@ -123,9 +142,22 @@ public:
     }
     
     /**
-     * Retrieves the length of this option's data.
+     * \brief Retrieves the length of this option's data.
+     * 
+     * This is the actual size of the data.
      */
     size_t data_size() const {
+        return value_.size();
+    }
+    
+    /**
+     * \brief Retrieves the data length field.
+     * 
+     * This may be different to the actual size of the data. 
+     * 
+     * \sa data_size.
+     */
+    size_t length_field() const {
         return size_;
     }
 private:

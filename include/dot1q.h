@@ -41,6 +41,7 @@ public:
      * This PDU's flag.
      */
     static const PDU::PDUType pdu_flag = PDU::DOT1Q;
+    
     /**
      * Default constructor
      */
@@ -177,6 +178,7 @@ public:
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
+    TINS_BEGIN_PACK
     struct dot1q_hdr {
         #if TINS_IS_BIG_ENDIAN
             uint16_t priority:3,
@@ -190,7 +192,7 @@ private:
                     idL:8;
             uint16_t type;
         #endif
-    };
+    } TINS_END_PACK;
     
     static uint16_t get_id(const dot1q_hdr *hdr);
     

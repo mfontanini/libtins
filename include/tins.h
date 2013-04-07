@@ -65,5 +65,6 @@
 #include "timestamp.h"
 #include "sll.h"
 #include "dhcpv6.h"
+#include "pppoe.h"
 
 #endif // TINS_TINS_H

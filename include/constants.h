@@ -84,6 +84,7 @@ namespace Tins {
                 VLAN = 0x8100,    /* IEEE 802.1Q VLAN tagging */
                 IPX = 0x8137,	  /* IPX */
                 IPV6 = 0x86dd,    /* IP protocol version 6 */
+                PPPOED = 0x8863, /* PPPoE Discovery */
                 EAPOL = 0x888e,   /* EAPOL */
                 LOOPBACK = 0x9000 /* used to test interfaces */
             };

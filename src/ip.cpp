@@ -88,45 +88,26 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
         option_identifier opt_type;
         memcpy(&opt_type, ptr_buffer, sizeof(uint8_t));
         ptr_buffer++;
-        switch (opt_type.number) {
+        if(opt_type.number > NOOP) {
             /* Multibyte options with length as second byte */
-            case SEC:
-            case LSSR:
-            case TIMESTAMP:
-            case EXTSEC:
-            case RR:
-            case SID:
-            case SSRR:
-            case MTUPROBE:
-            case MTUREPLY:
-            case EIP:
-            case TR:
-            case ADDEXT:
-            case RTRALT:
-            case SDB:
-            case DPS:
-            case UMP:
-            case QS:
-                if(ptr_buffer == buffer || *ptr_buffer == 0)
-                    throw std::runtime_error(msg);
-                    
-                {
-                    const uint8_t data_size = *ptr_buffer - 2;
-                    if(data_size > 0) {
-                        ptr_buffer++;
-                        if(buffer - ptr_buffer < data_size)
-                            throw std::runtime_error(msg);
-                        _ip_options.push_back(ip_option(opt_type, ptr_buffer, ptr_buffer + data_size));
-                    }
-                    else
-                        _ip_options.push_back(ip_option(opt_type));
-                }
+            if(ptr_buffer == buffer || *ptr_buffer == 0)
+                throw std::runtime_error(msg);
                 
-                ptr_buffer += _ip_options.back().data_size() + 1;
-                break;
-            default:
+            const uint8_t data_size = *ptr_buffer - 2;
+            if(data_size > 0) {
+                ptr_buffer++;
+                if(buffer - ptr_buffer < data_size)
+                    throw std::runtime_error(msg);
+                _ip_options.push_back(ip_option(opt_type, ptr_buffer, ptr_buffer + data_size));
+            }
+            else
                 _ip_options.push_back(ip_option(opt_type));
-                break;
+            
+            ptr_buffer += _ip_options.back().data_size() + 1;
+        }
+        else {
+            _ip_options.push_back(ip_option(opt_type));
+            break;
         }
         _options_size += _ip_options.back().data_size() + 2;
     }

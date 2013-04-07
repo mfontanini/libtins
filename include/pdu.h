@@ -40,6 +40,11 @@
 namespace Tins {
 
     class PacketSender;
+    
+    /**
+     * The type used to store several PDU option values.
+     */
+    typedef std::vector<uint8_t> byte_array;
 
     /** \brief Base class for protocol data units.
      *
@@ -55,7 +60,7 @@ namespace Tins {
         /**
          * The type that will be returned when serializing PDUs.
          */
-        typedef std::vector<uint8_t> serialization_type;
+        typedef byte_array serialization_type;
 
         /**
          * \brief Enum which identifies each type of PDU.
@@ -107,7 +112,8 @@ namespace Tins {
             ICMPv6,
             SLL,
             DHCPv6,
-            DOT1Q
+            DOT1Q,
+            PPPOE
         };
 
         /** \brief PDU constructor
