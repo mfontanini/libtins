@@ -321,7 +321,7 @@ uint8_t* IP::write_option(const ip_option &opt, uint8_t* buffer) {
     option_identifier opt_type = opt.option();
     memcpy(buffer, &opt_type, 1);
     buffer++;
-    *(buffer++) = opt.data_size() + 2;
+    *(buffer++) = opt.length_field() + 2;
     std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
     buffer += opt.data_size();
     return buffer;

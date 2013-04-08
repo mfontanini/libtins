@@ -173,4 +173,5 @@ TEST_F(PPPoETest, SpoofedOptions) {
     );
     // probably we'd expect it to crash if it's not working, valgrind plx
     EXPECT_EQ(3, pdu.tags().size());
+    EXPECT_EQ(pdu.serialize().size(), pdu.size());
 }

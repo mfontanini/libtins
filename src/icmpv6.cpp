@@ -254,7 +254,7 @@ void ICMPv6::internal_add_option(const icmpv6_option &option) {
 
 uint8_t *ICMPv6::write_option(const icmpv6_option &opt, uint8_t *buffer) {
     *buffer++ = opt.option();
-    *buffer++ = (opt.data_size() + sizeof(uint8_t) * 2) / 8;
+    *buffer++ = (opt.length_field() + sizeof(uint8_t) * 2) / 8;
     return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
 }
 

@@ -153,7 +153,12 @@ public:
     /**
      * \brief Retrieves the data length field.
      * 
-     * This may be different to the actual size of the data. 
+     * This may be different to the actual size of the data. Note that
+     * in some protocols, such as TCP, the size of the length and the
+     * identifier fields is added to this field before serializing. 
+     * Therefore, if on one of such protocols, an option's length_field
+     * returns X, then the actual length included in the serialized 
+     * option will be X + C, where C is the size of those fields.
      * 
      * \sa data_size.
      */

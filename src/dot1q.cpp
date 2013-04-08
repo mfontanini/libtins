@@ -41,7 +41,9 @@ Dot1Q::Dot1Q(small_uint<12> tag_id, bool append_pad)
     id(tag_id);
 }
 
-Dot1Q::Dot1Q(const uint8_t *buffer, uint32_t total_sz) {
+Dot1Q::Dot1Q(const uint8_t *buffer, uint32_t total_sz) 
+: _append_padding()
+{
     if(total_sz < sizeof(_header))
         throw std::runtime_error("Not enough size for a Dot1Q header");
     std::memcpy(&_header, buffer, sizeof(_header));

@@ -210,3 +210,20 @@ TEST_F(TCPTest, Serialize) {
     ASSERT_EQ(buffer.size(), sizeof(expected_packet));
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
+
+TEST_F(TCPTest, SpoofedOptions) {
+    TCP pdu;
+    uint8_t a[] = { 1,2,3,4,5,6 };
+    pdu.add_option(
+        TCP::tcp_option(TCP::SACK, 250, a, a + sizeof(a))
+    );
+    pdu.add_option(
+        TCP::tcp_option(TCP::SACK, 250, a, a + sizeof(a))
+    );
+    pdu.add_option(
+        TCP::tcp_option(TCP::SACK, 250, a, a + sizeof(a))
+    );
+    // probably we'd expect it to crash if it's not working, valgrind plx
+    EXPECT_EQ(3, pdu.options().size());
+    EXPECT_EQ(pdu.serialize().size(), pdu.size());
+}

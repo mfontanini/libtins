@@ -221,7 +221,7 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
     assert(total_sz >= child_len + _options_size);
     for(std::list<dot11_option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option();
-        *(buffer++) = it->data_size();
+        *(buffer++) = it->length_field();
         std::copy(it->data_ptr(), it->data_ptr() + it->data_size(), buffer);
         buffer += it->data_size();
     }

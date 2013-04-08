@@ -222,7 +222,7 @@ void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
         *((uint32_t*)&result[0]) = Endian::host_to_be<uint32_t>(0x63825363);
         for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
             *(ptr++) = it->option();
-            *(ptr++) = it->data_size();
+            *(ptr++) = it->length_field();
             std::copy(it->data_ptr(), it->data_ptr() + it->data_size(), ptr);
             ptr += it->data_size();
         }

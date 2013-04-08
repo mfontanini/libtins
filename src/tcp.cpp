@@ -346,10 +346,10 @@ uint8_t *TCP::write_option(const tcp_option &opt, uint8_t *buffer) {
     }
     else {
         buffer[0] = opt.option();
-        buffer[1] = opt.data_size() + (sizeof(uint8_t) << 1);
+        buffer[1] = opt.length_field() + (sizeof(uint8_t) << 1);
         if(opt.data_size() != 0)
             std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer + 2);
-        return buffer + buffer[1];
+        return buffer + opt.data_size() + (sizeof(uint8_t) << 1);
     }
 }
 

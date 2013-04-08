@@ -264,7 +264,7 @@ void IPv6::set_last_next_header(uint8_t value) {
 
 uint8_t *IPv6::write_header(const ipv6_ext_header &header, uint8_t *buffer) {
     *buffer++ = header.option();
-    *buffer++ = (header.data_size() > 8) ? (header.data_size() - 8) : 0;
+    *buffer++ = (header.length_field() > 8) ? (header.length_field() - 8) : 0;
     return std::copy(header.data_ptr(), header.data_ptr() + header.data_size(), buffer);
 }
 

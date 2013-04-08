@@ -417,3 +417,20 @@ TEST_F(ICMPv6Test, DNSSearchList) {
     EXPECT_EQ(output.lifetime, data.lifetime);
     EXPECT_EQ(data.domains, output.domains);
 }
+
+TEST_F(ICMPv6Test, SpoofedOptions) {
+    ICMPv6 pdu;
+    uint8_t a[] = { 1,2,3,4,5,6 };
+    pdu.add_option(
+        ICMPv6::icmpv6_option(ICMPv6::NAACK, 250, a, a + sizeof(a))
+    );
+    pdu.add_option(
+        ICMPv6::icmpv6_option(ICMPv6::NAACK, 250, a, a + sizeof(a))
+    );
+    pdu.add_option(
+        ICMPv6::icmpv6_option(ICMPv6::NAACK, 250, a, a + sizeof(a))
+    );
+    // probably we'd expect it to crash if it's not working, valgrind plx
+    EXPECT_EQ(3, pdu.options().size());
+    EXPECT_EQ(pdu.serialize().size(), pdu.size());
+}
