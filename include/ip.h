@@ -169,7 +169,9 @@ namespace Tins {
         /**
          * The IP options type.
          */
-        typedef PDUOption<option_identifier> ip_option;
+        typedef PDUOption<option_identifier> option;
+        
+        TINS_DEPRECATED(typedef option ip_option);
 
         /**
          * The type of the security option.
@@ -218,7 +220,7 @@ namespace Tins {
         /**
          * The type used to store IP options.
          */
-        typedef std::list<ip_option> options_type;
+        typedef std::list<option> options_type;
 
         /**
          * \brief Constructor for building the IP PDU.
@@ -415,9 +417,9 @@ namespace Tins {
          * The option is added after the last option in the option 
          * fields.
          * 
-         * \param option The option to be added
+         * \param opt The option to be added
          */
-        void add_option(const ip_option &option);
+        void add_option(const option &opt);
         
         #if TINS_IS_CXX11
             /**
@@ -425,9 +427,9 @@ namespace Tins {
              * 
              * The option is move-constructed.
              * 
-             * \param option The option to be added.
+             * \param opt The option to be added.
              */
-            void add_option(ip_option &&option);
+            void add_option(option &&opt);
         #endif
 
         /**
@@ -439,7 +441,7 @@ namespace Tins {
          * 
          * \param id The option identifier to be searched.
          */
-        const ip_option *search_option(option_identifier id) const;
+        const option *search_option(option_identifier id) const;
 
         // Option setters
         
@@ -635,10 +637,10 @@ namespace Tins {
         } TINS_END_PACK;
 
         void prepare_for_serialize(const PDU *parent);
-        void internal_add_option(const ip_option &option);
+        void internal_add_option(const option &option);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-        uint8_t* write_option(const ip_option &opt, uint8_t* buffer);
+        uint8_t* write_option(const option &opt, uint8_t* buffer);
         void add_route_option(option_identifier id, const generic_route_option_type &data);
         generic_route_option_type search_route_option(option_identifier id) const;
 

@@ -84,7 +84,7 @@ public:
     /**
      * The types of ICMPv6 options.
      */
-    enum Options {
+    enum OptionTypes {
         SOURCE_ADDRESS = 1,
         TARGET_ADDRESS,
         PREFIX_INFO,
@@ -122,6 +122,8 @@ public:
         CARD_REPLY
     };
     
+    TINS_DEPRECATED(typedef OptionTypes Options);
+    
     /**
      * The type used to store addresses.
      */
@@ -135,12 +137,14 @@ public:
     /**
      * The type used to represent ICMPv6 options.
      */
-    typedef PDUOption<uint8_t> icmpv6_option;
+    typedef PDUOption<uint8_t> option;
+    
+    TINS_DEPRECATED(typedef option icmpv6_option);
     
     /**
      * The type used to store options.
      */
-    typedef std::list<icmpv6_option> options_type;
+    typedef std::list<option> options_type;
     
     /**
      * \brief The type used to store the new home agent information 
@@ -737,7 +741,7 @@ public:
      * 
      * \param option The option to be added
      */
-    void add_option(const icmpv6_option &option);
+    void add_option(const option &option);
     
     #if TINS_IS_CXX11
         /**
@@ -747,7 +751,7 @@ public:
          * 
          * \param option The option to be added.
          */
-        void add_option(icmpv6_option &&option);
+        void add_option(option &&option);
     #endif
 
     /**
@@ -776,7 +780,7 @@ public:
      * 
      * \param id The option identifier to be searched.
      */
-    const icmpv6_option *search_option(Options id) const;
+    const option *search_option(OptionTypes id) const;
 
     /**
      * \sa PDU::clone
@@ -1202,17 +1206,17 @@ private:
         };
     } TINS_END_PACK;
     
-    void internal_add_option(const icmpv6_option &option);
+    void internal_add_option(const option &option);
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     bool has_options() const;
-    uint8_t *write_option(const icmpv6_option &opt, uint8_t *buffer);
+    uint8_t *write_option(const option &opt, uint8_t *buffer);
     void parse_options(const uint8_t *&buffer, uint32_t &total_sz);
     void add_addr_list(uint8_t type, const addr_list_type &value);
-    addr_list_type search_addr_list(Options type) const;
+    addr_list_type search_addr_list(OptionTypes type) const;
     
     template<template <typename> class Functor>
-    const icmpv6_option *safe_search_option(Options opt, uint32_t size) const {
-        const icmpv6_option *option = search_option(opt);
+    const option *safe_search_option(OptionTypes opt, uint32_t size) const {
+        const option *option = search_option(opt);
         if(!option || Functor<uint32_t>()(option->data_size(), size))
             throw option_not_found();
         return option;

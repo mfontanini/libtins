@@ -151,8 +151,8 @@ TEST_F(Dot11Test, Addr1) {
 
 TEST_F(Dot11Test, AddTaggedOption) {
     Dot11 dot11;
-    dot11.add_tagged_option(Dot11::dot11_option(Dot11::SSID, hwaddr.begin(), hwaddr.end()));
-    const Dot11::dot11_option *option;
+    dot11.add_option(Dot11::option(Dot11::SSID, hwaddr.begin(), hwaddr.end()));
+    const Dot11::option *option;
     ASSERT_TRUE((option = dot11.search_option(Dot11::SSID)));
     EXPECT_EQ(option->data_size(), hwaddr.size());
     EXPECT_EQ(option->option(), Dot11::SSID);

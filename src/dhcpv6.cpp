@@ -64,7 +64,7 @@ DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz)
         if(total_sz < sizeof(uint16_t) * 2) 
             throw std::runtime_error(opt_err_msg);
         
-        const uint16_t option = Endian::be_to_host(*(const uint16_t*)buffer);
+        const uint16_t opt = Endian::be_to_host(*(const uint16_t*)buffer);
         const uint16_t data_size = Endian::be_to_host(
             *(const uint16_t*)(buffer + sizeof(uint16_t))
         );
@@ -72,18 +72,18 @@ DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz)
             throw std::runtime_error(opt_err_msg);
         buffer += sizeof(uint16_t) * 2;
         add_option(
-            dhcpv6_option(option, buffer, buffer + data_size)
+            option(opt, buffer, buffer + data_size)
         );
         buffer += data_size;
         total_sz -= sizeof(uint16_t) * 2 + data_size;
     }
 }
     
-void DHCPv6::add_option(const dhcpv6_option &option) {
-    options_.push_back(option);
+void DHCPv6::add_option(const option &opt) {
+    options_.push_back(opt);
 }
 
-const DHCPv6::dhcpv6_option *DHCPv6::search_option(Option id) const {
+const DHCPv6::option *DHCPv6::search_option(OptionTypes id) const {
     for(options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
         if(it->option() == static_cast<uint16_t>(id))
             return &*it;
@@ -91,12 +91,12 @@ const DHCPv6::dhcpv6_option *DHCPv6::search_option(Option id) const {
     return 0;
 }
 
-uint8_t* DHCPv6::write_option(const dhcpv6_option &option, uint8_t* buffer) const {
-    *(uint16_t*)buffer = Endian::host_to_be(option.option());
-    *(uint16_t*)&buffer[sizeof(uint16_t)] = Endian::host_to_be<uint16_t>(option.length_field());
+uint8_t* DHCPv6::write_option(const option &opt, uint8_t* buffer) const {
+    *(uint16_t*)buffer = Endian::host_to_be(opt.option());
+    *(uint16_t*)&buffer[sizeof(uint16_t)] = Endian::host_to_be<uint16_t>(opt.length_field());
     return std::copy(
-        option.data_ptr(), 
-        option.data_ptr() + option.data_size(), 
+        opt.data_ptr(), 
+        opt.data_ptr() + opt.data_size(), 
         buffer + sizeof(uint16_t) * 2
     );
 }
@@ -158,7 +158,7 @@ void DHCPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
 // ********************************************************************
 
 DHCPv6::ia_na_type DHCPv6::ia_na() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         IA_NA, sizeof(uint32_t) * 3
     );
     const uint8_t *ptr = opt->data_ptr() + sizeof(uint32_t) * 3;
@@ -172,7 +172,7 @@ DHCPv6::ia_na_type DHCPv6::ia_na() const {
 }
 
 DHCPv6::ia_ta_type DHCPv6::ia_ta() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         IA_TA, sizeof(uint32_t)
     );
     const uint8_t *ptr = opt->data_ptr() + sizeof(uint32_t);
@@ -184,7 +184,7 @@ DHCPv6::ia_ta_type DHCPv6::ia_ta() const {
 }
 
 DHCPv6::ia_address_type DHCPv6::ia_address() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         IA_ADDR, sizeof(uint32_t) * 2 + ipaddress_type::address_size
     );
     const uint8_t *ptr = opt->data_ptr() + sizeof(uint32_t) * 2 + ipaddress_type::address_size;
@@ -198,7 +198,7 @@ DHCPv6::ia_address_type DHCPv6::ia_address() const {
 }
 
 DHCPv6::option_request_type DHCPv6::option_request() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         OPTION_REQUEST, 2
     );
     const uint16_t *ptr = (const uint16_t*)opt->data_ptr(), 
@@ -206,21 +206,21 @@ DHCPv6::option_request_type DHCPv6::option_request() const {
     option_request_type output;
     while(ptr < end) {
         output.push_back(
-            static_cast<Option>(Endian::be_to_host(*ptr++))
+            static_cast<OptionTypes>(Endian::be_to_host(*ptr++))
         );
     }
     return output;
 }
 
 uint8_t DHCPv6::preference() const {
-    const dhcpv6_option *opt = safe_search_option<std::not_equal_to>(
+    const option *opt = safe_search_option<std::not_equal_to>(
         PREFERENCE, 1
     );
     return *opt->data_ptr();
 }
 
 uint16_t DHCPv6::elapsed_time() const {
-    const dhcpv6_option *opt = safe_search_option<std::not_equal_to>(
+    const option *opt = safe_search_option<std::not_equal_to>(
         ELAPSED_TIME, 2
     );
     return Endian::be_to_host(
@@ -229,7 +229,7 @@ uint16_t DHCPv6::elapsed_time() const {
 }
 
 DHCPv6::relay_msg_type DHCPv6::relay_message() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         RELAY_MSG, 1
     );
     return relay_msg_type(
@@ -239,7 +239,7 @@ DHCPv6::relay_msg_type DHCPv6::relay_message() const {
 }
 
 DHCPv6::authentication_type DHCPv6::authentication() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         AUTH, sizeof(uint8_t) * 3 + sizeof(uint64_t)
     );
     const uint8_t *ptr = opt->data_ptr();
@@ -256,14 +256,14 @@ DHCPv6::authentication_type DHCPv6::authentication() const {
 }
 
 DHCPv6::ipaddress_type DHCPv6::server_unicast() const {
-    const dhcpv6_option *opt = safe_search_option<std::not_equal_to>(
+    const option *opt = safe_search_option<std::not_equal_to>(
         UNICAST, ipaddress_type::address_size
     );
     return ipaddress_type(opt->data_ptr());
 }
 
 DHCPv6::status_code_type DHCPv6::status_code() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         STATUS_CODE, sizeof(uint16_t)
     );
     status_code_type output;
@@ -280,7 +280,7 @@ bool DHCPv6::has_rapid_commit() const {
 }
 
 DHCPv6::user_class_type DHCPv6::user_class() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         USER_CLASS, sizeof(uint16_t)
     );
     return option2class_option_data<user_class_type>(
@@ -289,7 +289,7 @@ DHCPv6::user_class_type DHCPv6::user_class() const {
 }
 
 DHCPv6::vendor_class_type DHCPv6::vendor_class() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         VENDOR_CLASS, sizeof(uint32_t)
     );
     typedef vendor_class_type::class_data_type data_type;
@@ -306,7 +306,7 @@ DHCPv6::vendor_class_type DHCPv6::vendor_class() const {
 }
 
 DHCPv6::vendor_info_type DHCPv6::vendor_info() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         VENDOR_OPTS, sizeof(uint32_t)
     );
     vendor_info_type output;
@@ -321,7 +321,7 @@ DHCPv6::vendor_info_type DHCPv6::vendor_info() const {
 }
 
 DHCPv6::interface_id_type DHCPv6::interface_id() const {
-    const dhcpv6_option *opt = safe_search_option<std::equal_to>(
+    const option *opt = safe_search_option<std::equal_to>(
         INTERFACE_ID, 0
     );
     return interface_id_type(
@@ -341,7 +341,7 @@ bool DHCPv6::has_reconfigure_accept() const {
 }
 
 DHCPv6::duid_type DHCPv6::client_id() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         CLIENTID, sizeof(uint16_t) + 1
     );
     return duid_type(
@@ -354,7 +354,7 @@ DHCPv6::duid_type DHCPv6::client_id() const {
 }
 
 DHCPv6::duid_type DHCPv6::server_id() const {
-    const dhcpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         SERVERID, sizeof(uint16_t) + 1
     );
     return duid_type(
@@ -382,7 +382,7 @@ void DHCPv6::ia_na(const ia_na_type &value) {
         buffer.begin() + sizeof(uint32_t) * 3
     );
     add_option(
-        dhcpv6_option(IA_NA, buffer.begin(), buffer.end())
+        option(IA_NA, buffer.begin(), buffer.end())
     );
 }
 
@@ -396,7 +396,7 @@ void DHCPv6::ia_ta(const ia_ta_type &value) {
         buffer.begin() + sizeof(uint32_t)
     );
     add_option(
-        dhcpv6_option(IA_TA, buffer.begin(), buffer.end())
+        option(IA_TA, buffer.begin(), buffer.end())
     );
 }
 
@@ -414,7 +414,7 @@ void DHCPv6::ia_address(const ia_address_type &value) {
         buffer.begin() + sizeof(uint32_t) * 2 + ipaddress_type::address_size
     );
     add_option(
-        dhcpv6_option(IA_ADDR, buffer.begin(), buffer.end())
+        option(IA_ADDR, buffer.begin(), buffer.end())
     );
 }
 
@@ -426,26 +426,26 @@ void DHCPv6::option_request(const option_request_type &value) {
     for(iterator it = value.begin(); it != value.end(); ++it, index += 2) 
         *(uint16_t*)&buffer[index] = Endian::host_to_be<uint16_t>(*it);
     add_option(
-        dhcpv6_option(OPTION_REQUEST, buffer.begin(), buffer.end())
+        option(OPTION_REQUEST, buffer.begin(), buffer.end())
     );
 }
 
 void DHCPv6::preference(uint8_t value) {
     add_option(
-        dhcpv6_option(PREFERENCE, 1, &value)
+        option(PREFERENCE, 1, &value)
     );
 }
 
 void DHCPv6::elapsed_time(uint16_t value) {
     value = Endian::host_to_be(value);
     add_option(
-        dhcpv6_option(ELAPSED_TIME, 2, (const uint8_t*)&value)
+        option(ELAPSED_TIME, 2, (const uint8_t*)&value)
     );
 }
 
 void DHCPv6::relay_message(const relay_msg_type &value) {
     add_option(
-        dhcpv6_option(RELAY_MSG, value.begin(), value.end())
+        option(RELAY_MSG, value.begin(), value.end())
     );
 }
 
@@ -463,13 +463,13 @@ void DHCPv6::authentication(const authentication_type &value) {
         buffer.begin() + sizeof(uint8_t) * 3 + sizeof(uint64_t)
     );
     add_option(
-        dhcpv6_option(AUTH, buffer.begin(), buffer.end())
+        option(AUTH, buffer.begin(), buffer.end())
     );
 }
 
 void DHCPv6::server_unicast(const ipaddress_type &value) {
     add_option(
-        dhcpv6_option(UNICAST, value.begin(), value.end())
+        option(UNICAST, value.begin(), value.end())
     );
 }
 
@@ -482,7 +482,7 @@ void DHCPv6::status_code(const status_code_type &value) {
         buffer.begin() + sizeof(uint16_t)
     );
     add_option(
-        dhcpv6_option(STATUS_CODE, buffer.begin(), buffer.end())
+        option(STATUS_CODE, buffer.begin(), buffer.end())
     );
 }
 
@@ -498,7 +498,7 @@ void DHCPv6::user_class(const user_class_type &value) {
     std::vector<uint8_t> buffer;
     class_option_data2option(value.begin(), value.end(), buffer);
     add_option(
-        dhcpv6_option(USER_CLASS, buffer.begin(), buffer.end())
+        option(USER_CLASS, buffer.begin(), buffer.end())
     );
 }
 
@@ -514,7 +514,7 @@ void DHCPv6::vendor_class(const vendor_class_type &value) {
         sizeof(uint32_t)
     );
     add_option(
-        dhcpv6_option(VENDOR_CLASS, buffer.begin(), buffer.end())
+        option(VENDOR_CLASS, buffer.begin(), buffer.end())
     );
 }
 
@@ -527,19 +527,19 @@ void DHCPv6::vendor_info(const vendor_info_type &value) {
         buffer.begin() + sizeof(uint32_t)
     );
     add_option(
-        dhcpv6_option(VENDOR_OPTS, buffer.begin(), buffer.end())
+        option(VENDOR_OPTS, buffer.begin(), buffer.end())
     );
 }
 
 void DHCPv6::interface_id(const interface_id_type &value) {
     add_option(
-        dhcpv6_option(INTERFACE_ID, value.begin(), value.end())
+        option(INTERFACE_ID, value.begin(), value.end())
     );
 }
 
 void DHCPv6::reconfigure_msg(uint8_t value) {
     add_option(
-        dhcpv6_option(RECONF_MSG, 1, &value)
+        option(RECONF_MSG, 1, &value)
     );
 }
 
@@ -634,7 +634,7 @@ void DHCPv6::client_id(const duid_type &value) {
         buffer.begin() + sizeof(uint16_t)
     );
     add_option(
-        dhcpv6_option(CLIENTID, buffer.begin(), buffer.end())
+        option(CLIENTID, buffer.begin(), buffer.end())
     );
 }
 
@@ -647,7 +647,7 @@ void DHCPv6::server_id(const duid_type &value) {
         buffer.begin() + sizeof(uint16_t)
     );
     add_option(
-        dhcpv6_option(SERVERID, buffer.begin(), buffer.end())
+        option(SERVERID, buffer.begin(), buffer.end())
     );
 }
 

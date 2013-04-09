@@ -60,12 +60,14 @@ public:
     /**
      * The type used to represent IPv6 extension headers.
      */
-    typedef PDUOption<uint8_t> ipv6_ext_header;
+    typedef PDUOption<uint8_t> ext_header;
+    
+    TINS_DEPRECATED(typedef ext_header ipv6_ext_header);
     
     /**
      * The type used to store the extension headers.
      */
-    typedef std::list<ipv6_ext_header> headers_type;
+    typedef std::list<ext_header> headers_type;
 
     /**
      * The values used to identify extension headers.
@@ -291,7 +293,7 @@ public:
      * 
      * \param header The extension header to be added.
      */
-    void add_ext_header(const ipv6_ext_header &header);
+    void add_ext_header(const ext_header &header);
     
     /**
      * \brief Searchs for an extension header that matchs the given 
@@ -303,11 +305,11 @@ public:
      * 
      * \param id The header identifier to be searched.
      */
-    const ipv6_ext_header *search_header(ExtensionHeader id) const;
+    const ext_header *search_header(ExtensionHeader id) const;
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     void set_last_next_header(uint8_t value);
-    static uint8_t *write_header(const ipv6_ext_header &header, uint8_t *buffer);
+    static uint8_t *write_header(const ext_header &header, uint8_t *buffer);
     static bool is_extension_header(uint8_t header_id);
 
     TINS_BEGIN_PACK

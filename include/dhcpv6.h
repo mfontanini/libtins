@@ -46,7 +46,9 @@ public:
     /**
      * Represents a DHCPv6 option. 
      */
-    typedef PDUOption<uint16_t> dhcpv6_option;
+    typedef PDUOption<uint16_t> option;
+    
+    TINS_DEPRECATED(typedef option dhcpv6_option);
 
     /**
      * The message types.
@@ -74,7 +76,7 @@ public:
     /**
      * The DHCPv6 options.
      */
-    enum Option {
+    enum OptionTypes {
         CLIENTID = 1, 
         SERVERID, 
         IA_NA, 
@@ -150,11 +152,13 @@ public:
         KRB_DEFAULT_REALM_NAME, 
         KRB_KDC
     };
+    
+    TINS_DEPRECATED(typedef OptionTypes Option);
 
     /**
      * The type used to store the DHCPv6 options.
      */
-    typedef std::list<dhcpv6_option> options_type;
+    typedef std::list<option> options_type;
 
     /**
      * The type used to store IP addresses.
@@ -366,7 +370,7 @@ public:
     /**
      * The type used to store the Option Request option.
      */
-    typedef std::vector<Option> option_request_type;
+    typedef std::vector<OptionTypes> option_request_type;
     
     /**
      * The type used to store the Relay Message option.
@@ -779,9 +783,9 @@ public:
      * The option is added after the last option in the option 
      * fields.
      * 
-     * \param option The option to be added
+     * \param opt The option to be added
      */
-    void add_option(const dhcpv6_option &option);
+    void add_option(const option &opt);
     
     /**
      * \brief Searchs for an option that matchs the given flag.
@@ -792,7 +796,7 @@ public:
      * 
      * \param id The option identifier to be searched.
      */
-    const dhcpv6_option *search_option(Option id) const;
+    const option *search_option(OptionTypes id) const;
 
     // PDU stuff
     
@@ -826,11 +830,11 @@ public:
     }
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *);
-    uint8_t* write_option(const dhcpv6_option &option, uint8_t* buffer) const;
+    uint8_t* write_option(const option &option, uint8_t* buffer) const;
     
     template<template <typename> class Functor>
-    const dhcpv6_option *safe_search_option(Option opt, uint32_t size) const {
-        const dhcpv6_option *option = search_option(opt);
+    const option *safe_search_option(OptionTypes opt, uint32_t size) const {
+        const option *option = search_option(opt);
         if(!option || Functor<uint32_t>()(option->data_size(), size))
             throw option_not_found();
         return option;

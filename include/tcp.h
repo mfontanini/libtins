@@ -79,8 +79,7 @@ namespace Tins {
          *
          * This enum identifies valid options supported by TCP PDU.
          */
-
-        enum Option {
+        enum OptionTypes {
             EOL     = 0,
             NOP     = 1,
             MSS     = 2,
@@ -91,6 +90,8 @@ namespace Tins {
             ALTCHK  = 14
         };
         
+        TINS_DEPRECATED(typedef OptionTypes Option);
+        
         /**
          * \brief Alternate checksum enum.
          */
@@ -100,12 +101,17 @@ namespace Tins {
             CHK_16FLETCHER
         };
         
-        typedef PDUOption<uint8_t> tcp_option;
+        /**
+         * The type used to store TCP options.
+         */
+        typedef PDUOption<uint8_t> option;
+        
+        TINS_DEPRECATED(typedef option tcp_option);
 
         /**
          * The type used to store the options.
          */
-        typedef std::list<tcp_option> options_type;
+        typedef std::list<option> options_type;
         
         /**
          * The type used to store the sack option.
@@ -357,20 +363,20 @@ namespace Tins {
          * \brief Adds a TCP option.
          *
          * \deprecated This function is deprecated. The overloads taking
-         * tcp_option should be used.
+         * a TCP::option should be used.
          * 
          * \param option The option type flag to be set.
          * \param length The length of this option(optional).
          * \param data Pointer to this option's data(optional).
          */
-        TINS_DEPRECATED(void add_option(Option option, uint8_t length = 0, const uint8_t *data = 0));
+        TINS_DEPRECATED(void add_option(OptionTypes opt, uint8_t length = 0, const uint8_t *data = 0));
         
         /**
          * \brief Adds a TCP option.
          *
          * \param option The option to be added.
          */
-        void add_option(const tcp_option &option);
+        void add_option(const option &opt);
         
         #if TINS_IS_CXX11
             /**
@@ -380,7 +386,7 @@ namespace Tins {
              * 
              * \param option The option to be added.
              */
-            void add_option(tcp_option &&option);
+            void add_option(option &&opt);
         #endif
 
         /**
@@ -414,7 +420,7 @@ namespace Tins {
          * \param opt_flag The flag to be searched.
          * \return A pointer to the option, or 0 if it was not found.
          */
-        const tcp_option *search_option(Option opt) const;
+        const option *search_option(OptionTypes opt) const;
         
         /**
          * \sa PDU::clone
@@ -462,17 +468,17 @@ namespace Tins {
         static const uint16_t DEFAULT_WINDOW;
         
         template<class T> 
-        T generic_search(Option opt) const {
-            const tcp_option *option = search_option(opt);
+        T generic_search(OptionTypes opt) const {
+            const option *option = search_option(opt);
             if(option && option->data_size() == sizeof(T))
                 return *(const T*)(&option->data_ptr()[0]);
             throw option_not_found();
         }
         
-        void internal_add_option(const tcp_option &option);
+        void internal_add_option(const option &option);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
-        uint8_t *write_option(const tcp_option &opt, uint8_t *buffer);
+        uint8_t *write_option(const option &opt, uint8_t *buffer);
 
         tcphdr _tcp;
         uint16_t _options_size, _total_options_size;

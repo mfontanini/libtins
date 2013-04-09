@@ -67,7 +67,7 @@ namespace Tins {
         /** 
          * \brief DHCP options enum.
          */
-        enum Options {
+        enum OptionTypes {
             PAD,
             SUBNET_MASK,
             TIME_OFFSET,
@@ -140,15 +140,19 @@ namespace Tins {
             END	= 255
         };
         
+        TINS_DEPRECATED(typedef OptionTypes Options);
+        
         /**
          * The DHCP option type.
          */
-        typedef PDUOption<uint8_t> dhcp_option;
+        typedef PDUOption<uint8_t> option;
+        
+        TINS_DEPRECATED(typedef option dhcp_option);
         
         /**
          * The type used to store the DHCP options.
          */
-        typedef std::list<dhcp_option> options_type;
+        typedef std::list<option> options_type;
         
         /** 
          * \brief Creates an instance of DHCP.
@@ -169,9 +173,9 @@ namespace Tins {
         
         /** 
          * \brief Adds a new option to this DHCP PDU.
-         * \param option The option to be added.
+         * \param opt The option to be added.
          */
-        void add_option(const dhcp_option &option);
+        void add_option(const option &opt);
         
         #if TINS_IS_CXX11
             /** 
@@ -179,9 +183,9 @@ namespace Tins {
              * 
              * The option is move-constructed.
              * 
-             * \param option The option to be added.
+             * \param opt The option to be added.
              */
-            void add_option(dhcp_option &&option);
+            void add_option(option &&opt);
         #endif 
     
         /**
@@ -189,7 +193,7 @@ namespace Tins {
          * \param opt_flag The flag to be searched.
          * \return A pointer to the option, or 0 if it was not found.
          */
-        const dhcp_option *search_option(Options opt) const;
+        const option *search_option(OptionTypes opt) const;
         
         /** 
          * \brief Adds a type option the the option list.
@@ -413,18 +417,18 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         
         template<class T> 
-        T generic_search(Options opt, type2type<T>) const {
-            const dhcp_option *option = search_option(opt);
+        T generic_search(OptionTypes opt, type2type<T>) const {
+            const option *option = search_option(opt);
             if(option && option->data_size() == sizeof(T))
                 return *(const T*)option->data_ptr();
             else
                 throw option_not_found();
         }
         
-        void internal_add_option(const dhcp_option &option);
-        std::list<ipaddress_type> generic_search(Options opt, type2type<std::list<ipaddress_type> >) const;
-        std::string generic_search(Options opt, type2type<std::string>) const;
-        ipaddress_type generic_search(Options opt, type2type<ipaddress_type>) const;
+        void internal_add_option(const option &opt);
+        std::list<ipaddress_type> generic_search(OptionTypes opt, type2type<std::list<ipaddress_type> >) const;
+        std::string generic_search(OptionTypes opt, type2type<std::string>) const;
+        ipaddress_type generic_search(OptionTypes opt, type2type<ipaddress_type>) const;
         
         serialization_type serialize_list(const std::list<ipaddress_type> &ip_list);
         

@@ -45,7 +45,7 @@ public:
     /**
      * The tag types enum.
      */
-    enum tag_identifiers {
+    enum TagTypes {
         END_OF_LIST = 0,
         SERVICE_NAME = 0x101,
         #if TINS_IS_LITTLE_ENDIAN
@@ -72,12 +72,12 @@ public:
     /**
      * The type used to store a TLV option.
      */
-    typedef PDUOption<tag_identifiers> pppoe_tag;
+    typedef PDUOption<TagTypes> tag;
     
     /**
      * The type used to store the options.
      */
-    typedef std::list<pppoe_tag> tags_type;
+    typedef std::list<tag> tags_type;
     
     /**
      * The type used to store the Vendor-Specific tag's value.
@@ -175,7 +175,7 @@ public:
         return new PPPoE(*this);
     }
     
-    const pppoe_tag *search_tag(tag_identifiers identifier) const;
+    const tag *search_tag(TagTypes identifier) const;
     
     /**
      * \brief Getter for the PDU's type.
@@ -220,7 +220,7 @@ public:
      *
      * \param option The option to be added.
      */
-    void add_tag(const pppoe_tag &option);
+    void add_tag(const tag &option);
     
     #if TINS_IS_CXX11
         /**
@@ -230,7 +230,7 @@ public:
          * 
          * \param option The option to be added.
          */
-        void add_tag(pppoe_tag &&option);
+        void add_tag(tag &&option);
     #endif
     
     // Option setters
@@ -380,9 +380,9 @@ private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *);
     
     template<typename T>
-    void add_tag_iterable(tag_identifiers id, const T &data) {
+    void add_tag_iterable(TagTypes id, const T &data) {
         add_tag(
-            pppoe_tag(
+            tag(
                 id,
                 data.begin(),
                 data.end()
@@ -391,16 +391,16 @@ private:
     }
     
     template<typename T>
-    T retrieve_tag_iterable(tag_identifiers id) const {
-        const pppoe_tag *tag = search_tag(id);
+    T retrieve_tag_iterable(TagTypes id) const {
+        const tag *tag = search_tag(id);
         if(!tag)
             throw option_not_found();
         return T(tag->data_ptr(), tag->data_ptr() + tag->data_size());
     }
 
     template<template <typename> class Functor>
-    const pppoe_tag *safe_search_tag(tag_identifiers opt, uint32_t size) const {
-        const pppoe_tag *option = search_tag(opt);
+    const tag *safe_search_tag(TagTypes opt, uint32_t size) const {
+        const tag *option = search_tag(opt);
         if(!option || Functor<uint32_t>()(option->data_size(), size))
             throw option_not_found();
         return option;

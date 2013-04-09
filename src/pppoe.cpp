@@ -62,8 +62,8 @@ PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz)
         if(Endian::be_to_host(opt_len) > total_sz)
             throw std::runtime_error(err_msg);
         add_tag(
-            pppoe_tag(
-                static_cast<tag_identifiers>(opt_type), 
+            tag(
+                static_cast<TagTypes>(opt_type), 
                 Endian::be_to_host(opt_len), 
                 buffer
             )
@@ -73,7 +73,7 @@ PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz)
     }
 }
 
-const PPPoE::pppoe_tag *PPPoE::search_tag(tag_identifiers identifier) const {
+const PPPoE::tag *PPPoE::search_tag(TagTypes identifier) const {
     for(tags_type::const_iterator it = _tags.begin(); it != _tags.end(); ++it) {
         if(it->option() == identifier)
             return &*it;
@@ -126,13 +126,13 @@ void PPPoE::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
     }
 }
 
-void PPPoE::add_tag(const pppoe_tag &option) {
+void PPPoE::add_tag(const tag &option) {
     _tags_size += option.data_size() + sizeof(uint16_t) * 2;
     _tags.push_back(option);
 }
 
 #if TINS_IS_CXX11
-void PPPoE::add_tag(pppoe_tag &&option) {
+void PPPoE::add_tag(tag &&option) {
     _tags_size += option.data_size() + sizeof(uint16_t) * 2;
     _tags.push_back(std::move(option));
 }
@@ -171,7 +171,7 @@ void PPPoE::vendor_specific(const vendor_spec_type &value) {
         buffer.begin() + sizeof(uint32_t)
     );
     add_tag(
-        pppoe_tag(
+        tag(
             VENDOR_SPECIFIC,
             buffer.begin(),
             buffer.end()
@@ -214,7 +214,7 @@ byte_array PPPoE::ac_cookie() const {
 }
 
 PPPoE::vendor_spec_type PPPoE::vendor_specific() const {
-    const pppoe_tag *tag = safe_search_tag<std::less>(
+    const tag *tag = safe_search_tag<std::less>(
         VENDOR_SPECIFIC, sizeof(uint32_t)
     );
     vendor_spec_type output;

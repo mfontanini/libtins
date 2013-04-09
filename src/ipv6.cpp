@@ -77,7 +77,7 @@ IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz)
                 throw header_size_error();
             // minus one, from the size field
             add_ext_header(
-                ipv6_ext_header(buffer[0], size - sizeof(uint8_t)*2, buffer + 2)
+                ext_header(buffer[0], size - sizeof(uint8_t)*2, buffer + 2)
             );
             current_header = buffer[0];
             buffer += size;
@@ -238,12 +238,12 @@ void IPv6::send(PacketSender &sender) {
 }
 #endif
 
-void IPv6::add_ext_header(const ipv6_ext_header &header) {
+void IPv6::add_ext_header(const ext_header &header) {
     ext_headers.push_back(header);
     headers_size += header.data_size() + sizeof(uint8_t) * 2;
 }
 
-const IPv6::ipv6_ext_header *IPv6::search_header(ExtensionHeader id) const {
+const IPv6::ext_header *IPv6::search_header(ExtensionHeader id) const {
     uint8_t current_header = _header.next_header;
     headers_type::const_iterator it = ext_headers.begin();
     while(it != ext_headers.end() && current_header != id) {
@@ -262,7 +262,7 @@ void IPv6::set_last_next_header(uint8_t value) {
         ext_headers.back().option(value);
 }
 
-uint8_t *IPv6::write_header(const ipv6_ext_header &header, uint8_t *buffer) {
+uint8_t *IPv6::write_header(const ext_header &header, uint8_t *buffer) {
     *buffer++ = header.option();
     *buffer++ = (header.length_field() > 8) ? (header.length_field() - 8) : 0;
     return std::copy(header.data_ptr(), header.data_ptr() + header.data_size(), buffer);

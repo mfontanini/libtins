@@ -72,7 +72,7 @@ TEST_F(ICMPv6Test, ConstructorFromBuffer2) {
     EXPECT_EQ(icmp.router_lifetime(), 1800);
     EXPECT_EQ(icmp.reachable_time(), 30000);
     EXPECT_EQ(icmp.retransmit_timer(), 1000);
-    const ICMPv6::icmpv6_option *opt = icmp.search_option(ICMPv6::SOURCE_ADDRESS);
+    const ICMPv6::option *opt = icmp.search_option(ICMPv6::SOURCE_ADDRESS);
     ASSERT_TRUE(opt);
     EXPECT_EQ(opt->data_size(), 6);
     EXPECT_EQ(HWAddress<6>(opt->data_ptr()), "00:60:97:07:69:ea");

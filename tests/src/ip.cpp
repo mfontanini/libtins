@@ -196,11 +196,11 @@ TEST_F(IPTest, AddOption) {
     IP ip;
     const uint8_t data[] = { 0x15, 0x17, 0x94, 0x66, 0xff };
     IP::option_identifier id(IP::SEC, IP::CONTROL, 1);
-    ip.add_option(IP::ip_option(id, data, data + sizeof(data)));
-    const IP::ip_option *option;
-    ASSERT_TRUE((option = ip.search_option(id)));
-    ASSERT_EQ(option->data_size(), sizeof(data));
-    EXPECT_TRUE(memcmp(option->data_ptr(), data, sizeof(data)) == 0);
+    ip.add_option(IP::option(id, data, data + sizeof(data)));
+    const IP::option *opt;
+    ASSERT_TRUE((opt = ip.search_option(id)));
+    ASSERT_EQ(opt->data_size(), sizeof(data));
+    EXPECT_TRUE(memcmp(opt->data_ptr(), data, sizeof(data)) == 0);
 }
 
 void IPTest::test_equals(const IP &ip1, const IP &ip2) {

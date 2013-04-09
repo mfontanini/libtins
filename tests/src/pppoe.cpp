@@ -163,13 +163,13 @@ TEST_F(PPPoETest, SpoofedOptions) {
     PPPoE pdu;
     uint8_t a[] = { 1,2,3,4,5,6 };
     pdu.add_tag(
-        PPPoE::pppoe_tag(PPPoE::VENDOR_SPECIFIC, 65000, a, a + sizeof(a))
+        PPPoE::tag(PPPoE::VENDOR_SPECIFIC, 65000, a, a + sizeof(a))
     );
     pdu.add_tag(
-        PPPoE::pppoe_tag(PPPoE::VENDOR_SPECIFIC, 65000, a, a + sizeof(a))
+        PPPoE::tag(PPPoE::VENDOR_SPECIFIC, 65000, a, a + sizeof(a))
     );
     pdu.add_tag(
-        PPPoE::pppoe_tag(PPPoE::VENDOR_SPECIFIC, 65000, a, a + sizeof(a))
+        PPPoE::tag(PPPoE::VENDOR_SPECIFIC, 65000, a, a + sizeof(a))
     );
     // probably we'd expect it to crash if it's not working, valgrind plx
     EXPECT_EQ(3, pdu.tags().size());

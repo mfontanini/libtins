@@ -98,15 +98,15 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
                 ptr_buffer++;
                 if(buffer - ptr_buffer < data_size)
                     throw std::runtime_error(msg);
-                _ip_options.push_back(ip_option(opt_type, ptr_buffer, ptr_buffer + data_size));
+                _ip_options.push_back(option(opt_type, ptr_buffer, ptr_buffer + data_size));
             }
             else
-                _ip_options.push_back(ip_option(opt_type));
+                _ip_options.push_back(option(opt_type));
             
             ptr_buffer += _ip_options.back().data_size() + 1;
         }
         else {
-            _ip_options.push_back(ip_option(opt_type));
+            _ip_options.push_back(option(opt_type));
             break;
         }
         _options_size += _ip_options.back().data_size() + 2;
@@ -213,7 +213,7 @@ void IP::security(const security_type &data) {
     array[6] = ((value >> 16) & 0xff);
     
     add_option(
-        ip_option(
+        option(
             130,
             sizeof(array),
             array
@@ -224,7 +224,7 @@ void IP::security(const security_type &data) {
 void IP::stream_identifier(uint16_t stream_id) {
     stream_id = Endian::host_to_be(stream_id);
         add_option(
-        ip_option(
+        option(
             136,
             sizeof(uint16_t),
             (const uint8_t*)&stream_id
@@ -246,7 +246,7 @@ void IP::add_route_option(option_identifier id, const generic_route_option_type 
         opt_data[1 + i * 4 + 3] = (ip >> 24) & 0xff;
     }
     add_option(
-        ip_option(
+        option(
             id,
             opt_data.size(),
             &opt_data[0]
@@ -255,7 +255,7 @@ void IP::add_route_option(option_identifier id, const generic_route_option_type 
 }
 
 IP::generic_route_option_type IP::search_route_option(option_identifier id) const {
-    const ip_option *option = search_option(id);
+    const option *option = search_option(id);
     if(!option || option->data_size() < 1 + sizeof(uint32_t) || 
       ((option->data_size() - 1) % sizeof(uint32_t)) != 0)
         throw option_not_found();
@@ -269,7 +269,7 @@ IP::generic_route_option_type IP::search_route_option(option_identifier id) cons
 }
 
 IP::security_type IP::security() const {
-    const ip_option *option = search_option(130);
+    const option *option = search_option(130);
     if(!option || option->data_size() < 9)
         throw option_not_found();
     security_type output;
@@ -285,39 +285,39 @@ IP::security_type IP::security() const {
 }
 
 uint16_t IP::stream_identifier() const {
-    const ip_option *option = search_option(136);
+    const option *option = search_option(136);
     if(!option || option->data_size() != sizeof(uint16_t))
         throw option_not_found();
     return Endian::be_to_host(*(const uint16_t*)option->data_ptr());
 }
 
 #if TINS_IS_CXX11
-void IP::add_option(ip_option &&option) {
-    internal_add_option(option);
-    _ip_options.push_back(std::move(option));
+void IP::add_option(option &&opt) {
+    internal_add_option(opt);
+    _ip_options.push_back(std::move(opt));
 }
 #endif
 
-void IP::add_option(const ip_option &option) {
-    internal_add_option(option);
-    _ip_options.push_back(option);
+void IP::add_option(const option &opt) {
+    internal_add_option(opt);
+    _ip_options.push_back(opt);
 }
 
-void IP::internal_add_option(const ip_option &option) {
-    _options_size += 1 + option.data_size();
+void IP::internal_add_option(const option &opt) {
+    _options_size += 1 + opt.data_size();
     uint8_t padding = _options_size % 4;
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
 }
 
-const IP::ip_option *IP::search_option(option_identifier id) const {
-    for(std::list<ip_option>::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
+const IP::option *IP::search_option(option_identifier id) const {
+    for(options_type::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
         if(it->option() == id)
             return &(*it);
     }
     return 0;
 }
 
-uint8_t* IP::write_option(const ip_option &opt, uint8_t* buffer) {
+uint8_t* IP::write_option(const option &opt, uint8_t* buffer) {
     option_identifier opt_type = opt.option();
     memcpy(buffer, &opt_type, 1);
     buffer++;
@@ -411,7 +411,7 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     memcpy(buffer, &_ip, sizeof(_ip));
 
     uint8_t* ptr_buffer = buffer + sizeof(_ip);
-    for(list<ip_option>::iterator it = _ip_options.begin(); it != _ip_options.end(); ++it)
+    for(options_type::iterator it = _ip_options.begin(); it != _ip_options.end(); ++it)
         ptr_buffer = write_option(*it, ptr_buffer);
     memset(buffer + sizeof(_ip) + _options_size, 0, _padded_options_size - _options_size);
 

@@ -45,7 +45,7 @@ void IPv6Test::test_equals(IPv6 &ip1, IPv6 &ip2) {
     EXPECT_EQ(ip1.src_addr(), ip2.src_addr());
     
     EXPECT_EQ(bool(ip1.search_header(IPv6::HOP_BY_HOP)), bool(ip2.search_header(IPv6::HOP_BY_HOP)));
-    const IPv6::ipv6_ext_header *header1 = ip1.search_header(IPv6::HOP_BY_HOP),
+    const IPv6::ext_header *header1 = ip1.search_header(IPv6::HOP_BY_HOP),
                                     *header2 = ip2.search_header(IPv6::HOP_BY_HOP);
     if(header1 && header2) {
         EXPECT_EQ(header1->data_size(), header2->data_size());
@@ -109,7 +109,7 @@ TEST_F(IPv6Test, ConstructorFromBuffer2) {
     EXPECT_EQ(pdu->checksum(), 0x74fe);
     EXPECT_EQ(pdu->checksum(), 0x74fe);
     
-    const IPv6::ipv6_ext_header *header = ipv6.search_header(IPv6::HOP_BY_HOP);
+    const IPv6::ext_header *header = ipv6.search_header(IPv6::HOP_BY_HOP);
     ASSERT_TRUE(header);
     EXPECT_EQ(header->data_size(), 6);
 }

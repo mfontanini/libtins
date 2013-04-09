@@ -68,29 +68,29 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
         }
         if(total_sz < args[1])
             throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
-        add_option(dhcp_option((Options)args[0], args[1], buffer));
+        add_option(option((OptionTypes)args[0], args[1], buffer));
         buffer += args[1];
         total_sz -= args[1];
     }
 }
 
-void DHCP::add_option(const dhcp_option &option) {
-    internal_add_option(option);
-    _options.push_back(option);
+void DHCP::add_option(const option &opt) {
+    internal_add_option(opt);
+    _options.push_back(opt);
 }
 
 #if TINS_IS_CXX11
-void DHCP::add_option(dhcp_option &&option) {
-    internal_add_option(option);
-    _options.push_back(std::move(option));
+void DHCP::add_option(option &&opt) {
+    internal_add_option(opt);
+    _options.push_back(std::move(opt));
 }
 #endif
 
-void DHCP::internal_add_option(const dhcp_option &option) {
-    _size += option.data_size() + (sizeof(uint8_t) << 1);
+void DHCP::internal_add_option(const option &opt) {
+    _size += opt.data_size() + (sizeof(uint8_t) << 1);
 }
 
-const DHCP::dhcp_option *DHCP::search_option(Options opt) const {
+const DHCP::option *DHCP::search_option(OptionTypes opt) const {
     for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         if(it->option() == opt)
             return &(*it);
@@ -100,11 +100,11 @@ const DHCP::dhcp_option *DHCP::search_option(Options opt) const {
 
 void DHCP::type(Flags type) {
     uint8_t int_type = type;
-    add_option(dhcp_option(DHCP_MESSAGE_TYPE, sizeof(uint8_t), &int_type));
+    add_option(option(DHCP_MESSAGE_TYPE, sizeof(uint8_t), &int_type));
 }
 
 void DHCP::end() {
-    add_option(dhcp_option(DHCP_MESSAGE_TYPE));
+    add_option(option(DHCP_MESSAGE_TYPE));
 }
 
 uint8_t DHCP::type() const {
@@ -113,7 +113,7 @@ uint8_t DHCP::type() const {
 
 void DHCP::server_identifier(ipaddress_type ip) {
     uint32_t ip_int = ip;
-    add_option(dhcp_option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), (const uint8_t*)&ip_int));
+    add_option(option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), (const uint8_t*)&ip_int));
 }
 
 DHCP::ipaddress_type DHCP::server_identifier() const {
@@ -122,7 +122,7 @@ DHCP::ipaddress_type DHCP::server_identifier() const {
 
 void DHCP::lease_time(uint32_t time) {
     time = Endian::host_to_be(time);
-    add_option(dhcp_option(DHCP_LEASE_TIME, sizeof(uint32_t), (const uint8_t*)&time));
+    add_option(option(DHCP_LEASE_TIME, sizeof(uint32_t), (const uint8_t*)&time));
 }
 
 uint32_t DHCP::lease_time() const {
@@ -131,7 +131,7 @@ uint32_t DHCP::lease_time() const {
 
 void DHCP::renewal_time(uint32_t time) {
     time = Endian::host_to_be(time);
-    add_option(dhcp_option(DHCP_RENEWAL_TIME, sizeof(uint32_t), (const uint8_t*)&time));
+    add_option(option(DHCP_RENEWAL_TIME, sizeof(uint32_t), (const uint8_t*)&time));
 }
         
 uint32_t DHCP::renewal_time() const {
@@ -140,7 +140,7 @@ uint32_t DHCP::renewal_time() const {
 
 void DHCP::subnet_mask(ipaddress_type mask) {
     uint32_t mask_int = mask;
-    add_option(dhcp_option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask_int));
+    add_option(option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask_int));
 }
 
 DHCP::ipaddress_type DHCP::subnet_mask() const {
@@ -149,7 +149,7 @@ DHCP::ipaddress_type DHCP::subnet_mask() const {
 
 void DHCP::routers(const list<ipaddress_type> &routers) {
     serialization_type buffer = serialize_list(routers);
-    add_option(dhcp_option(ROUTERS, buffer.begin(), buffer.end()));
+    add_option(option(ROUTERS, buffer.begin(), buffer.end()));
 }
 
 std::list<DHCP::ipaddress_type> DHCP::routers() const {
@@ -158,7 +158,7 @@ std::list<DHCP::ipaddress_type> DHCP::routers() const {
 
 void DHCP::domain_name_servers(const list<ipaddress_type> &dns) {
     serialization_type buffer = serialize_list(dns);
-    add_option(dhcp_option(DOMAIN_NAME_SERVERS, buffer.begin(), buffer.end()));
+    add_option(option(DOMAIN_NAME_SERVERS, buffer.begin(), buffer.end()));
 }
 
 std::list<DHCP::ipaddress_type> DHCP::domain_name_servers() const {
@@ -167,7 +167,7 @@ std::list<DHCP::ipaddress_type> DHCP::domain_name_servers() const {
 
 void DHCP::broadcast(ipaddress_type addr) {
     uint32_t int_addr = addr;
-    add_option(dhcp_option(BROADCAST_ADDRESS, sizeof(uint32_t), (uint8_t*)&int_addr));
+    add_option(option(BROADCAST_ADDRESS, sizeof(uint32_t), (uint8_t*)&int_addr));
 }
 
 DHCP::ipaddress_type DHCP::broadcast() const {
@@ -176,7 +176,7 @@ DHCP::ipaddress_type DHCP::broadcast() const {
 
 void DHCP::requested_ip(ipaddress_type addr) {
     uint32_t int_addr = addr;
-    add_option(dhcp_option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), (uint8_t*)&int_addr));
+    add_option(option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), (uint8_t*)&int_addr));
 }
 
 DHCP::ipaddress_type DHCP::requested_ip() const {
@@ -184,7 +184,7 @@ DHCP::ipaddress_type DHCP::requested_ip() const {
 }
 
 void DHCP::domain_name(const string &name) {
-    add_option(dhcp_option(DOMAIN_NAME, name.size(), (const uint8_t*)name.c_str()));
+    add_option(option(DOMAIN_NAME, name.size(), (const uint8_t*)name.c_str()));
 }
 
 std::string DHCP::domain_name() const {
@@ -193,7 +193,7 @@ std::string DHCP::domain_name() const {
 
 void DHCP::rebind_time(uint32_t time) {
     time = Endian::host_to_be(time);
-    add_option(dhcp_option(DHCP_REBINDING_TIME, sizeof(uint32_t), (uint8_t*)&time));
+    add_option(option(DHCP_REBINDING_TIME, sizeof(uint32_t), (uint8_t*)&time));
 }
         
 uint32_t DHCP::rebind_time() const {
@@ -230,12 +230,12 @@ void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
     BootP::write_serialization(buffer, total_sz, parent);
 }
 
-std::list<DHCP::ipaddress_type> DHCP::generic_search(Options opt, type2type<std::list<ipaddress_type> >) const {
-    const dhcp_option *option = search_option(opt);
-    if(!option)
+std::list<DHCP::ipaddress_type> DHCP::generic_search(OptionTypes opt_type, type2type<std::list<ipaddress_type> >) const {
+    const option *opt = search_option(opt_type);
+    if(!opt)
         throw option_not_found();
-    const uint32_t *ptr = (const uint32_t*)option->data_ptr();
-    uint32_t len = option->data_size();
+    const uint32_t *ptr = (const uint32_t*)opt->data_ptr();
+    uint32_t len = opt->data_size();
     if((len % sizeof(uint32_t)) != 0)
         throw option_not_found();
     std::list<ipaddress_type> container;
@@ -246,14 +246,14 @@ std::list<DHCP::ipaddress_type> DHCP::generic_search(Options opt, type2type<std:
     return container;
 }
 
-std::string DHCP::generic_search(Options opt, type2type<std::string>) const {
-    const dhcp_option *option = search_option(opt);
-    if(!option)
+std::string DHCP::generic_search(OptionTypes opt_type, type2type<std::string>) const {
+    const option *opt = search_option(opt_type);
+    if(!opt)
         throw option_not_found();
-    return string(option->data_ptr(), option->data_ptr() + option->data_size());
+    return string(opt->data_ptr(), opt->data_ptr() + opt->data_size());
 }
 
-DHCP::ipaddress_type DHCP::generic_search(Options opt, type2type<ipaddress_type>) const {
+DHCP::ipaddress_type DHCP::generic_search(OptionTypes opt, type2type<ipaddress_type>) const {
     return ipaddress_type(generic_search(opt, type2type<uint32_t>()));
 }
 }

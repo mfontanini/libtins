@@ -77,7 +77,7 @@ namespace Tins {
         /**
          * \brief Enum for the different types of tagged options.
          */
-        enum TaggedOption {
+        enum OptionTypes {
             SSID,
             SUPPORTED_RATES,
             FH_SET,
@@ -112,6 +112,8 @@ namespace Tins {
             RSN = 48,
             EXT_SUPPORTED_RATES = 50
         };
+        
+        TINS_DEPRECATED(typedef OptionTypes TaggedOption);
 
         /**
          * \brief Enum for the different subtypes of 802.11 management frames.
@@ -169,7 +171,9 @@ namespace Tins {
         /**
          * \brief IEEE 802.11 options struct.
          */
-        typedef PDUOption<uint8_t> dot11_option;
+        typedef PDUOption<uint8_t> option;
+        
+        TINS_DEPRECATED(typedef option dot11_option);
         
         /**
          * \brief Constructor for creating an 802.11 PDU
@@ -395,7 +399,13 @@ namespace Tins {
          * \brief Adds a new option to this Dot11 PDU.
          * \param opt The option to be added.
          */
-        void add_tagged_option(const dot11_option &opt);
+        TINS_DEPRECATED(void add_tagged_option(const option &opt));
+        
+        /**
+         * \brief Adds a new option to this Dot11 PDU.
+         * \param opt The option to be added.
+         */
+        void add_option(const option &opt);
         
         #if TINS_IS_CXX11
             /**
@@ -405,7 +415,7 @@ namespace Tins {
              * 
              * \param opt The option to be added.
              */
-            void add_tagged_option(dot11_option &&opt);
+            void add_option(option &&opt);
         #endif
 
         /**
@@ -416,7 +426,7 @@ namespace Tins {
          * \param opt The option identifier.
          * \return The option found, or 0 if no such option has been set.
          */
-        const dot11_option *search_option(TaggedOption opt) const;
+        const option *search_option(OptionTypes opt) const;
 
         /**
          * \brief Getter for the PDU's type.
@@ -457,7 +467,7 @@ namespace Tins {
         virtual uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz) { return 0; }
         virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
         void parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz);
-        void add_tagged_option(TaggedOption opt, uint8_t len, const uint8_t *val);
+        void add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t *val);
     protected:
         /**
          * Struct that represents the 802.11 header
@@ -499,14 +509,14 @@ namespace Tins {
     private:
         Dot11(const ieee80211_header *header_ptr);
         
-        void internal_add_option(const dot11_option &opt);
+        void internal_add_option(const option &opt);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
 
         ieee80211_header _header;
         NetworkInterface _iface;
         uint32_t _options_size;
-        std::list<dot11_option> _options;
+        std::list<option> _options;
     };
 
     /**
@@ -1487,7 +1497,7 @@ namespace Tins {
         }
     private:
         static uint8_t *serialize_rates(const rates_type &rates);
-        static rates_type deserialize_rates(const dot11_option *option);
+        static rates_type deserialize_rates(const option *option);
     
         ExtendedHeader _ext_header;
         address_type _addr4;

@@ -87,7 +87,7 @@ void ICMPv6::parse_options(const uint8_t *&buffer, uint32_t &total_sz) {
         if(total_sz < 8 || (static_cast<uint32_t>(buffer[1]) * 8) > total_sz || buffer[1] < 1) 
             throw std::runtime_error("Not enough size for options");
         // size(option) = option_size - identifier_size - length_identifier_size
-        add_option(icmpv6_option(buffer[0], static_cast<uint32_t>(buffer[1]) * 8 - sizeof(uint8_t) * 2, buffer + 2));
+        add_option(option(buffer[0], static_cast<uint32_t>(buffer[1]) * 8 - sizeof(uint8_t) * 2, buffer + 2));
         total_sz -= buffer[1] * 8;
         buffer += buffer[1] * 8;
     }
@@ -236,29 +236,29 @@ bool ICMPv6::has_options() const {
             type() == ROUTER_ADVERT;
 }
 
-void ICMPv6::add_option(const icmpv6_option &option) {
+void ICMPv6::add_option(const option &option) {
     internal_add_option(option);
     _options.push_back(option);
 }
 
 #if TINS_IS_CXX11
-void ICMPv6::add_option(icmpv6_option &&option) {
+void ICMPv6::add_option(option &&option) {
     internal_add_option(option);
     _options.push_back(std::move(option));
 }
 #endif
 
-void ICMPv6::internal_add_option(const icmpv6_option &option) {
+void ICMPv6::internal_add_option(const option &option) {
     _options_size += option.data_size() + sizeof(uint8_t) * 2;
 }
 
-uint8_t *ICMPv6::write_option(const icmpv6_option &opt, uint8_t *buffer) {
+uint8_t *ICMPv6::write_option(const option &opt, uint8_t *buffer) {
     *buffer++ = opt.option();
     *buffer++ = (opt.length_field() + sizeof(uint8_t) * 2) / 8;
     return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
 }
 
-const ICMPv6::icmpv6_option *ICMPv6::search_option(Options id) const {
+const ICMPv6::option *ICMPv6::search_option(OptionTypes id) const {
     for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         if(it->option() == id)
             return &*it;
@@ -271,11 +271,11 @@ const ICMPv6::icmpv6_option *ICMPv6::search_option(Options id) const {
 // ********************************************************************
 
 void ICMPv6::source_link_layer_addr(const hwaddress_type &addr) {
-    add_option(icmpv6_option(SOURCE_ADDRESS, addr.begin(), addr.end()));
+    add_option(option(SOURCE_ADDRESS, addr.begin(), addr.end()));
 }
 
 void ICMPv6::target_link_layer_addr(const hwaddress_type &addr) {
-    add_option(icmpv6_option(TARGET_ADDRESS, addr.begin(), addr.end()));
+    add_option(option(TARGET_ADDRESS, addr.begin(), addr.end()));
 }
 
 void ICMPv6::prefix_info(prefix_info_type info) {
@@ -287,7 +287,7 @@ void ICMPv6::prefix_info(prefix_info_type info) {
     *(uint32_t*)(buffer + 2 + sizeof(uint32_t) * 2) = 0;
     info.prefix.copy(buffer + 2 + sizeof(uint32_t) * 3);
     add_option(
-        icmpv6_option(PREFIX_INFO, buffer, buffer + sizeof(buffer))
+        option(PREFIX_INFO, buffer, buffer + sizeof(buffer))
     );
 }
 
@@ -299,32 +299,32 @@ void ICMPv6::redirect_header(PDU::serialization_type data) {
     if(padding == 8)
         padding = 0;
     data.insert(data.end(), padding, 0);
-    add_option(icmpv6_option(REDIRECT_HEADER, data.begin(), data.end()));
+    add_option(option(REDIRECT_HEADER, data.begin(), data.end()));
 }
 
 void ICMPv6::mtu(uint32_t value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
     *((uint32_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value);
-    add_option(icmpv6_option(MTU, sizeof(buffer), buffer));
+    add_option(option(MTU, sizeof(buffer), buffer));
 }
 
 void ICMPv6::shortcut_limit(uint8_t value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
     buffer[0] = value;
-    add_option(icmpv6_option(NBMA_SHORT_LIMIT, sizeof(buffer), buffer));
+    add_option(option(NBMA_SHORT_LIMIT, sizeof(buffer), buffer));
 }
 
 void ICMPv6::new_advert_interval(uint32_t value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
     *((uint32_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value);
-    add_option(icmpv6_option(ADVERT_INTERVAL, sizeof(buffer), buffer));
+    add_option(option(ADVERT_INTERVAL, sizeof(buffer), buffer));
 }
 
 void ICMPv6::new_home_agent_info(const new_ha_info_type &value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
     *((uint16_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value.first);
     *((uint16_t*)(buffer + sizeof(uint16_t) * 2)) = Endian::host_to_be(value.second);
-    add_option(icmpv6_option(HOME_AGENT_INFO, sizeof(buffer), buffer));
+    add_option(option(HOME_AGENT_INFO, sizeof(buffer), buffer));
 }
 
 void ICMPv6::source_addr_list(const addr_list_type &value) {
@@ -341,7 +341,7 @@ void ICMPv6::add_addr_list(uint8_t type, const addr_list_type &value) {
     buffer.insert(buffer.end(), 6, 0);
     for(addr_list_type::const_iterator it(value.begin()); it != value.end(); ++it)
         buffer.insert(buffer.end(), it->begin(), it->end());
-    add_option(icmpv6_option(type, buffer.begin(), buffer.end()));
+    add_option(option(type, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::rsa_signature(const rsa_sign_type &value) {
@@ -355,18 +355,18 @@ void ICMPv6::rsa_signature(const rsa_sign_type &value) {
     buffer.insert(buffer.end(), value.key_hash, value.key_hash + sizeof(value.key_hash));
     buffer.insert(buffer.end(), value.signature.begin(), value.signature.end());
     buffer.insert(buffer.end(), padding, 0);
-    add_option(icmpv6_option(RSA_SIGN, buffer.begin(), buffer.end()));
+    add_option(option(RSA_SIGN, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::timestamp(uint64_t value) {
     std::vector<uint8_t> buffer(6 + sizeof(uint64_t));
     buffer.insert(buffer.begin(), 6, 0);
     *((uint64_t*)&buffer[6]) = Endian::host_to_be(value);
-    add_option(icmpv6_option(TIMESTAMP, buffer.begin(), buffer.end()));
+    add_option(option(TIMESTAMP, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::nonce(const nonce_type &value) {
-    add_option(icmpv6_option(NONCE, value.begin(), value.end()));
+    add_option(option(NONCE, value.begin(), value.end()));
 }
 
 void ICMPv6::ip_prefix(const ip_prefix_type &value) {
@@ -377,7 +377,7 @@ void ICMPv6::ip_prefix(const ip_prefix_type &value) {
     // reserved
     buffer.insert(buffer.end(), sizeof(uint32_t), 0);
     buffer.insert(buffer.end(), value.address.begin(), value.address.end());
-    add_option(icmpv6_option(IP_PREFIX, buffer.begin(), buffer.end()));
+    add_option(option(IP_PREFIX, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::link_layer_addr(lladdr_type value) {
@@ -386,14 +386,14 @@ void ICMPv6::link_layer_addr(lladdr_type value) {
     if(padding == 8)
         padding = 0;
     value.address.insert(value.address.end(), padding, 0);
-    add_option(icmpv6_option(LINK_ADDRESS, value.address.begin(), value.address.end()));
+    add_option(option(LINK_ADDRESS, value.address.begin(), value.address.end()));
 }
 
 void ICMPv6::naack(const naack_type &value) {
     uint8_t buffer[6];
     buffer[0] = value.first;
     buffer[1] = value.second;
-    add_option(icmpv6_option(NAACK, buffer, buffer + sizeof(buffer)));
+    add_option(option(NAACK, buffer, buffer + sizeof(buffer)));
 }
 
 void ICMPv6::map(const map_type &value) {
@@ -402,7 +402,7 @@ void ICMPv6::map(const map_type &value) {
     buffer[1] = value.r << 7;
     *(uint32_t*)(buffer + 2) = Endian::host_to_be(value.valid_lifetime);
     value.address.copy(buffer + 2 + sizeof(uint32_t));
-    add_option(icmpv6_option(MAP, buffer, buffer + sizeof(buffer)));
+    add_option(option(MAP, buffer, buffer + sizeof(buffer)));
 }
 
 void ICMPv6::route_info(const route_info_type &value) {
@@ -419,7 +419,7 @@ void ICMPv6::route_info(const route_info_type &value) {
         padding, 
         0
     );
-    add_option(icmpv6_option(ROUTE_INFO, buffer.begin(), buffer.end()));
+    add_option(option(ROUTE_INFO, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::recursive_dns_servers(const recursive_dns_type &value) {
@@ -433,7 +433,7 @@ void ICMPv6::recursive_dns_servers(const recursive_dns_type &value) {
     typedef recursive_dns_type::servers_type::const_iterator iterator;
     for(iterator it = value.servers.begin(); it != value.servers.end(); ++it)
         out = it->copy(out);
-    add_option(icmpv6_option(RECURSIVE_DNS_SERV, buffer.begin(), buffer.end()));
+    add_option(option(RECURSIVE_DNS_SERV, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::handover_key_request(const handover_key_req_type &value) {
@@ -449,7 +449,7 @@ void ICMPv6::handover_key_request(const handover_key_req_type &value) {
         buffer.end(),
         0
     );
-    add_option(icmpv6_option(HANDOVER_KEY_REQ, buffer.begin(), buffer.end()));
+    add_option(option(HANDOVER_KEY_REQ, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::handover_key_reply(const handover_key_reply_type &value) {
@@ -467,7 +467,7 @@ void ICMPv6::handover_key_reply(const handover_key_reply_type &value) {
         buffer.end(),
         0
     );
-    add_option(icmpv6_option(HANDOVER_KEY_REPLY, buffer.begin(), buffer.end()));
+    add_option(option(HANDOVER_KEY_REPLY, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::handover_assist_info(const handover_assist_info_type &value) {
@@ -484,7 +484,7 @@ void ICMPv6::handover_assist_info(const handover_assist_info_type &value) {
         padding,
         0
     );
-    add_option(icmpv6_option(HANDOVER_ASSIST_INFO, buffer.begin(), buffer.end()));
+    add_option(option(HANDOVER_ASSIST_INFO, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::mobile_node_identifier(const mobile_node_id_type &value) {
@@ -501,7 +501,7 @@ void ICMPv6::mobile_node_identifier(const mobile_node_id_type &value) {
         padding,
         0
     );
-    add_option(icmpv6_option(MOBILE_NODE_ID, buffer.begin(), buffer.end()));
+    add_option(option(MOBILE_NODE_ID, buffer.begin(), buffer.end()));
 }
 
 void ICMPv6::dns_search_list(const dns_search_list_type &value) {
@@ -525,7 +525,7 @@ void ICMPv6::dns_search_list(const dns_search_list_type &value) {
     if(padding == 8)
         padding = 0;
     buffer.insert(buffer.end(), padding, 0);
-    add_option(icmpv6_option(DNS_SEARCH_LIST, buffer.begin(), buffer.end()));
+    add_option(option(DNS_SEARCH_LIST, buffer.begin(), buffer.end()));
 }
 
 // ********************************************************************
@@ -533,21 +533,21 @@ void ICMPv6::dns_search_list(const dns_search_list_type &value) {
 // ********************************************************************
 
 ICMPv6::hwaddress_type ICMPv6::source_link_layer_addr() const {
-    const icmpv6_option *opt = search_option(SOURCE_ADDRESS);
+    const option *opt = search_option(SOURCE_ADDRESS);
     if(!opt || opt->data_size() != hwaddress_type::address_size)
         throw option_not_found();
     return hwaddress_type(opt->data_ptr());
 }
 
 ICMPv6::hwaddress_type ICMPv6::target_link_layer_addr() const {
-    const icmpv6_option *opt = search_option(TARGET_ADDRESS);
+    const option *opt = search_option(TARGET_ADDRESS);
     if(!opt || opt->data_size() != hwaddress_type::address_size)
         throw option_not_found();
     return hwaddress_type(opt->data_ptr());
 }
 
 ICMPv6::prefix_info_type ICMPv6::prefix_info() const {
-    const icmpv6_option *opt = search_option(PREFIX_INFO);
+    const option *opt = search_option(PREFIX_INFO);
     if(!opt || opt->data_size() != 2 + sizeof(uint32_t) * 3 + ipaddress_type::address_size)
         throw option_not_found();
     const uint8_t *ptr = opt->data_ptr();
@@ -563,7 +563,7 @@ ICMPv6::prefix_info_type ICMPv6::prefix_info() const {
 }
 
 PDU::serialization_type ICMPv6::redirect_header() const {
-    const icmpv6_option *opt = search_option(REDIRECT_HEADER);
+    const option *opt = search_option(REDIRECT_HEADER);
     if(!opt || opt->data_size() < 6)
         throw option_not_found();
     const uint8_t *ptr = opt->data_ptr() + 6;
@@ -571,28 +571,28 @@ PDU::serialization_type ICMPv6::redirect_header() const {
 }
 
 uint32_t ICMPv6::mtu() const {
-    const icmpv6_option *opt = search_option(MTU);
+    const option *opt = search_option(MTU);
     if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
         throw option_not_found();
     return Endian::be_to_host(*(const uint32_t*)(opt->data_ptr() + sizeof(uint16_t)));
 }
 
 uint8_t ICMPv6::shortcut_limit() const {
-    const icmpv6_option *opt = search_option(NBMA_SHORT_LIMIT);
+    const option *opt = search_option(NBMA_SHORT_LIMIT);
     if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
         throw option_not_found();
     return *opt->data_ptr();
 }
 
 uint32_t ICMPv6::new_advert_interval() const {
-    const icmpv6_option *opt = search_option(ADVERT_INTERVAL);
+    const option *opt = search_option(ADVERT_INTERVAL);
     if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
         throw option_not_found();
     return Endian::be_to_host(*(const uint32_t*)(opt->data_ptr() + sizeof(uint16_t)));
 }
 
 ICMPv6::new_ha_info_type ICMPv6::new_home_agent_info() const {
-    const icmpv6_option *opt = search_option(HOME_AGENT_INFO);
+    const option *opt = search_option(HOME_AGENT_INFO);
     if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
         throw option_not_found();
     return std::make_pair(
@@ -609,8 +609,8 @@ ICMPv6::addr_list_type ICMPv6::target_addr_list() const {
     return search_addr_list(T_ADDRESS_LIST);
 }
 
-ICMPv6::addr_list_type ICMPv6::search_addr_list(Options type) const {
-    const icmpv6_option *opt = search_option(type);
+ICMPv6::addr_list_type ICMPv6::search_addr_list(OptionTypes type) const {
+    const option *opt = search_option(type);
     if(!opt || opt->data_size() < 6 + ipaddress_type::address_size)
         throw option_not_found();
     addr_list_type output;
@@ -625,7 +625,7 @@ ICMPv6::addr_list_type ICMPv6::search_addr_list(Options type) const {
 }
 
 ICMPv6::rsa_sign_type ICMPv6::rsa_signature() const {
-    const icmpv6_option *opt = search_option(RSA_SIGN);
+    const option *opt = search_option(RSA_SIGN);
     // 2 bytes reserved + at least 1 byte signature.
     // 16 == sizeof(rsa_sign_type::key_hash), removed the sizeof
     // expression since gcc 4.2 doesn't like it
@@ -640,21 +640,21 @@ ICMPv6::rsa_sign_type ICMPv6::rsa_signature() const {
 }
 
 uint64_t ICMPv6::timestamp() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         TIMESTAMP, 6 + sizeof(uint64_t)
     );
     return Endian::be_to_host(*(uint64_t*)(opt->data_ptr() + 6));
 }
 
 ICMPv6::nonce_type ICMPv6::nonce() const {
-    const icmpv6_option *opt = safe_search_option<std::equal_to>(
+    const option *opt = safe_search_option<std::equal_to>(
         NONCE, 0
     );
     return nonce_type(opt->data_ptr(), opt->data_ptr() + opt->data_size());
 }
 
 ICMPv6::ip_prefix_type ICMPv6::ip_prefix() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         IP_PREFIX, 2
     );
     const uint8_t *ptr = opt->data_ptr();
@@ -669,7 +669,7 @@ ICMPv6::ip_prefix_type ICMPv6::ip_prefix() const {
 
 ICMPv6::lladdr_type ICMPv6::link_layer_addr() const {
     // at least the option_code and 1 byte from the link layer address
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         LINK_ADDRESS, 2
     );
     const uint8_t *ptr = opt->data_ptr();
@@ -679,7 +679,7 @@ ICMPv6::lladdr_type ICMPv6::link_layer_addr() const {
 }
 
 ICMPv6::naack_type ICMPv6::naack() const {
-    const icmpv6_option *opt = safe_search_option<std::not_equal_to>(
+    const option *opt = safe_search_option<std::not_equal_to>(
         NAACK, 6
     );
     const uint8_t *ptr = opt->data_ptr();
@@ -687,7 +687,7 @@ ICMPv6::naack_type ICMPv6::naack() const {
 }
 
 ICMPv6::map_type ICMPv6::map() const {
-    const icmpv6_option *opt = safe_search_option<std::not_equal_to>(
+    const option *opt = safe_search_option<std::not_equal_to>(
         MAP, 2 + sizeof(uint32_t) + ipaddress_type::address_size
     );
     const uint8_t *ptr = opt->data_ptr();
@@ -702,7 +702,7 @@ ICMPv6::map_type ICMPv6::map() const {
 }
 
 ICMPv6::route_info_type ICMPv6::route_info() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         ROUTE_INFO, 2 + sizeof(uint32_t)
     );
     const uint8_t *ptr = opt->data_ptr();
@@ -716,7 +716,7 @@ ICMPv6::route_info_type ICMPv6::route_info() const {
 }
 
 ICMPv6::recursive_dns_type ICMPv6::recursive_dns_servers() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         RECURSIVE_DNS_SERV, 2 + sizeof(uint32_t) + ipaddress_type::address_size
     );
     const uint8_t *ptr = opt->data_ptr() + 2, *end = opt->data_ptr() + opt->data_size();
@@ -733,7 +733,7 @@ ICMPv6::recursive_dns_type ICMPv6::recursive_dns_servers() const {
 }
 
 ICMPv6::handover_key_req_type ICMPv6::handover_key_request() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         HANDOVER_KEY_REQ, 2 + sizeof(uint32_t)
     );
     const uint8_t *ptr = opt->data_ptr() + 1, *end = opt->data_ptr() + opt->data_size();
@@ -747,7 +747,7 @@ ICMPv6::handover_key_req_type ICMPv6::handover_key_request() const {
 }
 
 ICMPv6::handover_key_reply_type ICMPv6::handover_key_reply() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         HANDOVER_KEY_REPLY, 2 + sizeof(uint32_t)
     );
     const uint8_t *ptr = opt->data_ptr() + 1, *end = opt->data_ptr() + opt->data_size();
@@ -763,7 +763,7 @@ ICMPv6::handover_key_reply_type ICMPv6::handover_key_reply() const {
 }
 
 ICMPv6::handover_assist_info_type ICMPv6::handover_assist_info() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         HANDOVER_ASSIST_INFO, 2
     );
     const uint8_t *ptr = opt->data_ptr(), *end = ptr + opt->data_size();
@@ -776,7 +776,7 @@ ICMPv6::handover_assist_info_type ICMPv6::handover_assist_info() const {
 }
 
 ICMPv6::mobile_node_id_type ICMPv6::mobile_node_identifier() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         MOBILE_NODE_ID, 2
     );
     const uint8_t *ptr = opt->data_ptr(), *end = ptr + opt->data_size();
@@ -789,7 +789,7 @@ ICMPv6::mobile_node_id_type ICMPv6::mobile_node_identifier() const {
 }
 
 ICMPv6::dns_search_list_type ICMPv6::dns_search_list() const {
-    const icmpv6_option *opt = safe_search_option<std::less>(
+    const option *opt = safe_search_option<std::less>(
         DNS_SEARCH_LIST, 2 + sizeof(uint32_t)
     );
     const uint8_t *ptr = opt->data_ptr(), *end = ptr + opt->data_size();
