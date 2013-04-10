@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include <vector>
 #include "macros.h"
+#include "cxxstd.h"
 
 /** \brief The Tins namespace.
  */
@@ -116,15 +117,33 @@ namespace Tins {
             PPPOE
         };
 
-        /** \brief PDU constructor
+        /** 
+         * \brief PDU constructor
          *
          * Must be called by subclasses in their constructors.
          * \param flag The flag identifier for the subclass' PDU.
          * \param next_pdu The child PDU. Can be obviated.
          */
         PDU(PDU *next_pdu = 0);
+        
+        #if TINS_IS_CXX11
+            /**
+             * \brief Move constructor.
+             * 
+             * \param rhs The PDU to be moved.
+             */
+            PDU(PDU &&rhs);
+            
+            /**
+             * \brief Move assignment operator.
+             * 
+             * \param rhs The PDU to be moved.
+             */
+            PDU& operator=(PDU &&rhs);
+        #endif
 
-        /** \brief PDU destructor.
+        /** 
+         * \brief PDU destructor.
          *
          * Deletes the inner pdu, as a consequence every child pdu is
          * deleted.
