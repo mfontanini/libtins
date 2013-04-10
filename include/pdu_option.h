@@ -101,6 +101,8 @@ public:
      * when this option is serialized. Note that this can be different
      * to std::distance(start, end).
      * 
+     * \sa length_field
+     * 
      * \param opt The option type.
      * \param length The length of this option.
      * \param start The beginning of the option data.
@@ -153,12 +155,12 @@ public:
     /**
      * \brief Retrieves the data length field.
      * 
-     * This may be different to the actual size of the data. Note that
-     * in some protocols, such as TCP, the size of the length and the
-     * identifier fields is added to this field before serializing. 
-     * Therefore, if on one of such protocols, an option's length_field
-     * returns X, then the actual length included in the serialized 
-     * option will be X + C, where C is the size of those fields.
+     * This is what the size field will contain when this option is 
+     * serialized. It can differ from the actual data size. 
+     * 
+     * This will be equal to data_size unless the constructor that takes
+     * both a data length and two iterators is used.
+
      * 
      * \sa data_size.
      */
