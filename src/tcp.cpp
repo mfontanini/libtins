@@ -284,6 +284,7 @@ uint32_t TCP::header_size() const {
 void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     assert(total_sz >= header_size());
     uint8_t *tcp_start = buffer;
+    check(0);
     buffer += sizeof(tcphdr);
     _tcp.doff = (sizeof(tcphdr) + _total_options_size) / sizeof(uint32_t);
     for(options_type::iterator it = _options.begin(); it != _options.end(); ++it)
@@ -299,34 +300,30 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
 
     memcpy(tcp_start, &_tcp, sizeof(tcphdr));
 
-    if(!_tcp.check) {
-        const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
-        if(ip_packet) {
-            uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(),  
-                                                             ip_packet->dst_addr(), 
-                                                             size(), Constants::IP::PROTO_TCP) +
-                                Utils::do_checksum(tcp_start, tcp_start + total_sz);
+    const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
+    if(ip_packet) {
+        uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(),  
+                                                         ip_packet->dst_addr(), 
+                                                         size(), Constants::IP::PROTO_TCP) +
+                            Utils::do_checksum(tcp_start, tcp_start + total_sz);
+        while (checksum >> 16)
+            checksum = (checksum & 0xffff) + (checksum >> 16);
+        check(~checksum);
+        ((tcphdr*)tcp_start)->check = _tcp.check;
+    }
+    else {
+        const Tins::IPv6 *ipv6_packet = dynamic_cast<const Tins::IPv6*>(parent);
+        if(ipv6_packet) {
+            uint32_t checksum = Utils::pseudoheader_checksum(ipv6_packet->src_addr(),  
+                                                         ipv6_packet->dst_addr(), 
+                                                         size(), Constants::IP::PROTO_TCP) +
+                                        Utils::do_checksum(tcp_start, tcp_start + total_sz);
             while (checksum >> 16)
                 checksum = (checksum & 0xffff) + (checksum >> 16);
-            
-            ((tcphdr*)tcp_start)->check = Endian::host_to_be<uint16_t>(~checksum);
-        }
-        else {
-            const Tins::IPv6 *ipv6_packet = dynamic_cast<const Tins::IPv6*>(parent);
-            if(ipv6_packet) {
-                uint32_t checksum = Utils::pseudoheader_checksum(ipv6_packet->src_addr(),  
-                                                             ipv6_packet->dst_addr(), 
-                                                             size(), Constants::IP::PROTO_TCP) +
-                                            Utils::do_checksum(tcp_start, tcp_start + total_sz);
-                while (checksum >> 16)
-                    checksum = (checksum & 0xffff) + (checksum >> 16);
-                
-                ((tcphdr*)tcp_start)->check = Endian::host_to_be<uint16_t>(~checksum);
-            }
+            check(~checksum);
+            ((tcphdr*)tcp_start)->check = _tcp.check;
         }
     }
-    
-    _tcp.check = 0;
 }
 
 const TCP::option *TCP::search_option(OptionTypes opt) const {

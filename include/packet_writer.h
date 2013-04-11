@@ -99,6 +99,18 @@ public:
     void write(PDU &pdu);
     
     /**
+     * \brief Writes a PDU to this file. 
+     * 
+     * The template parameter T must at some point yield a PDU& after
+     * applying operator* one or more than one time. This accepts both
+     * raw and smartpointers.
+     */
+    template<typename T>
+    void write(T &pdu) {
+        write(Utils::dereference_until_pdu(pdu));
+    }
+    
+    /**
      * \brief Writes all the PDUs in the range [start, end)
      * \param start A forward iterator pointing to the first PDU
      * to be written.

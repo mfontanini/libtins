@@ -378,6 +378,7 @@ void IP::prepare_for_serialize(const PDU *parent) {
 void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
     uint32_t my_sz = header_size();
     assert(total_sz >= my_sz);
+    check(0);
     if(inner_pdu()) {
         uint32_t new_flag;
         switch(inner_pdu()->pdu_type()) {
@@ -415,12 +416,12 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
         ptr_buffer = write_option(*it, ptr_buffer);
     memset(buffer + sizeof(_ip) + _options_size, 0, _padded_options_size - _options_size);
 
-    if(parent && !_ip.check) {
+    if(parent) {
         uint32_t checksum = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
         while (checksum >> 16)
             checksum = (checksum & 0xffff) + (checksum >> 16);
-        ((iphdr*)buffer)->check = Endian::host_to_be<uint16_t>(~checksum);
-        this->check(0);
+        check(~checksum);
+        ((iphdr*)buffer)->check = _ip.check;
     }
 }
 
