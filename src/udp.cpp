@@ -77,19 +77,24 @@ void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     assert(total_sz >= sizeof(udphdr));
     #endif
     const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
+    _udp.check = 0;
     if(inner_pdu())
         length(sizeof(udphdr) + inner_pdu()->size());
     else
         length(sizeof(udphdr));
     std::memcpy(buffer, &_udp, sizeof(udphdr));
-    if(!_udp.check && ip_packet) {
-        uint32_t checksum = Utils::pseudoheader_checksum(ip_packet->src_addr(), ip_packet->dst_addr(), size(), Constants::IP::PROTO_UDP) +
-                            Utils::do_checksum(buffer, buffer + total_sz);
+    if(ip_packet) {
+        uint32_t checksum = Utils::pseudoheader_checksum(
+                                ip_packet->src_addr(), 
+                                ip_packet->dst_addr(), 
+                                size(), 
+                                Constants::IP::PROTO_UDP
+                            ) + Utils::do_checksum(buffer, buffer + total_sz);
         while (checksum >> 16)
             checksum = (checksum & 0xffff)+(checksum >> 16);
-        ((udphdr*)buffer)->check = Endian::host_to_be<uint16_t>(~checksum);
+        _udp.check = Endian::host_to_be<uint16_t>(~checksum);
+        ((udphdr*)buffer)->check = _udp.check;
     }
-    _udp.check = 0;
 }
 
 bool UDP::matches_response(uint8_t *ptr, uint32_t total_sz) {

@@ -91,13 +91,15 @@ namespace Tins {
          */
         void dport(uint16_t new_dport);
 
-        /** \brief Set the source port.
+        /** 
+         * \brief Set the source port.
          *
          * \param new_sport The new source port.
          */
         void sport(uint16_t new_sport);
         
-        /** \brief Getter for the length field.
+        /** 
+         * \brief Getter for the length field.
          * \param new_len The new length field.
          * \return The length field.
          */
@@ -115,7 +117,8 @@ namespace Tins {
          */
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
 
-        /** \brief Returns the header size.
+        /** 
+         * \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. This size includes the
          * payload and options size. \sa PDU::header_size
