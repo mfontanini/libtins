@@ -61,6 +61,7 @@ libtins_include_HEADERS = include/internals.h \
 							include/pppoe.h \
 							include/ipv6.h \
 							include/icmpv6.h \
+							include/ieee802_3.h \
 							include/endianness.h \
 							include/rsn_information.h \
 							include/loopback.h \
