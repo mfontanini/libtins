@@ -102,12 +102,12 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtins_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo src/pppoe.lo \
-	src/crypto.lo src/dhcp.lo src/dhcpv6.lo src/dns.lo \
-	src/dns_record.lo src/dot11.lo src/dot3.lo src/dot1q.lo \
-	src/eapol.lo src/ethernetII.lo src/icmp.lo src/icmpv6.lo \
-	src/internals.lo src/ip.lo src/ip_address.lo src/ipv6.lo \
-	src/ipv6_address.lo src/llc.lo src/loopback.lo \
+am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo src/stp.lo \
+	src/pppoe.lo src/crypto.lo src/dhcp.lo src/dhcpv6.lo \
+	src/dns.lo src/dns_record.lo src/dot11.lo src/dot3.lo \
+	src/dot1q.lo src/eapol.lo src/ethernetII.lo src/icmp.lo \
+	src/icmpv6.lo src/internals.lo src/ip.lo src/ip_address.lo \
+	src/ipv6.lo src/ipv6_address.lo src/llc.lo src/loopback.lo \
 	src/network_interface.lo src/packet_sender.lo \
 	src/packet_writer.lo src/pdu.lo src/radiotap.lo src/rawpdu.lo \
 	src/rsn_information.lo src/sll.lo src/snap.lo src/sniffer.lo \
@@ -287,6 +287,7 @@ libtins_la_LDFLAGS = -version-info @LIBTINS_VERSION@
 AM_CXXFLAGS = -Wall -pedantic -I@LIBTINS_INCLUDE_DIR@
 libtins_la_SOURCES = src/arp.cpp \
                     src/bootp.cpp \
+                    src/stp.cpp \
                     src/pppoe.cpp \
                     src/crypto.cpp \
                     src/dhcp.cpp \
@@ -369,7 +370,8 @@ libtins_include_HEADERS = include/internals.h \
 							include/ipv6_address.h  \
 							include/constants.h \
 							include/utils.h \
-							include/cxxstd.h
+							include/cxxstd.h \
+							include/stp.h
 
 all: all-am
 
@@ -451,6 +453,7 @@ src/$(DEPDIR)/$(am__dirstamp):
 	@: > src/$(DEPDIR)/$(am__dirstamp)
 src/arp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/bootp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/stp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/pppoe.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/crypto.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dhcp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -558,6 +561,8 @@ mostlyclean-compile:
 	-rm -f src/snap.lo
 	-rm -f src/sniffer.$(OBJEXT)
 	-rm -f src/sniffer.lo
+	-rm -f src/stp.$(OBJEXT)
+	-rm -f src/stp.lo
 	-rm -f src/tcp.$(OBJEXT)
 	-rm -f src/tcp.lo
 	-rm -f src/tcp_stream.$(OBJEXT)
@@ -602,6 +607,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/sll.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/snap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/sniffer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/stp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/tcp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/tcp_stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/udp.Plo@am__quote@

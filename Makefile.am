@@ -13,6 +13,7 @@ AM_CXXFLAGS = -Wall -pedantic -I@LIBTINS_INCLUDE_DIR@
 
 libtins_la_SOURCES=src/arp.cpp \
                     src/bootp.cpp \
+                    src/stp.cpp \
                     src/pppoe.cpp \
                     src/crypto.cpp \
                     src/dhcp.cpp \
@@ -95,4 +96,5 @@ libtins_include_HEADERS = include/internals.h \
 							include/ipv6_address.h  \
 							include/constants.h \
 							include/utils.h \
-							include/cxxstd.h
+							include/cxxstd.h \
+							include/stp.h

@@ -114,7 +114,8 @@ namespace Tins {
             SLL,
             DHCPv6,
             DOT1Q,
-            PPPOE
+            PPPOE,
+            STP
         };
 
         /** 
