@@ -104,12 +104,12 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
                 _ip_options.push_back(option(opt_type));
             
             ptr_buffer += _ip_options.back().data_size() + 1;
+            _options_size += _ip_options.back().data_size() + 2;
         }
         else {
             _ip_options.push_back(option(opt_type));
-            break;
+            _options_size++;
         }
-        _options_size += _ip_options.back().data_size() + 2;
     }
     uint8_t padding = _options_size % 4;
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
@@ -320,11 +320,14 @@ const IP::option *IP::search_option(option_identifier id) const {
 uint8_t* IP::write_option(const option &opt, uint8_t* buffer) {
     option_identifier opt_type = opt.option();
     memcpy(buffer, &opt_type, 1);
+    if(*buffer <= 1)
+        return ++buffer;
     buffer++;
-    *(buffer++) = opt.length_field() + 2;
-    std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
-    buffer += opt.data_size();
-    return buffer;
+    *buffer = opt.length_field();
+    if(opt.data_size() == opt.length_field())
+        *buffer += 2;
+    buffer++;
+    return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
 }
 
 /* Virtual method overriding. */
@@ -412,8 +415,9 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     memcpy(buffer, &_ip, sizeof(_ip));
 
     uint8_t* ptr_buffer = buffer + sizeof(_ip);
-    for(options_type::iterator it = _ip_options.begin(); it != _ip_options.end(); ++it)
+    for(options_type::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
         ptr_buffer = write_option(*it, ptr_buffer);
+    }
     memset(buffer + sizeof(_ip) + _options_size, 0, _padded_options_size - _options_size);
 
     if(parent) {
