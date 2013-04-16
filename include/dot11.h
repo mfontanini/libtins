@@ -2708,7 +2708,11 @@ namespace Tins {
             uint8_t addr3[address_type::address_size];
             uint16_t frag_seq;
         } TINS_END_PACK;
+        
+        struct no_inner_pdu { };
+        Dot11Data(const uint8_t *buffer, uint32_t total_sz, no_inner_pdu);
 
+        uint32_t init(const uint8_t *buffer, uint32_t total_sz);
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 
         uint32_t data_frame_size() { 

@@ -1247,7 +1247,28 @@ uint32_t Dot11ProbeResponse::write_fixed_parameters(uint8_t *buffer, uint32_t to
 /* Dot11Data */
 
 Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz) 
-: Dot11(buffer, total_sz) {
+: Dot11(buffer, total_sz)
+{
+    const uint32_t offset = init(buffer, total_sz);
+    buffer += offset;
+    total_sz -= offset;
+    if(total_sz) {
+        // If the wep bit is on, then just use a RawPDU
+        if(wep())
+            inner_pdu(new Tins::RawPDU(buffer, total_sz));
+        else
+            inner_pdu(new Tins::SNAP(buffer, total_sz));
+    }
+}
+
+Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz, no_inner_pdu) 
+: Dot11(buffer, total_sz)
+{
+    init(buffer, total_sz);
+}
+
+uint32_t Dot11Data::init(const uint8_t *buffer, uint32_t total_sz) {
+    const uint8_t *start_ptr = buffer;
     uint32_t sz = Dot11::header_size();
     buffer += sz;
     total_sz -= sz;
@@ -1263,15 +1284,8 @@ Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz)
         buffer += _addr4.size();
         total_sz -= _addr4.size();
     }
-    if(total_sz) {
-        // If the wep bit is on, then just use a RawPDU
-        if(wep())
-            inner_pdu(new Tins::RawPDU(buffer, total_sz));
-        else
-            inner_pdu(new Tins::SNAP(buffer, total_sz));
-    }
+    return buffer - start_ptr;
 }
-
 
 Dot11Data::Dot11Data(const address_type &dst_hw_addr, 
   const address_type &src_hw_addr, PDU* child) 
@@ -1341,12 +1355,11 @@ Dot11QoSData::Dot11QoSData(const address_type &dst_hw_addr,
 
 Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) 
 // Am I breaking something? :S
-//: Dot11Data(buffer, std::min(data_frame_size(), total_sz)) {
-: Dot11Data(buffer, total_sz) {
+: Dot11Data(buffer, total_sz, no_inner_pdu()) {
     uint32_t sz = data_frame_size();
     buffer += sz;
     total_sz -= sz;
-    if(total_sz < sizeof(this->_qos_control))
+    if(total_sz < sizeof(_qos_control))
         throw runtime_error("Not enough size for an IEEE 802.11 data header in the buffer.");
     _qos_control = *(uint16_t*)buffer;
     total_sz -= sizeof(uint16_t);
