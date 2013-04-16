@@ -71,60 +71,67 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
     check_size(total_sz, sizeof(_radio));
     const uint8_t *buffer_start = buffer;
     std::memcpy(&_radio, buffer, sizeof(_radio));
+    uint32_t radiotap_hdr_size = Endian::le_to_host(_radio.it_len);
+    check_size(total_sz, radiotap_hdr_size);
     buffer += sizeof(_radio);
-    total_sz -= sizeof(_radio);
+    radiotap_hdr_size -= sizeof(_radio);
+
     if(_radio.tsft) 
-        read_field(buffer, total_sz, _tsft);
+        read_field(buffer, radiotap_hdr_size, _tsft);
         
     if(_radio.flags) 
-        read_field(buffer, total_sz, _flags);
+        read_field(buffer, radiotap_hdr_size, _flags);
 
     if(_radio.rate) 
-        read_field(buffer, total_sz, _rate);
+        read_field(buffer, radiotap_hdr_size, _rate);
     
     if(_radio.channel) {
         if(((buffer - buffer_start) & 1) == 1) {
             buffer++;
-            total_sz--;
+            radiotap_hdr_size--;
         }
-        read_field(buffer, total_sz, _channel_freq);
+        read_field(buffer, radiotap_hdr_size, _channel_freq);
         uint16_t dummy;
-        read_field(buffer, total_sz, dummy);
+        read_field(buffer, radiotap_hdr_size, dummy);
         _channel_type = dummy;
     }
     
     if(_radio.dbm_signal)
-        read_field(buffer, total_sz, _dbm_signal);
+        read_field(buffer, radiotap_hdr_size, _dbm_signal);
     
     if(_radio.dbm_noise) 
-        read_field(buffer, total_sz, _dbm_noise);
+        read_field(buffer, radiotap_hdr_size, _dbm_noise);
     
     if(_radio.antenna) 
-        read_field(buffer, total_sz, _antenna);
+        read_field(buffer, radiotap_hdr_size, _antenna);
     
     if(_radio.rx_flags) {
         if(((buffer - buffer_start) & 1) == 1) {
             buffer++;
-            total_sz--;
+            radiotap_hdr_size--;
         }
-        read_field(buffer, total_sz, _rx_flags);
+        read_field(buffer, radiotap_hdr_size, _rx_flags);
     }
     if(_radio.channel_plus) {
         uint32_t offset = ((buffer - buffer_start) % 4);
         if(offset) {
             offset = 4 - offset;
             buffer += offset;
-            total_sz -= offset;
+            radiotap_hdr_size -= offset;
         }
-        read_field(buffer, total_sz, _channel_type);
-        read_field(buffer, total_sz, _channel_freq);
-        read_field(buffer, total_sz, _channel);
-        read_field(buffer, total_sz, _max_power);
+        read_field(buffer, radiotap_hdr_size, _channel_type);
+        read_field(buffer, radiotap_hdr_size, _channel_freq);
+        read_field(buffer, radiotap_hdr_size, _channel);
+        read_field(buffer, radiotap_hdr_size, _max_power);
     }
     if((flags() & FCS) != 0) {
-        check_size(total_sz, sizeof(uint32_t));
-        total_sz -= sizeof(uint32_t);
+        check_size(radiotap_hdr_size, sizeof(uint32_t));
+        radiotap_hdr_size -= sizeof(uint32_t);
     }
+
+    total_sz -= _radio.it_len;
+    buffer += radiotap_hdr_size;
+
     if(total_sz) 
         inner_pdu(Dot11::from_bytes(buffer, total_sz));
 }
