@@ -376,7 +376,6 @@ namespace Tins {
         
         typedef std::vector<uint8_t> field_type;
 
-        void copy_fields(const LLC *other);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         llchdr _header;

@@ -3,6 +3,8 @@
 #include <string>
 #include <stdint.h>
 #include "stp.h"
+#include "dot3.h"
+#include "llc.h"
 
 using namespace std;
 using namespace Tins;
@@ -15,7 +17,7 @@ public:
 const uint8_t STPTest::expected_packet[] = { 
     146, 131, 138, 146, 146, 128, 0, 0, 144, 76, 8, 23, 181, 0, 146, 131, 
     120, 128, 0, 0, 144, 76, 8, 23, 181, 128, 1, 15, 0, 20, 0, 2, 0, 0, 
-    0, 165, 165, 165, 165, 165, 165, 165, 165
+    0
 };
 
 TEST_F(STPTest, DefaultConstructor) {
@@ -46,6 +48,37 @@ TEST_F(STPTest, ConstructorFromBuffer) {
     EXPECT_EQ(20, pdu.max_age());
     EXPECT_EQ(2, pdu.hello_time());
     EXPECT_EQ(0, pdu.fwd_delay());
+}
+
+TEST_F(STPTest, ChainedPDUs) {
+    const uint8_t input[] = {
+        1, 128, 194, 0, 0, 0, 0, 144, 76, 8, 23, 181, 0, 38, 66, 66, 3, 
+        0, 0, 0, 0, 0, 128, 0, 0, 144, 76, 8, 23, 181, 0, 0, 0, 0, 128, 
+        0, 0, 144, 76, 8, 23, 181, 128, 1, 0, 0, 20, 0, 2, 0, 0, 0
+    };
+    Dot3 pkt(input, sizeof(input));
+    STP *stp = pkt.find_pdu<STP>();
+    LLC *llc = pkt.find_pdu<LLC>();
+    ASSERT_TRUE(stp);
+    ASSERT_TRUE(llc);
+    EXPECT_EQ(0x8001, stp->port_id());
+    EXPECT_EQ(0, stp->msg_age());
+    EXPECT_EQ(20, stp->max_age());
+    EXPECT_EQ(2, stp->hello_time());
+    llc->dsap(0);
+    llc->ssap(0);
+    EXPECT_EQ(
+        PDU::serialization_type(input, input + sizeof(input)),
+        pkt.serialize()
+    );
+}
+
+TEST_F(STPTest, Serialize) {
+    STP pdu(expected_packet, sizeof(expected_packet));
+    EXPECT_EQ(
+        PDU::serialization_type(expected_packet, expected_packet + sizeof(expected_packet)),
+        pdu.serialize()
+    );
 }
 
 TEST_F(STPTest, ProtoID) {

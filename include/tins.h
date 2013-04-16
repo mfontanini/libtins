@@ -66,5 +66,6 @@
 #include "sll.h"
 #include "dhcpv6.h"
 #include "pppoe.h"
+#include "stp.h"
 
 #endif // TINS_TINS_H

@@ -28,6 +28,7 @@
  */
 
 #include <cstring>
+#include <cassert>
 #include "stp.h"
 
 namespace Tins {
@@ -86,7 +87,10 @@ void STP::fwd_delay(uint16_t new_fwd_delay) {
 }
 
 void STP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    
+    #ifdef TINS_DEBUG
+        assert(total_sz >= sizeof(_header));
+    #endif
+    std::memcpy(buffer, &_header, sizeof(_header));
 }
 
 uint32_t STP::header_size() const {

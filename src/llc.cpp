@@ -30,9 +30,8 @@
 #include <stdexcept>
 #include <cstring>
 #include <cassert>
-
-#include "pdu.h"
 #include "llc.h"
+#include "stp.h"
 #include "rawpdu.h"
 
 using std::list;
@@ -86,8 +85,12 @@ LLC::LLC(const uint8_t *buffer, uint32_t total_sz) {
 		buffer += 2;
 		total_sz -= 2;
 	}
-    if(total_sz > 0)
-        inner_pdu(new Tins::RawPDU(buffer, total_sz));
+    if(total_sz > 0) {
+        if(dsap() == 0x42 && ssap() == 0x42)
+            inner_pdu(new Tins::STP(buffer, total_sz));
+        else
+            inner_pdu(new Tins::RawPDU(buffer, total_sz));
+    }
 }
 
 void LLC::group(bool value) {
@@ -201,6 +204,10 @@ void LLC::clear_information_fields() {
 
 void LLC::write_serialization(uint8_t *buffer, uint32_t total_sz, const Tins::PDU *parent) {
 	assert(total_sz >= header_size());
+    if(inner_pdu() && inner_pdu()->pdu_type() == PDU::STP) {
+        dsap(0x42);
+        ssap(0x42);
+    }
 	std::memcpy(buffer, &_header, sizeof(_header));
 	buffer += sizeof(_header);
 	switch (type()) {
@@ -219,7 +226,6 @@ void LLC::write_serialization(uint8_t *buffer, uint32_t total_sz, const Tins::PD
 	}
 
 	for (list<field_type>::const_iterator it = information_fields.begin(); it != information_fields.end(); it++) {
-		//std::memcpy(buffer, it->second, it->first);
         std::copy(it->begin(), it->end(), buffer);
 		buffer += it->size();
 	}
