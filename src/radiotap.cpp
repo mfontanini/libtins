@@ -124,13 +124,14 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
         read_field(buffer, radiotap_hdr_size, _channel);
         read_field(buffer, radiotap_hdr_size, _max_power);
     }
-    if((flags() & FCS) != 0) {
-        check_size(radiotap_hdr_size, sizeof(uint32_t));
-        radiotap_hdr_size -= sizeof(uint32_t);
-    }
 
-    total_sz -= _radio.it_len;
+    total_sz -= Endian::le_to_host(_radio.it_len);
     buffer += radiotap_hdr_size;
+
+    if((flags() & FCS) != 0) {
+        check_size(total_sz, sizeof(uint32_t));
+        total_sz -= sizeof(uint32_t);
+    }
 
     if(total_sz) 
         inner_pdu(Dot11::from_bytes(buffer, total_sz));
