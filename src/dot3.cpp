@@ -44,6 +44,7 @@
 #include "dot3.h"
 #include "packet_sender.h"
 #include "llc.h"
+#include "exceptions.h"
 
 namespace Tins {
 const Dot3::address_type Dot3::BROADCAST("ff:ff:ff:ff:ff:ff");
@@ -64,7 +65,7 @@ Dot3::Dot3(const NetworkInterface& iface,
 Dot3::Dot3(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(ethhdr))
-        throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
+        throw malformed_packet();
     memcpy(&_eth, buffer, sizeof(ethhdr));
     buffer += sizeof(ethhdr);
     total_sz -= sizeof(ethhdr);

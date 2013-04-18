@@ -33,6 +33,7 @@
 #include <typeinfo>
 #include "dns_record.h"
 #include "endianness.h"
+#include "exceptions.h"
 
 namespace Tins {
 bool contains_dname(uint16_t type) {
@@ -65,17 +66,17 @@ DNSResourceRecord::DNSResourceRecord(const uint8_t *buffer, uint32_t size)
         while(str_end < buffer_end && *str_end)
             str_end++;
         if(str_end == buffer_end)
-            throw std::runtime_error("Not enough size for a resource domain name.");
+            throw malformed_packet();
         //str_end++;
         tmp_impl.reset(new NamedDNSRRImpl(buffer, str_end));
         buffer = ++str_end;
     }
     if(buffer + sizeof(info_) > buffer_end)
-        throw std::runtime_error("Not enough size for a resource info.");
+        throw malformed_packet();
     std::memcpy(&info_, buffer, sizeof(info_));
     buffer += sizeof(info_);
     if(buffer + sizeof(uint16_t) > buffer_end)
-        throw std::runtime_error("Not enough size for resource data size.");
+        throw malformed_packet();
 
     // Store the option size.
     data.resize(
@@ -83,7 +84,7 @@ DNSResourceRecord::DNSResourceRecord(const uint8_t *buffer, uint32_t size)
     );
     buffer += sizeof(uint16_t);
     if(buffer + data.size() > buffer_end)
-        throw std::runtime_error("Not enough size for resource data");
+        throw malformed_packet();
     if(contains_dname(info_.type) || data.size() != sizeof(uint32_t))
         std::copy(buffer, buffer + data.size(), data.begin());
     else if(data.size() == sizeof(uint32_t))

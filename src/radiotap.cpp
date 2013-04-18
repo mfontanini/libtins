@@ -43,12 +43,12 @@
 #include "dot11.h"
 #include "utils.h"
 #include "packet_sender.h"
+#include "exceptions.h"
 
 namespace Tins {
 void check_size(uint32_t total_sz, size_t field_size) {
-    static const std::string msg("Not enough size for an RadioTap header in the buffer.");
     if(total_sz < field_size)
-        throw std::runtime_error(msg);
+        throw malformed_packet();
 }
 
 template<typename T>

@@ -76,8 +76,14 @@ namespace Tins {
                     PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an EthernetII object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructs a EthernetII object from a buffer and adds 
+         * all identifiable PDUs found in the buffer as children of 
+         * this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for a EthernetII header in the 
+         * buffer, a malformed_packet exception is thrown.
          * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.

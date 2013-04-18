@@ -107,6 +107,9 @@ public:
     /**
      * \brief Constructor which creates an PPPoE object from a buffer.
      * 
+     * If there is not enough size for a PPPoE header, a malformed_packet
+     * exception is thrown.
+     * 
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */

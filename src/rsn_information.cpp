@@ -29,12 +29,13 @@
 
 #include <stdexcept>
 #include "rsn_information.h"
+#include "exceptions.h"
 
 namespace Tins {
 template<typename T>
-void check_size(uint32_t total_sz, const char* err_msg) {
+void check_size(uint32_t total_sz) {
     if(total_sz < sizeof(T))
-        throw std::runtime_error(err_msg);
+        throw malformed_packet();
 }
     
 RSNInformation::RSNInformation() : _version(1), _capabilities(0) {
@@ -50,9 +51,8 @@ RSNInformation::RSNInformation(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 void RSNInformation::init(const uint8_t *buffer, uint32_t total_sz) {
-    const char *err_msg = "Malformed RSN information structure";
     if(total_sz <= sizeof(uint16_t) * 2 + sizeof(uint32_t))
-        throw std::runtime_error(err_msg);
+        throw malformed_packet();
     version(Endian::le_to_host(*(uint16_t*)buffer));
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
@@ -66,25 +66,25 @@ void RSNInformation::init(const uint8_t *buffer, uint32_t total_sz) {
     total_sz -= sizeof(uint16_t);
     
     if(count * sizeof(uint32_t) > total_sz)
-        throw std::runtime_error(err_msg);
+        throw malformed_packet();
     total_sz -= count * sizeof(uint32_t);
     while(count--) {
         add_pairwise_cypher((RSNInformation::CypherSuites)*(uint32_t*)buffer);
         buffer += sizeof(uint32_t);
     }
-    check_size<uint16_t>(total_sz, err_msg);
+    check_size<uint16_t>(total_sz);
 
     count = *(uint16_t*)buffer;
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
     if(count * sizeof(uint32_t) > total_sz)
-        throw std::runtime_error(err_msg);
+        throw malformed_packet();
     total_sz -= count * sizeof(uint32_t);
     while(count--) {
         add_akm_cypher((RSNInformation::AKMSuites)*(uint32_t*)buffer);
         buffer += sizeof(uint32_t);
     }
-    check_size<uint16_t>(total_sz, err_msg);
+    check_size<uint16_t>(total_sz);
     
     capabilities(Endian::le_to_host(*(uint16_t*)buffer));
 }

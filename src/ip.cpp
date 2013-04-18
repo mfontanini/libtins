@@ -49,6 +49,7 @@
 #include "packet_sender.h"
 #include "constants.h"
 #include "network_interface.h"
+#include "exceptions.h"
 
 using std::list;
 
@@ -66,18 +67,17 @@ IP::IP(address_type ip_dst, address_type ip_src, PDU *child)
 
 IP::IP(const uint8_t *buffer, uint32_t total_sz) 
 {
-    const char *msg = "Not enough size for an IP header in the buffer.";
     if(total_sz < sizeof(iphdr))
-        throw std::runtime_error(msg);
+        throw malformed_packet();
     std::memcpy(&_ip, buffer, sizeof(iphdr));
 
     /* Options... */
     /* Establish beginning and ending of the options */
     const uint8_t* ptr_buffer = buffer + sizeof(iphdr);
     if(total_sz < head_len() * sizeof(uint32_t))
-        throw std::runtime_error(msg);
+        throw malformed_packet();
     if(head_len() * sizeof(uint32_t) < sizeof(iphdr))
-        throw std::runtime_error("Malformed head len field");
+        throw malformed_packet();
     buffer += head_len() * sizeof(uint32_t);
     
     _options_size = 0;
@@ -91,13 +91,13 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
         if(opt_type.number > NOOP) {
             /* Multibyte options with length as second byte */
             if(ptr_buffer == buffer || *ptr_buffer == 0)
-                throw std::runtime_error(msg);
+                throw malformed_packet();
                 
             const uint8_t data_size = *ptr_buffer - 2;
             if(data_size > 0) {
                 ptr_buffer++;
                 if(buffer - ptr_buffer < data_size)
-                    throw std::runtime_error(msg);
+                    throw malformed_packet();
                 _ip_options.push_back(option(opt_type, ptr_buffer, ptr_buffer + data_size));
             }
             else

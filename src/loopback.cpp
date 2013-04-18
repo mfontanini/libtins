@@ -43,6 +43,7 @@
 #include "ip.h"
 #include "llc.h"
 #include "rawpdu.h"
+#include "exceptions.h"
 
 #if !defined(PF_LLC)
     // compilation fix, nasty but at least works on BSD
@@ -65,7 +66,7 @@ Loopback::Loopback(const NetworkInterface &iface, PDU *inner_pdu)
 Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(_family))
-        throw std::runtime_error("Not enough size for a loopback PDU");
+        throw malformed_packet();
     _family = *reinterpret_cast<const uint32_t*>(buffer);
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);

@@ -61,7 +61,14 @@ public:
     Loopback(const NetworkInterface &iface, PDU *inner_pdu = 0);
     
     /**
-     * \brief Construct a Loopback object from a buffer.
+     * \brief Construct a Loopback object from a buffer and adds 
+     * all identifiable PDUs found in the buffer as children of 
+     * this one. 
+     * 
+     * If the next PDU is not recognized, then a RawPDU is used.
+     * 
+     * If there is not enough size for a Loopback header, a 
+     * malformed_packet exception is thrown.
      * 
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.

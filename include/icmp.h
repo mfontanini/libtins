@@ -71,8 +71,13 @@ namespace Tins {
         ICMP(Flags flag = ECHO_REQUEST);
 
         /**
-         * \brief Constructor which creates an ICMP object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructs an ICMP object from a buffer.
+         * 
+         * If there is not enough size for an ICMP header, a 
+         * malformed_packet exception is thrown.
+         * 
+         * Any extra data in the buffer will be stored in a RawPDU.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */

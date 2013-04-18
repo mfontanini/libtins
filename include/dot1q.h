@@ -48,9 +48,14 @@ public:
     Dot1Q(small_uint<12> tag_id = 0, bool append_pad = true);
 
     /**
-     * \brief Constructor which creates an Dot1Q object from a buffer and 
-     * adds all identifiable PDUs found in the buffer as children of this 
-     * one.
+     * \brief Constructs a Dot1Q object from a buffer and adds all 
+     * identifiable PDUs found in the buffer as children of this 
+     * one. 
+     * 
+     * If the next PDU is not recognized, then a RawPDU is used.
+     * 
+     * If there is not enough size for a Dot1Q header in the buffer,
+     * a malformed_packet exception is thrown.
      * 
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.

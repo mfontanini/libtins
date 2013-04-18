@@ -45,6 +45,7 @@
 #include "icmp.h"
 #include "icmpv6.h"
 #include "rawpdu.h"
+#include "exceptions.h"
 
 namespace Tins {
 
@@ -60,7 +61,7 @@ IPv6::IPv6(address_type ip_dst, address_type ip_src, PDU *child)
 IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz) 
 : headers_size(0) {
     if(total_sz < sizeof(_header))
-        throw std::runtime_error("Not enough size for an IPv6 PDU");
+        throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
@@ -68,13 +69,13 @@ IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz)
     while(total_sz) {
         if(is_extension_header(current_header)) {
             if(total_sz < 8)
-                throw header_size_error();
+                throw malformed_packet();
             // every ext header is at least 8 bytes long
             // minus one, from the next_header field.
             uint32_t size = static_cast<uint32_t>(buffer[1]) + 8;
             // -1 -> next header identifier
             if(total_sz < size) 
-                throw header_size_error();
+                throw malformed_packet();
             // minus one, from the size field
             add_ext_header(
                 ext_header(buffer[0], size - sizeof(uint8_t)*2, buffer + 2)

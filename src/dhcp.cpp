@@ -32,6 +32,7 @@
 #include "endianness.h"
 #include "dhcp.h"
 #include "ethernetII.h"
+#include "exceptions.h"
 
 using std::string;
 using std::list;
@@ -52,7 +53,7 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
     total_sz -= BootP::header_size() - vend().size();
     uint8_t args[2] = {0};
     if(total_sz < sizeof(uint32_t) || *(uint32_t*)buffer != Endian::host_to_be<uint32_t>(0x63825363))
-        throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
+        throw malformed_packet();
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);
     while(total_sz) {
@@ -64,11 +65,13 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
                 i = 2;
             }
             else if(!total_sz)
-                throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
+                throw malformed_packet();
         }
         if(total_sz < args[1])
-            throw std::runtime_error("Not enough size for a DHCP header in the buffer.");
-        add_option(option((OptionTypes)args[0], args[1], buffer));
+            throw malformed_packet();
+        add_option(
+            option((OptionTypes)args[0], args[1], buffer)
+        );
         buffer += args[1];
         total_sz -= args[1];
     }

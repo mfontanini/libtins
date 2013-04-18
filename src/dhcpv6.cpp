@@ -30,6 +30,7 @@
 #include <vector>
 #include <algorithm>
 #include "dhcpv6.h"
+#include "exceptions.h"
 
 namespace Tins {
 DHCPv6::DHCPv6() : options_size() {
@@ -39,21 +40,19 @@ DHCPv6::DHCPv6() : options_size() {
 DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz) 
 : options_size() 
 {
-    const char *err_msg = "Not enough size for a DHCPv6 header",
-                *opt_err_msg = "Not enough size for a DHCPv6 option";
     if(total_sz == 0) 
-        throw std::runtime_error(err_msg);
+        throw malformed_packet();
     // Relay Agent/Server Messages
     bool is_relay_msg = (buffer[0] == 12 || buffer[0] == 13);
     uint32_t required_size = is_relay_msg ? 2 : 4;
     if(total_sz < required_size)
-        throw std::runtime_error(err_msg);
+        throw malformed_packet();
     std::copy(buffer, buffer + required_size, header_data);
     buffer += required_size;
     total_sz -= required_size;
     if(is_relay_message()) {
         if(total_sz < ipaddress_type::address_size * 2)
-            throw std::runtime_error(err_msg);
+            throw malformed_packet();
         link_addr = buffer;
         peer_addr = buffer + ipaddress_type::address_size;
         buffer += ipaddress_type::address_size * 2;
@@ -62,14 +61,14 @@ DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz)
     options_size = total_sz;
     while(total_sz) {
         if(total_sz < sizeof(uint16_t) * 2) 
-            throw std::runtime_error(opt_err_msg);
+            throw malformed_packet();
         
         const uint16_t opt = Endian::be_to_host(*(const uint16_t*)buffer);
         const uint16_t data_size = Endian::be_to_host(
             *(const uint16_t*)(buffer + sizeof(uint16_t))
         );
         if(total_sz - sizeof(uint16_t) * 2 < data_size)
-            throw std::runtime_error(opt_err_msg);
+            throw malformed_packet();
         buffer += sizeof(uint16_t) * 2;
         add_option(
             option(opt, buffer, buffer + data_size)

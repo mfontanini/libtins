@@ -239,9 +239,13 @@ namespace Tins {
             PDU *child = 0);
 
         /**
-         * \brief Constructor which constructs an IP object from a buffer 
-         * and adds all identifiable PDUs found in the buffer as children 
-         * of this one.
+         * \brief Constructs an IP object from a buffer and adds all 
+         * identifiable PDUs found in the buffer as children of this 
+         * one.
+         * 
+         * If there is not enough size for an IP header, a 
+         * malformed_packet exception is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */

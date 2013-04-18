@@ -35,6 +35,8 @@
 #include "dns.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
+#include "exceptions.h"
+#include "rawpdu.h"
 
 using std::string;
 using std::list;
@@ -47,7 +49,7 @@ DNS::DNS() : extra_size(0) {
 
 DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : extra_size(0) {
     if(total_sz < sizeof(dnshdr))
-        throw std::runtime_error("Not enough size for a DNS header in the buffer.");
+        throw malformed_packet();
     std::memcpy(&dns, buffer, sizeof(dnshdr));
     const uint8_t *end(buffer + total_sz);
     uint16_t nquestions(questions_count());
@@ -59,7 +61,7 @@ DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : extra_size(0) {
             ptr++;
         Query query;
         if((ptr + (sizeof(uint16_t) * 2)) >= end)
-            throw std::runtime_error("Not enough size for a given query.");
+            throw malformed_packet();
         query.dname(string(buffer, ptr));
         ptr++;
         const uint16_t *opt_ptr = reinterpret_cast<const uint16_t*>(ptr);
@@ -73,6 +75,8 @@ DNS::DNS(const uint8_t *buffer, uint32_t total_sz) : extra_size(0) {
     buffer = build_resource_list(ans, buffer, total_sz, answers_count());
     buffer = build_resource_list(arity, buffer, total_sz, authority_count());
     build_resource_list(addit, buffer, total_sz, additional_count());
+    if(total_sz)
+        inner_pdu(new RawPDU(buffer, total_sz));
 }
 
 const uint8_t *DNS::build_resource_list(ResourcesType &lst, const uint8_t *ptr, uint32_t &sz, uint16_t nrecs) {
@@ -81,7 +85,7 @@ const uint8_t *DNS::build_resource_list(ResourcesType &lst, const uint8_t *ptr, 
     for(uint16_t i(0); i < nrecs; ++i) {
         const uint8_t *this_opt_start(ptr);
         if(ptr + sizeof(uint16_t) > ptr_end)
-            throw std::runtime_error("Not enough size for a given resource.");
+            throw malformed_packet();
         lst.push_back(DNSResourceRecord(ptr, ptr_end - ptr));
         ptr += lst.back().size();
         extra_size += ptr - this_opt_start;
@@ -386,7 +390,7 @@ void DNS::compose_name(const uint8_t *ptr, uint32_t sz, std::string &out) const 
             // We need at least a suffix or a suffix index to compose 
             // the domain name
             if(it == suffixes.end() && suff_it == suffix_indices.end())
-                throw std::runtime_error("Malformed DNS packet");
+                throw malformed_packet();
             bool first(true);
             do {
                 if(it != suffixes.end()) {

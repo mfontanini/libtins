@@ -35,6 +35,7 @@
 #include "constants.h"
 #include "rawpdu.h"
 #include "utils.h"
+#include "exceptions.h"
 
 namespace Tins {
 
@@ -53,7 +54,7 @@ TCP::TCP(uint16_t dport, uint16_t sport)
 TCP::TCP(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(tcphdr))
-        throw std::runtime_error("Not enough size for an TCP header in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_tcp, buffer, sizeof(tcphdr));
     buffer += sizeof(tcphdr);
     total_sz -= sizeof(tcphdr);
@@ -67,7 +68,7 @@ TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
         while(index < header_end) {
             for(unsigned i(0); i < 2; ++i) {
                 if(index == header_end)
-                    throw std::runtime_error("Not enough size for a TCP header in the buffer.");
+                    throw malformed_packet();
                 args[i] = buffer[index++];
                 // NOP and EOL contain no length field
                 if(args[0] == NOP || args[0] == EOL)
@@ -78,7 +79,7 @@ TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
                 // Not enough size for this option
                 args[1] -= (sizeof(uint8_t) << 1);
                 if(header_end - index < args[1])
-                    throw std::runtime_error("Not enough size for a TCP header in the buffer.");                        
+                    throw malformed_packet(); 
                 if(args[1])
                     add_option(option((OptionTypes)args[0], buffer + index, buffer + index + args[1]));
                 else

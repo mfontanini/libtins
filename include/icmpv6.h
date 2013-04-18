@@ -434,8 +434,12 @@ public:
     ICMPv6(Types tp = ECHO_REQUEST);
     
     /**
-     * \brief Constructor which creates an ICMP object from a buffer and 
-     * adds all identifiable PDUs found in the buffer as children of this one.
+     * \brief Constructs an ICMPv6 object from a buffer.
+     * 
+     * If there is not enough size for an ICMPv6 header, a
+     * malformed_packet exception is thrown.
+     * 
+     * Any extra data is stored in a RawPDU.
      * 
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.

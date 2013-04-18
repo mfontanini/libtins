@@ -31,6 +31,7 @@
 #include <cstring>
 #include "sll.h"
 #include "internals.h"
+#include "exceptions.h"
 
 namespace Tins {
 SLL::SLL() : _header() {
@@ -38,9 +39,8 @@ SLL::SLL() : _header() {
 }
     
 SLL::SLL(const uint8_t *buffer, uint32_t total_sz) {
-    const char *err_msg = "Not enough size for a SLL header";
     if(total_sz < sizeof(_header))
-        throw std::runtime_error(err_msg);
+        throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);

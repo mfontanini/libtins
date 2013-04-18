@@ -82,8 +82,14 @@ namespace Tins {
             const hwaddress_type &sender_hw = hwaddress_type());
 
         /**
-         * \brief Constructor which creates an ARP object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructs an ARP object from a buffer.
+         * 
+         * If there is not enough size for an ARP header in the buffer,
+         * a malformed_packet exception is thrown. 
+         * 
+         * If the buffer is bigger than the size of the ARP header, 
+         * then the extra data is stored in a RawPDU.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */

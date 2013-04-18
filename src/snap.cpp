@@ -39,6 +39,7 @@
 #include "ip.h"
 #include "eapol.h"
 #include "internals.h"
+#include "exceptions.h"
 
 
 Tins::SNAP::SNAP(PDU *child) : PDU(child) 
@@ -51,22 +52,11 @@ Tins::SNAP::SNAP(PDU *child) : PDU(child)
 Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(_snap))
-        throw std::runtime_error("Not enough size for a SNAP header in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_snap, buffer, sizeof(_snap));
     buffer += sizeof(_snap);
     total_sz -= sizeof(_snap);
     if(total_sz) {
-        /*switch(eth_type()) {
-            case Tins::Constants::Ethernet::IP:
-                inner_pdu(new Tins::IP(buffer, total_sz));
-                break;
-            case Tins::Constants::Ethernet::ARP:
-                inner_pdu(new Tins::ARP(buffer, total_sz));
-                break;
-            case Tins::Constants::Ethernet::EAPOL:
-                inner_pdu(Tins::EAPOL::from_bytes(buffer, total_sz));
-                break;
-        };*/
         inner_pdu(
             Internals::pdu_from_flag(
                 (Constants::Ethernet::e)eth_type(), 

@@ -31,6 +31,7 @@
 #include <cstring>
 #include <cassert>
 #include "bootp.h"
+#include "exceptions.h"
 
 namespace Tins{
 BootP::BootP() 
@@ -42,7 +43,7 @@ BootP::BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size)
 : _vend(vend_field_size) 
 {
     if(total_sz < sizeof(bootphdr) + vend_field_size)
-        throw std::runtime_error("Not enough size for a BootP header in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_bootp, buffer, sizeof(bootphdr));
     buffer += sizeof(bootphdr);
     total_sz -= sizeof(bootphdr);

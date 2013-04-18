@@ -85,17 +85,6 @@ public:
     };
 
     /**
-     * Exception thrown when an invalid extension header size is 
-     * encountered.
-     */
-    class header_size_error : public std::exception {
-    public:
-        const char *what() const throw() {
-            return "Not enough size for an extension header";
-        }
-    };
-
-    /**
      * \brief Constructs an IPv6 object.
      * 
      * \param ip_dst The destination ip address(optional).
@@ -108,9 +97,11 @@ public:
         PDU *child = 0);
 
     /**
-     * \brief Constructor which creates an IPv6 object from a buffer and 
-     * adds all identifiable PDUs found in the buffer as children of this 
-     * one.
+     * \brief Constructs an IPv6 object from a buffer and adds all 
+     * identifiable PDUs found in the buffer as children of this one.
+     * 
+     * If there is not enough size for an IPv6 header, a malformed_packet
+     * exception is thrown.
      * 
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.

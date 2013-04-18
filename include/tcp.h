@@ -129,9 +129,14 @@ namespace Tins {
         TCP(uint16_t dport = 0, uint16_t sport = 0);
 
         /**
-         * \brief Constructor which creates an TCP object from a buffer 
-         * and adds all identifiable PDUs found in the buffer as children
-         * of this one.
+         * \brief Constructs TCP object from a buffer.
+         * 
+         * If there is not enough size for a TCP header, or any of the
+         * TLV options are malformed a malformed_packet exception is 
+         * thrown.
+         * 
+         * Any extra data will be stored in a RawPDU.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */

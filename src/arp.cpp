@@ -36,6 +36,7 @@
 #include "rawpdu.h"
 #include "constants.h"
 #include "network_interface.h"
+#include "exceptions.h"
 
 
 using std::runtime_error;
@@ -59,7 +60,7 @@ ARP::ARP(ipaddress_type target_ip, ipaddress_type sender_ip,
 ARP::ARP(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(arphdr))
-        throw runtime_error("Not enough size for an ARP header in the buffer.");
+        throw malformed_packet();
     memcpy(&_arp, buffer, sizeof(arphdr));
     total_sz -= sizeof(arphdr);
     if(total_sz)

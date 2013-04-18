@@ -34,6 +34,7 @@
 #include "rawpdu.h"
 #include "utils.h"
 #include "constants.h"
+#include "exceptions.h"
 
 namespace Tins {
 
@@ -48,27 +49,27 @@ ICMPv6::ICMPv6(const uint8_t *buffer, uint32_t total_sz)
 : _options_size(), reach_time(0), retrans_timer(0)
 {
     if(total_sz < sizeof(_header))
-        throw std::runtime_error("Not enough size for an ICMPv6 header");
+        throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
     if(has_target_addr()) {
         if(total_sz < ipaddress_type::address_size)
-            throw std::runtime_error("Not enough size for the target address");
+            throw malformed_packet();
         target_addr(buffer);
         buffer += ipaddress_type::address_size;
         total_sz -= ipaddress_type::address_size;
     }
     if(has_dest_addr()) {
         if(total_sz < ipaddress_type::address_size)
-            throw std::runtime_error("Not enough size for the destination address");
+            throw malformed_packet();
         dest_addr(buffer);
         buffer += ipaddress_type::address_size;
         total_sz -= ipaddress_type::address_size;
     }
     if(type() == ROUTER_ADVERT) {
         if(total_sz < sizeof(uint32_t) * 2)
-            throw std::runtime_error("Not enough size for router advert fields");
+            throw malformed_packet();
         const uint32_t *ptr_32 = (const uint32_t*)buffer;
         reach_time = *ptr_32++;
         retrans_timer = *ptr_32++;
@@ -85,9 +86,15 @@ ICMPv6::ICMPv6(const uint8_t *buffer, uint32_t total_sz)
 void ICMPv6::parse_options(const uint8_t *&buffer, uint32_t &total_sz) {
     while(total_sz > 0) {
         if(total_sz < 8 || (static_cast<uint32_t>(buffer[1]) * 8) > total_sz || buffer[1] < 1) 
-            throw std::runtime_error("Not enough size for options");
+            throw malformed_packet();
         // size(option) = option_size - identifier_size - length_identifier_size
-        add_option(option(buffer[0], static_cast<uint32_t>(buffer[1]) * 8 - sizeof(uint8_t) * 2, buffer + 2));
+        add_option(
+            option(
+                buffer[0], 
+                static_cast<uint32_t>(buffer[1]) * 8 - sizeof(uint8_t) * 2, 
+                buffer + 2
+            )
+        );
         total_sz -= buffer[1] * 8;
         buffer += buffer[1] * 8;
     }

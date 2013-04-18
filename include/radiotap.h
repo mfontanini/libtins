@@ -116,8 +116,12 @@ namespace Tins {
           PDU *child = 0);
         
         /**
-         * \brief Constructor which creates a RadioTap object from a buffer and adds all
+         * \brief Constructs a RadioTap object from a buffer and adds all
          * identifiable PDUs found in the buffer as children of this one.
+         * 
+         * If there is not enough size for a RadioTap header, a
+         * malformed_packet exception is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */

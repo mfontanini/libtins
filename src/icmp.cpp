@@ -37,6 +37,7 @@
 #include "icmp.h"
 #include "rawpdu.h"
 #include "utils.h"
+#include "exceptions.h"
 
 Tins::ICMP::ICMP(Flags flag) 
 {
@@ -47,7 +48,7 @@ Tins::ICMP::ICMP(Flags flag)
 Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(icmphdr))
-        throw std::runtime_error("Not enough size for an ICMP header in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_icmp, buffer, sizeof(icmphdr));
     total_sz -= sizeof(icmphdr);
     if(total_sz)

@@ -76,8 +76,12 @@ namespace Tins {
                   PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an Dot3 object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot3 object from a buffer and adds a
+         * LLC object with the remaining data as the inner PDU.
+         * 
+         * If there is not enough size for a Dot3 header, a 
+         * malformed_packet exception is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */

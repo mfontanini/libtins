@@ -33,6 +33,7 @@
 #include "llc.h"
 #include "stp.h"
 #include "rawpdu.h"
+#include "exceptions.h"
 
 using std::list;
 
@@ -62,14 +63,14 @@ LLC::LLC(uint8_t dsap, uint8_t ssap, PDU *child)
 LLC::LLC(const uint8_t *buffer, uint32_t total_sz) {
     // header + 1 info byte
 	if(total_sz < sizeof(_header) + 1)
-		throw std::runtime_error("Not enough size for a LLC header in the buffer.");
+		throw malformed_packet();
 	std::memcpy(&_header, buffer, sizeof(_header));
 	buffer += sizeof(_header);
 	total_sz -= sizeof(_header);
 	information_field_length = 0;
 	if ((buffer[0] & 0x03) == LLC::UNNUMBERED) {
         if(total_sz < sizeof(un_control_field))
-            throw std::runtime_error("Not enough size for a LLC header in the buffer.");
+            throw malformed_packet();
 		type(LLC::UNNUMBERED);
 		std::memcpy(&control_field.unnumbered, buffer, sizeof(un_control_field));
 		buffer += sizeof(un_control_field);
@@ -78,7 +79,7 @@ LLC::LLC(const uint8_t *buffer, uint32_t total_sz) {
 	}
 	else {
         if(total_sz < sizeof(info_control_field))
-            throw std::runtime_error("Not enough size for a LLC header in the buffer.");
+            throw malformed_packet();
 		type((Format)(buffer[0] & 0x03));
 		control_field_length = 2;
 		std::memcpy(&control_field.info, buffer, sizeof(info_control_field));

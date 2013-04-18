@@ -32,6 +32,7 @@
 #include <cassert>
 #include "dot1q.h"
 #include "internals.h"
+#include "exceptions.h"
 
 namespace Tins {
 
@@ -45,7 +46,7 @@ Dot1Q::Dot1Q(const uint8_t *buffer, uint32_t total_sz)
 : _append_padding()
 {
     if(total_sz < sizeof(_header))
-        throw std::runtime_error("Not enough size for a Dot1Q header");
+        throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);

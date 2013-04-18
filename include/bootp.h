@@ -84,8 +84,11 @@ namespace Tins {
         BootP();
 
         /**
-         * \brief Constructor which creates a BootP object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructs a BootP object from a buffer .
+         * 
+         * If there's not enough size for a BootP header, then a 
+         * malformed_packet exception is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          * \param vend_field_size The vend field size to allocate.

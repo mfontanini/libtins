@@ -33,18 +33,9 @@
 #include <vector>
 #include <iterator>
 #include <stdint.h>
+#include "exceptions.h"
 
 namespace Tins {
-/**
- * \brief Exception thrown when an option is not found.
- */
-class option_not_found : public std::exception {
-public:
-    const char* what() const throw() {
-        return "Option not found";
-    }
-};
-    
 /**
  * \class PDUOption
  * \brief Represents a PDU option field.

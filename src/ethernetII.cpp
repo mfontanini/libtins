@@ -49,6 +49,7 @@
 #include "arp.h"
 #include "constants.h"
 #include "internals.h"
+#include "exceptions.h"
 
 namespace Tins {
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
@@ -69,7 +70,7 @@ EthernetII::EthernetII(const NetworkInterface& iface,
 EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(ethhdr))
-        throw std::runtime_error("Not enough size for an ethernetII header in the buffer.");
+        throw malformed_packet();
     memcpy(&_eth, buffer, sizeof(ethhdr));
     buffer += sizeof(ethhdr);
     total_sz -= sizeof(ethhdr);

@@ -388,9 +388,12 @@ public:
     DHCPv6();
     
     /**
-     * \brief Constructor which constructs a DHCPv6 object from a buffer 
-     * and adds all identifiable PDUs found in the buffer as children 
-     * of this one.
+     * \brief Constructs a DHCPv6 object from a buffer.
+     * 
+     * If there is not enough size for the DHCPv6 header, or any
+     * of the TLV options contains an invalid size field, a 
+     * malformed_packet exception is thrown.
+     * 
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */

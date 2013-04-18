@@ -32,6 +32,7 @@
 #endif
 #include <cstring>
 #include "pppoe.h"
+#include "exceptions.h"
 
 namespace Tins {
 
@@ -45,22 +46,21 @@ PPPoE::PPPoE()
 PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz) 
 : _tags_size()
 {
-    const char *err_msg = "Not enough size for a PPPoE";
     if(total_sz < sizeof(_header))
-        throw std::runtime_error(err_msg);
+        throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
     const uint8_t *end = buffer + total_sz;
     while(buffer < end) {
         if(buffer + sizeof(uint32_t) * 2 > end)
-            throw std::runtime_error(err_msg);
+            throw malformed_packet();
         uint16_t opt_type = *(const uint16_t*)buffer;
         uint16_t opt_len = *(const uint16_t*)(buffer + sizeof(uint16_t));
         buffer += sizeof(uint16_t) * 2;
         total_sz -= sizeof(uint16_t) * 2;
         if(Endian::be_to_host(opt_len) > total_sz)
-            throw std::runtime_error(err_msg);
+            throw malformed_packet();
         add_tag(
             tag(
                 static_cast<TagTypes>(opt_type), 

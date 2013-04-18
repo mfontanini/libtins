@@ -30,6 +30,7 @@
 #include <cstring>
 #include <cassert>
 #include "stp.h"
+#include "exceptions.h"
 
 namespace Tins {
 
@@ -42,7 +43,7 @@ STP::STP()
 STP::STP(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(_header))
-        throw std::runtime_error("Not enough size.");
+        throw malformed_packet();
     std::memcpy(&_header, buffer ,sizeof(_header));
 }
 

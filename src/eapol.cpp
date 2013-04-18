@@ -33,7 +33,7 @@
 #include "eapol.h"
 #include "dot11.h"
 #include "rsn_information.h"
-
+#include "exceptions.h"
 
 namespace Tins {
 EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) 
@@ -47,13 +47,13 @@ EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type)
 EAPOL::EAPOL(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(_header))
-        throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
 }
 
 EAPOL *EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz < sizeof(eapolhdr))
-        throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
+        throw malformed_packet();
     const eapolhdr *ptr = (const eapolhdr*)buffer;
     switch(ptr->type) {
         case RC4:
@@ -86,8 +86,6 @@ void EAPOL::type(uint8_t new_type) {
 void EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     uint32_t sz = header_size();
     assert(total_sz >= sz);
-    //if(!_header.length)
-    //    length(sz - sizeof(_header.version) - sizeof(_header.length) - sizeof(_header.type));
     std::memcpy(buffer, &_header, sizeof(_header));
     write_body(buffer + sizeof(_header), total_sz - sizeof(_header));
 }
@@ -106,7 +104,7 @@ RC4EAPOL::RC4EAPOL(const uint8_t *buffer, uint32_t total_sz)
     buffer += sizeof(eapolhdr);
     total_sz -= sizeof(eapolhdr);
     if(total_sz < sizeof(_header))
-        throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
@@ -171,7 +169,7 @@ RSNEAPOL::RSNEAPOL(const uint8_t *buffer, uint32_t total_sz)
     buffer += sizeof(eapolhdr);
     total_sz -= sizeof(eapolhdr);
     if(total_sz < sizeof(_header))
-        throw std::runtime_error("Not enough size for an EAPOL header in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);

@@ -252,7 +252,11 @@ namespace Tins {
         DNS();
         
         /**
-         * \brief Constructor which creates a DNS object from a buffer.
+         * \brief Constructs a DNS object from a buffer.
+         * 
+         * If there's not enough size for the DNS header, or any of the
+         * records are malformed, a malformed_packet is be thrown.
+         * 
          * \param buffer The buffer from which this PDU will be 
          * constructed.
          * \param total_sz The total size of the buffer.

@@ -133,14 +133,14 @@ namespace Tins {
              * 
              * \param rhs The PDU to be moved.
              */
-            PDU(PDU &&rhs);
+            PDU(PDU &&rhs) noexcept;
             
             /**
              * \brief Move assignment operator.
              * 
              * \param rhs The PDU to be moved.
              */
-            PDU& operator=(PDU &&rhs);
+            PDU& operator=(PDU &&rhs) noexcept;
         #endif
 
         /** 

@@ -68,6 +68,10 @@ public:
     
     /**
      * \brief Constructs a record.
+     * 
+     * If the input data is malformed, a malformed_packet exception
+     * is thrown.
+     * 
      * \param buffer A pointer to the start of the data buffer.
      * \param len The length of the data.
      */

@@ -89,7 +89,10 @@ namespace Tins{
         RSNInformation(const serialization_type &buffer);
         
         /**
-         * \brief Constructor from buffer.
+         * \brief Constructs a RSNInformation from a buffer.
+         * 
+         * If the input is malformed, a malformed_packet exception is
+         * thrown.
          * 
          * \param buffer The buffer from which this object will be constructed.
          * \param total_sz The total size of the buffer.

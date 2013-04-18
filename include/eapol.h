@@ -67,6 +67,12 @@ namespace Tins {
         /**
          * \brief Static method to instantiate the correct EAPOL subclass 
          * based on a raw buffer.
+         * 
+         * If no valid EAPOL type is detected, a null pointer is returned.
+         * 
+         * \sa RC4EAPOL
+         * \sa RSNEAPOL
+         * 
          * \param buffer The buffer from which the data will be taken.
          * \param total_sz The total size of the buffer.
          */
@@ -197,12 +203,16 @@ namespace Tins {
         static const size_t key_sign_size = 16;
     
         /**
-         * \brief Creates an instance of RC4EAPOL
+         * \brief Default constructor.
          */
         RC4EAPOL();
         
         /**
-         * \brief Constructor which creates an RC4EAPOL object from a buffer.
+         * \brief Constructs a RC4EAPOL object from a buffer.
+         * 
+         * If there is not enough size for a RC4EAPOL header in the 
+         * buffer, a malformed_packet exception is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -396,7 +406,11 @@ namespace Tins {
         RSNEAPOL();
         
         /**
-         * \brief Constructor which creates an RSNEAPOL object from a buffer.
+         * \brief Constructs a RSNEAPOL object from a buffer.
+         * 
+         * If there is not enough size for the RSNEAPOL header, a
+         * malformed_packet exception is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
