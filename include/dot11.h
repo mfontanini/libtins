@@ -188,8 +188,14 @@ namespace Tins {
                PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructs 802.11 PDU from a buffer and adds all 
+         * identifiable PDUs found in the buffer as children of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for a 802.11 header in the 
+         * buffer, a malformed_packet exception is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -1481,8 +1487,15 @@ namespace Tins {
                             const address_type &src_hw_addr = address_type());
         
         /**
-         * \brief Constructor which creates a Dot11ManagementFrame object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11ManagementFrame object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
          * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -1527,9 +1540,16 @@ namespace Tins {
                     const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11Beacon object from a buffer and adds
-         * all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11Beacon object from a buffer and adds
+         * all identifiable PDUs found in the buffer as children of this 
+         * one.
          *
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -1647,9 +1667,16 @@ namespace Tins {
                     const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11Disassoc object from a buffer and adds
-         * all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11Disassoc object from a buffer and 
+         * adds all identifiable PDUs found in the buffer as children 
+         * of this one.
          *
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -1734,8 +1761,15 @@ namespace Tins {
                         const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11AssocRequest object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11AssocRequest object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -1838,9 +1872,16 @@ namespace Tins {
                             const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11AssocResponse object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructor which creates a Dot11AssocResponse object 
+         * from a buffer and adds all identifiable PDUs found in the 
+         * buffer as children of this one.
          *
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -1957,8 +1998,15 @@ namespace Tins {
                             const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11AssocRequest object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11AssocRequest object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as 
+         * children of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2076,8 +2124,15 @@ namespace Tins {
                             const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11ReAssocResponse object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11ReAssocResponse object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2195,8 +2250,15 @@ namespace Tins {
                             const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11Authentication object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11Authentication object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2315,8 +2377,15 @@ namespace Tins {
                             const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11Deauthentication object from a buffer and adds
-         * all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11Deauthentication object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2402,8 +2471,15 @@ namespace Tins {
                         const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11ProbeRequest object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11ProbeRequest object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2460,8 +2536,15 @@ namespace Tins {
                         const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructor which creates a Dot11ProbeResponse object from a
-         * buffer and adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11ProbeResponse object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
          *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
@@ -2581,8 +2664,16 @@ namespace Tins {
                 PDU* child = 0);
                     
         /**
-         * \brief Constructor which creates a Dot11Data object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11Data object from a buffer and adds 
+         * all identifiable PDUs found in the buffer as children of 
+         * this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -2745,8 +2836,16 @@ namespace Tins {
                     PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 QoS Data object from a buffer and adds all identifiable
-         * PDUs found in the buffer as children of this one.
+         * \brief Constructors Dot11QoSData object from a buffer and adds
+         * all identifiable PDUs found in the buffer as children of this 
+         * one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -2827,8 +2926,16 @@ namespace Tins {
                     PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 control frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11Control object from a buffer and
+         * adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -2882,8 +2989,16 @@ namespace Tins {
                     PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 control frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11ControlTA object from a buffer and
+         * adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -2930,8 +3045,15 @@ namespace Tins {
                 PDU* child = 0);
                     
         /**
-         * \brief Constructor which creates an 802.11 RTS frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11RTS object from a buffer and adds all 
+         * identifiable PDUs found in the buffer as children of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -2984,8 +3106,16 @@ namespace Tins {
                     PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 PS-Poll frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11PSPoll object from a buffer and
+         * adds all identifiable PDUs found in the buffer as children of 
+         * this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -3038,8 +3168,16 @@ namespace Tins {
                 PDU* child = 0);
                     
         /**
-         * \brief Constructor which creates an 802.11 CF-End frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11CFEnd object from a buffer and adds 
+         * all identifiable PDUs found in the buffer as children of this 
+         * one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -3092,8 +3230,16 @@ namespace Tins {
                     PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 End-CF-Ack frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11EndCFAck frame object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -3144,8 +3290,16 @@ namespace Tins {
                 PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 Ack frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11Ack frame object from a buffer and
+         * adds all identifiable PDUs found in the buffer as children of 
+         * this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -3201,8 +3355,16 @@ namespace Tins {
                             PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11BlockAckRequest object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -3330,8 +3492,16 @@ namespace Tins {
                     PDU* child = 0);
 
         /**
-         * \brief Constructor which creates an 802.11 Block Ack request frame object from a buffer and
-         * adds all identifiable PDUs found in the buffer as children of this one.
+         * \brief Constructs a Dot11BlockAck frame object from a buffer 
+         * and adds all identifiable PDUs found in the buffer as children 
+         * of this one.
+         * 
+         * If the next PDU is not recognized, then a RawPDU is used.
+         * 
+         * If there is not enough size for the header in the buffer
+         * or the input data is malformed, a malformed_packet exception 
+         * is thrown.
+         * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
