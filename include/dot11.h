@@ -1245,7 +1245,8 @@ namespace Tins {
          * \brief Helper method to search for this PDU's rsn information 
          * option.
          * 
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return std::string containing the ssid.
          */
@@ -1254,7 +1255,8 @@ namespace Tins {
         /**
          * \brief Helper method to search for this PDU's ssid.
          * 
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return std::string containing the ssid.
          */
@@ -1263,7 +1265,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the supported rates.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return rates_type containing the supported rates.
          */
@@ -1272,7 +1275,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the extended supported rates.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return rates_type containing the extended supported rates.
          */
@@ -1281,7 +1285,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the QOS capability.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return uint8_t containing the QOS capability.
          */
@@ -1290,7 +1295,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the power capability.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return std::pair<uint8_t, uint8_t> containing the power capability.
          */
@@ -1299,7 +1305,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the supported channels.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return channels_type containing the power capability.
          */
@@ -1308,7 +1315,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the request information.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return request_info_type containing the request information.
          */
@@ -1317,7 +1325,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the fh parameter set.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return fh_params_set containing the fh parameter set.
          */
@@ -1326,7 +1335,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the ds parameter set.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return uint8_t containing the ds parameter set.
          */
@@ -1335,7 +1345,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the ibss parameter set.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return uint16_t containing the ibss parameter set.
          */
@@ -1344,7 +1355,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the ibss dfs.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return ibss_dfs_params containing the ibss dfs.
          */
@@ -1353,7 +1365,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the country option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return country_params containing the country attributes.
          */
@@ -1362,7 +1375,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the fh parameters option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return std::pair<uint8_t, uint8_t> containing the fh parameters.
          */
@@ -1371,7 +1385,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the fh patterns option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return fh_pattern_type containing the fh patterns.
          */
@@ -1380,7 +1395,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the power constraint option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return uint8_t containing the power constraint.
          */
@@ -1389,7 +1405,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the channel switch option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return channel_switch_type containing the channel switch.
          */
@@ -1398,7 +1415,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the quiet option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return quiet_type containing the quiet option value.
          */
@@ -1407,7 +1425,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the tpc report option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return quiet_type containing the tpc report option value.
          */
@@ -1416,7 +1435,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the erp information option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return quiet_type containing the erp information option value.
          */
@@ -1425,7 +1445,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the bss load option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return quiet_type containing the bss load option value.
          */
@@ -1434,7 +1455,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the tim option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return tim_type containing the tim option value.
          */
@@ -1443,7 +1465,8 @@ namespace Tins {
         /**
          * \brief Helper method to get the challenge text option.
          *
-         * Throws a std::runtime_error if the option has not been set.
+         * An option_not_found exception is thrown if the option has not 
+         * been set.
          * 
          * \return std::string containing the challenge text option value.
          */

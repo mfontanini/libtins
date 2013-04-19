@@ -44,6 +44,7 @@
 #include "dot11.h"
 #include "sll.h"
 #include "cxxstd.h"
+#include "exceptions.h"
 
 namespace Tins {
     /**
@@ -268,10 +269,10 @@ namespace Tins {
     
     template<class Functor>
     void Tins::BaseSniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
+        bool ret_val(false);
+        LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
         try {
             std::auto_ptr<PDU> pdu;
-            LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
-            bool ret_val(false);
             if(data->iface_type == DLT_EN10MB)
                 ret_val = call_functor<Tins::EthernetII>(data, packet, header);
             else if(data->iface_type == DLT_IEEE802_11_RADIO)
@@ -287,13 +288,12 @@ namespace Tins {
                 ret_val = call_functor<Tins::Loopback>(data, packet, header);
             else if(data->iface_type == DLT_LINUX_SLL)
                 ret_val = call_functor<Tins::SLL>(data, packet, header);
-                
-            if(!ret_val)
-                pcap_breakloop(data->handle);
         }
-        catch(std::runtime_error&) {
+        catch(malformed_packet&) {
             
         }
+        if(!ret_val)
+            pcap_breakloop(data->handle);
     }
     
     template<class T>

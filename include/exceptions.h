@@ -36,8 +36,12 @@ namespace Tins {
 /**
  * \brief Exception thrown when an option is not found.
  */
-class option_not_found : public std::exception {
+class option_not_found : public std::runtime_error {
 public:
+    option_not_found()
+    : std::runtime_error(std::string()) { }
+
+    // try to avoid allocations by doing this.
     const char* what() const throw() {
         return "Option not found";
     }
@@ -49,7 +53,11 @@ public:
 class malformed_packet : public std::runtime_error {
 public:
     malformed_packet()
-    : std::runtime_error("Malformed") { }
+    : std::runtime_error(std::string()) { }
+    
+    const char* what() const throw() {
+        return "Option not found";
+    }
 };
 }
 
