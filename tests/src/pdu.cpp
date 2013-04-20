@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "ip.h"
 #include "tcp.h"
+#include "udp.h"
 #include "rawpdu.h"
 #include "pdu.h"
 #include "packet.h"
@@ -14,6 +15,18 @@ using namespace Tins;
 class PDUTest : public testing::Test {
 public:
 };
+
+TEST_F(PDUTest, FindPDU) {
+    IP ip = IP("192.168.0.1") / TCP(22, 52) / RawPDU("Test"); 
+    EXPECT_TRUE(ip.find_pdu<TCP>());
+    EXPECT_TRUE(ip.find_pdu<RawPDU>());
+    EXPECT_FALSE(ip.find_pdu<UDP>());
+    TCP &t1 = ip.rfind_pdu<TCP>();
+    const TCP &t2 = ip.rfind_pdu<TCP>();
+    (void)t1;
+    (void)t2;
+    EXPECT_THROW(ip.rfind_pdu<UDP>(), pdu_not_found);
+}
 
 TEST_F(PDUTest, OperatorConcat) {
     std::string raw_payload = "Test";

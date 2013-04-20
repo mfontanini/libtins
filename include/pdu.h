@@ -35,6 +35,7 @@
 #include <vector>
 #include "macros.h"
 #include "cxxstd.h"
+#include "exceptions.h"
 
 /** \brief The Tins namespace.
  */
@@ -220,14 +221,14 @@ namespace Tins {
         serialization_type serialize();
 
         /**
-         * \brief Find and returns the first PDU that matches the given flag.
+         * \brief Finds and returns the first PDU that matches the given flag.
          *
          * This method searches for the first PDU which has the same type flag as
          * the given one. If the first PDU matches that flag, it is returned.
          * If no PDU matches, 0 is returned.
          * \param flag The flag which being searched.
          */
-        template<class T> 
+        template<typename T> 
         T *find_pdu(PDUType type = T::pdu_flag) {
             PDU *pdu = this;
             while(pdu) {
@@ -239,13 +240,40 @@ namespace Tins {
         }
         
         /**
-         * \brief Find and returns the first PDU that matches the given flag.
+         * \brief Finds and returns the first PDU that matches the given flag.
          *
          * \param flag The flag which being searched.
          */
-        template<class T> 
+        template<typename T> 
         const T *find_pdu(PDUType type = T::pdu_flag) const {
             return const_cast<PDU*>(this)->find_pdu<T>();
+        }
+
+        /**
+         * \brief Finds and returns the first PDU that matches the given flag.
+         * 
+         * If the PDU is not found, a pdu_not_found exception is thrown.
+         * 
+         * \sa PDU::find_pdu
+         * 
+         * \param flag The flag which being searched.
+         */
+        template<typename T>
+        T &rfind_pdu(PDUType type = T::pdu_flag) {
+            T *ptr = find_pdu<T>(type);
+            if(!ptr)
+                throw pdu_not_found();
+            return *ptr;
+        }
+
+        /**
+         * \brief Finds and returns the first PDU that matches the given flag.
+         *
+         * \param flag The flag which being searched.
+         */
+        template<typename T> 
+        const T &rfind_pdu(PDUType type = T::pdu_flag) const {
+            return const_cast<PDU*>(this)->rfind_pdu<T>();
         }
 
         /**

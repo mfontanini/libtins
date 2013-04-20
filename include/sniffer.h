@@ -272,7 +272,7 @@ namespace Tins {
         bool ret_val(false);
         LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
         try {
-            std::auto_ptr<PDU> pdu;
+            Internals::smart_ptr<PDU>::type pdu;
             if(data->iface_type == DLT_EN10MB)
                 ret_val = call_functor<Tins::EthernetII>(data, packet, header);
             else if(data->iface_type == DLT_IEEE802_11_RADIO)

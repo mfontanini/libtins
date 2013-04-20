@@ -54,7 +54,7 @@ DNSResourceRecord::DNSResourceRecord(DNSRRImpl *impl,
 DNSResourceRecord::DNSResourceRecord(const uint8_t *buffer, uint32_t size) 
 {
     const uint8_t *buffer_end = buffer + size;
-    std::auto_ptr<DNSRRImpl> tmp_impl;
+    Internals::smart_ptr<DNSRRImpl>::type tmp_impl;
     if((*buffer & 0xc0)) {
         uint16_t offset(*reinterpret_cast<const uint16_t*>(buffer));
         offset = Endian::be_to_host(offset) & 0x3fff;

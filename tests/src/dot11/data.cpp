@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdint.h>
 #include "dot11.h"
+#include "cxxstd.h"
 #include "tests/dot11.h"
 
 
@@ -61,12 +62,12 @@ TEST_F(Dot11DataTest, SeqNum) {
 
 TEST_F(Dot11DataTest, ClonePDU) {
     Dot11Data dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11Data> dot2(dot1.clone());
+    Internals::smart_ptr<Dot11Data>::type dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 
 TEST_F(Dot11DataTest, FromBytes) {
-    std::auto_ptr<PDU> dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
+    Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get());
     const Dot11Data *inner = dot11->find_pdu<Dot11Data>();
     ASSERT_TRUE(inner);
@@ -94,7 +95,7 @@ TEST_F(Dot11DataTest, PCAPLoad1) {
     EXPECT_EQ(dot1.from_ds(), 1);
     EXPECT_EQ(dot1.frag_num(), 0);
     EXPECT_EQ(dot1.seq_num(), 1945);
-    std::auto_ptr<Dot11Data> dot2(dot1.clone());
+    Internals::smart_ptr<Dot11Data>::type dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 

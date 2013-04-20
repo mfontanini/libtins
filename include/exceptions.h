@@ -48,7 +48,7 @@ public:
 };
 
 /**
- * \brief Exception thrown when an option is not found.
+ * \brief Exception thrown when a malformed packet is parsed.
  */
 class malformed_packet : public std::runtime_error {
 public:
@@ -56,7 +56,20 @@ public:
     : std::runtime_error(std::string()) { }
     
     const char* what() const throw() {
-        return "Option not found";
+        return "Malformed packet";
+    }
+};
+
+/**
+ * \brief Exception thrown when a PDU is not found when using PDU::rfind_pdu.
+ */
+class pdu_not_found : public std::runtime_error {
+public:
+    pdu_not_found()
+    : std::runtime_error(std::string()) { }
+    
+    const char* what() const throw() {
+        return "PDU not found";
     }
 };
 }

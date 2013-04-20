@@ -30,11 +30,26 @@
 #ifndef TINS_CXXSTD_H
 #define TINS_CXXSTD_H
 
+#include <memory>
+
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
     #define TINS_CXXSTD_GCC_FIX 1
 #else
     #define TINS_CXXSTD_GCC_FIX 0
 #endif // __GXX_EXPERIMENTAL_CXX0X__
+
+namespace Tins{
+namespace Internals {
+template<typename T>
+struct smart_ptr {
+#if TINS_IS_CXX11
+    typedef std::unique_ptr<T> type;
+#else
+    typedef std::auto_ptr<T> type;
+#endif
+};
+}
+}
 
 #define TINS_IS_CXX11 (__cplusplus > 199711L || TINS_CXXSTD_GCC_FIX == 1)
 
