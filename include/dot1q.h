@@ -187,7 +187,7 @@ private:
     struct dot1q_hdr {
         #if TINS_IS_BIG_ENDIAN
             uint16_t priority:3,
-                    cfi:1
+                    cfi:1,
                     id:12;
             uint16_t type;
         #else

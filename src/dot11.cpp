@@ -1540,17 +1540,27 @@ uint32_t Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t total_
 }
 
 void Dot11BlockAckRequest::bar_control(uint16_t bar) {
-    //std::memcpy(&_bar_control, &bar, sizeof(bar));
-    _bar_control.tid = Endian::host_to_le(bar);
+    #if TINS_IS_LITTLE_ENDIAN
+    _bar_control = bar | (_bar_control & 0xfff0);
+    #else
+    _bar_control = (bar << 8) | (_bar_control & 0xf0ff);
+    #endif
 }
 
 void Dot11BlockAckRequest::start_sequence(uint16_t seq) {
-    //std::memcpy(&_start_sequence, &seq, sizeof(seq));
-    _start_sequence.seq = Endian::host_to_le(seq);
+    #if TINS_IS_LITTLE_ENDIAN
+    _start_sequence = (seq << 4) | (_start_sequence & 0xf);
+    #else
+    _start_sequence = Endian::host_to_le<uint16_t>(seq << 4) | (_start_sequence & 0xf00);
+    #endif
 }
 
 void Dot11BlockAckRequest::fragment_number(uint8_t frag) {
-    _start_sequence.frag = frag;
+    #if TINS_IS_LITTLE_ENDIAN
+    _start_sequence = frag | (_start_sequence & 0xfff0);
+    #else
+    _start_sequence = (frag << 8) | (_start_sequence & 0xf0ff);
+    #endif
 }
 
 uint32_t Dot11BlockAckRequest::header_size() const {

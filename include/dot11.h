@@ -3399,19 +3399,37 @@ namespace Tins {
          * \brief Getter for the bar control field.
          * \return The stored bar control field.
          */
-        uint16_t bar_control() const { return Endian::le_to_host(_bar_control.tid); }
+        uint16_t bar_control() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return _bar_control & 0xf; 
+            #else
+            return (_bar_control >> 8) & 0xf; 
+            #endif
+        }
 
         /**
          * \brief Getter for the start sequence field.
          * \return The stored start sequence.
          */
-        uint16_t start_sequence() const { return Endian::le_to_host(_start_sequence.seq); }
+        uint16_t start_sequence() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return (_start_sequence >> 4) & 0xfff; 
+            #else
+            return (Endian::le_to_host<uint16_t>(_start_sequence) >> 4) & 0xfff; 
+            #endif
+        }
         
         /**
          * \brief Getter for the fragment number field.
          * \return The stored fragment number field.
          */
-        uint8_t fragment_number() const { return _start_sequence.frag; }
+        uint8_t fragment_number() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return _start_sequence & 0xf; 
+            #else
+            return (_start_sequence >> 8) & 0xf; 
+            #endif
+        }
         
         /**
          * \brief Returns the 802.11 frame's header length.
@@ -3467,22 +3485,10 @@ namespace Tins {
     protected:
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
     private:
-        TINS_BEGIN_PACK
-        struct BarControl {
-            uint16_t tid:4,
-                reserved:12;
-        } TINS_END_PACK;
-
-        TINS_BEGIN_PACK
-        struct StartSequence {
-            uint16_t frag:4,
-                seq:12;
-        } TINS_END_PACK;
-
         void init_block_ack();
 
-        BarControl _bar_control;
-        StartSequence _start_sequence;
+        uint16_t _bar_control;
+        uint16_t _start_sequence;
     };
 
     /**
