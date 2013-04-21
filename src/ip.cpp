@@ -429,7 +429,7 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     }
 }
 
-bool IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool IP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(iphdr))
         return false;
     const iphdr *ip_ptr = (const iphdr*)ptr;

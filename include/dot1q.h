@@ -179,7 +179,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(uint8_t *ptr, uint32_t total_sz);
+    bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 

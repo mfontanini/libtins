@@ -110,7 +110,7 @@ void Dot3::send(PacketSender &sender, const NetworkInterface &iface) {
 }
 #endif // WIN32
 
-bool Dot3::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool Dot3::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(ethhdr))
         return false;
     const size_t addr_sz = address_type::address_size;

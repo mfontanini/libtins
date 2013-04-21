@@ -577,7 +577,7 @@ namespace Tins {
          * \param ptr The pointer to the buffer.
          * \param total_sz The size of the buffer.
          */
-        bool matches_response(uint8_t *ptr, uint32_t total_sz);
+        bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
         
         /**
          * \sa PDU::clone

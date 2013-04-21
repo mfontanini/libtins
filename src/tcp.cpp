@@ -370,7 +370,7 @@ void TCP::internal_add_option(const option &opt) {
     _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
 }
 
-bool TCP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool TCP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(tcphdr))
         return false;
     const tcphdr *tcp_ptr = (const tcphdr*)ptr;

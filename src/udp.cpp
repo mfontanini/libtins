@@ -98,7 +98,7 @@ void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     }
 }
 
-bool UDP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool UDP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(udphdr))
         return false;
     const udphdr *udp_ptr = (const udphdr*)ptr;

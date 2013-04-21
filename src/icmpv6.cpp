@@ -181,7 +181,7 @@ uint32_t ICMPv6::header_size() const {
         (has_dest_addr() ? ipaddress_type::address_size : 0);
 }
 
-bool ICMPv6::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool ICMPv6::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(icmp6hdr))
         return false;
     const icmp6hdr *hdr_ptr = (const icmp6hdr*)ptr;

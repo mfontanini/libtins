@@ -112,10 +112,10 @@ void ARP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     memcpy(buffer, &_arp, sizeof(arphdr));
 }
 
-bool ARP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool ARP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(arphdr))
         return false;
-    arphdr *arp_ptr = (arphdr*)ptr;
+    const arphdr *arp_ptr = (const arphdr*)ptr;
     return arp_ptr->ar_sip == _arp.ar_tip && arp_ptr->ar_tip == _arp.ar_sip;
 }
 

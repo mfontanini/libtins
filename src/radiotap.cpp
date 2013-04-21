@@ -263,7 +263,7 @@ void RadioTap::send(PacketSender &sender, const NetworkInterface &iface) {
 }
 #endif
 
-bool RadioTap::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool RadioTap::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(sizeof(_radio) < total_sz)
         return false;
     const radiotap_hdr *radio_ptr = (const radiotap_hdr*)ptr;

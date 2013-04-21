@@ -131,7 +131,7 @@ uint32_t DHCPv6::header_size() const {
     return (is_relay_message() ? (2 + ipaddress_type::address_size * 2) : 4) + options_size;
 }
 
-bool DHCPv6::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool DHCPv6::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(!is_relay_message()) {
         if(total_sz < 4 || (ptr[0] == 12 || ptr[0] == 13))
             return false;

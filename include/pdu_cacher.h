@@ -109,7 +109,7 @@ public:
     /**
      * Forwards the call to the cached PDU. \sa PDU::matches_response.
      */
-    bool matches_response(uint8_t *ptr, uint32_t total_sz) {
+    bool matches_response(const uint8_t *ptr, uint32_t total_sz) const {
         return cached.matches_response(ptr, total_sz);
     }
     

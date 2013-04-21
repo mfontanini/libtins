@@ -129,7 +129,7 @@ void Dot1Q::append_padding(bool value) {
     _append_padding = value;
 }
 
-bool Dot1Q::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool Dot1Q::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(_header))
         return false;
     const dot1q_hdr *dot1q_ptr = (const dot1q_hdr*)ptr;

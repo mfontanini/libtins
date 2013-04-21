@@ -162,7 +162,7 @@ uint32_t IPv6::header_size() const {
     return sizeof(_header) + headers_size;
 }
 
-bool IPv6::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool IPv6::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(ipv6_header))
         return false;
     const ipv6_header *hdr_ptr = (const ipv6_header*)ptr;

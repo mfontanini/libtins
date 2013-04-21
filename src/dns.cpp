@@ -481,7 +481,7 @@ DNS::resources_type DNS::answers() const {
     return res;
 }
 
-bool DNS::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool DNS::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(dnshdr))
         return false;
     const dnshdr *hdr = (const dnshdr*)ptr;
