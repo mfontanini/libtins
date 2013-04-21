@@ -193,6 +193,19 @@ namespace Tins {
             : handle(_handle), c_handler(_handler), iface_type(if_type)
             { }
         };
+        
+        struct PCapLoopBreaker {
+            bool &went_well;
+            pcap_t *handle;
+            
+            PCapLoopBreaker(bool &went_well, pcap_t *handle)
+            : went_well(went_well), handle(handle) { }
+            
+            ~PCapLoopBreaker() {
+                if(!went_well)
+                    pcap_breakloop(handle);
+            }
+        };
     
         BaseSniffer(const BaseSniffer&);
         BaseSniffer &operator=(const BaseSniffer&);
@@ -269,8 +282,9 @@ namespace Tins {
     
     template<class Functor>
     void Tins::BaseSniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
-        bool ret_val(false);
+        bool ret_val(true);
         LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
+        PCapLoopBreaker _(ret_val, data->handle);
         try {
             Internals::smart_ptr<PDU>::type pdu;
             if(data->iface_type == DLT_EN10MB)
@@ -278,7 +292,9 @@ namespace Tins {
             else if(data->iface_type == DLT_IEEE802_11_RADIO)
                 ret_val = call_functor<Tins::RadioTap>(data, packet, header);
             else if(data->iface_type == DLT_IEEE802_11) {
-                std::auto_ptr<PDU> pdu(Tins::Dot11::from_bytes((const uint8_t*)packet, header->caplen));
+                Internals::smart_ptr<PDU>::type pdu(
+                    Tins::Dot11::from_bytes((const uint8_t*)packet, header->caplen)
+                );
                 if(pdu.get()) {
                     RefPacket pck(*pdu, header->ts);
                     ret_val = data->c_handler(pck);
@@ -289,11 +305,12 @@ namespace Tins {
             else if(data->iface_type == DLT_LINUX_SLL)
                 ret_val = call_functor<Tins::SLL>(data, packet, header);
         }
-        catch(malformed_packet&) {
-            
+        catch(malformed_packet&) { 
+            ret_val = true;
         }
-        if(!ret_val)
-            pcap_breakloop(data->handle);
+        catch(pdu_not_found&) { 
+            ret_val = true;
+        }
     }
     
     template<class T>
