@@ -83,13 +83,13 @@ const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
     }
 #endif
 
-PacketSender::PacketSender(uint32_t recv_timeout, uint32_t usec) 
+PacketSender::PacketSender(const NetworkInterface &iface, uint32_t recv_timeout, 
+  uint32_t usec) 
 : _sockets(SOCKETS_END, INVALID_RAW_SOCKET), 
 #if !defined(BSD) && !defined(WIN32)
   _ether_socket(INVALID_RAW_SOCKET),
 #endif
-  _timeout(recv_timeout), 
-  _timeout_usec(usec)
+  _timeout(recv_timeout), _timeout_usec(usec), default_iface(iface)
 {
     _types[IP_TCP_SOCKET] = IPPROTO_TCP;
     _types[IP_UDP_SOCKET] = IPPROTO_UDP;
@@ -114,6 +114,14 @@ PacketSender::~PacketSender() {
     if(_ether_socket != INVALID_RAW_SOCKET)
         ::close(_ether_socket);
     #endif
+}
+
+void PacketSender::default_interface(const NetworkInterface &iface) {
+    default_iface = iface;
+}
+
+const NetworkInterface& PacketSender::default_interface() {
+    return default_iface;
 }
 
 #ifndef WIN32
@@ -219,7 +227,7 @@ void PacketSender::close_socket(SocketType type, const NetworkInterface &iface) 
 }
 
 void PacketSender::send(PDU &pdu) {
-    pdu.send(*this, NetworkInterface());
+    pdu.send(*this, default_iface);
 }
 
 void PacketSender::send(PDU &pdu, const NetworkInterface &iface) {

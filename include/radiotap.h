@@ -108,7 +108,7 @@ namespace Tins {
         
         /**
          * \brief Creates an instance of RadioTap.
-         * \param child The child PDU.(optional)
+         * \param child The child PDU.
          */
         RadioTap(PDU *child = 0);
         

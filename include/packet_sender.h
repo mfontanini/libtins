@@ -77,7 +77,8 @@ namespace Tins {
          * 
          * \param recv_timeout The timeout which will be used when receiving responses.
          */
-        PacketSender(uint32_t recv_timeout = DEFAULT_TIMEOUT, uint32_t usec = 0);
+        PacketSender(const NetworkInterface &iface = NetworkInterface(), 
+          uint32_t recv_timeout = DEFAULT_TIMEOUT, uint32_t usec = 0);
         
         /** 
          * \brief PacketSender destructor.
@@ -121,6 +122,21 @@ namespace Tins {
          */
         void close_socket(SocketType type, const NetworkInterface &iface = NetworkInterface());
 
+        /**
+         * \brief Sets the default interface.
+         * 
+         * The interface will be used whenever PacketSender::send(PDU&) 
+         * is called.
+         */
+        void default_interface(const NetworkInterface &iface);
+        
+        /**
+         * \brief Gets the default interface.
+         * 
+         * \sa PacketSender::default_interface
+         */
+        const NetworkInterface& default_interface();
+
         /** 
          * \brief Sends a PDU. 
          * 
@@ -128,6 +144,11 @@ namespace Tins {
          * and sends the PDU on the open socket.
          * 
          * If any send error occurs, then a SocketWriteError is thrown.
+         * 
+         * If the PDU contains a link layer protocol, then default_interface
+         * is used.
+         * 
+         * \sa PacketSender::default_interface
          * 
          * \param pdu The PDU to be sent.
          */
@@ -266,6 +287,7 @@ namespace Tins {
         #endif
         SocketTypeMap _types;
         uint32_t _timeout, _timeout_usec;
+        NetworkInterface default_iface;
     };
     
     
