@@ -49,15 +49,13 @@
 namespace Tins {
 const Dot3::address_type Dot3::BROADCAST("ff:ff:ff:ff:ff:ff");
 
-Dot3::Dot3(const NetworkInterface& iface, 
-  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
+Dot3::Dot3(const address_type &dst_hw_addr, const address_type &src_hw_addr, 
   PDU* child)
 : PDU(child) 
 {
     memset(&_eth, 0, sizeof(ethhdr));
     this->dst_addr(dst_hw_addr);
     this->src_addr(src_hw_addr);
-    this->iface(iface);
     this->_eth.length = 0;
 
 }
@@ -81,10 +79,6 @@ void Dot3::src_addr(const address_type &new_src_mac) {
     std::copy(new_src_mac.begin(), new_src_mac.end(), _eth.src_mac);
 }
 
-void Dot3::iface(const NetworkInterface &new_iface) {
-    _iface = new_iface;
-}
-
 void Dot3::length(uint16_t new_length) {
     this->_eth.length = Endian::host_to_be(new_length);
 }
@@ -94,9 +88,9 @@ uint32_t Dot3::header_size() const {
 }
 
 #ifndef WIN32
-void Dot3::send(PacketSender &sender) {
-    if(!_iface)
-        throw std::runtime_error("Interface has not been set");
+void Dot3::send(PacketSender &sender, const NetworkInterface &iface) {
+    if(!iface)
+        throw invalid_interface();
         
     #ifndef BSD
         struct sockaddr_ll addr;
@@ -106,12 +100,12 @@ void Dot3::send(PacketSender &sender) {
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
         addr.sll_halen = address_type::address_size;
-        addr.sll_ifindex = _iface.id();
+        addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
 
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        sender.send_l2(*this, 0, 0, _iface);
+        sender.send_l2(*this, 0, 0, iface);
     #endif
 }
 #endif // WIN32
@@ -147,9 +141,9 @@ void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
 }
 
 #ifndef WIN32
-PDU *Dot3::recv_response(PacketSender &sender) {
-    if(!_iface)
-        throw std::runtime_error("Interface has not been set");
+PDU *Dot3::recv_response(PacketSender &sender, const NetworkInterface &iface) {
+    if(!iface)
+        throw invalid_interface();
     #ifndef BSD
         struct sockaddr_ll addr;
         memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -157,12 +151,12 @@ PDU *Dot3::recv_response(PacketSender &sender) {
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_802_3);
         addr.sll_halen = address_type::address_size;
-        addr.sll_ifindex = _iface.id();
+        addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
 
         return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        return sender.recv_l2(*this, 0, 0, _iface);
+        return sender.recv_l2(*this, 0, 0, iface);
     #endif
 }
 #endif // WIN32

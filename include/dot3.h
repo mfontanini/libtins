@@ -35,7 +35,6 @@
 #include "pdu.h"
 #include "endianness.h"
 #include "hw_address.h"
-#include "network_interface.h"
 
 namespace Tins {
 
@@ -65,15 +64,13 @@ namespace Tins {
          * Constructor that builds an Dot3 PDU taking the interface name,
          * destination's and source's MAC.
          *
-         * \param iface string containing the interface's name from where to send the packet.
          * \param dst_hw_addr The destination hardware address.
          * \param src_hw_addr The source hardware address.
          * \param child The PDU which will be set as the inner PDU.
          */
-        Dot3(const NetworkInterface& iface = NetworkInterface(), 
-                  const address_type &dst_hw_addr = address_type(), 
-                  const address_type &src_hw_addr = address_type(), 
-                  PDU* child = 0);
+        Dot3(const address_type &dst_hw_addr = address_type(), 
+            const address_type &src_hw_addr = address_type(), 
+            PDU* child = 0);
 
         /**
          * \brief Constructs a Dot3 object from a buffer and adds a
@@ -103,13 +100,6 @@ namespace Tins {
         address_type src_addr() const { return _eth.src_mac; }
 
         /**
-         * \brief Getter for the interface.
-         *
-         * \return The network interface.
-         */
-        const NetworkInterface &iface() const { return this->_iface; }
-
-        /**
          * \brief Getter for the length field.
          * \return The length field value.
          */
@@ -132,13 +122,6 @@ namespace Tins {
         void src_addr(const address_type &new_src_mac);
 
         /**
-         * \brief Setter for the interface.
-         *
-         * \param new_iface The interface in which to send this PDU.
-         */
-        void iface(const NetworkInterface &new_iface);
-
-        /**
          * \brief Setter for the length field.
          *
          * \param new_length uint16_t with the new value of the length field.
@@ -158,7 +141,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        void send(PacketSender &sender);
+        void send(PacketSender &sender, const NetworkInterface &iface);
         #endif // WIN32
 
         /** 
@@ -172,12 +155,9 @@ namespace Tins {
 
         #ifndef WIN32
         /** 
-         * \brief Receives a matching response for this packet.
-         *
          * \sa PDU::recv_response
-         * \param sender The packet sender which will receive the packet.
          */
-        PDU *recv_response(PacketSender &sender);
+        PDU *recv_response(PacketSender &sender, const NetworkInterface &iface);
         #endif // WIN32
 
         /**
@@ -220,7 +200,6 @@ namespace Tins {
 
 
         ethhdr _eth;
-        NetworkInterface _iface;
     };
 }
 

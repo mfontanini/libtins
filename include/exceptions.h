@@ -72,6 +72,20 @@ public:
         return "PDU not found";
     }
 };
+
+/**
+ * \brief Exception thrown when PDU::send requires a valid interface,
+ * but an invalid is used.
+ */
+class invalid_interface : public std::runtime_error {
+public:
+    invalid_interface()
+    : std::runtime_error(std::string()) { }
+    
+    const char* what() const throw() {
+        return "Invalid interface";
+    }
+};
 }
 
 #endif // TINS_EXCEPTIONS_H

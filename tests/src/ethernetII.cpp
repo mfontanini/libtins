@@ -5,7 +5,6 @@
 #include "macros.h"
 #include "ipv6.h"
 #include "ip.h"
-#include "network_interface.h"
 
 using namespace Tins;
 
@@ -17,7 +16,6 @@ public:
     static address_type src_addr;
     static address_type dst_addr;
     static address_type empty_addr;
-    static const NetworkInterface iface;
     static const uint16_t p_type;
 
     void test_equals(const EthernetII &eth1, const EthernetII &eth2);
@@ -42,25 +40,17 @@ address_type EthernetIITest::dst_addr("aa:bb:cc:dd:ee:ff");
 
 address_type EthernetIITest::empty_addr;
 
-#ifdef BSD
-const NetworkInterface EthernetIITest::iface("lo0");
-#else
-const NetworkInterface EthernetIITest::iface("lo");
-#endif
-
 const uint16_t EthernetIITest::p_type = 0xd0ab;
 
 void EthernetIITest::test_equals(const EthernetII &eth1, const EthernetII &eth2) {
     EXPECT_EQ(eth1.dst_addr(), eth2.dst_addr());
     EXPECT_EQ(eth1.src_addr(), eth2.src_addr());
     EXPECT_EQ(eth1.payload_type(), eth2.payload_type());
-    EXPECT_EQ(eth1.iface(), eth2.iface());
     EXPECT_EQ((bool)eth1.inner_pdu(), (bool)eth2.inner_pdu());
 }
 
 TEST_F(EthernetIITest, DefaultConstructor) {
-    EthernetII eth(iface);
-    EXPECT_EQ(eth.iface(), iface);
+    EthernetII eth;
     EXPECT_EQ(eth.dst_addr(), empty_addr);
     EXPECT_EQ(eth.src_addr(), empty_addr);
     EXPECT_EQ(eth.payload_type(), 0);
@@ -107,24 +97,17 @@ TEST_F(EthernetIITest, PayloadType) {
     ASSERT_EQ(eth.payload_type(), p_type);
 }
 
-TEST_F(EthernetIITest, Interface) {
-    EthernetII eth;
-    eth.iface(iface);
-    ASSERT_EQ(eth.iface(), iface);
-}
-
 TEST_F(EthernetIITest, CompleteConstructor) {
     EthernetII* eth2 = new EthernetII();
-    EthernetII eth(iface, dst_addr, src_addr, eth2);
+    EthernetII eth(dst_addr, src_addr, eth2);
     EXPECT_EQ(eth.dst_addr(), dst_addr);
     EXPECT_EQ(eth.src_addr(), src_addr);
     EXPECT_TRUE(eth.inner_pdu() == eth2);
     EXPECT_EQ(eth.payload_type(), 0);
-    EXPECT_EQ(eth.iface(), iface);
 }
 
 TEST_F(EthernetIITest, Serialize) {
-    EthernetII eth(iface, dst_addr, src_addr);
+    EthernetII eth(dst_addr, src_addr);
     eth.payload_type(p_type);
     PDU::serialization_type serialized = eth.serialize();
     ASSERT_EQ(serialized.size(), sizeof(expected_packet));

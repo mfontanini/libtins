@@ -59,8 +59,8 @@ void read_field(const uint8_t* &buffer, uint32_t &total_sz, T& field) {
     total_sz -= sizeof(field);
 }
 
-RadioTap::RadioTap(const NetworkInterface &iface, PDU *child)
-: PDU(child), _iface(iface)
+RadioTap::RadioTap(PDU *child)
+: PDU(child)
 {
     std::memset(&_radio, 0, sizeof(_radio));
     init();
@@ -198,10 +198,6 @@ void RadioTap::rx_flags(uint16_t new_rx_flag) {
     _radio.rx_flags = 1;
 }
 
-void RadioTap::iface(const NetworkInterface& new_iface) {
-    _iface = new_iface;
-}
-
 uint32_t RadioTap::header_size() const {
     uint32_t total_bytes = 0;
     if(_radio.tsft)
@@ -240,9 +236,9 @@ uint32_t RadioTap::trailer_size() const {
 }
 
 #ifndef WIN32
-void RadioTap::send(PacketSender &sender) {
-    if(!_iface)
-        throw std::runtime_error("Interface has not been set");
+void RadioTap::send(PacketSender &sender, const NetworkInterface &iface) {
+    if(!iface)
+        throw invalid_interface();
     
     #ifndef BSD
         struct sockaddr_ll addr;
@@ -252,7 +248,7 @@ void RadioTap::send(PacketSender &sender) {
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
         addr.sll_halen = 6;
-        addr.sll_ifindex = _iface.id();
+        addr.sll_ifindex = iface.id();
         
         Tins::Dot11 *wlan = dynamic_cast<Tins::Dot11*>(inner_pdu());
         if(wlan) {
@@ -262,7 +258,7 @@ void RadioTap::send(PacketSender &sender) {
 
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        sender.send_l2(*this, 0, 0, _iface);
+        sender.send_l2(*this, 0, 0, iface);
     #endif
 }
 #endif

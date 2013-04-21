@@ -79,11 +79,11 @@ uint32_t PDU::size() const {
     return sz;
 }
 
-void PDU::send(PacketSender &) { 
+void PDU::send(PacketSender &, const NetworkInterface &) { 
     
 }
 
-PDU *PDU::recv_response(PacketSender &) { 
+PDU *PDU::recv_response(PacketSender &, const NetworkInterface &) { 
     return 0; 
 }
 

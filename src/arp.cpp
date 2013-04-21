@@ -123,8 +123,8 @@ PDU *ARP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
     return new ARP(ptr, total_sz);
 }
 
-EthernetII ARP::make_arp_request(const NetworkInterface& iface, 
-  ipaddress_type target, ipaddress_type sender, const hwaddress_type &hw_snd) 
+EthernetII ARP::make_arp_request(ipaddress_type target, ipaddress_type sender, 
+const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */
     ARP* arp = new ARP();
@@ -134,18 +134,17 @@ EthernetII ARP::make_arp_request(const NetworkInterface& iface,
     arp->opcode(REQUEST);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
-    return EthernetII(iface, EthernetII::BROADCAST, hw_snd, arp);
+    return EthernetII(EthernetII::BROADCAST, hw_snd, arp);
 }
 
-EthernetII ARP::make_arp_reply(const NetworkInterface& iface, 
-  ipaddress_type target, ipaddress_type sender, const hwaddress_type &hw_tgt, 
-  const hwaddress_type &hw_snd) 
+EthernetII ARP::make_arp_reply(ipaddress_type target, ipaddress_type sender, 
+const hwaddress_type &hw_tgt, const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */
     ARP* arp = new ARP(target, sender, hw_tgt, hw_snd);
     arp->opcode(REPLY);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
-    return EthernetII(iface, hw_tgt, hw_snd, arp);
+    return EthernetII(hw_tgt, hw_snd, arp);
 }
 }

@@ -276,7 +276,7 @@ public:
     /**
      * \sa PDU::send()
      */
-    void send(PacketSender &sender);
+    void send(PacketSender &sender, const NetworkInterface &);
     #endif
     
     /**

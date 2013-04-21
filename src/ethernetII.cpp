@@ -54,15 +54,13 @@
 namespace Tins {
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
 
-EthernetII::EthernetII(const NetworkInterface& iface, 
-  const address_type &dst_hw_addr, const address_type &src_hw_addr, 
-  PDU* child) 
+EthernetII::EthernetII(const address_type &dst_hw_addr, 
+const address_type &src_hw_addr, PDU* child) 
 : PDU(child)
 {
     memset(&_eth, 0, sizeof(ethhdr));
     dst_addr(dst_hw_addr);
     src_addr(src_hw_addr);
-    this->iface(iface);
     _eth.payload_type = 0;
 
 }
@@ -93,10 +91,6 @@ void EthernetII::src_addr(const address_type &new_src_addr) {
     new_src_addr.copy(_eth.src_mac);
 }
 
-void EthernetII::iface(const NetworkInterface& new_iface) {
-    _iface = new_iface;
-}
-
 void EthernetII::payload_type(uint16_t new_payload_type) {
     this->_eth.payload_type = Endian::host_to_be(new_payload_type);
 }
@@ -106,9 +100,9 @@ uint32_t EthernetII::header_size() const {
 }
 
 #ifndef WIN32
-void EthernetII::send(PacketSender &sender) {
-    if(!_iface)
-        throw std::runtime_error("Interface has not been set");
+void EthernetII::send(PacketSender &sender, const NetworkInterface &iface) {
+    if(!iface)
+        throw invalid_interface();
     
     #ifndef BSD
         struct sockaddr_ll addr;
@@ -118,12 +112,12 @@ void EthernetII::send(PacketSender &sender) {
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
         addr.sll_halen = address_type::address_size;
-        addr.sll_ifindex = _iface.id();
+        addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), _eth.dst_mac, address_type::address_size);
 
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        sender.send_l2(*this, 0, 0, _iface);
+        sender.send_l2(*this, 0, 0, iface);
     #endif
 }
 #endif // WIN32
@@ -158,7 +152,7 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
 }
 
 #ifndef WIN32
-PDU *EthernetII::recv_response(PacketSender &sender) {
+PDU *EthernetII::recv_response(PacketSender &sender, const NetworkInterface &iface) {
     #ifndef BSD
         struct sockaddr_ll addr;
         memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -166,12 +160,12 @@ PDU *EthernetII::recv_response(PacketSender &sender) {
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
         addr.sll_halen = address_type::address_size;
-        addr.sll_ifindex = _iface.id();
+        addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), _eth.dst_mac, address_type::address_size);
 
         return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        return sender.recv_l2(*this, 0, 0, _iface);
+        return sender.recv_l2(*this, 0, 0, iface);
     #endif
 }
 #endif // WIN32

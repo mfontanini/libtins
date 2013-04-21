@@ -180,19 +180,15 @@ void Dot11::addr1(const address_type &new_addr1) {
     std::copy(new_addr1.begin(), new_addr1.end(), _header.addr1);
 }
 
-void Dot11::iface(const NetworkInterface &new_iface) {
-    this->_iface = new_iface;
-}
-
 uint32_t Dot11::header_size() const {
     uint32_t sz = sizeof(ieee80211_header) + _options_size;
     return sz;
 }
 
 #ifndef WIN32
-void Dot11::send(PacketSender &sender) {
-    if(!_iface)
-        throw std::runtime_error("Interface has not been set");
+void Dot11::send(PacketSender &sender, const NetworkInterface &iface) {
+    if(!iface)
+        throw invalid_interface();
     
     #ifndef BSD
         sockaddr_ll addr;
@@ -202,11 +198,11 @@ void Dot11::send(PacketSender &sender) {
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
         addr.sll_halen = 6;
-        addr.sll_ifindex = _iface.id();
+        addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), _header.addr1, 6);
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
-        sender.send_l2(*this, 0, 0, _iface);
+        sender.send_l2(*this, 0, 0, iface);
     #endif
 }
 #endif // WIN32

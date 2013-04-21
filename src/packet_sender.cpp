@@ -219,7 +219,7 @@ void PacketSender::close_socket(SocketType type, const NetworkInterface &iface) 
 }
 
 void PacketSender::send(PDU &pdu) {
-    pdu.send(*this);
+    pdu.send(*this, NetworkInterface());
 }
 
 void PacketSender::send(PDU &pdu, const NetworkInterface &iface) {
@@ -243,14 +243,19 @@ void PacketSender::send(PDU &pdu, const NetworkInterface &iface) {
 }
 
 PDU *PacketSender::send_recv(PDU &pdu) {
+    return send_recv(pdu, NetworkInterface());
+}
+
+PDU *PacketSender::send_recv(PDU &pdu, const NetworkInterface &iface) {
     try {
-        pdu.send(*this);
+        pdu.send(*this, iface);
     }
     catch(std::runtime_error&) {
         return 0;
     }
-    return pdu.recv_response(*this);
+    return pdu.recv_response(*this, iface);
 }
+
 #ifndef WIN32
 void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, 
   uint32_t len_addr, const NetworkInterface &iface) {

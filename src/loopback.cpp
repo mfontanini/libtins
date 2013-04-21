@@ -57,8 +57,8 @@ Loopback::Loopback()
     
 }
     
-Loopback::Loopback(const NetworkInterface &iface, PDU *inner_pdu)
-: PDU(inner_pdu), _family(), _iface(iface)
+Loopback::Loopback(PDU *inner_pdu)
+: PDU(inner_pdu), _family()
 {
     
 }
@@ -91,10 +91,6 @@ void Loopback::family(uint32_t family_id) {
     _family = family_id;
 }
 
-void Loopback::iface(const NetworkInterface &new_iface) {
-    _iface = new_iface;
-}
-
 uint32_t Loopback::header_size() const {
     return sizeof(_family);
 }
@@ -109,11 +105,11 @@ void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     *reinterpret_cast<uint32_t*>(buffer) = _family;
 }
 #ifdef BSD
-void Loopback::send(PacketSender &sender) {
-    if(!_iface)
-        throw std::runtime_error("Interface has not been set");
+void Loopback::send(PacketSender &sender, const NetworkInterface &iface) {
+    if(!iface)
+        throw invalid_interface();
     
-    sender.send_l2(*this, 0, 0, _iface);
+    sender.send_l2(*this, 0, 0, iface);
 }
 #endif // WIN32
 }

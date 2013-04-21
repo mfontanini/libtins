@@ -32,7 +32,6 @@
 
 #include "pdu.h"
 #include "macros.h"
-#include "network_interface.h"
 
 namespace Tins {
 class Loopback : public PDU {
@@ -55,10 +54,9 @@ public:
      * The NetworkInterface object will only be used in *BSD, where
      * Null/Loopback PDUs can actually be sent.
      * 
-     * \param iface The network interface in which to send this PDU.
      * \param inner_pdu The inner pdu to be set.
      */
-    Loopback(const NetworkInterface &iface, PDU *inner_pdu = 0);
+    Loopback(PDU *inner_pdu = 0);
     
     /**
      * \brief Construct a Loopback object from a buffer and adds 
@@ -99,18 +97,6 @@ public:
     PDUType pdu_type() const { return PDU::IP; }
     
     /**
-     * \brief Getter for the interface member.
-     */
-    const NetworkInterface &iface() const { return _iface; }
-    
-    /**
-     * \brief Setter for the interface member.
-     * 
-     * \param new_iface The new interface to be set.
-     */
-    void iface(const NetworkInterface &new_iface);
-    
-    /**
      * \sa PDU::clone
      */
     Loopback *clone() const {
@@ -121,13 +107,12 @@ public:
     /**
      * \sa PDU::send()
      */
-    void send(PacketSender &sender);
+    void send(PacketSender &sender, const NetworkInterface &iface);
     #endif // BSD
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
     uint32_t _family;
-    NetworkInterface _iface;
 };
 }
 

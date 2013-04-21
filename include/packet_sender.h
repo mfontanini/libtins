@@ -162,6 +162,20 @@ namespace Tins {
          * \return Returns the response PDU, 0 if not response was received.
          */
         PDU *send_recv(PDU &pdu);
+        
+        /** 
+         * \brief Sends a PDU and waits for its response. 
+         * 
+         * This method is used to send PDUs and receive their response. 
+         * It opens the required socket(if it's not open yet). This can be used
+         * to expect responses for ICMP, ARP, and such packets that are normally
+         * answered by the host that receives the packet.
+         * 
+         * \param pdu The PDU to send.
+         * \param iface The network interface in which to send and receive.
+         * \return Returns the response PDU, 0 if not response was received.
+         */
+        PDU *send_recv(PDU &pdu, const NetworkInterface &iface);
 
         #ifndef WIN32
         /** 
@@ -236,11 +250,7 @@ namespace Tins {
         #endif
         template<typename T>
         void send(PDU &pdu, const NetworkInterface &iface) {
-            T *actual_pdu = static_cast<T*>(&pdu);
-            NetworkInterface old_iface = actual_pdu->iface();
-            actual_pdu->iface(iface);
-            send(*actual_pdu);
-            actual_pdu->iface(old_iface);
+            static_cast<T&>(pdu).send(*this, iface);
         }
         
         PDU *recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen);

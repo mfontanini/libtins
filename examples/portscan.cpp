@@ -97,8 +97,8 @@ void send_syns(const NetworkInterface &iface, IPv4Address dest_ip, const vector<
     // Pretend we're the scanned host...
     ip.src_addr(dest_ip);
     // We use an ethernet pdu, otherwise the kernel will drop it.
-    EthernetII eth(iface, info.hw_addr, info.hw_addr, ip.clone());
-    sender.send(eth);
+    EthernetII eth(info.hw_addr, info.hw_addr, ip.clone());
+    sender.send(eth, iface);
 }
 
 void *thread_proc(void *param) {

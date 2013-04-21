@@ -226,7 +226,7 @@ void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
 }
 
 #ifndef BSD
-void IPv6::send(PacketSender &sender) {
+void IPv6::send(PacketSender &sender, const NetworkInterface &) {
     struct sockaddr_in6 link_addr;
     PacketSender::SocketType type = PacketSender::IPV6_SOCKET;
     link_addr.sin6_family = AF_INET6;

@@ -349,7 +349,7 @@ PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
     }
 }
 
-void IP::send(PacketSender& sender) {
+void IP::send(PacketSender& sender, const NetworkInterface &) {
     sockaddr_in link_addr;
     PacketSender::SocketType type = PacketSender::IP_RAW_SOCKET;
     link_addr.sin_family = AF_INET;
@@ -361,7 +361,7 @@ void IP::send(PacketSender& sender) {
     sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
-PDU *IP::recv_response(PacketSender &sender) {
+PDU *IP::recv_response(PacketSender &sender, const NetworkInterface &) {
     sockaddr_in link_addr;
     PacketSender::SocketType type = PacketSender::IP_RAW_SOCKET;
     std::memset(&link_addr, 0, sizeof(link_addr));

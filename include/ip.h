@@ -572,7 +572,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        void send(PacketSender &sender);
+        void send(PacketSender &sender, const NetworkInterface &);
 
         /**
          * \brief Check wether ptr points to a valid response for this PDU.
@@ -589,7 +589,7 @@ namespace Tins {
          * \sa PDU::recv_response
          * \param sender The packet sender which will receive the packet.
          */
-        PDU *recv_response(PacketSender &sender);
+        PDU *recv_response(PacketSender &sender, const NetworkInterface &);
 
         /**
          * \brief Getter for the PDU's type.

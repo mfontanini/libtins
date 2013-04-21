@@ -236,34 +236,32 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::ARP; }
 
         /**
-         * \brief Creates an ARP Request within a Layer 2 PDU using uint32_t for target and sender.
+         * \brief Creates an ARP Request within an EthernetII PDU.
          *
          * Creates an ARP Request PDU and embeds it within a Layer 2 PDU ready to be
-         * sent. The target and sender's protocol address are given using uint32_t.
+         * sent. 
          *
-         * \param iface string with the interface from where to send the ARP.
          * \param target IPv4Address with the target's IP.
          * \param sender IPv4Address with the sender's IP.
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          * \return Returns a EthernetII containing the ARP Request.
          */
-        static EthernetII make_arp_request(const NetworkInterface& iface, ipaddress_type target, 
+        static EthernetII make_arp_request(ipaddress_type target, 
           ipaddress_type sender, const hwaddress_type &hw_snd = hwaddress_type());
 
         /**
-         * \brief Creates an ARP Reply within a Layer 2 PDU using uint32_t for target and sender.
+         * \brief Creates an ARP Reply within an EthernetII PDU.
          *
          * Creates an ARP Reply PDU and embeds it within a Layer 2 PDU ready to be
-         * sent. The target and sender's protocol address are given using uint32_t.
+         * sent. 
          *
-         * \param iface string with the interface from where to send the ARP.
          * \param target IPv4Address with the target's IP.
          * \param sender IPv4Address with the sender's IP.
          * \param hw_tgt uint8_t array of 6 bytes containing the target's hardware address.
          * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
          * \return Returns an EthetnetII containing the ARP Replay.
          */
-        static EthernetII make_arp_reply(const NetworkInterface& iface, ipaddress_type target, 
+        static EthernetII make_arp_reply(ipaddress_type target, 
           ipaddress_type sender, const hwaddress_type &hw_tgt = hwaddress_type(), 
           const hwaddress_type &hw_snd = hwaddress_type());
 

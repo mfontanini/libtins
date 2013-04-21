@@ -95,15 +95,15 @@ public:
     /**
      * Forwards the call to the cached PDU. \sa PDU::send.
      */
-    void send(PacketSender &sender) {
-        cached.send(sender);
+    void send(PacketSender &sender, const NetworkInterface &iface) {
+        cached.send(sender, iface);
     }
     
     /**
      * Forwards the call to the cached PDU. \sa PDU::recv_responde.
      */
-    PDU *recv_response(PacketSender &sender) {
-        return cached.recv_response(sender);
+    PDU *recv_response(PacketSender &sender, const NetworkInterface &iface) {
+        return cached.recv_response(sender, iface);
     }
     
     /**

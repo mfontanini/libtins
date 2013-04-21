@@ -42,6 +42,7 @@
 namespace Tins {
 
     class PacketSender;
+    class NetworkInterface;
     
     /**
      * The type used to store several PDU option values.
@@ -286,25 +287,37 @@ namespace Tins {
          */
         virtual PDU *clone() const = 0;
 
-        /** \brief Send the stack of PDUs through a PacketSender.
+        /** 
+         * \brief Send the stack of PDUs through a PacketSender.
          *
          * This method will be called only for the PDU on the bottom of the stack,
          * therefore it should only implement this method if it can be sent.
+         * 
          * PacketSender implements specific methods to send packets which start
          * on every valid TCP/IP stack layer; this should only be a proxy for
          * those methods.
+         * 
+         * If this PDU does not represent a link layer protocol, then
+         * the interface argument will be ignored.
+         * 
          * \param sender The PacketSender which will send the packet.
+         * \param iface The network interface in which this packet will 
+         * be sent.
          */
-        virtual void send(PacketSender &sender);
+        virtual void send(PacketSender &sender, const NetworkInterface &iface);
 
-        /** \brief Receives a matching response for this packet.
+        /** 
+         * \brief Receives a matching response for this packet.
          *
          * This method should act as a proxy for PacketSender::recv_lX methods.
+         * 
          * \param sender The packet sender which will receive the packet.
+         * \param iface The interface in which to expect the response.
          */
-        virtual PDU *recv_response(PacketSender &sender);
+        virtual PDU *recv_response(PacketSender &sender, const NetworkInterface &iface);
 
-        /** \brief Check wether ptr points to a valid response for this PDU.
+        /** 
+         * \brief Check wether ptr points to a valid response for this PDU.
          *
          * This method must check wether the buffer pointed by ptr is a valid
          * response for this PDU. If it is valid, then it might want to propagate

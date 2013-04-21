@@ -35,7 +35,6 @@
 #include "pdu.h"
 #include "endianness.h"
 #include "hw_address.h"
-#include "network_interface.h"
 
 namespace Tins {
 
@@ -60,18 +59,13 @@ namespace Tins {
         static const address_type BROADCAST;
 
         /**
-         * \brief Constructor for creating an ethernet PDU
+         * \brief Constructs an ethernet II PDU.
          *
-         * Constructor that builds an ethernet PDU taking the interface name,
-         * destination's and source's MAC.
-         *
-         * \param iface string containing the interface's name from where to send the packet.
          * \param dst_hw_addr address_type containing the destination's MAC(optional).
          * \param src_hw_addr address_type containing the source's MAC(optional).
          * \param child PDU* with the PDU contained by the ethernet PDU (optional).
          */
-        EthernetII(const NetworkInterface& iface = NetworkInterface(), 
-                    const address_type &dst_hw_addr = address_type(), 
+        EthernetII(const address_type &dst_hw_addr = address_type(), 
                     const address_type &src_hw_addr = address_type(), 
                     PDU* child = 0);
 
@@ -107,13 +101,6 @@ namespace Tins {
         address_type src_addr() const { return _eth.src_mac; }
 
         /**
-         * \brief Getter for the interface.
-         *
-         * \return Returns the interface in which this PDU will be sent.
-         */
-        const NetworkInterface &iface() const { return _iface; }
-
-        /**
          * \brief Getter for the payload_type
          * \return The payload type.
          */
@@ -136,13 +123,6 @@ namespace Tins {
         void src_addr(const address_type &new_src_addr);
 
         /**
-         * \brief Setter for the interface.
-         *
-         * \param new_iface the interface to be set.
-         */
-        void iface(const NetworkInterface& new_iface);
-
-        /**
          * \brief Setter for the payload type.
          *
          * \param new_payload_type the new value of the payload type field.
@@ -163,7 +143,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        void send(PacketSender &sender);
+        void send(PacketSender &sender, const NetworkInterface &iface);
         #endif // WIN32
 
         /** 
@@ -176,12 +156,12 @@ namespace Tins {
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
 
         #ifndef WIN32
-        /** \brief Receives a matching response for this packet.
+        /** 
+         * \brief Receives a matching response for this packet.
          *
          * \sa PDU::recv_response
-         * \param sender The packet sender which will receive the packet.
          */
-        PDU *recv_response(PacketSender &sender);
+        PDU *recv_response(PacketSender &sender, const NetworkInterface &iface);
         #endif // WIN32
 
         /**
@@ -223,7 +203,6 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         ethhdr _eth;
-        NetworkInterface _iface;
     };
 
 }

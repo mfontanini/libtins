@@ -115,8 +115,8 @@ bool resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip,
 {
     IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
-    EthernetII packet = ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr);
-    Internals::smart_ptr<PDU>::type response(sender.send_recv(packet));
+    EthernetII packet = ARP::make_arp_request(ip, info.ip_addr, info.hw_addr);
+    Internals::smart_ptr<PDU>::type response(sender.send_recv(packet, iface));
     if(response.get()) {
         ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)
@@ -131,8 +131,8 @@ HWAddress<6> resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, Packe
 {
     IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
-    EthernetII packet = ARP::make_arp_request(iface, ip, info.ip_addr, info.hw_addr);
-    Internals::smart_ptr<PDU>::type response(sender.send_recv(packet));
+    EthernetII packet = ARP::make_arp_request(ip, info.ip_addr, info.hw_addr);
+    Internals::smart_ptr<PDU>::type response(sender.send_recv(packet, iface));
     if(response.get()) {
         const ARP *arp_resp = response->find_pdu<ARP>();
         if(arp_resp)

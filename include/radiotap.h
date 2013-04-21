@@ -33,7 +33,6 @@
 #include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
-#include "network_interface.h"
 
 namespace Tins {
     class PacketSender;
@@ -109,11 +108,9 @@ namespace Tins {
         
         /**
          * \brief Creates an instance of RadioTap.
-         * \param iface The interface in which to send this PDU.
          * \param child The child PDU.(optional)
          */
-        RadioTap(const NetworkInterface &iface = NetworkInterface(), 
-          PDU *child = 0);
+        RadioTap(PDU *child = 0);
         
         /**
          * \brief Constructs a RadioTap object from a buffer and adds all
@@ -133,7 +130,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        void send(PacketSender &sender);
+        void send(PacketSender &sender, const NetworkInterface &iface);
         #endif
         
         /**
@@ -202,13 +199,6 @@ namespace Tins {
          * \param new_rx_flag The antenna signal.
          */
         void rx_flags(uint16_t new_rx_flag);
-        
-        /**
-         * \brief Setter for the interface.
-         *
-         * \param new_iface the interface to be set.
-         */
-        void iface(const NetworkInterface& new_iface);
         
         /* Getters */
         
@@ -303,13 +293,6 @@ namespace Tins {
             return (PresentFlags)*(uint32_t*)(&_radio.it_len + 1); 
         }
         
-        /**
-         * \brief Getter for the interface.
-         *
-         * \return Returns the interface in which this PDU will be sent.
-         */
-        const NetworkInterface &iface() const { return _iface; }
-        
         /** \brief Check wether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
@@ -403,7 +386,6 @@ namespace Tins {
         
         
         radiotap_hdr _radio;
-        NetworkInterface _iface;
         // present fields...
         uint64_t _tsft;
         uint32_t _channel_type;

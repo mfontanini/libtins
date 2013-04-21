@@ -286,14 +286,6 @@ namespace Tins {
         address_type addr1() const { return _header.addr1; }
 
         /**
-         * \brief Getter for the network interface.
-         *
-         * \return const NetworkInterface& containing the network 
-         * interface in which this PDU will be sent.
-         */
-        const NetworkInterface &iface() const { return _iface; }
-
-        /**
          * \brief Setter for the protocol version.
          *
          * \param new_proto The new protocol version.
@@ -377,14 +369,6 @@ namespace Tins {
          */
         void addr1(const address_type &new_addr1);
 
-        /**
-         * \brief Setter for the network interface.
-         *
-         * \param new_iface The network interface in which this PDU
-         * will be sent.
-         */
-        void iface(const NetworkInterface &new_iface);
-
         /* Virtual methods */
         /**
          * \brief Returns the 802.11 frame's header length.
@@ -398,7 +382,7 @@ namespace Tins {
         /**
          * \sa PDU::send()
          */
-        void send(PacketSender &sender);
+        void send(PacketSender &sender, const NetworkInterface &iface);
         #endif // WIN32
 
         /**
@@ -520,7 +504,6 @@ namespace Tins {
 
 
         ieee80211_header _header;
-        NetworkInterface _iface;
         uint32_t _options_size;
         std::list<option> _options;
     };
