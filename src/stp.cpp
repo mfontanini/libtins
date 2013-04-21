@@ -29,6 +29,7 @@
 
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 #include "stp.h"
 #include "exceptions.h"
 
@@ -87,6 +88,22 @@ void STP::fwd_delay(uint16_t new_fwd_delay) {
     _header.fwd_delay = Endian::host_to_be<uint16_t>(new_fwd_delay * 256);
 }
 
+STP::bpdu_id_type STP::root_id() const {
+    return convert(_header.root_id);
+}
+
+STP::bpdu_id_type STP::bridge_id() const {
+    return convert(_header.bridge_id);
+}
+
+void STP::root_id(const bpdu_id_type &id) {
+    _header.root_id = convert(id);
+}
+    
+void STP::bridge_id(const bpdu_id_type &id) {
+    _header.bridge_id = convert(id);
+}
+
 void STP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     #ifdef TINS_DEBUG
         assert(total_sz >= sizeof(_header));
@@ -96,6 +113,29 @@ void STP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
 
 uint32_t STP::header_size() const {
     return sizeof(_header);
+}
+
+STP::bpdu_id_type STP::convert(const pvt_bpdu_id &id) {
+    bpdu_id_type result(id.priority, 0, id.id);
+    #if TINS_IS_LITTLE_ENDIAN
+    result.ext_id = (id.ext_id << 8) | id.ext_idL;
+    #else
+    result.ext_id = id.ext_id;
+    #endif
+    return result;
+}
+
+STP::pvt_bpdu_id STP::convert(const bpdu_id_type &id) {
+    pvt_bpdu_id result;
+    result.priority = id.priority;
+    std::copy(id.id.begin(), id.id.end(), result.id);
+    #if TINS_IS_LITTLE_ENDIAN
+    result.ext_id = (id.ext_id >> 8) & 0xf;
+    result.ext_idL = id.ext_id & 0xff;
+    #else
+    result.ext_id = id.ext_id;
+    #endif
+    return result;
 }
 }
 

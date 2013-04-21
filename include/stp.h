@@ -32,6 +32,7 @@
 
 #include "pdu.h"
 #include "endianness.h"
+#include "hw_address.h"
 #include "small_uint.h"
 
 namespace Tins {
@@ -41,6 +42,24 @@ public:
      * This PDU's flag.
      */
     static const PDU::PDUType pdu_flag = PDU::STP;
+    
+    /**
+     * The type used to store BPDU identifier addresses.
+     */
+    typedef HWAddress<6> address_type;
+    
+    /**
+     * The type used to store the BPDU identifiers.
+     */
+    struct bpdu_id_type {
+        small_uint<4> priority;
+        small_uint<12> ext_id;
+        address_type id;
+        
+        bpdu_id_type(small_uint<4> priority=0, small_uint<12> ext_id=0, 
+            const address_type& id=address_type())
+        : priority(priority), ext_id(ext_id), id(id) { }
+    };
 
     /**
      * \brief Default constructor.
@@ -139,6 +158,18 @@ public:
     uint16_t fwd_delay() const {
         return Endian::be_to_host(_header.fwd_delay) / 256;
     }
+    
+    /**
+     *  \brief Getter for the root id field.
+     *  \return The stored root id field value.
+     */
+    bpdu_id_type root_id() const;
+    
+    /**
+     *  \brief Getter for the bridge id field.
+     *  \return The stored bridge id field value.
+     */
+    bpdu_id_type bridge_id() const;
 
     /**
      * \brief Getter for the PDU's type.
@@ -221,13 +252,26 @@ public:
      *  \param new_fwd_delay The new fwd_delay field value.
      */
     void fwd_delay(uint16_t new_fwd_delay);
+    
+    /**
+     *  \brief Setter for the root id field.
+     *  \param new_fwd_delay The new root id field value.
+     */
+    void root_id(const bpdu_id_type &id);
+    
+    /**
+     *  \brief Setter for the bridge id field.
+     *  \param new_fwd_delay The new bridge id field value.
+     */
+    void bridge_id(const bpdu_id_type &id);
 private:
     TINS_BEGIN_PACK
     struct pvt_bpdu_id {
         #if TINS_IS_LITTLE_ENDIAN 
             // fixme
-            uint16_t priority:4,
-                    ext_id:12;
+            uint16_t ext_id:4,
+                    priority:4,
+                    ext_idL:8;
         #else
             uint16_t priority:4,
                     ext_id:12;
@@ -250,6 +294,9 @@ private:
         uint16_t hello_time;
         uint16_t fwd_delay;
     } TINS_END_PACK;
+    
+    static bpdu_id_type convert(const pvt_bpdu_id &id);
+    static pvt_bpdu_id convert(const bpdu_id_type &id);
     
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     
