@@ -269,10 +269,6 @@ void TCP::set_flag(Flags tcp_flag, small_uint<1> value) {
     };
 }
 
-void TCP::add_option(OptionTypes opt, uint8_t length, const uint8_t *data) {
-    add_option(option(opt, data, data + length));
-}
-
 void TCP::add_option(const option &opt) {
     _options.push_back(opt);
     internal_add_option(opt);

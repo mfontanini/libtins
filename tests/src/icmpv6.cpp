@@ -422,13 +422,13 @@ TEST_F(ICMPv6Test, SpoofedOptions) {
     ICMPv6 pdu;
     uint8_t a[] = { 1,2,3,4,5,6 };
     pdu.add_option(
-        ICMPv6::icmpv6_option(ICMPv6::NAACK, 250, a, a + sizeof(a))
+        ICMPv6::option(ICMPv6::NAACK, 250, a, a + sizeof(a))
     );
     pdu.add_option(
-        ICMPv6::icmpv6_option(ICMPv6::NAACK, 250, a, a + sizeof(a))
+        ICMPv6::option(ICMPv6::NAACK, 250, a, a + sizeof(a))
     );
     pdu.add_option(
-        ICMPv6::icmpv6_option(ICMPv6::NAACK, 250, a, a + sizeof(a))
+        ICMPv6::option(ICMPv6::NAACK, 250, a, a + sizeof(a))
     );
     // probably we'd expect it to crash if it's not working, valgrind plx
     EXPECT_EQ(3, pdu.options().size());

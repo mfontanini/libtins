@@ -169,8 +169,4 @@ PDU *EthernetII::recv_response(PacketSender &sender, const NetworkInterface &ifa
     #endif
 }
 #endif // WIN32
-
-PDU *EthernetII::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    return new EthernetII(ptr, total_sz);
-}
 }

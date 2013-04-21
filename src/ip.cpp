@@ -441,8 +441,4 @@ bool IP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     }
     return false;
 }
-
-PDU *IP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    return new IP(ptr, total_sz);
-}
 }

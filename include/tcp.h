@@ -90,8 +90,6 @@ namespace Tins {
             ALTCHK  = 14
         };
         
-        TINS_DEPRECATED(typedef OptionTypes Option);
-        
         /**
          * \brief Alternate checksum enum.
          */
@@ -105,8 +103,6 @@ namespace Tins {
          * The type used to store TCP options.
          */
         typedef PDUOption<uint8_t> option;
-        
-        TINS_DEPRECATED(typedef option tcp_option);
 
         /**
          * The type used to store the options.
@@ -363,18 +359,6 @@ namespace Tins {
          * \param value The new value for this flag. Must be 0 or 1.
          */
         void set_flag(Flags tcp_flag, small_uint<1> value);
-
-        /**
-         * \brief Adds a TCP option.
-         *
-         * \deprecated This function is deprecated. The overloads taking
-         * a TCP::option should be used.
-         * 
-         * \param option The option type flag to be set.
-         * \param length The length of this option(optional).
-         * \param data Pointer to this option's data(optional).
-         */
-        TINS_DEPRECATED(void add_option(OptionTypes opt, uint8_t length = 0, const uint8_t *data = 0));
         
         /**
          * \brief Adds a TCP option.

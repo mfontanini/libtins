@@ -121,8 +121,4 @@ void PDU::serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
         _inner_pdu->serialize(buffer + header_size(), total_sz - sz, this);
     write_serialization(buffer, total_sz, parent);
 }
-
-PDU *PDU::clone_packet(const uint8_t *ptr, uint32_t total_sz) { 
-    return 0; 
-}
 }

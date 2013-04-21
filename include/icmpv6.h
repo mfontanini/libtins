@@ -122,8 +122,6 @@ public:
         CARD_REPLY
     };
     
-    TINS_DEPRECATED(typedef OptionTypes Options);
-    
     /**
      * The type used to store addresses.
      */
@@ -138,8 +136,6 @@ public:
      * The type used to represent ICMPv6 options.
      */
     typedef PDUOption<uint8_t> option;
-    
-    TINS_DEPRECATED(typedef option icmpv6_option);
     
     /**
      * The type used to store options.

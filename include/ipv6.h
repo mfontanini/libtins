@@ -62,8 +62,6 @@ public:
      */
     typedef PDUOption<uint8_t> ext_header;
     
-    TINS_DEPRECATED(typedef ext_header ipv6_ext_header);
-    
     /**
      * The type used to store the extension headers.
      */

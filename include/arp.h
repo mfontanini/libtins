@@ -272,19 +272,6 @@ namespace Tins {
          * \param total_sz The size of the buffer.
          */
         bool matches_response(uint8_t *ptr, uint32_t total_sz);
-
-        /** 
-         * \brief Clones this pdu, filling the corresponding header with data
-         * extracted from a buffer.
-         *
-         * \deprecated This method is obsolete.
-         * 
-         * \param ptr The pointer to the from from which the data will be extracted.
-         * \param total_sz The size of the buffer.
-         * \return The cloned PDU.
-         * \sa PDU::clone_packet
-         */
-        TINS_DEPRECATED(PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz));
         
         /**
          * \sa PDU::clone

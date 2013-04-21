@@ -47,8 +47,6 @@ public:
      * Represents a DHCPv6 option. 
      */
     typedef PDUOption<uint16_t> option;
-    
-    TINS_DEPRECATED(typedef option dhcpv6_option);
 
     /**
      * The message types.
@@ -152,8 +150,6 @@ public:
         KRB_DEFAULT_REALM_NAME, 
         KRB_KDC
     };
-    
-    TINS_DEPRECATED(typedef OptionTypes Option);
 
     /**
      * The type used to store the DHCPv6 options.

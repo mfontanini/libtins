@@ -258,13 +258,13 @@ TEST_F(IPTest, SpoofedOptions) {
     IP pdu;
     uint8_t a[] = { 1,2,3,4,5,6 };
     pdu.add_option(
-        IP::ip_option(IP::NOOP, 250, a, a + sizeof(a))
+        IP::option(IP::NOOP, 250, a, a + sizeof(a))
     );
     pdu.add_option(
-        IP::ip_option(IP::NOOP, 250, a, a + sizeof(a))
+        IP::option(IP::NOOP, 250, a, a + sizeof(a))
     );
     pdu.add_option(
-        IP::ip_option(IP::NOOP, 250, a, a + sizeof(a))
+        IP::option(IP::NOOP, 250, a, a + sizeof(a))
     );
     // probably we'd expect it to crash if it's not working, valgrind plx
     EXPECT_EQ(3, pdu.options().size());

@@ -120,11 +120,6 @@ void Dot11::add_option(const option &opt) {
     _options.push_back(opt);
 }
 
-void Dot11::add_tagged_option(const option &opt) {
-    internal_add_option(opt);
-    _options.push_back(opt);
-}
-
 const Dot11::option *Dot11::search_option(OptionTypes opt) const {
     for(std::list<option>::const_iterator it = _options.begin(); it != _options.end(); ++it)
         if(it->option() == (uint8_t)opt)

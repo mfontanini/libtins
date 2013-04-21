@@ -160,8 +160,4 @@ PDU *Dot3::recv_response(PacketSender &sender, const NetworkInterface &iface) {
     #endif
 }
 #endif // WIN32
-
-PDU *Dot3::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    return new Dot3(ptr, total_sz);
-}
 }

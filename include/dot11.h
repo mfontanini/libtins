@@ -112,8 +112,6 @@ namespace Tins {
             RSN = 48,
             EXT_SUPPORTED_RATES = 50
         };
-        
-        TINS_DEPRECATED(typedef OptionTypes TaggedOption);
 
         /**
          * \brief Enum for the different subtypes of 802.11 management frames.
@@ -172,8 +170,6 @@ namespace Tins {
          * \brief IEEE 802.11 options struct.
          */
         typedef PDUOption<uint8_t> option;
-        
-        TINS_DEPRECATED(typedef option dot11_option);
         
         /**
          * \brief Constructor for creating an 802.11 PDU
@@ -384,12 +380,6 @@ namespace Tins {
          */
         void send(PacketSender &sender, const NetworkInterface &iface);
         #endif // WIN32
-
-        /**
-         * \brief Adds a new option to this Dot11 PDU.
-         * \param opt The option to be added.
-         */
-        TINS_DEPRECATED(void add_tagged_option(const option &opt));
         
         /**
          * \brief Adds a new option to this Dot11 PDU.

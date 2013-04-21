@@ -95,16 +95,6 @@ namespace Tins {
              */
             IPv4Address mask;
         };
-
-        /** 
-         * \brief Resolves a domain name and returns its corresponding ip address.
-         *
-         * If an ip address is given, its integer representation is returned.
-         * Otherwise, the domain name is resolved and its ip address is returned.
-         *
-         * \param to_resolve The domain name/ip address to resolve.
-         */
-        IPv4Address resolve_ip(const std::string &to_resolve);
         
         /** 
          * \brief Resolves a domain name and returns its corresponding ip address.
@@ -125,21 +115,6 @@ namespace Tins {
          * \param to_resolve The domain name/ip address to resolve.
          */
         IPv6Address resolve_domain6(const std::string &to_resolve);
-
-        /** 
-         * \brief Resolves the hardware address for a given ip.
-         *
-         * \param iface The interface in which the packet will be sent.
-         * \param ip The ip to resolve, in integer format.
-         * \param buffer The buffer in which the host's hardware address will be stored.
-         * \param sender The sender to use to send and receive the ARP requests.
-         * \return Returns true if the hardware address was resolved successfully,
-         * false otherwise.
-         */
-        TINS_DEPRECATED(
-        bool resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
-          HWAddress<6> *address, PacketSender &sender)
-        );
         
         /** 
          * \brief Resolves the hardware address for a given ip.

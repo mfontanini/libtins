@@ -170,8 +170,6 @@ namespace Tins {
          * The IP options type.
          */
         typedef PDUOption<option_identifier> option;
-        
-        TINS_DEPRECATED(typedef option ip_option);
 
         /**
          * The type of the security option.
@@ -596,19 +594,6 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::IP; }
-
-        /**
-         * \brief Clones this pdu, filling the corresponding header with data
-         * extracted from a buffer.
-         *
-         * \deprecated This method is obsolete.
-         * 
-         * \param ptr The pointer to the from from which the data will be extracted.
-         * \param total_sz The size of the buffer.
-         * \return The cloned PDU.
-         * \sa PDU::clone_packet
-         */
-        TINS_DEPRECATED(PDU *clone_packet(const uint8_t *ptr, uint32_t total_sz));
 
         /**
          * \sa PDU::clone

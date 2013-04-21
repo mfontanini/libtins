@@ -88,13 +88,6 @@ namespace Tins {
 
 /** \endcond */
 namespace Utils {
-    
-IPv4Address resolve_ip(const string &to_resolve) {
-    struct hostent *data = gethostbyname(to_resolve.c_str());
-    if(!data)
-        throw std::runtime_error("Could not resolve IP");
-    return IPv4Address(((struct in_addr**)data->h_addr_list)[0]->s_addr);
-}
 
 IPv4Address resolve_domain(const std::string &to_resolve) {
     addrinfo *result = ::resolve_domain(to_resolve, AF_INET);
@@ -108,23 +101,6 @@ IPv6Address resolve_domain6(const std::string &to_resolve) {
     IPv6Address addr((const uint8_t*)&((sockaddr_in6*)result->ai_addr)->sin6_addr);
     freeaddrinfo(result);
     return addr;
-}
-
-bool resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, 
-  HWAddress<6> *address, PacketSender &sender) 
-{
-    IPv4Address my_ip;
-    NetworkInterface::Info info(iface.addresses());
-    EthernetII packet = ARP::make_arp_request(ip, info.ip_addr, info.hw_addr);
-    Internals::smart_ptr<PDU>::type response(sender.send_recv(packet, iface));
-    if(response.get()) {
-        ARP *arp_resp = response->find_pdu<ARP>();
-        if(arp_resp)
-            *address = arp_resp->sender_hw_addr();
-        return arp_resp != 0;
-    }
-    else
-        return false;
 }
 
 HWAddress<6> resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, PacketSender &sender) 

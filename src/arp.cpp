@@ -119,10 +119,6 @@ bool ARP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     return arp_ptr->ar_sip == _arp.ar_tip && arp_ptr->ar_tip == _arp.ar_sip;
 }
 
-PDU *ARP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    return new ARP(ptr, total_sz);
-}
-
 EthernetII ARP::make_arp_request(ipaddress_type target, ipaddress_type sender, 
 const hwaddress_type &hw_snd) 
 {

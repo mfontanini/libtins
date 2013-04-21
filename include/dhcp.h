@@ -140,14 +140,10 @@ namespace Tins {
             END	= 255
         };
         
-        TINS_DEPRECATED(typedef OptionTypes Options);
-        
         /**
          * The DHCP option type.
          */
         typedef PDUOption<uint8_t> option;
-        
-        TINS_DEPRECATED(typedef option dhcp_option);
         
         /**
          * The type used to store the DHCP options.

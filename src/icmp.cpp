@@ -39,13 +39,14 @@
 #include "utils.h"
 #include "exceptions.h"
 
-Tins::ICMP::ICMP(Flags flag) 
+namespace Tins {
+ICMP::ICMP(Flags flag) 
 {
     std::memset(&_icmp, 0, sizeof(icmphdr));
     type(flag);
 }
 
-Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) 
+ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) 
 {
     if(total_sz < sizeof(icmphdr))
         throw malformed_packet();
@@ -55,78 +56,78 @@ Tins::ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz)
         inner_pdu(new RawPDU(buffer + sizeof(icmphdr), total_sz));
 }
 
-void Tins::ICMP::code(uint8_t new_code) {
+void ICMP::code(uint8_t new_code) {
     _icmp.code = new_code;
 }
 
-void Tins::ICMP::type(Flags new_type) {
+void ICMP::type(Flags new_type) {
     _icmp.type = new_type;
 }
 
-void Tins::ICMP::check(uint16_t new_check) {
+void ICMP::check(uint16_t new_check) {
     _icmp.check = Endian::host_to_be(new_check);
 }
 
-void Tins::ICMP::id(uint16_t new_id) {
+void ICMP::id(uint16_t new_id) {
     _icmp.un.echo.id = Endian::host_to_be(new_id);
 }
 
-void Tins::ICMP::sequence(uint16_t new_seq) {
+void ICMP::sequence(uint16_t new_seq) {
     _icmp.un.echo.sequence = Endian::host_to_be(new_seq);
 }
 
-void Tins::ICMP::gateway(uint32_t new_gw) {
+void ICMP::gateway(uint32_t new_gw) {
     _icmp.un.gateway = Endian::host_to_be(new_gw);
 }
 
-void Tins::ICMP::mtu(uint16_t new_mtu) {
+void ICMP::mtu(uint16_t new_mtu) {
     _icmp.un.frag.mtu = Endian::host_to_be(new_mtu);
 }
 
-void Tins::ICMP::pointer(uint8_t new_pointer) {
+void ICMP::pointer(uint8_t new_pointer) {
     _icmp.un.pointer = new_pointer;
 }
 
-uint32_t Tins::ICMP::header_size() const {
+uint32_t ICMP::header_size() const {
     return sizeof(icmphdr);
 }
 
-void Tins::ICMP::set_echo_request(uint16_t id, uint16_t seq) {
+void ICMP::set_echo_request(uint16_t id, uint16_t seq) {
     type(ECHO_REQUEST);
     this->id(id);
     sequence(seq);
 }
 
-void Tins::ICMP::set_echo_reply(uint16_t id, uint16_t seq) {
+void ICMP::set_echo_reply(uint16_t id, uint16_t seq) {
     type(ECHO_REPLY);
     this->id(id);
     sequence(seq);
 }
 
-void Tins::ICMP::set_info_request(uint16_t id, uint16_t seq) {
+void ICMP::set_info_request(uint16_t id, uint16_t seq) {
     type(INFO_REQUEST);
     code(0);
     this->id(id);
     sequence(seq);
 }
 
-void Tins::ICMP::set_info_reply(uint16_t id, uint16_t seq) {
+void ICMP::set_info_reply(uint16_t id, uint16_t seq) {
     type(INFO_REPLY);
     code(0);
     this->id(id);
     sequence(seq);
 }
 
-void Tins::ICMP::set_dest_unreachable() {
+void ICMP::set_dest_unreachable() {
     type(DEST_UNREACHABLE);
 }
 
-void Tins::ICMP::set_time_exceeded(bool ttl_exceeded) {
+void ICMP::set_time_exceeded(bool ttl_exceeded) {
     type(TIME_EXCEEDED);
     code((ttl_exceeded) ? 0 : 1);
 }
 
-void Tins::ICMP::set_param_problem(bool set_pointer, uint8_t bad_octet) {
+void ICMP::set_param_problem(bool set_pointer, uint8_t bad_octet) {
     type(PARAM_PROBLEM);
     if(set_pointer) {
         code(0);
@@ -136,17 +137,17 @@ void Tins::ICMP::set_param_problem(bool set_pointer, uint8_t bad_octet) {
         code(1);
 }
 
-void Tins::ICMP::set_source_quench() {
+void ICMP::set_source_quench() {
     type(SOURCE_QUENCH);
 }
 
-void Tins::ICMP::set_redirect(uint8_t icode, uint32_t address) {
+void ICMP::set_redirect(uint8_t icode, uint32_t address) {
     type(REDIRECT);
     code(icode);
     gateway(address);
 }
 
-void Tins::ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     assert(total_sz >= sizeof(icmphdr));
     if(!_icmp.check) {
         uint32_t checksum = Utils::do_checksum(buffer + sizeof(icmphdr), buffer + total_sz) + 
@@ -159,7 +160,7 @@ void Tins::ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     _icmp.check = 0;
 }
 
-bool Tins::ICMP::matches_response(uint8_t *ptr, uint32_t total_sz) {
+bool ICMP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     if(total_sz < sizeof(icmphdr))
         return false;
     const icmphdr *icmp_ptr = (const icmphdr*)ptr;
@@ -168,7 +169,4 @@ bool Tins::ICMP::matches_response(uint8_t *ptr, uint32_t total_sz) {
     }
     return false;
 }
-
-Tins::PDU *Tins::ICMP::clone_packet(const uint8_t *ptr, uint32_t total_sz) {
-    return new ICMP(ptr, total_sz);
-}
+} // namespace Tins
