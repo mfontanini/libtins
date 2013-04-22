@@ -1530,7 +1530,7 @@ uint32_t Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t total_
     return parent_size + sizeof(_start_sequence) + sizeof(_bar_control);
 }
 
-void Dot11BlockAckRequest::bar_control(uint16_t bar) {
+void Dot11BlockAckRequest::bar_control(small_uint<4> bar) {
     #if TINS_IS_LITTLE_ENDIAN
     _bar_control = bar | (_bar_control & 0xfff0);
     #else
@@ -1538,7 +1538,7 @@ void Dot11BlockAckRequest::bar_control(uint16_t bar) {
     #endif
 }
 
-void Dot11BlockAckRequest::start_sequence(uint16_t seq) {
+void Dot11BlockAckRequest::start_sequence(small_uint<12> seq) {
     #if TINS_IS_LITTLE_ENDIAN
     _start_sequence = (seq << 4) | (_start_sequence & 0xf);
     #else
@@ -1546,7 +1546,7 @@ void Dot11BlockAckRequest::start_sequence(uint16_t seq) {
     #endif
 }
 
-void Dot11BlockAckRequest::fragment_number(uint8_t frag) {
+void Dot11BlockAckRequest::fragment_number(small_uint<4> frag) {
     #if TINS_IS_LITTLE_ENDIAN
     _start_sequence = frag | (_start_sequence & 0xfff0);
     #else
@@ -1581,12 +1581,28 @@ Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11Co
     std::memcpy(&_bitmap, buffer, sizeof(_bitmap));
 }
 
-void Dot11BlockAck::bar_control(uint16_t bar) {
-    std::memcpy(&_bar_control, &bar, sizeof(bar));
+void Dot11BlockAck::bar_control(small_uint<4> bar) {
+    #if TINS_IS_LITTLE_ENDIAN
+    _bar_control = bar | (_bar_control & 0xfff0);
+    #else
+    _bar_control = (bar << 8) | (_bar_control & 0xf0ff);
+    #endif
 }
 
-void Dot11BlockAck::start_sequence(uint16_t seq) {
-    std::memcpy(&_start_sequence, &seq, sizeof(seq));
+void Dot11BlockAck::start_sequence(small_uint<12> seq) {
+    #if TINS_IS_LITTLE_ENDIAN
+    _start_sequence = (seq << 4) | (_start_sequence & 0xf);
+    #else
+    _start_sequence = Endian::host_to_le<uint16_t>(seq << 4) | (_start_sequence & 0xf00);
+    #endif
+}
+
+void Dot11BlockAck::fragment_number(small_uint<4> frag) {
+    #if TINS_IS_LITTLE_ENDIAN
+    _start_sequence = frag | (_start_sequence & 0xfff0);
+    #else
+    _start_sequence = (frag << 8) | (_start_sequence & 0xf0ff);
+    #endif
 }
 
 void Dot11BlockAck::bitmap(const uint8_t *bit) {

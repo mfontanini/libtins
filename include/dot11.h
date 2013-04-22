@@ -3372,7 +3372,7 @@ namespace Tins {
          * \brief Getter for the bar control field.
          * \return The stored bar control field.
          */
-        uint16_t bar_control() const { 
+        small_uint<4> bar_control() const { 
             #if TINS_IS_LITTLE_ENDIAN
             return _bar_control & 0xf; 
             #else
@@ -3384,7 +3384,7 @@ namespace Tins {
          * \brief Getter for the start sequence field.
          * \return The stored start sequence.
          */
-        uint16_t start_sequence() const { 
+        small_uint<12> start_sequence() const { 
             #if TINS_IS_LITTLE_ENDIAN
             return (_start_sequence >> 4) & 0xfff; 
             #else
@@ -3396,7 +3396,7 @@ namespace Tins {
          * \brief Getter for the fragment number field.
          * \return The stored fragment number field.
          */
-        uint8_t fragment_number() const { 
+        small_uint<4> fragment_number() const { 
             #if TINS_IS_LITTLE_ENDIAN
             return _start_sequence & 0xf; 
             #else
@@ -3418,19 +3418,19 @@ namespace Tins {
          * \brief Setter for the bar control field.
          * \param bar The bar control field to be set.
          */
-        void bar_control(uint16_t bar);
+        void bar_control(small_uint<4> bar);
 
         /**
          * \brief Setter for the start sequence field.
          * \param bar The start sequence field to be set.
          */
-        void start_sequence(uint16_t seq);
+        void start_sequence(small_uint<12> seq);
         
         /**
          * \brief Setter for the fragment number field.
          * \param frag The fragment number field to be set.
          */
-        void fragment_number(uint8_t frag);
+        void fragment_number(small_uint<4> frag);
 
         /**
          * \brief Clones this PDU.
@@ -3515,13 +3515,38 @@ namespace Tins {
          * \brief Getter for the bar control field.
          * \return The stored bar control field.
          */
-        uint16_t bar_control() const { return _bar_control.tid; }
+        small_uint<4> bar_control() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return _bar_control & 0xf; 
+            #else
+            return (_bar_control >> 8) & 0xf; 
+            #endif
+        }
 
         /**
          * \brief Getter for the start sequence field.
-         * \return The stored bar start sequence.
+         * \return The stored start sequence.
          */
-        uint16_t start_sequence() const { return (_start_sequence.frag << 12) | (_start_sequence.seq); }
+        small_uint<12> start_sequence() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return (_start_sequence >> 4) & 0xfff; 
+            #else
+            return (Endian::le_to_host<uint16_t>(_start_sequence) >> 4) & 0xfff; 
+            #endif
+        }
+        
+        /**
+         * \brief Getter for the fragment number field.
+         * \return The stored fragment number field.
+         */
+        small_uint<4> fragment_number() const { 
+            #if TINS_IS_LITTLE_ENDIAN
+            return _start_sequence & 0xf; 
+            #else
+            return (_start_sequence >> 8) & 0xf; 
+            #endif
+        }
+        
         /**
          * \brief Returns the 802.11 frame's header length.
          *
@@ -3534,15 +3559,21 @@ namespace Tins {
 
         /**
          * \brief Setter for the bar control field.
-         * \param bar The bar control to be set.
+         * \param bar The bar control field to be set.
          */
-        void bar_control(uint16_t bar);
+        void bar_control(small_uint<4> bar);
 
         /**
          * \brief Setter for the start sequence field.
-         * \param bar The start sequence  to be set.
+         * \param bar The start sequence field to be set.
          */
-        void start_sequence(uint16_t seq);
+        void start_sequence(small_uint<12> seq);
+        
+        /**
+         * \brief Setter for the fragment number field.
+         * \param frag The fragment number field to be set.
+         */
+        void fragment_number(small_uint<4> frag);
 
         /**
          * \brief Getter for the bitmap field.
@@ -3583,24 +3614,10 @@ namespace Tins {
             return new Dot11BlockAck(*this);
         }
     private:
-        TINS_BEGIN_PACK
-        struct BarControl {
-            uint16_t reserved:12,
-                tid:4;
-        } TINS_END_PACK;
-
-        TINS_BEGIN_PACK
-        struct StartSequence {
-            uint16_t frag:4,
-                seq:12;
-        } TINS_END_PACK;
-
         void init_block_ack();
         uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 
-
-        BarControl _bar_control;
-        StartSequence _start_sequence;
+        uint16_t _bar_control, _start_sequence;
         uint8_t _bitmap[bitmap_size];
     };
 }

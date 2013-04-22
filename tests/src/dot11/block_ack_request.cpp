@@ -55,7 +55,7 @@ TEST_F(Dot11BlockAckRequestTest, CopyConstructor) {
     Dot11BlockAckRequest dot1;
     dot1.fragment_number(6);
     dot1.start_sequence(0x294);
-    dot1.bar_control(0x92f);
+    dot1.bar_control(0x9);
     Dot11BlockAckRequest dot2(dot1);
     test_equals(dot1, dot2);
 }
@@ -64,7 +64,7 @@ TEST_F(Dot11BlockAckRequestTest, CopyAssignmentOperator) {
     Dot11BlockAckRequest dot1;
     dot1.fragment_number(6);
     dot1.start_sequence(0x294);
-    dot1.bar_control(0x92f);
+    dot1.bar_control(0x9);
     Dot11BlockAckRequest dot2;
     dot2 = dot1;
     test_equals(dot1, dot2);
@@ -74,7 +74,7 @@ TEST_F(Dot11BlockAckRequestTest, ClonePDU) {
     Dot11BlockAckRequest dot1;
     dot1.fragment_number(6);
     dot1.start_sequence(0x294);
-    dot1.bar_control(0x92f);
+    dot1.bar_control(0x9);
     std::auto_ptr<Dot11BlockAckRequest> dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
