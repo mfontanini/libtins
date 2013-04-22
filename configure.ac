@@ -1,4 +1,5 @@
 AC_INIT([libtins], [0.3], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
+AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE([-Wall -Werror])
 LT_INIT([disable-static])
 AC_CONFIG_MACRO_DIR([m4])
