@@ -178,7 +178,7 @@ namespace Tins {
          *
          * \return The checksum field in an uint16_t.
          */
-        uint16_t check() const { return Endian::be_to_host(_tcp.check); }
+        uint16_t checksum() const { return Endian::be_to_host(_tcp.check); }
 
         /**
          * \brief Getter for the urgent pointer field.
@@ -245,13 +245,6 @@ namespace Tins {
          * \param new_window The new window size.
          */
         void window(uint16_t new_window);
-
-        /**
-         * \brief Setter for the checksum field.
-         *
-         * \param new_check The new checksum.
-         */
-        void check(uint16_t new_check);
 
         /**
          * \brief Setter for the urgent pointer field.
@@ -466,6 +459,7 @@ namespace Tins {
         
         void internal_add_option(const option &option);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        void checksum(uint16_t new_check);
         
         uint8_t *write_option(const option &opt, uint8_t *buffer);
 

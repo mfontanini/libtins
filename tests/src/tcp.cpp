@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <stdint.h>
 #include "tcp.h"
+#include "ip.h"
 #include "utils.h"
 
 using namespace std;
@@ -11,7 +12,7 @@ using namespace Tins;
 
 class TCPTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[];
+    static const uint8_t expected_packet[], checksum_packet[];
     
     void test_equals(const TCP &tcp1, const TCP &tcp2);
 };
@@ -22,12 +23,32 @@ const uint8_t TCPTest::expected_packet[] = {
     18, 52, 3, 3, 122, 4, 2, 5, 10, 0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0
 };
 
+// IP + TCP
+const uint8_t TCPTest::checksum_packet[] = {
+    69, 0, 0, 40, 0, 0, 64, 0, 64, 6, 60, 206, 0, 0, 0, 0, 127, 0, 0, 1, 
+    5, 57, 199, 49, 0, 0, 0, 0, 255, 216, 70, 222, 80, 20, 0, 0, 158, 172, 
+    0, 0
+};
+
 
 TEST_F(TCPTest, DefaultConstructor) {
     TCP tcp;
     EXPECT_EQ(tcp.dport(), 0);
     EXPECT_EQ(tcp.sport(), 0);
     EXPECT_EQ(tcp.pdu_type(), PDU::TCP);
+}
+
+TEST_F(TCPTest, ChecksumCheck) {
+    IP pkt1(checksum_packet, sizeof(checksum_packet)); 
+    const TCP &tcp1 = pkt1.rfind_pdu<TCP>();
+    uint16_t checksum = tcp1.checksum();
+    
+    IP::serialization_type buffer = pkt1.serialize();
+    IP pkt2(&buffer[0], buffer.size());
+    const TCP &tcp2 = pkt2.rfind_pdu<TCP>();
+    EXPECT_EQ(checksum, tcp2.checksum());
+    EXPECT_EQ(tcp1.checksum(), tcp2.checksum());
+    
 }
 
 TEST_F(TCPTest, CopyConstructor) {
@@ -84,12 +105,6 @@ TEST_F(TCPTest, Window) {
     TCP tcp;
     tcp.window(0x5fad);
     EXPECT_EQ(tcp.window(), 0x5fad);
-}
-
-TEST_F(TCPTest, Check) {
-    TCP tcp;
-    tcp.check(0x5fad);
-    EXPECT_EQ(tcp.check(), 0x5fad);
 }
 
 TEST_F(TCPTest, UrgPtr) {
@@ -166,7 +181,7 @@ void TCPTest::test_equals(const TCP &tcp1, const TCP &tcp2) {
     EXPECT_EQ(tcp1.seq(), tcp2.seq());
     EXPECT_EQ(tcp1.ack_seq(), tcp2.ack_seq());
     EXPECT_EQ(tcp1.window(), tcp2.window());
-    EXPECT_EQ(tcp1.check(), tcp2.check());
+    EXPECT_EQ(tcp1.checksum(), tcp2.checksum());
     EXPECT_EQ(tcp1.urg_ptr(), tcp2.urg_ptr());
     EXPECT_EQ(tcp1.data_offset(), tcp2.data_offset());
     EXPECT_EQ((bool)tcp1.inner_pdu(), (bool)tcp2.inner_pdu());

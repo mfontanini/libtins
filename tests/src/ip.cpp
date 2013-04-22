@@ -105,12 +105,6 @@ TEST_F(IPTest, Protocol) {
     EXPECT_EQ(ip.protocol(), 0x7f);
 }
 
-TEST_F(IPTest, Check) {
-    IP ip;
-    ip.check(0x7f1a);
-    EXPECT_EQ(ip.check(), 0x7f1a);
-}
-
 TEST_F(IPTest, SrcIPString) {
     IP ip;
     string string_ip("192.155.32.10");

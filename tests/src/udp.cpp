@@ -2,7 +2,7 @@
 #include <cstring>
 #include <stdint.h>
 #include "udp.h"
-#include "pdu.h"
+#include "ip.h"
 
 
 using namespace std;
@@ -11,13 +11,19 @@ using namespace Tins;
 
 class UDPTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[];
+    static const uint8_t expected_packet[], checksum_packet[];
     
     void test_equals(const UDP& udp1, const UDP& udp2);
 };
 
 const uint8_t UDPTest::expected_packet[] = {
     245, 26, 71, 241, 8, 0, 0, 0
+};
+
+const uint8_t UDPTest::checksum_packet[] = {
+    69, 0, 0, 48, 35, 109, 64, 0, 64, 17, 25, 78, 0, 0, 0, 0, 127, 0, 0, 
+    1, 5, 57, 155, 11, 0, 28, 84, 167, 97, 115, 100, 97, 115, 100, 115, 
+    97, 115, 100, 97, 115, 100, 115, 97, 100, 97, 115, 100, 10
 };
 
 
@@ -35,6 +41,18 @@ TEST_F(UDPTest, DefaultContructor) {
     EXPECT_EQ(udp.dport(), 0);
     EXPECT_EQ(udp.sport(), 0);
     EXPECT_FALSE(udp.inner_pdu());
+}
+
+TEST_F(UDPTest, ChecksumCheck) {
+    IP pkt1(checksum_packet, sizeof(checksum_packet)); 
+    const UDP &udp1 = pkt1.rfind_pdu<UDP>();
+    uint16_t checksum = udp1.checksum();
+    
+    IP::serialization_type buffer = pkt1.serialize();
+    IP pkt2(&buffer[0], buffer.size());
+    const UDP &udp2 = pkt2.rfind_pdu<UDP>();
+    EXPECT_EQ(checksum, udp2.checksum());
+    EXPECT_EQ(udp1.checksum(), udp2.checksum());
 }
 
 TEST_F(UDPTest, CopyContructor) {

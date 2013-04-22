@@ -307,7 +307,7 @@ namespace Tins {
          *
          * \return The checksum for this IP PDU.
          */
-        uint16_t check() const { return Endian::be_to_host(_ip.check); }
+        uint16_t checksum() const { return Endian::be_to_host(_ip.check); }
 
         /**
          * \brief Getter for the source address field.
@@ -384,13 +384,6 @@ namespace Tins {
          * \param new_protocol The new protocol.
          */
         void protocol(uint8_t new_protocol);
-
-        /**
-         * \brief Setter for the checksum field.
-         *
-         * \param new_check The new checksum.
-         */
-        void check(uint16_t new_check);
 
         /**
          * \brief Setter for the source address field.
@@ -632,6 +625,7 @@ namespace Tins {
         uint8_t* write_option(const option &opt, uint8_t* buffer);
         void add_route_option(option_identifier id, const generic_route_option_type &data);
         generic_route_option_type search_route_option(option_identifier id) const;
+        void checksum(uint16_t new_check);
 
         iphdr _ip;
         uint16_t _options_size, _padded_options_size;

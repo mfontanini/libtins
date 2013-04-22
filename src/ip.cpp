@@ -173,7 +173,7 @@ void IP::protocol(uint8_t new_protocol) {
     _ip.protocol = new_protocol;
 }
 
-void IP::check(uint16_t new_check) {
+void IP::checksum(uint16_t new_check) {
     _ip.check = Endian::host_to_be(new_check);
 }
 
@@ -385,7 +385,7 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     #ifdef TINS_DEBUG
     assert(total_sz >= my_sz);
     #endif
-    check(0);
+    checksum(0);
     if(inner_pdu()) {
         uint32_t new_flag;
         switch(inner_pdu()->pdu_type()) {
@@ -425,10 +425,10 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     memset(buffer + sizeof(_ip) + _options_size, 0, _padded_options_size - _options_size);
 
     if(parent) {
-        uint32_t checksum = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
-        while (checksum >> 16)
-            checksum = (checksum & 0xffff) + (checksum >> 16);
-        check(~checksum);
+        uint32_t check = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
+        while (check >> 16)
+            check = (check & 0xffff) + (check >> 16);
+        checksum(~check);
         ((iphdr*)buffer)->check = _ip.check;
     }
 }

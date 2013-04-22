@@ -89,6 +89,12 @@ namespace Tins {
          * \return The length of the datagram.
          */
         uint16_t length() const { return Endian::be_to_host(_udp.len); }
+        
+        /**
+         * \brief Getter for the checksum of the datagram.
+         * \return The datagram's checksum.
+         */
+        uint16_t checksum() const { return Endian::be_to_host(_udp.check); }
 
         /** 
          * \brief Set the destination port.
