@@ -29,7 +29,9 @@
 
 #include <stdexcept>
 #include <cstring>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <algorithm>
 #ifndef WIN32
     #include <netdb.h>
@@ -380,7 +382,9 @@ void IP::prepare_for_serialize(const PDU *parent) {
 
 void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
     uint32_t my_sz = header_size();
+    #ifdef TINS_DEBUG
     assert(total_sz >= my_sz);
+    #endif
     check(0);
     if(inner_pdu()) {
         uint32_t new_flag;

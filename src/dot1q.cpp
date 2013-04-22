@@ -101,7 +101,7 @@ uint32_t Dot1Q::trailer_size() const {
 void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     uint32_t trailer = trailer_size();
     #ifdef TINS_DEBUG
-        assert(total_sz >= sizeof(_header) + trailer);
+    assert(total_sz >= sizeof(_header) + trailer);
     #endif
     if ((payload_type() == 0) && inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(

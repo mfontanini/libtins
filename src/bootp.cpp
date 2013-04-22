@@ -114,7 +114,9 @@ void BootP::vend(const vend_type &new_vend) {
 }
 
 void BootP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+    #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(bootphdr) + _vend.size());
+    #endif
     std::memcpy(buffer, &_bootp, sizeof(bootphdr));
     std::copy(_vend.begin(), _vend.end(), buffer + sizeof(bootphdr));
 }

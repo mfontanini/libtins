@@ -28,7 +28,9 @@
  */
 
 #include <cstring>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #ifndef WIN32
     #include <netinet/in.h>
     #include <sys/socket.h>
@@ -190,7 +192,7 @@ bool IPv6::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef DEBUG
+    #ifdef TINS_DEBUG
     assert(total_sz >= header_size());
     #endif
     if(inner_pdu()) {

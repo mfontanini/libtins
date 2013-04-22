@@ -29,7 +29,9 @@
 
 #include <stdexcept>
 #include <cstring>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #ifndef WIN32
     #define NOMINMAX
     #include <netinet/in.h>
@@ -148,7 +150,9 @@ void ICMP::set_redirect(uint8_t icode, uint32_t address) {
 }
 
 void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+    #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(icmphdr));
+    #endif
     if(!_icmp.check) {
         uint32_t checksum = Utils::do_checksum(buffer + sizeof(icmphdr), buffer + total_sz) + 
                             Utils::do_checksum((uint8_t*)&_icmp, ((uint8_t*)&_icmp) + sizeof(icmphdr));

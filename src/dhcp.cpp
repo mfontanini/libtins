@@ -216,7 +216,9 @@ uint32_t DHCP::header_size() const {
 }
 
 void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+    #ifdef TINS_DEBUG
     assert(total_sz >= header_size());
+    #endif
     if(_size) {
         vend_type &result(BootP::vend());
         result.resize(_size);

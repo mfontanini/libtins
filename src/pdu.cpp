@@ -26,8 +26,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
+ 
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include "pdu.h"
 #include "rawpdu.h"
 #include "packet_sender.h"

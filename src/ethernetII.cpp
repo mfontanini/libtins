@@ -27,7 +27,9 @@
  *
  */
 
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
@@ -138,8 +140,9 @@ bool EthernetII::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    uint32_t my_sz = header_size();
-    assert(total_sz >= my_sz);
+    #ifdef TINS_DEBUG
+    assert(total_sz >= header_size());
+    #endif
 
     /* Inner type defaults to IP */
     if ((_eth.payload_type == 0) && inner_pdu()) {

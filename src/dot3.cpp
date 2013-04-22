@@ -27,7 +27,9 @@
  *
  */
 
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
@@ -127,9 +129,10 @@ bool Dot3::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    uint32_t my_sz = header_size();
     bool set_length = _eth.length == 0;
-    assert(total_sz >= my_sz);
+    #ifdef TINS_DEBUG
+    assert(total_sz >= header_size());
+    #endif
 
     if (set_length)
     	_eth.length = Endian::host_to_be(size() - sizeof(_eth));

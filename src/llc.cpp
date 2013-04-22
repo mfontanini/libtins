@@ -29,7 +29,9 @@
 
 #include <stdexcept>
 #include <cstring>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include "llc.h"
 #include "stp.h"
 #include "rawpdu.h"
@@ -204,7 +206,9 @@ void LLC::clear_information_fields() {
 }
 
 void LLC::write_serialization(uint8_t *buffer, uint32_t total_sz, const Tins::PDU *parent) {
+    #ifdef TINS_DEBUG
 	assert(total_sz >= header_size());
+    #endif
     if(inner_pdu() && inner_pdu()->pdu_type() == PDU::STP) {
         dsap(0x42);
         ssap(0x42);

@@ -36,7 +36,9 @@
     #endif
 #endif
 #include <stdexcept>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <cstring>
 #include "loopback.h"
 #include "packet_sender.h"
@@ -97,7 +99,9 @@ uint32_t Loopback::header_size() const {
 
 void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
 {
+    #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(_family));
+    #endif
     if(dynamic_cast<const Tins::IP*>(inner_pdu()))
         _family = PF_INET;
     else if(dynamic_cast<const Tins::LLC*>(inner_pdu()))

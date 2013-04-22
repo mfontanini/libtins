@@ -28,7 +28,9 @@
  */
 
 #include <cstring>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <algorithm>
 #include "stp.h"
 #include "exceptions.h"
@@ -106,7 +108,7 @@ void STP::bridge_id(const bpdu_id_type &id) {
 
 void STP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     #ifdef TINS_DEBUG
-        assert(total_sz >= sizeof(_header));
+    assert(total_sz >= sizeof(_header));
     #endif
     std::memcpy(buffer, &_header, sizeof(_header));
 }

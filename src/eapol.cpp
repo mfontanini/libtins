@@ -28,7 +28,9 @@
  */
 
 #include <cstring>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <stdexcept>
 #include "eapol.h"
 #include "dot11.h"
@@ -84,8 +86,9 @@ void EAPOL::type(uint8_t new_type) {
 }
 
 void EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    uint32_t sz = header_size();
-    assert(total_sz >= sz);
+    #ifdef TINS_DEBUG
+    assert(total_sz >= header_size());
+    #endif
     std::memcpy(buffer, &_header, sizeof(_header));
     write_body(buffer + sizeof(_header), total_sz - sizeof(_header));
 }
@@ -145,8 +148,9 @@ uint32_t RC4EAPOL::header_size() const {
 }
 
 void RC4EAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(_header) + _key.size();
-    assert(total_sz >= sz);
+    #ifdef TINS_DEBUG
+    assert(total_sz >= sizeof(_header) + _key.size());
+    #endif
     if(_key.size())
         _header.key_length = Endian::host_to_be(_key.size());
     std::memcpy(buffer, &_header, sizeof(_header));
@@ -259,8 +263,9 @@ uint32_t RSNEAPOL::header_size() const {
 }
 
 void RSNEAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = header_size() - sizeof(eapolhdr);
-    assert(total_sz >= sz);
+    #ifdef TINS_DEBUG
+    assert(total_sz >= header_size() - sizeof(eapolhdr));
+    #endif
     if(_key.size()) {
         if(!_header.key_t) {
             _header.key_length = Endian::host_to_be<uint16_t>(32);

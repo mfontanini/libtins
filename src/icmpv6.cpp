@@ -27,7 +27,9 @@
  *
  */
  
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <cstring>
 #include "icmpv6.h"
 #include "ipv6.h"
@@ -217,6 +219,7 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         #ifdef TINS_DEBUG
         assert(total_sz >= it->data_size() + sizeof(uint8_t) * 2);
+        // total_sz is only used if TINS_DEBUG is defined.
         total_sz -= it->data_size() + sizeof(uint8_t) * 2;
         #endif
         buffer = write_option(*it, buffer);

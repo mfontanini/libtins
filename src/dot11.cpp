@@ -203,8 +203,9 @@ void Dot11::send(PacketSender &sender, const NetworkInterface &iface) {
 #endif // WIN32
 
 void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    uint32_t my_sz = header_size();
-    assert(total_sz >= my_sz);
+    #ifdef TINS_DEBUG
+    assert(total_sz >= header_size());
+    #endif
     memcpy(buffer, &_header, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
@@ -215,7 +216,9 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
 
     uint32_t child_len = write_fixed_parameters(buffer, total_sz - _options_size);
     buffer += child_len;
+    #ifdef TINS_DEBUG
     assert(total_sz >= child_len + _options_size);
+    #endif
     for(std::list<option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option();
         *(buffer++) = it->length_field();
@@ -881,7 +884,9 @@ uint32_t Dot11Beacon::header_size() const {
 
 uint32_t Dot11Beacon::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(_body);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -919,7 +924,9 @@ uint32_t Dot11Disassoc::header_size() const {
 
 uint32_t Dot11Disassoc::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(DisassocBody);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -958,7 +965,9 @@ uint32_t Dot11AssocRequest::header_size() const {
 
 uint32_t Dot11AssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(AssocReqBody);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -1001,7 +1010,9 @@ uint32_t Dot11AssocResponse::header_size() const {
 
 uint32_t Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(AssocRespBody);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -1044,7 +1055,9 @@ uint32_t Dot11ReAssocRequest::header_size() const {
 
 uint32_t Dot11ReAssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(this->_body);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -1086,7 +1099,9 @@ uint32_t Dot11ReAssocResponse::header_size() const {
 
 uint32_t Dot11ReAssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(this->_body);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -1134,7 +1149,9 @@ uint32_t Dot11Authentication::header_size() const {
 
 uint32_t Dot11Authentication::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(this->_body);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -1172,7 +1189,9 @@ uint32_t Dot11Deauthentication::header_size() const {
 
 uint32_t Dot11Deauthentication::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(this->_body);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -1233,7 +1252,9 @@ uint32_t Dot11ProbeResponse::header_size() const {
 
 uint32_t Dot11ProbeResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(this->_body);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     memcpy(buffer, &this->_body, sz);
     return sz;
 }
@@ -1372,7 +1393,9 @@ uint32_t Dot11QoSData::header_size() const {
 
 uint32_t Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
     uint32_t sz = sizeof(this->_qos_control);
+    #ifdef TINS_DEBUG
     assert(sz <= total_sz);
+    #endif
     *(uint16_t*)buffer = this->_qos_control;
     return sz;
 }
@@ -1413,7 +1436,9 @@ uint32_t Dot11ControlTA::header_size() const {
 }
 
 uint32_t Dot11ControlTA::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
+    #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(_taddr));
+    #endif
     //std::memcpy(buffer, _taddr, sizeof(_taddr));
     _taddr.copy(buffer);
     return sizeof(_taddr);

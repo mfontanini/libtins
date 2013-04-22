@@ -294,7 +294,9 @@ void DNS::unparse_domain_name(const std::string &dn, std::string &out) const {
 }
 
 void DNS::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+    #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(dns) + extra_size);
+    #endif
     std::memcpy(buffer, &dns, sizeof(dns)); 
     buffer += sizeof(dns);
     for(list<Query>::const_iterator it(queries_.begin()); it != queries_.end(); ++it) {

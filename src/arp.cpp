@@ -108,7 +108,9 @@ uint32_t ARP::header_size() const {
 }
 
 void ARP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+    #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(arphdr));
+    #endif
     memcpy(buffer, &_arp, sizeof(arphdr));
 }
 

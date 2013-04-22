@@ -28,7 +28,9 @@
  */
 
 #include <cstring>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <stdexcept>
 #ifndef WIN32
     #include <net/ethernet.h>
@@ -92,7 +94,9 @@ uint32_t Tins::SNAP::header_size() const {
 }
 
 void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+    #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(_snap));
+    #endif
     if (!_snap.eth_type && inner_pdu()) {
         uint16_t type = Tins::Constants::Ethernet::IP;
         switch (inner_pdu()->pdu_type()) {

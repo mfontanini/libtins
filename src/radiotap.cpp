@@ -28,7 +28,9 @@
  */
 
 #include <cstring>
+#ifdef TINS_DEBUG
 #include <cassert>
+#endif
 #include <stdexcept>
 #include "macros.h"
 #ifndef WIN32
@@ -278,7 +280,9 @@ bool RadioTap::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     uint32_t sz = header_size();
     uint8_t *buffer_start = buffer;
+    #ifdef TINS_DEBUG
     assert(total_sz >= sz);
+    #endif
     if(!_radio.it_len)
         _radio.it_len = Endian::host_to_le<uint16_t>(sz);
     memcpy(buffer, &_radio, sizeof(_radio));
