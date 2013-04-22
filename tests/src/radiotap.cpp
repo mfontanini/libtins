@@ -11,7 +11,8 @@ using namespace Tins;
 
 class RadioTapTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[], expected_packet1[];
+    static const uint8_t expected_packet[], expected_packet1[],
+                        expected_packet2[];
 };
 
 const uint8_t RadioTapTest::expected_packet[] = {
@@ -49,6 +50,17 @@ const uint8_t RadioTapTest::expected_packet1[] = {
     0, 0, 145, 139, 60, 178
 };
 
+const uint8_t RadioTapTest::expected_packet2[] = {
+    0, 0, 34, 0, 47, 72, 0, 0, 166, 1, 78, 68, 1, 0, 0, 0, 2, 18, 143, 9, 
+    192, 0, 185, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 136, 66, 223, 0, 0, 33, 
+    106, 120, 24, 244, 0, 37, 156, 66, 159, 63, 132, 24, 136, 177, 96, 
+    139, 160, 246, 0, 0, 105, 15, 0, 32, 0, 0, 0, 0, 144, 70, 21, 19, 239, 
+    128, 176, 53, 109, 131, 215, 214, 175, 122, 48, 125, 96, 224, 165, 
+    112, 100, 218, 16, 165, 71, 12, 251, 231, 214, 69, 86, 10, 41, 95, 
+    147, 149, 126, 177, 131, 158, 124, 227, 49, 222, 97, 79, 200, 223, 
+    132, 241, 42, 135, 151, 94, 223, 190, 109, 180, 255, 115, 238, 211
+};
+
 TEST_F(RadioTapTest, DefaultConstructor) {
     RadioTap radio;
     EXPECT_TRUE(radio.flags() & RadioTap::FCS);
@@ -74,7 +86,7 @@ TEST_F(RadioTapTest, ConstructorFromBuffer) {
     EXPECT_EQ(radio.antenna(), 2);
 }
 
-TEST_F(RadioTapTest, ConstructorFromBuffer2) {
+TEST_F(RadioTapTest, ConstructorFromBuffer1) {
     RadioTap radio(expected_packet1, sizeof(expected_packet1));
     EXPECT_EQ(radio.version(), 0);
     EXPECT_EQ(radio.length(), 26);
@@ -83,6 +95,26 @@ TEST_F(RadioTapTest, ConstructorFromBuffer2) {
     EXPECT_TRUE(radio.flags() & RadioTap::FCS);
     EXPECT_EQ(radio.antenna(), 1);
     EXPECT_TRUE(radio.find_pdu<Dot11Beacon>());
+}
+
+TEST_F(RadioTapTest, ConstructorFromBuffer2) {
+    RadioTap radio(expected_packet2, sizeof(expected_packet2));
+    
+    EXPECT_TRUE(radio.present() & RadioTap::RATE);
+    EXPECT_TRUE(radio.present() & RadioTap::CHANNEL);
+    EXPECT_TRUE(radio.present() & RadioTap::DBM_SIGNAL);
+    EXPECT_TRUE(radio.present() & RadioTap::ANTENNA);
+    EXPECT_TRUE(radio.present() & RadioTap::RX_FLAGS);
+    
+    EXPECT_EQ(radio.version(), 0);
+    EXPECT_EQ(radio.length(), 34);
+    EXPECT_EQ(radio.rate(), 0x12);
+    EXPECT_EQ(radio.flags(), 0x02);
+    EXPECT_EQ(radio.dbm_signal(), 0xb9);
+    EXPECT_EQ(radio.channel_type(), 192);
+    EXPECT_EQ(radio.channel_freq(), 2447);
+    EXPECT_EQ(radio.antenna(), 0);
+    EXPECT_TRUE(radio.find_pdu<Dot11QoSData>());
 }
 
 TEST_F(RadioTapTest, Serialize) {

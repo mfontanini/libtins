@@ -339,9 +339,10 @@ void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
         memcpy(buffer, &_max_power, sizeof(_max_power));
         buffer += sizeof(_max_power);
     }
-    if((_flags & 0x10) != 0 && inner_pdu())
+    if((_flags & 0x10) != 0 && inner_pdu()) {
         *(uint32_t*)(buffer + inner_pdu()->size()) = Endian::host_to_le(
             Utils::crc32(buffer, inner_pdu()->size())
         );
+    }
 }
 }
