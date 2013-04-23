@@ -1,5 +1,6 @@
-AC_INIT([libtins], [0.3], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
+AC_INIT([libtins], [1.0], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
 AC_CANONICAL_SYSTEM
+AC_CONFIG_HEADER(include/config.h)
 AM_INIT_AUTOMAKE([-Wall -Werror])
 LT_INIT([disable-static])
 AC_CONFIG_MACRO_DIR([m4])
@@ -10,19 +11,12 @@ AC_LANG(C++)
 
 AC_PROG_LIBTOOL
 
-if test -n "$debug"
-then
-    CXXFLAGS="$CXXFLAGS -DTINS_DEBUG -g"
-else
-    CXXFLAGS="$CXXFLAGS -O3"
-fi
-
 CXXFLAGS="$CXXFLAGS -Iinclude"
 
 AC_ARG_ENABLE(
     c++11, 
     [  --enable-c++11          enable C++11 features], 
-    [CXXFLAGS="$CXXFLAGS -std=c++0x"]
+    [AX_CXX_COMPILE_STDCXX_11(noext)]
 )
 
 # Check that libpcap exists
