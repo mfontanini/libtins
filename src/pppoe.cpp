@@ -131,13 +131,6 @@ void PPPoE::add_tag(const tag &option) {
     _tags.push_back(option);
 }
 
-#if TINS_IS_CXX11
-void PPPoE::add_tag(tag &&option) {
-    _tags_size += option.data_size() + sizeof(uint16_t) * 2;
-    _tags.push_back(std::move(option));
-}
-#endif
-
 // *********************** Setters *************************
 
 void PPPoE::end_of_list() {

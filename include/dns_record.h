@@ -108,12 +108,23 @@ public:
         /**
          * Move constructor.
          */
-        DNSResourceRecord(DNSResourceRecord &&rhs) noexcept;
+        DNSResourceRecord(DNSResourceRecord &&rhs) noexcept 
+        : info_(rhs.info_), data(std::move(rhs.data)), impl(0) {
+            std::swap(impl, rhs.impl);
+        }
         
         /**
          * Move assignment operator.
          */
-        DNSResourceRecord& operator=(DNSResourceRecord &&rhs) noexcept;
+        DNSResourceRecord& operator=(DNSResourceRecord &&rhs) noexcept 
+        {
+            info_ = rhs.info_;
+            data = std::move(rhs.data);
+            delete impl;
+            impl = 0;
+            std::swap(impl, rhs.impl);
+            return *this;
+        }
     #endif // TINS_IS_CXX11
     
     /**

@@ -233,7 +233,10 @@ public:
          * 
          * \param option The option to be added.
          */
-        void add_tag(tag &&option);
+        void add_tag(tag &&option) {
+            _tags_size += option.data_size() + sizeof(uint16_t) * 2;
+            _tags.push_back(std::move(option));
+        }
     #endif
     
     // Option setters

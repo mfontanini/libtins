@@ -751,7 +751,10 @@ public:
          * 
          * \param option The option to be added.
          */
-        void add_option(option &&option);
+        void add_option(option &&option) {
+            internal_add_option(option);
+            _options.push_back(std::move(option));
+        }
     #endif
 
     /**

@@ -86,13 +86,31 @@ namespace Tins {
              * \brief Move constructor.
              * \param rhs The sender to be moved.
              */
-            PacketSender(PacketSender &&rhs);
+            PacketSender(PacketSender &&rhs) noexcept {
+                *this = std::move(rhs);
+            }
             
             /**
              * \brief Move assignment operator.
              * \param rhs The sender to be moved.
              */
-            PacketSender& operator=(PacketSender &&rhs);
+            PacketSender& operator=(PacketSender &&rhs) noexcept {
+                _sockets = std::move(rhs._sockets);
+                rhs._sockets = std::vector<int>(SOCKETS_END, INVALID_RAW_SOCKET);
+                #ifndef WIN32
+                    #if defined(BSD) || defined(__FreeBSD_kernel__)
+                    _ether_socket = std::move(rhs._ether_socket);
+                    #else
+                    _ether_socket = rhs._ether_socket;
+                    rhs._ether_socket = INVALID_RAW_SOCKET;
+                    #endif
+                #endif
+                _types = rhs._types; // no move
+                _timeout = rhs._timeout;
+                _timeout_usec = rhs._timeout_usec;
+                default_iface = rhs.default_iface;
+                return *this;
+            }
         #endif
         
         /** 

@@ -97,33 +97,6 @@ PacketSender::PacketSender(const NetworkInterface &iface, uint32_t recv_timeout,
     _types[ICMP_SOCKET] = IPPROTO_ICMP;
 }
 
-#if TINS_IS_CXX11
-PacketSender::PacketSender(PacketSender &&rhs) 
-{
-    *this = std::move(rhs);
-}
-    
-PacketSender& PacketSender::operator=(PacketSender &&rhs)
-{
-    _sockets = std::move(rhs._sockets);
-    rhs._sockets = std::vector<int>(SOCKETS_END, INVALID_RAW_SOCKET);
-    #ifndef WIN32
-        #if defined(BSD) || defined(__FreeBSD_kernel__)
-        _ether_socket = std::move(rhs._ether_socket);
-        #else
-        _ether_socket = rhs._ether_socket;
-        rhs._ether_socket = INVALID_RAW_SOCKET;
-        #endif
-    #endif
-    _types = rhs._types; // no move
-    _timeout = rhs._timeout;
-    _timeout_usec = rhs._timeout_usec;
-    default_iface = rhs.default_iface;
-    return *this;
-    
-}
-#endif
-
 PacketSender::~PacketSender() {
     for(unsigned i(0); i < _sockets.size(); ++i) {
         if(_sockets[i] != INVALID_RAW_SOCKET) 

@@ -251,13 +251,6 @@ void ICMPv6::add_option(const option &option) {
     _options.push_back(option);
 }
 
-#if TINS_IS_CXX11
-void ICMPv6::add_option(option &&option) {
-    internal_add_option(option);
-    _options.push_back(std::move(option));
-}
-#endif
-
 void ICMPv6::internal_add_option(const option &option) {
     _options_size += option.data_size() + sizeof(uint8_t) * 2;
 }

@@ -293,13 +293,6 @@ uint16_t IP::stream_identifier() const {
     return Endian::be_to_host(*(const uint16_t*)option->data_ptr());
 }
 
-#if TINS_IS_CXX11
-void IP::add_option(option &&opt) {
-    internal_add_option(opt);
-    _ip_options.push_back(std::move(opt));
-}
-#endif
-
 void IP::add_option(const option &opt) {
     internal_add_option(opt);
     _ip_options.push_back(opt);

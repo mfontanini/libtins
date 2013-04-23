@@ -135,14 +135,21 @@ namespace Tins {
              * 
              * \param rhs The PDU to be moved.
              */
-            PDU(PDU &&rhs) noexcept;
+            PDU(PDU &&rhs) noexcept 
+            : _inner_pdu(0)
+            {
+                std::swap(_inner_pdu, rhs._inner_pdu);
+            }
             
             /**
              * \brief Move assignment operator.
              * 
              * \param rhs The PDU to be moved.
              */
-            PDU& operator=(PDU &&rhs) noexcept;
+            PDU& operator=(PDU &&rhs) noexcept {
+                std::swap(_inner_pdu, rhs._inner_pdu);
+                return *this;
+            }
         #endif
 
         /** 

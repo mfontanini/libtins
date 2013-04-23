@@ -104,13 +104,6 @@ void Dot11::add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t *val) 
     _options_size += opt_size;
 }
 
-#if TINS_IS_CXX11
-void Dot11::add_option(option &&opt) {
-    internal_add_option(opt);
-    _options.push_back(std::move(opt));
-}
-#endif
-
 void Dot11::internal_add_option(const option &opt) {
     _options_size += opt.data_size() + sizeof(uint8_t) * 2;
 }

@@ -75,7 +75,9 @@ public:
          * 
          * \param rhs The PacketWriter to be moved.
          */
-        PacketWriter(PacketWriter &&rhs) noexcept;
+        PacketWriter(PacketWriter &&rhs) noexcept {
+            *this = std::move(rhs);
+        }
         
         /**
          * \brief Move assignment operator.
@@ -85,7 +87,13 @@ public:
          * 
          * \param rhs The PacketWriter to be moved.
          */
-        PacketWriter& operator=(PacketWriter &&rhs) noexcept;
+        PacketWriter& operator=(PacketWriter &&rhs) noexcept {
+            handle = 0;
+            dumper = 0;
+            std::swap(handle, rhs.handle);
+            std::swap(dumper, rhs.dumper);
+            return *this;
+        }
     #endif
     
     /**

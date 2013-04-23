@@ -368,7 +368,10 @@ namespace Tins {
              * 
              * \param option The option to be added.
              */
-            void add_option(option &&opt);
+            void add_option(option &&opt) {
+                internal_add_option(opt);
+                _options.push_back(std::move(opt));
+            }
         #endif
 
         /**

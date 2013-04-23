@@ -64,13 +64,25 @@ namespace Tins {
              * \brief Move constructor.
              * This constructor is available only in C++11.
              */
-            BaseSniffer(BaseSniffer &&rhs) noexcept;
+            BaseSniffer(BaseSniffer &&rhs) noexcept 
+            {
+                *this = std::move(rhs);
+            }
             
             /**
              * \brief Move assignment operator.
              * This opeartor is available only in C++11.
              */
-            BaseSniffer& operator=(BaseSniffer &&rhs) noexcept;
+            BaseSniffer& operator=(BaseSniffer &&rhs) noexcept 
+            {
+                handle = 0;
+                mask = rhs.mask;
+                iface_type = rhs.iface_type;
+                actual_filter.bf_insns = 0;
+                std::swap(handle, rhs.handle);
+                std::swap(actual_filter, rhs.actual_filter);
+                return *this;
+            }
         #endif
     
         /**

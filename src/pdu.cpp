@@ -40,19 +40,6 @@ PDU::PDU(PDU *next_pdu) : _inner_pdu(next_pdu) {
 
 }
 
-#if TINS_IS_CXX11
-PDU::PDU(PDU &&rhs) noexcept
-: _inner_pdu(0)
-{
-    std::swap(_inner_pdu, rhs._inner_pdu);
-}
-
-PDU& PDU::operator=(PDU &&rhs) noexcept {
-    std::swap(_inner_pdu, rhs._inner_pdu);
-    return *this;
-}
-#endif
-
 PDU::PDU(const PDU &other) : _inner_pdu(0) {
     copy_inner_pdu(other);
 }

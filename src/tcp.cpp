@@ -349,13 +349,6 @@ uint8_t *TCP::write_option(const option &opt, uint8_t *buffer) {
     }
 }
 
-#if TINS_IS_CXX11
-void TCP::add_option(option &&opt) {
-    internal_add_option(opt);
-    _options.push_back(std::move(opt));
-}
-#endif
-
 void TCP::internal_add_option(const option &opt) {
     uint8_t padding;
     

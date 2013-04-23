@@ -82,13 +82,6 @@ void DHCP::add_option(const option &opt) {
     _options.push_back(opt);
 }
 
-#if TINS_IS_CXX11
-void DHCP::add_option(option &&opt) {
-    internal_add_option(opt);
-    _options.push_back(std::move(opt));
-}
-#endif
-
 void DHCP::internal_add_option(const option &opt) {
     _size += opt.data_size() + (sizeof(uint8_t) << 1);
 }
