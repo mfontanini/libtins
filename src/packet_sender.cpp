@@ -34,7 +34,7 @@
     #include <sys/time.h>
     #include <arpa/inet.h>
     #include <unistd.h>
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <sys/ioctl.h>
         #include <sys/types.h>
         #include <sys/stat.h>
@@ -85,7 +85,7 @@ const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
 PacketSender::PacketSender(const NetworkInterface &iface, uint32_t recv_timeout, 
   uint32_t usec) 
 : _sockets(SOCKETS_END, INVALID_RAW_SOCKET), 
-#if !defined(BSD) && !defined(WIN32)
+#if !defined(BSD) && !defined(WIN32) && !defined(__FreeBSD_kernel__)
   _ether_socket(INVALID_RAW_SOCKET),
 #endif
   _timeout(recv_timeout), _timeout_usec(usec), default_iface(iface)
@@ -106,7 +106,7 @@ PacketSender::~PacketSender() {
             ::closesocket(_sockets[i]);
         #endif
     }
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
     for(BSDEtherSockets::iterator it = _ether_socket.begin(); it != _ether_socket.end(); ++it)
         ::close(it->second);
     #elif !defined(WIN32)
@@ -125,7 +125,7 @@ const NetworkInterface& PacketSender::default_interface() {
 
 #ifndef WIN32
 bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const {
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
     return _ether_socket.count(iface.id());
     #else
     return _ether_socket != INVALID_RAW_SOCKET;
@@ -135,7 +135,7 @@ bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const
 int PacketSender::get_ether_socket(const NetworkInterface& iface) {
     if(!ether_socket_initialized(iface))
         open_l2_socket(iface);
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
     return _ether_socket[iface.id()];
     #else
     return _ether_socket;
@@ -143,7 +143,7 @@ int PacketSender::get_ether_socket(const NetworkInterface& iface) {
 }
 
 void PacketSender::open_l2_socket(const NetworkInterface& iface) {
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
         int sock = -1;
         // At some point, there should be an available device
         for (int i = 0; sock == -1;i++) {
@@ -197,7 +197,7 @@ void PacketSender::open_l3_socket(SocketType type) {
 
 void PacketSender::close_socket(SocketType type, const NetworkInterface &iface) {
     if(type == ETHER_SOCKET) {
-        #ifdef BSD
+        #if defined(BSD) || defined(__FreeBSD_kernel__)
         BSDEtherSockets::iterator it = _ether_socket.find(iface.id());
         if(it == _ether_socket.end())
             throw InvalidSocketTypeError();
@@ -265,11 +265,12 @@ PDU *PacketSender::send_recv(PDU &pdu, const NetworkInterface &iface) {
 
 #ifndef WIN32
 void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, 
-  uint32_t len_addr, const NetworkInterface &iface) {
+  uint32_t len_addr, const NetworkInterface &iface) 
+{
     int sock = get_ether_socket(iface);
     PDU::serialization_type buffer = pdu.serialize();
     if(!buffer.empty()) {
-        #ifdef BSD
+        #if defined(BSD) || defined(__FreeBSD_kernel__)
         if(::write(sock, &buffer[0], buffer.size()) == -1)
         #else
         if(::sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
@@ -279,7 +280,8 @@ void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr,
 }
 
 PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, 
-  uint32_t len_addr, const NetworkInterface &iface) {
+  uint32_t len_addr, const NetworkInterface &iface) 
+{
     int sock = get_ether_socket(iface);
     return recv_match_loop(sock, pdu, link_addr, len_addr);
 }

@@ -39,7 +39,7 @@
     #undef interface
 #endif
 #include "macros.h"
-#ifdef BSD
+#if defined(BSD) || defined(__FreeBSD_kernel__)
     #include <sys/file.h>
     #include <sys/socket.h>
     #include <sys/sysctl.h>
@@ -280,7 +280,7 @@ namespace Tins {
         dereference_until_pdu(T &value) {
             return dereference_until_pdu(*value);
         }
-        #ifdef BSD
+        #if defined(BSD) || defined(__FreeBSD_kernel__)
         inline std::vector<char> query_route_table() {
             int mib[6];
             std::vector<char> buf;
@@ -322,7 +322,7 @@ namespace Tins {
         #endif
     }
 }
-#ifdef BSD
+#if defined(BSD) || defined(__FreeBSD_kernel__)
 template<class ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
     std::vector<char> buffer = query_route_table();

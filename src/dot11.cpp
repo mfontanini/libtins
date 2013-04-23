@@ -36,7 +36,7 @@
 #include "exceptions.h"
 
 #ifndef WIN32
-    #if defined(BSD) || defined(__APPLE__)
+    #if defined(__FreeBSD_kernel__) || defined(BSD) || defined(__APPLE__)
         #include <sys/types.h>
         #include <net/if_dl.h>
     #else
@@ -185,7 +185,7 @@ void Dot11::send(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)
         throw invalid_interface();
     
-    #ifndef BSD
+    #if !defined(BSD) && !defined(__FreeBSD_kernel__)
         sockaddr_ll addr;
 
         memset(&addr, 0, sizeof(struct sockaddr_ll));

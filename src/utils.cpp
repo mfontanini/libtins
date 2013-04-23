@@ -34,7 +34,7 @@
 #include <cstring>
 #include "utils.h"
 #ifndef WIN32
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <sys/socket.h>
         #include <netinet/in.h>
         #include <net/if_dl.h>

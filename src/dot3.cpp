@@ -35,7 +35,7 @@
 #include <algorithm>
 #include "macros.h"
 #ifndef WIN32
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <net/if_dl.h>
     #else
         #include <netpacket/packet.h>
@@ -94,7 +94,7 @@ void Dot3::send(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)
         throw invalid_interface();
         
-    #ifndef BSD
+    #if !defined(BSD) && !defined(__FreeBSD_kernel__)
         struct sockaddr_ll addr;
 
         memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -147,7 +147,7 @@ void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
 PDU *Dot3::recv_response(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)
         throw invalid_interface();
-    #ifndef BSD
+    #if !defined(BSD) && !defined(__FreeBSD_kernel__)
         struct sockaddr_ll addr;
         memset(&addr, 0, sizeof(struct sockaddr_ll));
 

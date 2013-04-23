@@ -278,7 +278,7 @@ namespace Tins {
 
         std::vector<int> _sockets;
         #ifndef WIN32
-            #ifdef BSD
+            #if defined(BSD) || defined(__FreeBSD_kernel__)
             typedef std::map<uint32_t, int> BSDEtherSockets;
             BSDEtherSockets _ether_socket;
             #else

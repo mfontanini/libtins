@@ -34,7 +34,7 @@
 #include <stdexcept>
 #include "macros.h"
 #ifndef WIN32
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <net/if_dl.h>
     #else
         #include <netpacket/packet.h>
@@ -242,7 +242,7 @@ void RadioTap::send(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)
         throw invalid_interface();
     
-    #ifndef BSD
+    #if !defined(BSD) && !defined(__FreeBSD_kernel__)
         struct sockaddr_ll addr;
 
         memset(&addr, 0, sizeof(struct sockaddr_ll));

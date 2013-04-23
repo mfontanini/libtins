@@ -409,7 +409,7 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
         //flag(new_flag);
     }
     
-    #ifdef __FreeBSD__
+    #if __FreeBSD__ || defined(__FreeBSD_kernel__)
         if(!parent)
             total_sz = Endian::host_to_be<uint16_t>(total_sz);
     #endif

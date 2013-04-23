@@ -33,7 +33,7 @@
 #include "macros.h"
 #ifndef WIN32
     #include <netinet/in.h>
-    #ifdef BSD
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <ifaddrs.h>
         #include <net/if_dl.h>
         #include <sys/socket.h>
@@ -64,7 +64,7 @@ struct InterfaceInfoCollector {
     bool operator() (const struct ifaddrs *addr) {
         using Tins::Endian::host_to_be;
             using Tins::IPv4Address;
-        #ifdef BSD
+        #if defined(BSD) || defined(__FreeBSD_kernel__)
             const struct sockaddr_dl* addr_ptr = ((struct sockaddr_dl*)addr->ifa_addr);
             
             if(addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id)
@@ -138,7 +138,7 @@ NetworkInterface::NetworkInterface(IPv4Address ip) : iface_id(0) {
     typedef std::vector<Utils::RouteEntry> entries_type;
     
     if(ip == "127.0.0.1")
-        #ifdef BSD
+        #if defined(BSD) || defined(__FreeBSD_kernel__)
         iface_id = resolve_index("lo0");
         #else
         iface_id = resolve_index("lo");
