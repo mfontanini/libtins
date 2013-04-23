@@ -69,8 +69,7 @@ namespace Tins {
          * \param child The PDU which will be set as the inner PDU.
          */
         Dot3(const address_type &dst_hw_addr = address_type(), 
-            const address_type &src_hw_addr = address_type(), 
-            PDU* child = 0);
+            const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructs a Dot3 object from a buffer and adds a

@@ -53,11 +53,11 @@ namespace Tins {
          *
          * Creates an instance of UDP. Destination and source port can
          * be provided, otherwise both will be 0.
+         * 
          * \param dport Destination port.
          * \param sport Source port.
-         * \param child The child PDU(optional).
          * */
-        UDP(uint16_t dport = 0, uint16_t sport = 0, PDU *child = 0);
+        UDP(uint16_t dport = 0, uint16_t sport = 0);
 
         /**
          * \brief Constructs an UDP object from a buffer.
@@ -145,7 +145,7 @@ namespace Tins {
         /**
          * \sa PDU::clone
          */
-        PDU *clone() const {
+        UDP *clone() const {
             return new UDP(*this);
         }
     private:

@@ -44,7 +44,7 @@
 #include "exceptions.h"
 
 
-Tins::SNAP::SNAP(PDU *child) : PDU(child) 
+Tins::SNAP::SNAP()
 {
     std::memset(&_snap, 0, sizeof(_snap));
     _snap.dsap = _snap.ssap = 0xaa;

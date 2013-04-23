@@ -51,9 +51,7 @@
 namespace Tins {
 const Dot3::address_type Dot3::BROADCAST("ff:ff:ff:ff:ff:ff");
 
-Dot3::Dot3(const address_type &dst_hw_addr, const address_type &src_hw_addr, 
-  PDU* child)
-: PDU(child) 
+Dot3::Dot3(const address_type &dst_hw_addr, const address_type &src_hw_addr)
 {
     memset(&_eth, 0, sizeof(ethhdr));
     this->dst_addr(dst_hw_addr);

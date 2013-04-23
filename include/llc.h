@@ -90,18 +90,17 @@ namespace Tins {
         };
 
         /**
-         * \brief Creates an instance of LLC
-         * \param child The child PDU.(optional)
+         * \brief Default constructor.
          */
-    	LLC(PDU *child = 0);
+    	LLC();
 
     	/**
-    	 * \brief Creates an instance of LLC, setting the dsap and ssap.
-    	 * The control field is set all to 0.
-    	 * @param dsap The dsap value to be set.
-    	 * @param ssap The ssap value to be set.
+    	 * \brief Constructs an instance of LLC, setting the dsap and ssap.
+    	 * The control field is set to 0.
+    	 * \param dsap The dsap value to be set.
+    	 * \param ssap The ssap value to be set.
     	 */
-    	LLC(uint8_t dsap, uint8_t ssap, PDU* child = 0);
+    	LLC(uint8_t dsap, uint8_t ssap);
 
         /**
          * \brief Constructs a LLC object from a buffer and adds all 

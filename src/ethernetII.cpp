@@ -57,8 +57,7 @@ namespace Tins {
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
 
 EthernetII::EthernetII(const address_type &dst_hw_addr, 
-const address_type &src_hw_addr, PDU* child) 
-: PDU(child)
+const address_type &src_hw_addr) 
 {
     memset(&_eth, 0, sizeof(ethhdr));
     dst_addr(dst_hw_addr);

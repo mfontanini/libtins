@@ -98,11 +98,10 @@ TEST_F(EthernetIITest, PayloadType) {
 }
 
 TEST_F(EthernetIITest, CompleteConstructor) {
-    EthernetII* eth2 = new EthernetII();
-    EthernetII eth(dst_addr, src_addr, eth2);
+    EthernetII eth2;
+    EthernetII eth = EthernetII(dst_addr, src_addr) / eth2;
     EXPECT_EQ(eth.dst_addr(), dst_addr);
     EXPECT_EQ(eth.src_addr(), src_addr);
-    EXPECT_TRUE(eth.inner_pdu() == eth2);
     EXPECT_EQ(eth.payload_type(), 0);
 }
 

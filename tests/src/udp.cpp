@@ -69,11 +69,9 @@ TEST_F(UDPTest, CopyAssignmentOperator) {
 }
 
 TEST_F(UDPTest, CompleteConstructor) {
-    UDP *inner = new UDP(0x48fa, 0x716b);
-    UDP udp(0x1234, 0x4321, inner);
+    UDP udp(0x1234, 0x4321);
     EXPECT_EQ(udp.dport(), 0x1234);
     EXPECT_EQ(udp.sport(), 0x4321);
-    EXPECT_TRUE(udp.inner_pdu() == inner);
 }
 
 TEST_F(UDPTest, DPort) {
@@ -109,7 +107,7 @@ TEST_F(UDPTest, ClonePDU) {
     udp1.sport(sport);
     udp1.length(length);
     
-    UDP *udp2 = static_cast<UDP*>(udp1.clone());
+    UDP *udp2 = udp1.clone();
     ASSERT_TRUE(udp2);
     EXPECT_EQ(udp2->sport(), sport);
     EXPECT_EQ(udp2->dport(), dport);

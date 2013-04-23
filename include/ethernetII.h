@@ -61,13 +61,11 @@ namespace Tins {
         /**
          * \brief Constructs an ethernet II PDU.
          *
-         * \param dst_hw_addr address_type containing the destination's MAC(optional).
-         * \param src_hw_addr address_type containing the source's MAC(optional).
-         * \param child PDU* with the PDU contained by the ethernet PDU (optional).
+         * \param dst_hw_addr address_type containing the destination's MAC.
+         * \param src_hw_addr address_type containing the source's MAC.
          */
         EthernetII(const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type(), 
-                    PDU* child = 0);
+                    const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructs a EthernetII object from a buffer and adds 

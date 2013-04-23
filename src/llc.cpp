@@ -43,8 +43,8 @@ namespace Tins {
 const uint8_t LLC::GLOBAL_DSAP_ADDR = 0xFF;
 const uint8_t LLC::NULL_ADDR = 0x00;
 
-LLC::LLC(PDU *child)
-: PDU(child), _type(LLC::INFORMATION) 
+LLC::LLC()
+: _type(LLC::INFORMATION) 
 {
 	memset(&_header, 0, sizeof(llchdr));
 	control_field_length = 2;
@@ -52,8 +52,8 @@ LLC::LLC(PDU *child)
 	information_field_length = 0;
 }
 
-LLC::LLC(uint8_t dsap, uint8_t ssap, PDU *child) 
-: PDU(child), _type(LLC::INFORMATION) 
+LLC::LLC(uint8_t dsap, uint8_t ssap) 
+: _type(LLC::INFORMATION) 
 {
 	_header.dsap = dsap;
 	_header.ssap = ssap;

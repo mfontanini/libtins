@@ -36,7 +36,9 @@
 
 namespace Tins {
 
-PDU::PDU(PDU *next_pdu) : _inner_pdu(next_pdu) {
+PDU::PDU()
+: _inner_pdu()
+{
 
 }
 

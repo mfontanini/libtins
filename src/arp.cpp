@@ -125,24 +125,24 @@ EthernetII ARP::make_arp_request(ipaddress_type target, ipaddress_type sender,
 const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */
-    ARP* arp = new ARP();
-    arp->target_ip_addr(target);
-    arp->sender_ip_addr(sender);
-    arp->sender_hw_addr(hw_snd);
-    arp->opcode(REQUEST);
+    ARP arp;
+    arp.target_ip_addr(target);
+    arp.sender_ip_addr(sender);
+    arp.sender_hw_addr(hw_snd);
+    arp.opcode(REQUEST);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
-    return EthernetII(EthernetII::BROADCAST, hw_snd, arp);
+    return EthernetII(EthernetII::BROADCAST, hw_snd) / arp;
 }
 
 EthernetII ARP::make_arp_reply(ipaddress_type target, ipaddress_type sender, 
 const hwaddress_type &hw_tgt, const hwaddress_type &hw_snd) 
 {
     /* Create ARP packet and set its attributes */
-    ARP* arp = new ARP(target, sender, hw_tgt, hw_snd);
-    arp->opcode(REPLY);
+    ARP arp(target, sender, hw_tgt, hw_snd);
+    arp.opcode(REPLY);
 
     /* Create the EthernetII PDU with the ARP PDU as its inner PDU */
-    return EthernetII(hw_tgt, hw_snd, arp);
+    return EthernetII(hw_tgt, hw_snd) / arp;
 }
 }

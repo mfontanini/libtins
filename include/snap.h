@@ -56,9 +56,8 @@ namespace Tins {
          * \brief Creates an instance of SNAP
          * This constructor sets the dsap and ssap fields to 0xaa, and
          * the id field to 3.
-         * \param child The child PDU.(optional)
          */
-        SNAP(PDU *child = 0);
+        SNAP();
         
         /**
          * \brief Constructs a SNAP object from a buffer and adds all 

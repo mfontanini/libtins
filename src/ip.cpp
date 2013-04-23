@@ -59,8 +59,7 @@ namespace Tins {
 
 const uint8_t IP::DEFAULT_TTL = 128;
 
-IP::IP(address_type ip_dst, address_type ip_src, PDU *child) 
-: PDU(child) 
+IP::IP(address_type ip_dst, address_type ip_src) 
 {
     init_ip_fields();
     this->dst_addr(ip_dst);

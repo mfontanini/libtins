@@ -178,10 +178,8 @@ namespace Tins {
          * destination's and source's MAC.
          *
          * \param dst_hw_addr The destination hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11(const address_type &dst_hw_addr = address_type(), 
-               PDU* child = 0);
+        Dot11(const address_type &dst_hw_addr = address_type());
 
         /**
          * \brief Constructs 802.11 PDU from a buffer and adds all 
@@ -2656,11 +2654,9 @@ namespace Tins {
          *
          * \param dst_hw_addr The destination hardware address.
          * \param src_hw_addr The source hardware address.
-         * \param child The inner PDU.
          */
         Dot11Data(const address_type &dst_hw_addr = address_type(), 
-                const address_type &src_hw_addr = address_type(), 
-                PDU* child = 0);
+                const address_type &src_hw_addr = address_type());
                     
         /**
          * \brief Constructs a Dot11Data object from a buffer and adds 
@@ -2828,11 +2824,9 @@ namespace Tins {
          *
          * \param dst_hw_addr The destination hardware address.
          * \param src_hw_addr The source hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         Dot11QoSData(const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type(), 
-                    PDU* child = 0);
+                    const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructors Dot11QoSData object from a buffer and adds
@@ -2919,10 +2913,8 @@ namespace Tins {
          * source hardware addresses.
          *
          * \param dst_addr The destination hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Control(const address_type &dst_addr = address_type(), 
-                    PDU* child = 0);
+        Dot11Control(const address_type &dst_addr = address_type());
 
         /**
          * \brief Constructs a Dot11Control object from a buffer and
@@ -2981,11 +2973,9 @@ namespace Tins {
          *
          * \param dst_addr The destination hardware address.
          * \param target_addr The source hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         Dot11ControlTA(const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
+                    const address_type &target_addr = address_type());
 
         /**
          * \brief Constructs a Dot11ControlTA object from a buffer and
@@ -3037,11 +3027,9 @@ namespace Tins {
          *
          * \param dst_addr The destination hardware address.
          * \param target_addr The source hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         Dot11RTS(const address_type &dst_addr = address_type(), 
-                const address_type &target_addr = address_type(), 
-                PDU* child = 0);
+                const address_type &target_addr = address_type());
                     
         /**
          * \brief Constructs a Dot11RTS object from a buffer and adds all 
@@ -3098,11 +3086,9 @@ namespace Tins {
          *
          * \param dst_addr The destination hardware address.
          * \param target_addr The source hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         Dot11PSPoll(const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
+                    const address_type &target_addr = address_type());
 
         /**
          * \brief Constructs a Dot11PSPoll object from a buffer and
@@ -3160,11 +3146,9 @@ namespace Tins {
          *
          * \param dst_addr The destination hardware address.
          * \param target_addr The source hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         Dot11CFEnd(const address_type &dst_addr = address_type(), 
-                const address_type &target_addr = address_type(), 
-                PDU* child = 0);
+                const address_type &target_addr = address_type());
                     
         /**
          * \brief Constructs a Dot11CFEnd object from a buffer and adds 
@@ -3222,11 +3206,9 @@ namespace Tins {
          * 
          * \param dst_addr The destination hardware address.
          * \param target_addr The source hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         Dot11EndCFAck(const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
+                    const address_type &target_addr = address_type());
 
         /**
          * \brief Constructs a Dot11EndCFAck frame object from a buffer 
@@ -3283,10 +3265,8 @@ namespace Tins {
          * hardware addresses.
          *
          * \param dst_addr The destination hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
-        Dot11Ack(const address_type &dst_addr = address_type(), 
-                PDU* child = 0);
+        Dot11Ack(const address_type &dst_addr = address_type());
 
         /**
          * \brief Constructs a Dot11Ack frame object from a buffer and
@@ -3347,11 +3327,9 @@ namespace Tins {
          * 
          * \param dst_addr The destination hardware address.
          * \param target_addr The source hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         Dot11BlockAckRequest(const address_type &dst_addr = address_type(), 
-                            const address_type &target_addr = address_type(), 
-                            PDU* child = 0);
+                            const address_type &target_addr = address_type());
 
         /**
          * \brief Constructs a Dot11BlockAckRequest object from a buffer 
@@ -3490,11 +3468,9 @@ namespace Tins {
          * 
          * \param dst_addr The destination hardware address.
          * \param target_addr The source hardware address.
-         * \param child PDU* with the PDU contained by the 802.11 PDU (optional).
          */
         Dot11BlockAck(const address_type &dst_addr = address_type(), 
-                    const address_type &target_addr = address_type(), 
-                    PDU* child = 0);
+                    const address_type &target_addr = address_type());
 
         /**
          * \brief Constructs a Dot11BlockAck frame object from a buffer 

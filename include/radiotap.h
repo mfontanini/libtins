@@ -107,10 +107,9 @@ namespace Tins {
         };
         
         /**
-         * \brief Creates an instance of RadioTap.
-         * \param child The child PDU.
+         * \brief Default constructor.
          */
-        RadioTap(PDU *child = 0);
+        RadioTap();
         
         /**
          * \brief Constructs a RadioTap object from a buffer and adds all

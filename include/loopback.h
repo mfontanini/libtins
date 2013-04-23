@@ -47,16 +47,6 @@ public:
      * The family identifier is left as zero.
      */
     Loopback();
-
-    /**
-     * \brief Construct a Loopback object.
-     * 
-     * The NetworkInterface object will only be used in *BSD, where
-     * Null/Loopback PDUs can actually be sent.
-     * 
-     * \param inner_pdu The inner pdu to be set.
-     */
-    Loopback(PDU *inner_pdu = 0);
     
     /**
      * \brief Construct a Loopback object from a buffer and adds 

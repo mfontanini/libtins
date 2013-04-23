@@ -60,8 +60,8 @@ using std::runtime_error;
 namespace Tins {
 const Dot11::address_type Dot11::BROADCAST = "ff:ff:ff:ff:ff:ff";
 
-Dot11::Dot11(const address_type &dst_hw_addr, PDU* child) 
-: PDU(child), _options_size(0)
+Dot11::Dot11(const address_type &dst_hw_addr) 
+: _options_size(0)
 {
     memset(&_header, 0, sizeof(ieee80211_header));
     addr1(dst_hw_addr);
@@ -1296,8 +1296,8 @@ uint32_t Dot11Data::init(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 Dot11Data::Dot11Data(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr, PDU* child) 
-: Dot11(dst_hw_addr, child) 
+  const address_type &src_hw_addr) 
+: Dot11(dst_hw_addr) 
 {
     type(Dot11::DATA);
     memset(&_ext_header, 0, sizeof(_ext_header));
@@ -1354,8 +1354,8 @@ uint32_t Dot11Data::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
 /* QoS data. */
 
 Dot11QoSData::Dot11QoSData(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr, PDU* child) 
-: Dot11Data(dst_hw_addr, src_hw_addr, child) 
+  const address_type &src_hw_addr) 
+: Dot11Data(dst_hw_addr, src_hw_addr) 
 {
     subtype(Dot11::QOS_DATA_DATA);
     _qos_control = 0;
@@ -1395,8 +1395,8 @@ uint32_t Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz
 
 /* Dot11Control */
 
-Dot11Control::Dot11Control(const address_type &dst_addr, PDU* child) 
-: Dot11(dst_addr, child) 
+Dot11Control::Dot11Control(const address_type &dst_addr) 
+: Dot11(dst_addr) 
 {
     type(CONTROL);
 }
@@ -1409,8 +1409,8 @@ Dot11Control::Dot11Control(const uint8_t *buffer, uint32_t total_sz)
 /* Dot11ControlTA */
 
 Dot11ControlTA::Dot11ControlTA(const address_type &dst_addr, 
-  const address_type &target_address, PDU* child) 
-: Dot11Control(dst_addr, child)
+  const address_type &target_address) 
+: Dot11Control(dst_addr)
 {
     target_addr(target_address);
 }
@@ -1444,8 +1444,8 @@ void Dot11ControlTA::target_addr(const address_type &addr) {
 /* Dot11RTS */
 
 Dot11RTS::Dot11RTS(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(dst_addr, target_addr, child) 
+  const address_type &target_addr) 
+: Dot11ControlTA(dst_addr, target_addr) 
 {
     subtype(RTS);
 }
@@ -1458,8 +1458,8 @@ Dot11RTS::Dot11RTS(const uint8_t *buffer, uint32_t total_sz)
 /* Dot11PSPoll */
 
 Dot11PSPoll::Dot11PSPoll(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(dst_addr, target_addr, child) 
+  const address_type &target_addr) 
+: Dot11ControlTA(dst_addr, target_addr) 
 {
     subtype(PS);
 }
@@ -1472,8 +1472,8 @@ Dot11PSPoll::Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz)
 /* Dot11CFEnd */
 
 Dot11CFEnd::Dot11CFEnd(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(dst_addr, target_addr, child) 
+  const address_type &target_addr) 
+: Dot11ControlTA(dst_addr, target_addr) 
 {
     subtype(CF_END);
 }
@@ -1486,8 +1486,8 @@ Dot11CFEnd::Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz)
 /* Dot11EndCFAck */
 
 Dot11EndCFAck::Dot11EndCFAck(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child) 
-: Dot11ControlTA(dst_addr, target_addr, child) 
+  const address_type &target_addr) 
+: Dot11ControlTA(dst_addr, target_addr) 
 {
     subtype(CF_END_ACK);
 }
@@ -1499,8 +1499,8 @@ Dot11EndCFAck::Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz)
 
 /* Dot11Ack */
 
-Dot11Ack::Dot11Ack(const address_type &dst_addr, PDU* child) 
-: Dot11Control(dst_addr, child) 
+Dot11Ack::Dot11Ack(const address_type &dst_addr) 
+: Dot11Control(dst_addr) 
 {
     subtype(ACK);
 }
@@ -1514,8 +1514,8 @@ Dot11Ack::Dot11Ack(const uint8_t *buffer, uint32_t total_sz)
 /* Dot11BlockAck */
 
 Dot11BlockAckRequest::Dot11BlockAckRequest(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child)
-: Dot11ControlTA(dst_addr, target_addr, child) 
+  const address_type &target_addr)
+: Dot11ControlTA(dst_addr, target_addr) 
 {
     init_block_ack();
 }
@@ -1579,8 +1579,8 @@ uint32_t Dot11BlockAckRequest::header_size() const {
 /* Dot11BlockAck */
 
 Dot11BlockAck::Dot11BlockAck(const address_type &dst_addr, 
-  const address_type &target_addr, PDU* child)
-: Dot11ControlTA(dst_addr, target_addr, child) 
+  const address_type &target_addr)
+: Dot11ControlTA(dst_addr, target_addr) 
 {
     subtype(BLOCK_ACK);
     std::memset(_bitmap, 0, sizeof(_bitmap));

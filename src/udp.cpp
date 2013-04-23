@@ -40,8 +40,7 @@
 #include "exceptions.h"
 
 namespace Tins {
-UDP::UDP(uint16_t dport, uint16_t sport, PDU *child) 
-: PDU(child) 
+UDP::UDP(uint16_t dport, uint16_t sport) 
 {
     this->dport(dport);
     this->sport(sport);

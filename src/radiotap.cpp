@@ -61,8 +61,7 @@ void read_field(const uint8_t* &buffer, uint32_t &total_sz, T& field) {
     total_sz -= sizeof(field);
 }
 
-RadioTap::RadioTap(PDU *child)
-: PDU(child)
+RadioTap::RadioTap()
 {
     std::memset(&_radio, 0, sizeof(_radio));
     init();

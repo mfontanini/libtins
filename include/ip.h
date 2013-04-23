@@ -229,12 +229,9 @@ namespace Tins {
          *
          * \param ip_dst The destination ip address(optional).
          * \param ip_src The source ip address(optional).
-         * \param child pointer to a PDU which will be set as the inner_pdu 
-         * for the packet being constructed(optional).
          */
         IP(address_type ip_dst = address_type(), 
-            address_type ip_src = address_type(), 
-            PDU *child = 0);
+            address_type ip_src = address_type());
 
         /**
          * \brief Constructs an IP object from a buffer and adds all 

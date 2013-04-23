@@ -121,13 +121,9 @@ namespace Tins {
         };
 
         /** 
-         * \brief PDU constructor
-         *
-         * Must be called by subclasses in their constructors.
-         * \param flag The flag identifier for the subclass' PDU.
-         * \param next_pdu The child PDU. Can be obviated.
+         * \brief Default constructor.
          */
-        PDU(PDU *next_pdu = 0);
+        PDU();
         
         #if TINS_IS_CXX11
             /**

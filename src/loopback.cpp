@@ -58,12 +58,6 @@ Loopback::Loopback()
 {
     
 }
-    
-Loopback::Loopback(PDU *inner_pdu)
-: PDU(inner_pdu), _family()
-{
-    
-}
 
 Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz) 
 {
