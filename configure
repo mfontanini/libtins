@@ -15334,7 +15334,7 @@ CPPFLAGS=$old_cppflags
 
 
 
-LIBTINS_VERSION=0:3:0
+LIBTINS_VERSION=1:0:0
 
 ac_config_files="$ac_config_files Makefile libtins.pc"
 

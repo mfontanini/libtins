@@ -37,7 +37,17 @@
 #include "macros.h"
 
 namespace Tins {
-class DNSRRImpl;
+/** 
+ * \cond
+ */
+class DNSRRImpl {
+public:
+    virtual ~DNSRRImpl() {}
+    virtual uint32_t size() const = 0;
+    virtual uint32_t do_write(uint8_t *buffer) const = 0;
+    virtual bool matches(const std::string &dname) const { return false; }
+    virtual DNSRRImpl *clone() const = 0;
+};
 
 /**
  * \brief Abstracts a DNS resource record.
@@ -211,18 +221,6 @@ private:
     info info_;
     std::vector<uint8_t> data;
     DNSRRImpl *impl;
-};
-
-/** 
- * \cond
- */
-class DNSRRImpl {
-public:
-    virtual ~DNSRRImpl() {}
-    virtual uint32_t size() const = 0;
-    virtual uint32_t do_write(uint8_t *buffer) const = 0;
-    virtual bool matches(const std::string &dname) const { return false; }
-    virtual DNSRRImpl *clone() const = 0;
 };
 
 class OffsetedDNSRRImpl : public DNSRRImpl {
