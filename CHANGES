@@ -1,3 +1,43 @@
+v1.0 - Tue Apr 23 20:40:57 ART 2013
+
+- Link layer protocol PDUs now don't hold a NetworkInterface. This led
+to changes in their constructors.
+
+- Removed the obsolete PDU* parameter taken by several classes' 
+constructors.
+
+- IP now sets the sender's address automatically when no link layer
+PDU is used.
+
+- IP, TCP and UDP now calculate the checksum everytime they're 
+serialized.
+
+- Added PDU::rfind_pdu.
+
+- Defined several exception types.
+
+- Implemented matches_response on several protocols.
+
+- PacketSender is now movable.
+
+- Added an overload of add_option that takes an rvalue-reference in IP, 
+TCP, DHCP, ICMPv6 and Dot11.
+
+- Added support for GNU/kFreeBSD.
+
+- Removed several deprecated methods, such as PDU::clone_packet.
+
+- Added PacketSender::send(PDU&, NetworkInterface).
+
+- Normalized the TLV options naming conventions in all of the classes
+that used them.
+
+- Added support for Dot1Q, STP, PPPoE protocols.
+
+- Made some important optimizations on PDUOption<>'s constructors.
+
+- Added Utils::resolve_domain and Utils::resolve_domain6
+
 v0.3 - Thu Jan 31 16:47:27 ART 2013
 
 - Added IPv6, ICMPv6 and DHCPv6 classes.
