@@ -86,6 +86,44 @@ public:
         return "Invalid interface";
     }
 };
+
+/**
+ * \brief Exception thrown when PacketSender fails to open a socket.
+ */
+class socket_open_error : public std::runtime_error {
+public:
+    socket_open_error(const std::string &msg) 
+    : std::runtime_error(msg) { }
+};
+
+/**
+ * \brief Exception thrown when PacketSender fails to close a socket.
+ */
+class socket_close_error : public std::runtime_error {
+public:
+    socket_close_error(const std::string &msg) 
+    : std::runtime_error(msg) { }
+};
+
+/**
+ * \brief Exception thrown when PacketSender fails to write on a socket.
+ */
+class socket_write_error : public std::runtime_error {
+public:
+    socket_write_error(const std::string &msg) 
+    : std::runtime_error(msg) { }
+};
+
+/**
+ * \brief Exception thrown when an invalid socket type is provided
+ * to PacketSender.
+ */
+class invalid_socket_type : public std::exception {
+public:
+    const char *what() const throw() {
+        return "The provided socket type is invalid";
+    }
+};
 }
 
 #endif // TINS_EXCEPTIONS_H

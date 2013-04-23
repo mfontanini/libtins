@@ -38,6 +38,7 @@
 #include <map>
 #include "network_interface.h"
 #include "macros.h"
+#include "cxxstd.h"
 
 struct timeval;
 struct sockaddr;
@@ -80,6 +81,20 @@ namespace Tins {
         PacketSender(const NetworkInterface &iface = NetworkInterface(), 
           uint32_t recv_timeout = DEFAULT_TIMEOUT, uint32_t usec = 0);
         
+        #if TINS_IS_CXX11
+            /**
+             * \brief Move constructor.
+             * \param rhs The sender to be moved.
+             */
+            PacketSender(PacketSender &&rhs);
+            
+            /**
+             * \brief Move assignment operator.
+             * \param rhs The sender to be moved.
+             */
+            PacketSender& operator=(PacketSender &&rhs);
+        #endif
+        
         /** 
          * \brief PacketSender destructor.
          * 
@@ -91,7 +106,7 @@ namespace Tins {
         /** 
          * \brief Opens a layer 2 socket.
          * 
-         * If this operation fails, then a SocketOpenError will be thrown.
+         * If this operation fails, then a socket_open_error will be thrown.
          */
         void open_l2_socket(const NetworkInterface& iface = NetworkInterface());
         #endif // WIN32
@@ -100,9 +115,9 @@ namespace Tins {
          * \brief Opens a layer 3 socket, using the corresponding protocol
          * for the given flag.
          * 
-         * If this operation fails, then a SocketOpenError will be thrown.
-         * If the provided socket type is not valid, a InvalidSocketTypeError
-         * will be throw.
+         * If this operation fails, then a socket_open_error will be thrown.
+         * If the provided socket type is not valid, an invalid_socket_type
+         * exception will be throw.
          * 
          * \param type The type of socket which will be used to pick the protocol flag
          * for this socket.
@@ -113,9 +128,9 @@ namespace Tins {
          * \brief Closes the socket associated with the given flag.
          * 
          * If the provided type is invalid, meaning no such open socket
-         * exists, a InvalidSocketTypeError is thrown.
+         * exists, an invalid_socket_type exception is thrown.
          * 
-         * If any socket close errors are encountered, a SocketCloseError
+         * If any socket close errors are encountered, a socket_close_error
          * is thrown.
          * 
          * \param type The type of the socket to be closed.
@@ -143,7 +158,7 @@ namespace Tins {
          * This method opens the appropriate socket, if it's not open yet, 
          * and sends the PDU on the open socket.
          * 
-         * If any send error occurs, then a SocketWriteError is thrown.
+         * If any send error occurs, then a socket_write_error is thrown.
          * 
          * If the PDU contains a link layer protocol, then default_interface
          * is used.
@@ -220,7 +235,7 @@ namespace Tins {
          * using the corresponding flag, according to the given type of 
          * protocol. 
          * 
-         * If any socket write error occurs, a SocketWriteError is thrown.
+         * If any socket write error occurs, a socket_write_error is thrown.
          * 
          * \param pdu The PDU to send.
          * \param link_addr The sockaddr struct which will be used to send the PDU.
@@ -250,7 +265,7 @@ namespace Tins {
          * This method sends a layer 3 PDU, using a raw socket, open using the corresponding flag,
          * according to the given type of protocol.
          * 
-         * If any socket write error occurs, a SocketWriteError is thrown.
+         * If any socket write error occurs, a socket_write_error is thrown.
          * 
          * \param pdu The PDU to send.
          * \param link_addr The sockaddr struct which will be used to send the PDU.
@@ -263,6 +278,8 @@ namespace Tins {
 
         typedef std::map<SocketType, int> SocketTypeMap;
 
+        PacketSender(const PacketSender&);
+        PacketSender& operator=(const PacketSender&);
         int find_type(SocketType type);
         int timeval_subtract (struct timeval *result, struct timeval *x, struct timeval *y);
         #ifndef WIN32
@@ -288,32 +305,6 @@ namespace Tins {
         SocketTypeMap _types;
         uint32_t _timeout, _timeout_usec;
         NetworkInterface default_iface;
-    };
-    
-    
-    class SocketOpenError : public std::runtime_error {
-    public:
-        SocketOpenError(const std::string &msg) 
-        : std::runtime_error(msg) { }
-    };
-    
-    class SocketCloseError : public std::runtime_error {
-    public:
-        SocketCloseError(const std::string &msg) 
-        : std::runtime_error(msg) { }
-    };
-    
-    class SocketWriteError : public std::runtime_error {
-    public:
-        SocketWriteError(const std::string &msg) 
-        : std::runtime_error(msg) { }
-    };
-    
-    class InvalidSocketTypeError : public std::exception {
-    public:
-        const char *what() const throw() {
-            return "The provided socket type is invalid";
-        }
     };
 }
 

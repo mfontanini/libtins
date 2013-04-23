@@ -38,6 +38,8 @@
     #define TINS_CXXSTD_GCC_FIX 0
 #endif // __GXX_EXPERIMENTAL_CXX0X__
 
+#define TINS_IS_CXX11 (__cplusplus > 199711L || TINS_CXXSTD_GCC_FIX == 1)
+
 namespace Tins{
 namespace Internals {
 template<typename T>
@@ -50,7 +52,5 @@ struct smart_ptr {
 };
 }
 }
-
-#define TINS_IS_CXX11 (__cplusplus > 199711L || TINS_CXXSTD_GCC_FIX == 1)
 
 #endif // TINS_CXXSTD_H
