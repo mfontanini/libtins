@@ -11,17 +11,7 @@ AC_LANG(C++)
 
 AC_PROG_LIBTOOL
 
-CXXFLAGS="$CXXFLAGS -Iinclude"
-
-AC_ARG_ENABLE(
-    c++11, 
-    [  --enable-c++11          enable C++11 features], 
-    [AX_CXX_COMPILE_STDCXX_11(noext)]
-)
-
 # Check that libpcap exists
-
-# Get libpcap library and include locations
 
 AC_ARG_WITH([pcap-include-path],
   [AS_HELP_STRING([--with-pcap-include-path],
@@ -43,6 +33,14 @@ LIBTINS_INCLUDE_DIR="include"
 AC_CHECK_HEADERS([pcap.h], [], [AC_MSG_ERROR([libpcap headers are missing!])])
 
 CPPFLAGS=$old_cppflags
+
+# Options
+
+AC_ARG_ENABLE(
+    c++11, 
+    [  --enable-c++11          enable C++11 features], 
+    [AX_CXX_COMPILE_STDCXX_11(noext)]
+)
 
 # Substitute options
 

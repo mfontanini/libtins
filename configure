@@ -772,9 +772,9 @@ with_gnu_ld
 with_sysroot
 enable_libtool_lock
 enable_maintainer_mode
-enable_c__11
 with_pcap_include_path
 with_pcap_lib_path
+enable_c__11
 '
       ac_precious_vars='build_alias
 host_alias
@@ -15109,7 +15109,95 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 
-CXXFLAGS="$CXXFLAGS -Iinclude"
+# Check that libpcap exists
+
+
+# Check whether --with-pcap-include-path was given.
+if test "${with_pcap_include_path+set}" = set; then :
+  withval=$with_pcap_include_path; CXXFLAGS="$CXXFLAGS -I$withval"; CPPFLAGS="-I$withval"
+fi
+
+
+
+# Check whether --with-pcap-lib-path was given.
+if test "${with_pcap_lib_path+set}" = set; then :
+  withval=$with_pcap_lib_path; LIBS="$LIBS -L$withval"
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pcap_loop in -lpcap" >&5
+$as_echo_n "checking for pcap_loop in -lpcap... " >&6; }
+if ${ac_cv_lib_pcap_pcap_loop+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpcap  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char pcap_loop ();
+int
+main ()
+{
+return pcap_loop ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_pcap_pcap_loop=yes
+else
+  ac_cv_lib_pcap_pcap_loop=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcap_pcap_loop" >&5
+$as_echo "$ac_cv_lib_pcap_pcap_loop" >&6; }
+if test "x$ac_cv_lib_pcap_pcap_loop" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPCAP 1
+_ACEOF
+
+  LIBS="-lpcap $LIBS"
+
+else
+  as_fn_error $? "pcap library is missing!" "$LINENO" 5
+fi
+
+
+old_cppflags=$CPPFLAGS
+CPPFLAGS=""
+
+# Headers
+
+LIBTINS_INCLUDE_DIR="include"
+
+for ac_header in pcap.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "pcap.h" "ac_cv_header_pcap_h" "$ac_includes_default"
+if test "x$ac_cv_header_pcap_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PCAP_H 1
+_ACEOF
+
+else
+  as_fn_error $? "libpcap headers are missing!" "$LINENO" 5
+fi
+
+done
+
+
+CPPFLAGS=$old_cppflags
+
+# Options
 
 # Check whether --enable-c++11 was given.
 if test "${enable_c__11+set}" = set; then :
@@ -15238,96 +15326,6 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
 fi
 
-
-# Check that libpcap exists
-
-# Get libpcap library and include locations
-
-
-# Check whether --with-pcap-include-path was given.
-if test "${with_pcap_include_path+set}" = set; then :
-  withval=$with_pcap_include_path; CXXFLAGS="$CXXFLAGS -I$withval"; CPPFLAGS="-I$withval"
-fi
-
-
-
-# Check whether --with-pcap-lib-path was given.
-if test "${with_pcap_lib_path+set}" = set; then :
-  withval=$with_pcap_lib_path; LIBS="$LIBS -L$withval"
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pcap_loop in -lpcap" >&5
-$as_echo_n "checking for pcap_loop in -lpcap... " >&6; }
-if ${ac_cv_lib_pcap_pcap_loop+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpcap  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char pcap_loop ();
-int
-main ()
-{
-return pcap_loop ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_pcap_pcap_loop=yes
-else
-  ac_cv_lib_pcap_pcap_loop=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pcap_pcap_loop" >&5
-$as_echo "$ac_cv_lib_pcap_pcap_loop" >&6; }
-if test "x$ac_cv_lib_pcap_pcap_loop" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBPCAP 1
-_ACEOF
-
-  LIBS="-lpcap $LIBS"
-
-else
-  as_fn_error $? "pcap library is missing!" "$LINENO" 5
-fi
-
-
-old_cppflags=$CPPFLAGS
-CPPFLAGS=""
-
-# Headers
-
-LIBTINS_INCLUDE_DIR="include"
-
-for ac_header in pcap.h
-do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "pcap.h" "ac_cv_header_pcap_h" "$ac_includes_default"
-if test "x$ac_cv_header_pcap_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PCAP_H 1
-_ACEOF
-
-else
-  as_fn_error $? "libpcap headers are missing!" "$LINENO" 5
-fi
-
-done
-
-
-CPPFLAGS=$old_cppflags
 
 # Substitute options
 
