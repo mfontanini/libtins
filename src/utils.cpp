@@ -117,6 +117,10 @@ HWAddress<6> resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, Packe
     throw std::runtime_error("Could not resolve hardware address");
 }
 
+HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender &sender) {
+    return resolve_hwaddr(sender.default_interface(), ip, sender);
+}
+
 bool gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
     typedef std::vector<RouteEntry> entries_type;
     entries_type entries;

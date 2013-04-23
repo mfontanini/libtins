@@ -129,6 +129,21 @@ namespace Tins {
          */
         HWAddress<6> resolve_hwaddr(const NetworkInterface &iface, 
           IPv4Address ip, PacketSender &sender);
+        
+        /** 
+         * \brief Resolves the hardware address for a given ip.
+         *
+         * If the address can't be resolved, a std::runtime_error
+         * exception is thrown.
+         * 
+         * This method sends and receives the packet through
+         * PacketSender::default_interface.
+         * 
+         * \param ip The ip to resolve, in integer format.
+         * \param sender The sender to use to send and receive the ARP requests.
+         * \return HWAddress<6> containing the resolved hardware address.
+         */
+        HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender &sender);
 
         /** \brief List all network interfaces.
          *
