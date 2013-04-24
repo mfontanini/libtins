@@ -55,6 +55,7 @@ public:
         RADIOTAP = DLT_IEEE802_11_RADIO,
         DOT11 = DLT_IEEE802_11,
         ETH2 = DLT_EN10MB,
+        DOT3 = DLT_EN10MB,
         SLL = DLT_LINUX_SLL
     };
     

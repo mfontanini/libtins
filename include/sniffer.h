@@ -42,6 +42,7 @@
 #include "packet.h"
 #include "loopback.h"
 #include "dot11.h"
+#include "dot3.h"
 #include "sll.h"
 #include "cxxstd.h"
 #include "exceptions.h"
@@ -221,6 +222,9 @@ namespace Tins {
     
         BaseSniffer(const BaseSniffer&);
         BaseSniffer &operator=(const BaseSniffer&);
+        static bool is_dot3(const uint8_t *ptr, size_t sz) {
+            return (sz >= 13 && ptr[12] < 8);
+        }
         
         template<class ConcretePDU, class Functor>
         static bool call_functor(LoopData<Functor> *data, const u_char *packet, const struct pcap_pkthdr *header);
@@ -299,8 +303,11 @@ namespace Tins {
         PCapLoopBreaker _(ret_val, data->handle);
         try {
             Internals::smart_ptr<PDU>::type pdu;
-            if(data->iface_type == DLT_EN10MB)
-                ret_val = call_functor<Tins::EthernetII>(data, packet, header);
+            if(data->iface_type == DLT_EN10MB) {
+                ret_val = is_dot3((const uint8_t*)packet, header->caplen) ?
+                        call_functor<Tins::Dot3>(data, packet, header) :
+                        call_functor<Tins::EthernetII>(data, packet, header);
+            }
             else if(data->iface_type == DLT_IEEE802_11_RADIO)
                 ret_val = call_functor<Tins::RadioTap>(data, packet, header);
             else if(data->iface_type == DLT_IEEE802_11) {

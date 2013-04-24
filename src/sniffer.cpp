@@ -70,8 +70,12 @@ PtrPacket BaseSniffer::next_packet() {
 //    timestamp_ = header.ts;
     if(content) {
         try {
-            if(iface_type == DLT_EN10MB)
-                ret = new EthernetII((const uint8_t*)content, header.caplen);
+            if(iface_type == DLT_EN10MB) {
+                if(is_dot3((const uint8_t*)content, header.caplen))
+                    ret = new Dot3((const uint8_t*)content, header.caplen);
+                else
+                    ret = new EthernetII((const uint8_t*)content, header.caplen);
+            }
             else if(iface_type == DLT_IEEE802_11_RADIO)
                 ret = new RadioTap((const uint8_t*)content, header.caplen);
             else if(iface_type == DLT_IEEE802_11)
