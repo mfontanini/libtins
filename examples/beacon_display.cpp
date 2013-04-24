@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Nasel
+ * Copyright (c) 2012, Matias Fontanini
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,11 +53,11 @@ void BeaconSniffer::run(const std::string &iface) {
  
 bool BeaconSniffer::callback(PDU &pdu) {
     // Get the Dot11 layer
-    Dot11Beacon *beacon = pdu.find_pdu<Dot11Beacon>();
+    const Dot11Beacon &beacon = pdu.rfind_pdu<Dot11Beacon>();
     // All beacons must have from_ds == to_ds == 0
-    if(beacon && !beacon->from_ds() && !beacon->to_ds()) {
+    if(!beacon.from_ds() && !beacon.to_ds()) {
         // Get the AP address
-        address_type addr = beacon->addr2();
+        address_type addr = beacon.addr2();
         // Look it up in our set
         ssids_type::iterator it = ssids.find(addr);
         if(it == ssids.end()) {
@@ -66,7 +66,7 @@ bool BeaconSniffer::callback(PDU &pdu) {
                 /* If no ssid option is set, then Dot11::ssid will throw 
                  * a std::runtime_error.
                  */
-                std::string ssid = beacon->ssid();
+                std::string ssid = beacon.ssid();
                 // Save it so we don't show it again.
                 ssids.insert(addr);
                 // Display the tuple "address - ssid".

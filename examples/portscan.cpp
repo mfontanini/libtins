@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Nasel
+ * Copyright (c) 2012, Matias Fontanini
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,19 +54,17 @@ typedef std::pair<Sniffer*, std::string> sniffer_data;
  * the scanned port's status.
  */
 bool handler(PDU &pdu) {
-    TCP *tcp = pdu.find_pdu<TCP>();
-    if(tcp) {
-        // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
-        if(tcp->get_flag(TCP::RST)) {
-            // This indicates we should stop sniffing.
-            if(tcp->get_flag(TCP::SYN))
-                return false;
-            cout << "Port: " << setw(5) << tcp->sport() << " closed\n";
-        }
-        // Is SYN flag on? Then port is open!
-        else if(tcp->get_flag(TCP::SYN) && tcp->get_flag(TCP::ACK))
-            cout << "Port: " << setw(5) << tcp->sport() << " open\n";
+    TCP &tcp = pdu.rfind_pdu<TCP>();
+    // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
+    if(tcp.get_flag(TCP::RST)) {
+        // This indicates we should stop sniffing.
+        if(tcp.get_flag(TCP::SYN))
+            return false;
+        cout << "Port: " << setw(5) << tcp.sport() << " closed\n";
     }
+    // Is SYN flag on? Then port is open!
+    else if(tcp.get_flag(TCP::SYN) && tcp.get_flag(TCP::ACK))
+        cout << "Port: " << setw(5) << tcp.sport() << " open\n";
     return true;
 }
 
@@ -75,17 +73,18 @@ void send_syns(const NetworkInterface &iface, IPv4Address dest_ip, const vector<
     // Retrieve the addresses.
     NetworkInterface::Info info = iface.addresses();
     PacketSender sender;
-    TCP *tcp = new TCP();
     // Allocate the IP PDU
-    IP ip(dest_ip, info.ip_addr, tcp);
+    IP ip = IP(dest_ip, info.ip_addr) / TCP();
+    // Get the reference to the TCP PDU
+    TCP &tcp = ip.rfind_pdu<TCP>();
     // Set the SYN flag on.
-    tcp->set_flag(TCP::SYN, 1);
+    tcp.set_flag(TCP::SYN, 1);
     // Just some arbitrary port. 
-    tcp->sport(1337);
+    tcp.sport(1337);
     cout << "Sending SYNs..." << endl;
     for(vector<string>::const_iterator it = ips.begin(); it != ips.end(); ++it) {
         // Set the new port and send the packet!
-        tcp->dport(atoi(it->c_str()));
+        tcp.dport(atoi(it->c_str()));
         sender.send(ip);
     }
     // Wait 1 second.
@@ -93,11 +92,11 @@ void send_syns(const NetworkInterface &iface, IPv4Address dest_ip, const vector<
     /* Special packet to indicate that we're done. This will be sniffed
      * by our function, which will in turn return false.  
      */
-    tcp->set_flag(TCP::RST, 1);
+    tcp.set_flag(TCP::RST, 1);
     // Pretend we're the scanned host...
     ip.src_addr(dest_ip);
     // We use an ethernet pdu, otherwise the kernel will drop it.
-    EthernetII eth(info.hw_addr, info.hw_addr, ip.clone());
+    EthernetII eth = EthernetII(info.hw_addr, info.hw_addr) / ip;
     sender.send(eth, iface);
 }
 

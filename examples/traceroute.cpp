@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Nasel
+ * Copyright (c) 2012, Matias Fontanini
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,7 +74,7 @@ private:
 
     void send_packets(PacketSender &sender) {
         // ICMPs are icmp-requests by default
-        IP ip(addr, iface.addresses().ip_addr, new ICMP());
+        IP ip = IP(addr, iface.addresses().ip_addr) / ICMP();
         // We'll find at most 10 hops.
         
         for(auto i = 1; i <= 10; ++i) {
@@ -98,30 +98,20 @@ private:
     }
 
     bool sniff_callback(PDU &pdu) {
-        IP *ip = pdu.find_pdu<IP>();
-        RawPDU *raw = pdu.find_pdu<RawPDU>();
-        if(ip && raw) {
-            ttl_map::const_iterator iter;
-            IP inner_ip;
-            // This will fail if its a corrupted packet
-            try {
-                // Fetch the IP PDU attached to the ICMP response
-                inner_ip = IP(&raw->payload()[0], raw->payload_size());
-            }
-            catch(std::runtime_error &ex) {
-                return running;
-            }
-            // Critical section
-            {
-                std::lock_guard<std::mutex> _(lock);
-                iter = ttls.find(inner_ip.id());
-            } 
+        IP &ip = pdu.rfind_pdu<IP>();
+        ttl_map::const_iterator iter;
+        // Fetch the IP PDU attached to the ICMP response
+        IP inner_ip = pdu.rfind_pdu<RawPDU>().to<IP>();
+        // Critical section
+        {
+            std::lock_guard<std::mutex> _(lock);
+            iter = ttls.find(inner_ip.id());
+        } 
 
-            // It's an actual response
-            if(iter != ttls.end()) {
-                // Store it
-                results[inner_ip.id()] = ip->src_addr();
-            }
+        // It's an actual response
+        if(iter != ttls.end()) {
+            // Store it
+            results[inner_ip.id()] = ip.src_addr();
         }
         return running;
     }
