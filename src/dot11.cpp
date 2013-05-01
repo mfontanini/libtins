@@ -610,9 +610,12 @@ RSNInformation Dot11ManagementFrame::rsn_information() {
 
 string Dot11ManagementFrame::ssid() const {
     const Dot11::option *option = search_option(SSID);
-    if(!option || option->data_size() == 0)
+    if(!option)
         throw option_not_found();
-    return string((const char*)option->data_ptr(), option->data_size());
+    if(option->data_size() == 0 && this->subtype() == Dot11::PROBE_REQ)
+        return "BROADCAST";
+    else 
+        return string((const char*)option->data_ptr(), option->data_size());
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::supported_rates() const {
