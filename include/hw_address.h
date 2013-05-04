@@ -37,6 +37,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include "cxxstd.h"
 
 namespace Tins {
 /**
@@ -319,5 +320,16 @@ void HWAddress<n, Storage>::convert(const std::string &hw_addr,
         }
     }
 }
-}
+} // namespace Tins
+#if TINS_IS_CXX11
+namespace std
+{
+template<size_t n>
+struct hash<Tins::HWAddress<n>> {
+    size_t operator()(const Tins::HWAddress<n> &addr) const {
+        return std::hash<std::string>()(addr.to_string());
+    }
+};
+} // namespace std
+#endif
 #endif // TINS_HWADDRESS_H
