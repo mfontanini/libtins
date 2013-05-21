@@ -33,6 +33,7 @@
 #include <string>
 #include <stdexcept>
 #include <stdint.h>
+#include "cxxstd.h"
 
 namespace Tins {
 class IPv6Address {
@@ -192,6 +193,18 @@ private:
 
     uint8_t address[address_size];
 };
-}
+} //namespace Tins
+
+#if TINS_IS_CXX11
+namespace std
+{
+template<>
+struct hash<Tins::IPv6Address> {
+    size_t operator()(const Tins::IPv6Address &addr) const {
+        return std::hash<std::string>()(addr.to_string());
+    }
+};
+} // namespace std
+#endif
 
 #endif // TINS_IPV6_ADDRESS
