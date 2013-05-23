@@ -132,6 +132,8 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
     if((flags() & FCS) != 0) {
         check_size(total_sz, sizeof(uint32_t));
         total_sz -= sizeof(uint32_t);
+        if((flags() & FAILED_FCS) !=0)
+                throw malformed_packet();
     }
 
     if(total_sz) 
