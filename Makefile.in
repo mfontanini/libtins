@@ -58,8 +58,9 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(libtins_include_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/libtins.pc.in $(top_srcdir)/configure \
-	$(top_srcdir)/include/config.h.in AUTHORS THANKS TODO \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+	$(top_srcdir)/include/config.h.in AUTHORS COPYING INSTALL \
+	THANKS TODO config.guess config.sub depcomp install-sh \
+	ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
@@ -105,12 +106,13 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtins_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo src/stp.lo \
-	src/pppoe.lo src/crypto.lo src/dhcp.lo src/dhcpv6.lo \
-	src/dns.lo src/dns_record.lo src/dot11.lo src/dot3.lo \
-	src/dot1q.lo src/eapol.lo src/ethernetII.lo src/icmp.lo \
-	src/icmpv6.lo src/internals.lo src/ip.lo src/ip_address.lo \
-	src/ipv6.lo src/ipv6_address.lo src/llc.lo src/loopback.lo \
+am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo \
+	src/handshake_capturer.lo src/stp.lo src/pppoe.lo \
+	src/crypto.lo src/dhcp.lo src/dhcpv6.lo src/dns.lo \
+	src/dns_record.lo src/dot11.lo src/dot3.lo src/dot1q.lo \
+	src/eapol.lo src/ethernetII.lo src/icmp.lo src/icmpv6.lo \
+	src/internals.lo src/ip.lo src/ip_address.lo src/ipv6.lo \
+	src/ipv6_address.lo src/llc.lo src/loopback.lo \
 	src/network_interface.lo src/packet_sender.lo \
 	src/packet_writer.lo src/pdu.lo src/radiotap.lo src/rawpdu.lo \
 	src/rsn_information.lo src/sll.lo src/snap.lo src/sniffer.lo \
@@ -295,6 +297,7 @@ libtins_la_LDFLAGS = -version-info @LIBTINS_VERSION@
 AM_CXXFLAGS = -Wall -pedantic -I@LIBTINS_INCLUDE_DIR@
 libtins_la_SOURCES = src/arp.cpp \
                     src/bootp.cpp \
+                    src/handshake_capturer.cpp \
                     src/stp.cpp \
                     src/pppoe.cpp \
                     src/crypto.cpp \
@@ -342,6 +345,7 @@ libtins_include_HEADERS = include/internals.h \
 							include/eapol.h \
 							include/tcp_stream.h \
 							include/pppoe.h \
+							include/handshake_capturer.h \
 							include/ipv6.h \
 							include/icmpv6.h \
 							include/ieee802_3.h \
@@ -477,6 +481,8 @@ src/$(DEPDIR)/$(am__dirstamp):
 	@: > src/$(DEPDIR)/$(am__dirstamp)
 src/arp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/bootp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/handshake_capturer.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/stp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/pppoe.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/crypto.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -545,6 +551,8 @@ mostlyclean-compile:
 	-rm -f src/eapol.lo
 	-rm -f src/ethernetII.$(OBJEXT)
 	-rm -f src/ethernetII.lo
+	-rm -f src/handshake_capturer.$(OBJEXT)
+	-rm -f src/handshake_capturer.lo
 	-rm -f src/icmp.$(OBJEXT)
 	-rm -f src/icmp.lo
 	-rm -f src/icmpv6.$(OBJEXT)
@@ -611,6 +619,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dot3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/eapol.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ethernetII.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/handshake_capturer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/icmp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/icmpv6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/internals.Plo@am__quote@

@@ -13,6 +13,7 @@ AM_CXXFLAGS = -Wall -pedantic -I@LIBTINS_INCLUDE_DIR@
 
 libtins_la_SOURCES=src/arp.cpp \
                     src/bootp.cpp \
+                    src/handshake_capturer.cpp \
                     src/stp.cpp \
                     src/pppoe.cpp \
                     src/crypto.cpp \
@@ -60,6 +61,7 @@ libtins_include_HEADERS = include/internals.h \
 							include/eapol.h \
 							include/tcp_stream.h \
 							include/pppoe.h \
+							include/handshake_capturer.h \
 							include/ipv6.h \
 							include/icmpv6.h \
 							include/ieee802_3.h \

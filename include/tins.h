@@ -67,5 +67,6 @@
 #include "dhcpv6.h"
 #include "pppoe.h"
 #include "stp.h"
+#include "handshake_capturer.h"
 
 #endif // TINS_TINS_H

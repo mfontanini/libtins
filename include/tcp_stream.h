@@ -345,36 +345,34 @@ void TCPStreamFollower::follow_streams(ForwardIterator start, ForwardIterator en
 
 template<typename DataFunctor, typename EndFunctor>
 bool TCPStreamFollower::callback(PDU &pdu, const DataFunctor &data_fun, const EndFunctor &end_fun) {
-    IP *ip = pdu.find_pdu<IP>();
-    TCP *tcp = pdu.find_pdu<TCP>();
-    if(ip && tcp) {
-        TCPStream::StreamInfo info( 
-            ip->src_addr(), ip->dst_addr(),
-            tcp->sport(), tcp->dport()
-        );
-        sessions_type::iterator it = sessions.find(info);
-        if(it == sessions.end()) {
-            std::swap(info.client_addr, info.server_addr);
-            std::swap(info.client_port, info.server_port);
-            if((it = sessions.find(info)) == sessions.end()) {
-                if(tcp->get_flag(TCP::SYN) && !tcp->get_flag(TCP::ACK)) {
-                    sessions.insert(
-                        std::make_pair(
-                            info,
-                            TCPStream(ip, tcp, last_identifier++)
-                        )
-                    );
-                }
-                return true;
+    IP &ip = pdu.rfind_pdu<IP>();
+    TCP &tcp = pdu.rfind_pdu<TCP>();
+    TCPStream::StreamInfo info( 
+        ip.src_addr(), ip.dst_addr(),
+        tcp.sport(), tcp.dport()
+    );
+    sessions_type::iterator it = sessions.find(info);
+    if(it == sessions.end()) {
+        std::swap(info.client_addr, info.server_addr);
+        std::swap(info.client_port, info.server_port);
+        if((it = sessions.find(info)) == sessions.end()) {
+            if(tcp.get_flag(TCP::SYN) && !tcp.get_flag(TCP::ACK)) {
+                sessions.insert(
+                    std::make_pair(
+                        info,
+                        TCPStream(&ip, &tcp, last_identifier++)
+                    )
+                );
             }
+            return true;
         }
-        if(it->second.update(ip, tcp))
-            data_fun(it->second);
-        // We're done with this stream
-        if(it->second.is_finished()) {
-            end_fun(it->second);
-            sessions.erase(it);
-        }
+    }
+    if(it->second.update(&ip, &tcp))
+        data_fun(it->second);
+    // We're done with this stream
+    if(it->second.is_finished()) {
+        end_fun(it->second);
+        sessions.erase(it);
     }
     return true;
 }
