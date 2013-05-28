@@ -51,6 +51,11 @@ namespace Tins {
         typedef HWAddress<6> address_type;
         
         /**
+         * \brief Default constructor.
+         */
+        EAPOLHandshake() { }
+
+        /**
          * Constructs an EAPOLHandshake object.
          * 
          * \param client_address The client address.
