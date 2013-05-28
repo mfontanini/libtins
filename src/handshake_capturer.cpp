@@ -55,7 +55,7 @@ namespace Tins {
             handshakes_[addresses].assign(eapol, eapol + 1);
         }
         else if(eapol->key_t() && eapol->key_mic() && !eapol->install() && !eapol->key_ack()) {
-            if(!eapol->secure())
+            if(*std::max_element(eapol->nonce(), eapol->nonce() + RSNEAPOL::nonce_size) > 0)
                 do_insert(addresses, eapol, 1);
             else if(do_insert(addresses, eapol, 3)) {
                 completed_handshakes_.push_back(
@@ -80,8 +80,11 @@ namespace Tins {
     {
         handshake_map::iterator iter = handshakes_.find(key);
         if(iter != handshakes_.end()) {
-            if(iter->second.size() != expected)
-                iter->second.clear();
+            if(iter->second.size() != expected) {
+                // skip repeated
+                if(iter->second.size() != expected + 1)
+                    iter->second.clear();
+            }
             else {
                 iter->second.push_back(*eapol);
                 return true;

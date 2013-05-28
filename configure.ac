@@ -1,7 +1,7 @@
 AC_INIT([libtins], [1.0], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_HEADER(include/config.h)
-AM_INIT_AUTOMAKE([-Wall -Werror])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 LT_INIT([disable-static])
 AC_CONFIG_MACRO_DIR([m4])
 AM_MAINTAINER_MODE([enable])
