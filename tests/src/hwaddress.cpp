@@ -54,6 +54,13 @@ TEST_F(HWAddressTest, CopyConstructor) {
     EXPECT_EQ(addr1, addr2);
 }
 
+TEST_F(HWAddressTest, IsBroadcast) {
+    EXPECT_FALSE(HWAddress<6>("ff:ff:ff:ff:ff:fe").is_broadcast());
+    EXPECT_FALSE(HWAddress<6>("00:01:02:03:04:05").is_broadcast());
+    EXPECT_TRUE(HWAddress<6>("ff:ff:ff:ff:ff:ff").is_broadcast());
+}
+
+
 TEST_F(HWAddressTest, CopyAssignmentOperator) {
     HWAddress<6> addr1(byte_address), addr2;
     addr2 = addr1;

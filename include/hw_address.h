@@ -228,6 +228,13 @@ public:
     }
     
     /**
+     * \brief Indicates whether this is a broadcast address
+     */
+    bool is_broadcast() const {
+        return *std::min_element(begin(), end()) == 0xff;
+    }
+    
+    /**
      * \brief Convert this address to a hex-notation std::string address.
      * 
      * \return std::string containing the hex-notation address.
