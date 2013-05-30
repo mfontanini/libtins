@@ -103,9 +103,15 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
     if(_radio.dbm_noise) 
         read_field(buffer, radiotap_hdr_size, _dbm_noise);
     
+    if(_radio.lock_quality) 
+        read_field(buffer, radiotap_hdr_size, _signal_quality);
+
     if(_radio.antenna) 
         read_field(buffer, radiotap_hdr_size, _antenna);
     
+    if(_radio.db_signal) 
+        read_field(buffer, radiotap_hdr_size, _db_signal);
+
     if(_radio.rx_flags) {
         if(((buffer - buffer_start) & 1) == 1) {
             buffer++;
@@ -191,9 +197,19 @@ void RadioTap::dbm_noise(uint8_t new_dbm_noise) {
     _radio.dbm_noise = 1;
 }
 
+void RadioTap::signal_quality(uint8_t new_signal_quality) {
+    _signal_quality = new_signal_quality;
+    _radio.lock_quality = 1;
+}
+
 void RadioTap::antenna(uint8_t new_antenna) {
     _antenna = new_antenna;
     _radio.antenna = 1;
+}
+
+void RadioTap::db_signal(uint8_t new_db_signal) {
+    _db_signal = new_db_signal;
+    _radio.db_signal = 1;
 }
 
 void RadioTap::rx_flags(uint16_t new_rx_flag) {
@@ -217,8 +233,14 @@ uint32_t RadioTap::header_size() const {
         total_bytes += sizeof(_dbm_signal);
     if(_radio.dbm_noise)
         total_bytes += sizeof(_dbm_noise);
+    if(_radio.lock_quality) {
+        total_bytes += (total_bytes & 1);
+        total_bytes += sizeof(_signal_quality);
+    }
     if(_radio.antenna)
         total_bytes += sizeof(_antenna);
+    if(_radio.db_signal)
+        total_bytes += sizeof(_db_signal);
     if(_radio.rx_flags) {
         total_bytes += (total_bytes & 1);
         total_bytes += sizeof(_rx_flags);
@@ -284,8 +306,7 @@ void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     #ifdef TINS_DEBUG
     assert(total_sz >= sz);
     #endif
-    if(!_radio.it_len)
-        _radio.it_len = Endian::host_to_le<uint16_t>(sz);
+    _radio.it_len = Endian::host_to_le<uint16_t>(sz);
     memcpy(buffer, &_radio, sizeof(_radio));
     buffer += sizeof(_radio);
     if(_radio.tsft) {
@@ -317,9 +338,19 @@ void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
         memcpy(buffer, &_dbm_noise, sizeof(_dbm_noise));
         buffer += sizeof(_dbm_noise);
     }
+    if(_radio.lock_quality) {
+        if(((buffer - buffer_start) & 1) == 1)
+            *(buffer++) = 0;
+        memcpy(buffer, &_signal_quality, sizeof(_signal_quality));
+        buffer += sizeof(_signal_quality);
+    }
     if(_radio.antenna) {
         memcpy(buffer, &_antenna, sizeof(_antenna));
         buffer += sizeof(_antenna);
+    }
+    if(_radio.db_signal) {
+        memcpy(buffer, &_db_signal, sizeof(_db_signal));
+        buffer += sizeof(_db_signal);
     }
     if(_radio.rx_flags) {
         if(((buffer - buffer_start) & 1) == 1)

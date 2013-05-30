@@ -188,11 +188,23 @@ namespace Tins {
         void dbm_noise(uint8_t new_dbm_noise);
         
         /**
+         * \brief Setter for the signal quality field.
+         * \param new_antenna The signal quality signal.
+         */
+        void signal_quality(uint8_t new_signal_quality);
+
+        /**
          * \brief Setter for the antenna field.
          * \param new_antenna The antenna signal.
          */
         void antenna(uint8_t new_antenna);
         
+        /**
+         * \brief Setter for the db signal field.
+         * \param new_antenna The db signal signal.
+         */
+        void db_signal(uint8_t new_db_signal);
+
         /**
          * \brief Setter for the rx flag field.
          * \param new_rx_flag The antenna signal.
@@ -262,10 +274,22 @@ namespace Tins {
         uint8_t dbm_noise() const { return _dbm_noise; }
         
         /**
+         * \brief Getter for the signal quality field.
+         * \return The signal quality field.
+         */
+        uint16_t signal_quality() const { return _signal_quality; }
+
+        /**
          * \brief Getter for the antenna field.
          * \return The antenna field.
          */
         uint8_t antenna() const { return _antenna; }
+
+        /**
+         * \brief Getter for the db signal field.
+         * \return The db signal field.
+         */
+        uint8_t db_signal() const { return _db_signal; }
         
         /**
          * \brief Getter for the channel+ field.
@@ -388,8 +412,8 @@ namespace Tins {
         // present fields...
         uint64_t _tsft;
         uint32_t _channel_type;
-        uint16_t _channel_freq, _rx_flags;
-        uint8_t _antenna, _flags, _rate, _dbm_signal, _dbm_noise, _channel, _max_power;
+        uint16_t _channel_freq, _rx_flags, _signal_quality;
+        uint8_t _antenna, _flags, _rate, _dbm_signal, _dbm_noise, _channel, _max_power, _db_signal;
     };
 }
 
