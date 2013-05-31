@@ -41,27 +41,70 @@
  */
 namespace Tins {
 namespace Internals {
-    void skip_line(std::istream &input);
-    bool from_hex(const std::string &str, uint32_t &result);
+template<size_t n>
+class byte_array {
+public:
+    typedef uint8_t* iterator;
+    typedef const uint8_t* const_iterator;
     
-    template<bool, typename>
-    struct enable_if {
-        
-    };
+    byte_array() {
+        std::fill(begin(), end(), 0);
+    }
+    
+    template<typename InputIterator>
+    byte_array(InputIterator start, InputIterator last) {
+        std::copy(start, end, data);
+    }
+    
+    template<typename InputIterator>
+    byte_array(InputIterator start) {
+        std::copy(start, n, data);
+    }
+    
+    iterator begin() {
+        return data;
+    }
+    
+    iterator end() {
+        return data + n;
+    }
+    
+    const_iterator begin() const {
+        return data;
+    }
+    
+    const_iterator end() const {
+        return data + n;
+    }
+    
+    size_t size() const {
+        return n;
+    }
+private:
+    uint8_t data[n];
+};
 
-    template<typename T>
-    struct enable_if<true, T> {
-        typedef T type;
-    };
+void skip_line(std::istream &input);
+bool from_hex(const std::string &str, uint32_t &result);
+
+template<bool, typename>
+struct enable_if {
     
-    PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer, 
-      uint32_t size, bool rawpdu_on_no_match = true);
-    
-    PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size);
-    
-    Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
-}
-}
+};
+
+template<typename T>
+struct enable_if<true, T> {
+    typedef T type;
+};
+
+PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer, 
+  uint32_t size, bool rawpdu_on_no_match = true);
+
+PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size);
+
+Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
+} // namespace Internals
+} // namespace Tins
 /**
  * \endcond
  */

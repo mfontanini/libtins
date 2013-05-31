@@ -775,6 +775,7 @@ enable_maintainer_mode
 with_pcap_include_path
 with_pcap_lib_path
 enable_c__11
+enable_wpa2
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1418,6 +1419,7 @@ Optional Features:
   --disable-maintainer-mode  disable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
   --enable-c++11          enable C++11 features
+  --disable-wpa2          disable WPA2 decryption features
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -15199,6 +15201,8 @@ CPPFLAGS=$old_cppflags
 
 # Options
 
+wpa2_msg="WPA2 decryption(which requires openssl) can be disabled using the --disable-wpa2 flag."
+
 # Check whether --enable-c++11 was given.
 if test "${enable_c__11+set}" = set; then :
   enableval=$enable_c__11;     ax_cxx_compile_cxx11_required=truednl
@@ -15322,6 +15326,86 @@ $as_echo "#define HAVE_CXX11 1" >>confdefs.h
 
 
   fi
+
+
+fi
+
+
+# Check whether --enable-wpa2 was given.
+if test "${enable_wpa2+set}" = set; then :
+  enableval=$enable_wpa2;
+else
+
+        for ac_header in openssl/evp.h openssl/hmac.h openssl/aes.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_cxx_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+else
+  as_fn_error $? "openssl headers are missing! $wpa2_msg " "$LINENO" 5
+
+$as_echo "#define HAVE_WPA2_DECRYPTION 0" >>confdefs.h
+
+
+fi
+
+done
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PKCS5_PBKDF2_HMAC_SHA1 in -lcrypto" >&5
+$as_echo_n "checking for PKCS5_PBKDF2_HMAC_SHA1 in -lcrypto... " >&6; }
+if ${ac_cv_lib_crypto_PKCS5_PBKDF2_HMAC_SHA1+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcrypto  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char PKCS5_PBKDF2_HMAC_SHA1 ();
+int
+main ()
+{
+return PKCS5_PBKDF2_HMAC_SHA1 ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_lib_crypto_PKCS5_PBKDF2_HMAC_SHA1=yes
+else
+  ac_cv_lib_crypto_PKCS5_PBKDF2_HMAC_SHA1=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_PKCS5_PBKDF2_HMAC_SHA1" >&5
+$as_echo "$ac_cv_lib_crypto_PKCS5_PBKDF2_HMAC_SHA1" >&6; }
+if test "x$ac_cv_lib_crypto_PKCS5_PBKDF2_HMAC_SHA1" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBCRYPTO 1
+_ACEOF
+
+  LIBS="-lcrypto $LIBS"
+
+else
+  as_fn_error $? "openssl library is missing! $wpa2_msg " "$LINENO" 5
+
+fi
+
+
+$as_echo "#define HAVE_WPA2_DECRYPTION 1" >>confdefs.h
+
 
 
 fi

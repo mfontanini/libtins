@@ -34,15 +34,57 @@
 #include <string>
 #include <algorithm>
 #include <vector>
-#include "dot11.h"
 #include "utils.h"
 #include "snap.h"
 #include "rawpdu.h"
+#include "handshake_capturer.h"
+#include "config.h"
 
 namespace Tins {
 class PDU;
+class Dot11;
+class Dot11Data;
 
 namespace Crypto {
+    /**
+     * \cond
+     */
+    #ifdef HAVE_WPA2_DECRYPTION
+    namespace WPA2 {
+        class invalid_handshake : public std::exception {
+        public:
+            const char *what() const throw() {
+                return "invalid handshake";
+            }
+        };
+        class CCMPSessionKeys {
+        public:
+            typedef Internals::byte_array<80> ptk_type;
+            typedef Internals::byte_array<32> pmk_type;
+            
+            CCMPSessionKeys(const RSNHandshake &hs, const pmk_type &pmk);
+            SNAP *decrypt_unicast(const Dot11Data &dot11, const RawPDU &raw) const;
+        private:
+            ptk_type ptk;
+        };
+            
+        class SupplicantData {
+        public:
+            typedef HWAddress<6> address_type;
+            typedef CCMPSessionKeys::pmk_type pmk_type;
+            
+            SupplicantData(const std::string &psk, const std::string &ssid);
+            
+            const pmk_type &pmk() const;
+        private:
+            pmk_type pmk_;
+        };
+    }
+    #endif // HAVE_WPA2_DECRYPTION
+    /**
+     * \endcond
+     */
+
     /**
      * \brief RC4 Key abstraction.
      */
@@ -65,11 +107,11 @@ namespace Crypto {
     };
 
     /**
-     * 
+     * \brief Decrypts WEP-encrypted traffic.
      */
     class WEPDecrypter {
     public:
-        typedef Dot11::address_type address_type;
+        typedef HWAddress<6> address_type;
     
         /**
          * \brief Constructs a WEPDecrypter object.
@@ -93,19 +135,18 @@ namespace Crypto {
         void remove_password(const address_type &addr);
         
         /**
-         * \brief Decrypts the provided PDU and forwards the decrypted
-         * PDU to the functor held by this object.
+         * \brief Decrypts the provided PDU.
          * 
          * A Dot11Data PDU is looked up inside the provided PDU chain.
          * If no such PDU exists or there is no password associated
          * with the Dot11 packet's BSSID, then the PDU is left intact. 
          * 
          * Otherwise, the packet is decrypted using the given password. 
-         * If the CRC found after decrypting it is invalid,
-         * then false is returned.
+         * If the CRC found after decrypting is invalid, false is 
+         * returned.
          * 
-         * \return false if decryption failed due to invalid CRC, true
-         * otherwise.
+         * \return false if no decryption was performed or decryption 
+         * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
     private:
@@ -116,6 +157,95 @@ namespace Crypto {
         passwords_type passwords;
         std::vector<uint8_t> key_buffer;
     };
+
+    #ifdef HAVE_WPA2_DECRYPTION
+    /**
+     * \brief Decrypts WPA2-encrypted traffic.
+     *
+     * This class takes valid PSK and SSID tuples, captures client handshakes,
+     * and decrypts their traffic afterwards.
+     */
+    class WPA2Decrypter {
+    public:
+        /*
+         * \brief The type used to store Dot11 addresses.
+         */
+        typedef HWAddress<6> address_type;
+        
+        /**
+         * \brief Adds a supplicant's information.
+         *
+         * This associates an SSID with a PSK., and allows the decryption of
+         * any BSSIDs that broadcast the same SSID. 
+         * 
+         * The decrypter will inspect beacon frames, looking for SSID tags 
+         * that contain the given SSID.
+         *
+         * Note that using this overload, the decryption of data frames and
+         * handshake capturing will be disabled until any access point 
+         * broadcasts the provided SSID(this shouldn't take long at all). 
+         * If this is not the desired behaviour, then you should check out
+         * the ovther add_supplicant_data overload.
+         * 
+         * \param psk The PSK associated with the SSID.
+         * \param ssid The network's SSID.
+         */
+        void add_supplicant_data(const std::string &psk, const std::string &ssid);
+
+        /**
+         * \brief Adds a supplicant's information, including the BSSID.
+         *
+         * This overload can be used if the BSSID associated with this SSID is 
+         * known beforehand. The addr parameter indicates which specific BSSID 
+         * is associated to the SSID. 
+         * 
+         * Note that if any other access point broadcasts the provided SSID, 
+         * it will be taken into account as well.
+         * 
+         * \param psk The PSK associated with this SSID.
+         * \param ssid The network's SSID.
+         * \param addr The access point's BSSID.
+         */
+        void add_supplicant_data(const std::string &psk, const std::string &ssid, const address_type &addr);
+        
+        /**
+         * \brief Decrypts the provided PDU.
+         * 
+         * A Dot11Data PDU is looked up inside the provided PDU chain.
+         * If no such PDU exists or no PSK was associated with the SSID
+         * broadcasted by the Dot11 packet's BSSID, or no EAPOL handshake 
+         * was captured for the client involved in the communication, 
+         * then the PDU is left intact. 
+         * 
+         * Otherwise, the packet is decrypted using the generated PTK. 
+         * If the resulting MIC is invalid, then the packet is left intact.
+         * 
+         * \return false if no decryption was performed, or the decryption 
+         * failed, true otherwise.
+         */
+        bool decrypt(PDU &pdu);
+    private:
+        typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
+        typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
+        typedef std::pair<address_type, address_type> addr_pair;
+        typedef std::map<addr_pair, WPA2::CCMPSessionKeys> keys_map;
+        
+        void try_add_keys(const Dot11Data &dot11, const RSNHandshake &hs);
+        addr_pair make_addr_pair(const address_type &addr1, const address_type &addr2) {
+            return (addr1 < addr2) ? 
+                std::make_pair(addr1, addr2) :
+                std::make_pair(addr2, addr1);
+        }
+        addr_pair extract_addr_pair(const Dot11Data &dot11);
+        bssids_map::const_iterator find_ap(const Dot11Data &dot11);
+        void add_access_point(const std::string &ssid, const address_type &addr);
+
+        RSNHandshakeCapturer capturer;
+        pmks_map pmks;
+        bssids_map aps;
+        keys_map keys;
+    };
+    #endif // HAVE_WPA2_DECRYPTION
 
     /**
      * \brief Pluggable decrypter object which can be used to decrypt

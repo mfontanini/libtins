@@ -9,11 +9,23 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `crypto' library (-lcrypto). */
+#undef HAVE_LIBCRYPTO
+
 /* Define to 1 if you have the `pcap' library (-lpcap). */
 #undef HAVE_LIBPCAP
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <openssl/aes.h> header file. */
+#undef HAVE_OPENSSL_AES_H
+
+/* Define to 1 if you have the <openssl/evp.h> header file. */
+#undef HAVE_OPENSSL_EVP_H
+
+/* Define to 1 if you have the <openssl/hmac.h> header file. */
+#undef HAVE_OPENSSL_HMAC_H
 
 /* Define to 1 if you have the <pcap.h> header file. */
 #undef HAVE_PCAP_H
@@ -38,6 +50,9 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Have WPA2 decryption library */
+#undef HAVE_WPA2_DECRYPTION
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */

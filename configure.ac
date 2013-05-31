@@ -36,10 +36,33 @@ CPPFLAGS=$old_cppflags
 
 # Options
 
+wpa2_msg="WPA2 decryption(which requires openssl) can be disabled using the --disable-wpa2 flag."
+
 AC_ARG_ENABLE(
     c++11, 
     [  --enable-c++11          enable C++11 features], 
     [AX_CXX_COMPILE_STDCXX_11(noext)]
+)
+
+AC_ARG_ENABLE(
+    wpa2, 
+    [  --disable-wpa2          disable WPA2 decryption features], 
+    [],
+    [
+        AC_CHECK_HEADERS(
+            [openssl/evp.h openssl/hmac.h openssl/aes.h], 
+            [], 
+            [AC_MSG_ERROR([openssl headers are missing! $wpa2_msg ])]
+            AC_DEFINE([HAVE_WPA2_DECRYPTION], 0, Have WPA2 decryption library)
+        )
+        AC_CHECK_LIB(
+            crypto, 
+            PKCS5_PBKDF2_HMAC_SHA1, 
+            [], 
+            [AC_MSG_ERROR([openssl library is missing! $wpa2_msg ])]
+        )
+        AC_DEFINE([HAVE_WPA2_DECRYPTION], 1, Have WPA2 decryption library)
+    ]
 )
 
 # Substitute options

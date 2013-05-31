@@ -100,4 +100,5 @@ libtins_include_HEADERS = include/internals.h \
 							include/utils.h \
 							include/cxxstd.h \
 							include/stp.h \
-							include/exceptions.h
+							include/exceptions.h \
+							include/config.h
