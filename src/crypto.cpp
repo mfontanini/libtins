@@ -26,7 +26,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
+
+#include <iostream>  // borrame
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/aes.h>
@@ -281,6 +282,15 @@ WPA2Decrypter::addr_pair WPA2Decrypter::extract_addr_pair(const Dot11Data &dot11
         return make_addr_pair(dot11.addr2(), dot11.addr3());
 }
 
+WPA2Decrypter::addr_pair WPA2Decrypter::extract_addr_pair_dst(const Dot11Data &dot11) {
+    if(dot11.from_ds() && !dot11.to_ds())
+        return make_addr_pair(dot11.addr1(), dot11.addr2());
+    else if(!dot11.from_ds() && dot11.to_ds())
+        return make_addr_pair(dot11.addr1(), dot11.addr3());
+    else 
+        return make_addr_pair(dot11.addr1(), dot11.addr3());
+}
+
 WPA2Decrypter::bssids_map::const_iterator WPA2Decrypter::find_ap(const Dot11Data &dot11) {
     if(dot11.from_ds() && !dot11.to_ds())
         return aps.find(dot11.addr2());
@@ -310,7 +320,12 @@ bool WPA2Decrypter::decrypt(PDU &pdu) {
         Dot11Data *data = pdu.find_pdu<Dot11Data>();
         RawPDU *raw = pdu.find_pdu<RawPDU>();
         if(data && raw && data->wep()) {
+            // search for the tuple (bssid, src_addr)
             keys_map::const_iterator it = keys.find(extract_addr_pair(*data));
+            
+            // search for the tuple (bssid, dst_addr) if the above didn't work
+            if(it == keys.end())
+                it = keys.find(extract_addr_pair_dst(*data));
             if(it != keys.end()) {
                 SNAP *snap = it->second.decrypt_unicast(*data, *raw);
                 if(snap) {

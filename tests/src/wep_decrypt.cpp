@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "crypto.h"
 #include "arp.h"
+#include "dot11.h"
 
 using namespace Tins;
 

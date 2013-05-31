@@ -58,49 +58,56 @@
 ../include/hw_address.h:
 
 ../include/exceptions.h:
-../src/crypto.o: ../src/crypto.cpp ../include/crypto.h ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- ../include/utils.h ../include/ipv6_address.h ../include/internals.h \
- ../include/constants.h ../include/snap.h ../include/rawpdu.h
+../src/crypto.o: ../src/crypto.cpp ../include/crypto.h ../include/utils.h \
+ ../include/macros.h ../include/ip_address.h ../include/cxxstd.h \
+ ../include/ipv6_address.h ../include/hw_address.h ../include/internals.h \
+ ../include/constants.h ../include/pdu.h ../include/exceptions.h \
+ ../include/snap.h ../include/endianness.h ../include/small_uint.h \
+ ../include/rawpdu.h ../include/handshake_capturer.h ../include/eapol.h \
+ ../include/config.h ../include/dot11.h ../include/pdu_option.h \
+ ../include/network_interface.h
 
 ../include/crypto.h:
 
-../include/dot11.h:
+../include/utils.h:
 
 ../include/macros.h:
 
-../include/pdu.h:
+../include/ip_address.h:
 
 ../include/cxxstd.h:
 
-../include/exceptions.h:
-
-../include/endianness.h:
+../include/ipv6_address.h:
 
 ../include/hw_address.h:
-
-../include/small_uint.h:
-
-../include/pdu_option.h:
-
-../include/network_interface.h:
-
-../include/ip_address.h:
-
-../include/utils.h:
-
-../include/ipv6_address.h:
 
 ../include/internals.h:
 
 ../include/constants.h:
 
+../include/pdu.h:
+
+../include/exceptions.h:
+
 ../include/snap.h:
 
+../include/endianness.h:
+
+../include/small_uint.h:
+
 ../include/rawpdu.h:
+
+../include/handshake_capturer.h:
+
+../include/eapol.h:
+
+../include/config.h:
+
+../include/dot11.h:
+
+../include/pdu_option.h:
+
+../include/network_interface.h:
 ../src/dhcp.o: ../src/dhcp.cpp ../include/endianness.h \
  ../include/macros.h ../include/dhcp.h ../include/bootp.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
@@ -379,6 +386,38 @@
 ../include/constants.h:
 
 ../include/exceptions.h:
+../src/handshake_capturer.o: ../src/handshake_capturer.cpp \
+ ../include/handshake_capturer.h ../include/hw_address.h \
+ ../include/cxxstd.h ../include/eapol.h ../include/pdu.h \
+ ../include/macros.h ../include/exceptions.h ../include/small_uint.h \
+ ../include/endianness.h ../include/dot11.h ../include/pdu_option.h \
+ ../include/network_interface.h ../include/ip_address.h
+
+../include/handshake_capturer.h:
+
+../include/hw_address.h:
+
+../include/cxxstd.h:
+
+../include/eapol.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/exceptions.h:
+
+../include/small_uint.h:
+
+../include/endianness.h:
+
+../include/dot11.h:
+
+../include/pdu_option.h:
+
+../include/network_interface.h:
+
+../include/ip_address.h:
 ../src/icmp.o: ../src/icmp.cpp ../include/icmp.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/rawpdu.h ../include/utils.h \
@@ -573,9 +612,11 @@
 
 ../include/exceptions.h:
 ../src/ip_address.o: ../src/ip_address.cpp ../include/ip_address.h \
- ../include/endianness.h ../include/macros.h
+ ../include/cxxstd.h ../include/endianness.h ../include/macros.h
 
 ../include/ip_address.h:
+
+../include/cxxstd.h:
 
 ../include/endianness.h:
 
@@ -631,11 +672,13 @@
 
 ../include/exceptions.h:
 ../src/ipv6_address.o: ../src/ipv6_address.cpp ../include/macros.h \
- ../include/ipv6_address.h
+ ../include/ipv6_address.h ../include/cxxstd.h
 
 ../include/macros.h:
 
 ../include/ipv6_address.h:
+
+../include/cxxstd.h:
 ../src/llc.o: ../src/llc.cpp ../include/llc.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/stp.h ../include/hw_address.h \
@@ -703,9 +746,9 @@
 ../include/exceptions.h:
 ../src/network_interface.o: ../src/network_interface.cpp \
  ../include/macros.h ../include/network_interface.h \
- ../include/hw_address.h ../include/ip_address.h ../include/utils.h \
- ../include/macros.h ../include/ipv6_address.h ../include/internals.h \
- ../include/constants.h ../include/pdu.h ../include/cxxstd.h \
+ ../include/hw_address.h ../include/cxxstd.h ../include/ip_address.h \
+ ../include/utils.h ../include/macros.h ../include/ipv6_address.h \
+ ../include/internals.h ../include/constants.h ../include/pdu.h \
  ../include/exceptions.h ../include/endianness.h
 
 ../include/macros.h:
@@ -713,6 +756,8 @@
 ../include/network_interface.h:
 
 ../include/hw_address.h:
+
+../include/cxxstd.h:
 
 ../include/ip_address.h:
 
@@ -728,15 +773,13 @@
 
 ../include/pdu.h:
 
-../include/cxxstd.h:
-
 ../include/exceptions.h:
 
 ../include/endianness.h:
 ../src/packet_sender.o: ../src/packet_sender.cpp \
  ../include/packet_sender.h ../include/network_interface.h \
- ../include/hw_address.h ../include/ip_address.h ../include/macros.h \
- ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/hw_address.h ../include/cxxstd.h ../include/ip_address.h \
+ ../include/macros.h ../include/pdu.h ../include/exceptions.h \
  ../include/macros.h ../include/network_interface.h \
  ../include/ethernetII.h ../include/pdu.h ../include/endianness.h \
  ../include/radiotap.h ../include/dot11.h ../include/small_uint.h \
@@ -749,13 +792,13 @@
 
 ../include/hw_address.h:
 
+../include/cxxstd.h:
+
 ../include/ip_address.h:
 
 ../include/macros.h:
 
 ../include/pdu.h:
-
-../include/cxxstd.h:
 
 ../include/exceptions.h:
 
@@ -786,10 +829,9 @@
 ../include/constants.h:
 ../src/packet_writer.o: ../src/packet_writer.cpp \
  ../include/packet_writer.h ../include/utils.h ../include/macros.h \
- ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/ip_address.h ../include/cxxstd.h ../include/ipv6_address.h \
  ../include/hw_address.h ../include/internals.h ../include/constants.h \
- ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/pdu.h
+ ../include/pdu.h ../include/exceptions.h ../include/pdu.h
 
 ../include/packet_writer.h:
 
@@ -798,6 +840,8 @@
 ../include/macros.h:
 
 ../include/ip_address.h:
+
+../include/cxxstd.h:
 
 ../include/ipv6_address.h:
 
@@ -808,8 +852,6 @@
 ../include/constants.h:
 
 ../include/pdu.h:
-
-../include/cxxstd.h:
 
 ../include/exceptions.h:
 
@@ -1000,7 +1042,8 @@
  ../include/hw_address.h ../include/radiotap.h ../include/packet.h \
  ../include/timestamp.h ../include/loopback.h ../include/dot11.h \
  ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h ../include/sll.h
+ ../include/network_interface.h ../include/ip_address.h ../include/dot3.h \
+ ../include/sll.h
 
 ../include/sniffer.h:
 
@@ -1035,6 +1078,8 @@
 ../include/network_interface.h:
 
 ../include/ip_address.h:
+
+../include/dot3.h:
 
 ../include/sll.h:
 ../src/stp.o: ../src/stp.cpp ../include/stp.h ../include/pdu.h \
@@ -1111,9 +1156,9 @@
  ../include/radiotap.h ../include/packet.h ../include/timestamp.h \
  ../include/loopback.h ../include/dot11.h ../include/small_uint.h \
  ../include/pdu_option.h ../include/network_interface.h \
- ../include/ip_address.h ../include/sll.h ../include/tcp.h \
- ../include/utils.h ../include/ipv6_address.h ../include/internals.h \
- ../include/constants.h ../include/ip.h
+ ../include/ip_address.h ../include/dot3.h ../include/sll.h \
+ ../include/tcp.h ../include/utils.h ../include/ipv6_address.h \
+ ../include/internals.h ../include/constants.h ../include/ip.h
 
 ../include/rawpdu.h:
 
@@ -1153,6 +1198,8 @@
 
 ../include/ip_address.h:
 
+../include/dot3.h:
+
 ../include/sll.h:
 
 ../include/tcp.h:
@@ -1172,7 +1219,7 @@
  ../include/ip_address.h ../include/ipv6_address.h \
  ../include/hw_address.h ../include/internals.h ../include/constants.h \
  ../include/ip.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/rawpdu.h ../include/exceptions.h
+ ../include/ipv6.h ../include/rawpdu.h ../include/exceptions.h
 
 ../include/udp.h:
 
@@ -1206,23 +1253,27 @@
 
 ../include/pdu_option.h:
 
+../include/ipv6.h:
+
 ../include/rawpdu.h:
 
 ../include/exceptions.h:
 ../src/utils.o: ../src/utils.cpp ../include/utils.h ../include/macros.h \
- ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/ip_address.h ../include/cxxstd.h ../include/ipv6_address.h \
  ../include/hw_address.h ../include/internals.h ../include/constants.h \
- ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/pdu.h ../include/arp.h ../include/endianness.h \
- ../include/ethernetII.h ../include/endianness.h \
- ../include/network_interface.h ../include/packet_sender.h \
- ../include/network_interface.h ../include/cxxstd.h
+ ../include/pdu.h ../include/exceptions.h ../include/pdu.h \
+ ../include/arp.h ../include/endianness.h ../include/ethernetII.h \
+ ../include/endianness.h ../include/network_interface.h \
+ ../include/packet_sender.h ../include/network_interface.h \
+ ../include/cxxstd.h
 
 ../include/utils.h:
 
 ../include/macros.h:
 
 ../include/ip_address.h:
+
+../include/cxxstd.h:
 
 ../include/ipv6_address.h:
 
@@ -1233,8 +1284,6 @@
 ../include/constants.h:
 
 ../include/pdu.h:
-
-../include/cxxstd.h:
 
 ../include/exceptions.h:
 
@@ -2036,9 +2085,12 @@ src/ethernetII.o: src/ethernetII.cpp ../include/ethernetII.h \
 ../include/pdu_option.h:
 
 ../include/ip.h:
-src/hwaddress.o: src/hwaddress.cpp ../include/hw_address.h
+src/hwaddress.o: src/hwaddress.cpp ../include/hw_address.h \
+ ../include/cxxstd.h
 
 ../include/hw_address.h:
+
+../include/cxxstd.h:
 src/icmp.o: src/icmp.cpp ../include/icmp.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/utils.h ../include/ip_address.h \
@@ -2152,12 +2204,14 @@ src/ip.o: src/ip.cpp ../include/ip.h ../include/pdu.h ../include/macros.h \
 
 ../include/constants.h:
 src/ipaddress.o: src/ipaddress.cpp ../include/ip_address.h \
- ../include/utils.h ../include/macros.h ../include/ip_address.h \
- ../include/ipv6_address.h ../include/hw_address.h ../include/internals.h \
- ../include/constants.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h
+ ../include/cxxstd.h ../include/utils.h ../include/macros.h \
+ ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/hw_address.h ../include/internals.h ../include/constants.h \
+ ../include/pdu.h ../include/exceptions.h
 
 ../include/ip_address.h:
+
+../include/cxxstd.h:
 
 ../include/utils.h:
 
@@ -2174,8 +2228,6 @@ src/ipaddress.o: src/ipaddress.cpp ../include/ip_address.h \
 ../include/constants.h:
 
 ../include/pdu.h:
-
-../include/cxxstd.h:
 
 ../include/exceptions.h:
 src/ipv6.o: src/ipv6.cpp ../include/ipv6.h ../include/macros.h \
@@ -2224,12 +2276,14 @@ src/ipv6.o: src/ipv6.cpp ../include/ipv6.h ../include/macros.h \
 
 ../include/constants.h:
 src/ipv6address.o: src/ipv6address.cpp ../include/ipv6_address.h \
- ../include/utils.h ../include/macros.h ../include/ip_address.h \
- ../include/ipv6_address.h ../include/hw_address.h ../include/internals.h \
- ../include/constants.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h
+ ../include/cxxstd.h ../include/utils.h ../include/macros.h \
+ ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/hw_address.h ../include/internals.h ../include/constants.h \
+ ../include/pdu.h ../include/exceptions.h
 
 ../include/ipv6_address.h:
+
+../include/cxxstd.h:
 
 ../include/utils.h:
 
@@ -2246,8 +2300,6 @@ src/ipv6address.o: src/ipv6address.cpp ../include/ipv6_address.h \
 ../include/constants.h:
 
 ../include/pdu.h:
-
-../include/cxxstd.h:
 
 ../include/exceptions.h:
 src/llc.o: src/llc.cpp ../include/llc.h ../include/macros.h \
@@ -2306,14 +2358,16 @@ src/matches_response.o: src/matches_response.cpp ../include/ethernetII.h \
 ../include/ipv6_address.h:
 src/network_interface.o: src/network_interface.cpp \
  ../include/network_interface.h ../include/hw_address.h \
- ../include/ip_address.h ../include/utils.h ../include/macros.h \
- ../include/ipv6_address.h ../include/internals.h ../include/constants.h \
- ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/cxxstd.h ../include/ip_address.h ../include/utils.h \
+ ../include/macros.h ../include/ipv6_address.h ../include/internals.h \
+ ../include/constants.h ../include/pdu.h ../include/exceptions.h \
  ../include/macros.h
 
 ../include/network_interface.h:
 
 ../include/hw_address.h:
+
+../include/cxxstd.h:
 
 ../include/ip_address.h:
 
@@ -2328,8 +2382,6 @@ src/network_interface.o: src/network_interface.cpp \
 ../include/constants.h:
 
 ../include/pdu.h:
-
-../include/cxxstd.h:
 
 ../include/exceptions.h:
 
@@ -2587,8 +2639,9 @@ src/stp.o: src/stp.cpp ../include/stp.h ../include/pdu.h \
 src/tcp.o: src/tcp.cpp ../include/tcp.h ../include/pdu.h \
  ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/utils.h ../include/ip_address.h ../include/ipv6_address.h \
- ../include/hw_address.h ../include/internals.h ../include/constants.h
+ ../include/ip.h ../include/ip_address.h ../include/utils.h \
+ ../include/ipv6_address.h ../include/hw_address.h ../include/internals.h \
+ ../include/constants.h
 
 ../include/tcp.h:
 
@@ -2606,9 +2659,11 @@ src/tcp.o: src/tcp.cpp ../include/tcp.h ../include/pdu.h \
 
 ../include/pdu_option.h:
 
-../include/utils.h:
+../include/ip.h:
 
 ../include/ip_address.h:
+
+../include/utils.h:
 
 ../include/ipv6_address.h:
 
@@ -2623,10 +2678,10 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
  ../include/endianness.h ../include/hw_address.h ../include/radiotap.h \
  ../include/packet.h ../include/timestamp.h ../include/loopback.h \
  ../include/dot11.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h ../include/sll.h \
- ../include/tcp.h ../include/utils.h ../include/ipv6_address.h \
- ../include/internals.h ../include/constants.h ../include/ip.h \
- ../include/tcp.h ../include/utils.h
+ ../include/network_interface.h ../include/ip_address.h ../include/dot3.h \
+ ../include/sll.h ../include/tcp.h ../include/utils.h \
+ ../include/ipv6_address.h ../include/internals.h ../include/constants.h \
+ ../include/ip.h ../include/tcp.h ../include/utils.h
 
 ../include/tcp_stream.h:
 
@@ -2664,6 +2719,8 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
 
 ../include/ip_address.h:
 
+../include/dot3.h:
+
 ../include/sll.h:
 
 ../include/tcp.h:
@@ -2683,7 +2740,8 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
 ../include/utils.h:
 src/udp.o: src/udp.cpp ../include/udp.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/endianness.h ../include/pdu.h
+ ../include/endianness.h ../include/ip.h ../include/small_uint.h \
+ ../include/ip_address.h ../include/pdu_option.h
 
 ../include/udp.h:
 
@@ -2697,19 +2755,26 @@ src/udp.o: src/udp.cpp ../include/udp.h ../include/macros.h \
 
 ../include/endianness.h:
 
-../include/pdu.h:
+../include/ip.h:
+
+../include/small_uint.h:
+
+../include/ip_address.h:
+
+../include/pdu_option.h:
 src/utils.o: src/utils.cpp ../include/utils.h ../include/macros.h \
- ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/ip_address.h ../include/cxxstd.h ../include/ipv6_address.h \
  ../include/hw_address.h ../include/internals.h ../include/constants.h \
- ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/endianness.h ../include/ip_address.h \
- ../include/ipv6_address.h
+ ../include/pdu.h ../include/exceptions.h ../include/endianness.h \
+ ../include/ip_address.h ../include/ipv6_address.h
 
 ../include/utils.h:
 
 ../include/macros.h:
 
 ../include/ip_address.h:
+
+../include/cxxstd.h:
 
 ../include/ipv6_address.h:
 
@@ -2720,8 +2785,6 @@ src/utils.o: src/utils.cpp ../include/utils.h ../include/macros.h \
 ../include/constants.h:
 
 ../include/pdu.h:
-
-../include/cxxstd.h:
 
 ../include/exceptions.h:
 
@@ -2731,48 +2794,101 @@ src/utils.o: src/utils.cpp ../include/utils.h ../include/macros.h \
 
 ../include/ipv6_address.h:
 src/wep_decrypt.o: src/wep_decrypt.cpp ../include/crypto.h \
- ../include/dot11.h ../include/macros.h ../include/pdu.h \
- ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- ../include/utils.h ../include/ipv6_address.h ../include/internals.h \
- ../include/constants.h ../include/snap.h ../include/rawpdu.h \
- ../include/arp.h
+ ../include/utils.h ../include/macros.h ../include/ip_address.h \
+ ../include/cxxstd.h ../include/ipv6_address.h ../include/hw_address.h \
+ ../include/internals.h ../include/constants.h ../include/pdu.h \
+ ../include/exceptions.h ../include/snap.h ../include/endianness.h \
+ ../include/small_uint.h ../include/rawpdu.h \
+ ../include/handshake_capturer.h ../include/eapol.h ../include/config.h \
+ ../include/arp.h ../include/dot11.h ../include/pdu_option.h \
+ ../include/network_interface.h
 
 ../include/crypto.h:
 
-../include/dot11.h:
+../include/utils.h:
 
 ../include/macros.h:
 
-../include/pdu.h:
+../include/ip_address.h:
 
 ../include/cxxstd.h:
 
-../include/exceptions.h:
-
-../include/endianness.h:
+../include/ipv6_address.h:
 
 ../include/hw_address.h:
-
-../include/small_uint.h:
-
-../include/pdu_option.h:
-
-../include/network_interface.h:
-
-../include/ip_address.h:
-
-../include/utils.h:
-
-../include/ipv6_address.h:
 
 ../include/internals.h:
 
 ../include/constants.h:
 
+../include/pdu.h:
+
+../include/exceptions.h:
+
 ../include/snap.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
 
 ../include/rawpdu.h:
 
+../include/handshake_capturer.h:
+
+../include/eapol.h:
+
+../include/config.h:
+
 ../include/arp.h:
+
+../include/dot11.h:
+
+../include/pdu_option.h:
+
+../include/network_interface.h:
+src/wpa2_decrypt.o: src/wpa2_decrypt.cpp ../include/crypto.h \
+ ../include/utils.h ../include/macros.h ../include/ip_address.h \
+ ../include/cxxstd.h ../include/ipv6_address.h ../include/hw_address.h \
+ ../include/internals.h ../include/constants.h ../include/pdu.h \
+ ../include/exceptions.h ../include/snap.h ../include/endianness.h \
+ ../include/small_uint.h ../include/rawpdu.h \
+ ../include/handshake_capturer.h ../include/eapol.h ../include/config.h \
+ ../include/radiotap.h
+
+../include/crypto.h:
+
+../include/utils.h:
+
+../include/macros.h:
+
+../include/ip_address.h:
+
+../include/cxxstd.h:
+
+../include/ipv6_address.h:
+
+../include/hw_address.h:
+
+../include/internals.h:
+
+../include/constants.h:
+
+../include/pdu.h:
+
+../include/exceptions.h:
+
+../include/snap.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
+
+../include/rawpdu.h:
+
+../include/handshake_capturer.h:
+
+../include/eapol.h:
+
+../include/config.h:
+
+../include/radiotap.h:

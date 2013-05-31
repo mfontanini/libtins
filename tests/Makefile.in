@@ -1,6 +1,6 @@
 CXX=@CXX@
 CFLAGS=-c -Wall @CFLAGS@ -DTINS_VERSION=@PACKAGE_VERSION@
-LDFLAGS=-lpcap -lgtest -lpthread
+LDFLAGS=-lpcap -lgtest -lpthread -lcrypto
 SOURCES=@SOURCE_FILES@
 
 OBJECTS=$(SOURCES:.cpp=.o)
