@@ -11,7 +11,7 @@ AC_ARG_ENABLE(
     [CFLAGS="$CFLAGS -std=c++0x"]
 )
 
-SOURCE_FILES=$(ls ../src/*cpp src/*cpp src/dot11/*cpp | tr '\n' ' ')
+SOURCE_FILES=$(ls ../src/*cpp ../src/dot11/*cpp src/*cpp src/dot11/*cpp | tr '\n' ' ')
 
 AC_CHECK_HEADERS([pcap.h gtest/gtest.h])
 AC_CHECK_LIB(pcap, pcap_loop, [], [AC_MSG_ERROR([pcap library is needed!])])

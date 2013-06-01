@@ -61,7 +61,7 @@
 // PDUs required by PacketSender::send(PDU&, NetworkInterface)
 #include "ethernetII.h"
 #include "radiotap.h"
-#include "dot11.h"
+#include "dot11/dot11_base.h"
 #include "radiotap.h"
 #include "ieee802_3.h"
 #include "internals.h"

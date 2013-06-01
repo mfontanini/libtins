@@ -32,7 +32,7 @@
 #include "ethernetII.h"
 #include "ieee802_3.h"
 #include "radiotap.h"
-#include "dot11.h"
+#include "dot11/dot11_base.h"
 #include "ipv6.h"
 #include "arp.h"
 #include "eapol.h"

@@ -1,9 +1,6 @@
 #include <gtest/gtest.h>
-#include <algorithm>
-#include <memory>
-#include <stdint.h>
-#include "dot11.h"
-#include "tests/dot11.h"
+#include "dot11/dot11_assoc.h"
+#include "tests/dot11_mgmt.h"
 
 
 using namespace std;
@@ -70,12 +67,12 @@ TEST_F(Dot11DisassocTest, ReasonCode) {
 
 TEST_F(Dot11DisassocTest, ClonePDU) {
     Dot11Disassoc dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11Disassoc> dot2(dot1.clone());
+    Internals::smart_ptr<Dot11Disassoc>::type dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 
 TEST_F(Dot11DisassocTest, FromBytes) {
-    std::auto_ptr<PDU> dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
+    Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get());
     const Dot11Disassoc *inner = dot11->find_pdu<Dot11Disassoc>();
     ASSERT_TRUE(inner);

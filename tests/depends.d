@@ -64,8 +64,11 @@
  ../include/constants.h ../include/pdu.h ../include/exceptions.h \
  ../include/snap.h ../include/endianness.h ../include/small_uint.h \
  ../include/rawpdu.h ../include/handshake_capturer.h ../include/eapol.h \
- ../include/config.h ../include/dot11.h ../include/pdu_option.h \
- ../include/network_interface.h
+ ../include/config.h ../include/dot11/dot11_data.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h ../include/dot11/dot11_beacon.h \
+ ../include/dot11/dot11_mgmt.h
 
 ../include/crypto.h:
 
@@ -103,11 +106,27 @@
 
 ../include/config.h:
 
-../include/dot11.h:
+../include/dot11/dot11_data.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
 
 ../include/pdu_option.h:
 
-../include/network_interface.h:
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
+
+../include/dot11/dot11_beacon.h:
+
+../include/dot11/dot11_mgmt.h:
 ../src/dhcp.o: ../src/dhcp.cpp ../include/endianness.h \
  ../include/macros.h ../include/dhcp.h ../include/bootp.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
@@ -203,47 +222,303 @@
 ../include/endianness.h:
 
 ../include/exceptions.h:
-../src/dot11.o: ../src/dot11.cpp ../include/macros.h \
- ../include/exceptions.h ../include/dot11.h ../include/macros.h \
- ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/endianness.h ../include/hw_address.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/network_interface.h \
- ../include/ip_address.h ../include/rawpdu.h ../include/rsn_information.h \
- ../include/packet_sender.h ../include/snap.h
+../src/dot11/dot11.o: ../src/dot11/dot11.cpp ../include/dot11/dot11.h \
+ ../include/pdu.h ../include/macros.h ../include/cxxstd.h \
+ ../include/exceptions.h ../include/pdu_option.h ../include/small_uint.h \
+ ../include/hw_address.h ../include/endianness.h ../include/cxxstd.h \
+ ../include/macros.h ../include/dot11/dot11_data.h ../include/dot11.h \
+ ../include/dot11/dot11.h ../include/dot11/dot11_data.h \
+ ../include/dot11/dot11_mgmt.h ../include/dot11/dot11_beacon.h \
+ ../include/dot11/dot11_mgmt.h ../include/dot11/dot11_assoc.h \
+ ../include/dot11/dot11_auth.h ../include/dot11/dot11_probe.h \
+ ../include/dot11/dot11_control.h ../include/packet_sender.h \
+ ../include/network_interface.h ../include/hw_address.h \
+ ../include/ip_address.h
 
-../include/macros.h:
-
-../include/exceptions.h:
-
-../include/dot11.h:
-
-../include/macros.h:
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
 
-../include/rawpdu.h:
+../include/macros.h:
 
-../include/rsn_information.h:
+../include/dot11/dot11_data.h:
+
+../include/dot11.h:
+
+../include/dot11/dot11.h:
+
+../include/dot11/dot11_data.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11_beacon.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11_assoc.h:
+
+../include/dot11/dot11_auth.h:
+
+../include/dot11/dot11_probe.h:
+
+../include/dot11/dot11_control.h:
 
 ../include/packet_sender.h:
 
+../include/network_interface.h:
+
+../include/hw_address.h:
+
+../include/ip_address.h:
+../src/dot11/dot11_assoc.o: ../src/dot11/dot11_assoc.cpp \
+ ../include/dot11/dot11_assoc.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h
+
+../include/dot11/dot11_assoc.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/cxxstd.h:
+
+../include/exceptions.h:
+
+../include/pdu_option.h:
+
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
+../src/dot11/dot11_auth.o: ../src/dot11/dot11_auth.cpp \
+ ../include/dot11/dot11_auth.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h
+
+../include/dot11/dot11_auth.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/cxxstd.h:
+
+../include/exceptions.h:
+
+../include/pdu_option.h:
+
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
+../src/dot11/dot11_beacon.o: ../src/dot11/dot11_beacon.cpp \
+ ../include/dot11/dot11_beacon.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h
+
+../include/dot11/dot11_beacon.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/cxxstd.h:
+
+../include/exceptions.h:
+
+../include/pdu_option.h:
+
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
+../src/dot11/dot11_control.o: ../src/dot11/dot11_control.cpp \
+ ../include/dot11/dot11_control.h ../include/dot11/dot11.h \
+ ../include/pdu.h ../include/macros.h ../include/cxxstd.h \
+ ../include/exceptions.h ../include/pdu_option.h ../include/small_uint.h \
+ ../include/hw_address.h ../include/endianness.h ../include/cxxstd.h \
+ ../include/macros.h
+
+../include/dot11/dot11_control.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/cxxstd.h:
+
+../include/exceptions.h:
+
+../include/pdu_option.h:
+
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
+../src/dot11/dot11_data.o: ../src/dot11/dot11_data.cpp \
+ ../include/dot11/dot11_data.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/rawpdu.h ../include/pdu.h ../include/snap.h \
+ ../include/endianness.h ../include/small_uint.h
+
+../include/dot11/dot11_data.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/cxxstd.h:
+
+../include/exceptions.h:
+
+../include/pdu_option.h:
+
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
+
+../include/rawpdu.h:
+
+../include/pdu.h:
+
 ../include/snap.h:
+
+../include/endianness.h:
+
+../include/small_uint.h:
+../src/dot11/dot11_mgmt.o: ../src/dot11/dot11_mgmt.cpp \
+ ../include/dot11/dot11_mgmt.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/rsn_information.h ../include/endianness.h
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/cxxstd.h:
+
+../include/exceptions.h:
+
+../include/pdu_option.h:
+
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
+
+../include/rsn_information.h:
+
+../include/endianness.h:
+../src/dot11/dot11_probe.o: ../src/dot11/dot11_probe.cpp \
+ ../include/dot11/dot11_probe.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h
+
+../include/dot11/dot11_probe.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/cxxstd.h:
+
+../include/exceptions.h:
+
+../include/pdu_option.h:
+
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
 ../src/dot1q.o: ../src/dot1q.cpp ../include/dot1q.h ../include/pdu.h \
  ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/small_uint.h ../include/internals.h \
@@ -301,9 +576,7 @@
 ../include/exceptions.h:
 ../src/eapol.o: ../src/eapol.cpp ../include/eapol.h ../include/pdu.h \
  ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/small_uint.h ../include/endianness.h ../include/dot11.h \
- ../include/hw_address.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
+ ../include/small_uint.h ../include/endianness.h \
  ../include/rsn_information.h ../include/exceptions.h
 
 ../include/eapol.h:
@@ -319,16 +592,6 @@
 ../include/small_uint.h:
 
 ../include/endianness.h:
-
-../include/dot11.h:
-
-../include/hw_address.h:
-
-../include/pdu_option.h:
-
-../include/network_interface.h:
-
-../include/ip_address.h:
 
 ../include/rsn_information.h:
 
@@ -390,8 +653,10 @@
  ../include/handshake_capturer.h ../include/hw_address.h \
  ../include/cxxstd.h ../include/eapol.h ../include/pdu.h \
  ../include/macros.h ../include/exceptions.h ../include/small_uint.h \
- ../include/endianness.h ../include/dot11.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h
+ ../include/endianness.h ../include/dot11/dot11_data.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h
 
 ../include/handshake_capturer.h:
 
@@ -411,13 +676,23 @@
 
 ../include/endianness.h:
 
-../include/dot11.h:
+../include/dot11/dot11_data.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
 
 ../include/pdu_option.h:
 
-../include/network_interface.h:
+../include/small_uint.h:
 
-../include/ip_address.h:
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
 ../src/icmp.o: ../src/icmp.cpp ../include/icmp.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/rawpdu.h ../include/utils.h \
@@ -501,7 +776,9 @@
  ../include/small_uint.h ../include/endianness.h ../include/ip_address.h \
  ../include/pdu_option.h ../include/ethernetII.h ../include/hw_address.h \
  ../include/ieee802_3.h ../include/dot3.h ../include/radiotap.h \
- ../include/dot11.h ../include/network_interface.h ../include/ipv6.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h ../include/ipv6.h \
  ../include/ipv6_address.h ../include/arp.h ../include/eapol.h \
  ../include/rawpdu.h ../include/dot1q.h ../include/pppoe.h
 
@@ -537,9 +814,21 @@
 
 ../include/radiotap.h:
 
-../include/dot11.h:
+../include/dot11/dot11.h:
 
-../include/network_interface.h:
+../include/pdu.h:
+
+../include/pdu_option.h:
+
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
 
 ../include/ipv6.h:
 
@@ -782,8 +1071,9 @@
  ../include/macros.h ../include/pdu.h ../include/exceptions.h \
  ../include/macros.h ../include/network_interface.h \
  ../include/ethernetII.h ../include/pdu.h ../include/endianness.h \
- ../include/radiotap.h ../include/dot11.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/ieee802_3.h ../include/dot3.h \
+ ../include/radiotap.h ../include/dot11/dot11.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/ieee802_3.h ../include/dot3.h \
  ../include/internals.h ../include/constants.h
 
 ../include/packet_sender.h:
@@ -814,11 +1104,17 @@
 
 ../include/radiotap.h:
 
-../include/dot11.h:
+../include/dot11/dot11.h:
+
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
 
 ../include/ieee802_3.h:
 
@@ -906,11 +1202,12 @@
 ../src/radiotap.o: ../src/radiotap.cpp ../include/macros.h \
  ../include/radiotap.h ../include/macros.h ../include/pdu.h \
  ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/dot11.h ../include/hw_address.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/network_interface.h \
- ../include/ip_address.h ../include/utils.h ../include/ipv6_address.h \
- ../include/internals.h ../include/constants.h ../include/packet_sender.h \
- ../include/exceptions.h
+ ../include/dot11/dot11.h ../include/pdu.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/utils.h ../include/ip_address.h \
+ ../include/ipv6_address.h ../include/hw_address.h ../include/internals.h \
+ ../include/constants.h ../include/packet_sender.h \
+ ../include/network_interface.h ../include/exceptions.h
 
 ../include/macros.h:
 
@@ -926,27 +1223,35 @@
 
 ../include/endianness.h:
 
-../include/dot11.h:
+../include/dot11/dot11.h:
 
-../include/hw_address.h:
-
-../include/small_uint.h:
+../include/pdu.h:
 
 ../include/pdu_option.h:
 
-../include/network_interface.h:
+../include/small_uint.h:
 
-../include/ip_address.h:
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
 
 ../include/utils.h:
 
+../include/ip_address.h:
+
 ../include/ipv6_address.h:
+
+../include/hw_address.h:
 
 ../include/internals.h:
 
 ../include/constants.h:
 
 ../include/packet_sender.h:
+
+../include/network_interface.h:
 
 ../include/exceptions.h:
 ../src/rawpdu.o: ../src/rawpdu.cpp ../include/rawpdu.h ../include/pdu.h \
@@ -1040,10 +1345,10 @@
  ../include/pdu.h ../include/macros.h ../include/cxxstd.h \
  ../include/exceptions.h ../include/ethernetII.h ../include/endianness.h \
  ../include/hw_address.h ../include/radiotap.h ../include/packet.h \
- ../include/timestamp.h ../include/loopback.h ../include/dot11.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h ../include/dot3.h \
- ../include/sll.h
+ ../include/timestamp.h ../include/loopback.h ../include/dot11/dot11.h \
+ ../include/pdu.h ../include/pdu_option.h ../include/small_uint.h \
+ ../include/hw_address.h ../include/endianness.h ../include/cxxstd.h \
+ ../include/macros.h ../include/dot3.h ../include/sll.h
 
 ../include/sniffer.h:
 
@@ -1069,15 +1374,21 @@
 
 ../include/loopback.h:
 
-../include/dot11.h:
+../include/dot11/dot11.h:
 
-../include/small_uint.h:
+../include/pdu.h:
 
 ../include/pdu_option.h:
 
-../include/network_interface.h:
+../include/small_uint.h:
 
-../include/ip_address.h:
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
 
 ../include/dot3.h:
 
@@ -1154,11 +1465,13 @@
  ../include/exceptions.h ../include/tcp_stream.h ../include/sniffer.h \
  ../include/ethernetII.h ../include/endianness.h ../include/hw_address.h \
  ../include/radiotap.h ../include/packet.h ../include/timestamp.h \
- ../include/loopback.h ../include/dot11.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/network_interface.h \
- ../include/ip_address.h ../include/dot3.h ../include/sll.h \
- ../include/tcp.h ../include/utils.h ../include/ipv6_address.h \
- ../include/internals.h ../include/constants.h ../include/ip.h
+ ../include/loopback.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/dot3.h ../include/sll.h ../include/tcp.h \
+ ../include/small_uint.h ../include/pdu_option.h ../include/utils.h \
+ ../include/ip_address.h ../include/ipv6_address.h ../include/internals.h \
+ ../include/constants.h ../include/ip.h
 
 ../include/rawpdu.h:
 
@@ -1188,15 +1501,21 @@
 
 ../include/loopback.h:
 
-../include/dot11.h:
+../include/dot11/dot11.h:
 
-../include/small_uint.h:
+../include/pdu.h:
 
 ../include/pdu_option.h:
 
-../include/network_interface.h:
+../include/small_uint.h:
 
-../include/ip_address.h:
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
 
 ../include/dot3.h:
 
@@ -1204,7 +1523,13 @@
 
 ../include/tcp.h:
 
+../include/small_uint.h:
+
+../include/pdu_option.h:
+
 ../include/utils.h:
+
+../include/ip_address.h:
 
 ../include/ipv6_address.h:
 
@@ -1431,593 +1756,659 @@ src/dns.o: src/dns.cpp ../include/dns.h ../include/macros.h \
 ../include/internals.h:
 
 ../include/constants.h:
-src/dot11/ack.o: src/dot11/ack.cpp ../include/dot11.h ../include/macros.h \
- ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/endianness.h ../include/hw_address.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/network_interface.h \
- ../include/ip_address.h include/tests/dot11.h include/tests/dot11.h
+src/dot11/ack.o: src/dot11/ack.cpp ../include/dot11/dot11_control.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11.h
 
-../include/dot11.h:
+../include/dot11/dot11_control.h:
 
-../include/macros.h:
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/assoc_request.o: src/dot11/assoc_request.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+include/tests/dot11.h:
+src/dot11/assoc_request.o: src/dot11/assoc_request.cpp \
+ ../include/dot11/dot11_assoc.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
+
+../include/dot11/dot11_assoc.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
 
-include/tests/dot11.h:
+../include/macros.h:
+
+include/tests/dot11_mgmt.h:
 
 include/tests/dot11.h:
 src/dot11/assoc_response.o: src/dot11/assoc_response.cpp \
- ../include/dot11.h ../include/macros.h ../include/pdu.h \
- ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
+ ../include/dot11/dot11_assoc.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
 
-../include/dot11.h:
+../include/dot11/dot11_assoc.h:
 
-../include/macros.h:
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
 
-include/tests/dot11.h:
+../include/macros.h:
+
+include/tests/dot11_mgmt.h:
 
 include/tests/dot11.h:
 src/dot11/authentication.o: src/dot11/authentication.cpp \
- ../include/dot11.h ../include/macros.h ../include/pdu.h \
- ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
+ ../include/dot11/dot11_auth.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
 
-../include/dot11.h:
+../include/dot11/dot11_auth.h:
 
-../include/macros.h:
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/beacon.o: src/dot11/beacon.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- ../include/rsn_information.h include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+include/tests/dot11_mgmt.h:
+
+include/tests/dot11.h:
+src/dot11/beacon.o: src/dot11/beacon.cpp ../include/dot11/dot11_beacon.h \
+ ../include/dot11/dot11_mgmt.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/rsn_information.h ../include/endianness.h \
+ include/tests/dot11_mgmt.h include/tests/dot11.h
+
+../include/dot11/dot11_beacon.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
+
+../include/macros.h:
 
 ../include/rsn_information.h:
 
-include/tests/dot11.h:
+../include/endianness.h:
+
+include/tests/dot11_mgmt.h:
 
 include/tests/dot11.h:
 src/dot11/block_ack_request.o: src/dot11/block_ack_request.cpp \
- ../include/dot11.h ../include/macros.h ../include/pdu.h \
- ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
+ ../include/dot11/dot11_control.h ../include/dot11/dot11.h \
+ ../include/pdu.h ../include/macros.h ../include/cxxstd.h \
+ ../include/exceptions.h ../include/pdu_option.h ../include/small_uint.h \
+ ../include/hw_address.h ../include/endianness.h ../include/cxxstd.h \
+ ../include/macros.h include/tests/dot11.h
 
-../include/dot11.h:
+../include/dot11/dot11_control.h:
 
-../include/macros.h:
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/cfend.o: src/dot11/cfend.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+include/tests/dot11.h:
+src/dot11/cfend.o: src/dot11/cfend.cpp include/tests/dot11_control.h \
+ include/tests/dot11.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/dot11/dot11_control.h
+
+include/tests/dot11_control.h:
+
+include/tests/dot11.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/cfendack.o: src/dot11/cfendack.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+../include/dot11/dot11_control.h:
+src/dot11/cfendack.o: src/dot11/cfendack.cpp \
+ include/tests/dot11_control.h include/tests/dot11.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h ../include/dot11/dot11_control.h
+
+include/tests/dot11_control.h:
+
+include/tests/dot11.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/data.o: src/dot11/data.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- ../include/cxxstd.h include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+../include/dot11/dot11_control.h:
+src/dot11/data.o: src/dot11/data.cpp include/tests/dot11_data.h \
+ include/tests/dot11.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/dot11/dot11_data.h
+
+include/tests/dot11_data.h:
+
+include/tests/dot11.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
-
-../include/ip_address.h:
+../include/endianness.h:
 
 ../include/cxxstd.h:
 
-include/tests/dot11.h:
+../include/macros.h:
 
-include/tests/dot11.h:
+../include/dot11/dot11_data.h:
 src/dot11/deauthentication.o: src/dot11/deauthentication.cpp \
- ../include/dot11.h ../include/macros.h ../include/pdu.h \
- ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
+ ../include/dot11/dot11_auth.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
 
-../include/dot11.h:
+../include/dot11/dot11_auth.h:
 
-../include/macros.h:
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/disassoc.o: src/dot11/disassoc.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+include/tests/dot11_mgmt.h:
+
+include/tests/dot11.h:
+src/dot11/disassoc.o: src/dot11/disassoc.cpp \
+ ../include/dot11/dot11_assoc.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
+
+../include/dot11/dot11_assoc.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/dot11.o: src/dot11/dot11.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h ../include/utils.h \
- ../include/ipv6_address.h ../include/internals.h ../include/constants.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+include/tests/dot11_mgmt.h:
+
+include/tests/dot11.h:
+src/dot11/dot11.o: src/dot11/dot11.cpp include/tests/dot11.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h ../include/utils.h \
+ ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/hw_address.h ../include/internals.h ../include/constants.h \
+ ../include/pdu.h
+
+include/tests/dot11.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
 
-include/tests/dot11.h:
-
-include/tests/dot11.h:
+../include/macros.h:
 
 ../include/utils.h:
 
+../include/ip_address.h:
+
 ../include/ipv6_address.h:
+
+../include/hw_address.h:
 
 ../include/internals.h:
 
 ../include/constants.h:
-src/dot11/probe_request.o: src/dot11/probe_request.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
-
-../include/macros.h:
 
 ../include/pdu.h:
+src/dot11/probe_request.o: src/dot11/probe_request.cpp \
+ ../include/dot11/dot11_probe.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
+
+../include/dot11/dot11_probe.h:
+
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
 
-include/tests/dot11.h:
+../include/macros.h:
+
+include/tests/dot11_mgmt.h:
 
 include/tests/dot11.h:
 src/dot11/probe_response.o: src/dot11/probe_response.cpp \
- ../include/dot11.h ../include/macros.h ../include/pdu.h \
- ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
+ ../include/dot11/dot11_probe.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
 
-../include/dot11.h:
+../include/dot11/dot11_probe.h:
 
-../include/macros.h:
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/pspoll.o: src/dot11/pspoll.cpp ../include/dot11.h \
- ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/hw_address.h \
- ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+include/tests/dot11_mgmt.h:
+
+include/tests/dot11.h:
+src/dot11/pspoll.o: src/dot11/pspoll.cpp include/tests/dot11_control.h \
+ include/tests/dot11.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/dot11/dot11_control.h
+
+include/tests/dot11_control.h:
+
+include/tests/dot11.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
 
-include/tests/dot11.h:
+../include/macros.h:
 
-include/tests/dot11.h:
+../include/dot11/dot11_control.h:
 src/dot11/reassoc_request.o: src/dot11/reassoc_request.cpp \
- ../include/dot11.h ../include/macros.h ../include/pdu.h \
- ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
+ ../include/dot11/dot11_assoc.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
 
-../include/dot11.h:
+../include/dot11/dot11_assoc.h:
 
-../include/macros.h:
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
 
-include/tests/dot11.h:
+../include/macros.h:
+
+include/tests/dot11_mgmt.h:
 
 include/tests/dot11.h:
 src/dot11/reassoc_response.o: src/dot11/reassoc_response.cpp \
- ../include/dot11.h ../include/macros.h ../include/pdu.h \
- ../include/cxxstd.h ../include/exceptions.h ../include/endianness.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- include/tests/dot11.h include/tests/dot11.h
+ ../include/dot11/dot11_assoc.h ../include/dot11/dot11_mgmt.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/macros.h \
+ ../include/cxxstd.h ../include/exceptions.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h include/tests/dot11_mgmt.h \
+ include/tests/dot11.h
 
-../include/dot11.h:
+../include/dot11/dot11_assoc.h:
 
-../include/macros.h:
+../include/dot11/dot11_mgmt.h:
+
+../include/dot11/dot11.h:
 
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
-
-include/tests/dot11.h:
-
-include/tests/dot11.h:
-src/dot11/rts.o: src/dot11/rts.cpp ../include/dot11.h ../include/macros.h \
- ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/endianness.h ../include/hw_address.h ../include/small_uint.h \
- ../include/pdu_option.h ../include/network_interface.h \
- ../include/ip_address.h include/tests/dot11.h include/tests/dot11.h
-
-../include/dot11.h:
+../include/cxxstd.h:
 
 ../include/macros.h:
 
+include/tests/dot11_mgmt.h:
+
+include/tests/dot11.h:
+src/dot11/rts.o: src/dot11/rts.cpp include/tests/dot11_control.h \
+ include/tests/dot11.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/dot11/dot11_control.h
+
+include/tests/dot11_control.h:
+
+include/tests/dot11.h:
+
+../include/dot11/dot11.h:
+
 ../include/pdu.h:
+
+../include/macros.h:
 
 ../include/cxxstd.h:
 
 ../include/exceptions.h:
 
-../include/endianness.h:
-
-../include/hw_address.h:
+../include/pdu_option.h:
 
 ../include/small_uint.h:
 
-../include/pdu_option.h:
+../include/hw_address.h:
 
-../include/network_interface.h:
+../include/endianness.h:
 
-../include/ip_address.h:
+../include/cxxstd.h:
 
-include/tests/dot11.h:
+../include/macros.h:
 
-include/tests/dot11.h:
+../include/dot11/dot11_control.h:
 src/dot1q.o: src/dot1q.cpp ../include/dot1q.h ../include/pdu.h \
  ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/small_uint.h ../include/arp.h \
@@ -2448,11 +2839,13 @@ src/pppoe.o: src/pppoe.cpp ../include/pppoe.h ../include/pdu.h \
 ../include/hw_address.h:
 src/radiotap.o: src/radiotap.cpp ../include/radiotap.h \
  ../include/macros.h ../include/pdu.h ../include/cxxstd.h \
- ../include/exceptions.h ../include/endianness.h ../include/dot11.h \
- ../include/hw_address.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h \
- ../include/utils.h ../include/ipv6_address.h ../include/internals.h \
- ../include/constants.h
+ ../include/exceptions.h ../include/endianness.h \
+ ../include/dot11/dot11_data.h ../include/dot11/dot11.h ../include/pdu.h \
+ ../include/pdu_option.h ../include/small_uint.h ../include/hw_address.h \
+ ../include/endianness.h ../include/cxxstd.h ../include/macros.h \
+ ../include/dot11/dot11_beacon.h ../include/dot11/dot11_mgmt.h \
+ ../include/utils.h ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/hw_address.h ../include/internals.h ../include/constants.h
 
 ../include/radiotap.h:
 
@@ -2466,21 +2859,35 @@ src/radiotap.o: src/radiotap.cpp ../include/radiotap.h \
 
 ../include/endianness.h:
 
-../include/dot11.h:
+../include/dot11/dot11_data.h:
 
-../include/hw_address.h:
+../include/dot11/dot11.h:
 
-../include/small_uint.h:
+../include/pdu.h:
 
 ../include/pdu_option.h:
 
-../include/network_interface.h:
+../include/small_uint.h:
 
-../include/ip_address.h:
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
+
+../include/dot11/dot11_beacon.h:
+
+../include/dot11/dot11_mgmt.h:
 
 ../include/utils.h:
 
+../include/ip_address.h:
+
 ../include/ipv6_address.h:
+
+../include/hw_address.h:
 
 ../include/internals.h:
 
@@ -2677,9 +3084,11 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
  ../include/cxxstd.h ../include/exceptions.h ../include/ethernetII.h \
  ../include/endianness.h ../include/hw_address.h ../include/radiotap.h \
  ../include/packet.h ../include/timestamp.h ../include/loopback.h \
- ../include/dot11.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/network_interface.h ../include/ip_address.h ../include/dot3.h \
- ../include/sll.h ../include/tcp.h ../include/utils.h \
+ ../include/dot11/dot11.h ../include/pdu.h ../include/pdu_option.h \
+ ../include/small_uint.h ../include/hw_address.h ../include/endianness.h \
+ ../include/cxxstd.h ../include/macros.h ../include/dot3.h \
+ ../include/sll.h ../include/tcp.h ../include/small_uint.h \
+ ../include/pdu_option.h ../include/utils.h ../include/ip_address.h \
  ../include/ipv6_address.h ../include/internals.h ../include/constants.h \
  ../include/ip.h ../include/tcp.h ../include/utils.h
 
@@ -2709,15 +3118,21 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
 
 ../include/loopback.h:
 
-../include/dot11.h:
+../include/dot11/dot11.h:
 
-../include/small_uint.h:
+../include/pdu.h:
 
 ../include/pdu_option.h:
 
-../include/network_interface.h:
+../include/small_uint.h:
 
-../include/ip_address.h:
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
 
 ../include/dot3.h:
 
@@ -2725,7 +3140,13 @@ src/tcp_stream.o: src/tcp_stream.cpp ../include/tcp_stream.h \
 
 ../include/tcp.h:
 
+../include/small_uint.h:
+
+../include/pdu_option.h:
+
 ../include/utils.h:
+
+../include/ip_address.h:
 
 ../include/ipv6_address.h:
 
@@ -2800,8 +3221,10 @@ src/wep_decrypt.o: src/wep_decrypt.cpp ../include/crypto.h \
  ../include/exceptions.h ../include/snap.h ../include/endianness.h \
  ../include/small_uint.h ../include/rawpdu.h \
  ../include/handshake_capturer.h ../include/eapol.h ../include/config.h \
- ../include/arp.h ../include/dot11.h ../include/pdu_option.h \
- ../include/network_interface.h
+ ../include/arp.h ../include/dot11/dot11_data.h ../include/dot11/dot11.h \
+ ../include/pdu.h ../include/pdu_option.h ../include/small_uint.h \
+ ../include/hw_address.h ../include/endianness.h ../include/cxxstd.h \
+ ../include/macros.h
 
 ../include/crypto.h:
 
@@ -2841,11 +3264,23 @@ src/wep_decrypt.o: src/wep_decrypt.cpp ../include/crypto.h \
 
 ../include/arp.h:
 
-../include/dot11.h:
+../include/dot11/dot11_data.h:
+
+../include/dot11/dot11.h:
+
+../include/pdu.h:
 
 ../include/pdu_option.h:
 
-../include/network_interface.h:
+../include/small_uint.h:
+
+../include/hw_address.h:
+
+../include/endianness.h:
+
+../include/cxxstd.h:
+
+../include/macros.h:
 src/wpa2_decrypt.o: src/wpa2_decrypt.cpp ../include/crypto.h \
  ../include/utils.h ../include/macros.h ../include/ip_address.h \
  ../include/cxxstd.h ../include/ipv6_address.h ../include/hw_address.h \
@@ -2853,7 +3288,7 @@ src/wpa2_decrypt.o: src/wpa2_decrypt.cpp ../include/crypto.h \
  ../include/exceptions.h ../include/snap.h ../include/endianness.h \
  ../include/small_uint.h ../include/rawpdu.h \
  ../include/handshake_capturer.h ../include/eapol.h ../include/config.h \
- ../include/radiotap.h
+ ../include/radiotap.h ../include/udp.h
 
 ../include/crypto.h:
 
@@ -2892,3 +3327,5 @@ src/wpa2_decrypt.o: src/wpa2_decrypt.cpp ../include/crypto.h \
 ../include/config.h:
 
 ../include/radiotap.h:
+
+../include/udp.h:

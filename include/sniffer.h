@@ -41,7 +41,7 @@
 #include "radiotap.h"
 #include "packet.h"
 #include "loopback.h"
-#include "dot11.h"
+#include "dot11/dot11_base.h"
 #include "dot3.h"
 #include "sll.h"
 #include "cxxstd.h"

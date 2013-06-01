@@ -1,9 +1,6 @@
 #include <gtest/gtest.h>
-#include <algorithm>
-#include <memory>
-#include <stdint.h>
-#include "dot11.h"
-#include "tests/dot11.h"
+#include "dot11/dot11_probe.h"
+#include "tests/dot11_mgmt.h"
 
 
 using namespace std;
@@ -60,12 +57,12 @@ TEST_F(Dot11ProbeRequestTest, CopyAssignmentOperator) {
 
 TEST_F(Dot11ProbeRequestTest, ClonePDU) {
     Dot11ProbeRequest dot1(expected_packet, sizeof(expected_packet));
-    std::auto_ptr<Dot11ProbeRequest> dot2(dot1.clone());
+    Internals::smart_ptr<Dot11ProbeRequest>::type dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 
 TEST_F(Dot11ProbeRequestTest, FromBytes) {
-    std::auto_ptr<PDU> dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
+    Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get());
     const Dot11ProbeRequest *inner = dot11->find_pdu<Dot11ProbeRequest>();
     ASSERT_TRUE(inner);

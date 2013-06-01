@@ -25,18 +25,55 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- */
+ */  
 
-#ifndef TINS_DOT_11
-#define TINS_DOT_11
-
-#include "dot11/dot11_base.h"
-#include "dot11/dot11_data.h"
-#include "dot11/dot11_mgmt.h"
+#include <cstring>
+#include <cassert>
 #include "dot11/dot11_beacon.h"
-#include "dot11/dot11_assoc.h"
-#include "dot11/dot11_auth.h"
-#include "dot11/dot11_probe.h"
-#include "dot11/dot11_control.h"
 
-#endif // TINS_DOT_11
+namespace Tins {
+ /* Dot11Beacon */
+
+Dot11Beacon::Dot11Beacon(const address_type &dst_hw_addr, 
+const address_type &src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
+{
+    subtype(Dot11::BEACON);
+    std::memset(&_body, 0, sizeof(_body));
+}
+
+Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) 
+{
+    uint32_t sz = management_frame_size();
+    buffer += sz;
+    total_sz -= sz;
+    if(total_sz < sizeof(_body))
+        throw malformed_packet();
+    std::memcpy(&_body, buffer, sizeof(_body));
+    buffer += sizeof(_body);
+    total_sz -= sizeof(_body);
+    parse_tagged_parameters(buffer, total_sz);
+}
+
+void Dot11Beacon::timestamp(uint64_t new_timestamp) {
+    this->_body.timestamp = Endian::host_to_le(new_timestamp);
+}
+
+void Dot11Beacon::interval(uint16_t new_interval) {
+    this->_body.interval = Endian::host_to_le(new_interval);
+}
+
+uint32_t Dot11Beacon::header_size() const {
+    return Dot11ManagementFrame::header_size() + sizeof(_body);
+}
+
+uint32_t Dot11Beacon::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
+    uint32_t sz = sizeof(_body);
+    #ifdef TINS_DEBUG
+    assert(sz <= total_sz);
+    #endif
+    std::memcpy(buffer, &this->_body, sz);
+    return sz;
+}
+} // namespace Tins

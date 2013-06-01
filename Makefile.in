@@ -55,11 +55,12 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 subdir = .
-DIST_COMMON = README $(am__configure_deps) $(libtins_include_HEADERS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/libtins.pc.in $(top_srcdir)/configure \
-	$(top_srcdir)/include/config.h.in AUTHORS INSTALL THANKS \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+DIST_COMMON = README $(am__configure_deps) $(libtins_HEADERS) \
+	$(libtins_dot11_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/libtins.pc.in \
+	$(top_srcdir)/configure $(top_srcdir)/include/config.h.in \
+	AUTHORS COPYING INSTALL THANKS TODO config.guess config.sub \
+	depcomp install-sh ltmain.sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_cxx_compile_stdcxx_11.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
@@ -101,21 +102,25 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
-	"$(DESTDIR)$(libtins_includedir)"
+	"$(DESTDIR)$(libtinsdir)" "$(DESTDIR)$(libtins_dot11dir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtins_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo \
 	src/handshake_capturer.lo src/stp.lo src/pppoe.lo \
 	src/crypto.lo src/dhcp.lo src/dhcpv6.lo src/dns.lo \
-	src/dns_record.lo src/dot11.lo src/dot3.lo src/dot1q.lo \
-	src/eapol.lo src/ethernetII.lo src/icmp.lo src/icmpv6.lo \
-	src/internals.lo src/ip.lo src/ip_address.lo src/ipv6.lo \
-	src/ipv6_address.lo src/llc.lo src/loopback.lo \
-	src/network_interface.lo src/packet_sender.lo \
-	src/packet_writer.lo src/pdu.lo src/radiotap.lo src/rawpdu.lo \
-	src/rsn_information.lo src/sll.lo src/snap.lo src/sniffer.lo \
-	src/tcp.lo src/tcp_stream.lo src/udp.lo src/utils.lo
+	src/dns_record.lo src/dot3.lo src/dot1q.lo src/eapol.lo \
+	src/ethernetII.lo src/icmp.lo src/icmpv6.lo src/internals.lo \
+	src/ip.lo src/ip_address.lo src/ipv6.lo src/ipv6_address.lo \
+	src/llc.lo src/loopback.lo src/network_interface.lo \
+	src/packet_sender.lo src/packet_writer.lo src/pdu.lo \
+	src/radiotap.lo src/rawpdu.lo src/rsn_information.lo \
+	src/sll.lo src/snap.lo src/sniffer.lo src/tcp.lo \
+	src/tcp_stream.lo src/udp.lo src/utils.lo \
+	src/dot11/dot11_base.lo src/dot11/dot11_data.lo \
+	src/dot11/dot11_mgmt.lo src/dot11/dot11_beacon.lo \
+	src/dot11/dot11_assoc.lo src/dot11/dot11_auth.lo \
+	src/dot11/dot11_probe.lo src/dot11/dot11_control.lo
 libtins_la_OBJECTS = $(am_libtins_la_OBJECTS)
 libtins_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -141,7 +146,7 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 DATA = $(pkgconfig_DATA)
-HEADERS = $(libtins_include_HEADERS)
+HEADERS = $(libtins_HEADERS) $(libtins_dot11_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -304,7 +309,6 @@ libtins_la_SOURCES = src/arp.cpp \
                     src/dhcpv6.cpp \
                     src/dns.cpp \
                     src/dns_record.cpp \
-                    src/dot11.cpp \
                     src/dot3.cpp \
                     src/dot1q.cpp \
                     src/eapol.cpp \
@@ -330,10 +334,18 @@ libtins_la_SOURCES = src/arp.cpp \
                     src/tcp.cpp \
                     src/tcp_stream.cpp \
                     src/udp.cpp \
-                    src/utils.cpp 
+                    src/utils.cpp \
+                    src/dot11/dot11_base.cpp \
+                    src/dot11/dot11_data.cpp \
+                    src/dot11/dot11_mgmt.cpp \
+                    src/dot11/dot11_beacon.cpp \
+                    src/dot11/dot11_assoc.cpp \
+                    src/dot11/dot11_auth.cpp \
+                    src/dot11/dot11_probe.cpp \
+                    src/dot11/dot11_control.cpp
 
-libtins_includedir = $(includedir)/tins
-libtins_include_HEADERS = include/internals.h \
+libtinsdir = $(includedir)/tins
+libtins_HEADERS = include/internals.h \
 							include/dhcpv6.h \
 							include/dot11.h \
 							include/dot1q.h \
@@ -386,6 +398,16 @@ libtins_include_HEADERS = include/internals.h \
 							include/exceptions.h \
 							include/config.h
 
+libtins_dot11_HEADERS = include/dot11/dot11_base.h \
+						include/dot11/dot11_beacon.h \
+						include/dot11/dot11_data.h \
+						include/dot11/dot11_mgmt.h \
+						include/dot11/dot11_assoc.h \
+						include/dot11/dot11_auth.h \
+						include/dot11/dot11_probe.h \
+						include/dot11/dot11_control.h
+
+libtins_dot11dir = $(includedir)/tins/dot11/
 all: all-am
 
 .SUFFIXES:
@@ -490,7 +512,6 @@ src/dhcp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dhcpv6.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dns.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dns_record.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
-src/dot11.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dot3.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dot1q.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/eapol.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -522,6 +543,28 @@ src/tcp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/tcp_stream.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/udp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/utils.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/dot11/$(am__dirstamp):
+	@$(MKDIR_P) src/dot11
+	@: > src/dot11/$(am__dirstamp)
+src/dot11/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) src/dot11/$(DEPDIR)
+	@: > src/dot11/$(DEPDIR)/$(am__dirstamp)
+src/dot11/dot11_base.lo: src/dot11/$(am__dirstamp) \
+	src/dot11/$(DEPDIR)/$(am__dirstamp)
+src/dot11/dot11_data.lo: src/dot11/$(am__dirstamp) \
+	src/dot11/$(DEPDIR)/$(am__dirstamp)
+src/dot11/dot11_mgmt.lo: src/dot11/$(am__dirstamp) \
+	src/dot11/$(DEPDIR)/$(am__dirstamp)
+src/dot11/dot11_beacon.lo: src/dot11/$(am__dirstamp) \
+	src/dot11/$(DEPDIR)/$(am__dirstamp)
+src/dot11/dot11_assoc.lo: src/dot11/$(am__dirstamp) \
+	src/dot11/$(DEPDIR)/$(am__dirstamp)
+src/dot11/dot11_auth.lo: src/dot11/$(am__dirstamp) \
+	src/dot11/$(DEPDIR)/$(am__dirstamp)
+src/dot11/dot11_probe.lo: src/dot11/$(am__dirstamp) \
+	src/dot11/$(DEPDIR)/$(am__dirstamp)
+src/dot11/dot11_control.lo: src/dot11/$(am__dirstamp) \
+	src/dot11/$(DEPDIR)/$(am__dirstamp)
 libtins.la: $(libtins_la_OBJECTS) $(libtins_la_DEPENDENCIES) $(EXTRA_libtins_la_DEPENDENCIES) 
 	$(libtins_la_LINK) -rpath $(libdir) $(libtins_la_OBJECTS) $(libtins_la_LIBADD) $(LIBS)
 
@@ -541,8 +584,22 @@ mostlyclean-compile:
 	-rm -f src/dns.lo
 	-rm -f src/dns_record.$(OBJEXT)
 	-rm -f src/dns_record.lo
-	-rm -f src/dot11.$(OBJEXT)
-	-rm -f src/dot11.lo
+	-rm -f src/dot11/dot11_assoc.$(OBJEXT)
+	-rm -f src/dot11/dot11_assoc.lo
+	-rm -f src/dot11/dot11_auth.$(OBJEXT)
+	-rm -f src/dot11/dot11_auth.lo
+	-rm -f src/dot11/dot11_base.$(OBJEXT)
+	-rm -f src/dot11/dot11_base.lo
+	-rm -f src/dot11/dot11_beacon.$(OBJEXT)
+	-rm -f src/dot11/dot11_beacon.lo
+	-rm -f src/dot11/dot11_control.$(OBJEXT)
+	-rm -f src/dot11/dot11_control.lo
+	-rm -f src/dot11/dot11_data.$(OBJEXT)
+	-rm -f src/dot11/dot11_data.lo
+	-rm -f src/dot11/dot11_mgmt.$(OBJEXT)
+	-rm -f src/dot11/dot11_mgmt.lo
+	-rm -f src/dot11/dot11_probe.$(OBJEXT)
+	-rm -f src/dot11/dot11_probe.lo
 	-rm -f src/dot1q.$(OBJEXT)
 	-rm -f src/dot1q.lo
 	-rm -f src/dot3.$(OBJEXT)
@@ -614,7 +671,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dhcpv6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dns.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dns_record.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dot11.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dot1q.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dot3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/eapol.Plo@am__quote@
@@ -645,6 +701,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/tcp_stream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/udp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/dot11/$(DEPDIR)/dot11_assoc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/dot11/$(DEPDIR)/dot11_auth.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/dot11/$(DEPDIR)/dot11_base.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/dot11/$(DEPDIR)/dot11_beacon.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/dot11/$(DEPDIR)/dot11_control.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/dot11/$(DEPDIR)/dot11_data.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/dot11/$(DEPDIR)/dot11_mgmt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/dot11/$(DEPDIR)/dot11_probe.Plo@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -676,6 +740,7 @@ mostlyclean-libtool:
 clean-libtool:
 	-rm -rf .libs _libs
 	-rm -rf src/.libs src/_libs
+	-rm -rf src/dot11/.libs src/dot11/_libs
 
 distclean-libtool:
 	-rm -f libtool config.lt
@@ -700,27 +765,48 @@ uninstall-pkgconfigDATA:
 	@list='$(pkgconfig_DATA)'; test -n "$(pkgconfigdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(pkgconfigdir)'; $(am__uninstall_files_from_dir)
-install-libtins_includeHEADERS: $(libtins_include_HEADERS)
+install-libtinsHEADERS: $(libtins_HEADERS)
 	@$(NORMAL_INSTALL)
-	@list='$(libtins_include_HEADERS)'; test -n "$(libtins_includedir)" || list=; \
+	@list='$(libtins_HEADERS)'; test -n "$(libtinsdir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(libtins_includedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(libtins_includedir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libtinsdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libtinsdir)" || exit 1; \
 	fi; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(libtins_includedir)'"; \
-	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(libtins_includedir)" || exit $$?; \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(libtinsdir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(libtinsdir)" || exit $$?; \
 	done
 
-uninstall-libtins_includeHEADERS:
+uninstall-libtinsHEADERS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(libtins_include_HEADERS)'; test -n "$(libtins_includedir)" || list=; \
+	@list='$(libtins_HEADERS)'; test -n "$(libtinsdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(libtins_includedir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(libtinsdir)'; $(am__uninstall_files_from_dir)
+install-libtins_dot11HEADERS: $(libtins_dot11_HEADERS)
+	@$(NORMAL_INSTALL)
+	@list='$(libtins_dot11_HEADERS)'; test -n "$(libtins_dot11dir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libtins_dot11dir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libtins_dot11dir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(libtins_dot11dir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(libtins_dot11dir)" || exit $$?; \
+	done
+
+uninstall-libtins_dot11HEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(libtins_dot11_HEADERS)'; test -n "$(libtins_dot11dir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(libtins_dot11dir)'; $(am__uninstall_files_from_dir)
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -940,7 +1026,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(libtins_includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(libtinsdir)" "$(DESTDIR)$(libtins_dot11dir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -971,6 +1057,8 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/$(am__dirstamp)
+	-rm -f src/dot11/$(DEPDIR)/$(am__dirstamp)
+	-rm -f src/dot11/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -982,7 +1070,7 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf src/$(DEPDIR)
+	-rm -rf src/$(DEPDIR) src/dot11/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags
@@ -999,7 +1087,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-libtins_includeHEADERS install-pkgconfigDATA
+install-data-am: install-libtinsHEADERS install-libtins_dot11HEADERS \
+	install-pkgconfigDATA
 
 install-dvi: install-dvi-am
 
@@ -1030,7 +1119,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf src/$(DEPDIR)
+	-rm -rf src/$(DEPDIR) src/dot11/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1047,8 +1136,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES \
-	uninstall-libtins_includeHEADERS uninstall-pkgconfigDATA
+uninstall-am: uninstall-libLTLIBRARIES uninstall-libtinsHEADERS \
+	uninstall-libtins_dot11HEADERS uninstall-pkgconfigDATA
 
 .MAKE: install-am install-strip
 
@@ -1062,14 +1151,15 @@ uninstall-am: uninstall-libLTLIBRARIES \
 	install install-am install-data install-data-am install-dvi \
 	install-dvi-am install-exec install-exec-am install-html \
 	install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-libtins_includeHEADERS \
-	install-man install-pdf install-pdf-am install-pkgconfigDATA \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-libLTLIBRARIES \
-	uninstall-libtins_includeHEADERS uninstall-pkgconfigDATA
+	install-libLTLIBRARIES install-libtinsHEADERS \
+	install-libtins_dot11HEADERS install-man install-pdf \
+	install-pdf-am install-pkgconfigDATA install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-libLTLIBRARIES uninstall-libtinsHEADERS \
+	uninstall-libtins_dot11HEADERS uninstall-pkgconfigDATA
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -2542,7 +2542,7 @@ if test "${enable_c__11+set}" = set; then :
 fi
 
 
-SOURCE_FILES=$(ls ../src/*cpp src/*cpp src/dot11/*cpp | tr '\n' ' ')
+SOURCE_FILES=$(ls ../src/*cpp ../src/dot11/*cpp src/*cpp src/dot11/*cpp | tr '\n' ' ')
 
 
 ac_ext=cpp

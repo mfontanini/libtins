@@ -1,10 +1,5 @@
 #include <gtest/gtest.h>
-#include <algorithm>
-#include <memory>
-#include <stdint.h>
-#include "dot11.h"
-#include "cxxstd.h"
-#include "tests/dot11.h"
+#include "tests/dot11_data.h"
 
 
 using namespace std;

@@ -3,7 +3,8 @@
 #include <string>
 #include <stdint.h>
 #include "radiotap.h"
-#include "dot11.h"
+#include "dot11/dot11_data.h"
+#include "dot11/dot11_beacon.h"
 #include "utils.h"
 
 using namespace std;

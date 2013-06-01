@@ -28,7 +28,7 @@
  */
 
 #include "handshake_capturer.h"
-#include "dot11.h"
+#include "dot11/dot11_data.h"
 
 namespace Tins {
     bool RSNHandshakeCapturer::process_packet(const PDU &pdu) {

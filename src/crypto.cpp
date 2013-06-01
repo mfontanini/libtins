@@ -32,7 +32,8 @@
 #include <openssl/hmac.h>
 #include <openssl/aes.h>
 #include "crypto.h"
-#include "dot11.h"
+#include "dot11/dot11_data.h"
+#include "dot11/dot11_beacon.h"
 
 namespace Tins {
 namespace Crypto {

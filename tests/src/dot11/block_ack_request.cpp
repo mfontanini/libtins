@@ -1,8 +1,5 @@
 #include <gtest/gtest.h>
-#include <algorithm>
-#include <memory>
-#include <stdint.h>
-#include "dot11.h"
+#include "dot11/dot11_control.h"
 #include "tests/dot11.h"
 
 
@@ -75,12 +72,12 @@ TEST_F(Dot11BlockAckRequestTest, ClonePDU) {
     dot1.fragment_number(6);
     dot1.start_sequence(0x294);
     dot1.bar_control(0x9);
-    std::auto_ptr<Dot11BlockAckRequest> dot2(dot1.clone());
+    Internals::smart_ptr<Dot11BlockAckRequest>::type dot2(dot1.clone());
     test_equals(dot1, *dot2);
 }
 
 TEST_F(Dot11BlockAckRequestTest, FromBytes) {
-    std::auto_ptr<PDU> dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
+    Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get());
     const Dot11BlockAckRequest *inner = dot11->find_pdu<Dot11BlockAckRequest>();
     ASSERT_TRUE(inner);

@@ -1,0 +1,294 @@
+/*
+ * Copyright (c) 2012, Matias Fontanini
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * * Redistributions in binary form must reproduce the above
+ *   copyright notice, this list of conditions and the following disclaimer
+ *   in the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+#ifndef TINS_DOT11_DOT11_DATA_H
+#define TINS_DOT11_DOT11_DATA_H
+
+#include "../dot11/dot11_base.h"
+
+namespace Tins {
+class Dot11Data : public Dot11 {
+public:
+    /**
+     * \brief This PDU's flag.
+     */
+    static const PDU::PDUType pdu_flag = PDU::DOT11_DATA;
+    
+    /**
+     * \brief Constructor for creating a 802.11 Data frame.
+     *
+     * Constructs a 802.11 Data frame taking the
+     * destination and source hardware addresses.
+     *
+     * \param dst_hw_addr The destination hardware address.
+     * \param src_hw_addr The source hardware address.
+     */
+    Dot11Data(const address_type &dst_hw_addr = address_type(), 
+            const address_type &src_hw_addr = address_type());
+                
+    /**
+     * \brief Constructs a Dot11Data object from a buffer and adds 
+     * all identifiable PDUs found in the buffer as children of 
+     * this one.
+     * 
+     * If the next PDU is not recognized, then a RawPDU is used.
+     * 
+     * If there is not enough size for the header in the buffer
+     * or the input data is malformed, a malformed_packet exception 
+     * is thrown.
+     * 
+     * \param buffer The buffer from which this PDU will be constructed.
+     * \param total_sz The total size of the buffer.
+     */
+    Dot11Data(const uint8_t *buffer, uint32_t total_sz);
+    
+    /**
+     * \brief Getter for the second address.
+     *
+     * \return The stored second address.
+     */
+    address_type addr2() const { return _ext_header.addr2; }
+
+    /**
+     * \brief Getter for the third address.
+     *
+     * \return The stored third address.
+     */
+    address_type addr3() const { return _ext_header.addr3; }
+
+    /**
+     * \brief Getter for the fragment number field.
+     *
+     * \return The stored fragment number.
+     */
+    small_uint<4> frag_num() const { 
+        #if TINS_IS_LITTLE_ENDIAN
+        return _ext_header.frag_seq & 0xf; 
+        #else
+        return (_ext_header.frag_seq >> 8) & 0xf; 
+        #endif
+    }
+
+    /**
+     * \brief Getter for the sequence number field.
+     *
+     * \return The stored sequence number.
+     */
+    small_uint<12> seq_num() const { 
+        #if TINS_IS_LITTLE_ENDIAN
+        return (_ext_header.frag_seq >> 4) & 0xfff; 
+        #else
+        return (Endian::le_to_host<uint16_t>(_ext_header.frag_seq) >> 4) & 0xfff; 
+        #endif
+    }
+
+    /**
+     * \brief Getter for the fourth address.
+     *
+     * \return The fourth address.
+     */
+    address_type addr4() const { return _addr4; }
+
+    /**
+     * \brief Setter for the second address.
+     *
+     * \param new_addr2 The second address to be set.
+     */
+    void addr2(const address_type &new_addr2);
+
+    /**
+     * \brief Setter for the third address.
+     *
+     * \param new_addr3 The third address to be set.
+     */
+    void addr3(const address_type &new_addr3);
+
+    /**
+     * \brief Setter for the fragment number field.
+     *
+     * \param new_frag_num The fragment number to be set.
+     */
+    void frag_num(small_uint<4> new_frag_num);
+
+    /**
+     * \brief Setter for the sequence number field.
+     *
+     * \param new_seq_num The sequence number to be set.
+     */
+    void seq_num(small_uint<12> new_seq_num);
+
+    /**
+     * \brief Setter for the fourth address field.
+     *
+     * \param new_addr4 The fourth address to be set.
+     */
+    void addr4(const address_type &new_addr4);
+
+    /**
+     * \brief Returns the 802.11 frame's header length.
+     *
+     * \return An uint32_t with the header's size.
+     * \sa PDU::header_size()
+     */
+    uint32_t header_size() const;
+
+    /**
+     * \brief Getter for the PDU's type.
+     * \sa PDU::pdu_type
+     */
+    PDUType pdu_type() const { return pdu_flag; }
+
+    /**
+     * \brief Check wether this PDU matches the specified flag.
+     * \param flag The flag to match
+     * \sa PDU::matches_flag
+     */
+    bool matches_flag(PDUType flag) const {
+       return flag == pdu_flag || Dot11::matches_flag(flag);
+    }
+
+    /**
+     * \brief Clones this PDU.
+     *
+     * \sa PDU::clone
+     */
+    Dot11Data *clone() const {
+        return new Dot11Data(*this);
+    }
+protected:
+    TINS_BEGIN_PACK
+    struct ExtendedHeader {
+        uint8_t addr2[address_type::address_size];
+        uint8_t addr3[address_type::address_size];
+        uint16_t frag_seq;
+    } TINS_END_PACK;
+    
+    struct no_inner_pdu { };
+    Dot11Data(const uint8_t *buffer, uint32_t total_sz, no_inner_pdu);
+
+    uint32_t init(const uint8_t *buffer, uint32_t total_sz);
+    uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+
+    uint32_t data_frame_size() { 
+        return sizeof(_ext_header) + ((from_ds() && to_ds()) ? sizeof(_addr4) : 0); 
+    }
+private:
+    ExtendedHeader _ext_header;
+    address_type _addr4;
+};
+
+class Dot11QoSData : public Dot11Data {
+public:
+    /**
+     * \brief This PDU's flag.
+     */
+    static const PDU::PDUType pdu_flag = PDU::DOT11_QOS_DATA;
+
+    /**
+     * \brief Constructor for creating a 802.11 QoS Data PDU
+     *
+     * Constructs a 802.11 QoS Data PDU taking the
+     * destination and source hardware addresses.
+     *
+     * \param dst_hw_addr The destination hardware address.
+     * \param src_hw_addr The source hardware address.
+     */
+    Dot11QoSData(const address_type &dst_hw_addr = address_type(), 
+                const address_type &src_hw_addr = address_type());
+
+    /**
+     * \brief Constructors Dot11QoSData object from a buffer and adds
+     * all identifiable PDUs found in the buffer as children of this 
+     * one.
+     * 
+     * If the next PDU is not recognized, then a RawPDU is used.
+     * 
+     * If there is not enough size for the header in the buffer
+     * or the input data is malformed, a malformed_packet exception 
+     * is thrown.
+     * 
+     * \param buffer The buffer from which this PDU will be constructed.
+     * \param total_sz The total size of the buffer.
+     */
+    Dot11QoSData(const uint8_t *buffer, uint32_t total_sz);
+    
+    /**
+     * \brief Getter for the QOS Control field.
+     *
+     * \return The stored QOS Control field value.
+     */
+    uint16_t qos_control() const { return Endian::le_to_host(_qos_control); }
+
+    /**
+     * \brief Setter for the QOS Control field.
+     *
+     * \param new_qos_control The QOS Control to be set.
+     */
+    void qos_control(uint16_t new_qos_control);
+
+    /**
+     * \brief Returns the frame's header length.
+     *
+     * \return An uint32_t with the header's size.
+     * \sa PDU::header_size()
+     */
+    uint32_t header_size() const;
+
+    /**
+     * \brief Clones this PDU.
+     *
+     * \sa PDU::clone
+     */
+    Dot11QoSData *clone() const {
+        return new Dot11QoSData(*this);
+    }
+
+    /**
+     * \brief Getter for the PDU's type.
+     * \sa PDU::pdu_type
+     */
+    PDUType pdu_type() const { return PDU::DOT11_QOS_DATA; }
+
+    /**
+     * \brief Check wether this PDU matches the specified flag.
+     * \param flag The flag to match
+     * \sa PDU::matches_flag
+     */
+    bool matches_flag(PDUType flag) const {
+       return flag == PDU::DOT11_QOS_DATA || Dot11Data::matches_flag(flag);
+    }
+private:
+    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+
+
+    uint16_t _qos_control;
+};
+}
+
+#endif // TINS_DOT11_DOT11_DATA_H

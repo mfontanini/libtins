@@ -42,7 +42,7 @@
     #include <net/ethernet.h>
 #endif
 #include "radiotap.h"
-#include "dot11.h"
+#include "dot11/dot11_base.h"
 #include "utils.h"
 #include "packet_sender.h"
 #include "exceptions.h"

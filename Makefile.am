@@ -21,7 +21,6 @@ libtins_la_SOURCES=src/arp.cpp \
                     src/dhcpv6.cpp \
                     src/dns.cpp \
                     src/dns_record.cpp \
-                    src/dot11.cpp \
                     src/dot3.cpp \
                     src/dot1q.cpp \
                     src/eapol.cpp \
@@ -47,10 +46,19 @@ libtins_la_SOURCES=src/arp.cpp \
                     src/tcp.cpp \
                     src/tcp_stream.cpp \
                     src/udp.cpp \
-                    src/utils.cpp 
+                    src/utils.cpp \
+                    src/dot11/dot11_base.cpp \
+                    src/dot11/dot11_data.cpp \
+                    src/dot11/dot11_mgmt.cpp \
+                    src/dot11/dot11_beacon.cpp \
+                    src/dot11/dot11_assoc.cpp \
+                    src/dot11/dot11_auth.cpp \
+                    src/dot11/dot11_probe.cpp \
+                    src/dot11/dot11_control.cpp
 
-libtins_includedir = $(includedir)/tins
-libtins_include_HEADERS = include/internals.h \
+libtinsdir = $(includedir)/tins
+
+libtins_HEADERS = include/internals.h \
 							include/dhcpv6.h \
 							include/dot11.h \
 							include/dot1q.h \
@@ -102,3 +110,14 @@ libtins_include_HEADERS = include/internals.h \
 							include/stp.h \
 							include/exceptions.h \
 							include/config.h
+
+libtins_dot11_HEADERS =  include/dot11/dot11_base.h \
+						include/dot11/dot11_beacon.h \
+						include/dot11/dot11_data.h \
+						include/dot11/dot11_mgmt.h \
+						include/dot11/dot11_assoc.h \
+						include/dot11/dot11_auth.h \
+						include/dot11/dot11_probe.h \
+						include/dot11/dot11_control.h
+
+libtins_dot11dir  	  =     $(includedir)/tins/dot11/
