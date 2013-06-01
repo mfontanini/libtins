@@ -67,3 +67,20 @@ TEST_F(WPA2DecryptTest, DecryptUsingBeacon) {
             ASSERT_FALSE(decrypter.decrypt(radio));
     }
 }
+
+TEST_F(WPA2DecryptTest, DecryptWithoutUsingBeacon) {
+    Crypto::WPA2Decrypter decrypter;
+    decrypter.add_supplicant_data("Induction", "Coherer", "00:0c:41:82:b2:55");
+    for(size_t i = 1; i < 7; ++i) {
+        RadioTap radio(packets[i], packets_size[i]);
+        if(i > 4) {
+            ASSERT_TRUE(decrypter.decrypt(radio));
+            if(i == 5)
+                check_packet5(radio);
+            else
+                check_packet6(radio);
+        }
+        else 
+            ASSERT_FALSE(decrypter.decrypt(radio));
+    }
+}

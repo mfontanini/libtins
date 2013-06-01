@@ -252,8 +252,8 @@ void WPA2Decrypter::add_supplicant_data(const std::string &psk, const std::strin
 void WPA2Decrypter::add_supplicant_data(const std::string &psk, const std::string &ssid,
   const address_type &addr) 
 {
-    // ADD CODE PLX
     add_supplicant_data(psk, ssid);
+    add_access_point(ssid, addr);
 }
 
 void WPA2Decrypter::add_access_point(const std::string &ssid, const address_type &addr) {
