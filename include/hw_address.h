@@ -244,6 +244,15 @@ public:
         oss << *this;
         return oss.str();
     }
+
+    /**
+     * \brief Retrieves the i-th storage_type in this address.
+     *
+     * \param i The element to retrieve.
+     */
+    storage_type operator[](size_t i) const {
+        return buffer[i];
+    }
     
     /**
      * \brief Writes this HWAddress in hex-notation to a std::ostream.

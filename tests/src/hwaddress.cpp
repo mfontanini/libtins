@@ -36,6 +36,12 @@ TEST_F(HWAddressTest, DistinctOperator) {
     EXPECT_NE(addr1, addr2);
 }
 
+TEST_F(HWAddressTest, SubscriptOperator) {
+    HWAddress<6> addr("00:01:02:03:04:05");
+    for(size_t i = 0; i < addr.size(); ++i)
+        EXPECT_EQ(addr[i], i);
+}
+
 TEST_F(HWAddressTest, LessThanOperator) {
     HWAddress<6> addr1(byte_address), addr2(empty_addr);
     HWAddress<6> bcast = "ff:ff:ff:ff:ff:ff";
