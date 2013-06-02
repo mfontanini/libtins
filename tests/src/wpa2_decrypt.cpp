@@ -91,7 +91,7 @@ void WPA2DecryptTest::check_tkip_packet6(const PDU &pdu) {
 
 TEST_F(WPA2DecryptTest, DecryptCCMPUsingBeacon) {
     Crypto::WPA2Decrypter decrypter;
-    decrypter.add_supplicant_data("Induction", "Coherer");
+    decrypter.add_ap_data("Induction", "Coherer");
     for(size_t i = 0; i < 7; ++i) {
         RadioTap radio(ccmp_packets[i], ccmp_packets_size[i]);
         if(i > 4) {
@@ -108,7 +108,7 @@ TEST_F(WPA2DecryptTest, DecryptCCMPUsingBeacon) {
 
 TEST_F(WPA2DecryptTest, DecryptCCMPWithoutUsingBeacon) {
     Crypto::WPA2Decrypter decrypter;
-    decrypter.add_supplicant_data("Induction", "Coherer", "00:0c:41:82:b2:55");
+    decrypter.add_ap_data("Induction", "Coherer", "00:0c:41:82:b2:55");
     for(size_t i = 1; i < 7; ++i) {
         RadioTap radio(ccmp_packets[i], ccmp_packets_size[i]);
         if(i > 4) {
@@ -125,7 +125,7 @@ TEST_F(WPA2DecryptTest, DecryptCCMPWithoutUsingBeacon) {
 
 TEST_F(WPA2DecryptTest, DecryptTKIPUsingBeacon) {
     Crypto::WPA2Decrypter decrypter;
-    decrypter.add_supplicant_data("libtinstest", "NODO");
+    decrypter.add_ap_data("libtinstest", "NODO");
     for(size_t i = 0; i < 7; ++i) {
         RadioTap radio(tkip_packets[i], tkip_packets_size[i]);
         if(i > 4) {
@@ -142,7 +142,7 @@ TEST_F(WPA2DecryptTest, DecryptTKIPUsingBeacon) {
 
 TEST_F(WPA2DecryptTest, DecryptTKIPWithoutUsingBeacon) {
     Crypto::WPA2Decrypter decrypter;
-    decrypter.add_supplicant_data("libtinstest", "NODO", "00:1b:11:d2:1b:eb");
+    decrypter.add_ap_data("libtinstest", "NODO", "00:1b:11:d2:1b:eb");
     for(size_t i = 1; i < 7; ++i) {
         RadioTap radio(tkip_packets[i], tkip_packets_size[i]);
         if(i > 4) {
@@ -159,8 +159,8 @@ TEST_F(WPA2DecryptTest, DecryptTKIPWithoutUsingBeacon) {
 
 TEST_F(WPA2DecryptTest, DecryptCCMPAndTKIPUsingBeacon) {
     Crypto::WPA2Decrypter decrypter;
-    decrypter.add_supplicant_data("libtinstest", "NODO");
-    decrypter.add_supplicant_data("Induction", "Coherer");
+    decrypter.add_ap_data("libtinstest", "NODO");
+    decrypter.add_ap_data("Induction", "Coherer");
     for(size_t i = 0; i < 7; ++i) {
         RadioTap radio(ccmp_packets[i], ccmp_packets_size[i]);
         if(i > 4) {
@@ -189,8 +189,8 @@ TEST_F(WPA2DecryptTest, DecryptCCMPAndTKIPUsingBeacon) {
 
 TEST_F(WPA2DecryptTest, DecryptCCMPAndTKIPWithoutUsingBeacon) {
     Crypto::WPA2Decrypter decrypter;
-    decrypter.add_supplicant_data("libtinstest", "NODO", "00:1b:11:d2:1b:eb");
-    decrypter.add_supplicant_data("Induction", "Coherer", "00:0c:41:82:b2:55");
+    decrypter.add_ap_data("libtinstest", "NODO", "00:1b:11:d2:1b:eb");
+    decrypter.add_ap_data("Induction", "Coherer", "00:0c:41:82:b2:55");
     for(size_t i = 1; i < 7; ++i) {
         RadioTap radio(ccmp_packets[i], ccmp_packets_size[i]);
         if(i > 4) {

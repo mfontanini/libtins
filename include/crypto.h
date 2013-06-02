@@ -63,6 +63,7 @@ namespace Crypto {
             typedef Internals::byte_array<80> ptk_type;
             typedef Internals::byte_array<32> pmk_type;
             
+            SessionKeys();
             SessionKeys(const RSNHandshake &hs, const pmk_type &pmk);
             SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
         private:
@@ -179,9 +180,9 @@ namespace Crypto {
         typedef HWAddress<6> address_type;
         
         /**
-         * \brief Adds a supplicant's information.
+         * \brief Adds an access points's information.
          *
-         * This associates an SSID with a PSK., and allows the decryption of
+         * This associates an SSID with a PSK, and allows the decryption of
          * any BSSIDs that broadcast the same SSID. 
          * 
          * The decrypter will inspect beacon frames, looking for SSID tags 
@@ -191,15 +192,15 @@ namespace Crypto {
          * handshake capturing will be disabled until any access point 
          * broadcasts the provided SSID(this shouldn't take long at all). 
          * If this is not the desired behaviour, then you should check out
-         * the ovther add_supplicant_data overload.
+         * the ovther add_ap_data overload.
          * 
          * \param psk The PSK associated with the SSID.
          * \param ssid The network's SSID.
          */
-        void add_supplicant_data(const std::string &psk, const std::string &ssid);
+        void add_ap_data(const std::string &psk, const std::string &ssid);
 
         /**
-         * \brief Adds a supplicant's information, including the BSSID.
+         * \brief Adds a access points's information, including its BSSID.
          *
          * This overload can be used if the BSSID associated with this SSID is 
          * known beforehand. The addr parameter indicates which specific BSSID 
@@ -212,7 +213,7 @@ namespace Crypto {
          * \param ssid The network's SSID.
          * \param addr The access point's BSSID.
          */
-        void add_supplicant_data(const std::string &psk, const std::string &ssid, const address_type &addr);
+        void add_ap_data(const std::string &psk, const std::string &ssid, const address_type &addr);
         
         /**
          * \brief Decrypts the provided PDU.
@@ -320,7 +321,7 @@ namespace Crypto {
     void rc4(ForwardIterator start, ForwardIterator end, RC4Key &key, OutputIterator output);
     
     /**
-     * \brief Wrapper function to create DecrypterProxyes using a 
+     * \brief Wrapper function to create a DecrypterProxy using a 
      * WEPDecrypter as the Decrypter template parameter.
      * 
      * \param functor The functor to be forwarded to the DecrypterProxy
@@ -328,6 +329,16 @@ namespace Crypto {
      */
     template<typename Functor>
     DecrypterProxy<Functor, WEPDecrypter> make_wep_decrypter_proxy(const Functor &functor);
+
+    /**
+     * \brief Wrapper function to create a DecrypterProxy using a 
+     * WPA2Decrypter as the Decrypter template parameter.
+     * 
+     * \param functor The functor to be forwarded to the DecrypterProxy
+     * constructor.
+     */
+    template<typename Functor>
+    DecrypterProxy<Functor, WPA2Decrypter> make_wpa2_decrypter_proxy(const Functor &functor);
     
     // Implementation section
     
@@ -365,6 +376,12 @@ namespace Crypto {
     DecrypterProxy<Functor, WEPDecrypter> make_wep_decrypter_proxy(const Functor &functor)
     {
         return DecrypterProxy<Functor, WEPDecrypter>(functor);
+    }
+
+    template<typename Functor>
+    DecrypterProxy<Functor, WPA2Decrypter> make_wpa2_decrypter_proxy(const Functor &functor)
+    {
+        return DecrypterProxy<Functor, WPA2Decrypter>(functor);
     }
     
     // RC4 stuff

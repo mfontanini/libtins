@@ -473,8 +473,8 @@ namespace Tins {
         const key_type &key() const { return _key; }
         
         /**
-         * \brief Getter for the key_mic field.
-         * \return The key_mic field.
+         * \brief Getter for the key mic field.
+         * \return 1 if this EAPOL PDU contains a valid MIC, 0 otherwise.
          */
         small_uint<1> key_mic() const { return _header.key_mic; };
 
@@ -500,17 +500,18 @@ namespace Tins {
          * \brief Getter for the encrypted field.
          * \return The encrypted field.
          */
-        small_uint<1 > encrypted() const { return _header.encrypted; };
+        small_uint<1> encrypted() const { return _header.encrypted; };
 
         /**
-         * \brief Getter for the key_descriptor field.
-         * \return The key_descriptor field.
+         * \brief Getter for the key descriptor field.
+         * \return The key descriptor field.
          */
         small_uint<3> key_descriptor() const { return _header.key_descriptor; };
 
         /**
-         * \brief Getter for the key_t field.
-         * \return The key_t field.
+         * \brief Getter for the key type field.
+         * 
+         * \return 1 if this is a pairwise key, 0 otherwise.
          */
         small_uint<1> key_t() const { return _header.key_t; };
 
