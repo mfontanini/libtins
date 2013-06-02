@@ -60,6 +60,14 @@ public:
     byte_array(InputIterator start) {
         std::copy(start, n, data);
     }
+
+    uint8_t &operator[](size_t i) {
+        return data[i];
+    }
+
+    uint8_t operator[](size_t i) const{
+        return data[i];
+    }
     
     iterator begin() {
         return data;

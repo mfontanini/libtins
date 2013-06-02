@@ -49,6 +49,7 @@ namespace Crypto {
     /**
      * \cond
      */
+    class RC4Key;
     #ifdef HAVE_WPA2_DECRYPTION
     namespace WPA2 {
         class invalid_handshake : public std::exception {
@@ -57,21 +58,26 @@ namespace Crypto {
                 return "invalid handshake";
             }
         };
-        class CCMPSessionKeys {
+        class SessionKeys {
         public:
             typedef Internals::byte_array<80> ptk_type;
             typedef Internals::byte_array<32> pmk_type;
             
-            CCMPSessionKeys(const RSNHandshake &hs, const pmk_type &pmk);
-            SNAP *decrypt_unicast(const Dot11Data &dot11, const RawPDU &raw) const;
+            SessionKeys(const RSNHandshake &hs, const pmk_type &pmk);
+            SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
         private:
+            SNAP *ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
+            SNAP *tkip_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
+            RC4Key generate_rc4_key(const Dot11Data &dot11, const RawPDU &raw) const;
+
             ptk_type ptk;
+            bool is_ccmp;
         };
             
         class SupplicantData {
         public:
             typedef HWAddress<6> address_type;
-            typedef CCMPSessionKeys::pmk_type pmk_type;
+            typedef SessionKeys::pmk_type pmk_type;
             
             SupplicantData(const std::string &psk, const std::string &ssid);
             
@@ -228,7 +234,7 @@ namespace Crypto {
         typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
         typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
         typedef std::pair<address_type, address_type> addr_pair;
-        typedef std::map<addr_pair, WPA2::CCMPSessionKeys> keys_map;
+        typedef std::map<addr_pair, WPA2::SessionKeys> keys_map;
         
         void try_add_keys(const Dot11Data &dot11, const RSNHandshake &hs);
         addr_pair make_addr_pair(const address_type &addr1, const address_type &addr2) {
