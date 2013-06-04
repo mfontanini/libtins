@@ -27,7 +27,6 @@
  *
  */
 
-#include <iostream>  // borrame
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
 #include <openssl/aes.h>
@@ -69,14 +68,16 @@ bool WEPDecrypter::decrypt(PDU &pdu) {
             passwords_type::iterator it = passwords.find(addr);
             if(it != passwords.end()) {
                 dot11->inner_pdu(decrypt(*raw, it->second));
-                dot11->wep(0);
-                // Invalid WEP packet(CRC check failed). Skip it.
-                if(!dot11->inner_pdu())
-                    return false;
+                // If its valid, then return true
+                if(dot11->inner_pdu()) {
+                    // it's no longer encrypted.
+                    dot11->wep(0);
+                    return true;
+                }
             }
         }
     }
-    return true;
+    return false;
 }
 
 PDU *WEPDecrypter::decrypt(RawPDU &raw, const std::string &password) {
