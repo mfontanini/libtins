@@ -196,7 +196,8 @@ protected:
     uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 
     uint32_t data_frame_size() { 
-        return sizeof(_ext_header) + ((from_ds() && to_ds()) ? sizeof(_addr4) : 0); 
+        return Dot11::header_size() + sizeof(_ext_header) + 
+            ((from_ds() && to_ds()) ? _addr4.size() : 0); 
     }
 private:
     ExtendedHeader _ext_header;

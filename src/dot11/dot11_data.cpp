@@ -154,8 +154,13 @@ Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz)
     _qos_control = *(uint16_t*)buffer;
     total_sz -= sizeof(uint16_t);
     buffer += sizeof(uint16_t);
-    if(total_sz)
-        inner_pdu(new Tins::SNAP(buffer, total_sz));
+    if(total_sz) {
+        // If the wep bit is on, then just use a RawPDU
+        if(wep())
+            inner_pdu(new Tins::RawPDU(buffer, total_sz));
+        else
+            inner_pdu(new Tins::SNAP(buffer, total_sz));
+    }
 }
 
 void Dot11QoSData::qos_control(uint16_t new_qos_control) {
