@@ -1,3 +1,24 @@
+v1.1 - Wed Jun  5 09:03:37 ART 2013
+
+- Implemented std::hash specialization for IPv4, IPv6 and HWAddress<>
+types.
+
+- Added a RSNHandshakeCapturer class.
+
+- Added WPA2Decrypter class.
+
+- IEEE 802.11 frames are not parsed if the RadioTap FAILED_FCS flag 
+is on.
+
+- RadioTap now calculates its size everytime it's serialized.
+
+- Splitted the dot11.h and dot11.cpp files into several files to
+speed up compilation times.
+
+- Added HWAddress<>::is_broadcast and HWAddress::operator[].
+
+- Fixed a bug triggered when parsing Dot11QoSData frames.
+
 v1.0 - Tue Apr 23 20:40:57 ART 2013
 
 - Link layer protocol PDUs now don't hold a NetworkInterface. This led
