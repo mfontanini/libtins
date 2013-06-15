@@ -27,10 +27,12 @@
  *
  */
 
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/aes.h>
 #include "crypto.h"
+#ifdef HAVE_WPA2_DECRYPTION
+    #include <openssl/evp.h>
+    #include <openssl/hmac.h>
+    #include <openssl/aes.h>
+#endif // HAVE_WPA2_DECRYPTION
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
 

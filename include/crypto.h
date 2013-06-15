@@ -330,6 +330,7 @@ namespace Crypto {
     template<typename Functor>
     DecrypterProxy<Functor, WEPDecrypter> make_wep_decrypter_proxy(const Functor &functor);
 
+    #ifdef HAVE_WPA2_DECRYPTION
     /**
      * \brief Wrapper function to create a DecrypterProxy using a 
      * WPA2Decrypter as the Decrypter template parameter.
@@ -338,7 +339,10 @@ namespace Crypto {
      * constructor.
      */
     template<typename Functor>
-    DecrypterProxy<Functor, WPA2Decrypter> make_wpa2_decrypter_proxy(const Functor &functor);
+    DecrypterProxy<Functor, WPA2Decrypter> make_wpa2_decrypter_proxy(const Functor &functor) {
+        return DecrypterProxy<Functor, WPA2Decrypter>(functor);
+    }
+    #endif // HAVE_WPA2_DECRYPTION
     
     // Implementation section
     
@@ -378,12 +382,6 @@ namespace Crypto {
         return DecrypterProxy<Functor, WEPDecrypter>(functor);
     }
 
-    template<typename Functor>
-    DecrypterProxy<Functor, WPA2Decrypter> make_wpa2_decrypter_proxy(const Functor &functor)
-    {
-        return DecrypterProxy<Functor, WPA2Decrypter>(functor);
-    }
-    
     // RC4 stuff
     
     template<typename ForwardIterator>
