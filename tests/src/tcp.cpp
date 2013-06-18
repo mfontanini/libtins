@@ -134,6 +134,16 @@ TEST_F(TCPTest, SetFlag) {
     EXPECT_EQ(tcp.get_flag(TCP::CWR), 0);
 }
 
+TEST_F(TCPTest, Flags) {
+    TCP tcp;
+    tcp.set_flag(TCP::SYN, 1);
+    tcp.set_flag(TCP::FIN, 1);
+    
+    EXPECT_EQ(tcp.flags(), (TCP::SYN | TCP::FIN));
+    tcp.flags(TCP::PSH | TCP::RST);
+    EXPECT_EQ(tcp.flags(), (TCP::PSH | TCP::RST));
+}
+
 TEST_F(TCPTest, MSS) {
     TCP tcp;
     tcp.mss(0x456f);

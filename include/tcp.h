@@ -64,14 +64,14 @@ namespace Tins {
          * These flags identify those supported by the TCP PDU.
          */
         enum Flags {
-            FIN,
-            SYN,
-            RST,
-            PSH,
-            ACK,
-            URG,
-            ECE,
-            CWR
+            FIN = 1,
+            SYN = 2,
+            RST = 4,
+            PSH = 8,
+            ACK = 16,
+            URG = 32,
+            ECE = 64,
+            CWR = 128
         };
 
         /**
@@ -208,6 +208,32 @@ namespace Tins {
          * \return The value of the flag.
          */
         small_uint<1> get_flag(Flags tcp_flag);
+
+        /**
+         * \brief Gets the value of a flag.
+         * 
+         * \param tcp_flag The polled flag.
+         * \return The value of the flag.
+         */
+        small_uint<1> get_flag(Flags tcp_flag) const;
+
+        /**
+         * 
+         * \brief Gets the flags' values.
+         *
+         * All of the set flags will be joined together into
+         * a 12 bit value. This way, you can check for multiple
+         * flags at the same time:
+         * 
+         * \code
+         * TCP tcp = ...;
+         * if(tcp.flags() == (TCP::SYN | TCP::ACK))
+         *     // It's a SYN+ACK!
+         * \endcode
+         * 
+         * \return The value of the flags field.
+         */
+        small_uint<12> flags() const;
         
         /* Setters */
 
@@ -353,6 +379,25 @@ namespace Tins {
          */
         void set_flag(Flags tcp_flag, small_uint<1> value);
         
+        /**
+         * \brief Sets the value of the flag fields.
+         *
+         * This method can be used to set several flags at the 
+         * same time.
+         * 
+         * \code
+         * TCP tcp = ...;
+         * tcp.flags(TCP::SYN | TCP::ACK);
+         * // ...
+         * // only set the ACK, keeping the rest of the old flags.
+         * tcp.flags(tcp.flags() | TCP::ACK);
+         * \endcode
+         * 
+         * \param value The new value of the flags.
+         */
+        void flags(small_uint<12> value);
+        
+
         /**
          * \brief Adds a TCP option.
          *

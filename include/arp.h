@@ -241,9 +241,9 @@ namespace Tins {
          * Creates an ARP Request PDU and embeds it within a Layer 2 PDU ready to be
          * sent. 
          *
-         * \param target IPv4Address with the target's IP.
-         * \param sender IPv4Address with the sender's IP.
-         * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
+         * \param target The target's IP address.
+         * \param sender The sender's IP address.
+         * \param hw_snd The sender's hardware address.
          * \return Returns a EthernetII containing the ARP Request.
          */
         static EthernetII make_arp_request(ipaddress_type target, 
@@ -255,10 +255,10 @@ namespace Tins {
          * Creates an ARP Reply PDU and embeds it within a Layer 2 PDU ready to be
          * sent. 
          *
-         * \param target IPv4Address with the target's IP.
-         * \param sender IPv4Address with the sender's IP.
-         * \param hw_tgt uint8_t array of 6 bytes containing the target's hardware address.
-         * \param hw_snd uint8_t array of 6 bytes containing the sender's hardware address.
+         * \param target The target's IP address.
+         * \param sender The sender's IP address.
+         * \param hw_tgt The target's hardware address.
+         * \param hw_snd The sender's hardware address.
          * \return Returns an EthetnetII containing the ARP Replay.
          */
         static EthernetII make_arp_reply(ipaddress_type target, 
