@@ -36,6 +36,12 @@
 #include "cxxstd.h"
 
 namespace Tins {
+template<typename Address>
+class AddressRange;
+
+/**
+ * Represents an IPv6 address.
+ */
 class IPv6Address {
 public:
     /**
@@ -193,6 +199,13 @@ private:
 
     uint8_t address[address_size];
 };
+
+/**
+ * \brief Constructs an AddressRange from a base address and a mask.
+ * \param addr The range's first address.
+ * \param mask The bit-length of the prefix.
+ */
+AddressRange<IPv6Address> operator/(const IPv6Address &addr, int mask);
 } //namespace Tins
 
 #if TINS_IS_CXX11

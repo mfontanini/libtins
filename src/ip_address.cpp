@@ -31,6 +31,7 @@
 #include <sstream>
 #include "ip_address.h"
 #include "endianness.h"
+#include "address_range.h"
 
 using std::string;
 
@@ -93,5 +94,14 @@ std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
         mask -= 8;
     }
     return output;;
+}
+
+AddressRange<IPv4Address> operator/(const IPv4Address &addr, int mask) {
+    if(mask > 32)
+        throw std::logic_error("Prefix length cannot exceed 32");
+    return AddressRange<IPv4Address>::from_mask(
+        addr, 
+        IPv4Address(Endian::host_to_be(0xffffffff << (32 - mask)))
+    );
 }
 }

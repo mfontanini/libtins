@@ -36,6 +36,9 @@
 #include "cxxstd.h"
 
 namespace Tins {
+template<typename Address>
+class AddressRange;
+
 /**
  * \class IPv4Address
  * \brief Abstraction of an IPv4 address.
@@ -137,6 +140,13 @@ private:
 
     uint32_t ip_addr;
 };
+
+/**
+ * \brief Constructs an AddressRange from a base address and a mask.
+ * \param addr The range's first address.
+ * \param mask The bit-length of the prefix.
+ */
+AddressRange<IPv4Address> operator/(const IPv4Address &addr, int mask);
 } //namespace Tins
 
 #if TINS_IS_CXX11

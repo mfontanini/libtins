@@ -874,7 +874,7 @@
  ../include/dot11/../cxxstd.h ../include/dot11/../macros.h \
  ../include/ipv6.h ../include/ipv6_address.h ../include/arp.h \
  ../include/eapol.h ../include/rawpdu.h ../include/dot1q.h \
- ../include/pppoe.h
+ ../include/pppoe.h ../include/ip_address.h ../include/ipv6_address.h
 
 ../include/internals.h:
 
@@ -937,6 +937,10 @@
 ../include/dot1q.h:
 
 ../include/pppoe.h:
+
+../include/ip_address.h:
+
+../include/ipv6_address.h:
 ../src/ip.o: ../src/ip.cpp ../include/ip.h ../include/pdu.h \
  ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/small_uint.h ../include/endianness.h ../include/ip_address.h \
@@ -995,7 +999,10 @@
 
 ../include/exceptions.h:
 ../src/ip_address.o: ../src/ip_address.cpp ../include/ip_address.h \
- ../include/cxxstd.h ../include/endianness.h ../include/macros.h
+ ../include/cxxstd.h ../include/endianness.h ../include/macros.h \
+ ../include/address_range.h ../include/ip_address.h \
+ ../include/ipv6_address.h ../include/endianness.h ../include/internals.h \
+ ../include/constants.h ../include/pdu.h ../include/exceptions.h
 
 ../include/ip_address.h:
 
@@ -1004,6 +1011,22 @@
 ../include/endianness.h:
 
 ../include/macros.h:
+
+../include/address_range.h:
+
+../include/ip_address.h:
+
+../include/ipv6_address.h:
+
+../include/endianness.h:
+
+../include/internals.h:
+
+../include/constants.h:
+
+../include/pdu.h:
+
+../include/exceptions.h:
 ../src/ipv6.o: ../src/ipv6.cpp ../include/ipv6.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/small_uint.h ../include/pdu_option.h \
@@ -1749,6 +1772,35 @@
 ../include/network_interface.h:
 
 ../include/cxxstd.h:
+src/address_range.o: src/address_range.cpp ../include/address_range.h \
+ ../include/ip_address.h ../include/cxxstd.h ../include/ipv6_address.h \
+ ../include/endianness.h ../include/macros.h ../include/internals.h \
+ ../include/constants.h ../include/pdu.h ../include/exceptions.h \
+ ../include/ip_address.h ../include/ipv6_address.h
+
+../include/address_range.h:
+
+../include/ip_address.h:
+
+../include/cxxstd.h:
+
+../include/ipv6_address.h:
+
+../include/endianness.h:
+
+../include/macros.h:
+
+../include/internals.h:
+
+../include/constants.h:
+
+../include/pdu.h:
+
+../include/exceptions.h:
+
+../include/ip_address.h:
+
+../include/ipv6_address.h:
 src/arp.o: src/arp.cpp ../include/arp.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/hw_address.h ../include/ip_address.h \
@@ -3599,7 +3651,8 @@ src/wpa2_decrypt.o: src/wpa2_decrypt.cpp ../include/crypto.h \
  ../include/exceptions.h ../include/snap.h ../include/endianness.h \
  ../include/small_uint.h ../include/rawpdu.h \
  ../include/handshake_capturer.h ../include/eapol.h ../include/config.h \
- ../include/radiotap.h ../include/udp.h
+ ../include/radiotap.h ../include/udp.h ../include/tcp.h \
+ ../include/pdu_option.h
 
 ../include/crypto.h:
 
@@ -3640,3 +3693,7 @@ src/wpa2_decrypt.o: src/wpa2_decrypt.cpp ../include/crypto.h \
 ../include/radiotap.h:
 
 ../include/udp.h:
+
+../include/tcp.h:
+
+../include/pdu_option.h:

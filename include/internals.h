@@ -40,6 +40,8 @@
  * \cond
  */
 namespace Tins {
+class IPv4Address;
+class IPv6Address;
 namespace Internals {
 template<size_t n>
 class byte_array {
@@ -111,6 +113,11 @@ PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
 PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size);
 
 Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
+
+bool increment(IPv4Address &addr);
+bool increment(IPv6Address &addr);
+bool decrement(IPv4Address &addr);
+bool decrement(IPv6Address &addr);
 } // namespace Internals
 } // namespace Tins
 /**

@@ -39,6 +39,8 @@
 #include "rawpdu.h"
 #include "dot1q.h"
 #include "pppoe.h"
+#include "ip_address.h"
+#include "ipv6_address.h"
 
 using std::string;
 
@@ -149,5 +151,45 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
             return Constants::Ethernet::UNKNOWN;
     }
 }
+
+bool increment(IPv4Address &addr) {
+    uint32_t addr_int = Endian::be_to_host<uint32_t>(addr);
+    bool reached_end = ++addr_int == 0xffffffff;
+    addr = IPv4Address(Endian::be_to_host<uint32_t>(addr_int));
+    return reached_end;
 }
+
+bool increment(IPv6Address &addr) {
+    IPv6Address::iterator it = addr.end() - 1;
+    while(it >= addr.begin() && *it == 0xff) {
+        *it = 0;
+        --it;
+    }
+    // reached end
+    if(it < addr.begin())
+        return true;
+    (*it)++;
+    return false;
 }
+
+bool decrement(IPv4Address &addr) {
+    uint32_t addr_int = Endian::be_to_host<uint32_t>(addr);
+    bool reached_end = --addr_int == 0;
+    addr = IPv4Address(Endian::be_to_host<uint32_t>(addr_int));
+    return reached_end;
+}
+
+bool decrement(IPv6Address &addr) {
+    IPv6Address::iterator it = addr.end() - 1;
+    while(it >= addr.begin() && *it == 0) {
+        *it = 0xff;
+        --it;
+    }
+    // reached end
+    if(it < addr.begin())
+        return true;
+    (*it)--;
+    return false;
+}
+} // namespace Internals
+} // namespace Tins

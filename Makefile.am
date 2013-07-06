@@ -109,7 +109,8 @@ libtins_HEADERS = include/internals.h \
 							include/cxxstd.h \
 							include/stp.h \
 							include/exceptions.h \
-							include/config.h
+							include/config.h \
+							include/address_range.h
 
 libtins_dot11_HEADERS =  include/dot11/dot11_base.h \
 						include/dot11/dot11_beacon.h \
