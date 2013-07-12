@@ -56,6 +56,7 @@ EAPOL *EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz < sizeof(eapolhdr))
         throw malformed_packet();
     const eapolhdr *ptr = (const eapolhdr*)buffer;
+    total_sz = std::min(total_sz, (uint32_t)ptr->length);
     switch(ptr->type) {
         case RC4:
             return new Tins::RC4EAPOL(buffer, total_sz);
