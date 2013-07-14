@@ -103,12 +103,12 @@ uint32_t EthernetII::header_size() const {
 }
 
 uint32_t EthernetII::trailer_size() const {
-	int32_t padding = 60 - sizeof(ethhdr); // EthernetII min size is 60, padding is sometimes needed
-	if (inner_pdu()) {
-		padding -= inner_pdu()->size();
-		padding = std::max(0, padding);
-	}
-	return padding;
+    int32_t padding = 60 - sizeof(ethhdr); // EthernetII min size is 60, padding is sometimes needed
+    if (inner_pdu()) {
+        padding -= inner_pdu()->size();
+        padding = std::max(0, padding);
+    }
+    return padding;
 }
 
 #ifndef WIN32
@@ -164,10 +164,10 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     memcpy(buffer, &_eth, sizeof(ethhdr));
     uint32_t trailer = trailer_size();
     if (trailer) {
-		uint32_t trailer_offset = header_size();
-		if (inner_pdu())
-			trailer_offset += inner_pdu()->size();
-		memset(buffer + trailer_offset, 0, trailer);
+        uint32_t trailer_offset = header_size();
+        if (inner_pdu())
+            trailer_offset += inner_pdu()->size();
+        memset(buffer + trailer_offset, 0, trailer);
     }
 
 }

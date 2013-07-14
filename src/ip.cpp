@@ -117,7 +117,7 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
     // check this line PLX
     total_sz = std::min(total_sz, (uint32_t)tot_len());
     if (total_sz < head_len() * sizeof(uint32_t))
-    	throw malformed_packet();
+        throw malformed_packet();
     total_sz -= head_len() * sizeof(uint32_t);
     if (total_sz) {
         switch(_ip.protocol) {

@@ -48,14 +48,14 @@ TEST_F(PPPoETest, StackedOnEthernet) {
 
 TEST_F(PPPoETest, StackedOnEthernetSerializationWithTags) {
     PPPoE pdu(expected_packet, sizeof(expected_packet));
-	EthernetII eth = EthernetII() / pdu;
+    EthernetII eth = EthernetII() / pdu;
     PDU::serialization_type buffer = eth.serialize();
     EthernetII eth2(&buffer[0], buffer.size());
     PPPoE* unserialized = eth2.find_pdu<PPPoE>();
     ASSERT_TRUE(unserialized);
     EXPECT_EQ(
-    	PPPoE::serialization_type(expected_packet, expected_packet + sizeof(expected_packet)),
-    	unserialized->serialize()
+        PPPoE::serialization_type(expected_packet, expected_packet + sizeof(expected_packet)),
+        unserialized->serialize()
     );
 
 }
