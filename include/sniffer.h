@@ -302,7 +302,6 @@ namespace Tins {
         LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
         PCapLoopBreaker _(ret_val, data->handle);
         try {
-            Internals::smart_ptr<PDU>::type pdu;
             if(data->iface_type == DLT_EN10MB) {
                 ret_val = is_dot3((const uint8_t*)packet, header->caplen) ?
                         call_functor<Tins::Dot3>(data, packet, header) :

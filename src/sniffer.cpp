@@ -66,26 +66,29 @@ bool BaseSniffer::compile_set_filter(const string &filter, bpf_program &prog) {
 PtrPacket BaseSniffer::next_packet() {
     pcap_pkthdr header;
     PDU *ret = 0;
-    const u_char *content = pcap_next(handle, &header);
-//    timestamp_ = header.ts;
-    if(content) {
-        try {
-            if(iface_type == DLT_EN10MB) {
-                if(is_dot3((const uint8_t*)content, header.caplen))
-                    ret = new Dot3((const uint8_t*)content, header.caplen);
-                else
-                    ret = new EthernetII((const uint8_t*)content, header.caplen);
+    while(!ret) {
+        const u_char *content = pcap_next(handle, &header);
+        if(content) {
+            try {
+                if(iface_type == DLT_EN10MB) {
+                    if(is_dot3((const uint8_t*)content, header.caplen))
+                        ret = new Dot3((const uint8_t*)content, header.caplen);
+                    else
+                        ret = new EthernetII((const uint8_t*)content, header.caplen);
+                }
+                else if(iface_type == DLT_IEEE802_11_RADIO)
+                    ret = new RadioTap((const uint8_t*)content, header.caplen);
+                else if(iface_type == DLT_IEEE802_11)
+                    ret = Dot11::from_bytes((const uint8_t*)content, header.caplen);
+                else if(iface_type == DLT_LOOP)
+                    ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
+                else if(iface_type == DLT_LINUX_SLL)
+                    ret = new Tins::SLL((const uint8_t*)content, header.caplen);
             }
-            else if(iface_type == DLT_IEEE802_11_RADIO)
-                ret = new RadioTap((const uint8_t*)content, header.caplen);
-            else if(iface_type == DLT_IEEE802_11)
-                ret = Dot11::from_bytes((const uint8_t*)content, header.caplen);
-            else if(iface_type == DLT_LOOP)
-                ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
-            else if(iface_type == DLT_LINUX_SLL)
-                ret = new Tins::SLL((const uint8_t*)content, header.caplen);
+            catch(malformed_packet&) {}
         }
-        catch(malformed_packet&) {}
+        else
+            break;
     }
     return PtrPacket(ret, header.ts);
 }
