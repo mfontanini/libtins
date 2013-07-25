@@ -101,6 +101,14 @@ int BaseSniffer::get_fd() {
     return pcap_get_selectable_fd(handle);
 }
 
+BaseSniffer::iterator BaseSniffer::begin() {
+    return iterator(this);
+}
+
+BaseSniffer::iterator BaseSniffer::end() {
+    return iterator(0);
+}
+
 bool BaseSniffer::set_filter(const std::string &filter) {
     if(actual_filter.bf_insns)
         pcap_freecode(&actual_filter);

@@ -36,6 +36,7 @@
 #include <string>
 #include <memory>
 #include <stdexcept>
+#include <iterator>
 #include "pdu.h"
 #include "ethernetII.h"
 #include "radiotap.h"
@@ -48,6 +49,8 @@
 #include "exceptions.h"
 
 namespace Tins {
+    class SnifferIterator;
+
     /**
      * \class BaseSniffer
      * \brief Base class for sniffers.
@@ -60,6 +63,11 @@ namespace Tins {
      */
     class BaseSniffer {
     public:
+        /**
+         * The iterator type.
+         */
+        typedef SnifferIterator iterator;
+
         #if TINS_IS_CXX11
             /**
              * \brief Move constructor.
@@ -178,6 +186,16 @@ namespace Tins {
          * \brief Gets the file descriptor associated with the sniffer.
          */
         int get_fd();
+
+        /**
+         * Retrieves an iterator to the next packet in this sniffer.
+         */
+        iterator begin();
+
+        /**
+         * Retrieves an end iterator.
+         */
+        iterator end();
     protected:
         /**
          * Default constructor.
@@ -353,6 +371,81 @@ namespace Tins {
     {
         return HandlerProxy<T>(ptr, function);
     }
+
+    /**
+     * \brief Iterates over packets sniffed by a BaseSniffer.
+     */
+    class SnifferIterator : public std::iterator<std::forward_iterator_tag, PDU> {
+    public:
+        /**
+         * Constructs a SnifferIterator.
+         * \param sniffer The sniffer to iterate.
+         */
+        SnifferIterator(BaseSniffer *sniffer = 0)
+        : sniffer(sniffer)
+        {
+            if(sniffer)
+                advance();
+        }
+
+        /**
+         * Advances the iterator.
+         */
+        SnifferIterator& operator++() {
+            advance();
+            return *this;
+        }
+
+        /**
+         * Advances the iterator.
+         */
+        SnifferIterator operator++(int) {
+            SnifferIterator other(*this);
+            advance();
+            return other;
+        }
+
+        /**
+         * Dereferences the iterator.
+         * \return references to the current packet.
+         */
+        PDU &operator*() {
+            return *pkt.pdu();
+        }
+
+        /**
+         * Dereferences the iterator.
+         * \return pointer to the current packet.
+         */
+        PDU *operator->() {
+            return &(**this);
+        }
+
+        /**
+         * Compares this iterator for equality.
+         * \param rhs The iterator to be compared to.
+         */
+        bool operator==(const SnifferIterator &rhs) {
+            return sniffer == rhs.sniffer;
+        }
+
+        /**
+         * Compares this iterator for in-equality.
+         * \param rhs The iterator to be compared to.
+         */
+        bool operator!=(const SnifferIterator &rhs) {
+            return !(*this == rhs);
+        }
+    private:
+        void advance() {
+            pkt = sniffer->next_packet();
+            if(!pkt)
+                sniffer = 0;
+        }
+
+        BaseSniffer *sniffer;
+        Packet pkt;
+    };
 }
     
 #endif // TINS_SNIFFER_H
