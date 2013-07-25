@@ -5,6 +5,8 @@
 #include "macros.h"
 #include "ipv6.h"
 #include "ip.h"
+#include "tcp.h"
+#include "rawpdu.h"
 
 using namespace Tins;
 
@@ -12,7 +14,7 @@ typedef EthernetII::address_type address_type;
 
 class EthernetIITest : public ::testing::Test {
 public:
-    static const uint8_t expected_packet[], ip_packet[], ipv6_packet[];
+    static const uint8_t expected_packet[], ip_packet[], ipv6_packet[], smallip_packet[];
     static address_type src_addr;
     static address_type dst_addr;
     static address_type empty_addr;
@@ -22,7 +24,10 @@ public:
 };
 
 const uint8_t EthernetIITest::expected_packet[] = {
-    170, 187, 204, 221, 238, 255, 138, 139, 140, 141, 142, 143, 208, 171
+    170, 187, 204, 221, 238, 255, 138, 139, 140, 141, 142, 143, 208, 171,
+    00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00,
+    00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00, 00,
+    00, 00, 00, 00, 00, 00, 00, 00, 00, 00
 },
 EthernetIITest::ip_packet[] = {
     255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 8, 0, 69, 0, 0, 20, 
@@ -32,6 +37,12 @@ EthernetIITest::ipv6_packet[] = {
     255, 255, 255, 255, 255, 255, 0, 0, 0, 0, 0, 0, 134, 221, 96, 0, 0, 
     0, 0, 0, 59, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+},
+EthernetIITest::smallip_packet[] = {
+    64, 97, 134, 43, 174, 3, 0, 36, 1, 254, 210, 68, 8, 0, 69, 0, 0, 40,
+    53, 163, 64, 0, 127, 6, 44, 53, 192, 168, 1, 120, 173, 194, 42, 21,
+    163, 42, 1, 187, 162, 113, 212, 162, 132, 15, 66, 219, 80, 16, 16,
+    194, 34, 54, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 address_type EthernetIITest::src_addr("8a:8b:8c:8d:8e:8f");
@@ -113,6 +124,14 @@ TEST_F(EthernetIITest, Serialize) {
     EXPECT_TRUE(std::equal(serialized.begin(), serialized.end(), expected_packet));
 }
 
+TEST_F(EthernetIITest, SerializeSmallEthernetWithPadding) {
+    EthernetII eth(smallip_packet, sizeof(smallip_packet));
+    ASSERT_TRUE(eth.inner_pdu());
+    PDU::serialization_type serialized = eth.serialize();
+    EXPECT_EQ(serialized.size(), sizeof(smallip_packet));
+    EXPECT_TRUE(std::equal(serialized.begin(), serialized.end(), smallip_packet));
+}
+
 TEST_F(EthernetIITest, ConstructorFromBuffer) {
     EthernetII eth(expected_packet, sizeof(expected_packet));
     EXPECT_EQ(eth.src_addr(), src_addr);
@@ -132,3 +151,10 @@ TEST_F(EthernetIITest, ConstructorFromIPv6Buffer) {
     EXPECT_EQ(eth.find_pdu<IPv6>(), eth.inner_pdu());
 }
 
+TEST_F(EthernetIITest, EliminateEthernetPadding) {
+    EthernetII eth(smallip_packet, sizeof(smallip_packet));
+    ASSERT_TRUE(eth.inner_pdu());
+    ASSERT_TRUE(eth.find_pdu<IP>());
+    ASSERT_TRUE(eth.find_pdu<TCP>());
+    ASSERT_FALSE(eth.find_pdu<RawPDU>());
+}

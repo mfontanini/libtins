@@ -51,6 +51,7 @@ PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz)
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
+    total_sz = std::min(total_sz, (uint32_t)payload_length());
     const uint8_t *end = buffer + total_sz;
     while(buffer < end) {
         if(buffer + sizeof(uint32_t) * 2 > end)

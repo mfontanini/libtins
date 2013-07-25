@@ -136,6 +136,14 @@ namespace Tins {
          */
         uint32_t header_size() const;
         
+        /**
+         * \brief Returns the ethernet II frame's padding.
+         *
+         * \return An uint32_t with the padding size.
+         * \sa PDU::trailer_size()
+         */
+        uint32_t trailer_size() const;
+
         // Windows does not support sending L2 PDUs.
         #ifndef WIN32
         /**

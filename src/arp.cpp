@@ -63,6 +63,7 @@ ARP::ARP(const uint8_t *buffer, uint32_t total_sz)
         throw malformed_packet();
     memcpy(&_arp, buffer, sizeof(arphdr));
     total_sz -= sizeof(arphdr);
+    //TODO: Check whether this should be removed or not.
     if(total_sz)
         inner_pdu(new RawPDU(buffer + sizeof(arphdr), total_sz));
 }

@@ -82,6 +82,7 @@ EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz)
             )
         );
     }
+
 }
 
 void EthernetII::dst_addr(const address_type &new_dst_addr) {
@@ -97,7 +98,17 @@ void EthernetII::payload_type(uint16_t new_payload_type) {
 }
 
 uint32_t EthernetII::header_size() const {
+
     return sizeof(ethhdr);
+}
+
+uint32_t EthernetII::trailer_size() const {
+    int32_t padding = 60 - sizeof(ethhdr); // EthernetII min size is 60, padding is sometimes needed
+    if (inner_pdu()) {
+        padding -= inner_pdu()->size();
+        padding = std::max(0, padding);
+    }
+    return padding;
 }
 
 #ifndef WIN32
@@ -140,7 +151,7 @@ bool EthernetII::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 
 void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     #ifdef TINS_DEBUG
-    assert(total_sz >= header_size());
+    assert(total_sz >= header_size() + trailer_size());
     #endif
 
     /* Inner type defaults to IP */
@@ -151,6 +162,14 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
         payload_type(static_cast<uint16_t>(flag));
     }
     memcpy(buffer, &_eth, sizeof(ethhdr));
+    uint32_t trailer = trailer_size();
+    if (trailer) {
+        uint32_t trailer_offset = header_size();
+        if (inner_pdu())
+            trailer_offset += inner_pdu()->size();
+        memset(buffer + trailer_offset, 0, trailer);
+    }
+
 }
 
 #ifndef WIN32
