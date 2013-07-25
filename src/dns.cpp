@@ -449,8 +449,10 @@ void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) 
                     throw std::runtime_error("Malformed IPv6 address");
                 addr = IPv6Address(ptr).to_string();
             }
-            else
+            else if(Endian::be_to_host(it->information().type) <= NSEC3PARAM)
                 compose_name(ptr, sz, addr);
+            else
+                addr.assign(ptr, ptr + sz);
         }
         res.push_back(
             Resource(dname, addr, Endian::be_to_host(it->information().type), 
