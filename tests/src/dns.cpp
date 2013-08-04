@@ -204,7 +204,7 @@ TEST_F(DNSTest, Question) {
 TEST_F(DNSTest, Answers) {
     DNS dns;
     dns.add_answer("www.example.com", DNS::make_info(DNS::A, DNS::IN, 0x762), IPv4Address("127.0.0.1"));
-    dns.add_answer("www.example2.com", DNS::make_info(DNS::MX, DNS::IN, 0x762), IPv4Address("127.0.0.1"));
+    dns.add_answer("www.example2.com", DNS::make_info(DNS::MX, DNS::IN, 0x762), std::string("mail.example.com"));
     ASSERT_EQ(dns.answers_count(), 2);
     
     DNS::resources_type resources = dns.answers();
@@ -219,7 +219,7 @@ TEST_F(DNSTest, Answers) {
         else if(it->dname() == "www.example2.com") {
             EXPECT_EQ(it->type(), DNS::MX);
             EXPECT_EQ(it->ttl(), 0x762);
-            EXPECT_EQ(it->data(), "127.0.0.1");
+            EXPECT_EQ(it->data(), "mail.example.com");
             EXPECT_EQ(it->query_class(), DNS::IN);
         }
     }

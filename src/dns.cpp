@@ -224,9 +224,17 @@ DNSResourceRecord DNS::make_record(const std::string &name,
   const DNSResourceRecord::info &info, const uint8_t *ptr, uint32_t len) 
 {
     string nm;
+    std::basic_string<uint8_t> data;
     parse_domain_name(name, nm);
     uint16_t index = find_domain_name(nm);
     DNSResourceRecord res;
+    if(info.type == MX) {
+        data.push_back(0);
+        data.push_back(0);
+        data.insert(data.end(), ptr, ptr + len);
+        ptr = &data[0];
+        len = data.size();
+    }
     if(index)
         res = make_offseted_record(Endian::host_to_be(index), ptr, len);
     else
@@ -437,25 +445,36 @@ void DNS::convert_resources(const ResourcesType &lst, std::list<Resource> &res) 
         }
         ptr = it->data_ptr();
         sz = it->data_size();
-        if(sz == 4)
-            addr = IPv4Address(*(uint32_t*)ptr).to_string();
-        else {
-            if(Endian::be_to_host(it->information().type) ==  MX) {
-                ptr += 2;
-                sz -= 2;
-            }
-            if(Endian::be_to_host(it->information().type) == DNS::AAAA) {
+        uint16_t record_type = Endian::be_to_host(it->information().type);
+        // Skip the preference field if it's MX
+        if(record_type ==  MX) {
+            ptr += 2;
+            sz -= 2;
+        }
+        switch(record_type) {
+            case AAAA:
                 if(sz != 16)
-                    throw std::runtime_error("Malformed IPv6 address");
+                    throw malformed_packet();
                 addr = IPv6Address(ptr).to_string();
-            }
-            else if(Endian::be_to_host(it->information().type) <= NSEC3PARAM)
+                break;
+            case A:
+                if(sz != 4)
+                    throw malformed_packet();
+                addr = IPv4Address(*(uint32_t*)ptr).to_string();
+                break;
+            case NS:
+            case CNAME:
+            case DNAM:
+            case PTR:
+            case MX:
                 compose_name(ptr, sz, addr);
-            else
+                break;
+            default:
                 addr.assign(ptr, ptr + sz);
+                break;
         }
         res.push_back(
-            Resource(dname, addr, Endian::be_to_host(it->information().type), 
+            Resource(dname, addr, record_type, 
               Endian::host_to_be(it->information().qclass), 
               Endian::be_to_host(it->information().ttl)
             )
