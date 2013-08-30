@@ -69,5 +69,6 @@
 #include "stp.h"
 #include "handshake_capturer.h"
 #include "address_range.h"
+#include "pdu_allocator.h"
 
 #endif // TINS_TINS_H

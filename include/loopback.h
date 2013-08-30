@@ -84,7 +84,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return PDU::IP; }
+    PDUType pdu_type() const { return pdu_flag; }
     
     /**
      * \sa PDU::clone

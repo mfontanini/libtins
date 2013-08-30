@@ -874,7 +874,8 @@
  ../include/dot11/../cxxstd.h ../include/dot11/../macros.h \
  ../include/ipv6.h ../include/ipv6_address.h ../include/arp.h \
  ../include/eapol.h ../include/rawpdu.h ../include/dot1q.h \
- ../include/pppoe.h ../include/ip_address.h ../include/ipv6_address.h
+ ../include/pppoe.h ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/pdu_allocator.h
 
 ../include/internals.h:
 
@@ -941,6 +942,8 @@
 ../include/ip_address.h:
 
 ../include/ipv6_address.h:
+
+../include/pdu_allocator.h:
 ../src/ip.o: ../src/ip.cpp ../include/ip.h ../include/pdu.h \
  ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/small_uint.h ../include/endianness.h ../include/ip_address.h \
@@ -949,7 +952,8 @@
  ../include/utils.h ../include/hw_address.h ../include/internals.h \
  ../include/constants.h ../include/packet_sender.h \
  ../include/network_interface.h ../include/constants.h \
- ../include/network_interface.h ../include/exceptions.h
+ ../include/network_interface.h ../include/exceptions.h \
+ ../include/pdu_allocator.h
 
 ../include/ip.h:
 
@@ -998,6 +1002,8 @@
 ../include/network_interface.h:
 
 ../include/exceptions.h:
+
+../include/pdu_allocator.h:
 ../src/ip_address.o: ../src/ip_address.cpp ../include/ip_address.h \
  ../include/cxxstd.h ../include/endianness.h ../include/macros.h \
  ../include/address_range.h ../include/ip_address.h \
@@ -1034,7 +1040,7 @@
  ../include/packet_sender.h ../include/network_interface.h \
  ../include/hw_address.h ../include/ip_address.h ../include/ip.h \
  ../include/tcp.h ../include/udp.h ../include/icmp.h ../include/icmpv6.h \
- ../include/rawpdu.h ../include/exceptions.h
+ ../include/rawpdu.h ../include/exceptions.h ../include/pdu_allocator.h
 
 ../include/ipv6.h:
 
@@ -1077,14 +1083,37 @@
 ../include/rawpdu.h:
 
 ../include/exceptions.h:
+
+../include/pdu_allocator.h:
 ../src/ipv6_address.o: ../src/ipv6_address.cpp ../include/macros.h \
- ../include/ipv6_address.h ../include/cxxstd.h
+ ../include/ipv6_address.h ../include/cxxstd.h ../include/address_range.h \
+ ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/endianness.h ../include/macros.h ../include/internals.h \
+ ../include/constants.h ../include/pdu.h ../include/exceptions.h
 
 ../include/macros.h:
 
 ../include/ipv6_address.h:
 
 ../include/cxxstd.h:
+
+../include/address_range.h:
+
+../include/ip_address.h:
+
+../include/ipv6_address.h:
+
+../include/endianness.h:
+
+../include/macros.h:
+
+../include/internals.h:
+
+../include/constants.h:
+
+../include/pdu.h:
+
+../include/exceptions.h:
 ../src/llc.o: ../src/llc.cpp ../include/llc.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/stp.h ../include/hw_address.h \
@@ -1799,6 +1828,47 @@ src/address_range.o: src/address_range.cpp ../include/address_range.h \
 ../include/exceptions.h:
 
 ../include/ip_address.h:
+
+../include/ipv6_address.h:
+src/allocators.o: src/allocators.cpp ../include/pdu_allocator.h \
+ ../include/pdu.h ../include/macros.h ../include/cxxstd.h \
+ ../include/exceptions.h ../include/ethernetII.h ../include/endianness.h \
+ ../include/hw_address.h ../include/snap.h ../include/small_uint.h \
+ ../include/sll.h ../include/dot1q.h ../include/ip.h \
+ ../include/ip_address.h ../include/pdu_option.h ../include/ipv6.h \
+ ../include/ipv6_address.h
+
+../include/pdu_allocator.h:
+
+../include/pdu.h:
+
+../include/macros.h:
+
+../include/cxxstd.h:
+
+../include/exceptions.h:
+
+../include/ethernetII.h:
+
+../include/endianness.h:
+
+../include/hw_address.h:
+
+../include/snap.h:
+
+../include/small_uint.h:
+
+../include/sll.h:
+
+../include/dot1q.h:
+
+../include/ip.h:
+
+../include/ip_address.h:
+
+../include/pdu_option.h:
+
+../include/ipv6.h:
 
 ../include/ipv6_address.h:
 src/arp.o: src/arp.cpp ../include/arp.h ../include/macros.h \
@@ -2778,7 +2848,7 @@ src/ethernetII.o: src/ethernetII.cpp ../include/ethernetII.h \
  ../include/utils.h ../include/ip_address.h ../include/ipv6_address.h \
  ../include/internals.h ../include/constants.h ../include/macros.h \
  ../include/ipv6.h ../include/small_uint.h ../include/pdu_option.h \
- ../include/ip.h
+ ../include/ip.h ../include/tcp.h ../include/rawpdu.h
 
 ../include/ethernetII.h:
 
@@ -2813,6 +2883,10 @@ src/ethernetII.o: src/ethernetII.cpp ../include/ethernetII.h \
 ../include/pdu_option.h:
 
 ../include/ip.h:
+
+../include/tcp.h:
+
+../include/rawpdu.h:
 src/hwaddress.o: src/hwaddress.cpp ../include/hw_address.h \
  ../include/cxxstd.h
 

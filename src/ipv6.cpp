@@ -48,6 +48,7 @@
 #include "icmpv6.h"
 #include "rawpdu.h"
 #include "exceptions.h"
+#include "pdu_allocator.h"
 
 namespace Tins {
 
@@ -101,7 +102,15 @@ IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz)
                     inner_pdu(new Tins::ICMPv6(buffer, total_sz));
                     break;
                 default:
-                    inner_pdu(new Tins::RawPDU(buffer, total_sz));
+                    inner_pdu(
+                        Internals::allocate<IPv6>(
+                            current_header,
+                            buffer, 
+                            total_sz
+                        )
+                    );
+                    if(!inner_pdu())
+                        inner_pdu(new Tins::RawPDU(buffer, total_sz));
                     break;
             }
             total_sz = 0;
@@ -214,10 +223,13 @@ void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
                 new_flag = Constants::IP::PROTO_ICMPV6;
                 break;
             default:
+                if(Internals::pdu_type_registered<IPv6>(inner_pdu()->pdu_type()))
+                    new_flag = static_cast<Constants::IP::e>(
+                        Internals::pdu_type_to_id<IPv6>(inner_pdu()->pdu_type())
+                    );
                 break;
         };
-        if(new_flag != 0xff)
-            set_last_next_header(new_flag);
+        set_last_next_header(new_flag);
     }
     payload_length(total_sz - sizeof(_header));
     std::memcpy(buffer, &_header, sizeof(_header));

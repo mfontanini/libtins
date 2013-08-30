@@ -110,7 +110,8 @@ libtins_HEADERS = include/internals.h \
 							include/stp.h \
 							include/exceptions.h \
 							include/config.h \
-							include/address_range.h
+							include/address_range.h \
+							include/pdu_allocator.h
 
 libtins_dot11_HEADERS =  include/dot11/dot11_base.h \
 						include/dot11/dot11_beacon.h \

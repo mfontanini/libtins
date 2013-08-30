@@ -41,6 +41,7 @@
 #include "pppoe.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
+#include "pdu_allocator.h"
 
 using std::string;
 
@@ -74,18 +75,27 @@ Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
 {
     switch(flag) {
         case Tins::Constants::Ethernet::IP:
-            return new Tins::IP(buffer, size);
+            return new IP(buffer, size);
         case Constants::Ethernet::IPV6:
-            return new Tins::IPv6(buffer, size);
+            return new IPv6(buffer, size);
         case Tins::Constants::Ethernet::ARP:
-            return new Tins::ARP(buffer, size);
+            return new ARP(buffer, size);
         case Tins::Constants::Ethernet::PPPOED:
-            return new Tins::PPPoE(buffer, size);
+            return new PPPoE(buffer, size);
         case Tins::Constants::Ethernet::EAPOL:
-            return Tins::EAPOL::from_bytes(buffer, size);
+            return EAPOL::from_bytes(buffer, size);
         case Tins::Constants::Ethernet::VLAN:
-            return new Tins::Dot1Q(buffer, size);
+            return new Dot1Q(buffer, size);
         default:
+            {
+                PDU *pdu = Internals::allocate<EthernetII>(
+                    static_cast<uint16_t>(flag),
+                    buffer, 
+                    size
+                );
+                if(pdu)
+                    return pdu;
+            }
             return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
     };
 }
@@ -148,6 +158,10 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
         case PDU::PPPOE:
             return Constants::Ethernet::PPPOED;
         default:
+            if(Internals::pdu_type_registered<EthernetII>(flag))
+                return static_cast<Constants::Ethernet::e>(
+                    Internals::pdu_type_to_id<EthernetII>(flag)
+                );
             return Constants::Ethernet::UNKNOWN;
     }
 }

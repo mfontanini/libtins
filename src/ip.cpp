@@ -52,6 +52,7 @@
 #include "constants.h"
 #include "network_interface.h"
 #include "exceptions.h"
+#include "pdu_allocator.h"
 
 using std::list;
 
@@ -134,7 +135,15 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
                 inner_pdu(new Tins::IPv6(buffer, total_sz));
                 break;
             default:
-                inner_pdu(new Tins::RawPDU(buffer, total_sz));
+                inner_pdu(
+                    Internals::allocate<IP>(
+                        _ip.protocol,
+                        buffer, 
+                        total_sz
+                    )
+                );
+                if(!inner_pdu())
+                    inner_pdu(new RawPDU(buffer, total_sz));
                 break;
         }
     }
@@ -397,8 +406,13 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
                 new_flag = Constants::IP::PROTO_ICMP;
                 break;
             default:
-                // check for other protos
-                new_flag = 0xff;
+                if(Internals::pdu_type_registered<IP>(inner_pdu()->pdu_type()))
+                    new_flag = static_cast<Constants::IP::e>(
+                        Internals::pdu_type_to_id<IP>(inner_pdu()->pdu_type())
+                    );
+                else
+                    // check for other protos
+                    new_flag = 0xff;
         };
         protocol(new_flag);
         //flag(new_flag);
