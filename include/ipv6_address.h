@@ -185,6 +185,14 @@ public:
     }
     
     /**
+     * \brief Returns true if this is a loopback IPv6 address.
+     * 
+     * This method returns true if this address is the ::1/128 address,
+     * false otherwise.
+     */
+    bool is_loopback() const;
+    
+    /**
      * \brief Writes this address in hex-notation to a std::ostream.
      * 
      * \param os The stream in which to write the address.

@@ -125,6 +125,27 @@ public:
     }
     
     /**
+     * \brief Returns true if this is a private IPv4 address.
+     * 
+     * This takes into account the private network ranges defined in
+     * RFC 1918. Therefore, this method returns true if this address
+     * is in any of the following network ranges, false otherwise:
+     * 
+     * - 192.168.0.0/16
+     * - 10.0.0.0/8
+     * - 172.16.0.0/12
+     */
+    bool is_private() const;
+    
+    /**
+     * \brief Returns true if this is a loopback IPv4 address.
+     * 
+     * This method returns true if this address is in the address range
+     * 127.0.0.0/8, false otherwise.
+     */
+    bool is_loopback() const;
+    
+    /**
      * \brief Writes this address to a std::ostream.
      * 
      * This method writes addr in a dotted-string notation address

@@ -36,6 +36,14 @@
 using std::string;
 
 namespace Tins{
+const AddressRange<IPv4Address> private_ranges[] = {
+    IPv4Address("192.168.0.0") / 16,
+    IPv4Address("10.0.0.0") / 8,
+    IPv4Address("172.16.0.0") / 12
+};
+
+const AddressRange<IPv4Address> loopback_range = IPv4Address("127.0.0.0") / 8;
+    
 IPv4Address::IPv4Address(uint32_t ip) 
 : ip_addr(Endian::be_to_host(ip)) {
     
@@ -94,6 +102,20 @@ std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
         mask -= 8;
     }
     return output;;
+}
+
+bool IPv4Address::is_private() const {
+    const AddressRange<IPv4Address> *iter = private_ranges;
+    while(iter != private_ranges + 3) {
+        if(iter->contains(*this))
+            return true;
+        ++iter;
+    }
+    return false;
+}
+
+bool IPv4Address::is_loopback() const {
+    return loopback_range.contains(*this);
 }
 
 AddressRange<IPv4Address> operator/(const IPv4Address &addr, int mask) {

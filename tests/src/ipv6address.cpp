@@ -85,3 +85,9 @@ TEST(IPv6AddressTest, Copy) {
     addr1.copy(addr2.begin());
     EXPECT_EQ(addr1, addr2);
 }
+
+TEST(IPv6AddressTest, IsLoopback) {
+    EXPECT_TRUE(IPv6Address("::1").is_loopback());
+    EXPECT_FALSE(IPv6Address("::2").is_loopback());
+    EXPECT_FALSE(IPv6Address("ffff::2").is_loopback());
+}

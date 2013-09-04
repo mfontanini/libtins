@@ -44,72 +44,78 @@
 #include "address_range.h"
 
 namespace Tins {
-    IPv6Address::IPv6Address() {
-        std::fill(address, address + address_size, 0);
-    }
-    
-    IPv6Address::IPv6Address(const char *addr) {
-        init(addr);
-    }
-    
-    IPv6Address::IPv6Address(const_iterator ptr) {
-        std::copy(ptr, ptr + address_size, address);
-    }
-    
-    IPv6Address::IPv6Address(const std::string &addr) {
-        init(addr.c_str());
-    }
-    
-    void IPv6Address::init(const char *addr) {
-        #ifdef WIN32
-            // mingw on linux somehow doesn't have InetPton
-            #ifdef _MSC_VER
-                if(InetPtonA(AF_INET6, addr, address) != 1)
-                    throw malformed_address();
-			#else
-                ULONG dummy1;
-                USHORT dummy2;
-                // Maybe change this, mingw doesn't have any other conversion function
-                if(RtlIpv6StringToAddressExA(addr, (IN6_ADDR*)address, &dummy1, &dummy2) != NO_ERROR)
-                    throw malformed_address();
-            #endif
-        #else
-            if(inet_pton(AF_INET6, addr, address) == 0)
-                throw malformed_address();
-        #endif            
-    }
+const IPv6Address loopback_address = "::1";
 
-    std::string IPv6Address::to_string() const {
-        char buffer[INET6_ADDRSTRLEN];
-        #ifdef WIN32
-            // mingw on linux somehow doesn't have InetNtop
-            #ifdef _MSC_VER
-				if(InetNtopA(AF_INET6, (PVOID)address, buffer, sizeof(buffer)) != 0)
-					throw malformed_address();
-			#else
-                ULONG sz = sizeof(buffer);
-                if(RtlIpv6AddressToStringExA((const IN6_ADDR*)address, 0, 0, buffer, &sz) != NO_ERROR)
-                    throw malformed_address();
-            #endif
+IPv6Address::IPv6Address() {
+    std::fill(address, address + address_size, 0);
+}
+
+IPv6Address::IPv6Address(const char *addr) {
+    init(addr);
+}
+
+IPv6Address::IPv6Address(const_iterator ptr) {
+    std::copy(ptr, ptr + address_size, address);
+}
+
+IPv6Address::IPv6Address(const std::string &addr) {
+    init(addr.c_str());
+}
+
+void IPv6Address::init(const char *addr) {
+    #ifdef WIN32
+        // mingw on linux somehow doesn't have InetPton
+        #ifdef _MSC_VER
+            if(InetPtonA(AF_INET6, addr, address) != 1)
+                throw malformed_address();
         #else
-            if(inet_ntop(AF_INET6, address, buffer, sizeof(buffer)) == 0)
+            ULONG dummy1;
+            USHORT dummy2;
+            // Maybe change this, mingw doesn't have any other conversion function
+            if(RtlIpv6StringToAddressExA(addr, (IN6_ADDR*)address, &dummy1, &dummy2) != NO_ERROR)
                 throw malformed_address();
         #endif
-        return buffer;
-    }
+    #else
+        if(inet_pton(AF_INET6, addr, address) == 0)
+            throw malformed_address();
+    #endif            
+}
 
-    AddressRange<IPv6Address> operator/(const IPv6Address &addr, int mask) {
-        if(mask > 128)
-            throw std::logic_error("Prefix length cannot exceed 128");
-        IPv6Address last_addr;
-        IPv6Address::iterator it = last_addr.begin();
-        while(mask > 8) {
-            *it = 0xff;
-            ++it;
-            mask -= 8;
-        }
-        *it = 0xff << (8 - mask);
-        return AddressRange<IPv6Address>::from_mask(addr, last_addr);
+std::string IPv6Address::to_string() const {
+    char buffer[INET6_ADDRSTRLEN];
+    #ifdef WIN32
+        // mingw on linux somehow doesn't have InetNtop
+        #ifdef _MSC_VER
+            if(InetNtopA(AF_INET6, (PVOID)address, buffer, sizeof(buffer)) != 0)
+                throw malformed_address();
+        #else
+            ULONG sz = sizeof(buffer);
+            if(RtlIpv6AddressToStringExA((const IN6_ADDR*)address, 0, 0, buffer, &sz) != NO_ERROR)
+                throw malformed_address();
+        #endif
+    #else
+        if(inet_ntop(AF_INET6, address, buffer, sizeof(buffer)) == 0)
+            throw malformed_address();
+    #endif
+    return buffer;
+}
+
+bool IPv6Address::is_loopback() const {
+    return loopback_address == *this;
+}
+
+AddressRange<IPv6Address> operator/(const IPv6Address &addr, int mask) {
+    if(mask > 128)
+        throw std::logic_error("Prefix length cannot exceed 128");
+    IPv6Address last_addr;
+    IPv6Address::iterator it = last_addr.begin();
+    while(mask > 8) {
+        *it = 0xff;
+        ++it;
+        mask -= 8;
     }
+    *it = 0xff << (8 - mask);
+    return AddressRange<IPv6Address>::from_mask(addr, last_addr);
+}
 }
 

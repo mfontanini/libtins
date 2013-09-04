@@ -81,7 +81,7 @@ TEST_F(UtilsTest, ResolveDomain) {
 }
 
 TEST_F(UtilsTest, ResolveDomain6) {
-    IPv6Address localhost_ip("2001:500:88:200::10");
+    IPv6Address localhost_ip("2606:2800:220:6d:26bf:1447:1097:aa7");
 
     EXPECT_EQ(Utils::resolve_domain6("example.com"), localhost_ip);
 }

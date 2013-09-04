@@ -49,3 +49,34 @@ TEST(IPAddressTest, LessThanOperator) {
     EXPECT_LT(addr1, "192.168.0.226");
     EXPECT_LT(addr1, "193.0.0.0");
 }
+
+TEST(IPAddressTest, IsPrivate) {
+    EXPECT_TRUE(IPv4Address("192.168.0.1").is_private());
+    EXPECT_TRUE(IPv4Address("192.168.133.7").is_private());
+    EXPECT_TRUE(IPv4Address("192.168.255.254").is_private());
+    EXPECT_FALSE(IPv4Address("192.169.0.1").is_private());
+    EXPECT_FALSE(IPv4Address("192.167.255.254").is_private());
+    
+    EXPECT_TRUE(IPv4Address("10.0.0.1").is_private());
+    EXPECT_TRUE(IPv4Address("10.5.1.2").is_private());
+    EXPECT_TRUE(IPv4Address("10.255.255.254").is_private());
+    EXPECT_FALSE(IPv4Address("11.0.0.1").is_private());
+    EXPECT_FALSE(IPv4Address("9.255.255.254").is_private());
+    
+    EXPECT_TRUE(IPv4Address("172.16.0.1").is_private());
+    EXPECT_TRUE(IPv4Address("172.31.255.254").is_private());
+    EXPECT_TRUE(IPv4Address("172.20.13.75").is_private());
+    EXPECT_FALSE(IPv4Address("172.15.0.1").is_private());
+    EXPECT_FALSE(IPv4Address("172.32.0.1").is_private());
+    
+    EXPECT_FALSE(IPv4Address("100.100.100.100").is_private());
+    EXPECT_FALSE(IPv4Address("199.199.29.10").is_private());
+}
+
+TEST(IPAddressTest, IsLoopback) {
+    EXPECT_TRUE(IPv4Address("127.0.0.1").is_loopback());
+    EXPECT_TRUE(IPv4Address("127.0.0.0").is_loopback());
+    EXPECT_TRUE(IPv4Address("127.255.255.254").is_loopback());
+    EXPECT_FALSE(IPv4Address("126.255.255.254").is_loopback());
+    EXPECT_FALSE(IPv4Address("128.0.0.0").is_loopback());
+}
