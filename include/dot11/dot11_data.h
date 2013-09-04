@@ -151,6 +151,54 @@ public:
     void addr4(const address_type &new_addr4);
 
     /**
+     * \brief Retrieves the frame's source address.
+     *
+     * This is a wrapper over the addr* member functions which
+     * takes into account the value of the FromDS and ToDS bits.
+     *
+     * If FromDS == ToDS == 1, the return value is not defined.
+     */
+    address_type src_addr() const {
+        if(!from_ds() && !to_ds())
+            return addr2();
+        if(!from_ds() && to_ds())
+            return addr2();
+        return addr3();
+    }
+
+    /**
+     * \brief Retrieves the frame's destination address.
+     *
+     * This is a wrapper over the addr* member functions which
+     * takes into account the value of the FromDS and ToDS bits.
+     *
+     * If FromDS == ToDS == 1, the return value is not defined.
+     */
+    address_type dst_addr() const {
+        if(!from_ds() && !to_ds())
+            return addr1();
+        if(!from_ds() && to_ds())
+            return addr3();
+        return addr1();
+    }
+
+    /**
+     * \brief Retrieves the frame's BSSID address.
+     *
+     * This is a wrapper over the addr* member functions which
+     * takes into account the value of the FromDS and ToDS bits.
+     *
+     * If FromDS == ToDS == 1, the return value is not defined.
+     */
+    address_type bssid_addr() const {
+        if(!from_ds() && !to_ds())
+            return addr3();
+        if(!from_ds() && to_ds())
+            return addr1();
+        return addr2();
+    }
+
+    /**
      * \brief Returns the 802.11 frame's header length.
      *
      * \return An uint32_t with the header's size.

@@ -11,11 +11,47 @@ class Dot11DataTest : public testing::Test {
 public:
     static const address_type empty_addr, hwaddr;
     static const uint8_t expected_packet[];
+    static const uint8_t from_to_ds00[], from_to_ds10[], from_to_ds01[];
 };
 
 const uint8_t Dot11DataTest::expected_packet[] = { 
     9, 0, 79, 35, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6, 2, 3, 4, 5, 6, 7, 
     218, 241
+};
+
+const uint8_t Dot11DataTest::from_to_ds10[] = { 
+    8, 2, 58, 1, 0, 37, 156, 116, 149, 146, 0, 24, 248, 245, 194, 198, 
+    0, 24, 248, 245, 194, 198, 64, 25, 170, 170, 3, 0, 0, 0, 136, 142, 
+    1, 3, 0, 95, 2, 0, 138, 0, 16, 0, 0, 0, 0, 0, 0, 0, 1, 95, 85, 2, 
+    186, 64, 12, 215, 130, 122, 211, 219, 9, 59, 133, 92, 160, 245, 149, 
+    247, 123, 29, 204, 196, 41, 119, 233, 222, 169, 194, 225, 212, 18, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 60, 112, 49, 29
+};
+
+const uint8_t Dot11DataTest::from_to_ds01[] = { 
+    8, 1, 202, 0, 0, 24, 248, 245, 194, 198, 0, 37, 156, 116, 149, 146, 0, 
+    24, 248, 245, 194, 198, 176, 124, 170, 170, 3, 0, 0, 0, 136, 142, 1, 3, 
+    0, 117, 2, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 253, 86, 38, 165, 150, 
+    136, 166, 218, 91, 179, 56, 214, 89, 91, 73, 149, 237, 147, 66, 222, 31, 
+    21, 190, 114, 129, 179, 254, 230, 168, 219, 145, 48, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 123, 221, 85, 85, 63, 11, 217, 173, 76, 120, 17, 34, 0, 228, 72, 
+    107, 0, 22, 48, 20, 1, 0, 0, 15, 172, 2, 1, 0, 0, 15, 172, 4, 1, 0, 0, 
+    15, 172, 2, 0, 0, 170, 11, 87, 71
+};
+
+const uint8_t Dot11DataTest::from_to_ds00[] = { 
+    8, 0, 202, 0, 0, 24, 248, 245, 194, 198, 0, 37, 156, 116, 149, 146, 
+    0, 24, 248, 245, 194, 198, 176, 124, 170, 170, 3, 0, 0, 0, 136, 142, 
+    1, 3, 0, 117, 2, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 253, 86, 38, 
+    165, 150, 136, 166, 218, 91, 179, 56, 214, 89, 91, 73, 149, 237, 147, 
+    66, 222, 31, 21, 190, 114, 129, 179, 254, 230, 168, 219, 145, 48, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 123, 221, 85, 85, 63, 11, 217, 173, 76, 120, 
+    17, 34, 0, 228, 72, 107, 0, 22, 48, 20, 1, 0, 0, 15, 172, 2, 1, 0, 0, 
+    15, 172, 4, 1, 0, 0, 15, 172, 2, 0, 0, 170, 11, 87, 71
 };
 
 TEST_F(Dot11DataTest, Constructor) {
@@ -99,4 +135,25 @@ TEST_F(Dot11DataTest, Serialize) {
     PDU::serialization_type buffer = pdu.serialize();
     ASSERT_EQ(sizeof(expected_packet), buffer.size());
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
+}
+
+TEST_F(Dot11DataTest, Source_Dest_BSSID_Address1) {
+    Dot11Data data(from_to_ds10, sizeof(from_to_ds10));
+    EXPECT_EQ(data.src_addr(), "00:18:f8:f5:c2:c6");
+    EXPECT_EQ(data.dst_addr(), "00:25:9c:74:95:92");
+    EXPECT_EQ(data.bssid_addr(), "00:18:f8:f5:c2:c6");
+}
+
+TEST_F(Dot11DataTest, Source_Dest_BSSID_Address2) {
+    Dot11Data data(from_to_ds01, sizeof(from_to_ds01));
+    EXPECT_EQ(data.src_addr(), "00:25:9c:74:95:92");
+    EXPECT_EQ(data.dst_addr(), "00:18:f8:f5:c2:c6");
+    EXPECT_EQ(data.bssid_addr(), "00:18:f8:f5:c2:c6");
+}
+
+TEST_F(Dot11DataTest, Source_Dest_BSSID_Address3) {
+    Dot11Data data(from_to_ds01, sizeof(from_to_ds00));
+    EXPECT_EQ(data.src_addr(), "00:25:9c:74:95:92");
+    EXPECT_EQ(data.dst_addr(), "00:18:f8:f5:c2:c6");
+    EXPECT_EQ(data.bssid_addr(), "00:18:f8:f5:c2:c6");
 }
