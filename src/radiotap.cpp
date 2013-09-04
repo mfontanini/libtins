@@ -135,7 +135,7 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
     total_sz -= Endian::le_to_host(_radio.it_len);
     buffer += radiotap_hdr_size;
 
-    if((flags() & FCS) != 0) {
+    if(_radio.flags && (flags() & FCS) != 0) {
         check_size(total_sz, sizeof(uint32_t));
         total_sz -= sizeof(uint32_t);
         if((flags() & FAILED_FCS) !=0)
