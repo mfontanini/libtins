@@ -80,7 +80,7 @@ namespace Endian {
      * \param data The data to convert.
      */
      inline uint64_t do_change_endian(uint64_t data) {
-        return (((uint64_t)(do_change_endian((uint32_t)((data << 32) >> 32))) << 32) |
+        return (((uint64_t)(do_change_endian((uint32_t)(data & 0xffffffff))) << 32) |
                 (do_change_endian(((uint32_t)(data >> 32)))));
      }
      

@@ -113,10 +113,10 @@ am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo \
 	src/ethernetII.lo src/icmp.lo src/icmpv6.lo src/internals.lo \
 	src/ip.lo src/ip_address.lo src/ipv6.lo src/ipv6_address.lo \
 	src/llc.lo src/loopback.lo src/network_interface.lo \
-	src/packet_sender.lo src/packet_writer.lo src/pdu.lo \
-	src/radiotap.lo src/rawpdu.lo src/rsn_information.lo \
-	src/sll.lo src/snap.lo src/sniffer.lo src/tcp.lo \
-	src/tcp_stream.lo src/udp.lo src/utils.lo \
+	src/packet_sender.lo src/packet_writer.lo src/ppi.lo \
+	src/pdu.lo src/radiotap.lo src/rawpdu.lo \
+	src/rsn_information.lo src/sll.lo src/snap.lo src/sniffer.lo \
+	src/tcp.lo src/tcp_stream.lo src/udp.lo src/utils.lo \
 	src/dot11/dot11_base.lo src/dot11/dot11_data.lo \
 	src/dot11/dot11_mgmt.lo src/dot11/dot11_beacon.lo \
 	src/dot11/dot11_assoc.lo src/dot11/dot11_auth.lo \
@@ -324,6 +324,7 @@ libtins_la_SOURCES = src/arp.cpp \
                     src/network_interface.cpp \
                     src/packet_sender.cpp \
                     src/packet_writer.cpp \
+                    src/ppi.cpp \
                     src/pdu.cpp \
                     src/radiotap.cpp \
                     src/rawpdu.cpp \
@@ -378,6 +379,7 @@ libtins_HEADERS = include/internals.h \
 							include/bootp.h \
 							include/network_interface.h \
 							include/sll.h \
+							include/ppi.h \
 							include/radiotap.h \
 							include/dns.h \
 							include/rawpdu.h \
@@ -533,6 +535,7 @@ src/packet_sender.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/packet_writer.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/ppi.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/pdu.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/radiotap.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/rawpdu.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -638,6 +641,8 @@ mostlyclean-compile:
 	-rm -f src/packet_writer.lo
 	-rm -f src/pdu.$(OBJEXT)
 	-rm -f src/pdu.lo
+	-rm -f src/ppi.$(OBJEXT)
+	-rm -f src/ppi.lo
 	-rm -f src/pppoe.$(OBJEXT)
 	-rm -f src/pppoe.lo
 	-rm -f src/radiotap.$(OBJEXT)
@@ -691,6 +696,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/packet_sender.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/packet_writer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/pdu.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ppi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/pppoe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/radiotap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/rawpdu.Plo@am__quote@

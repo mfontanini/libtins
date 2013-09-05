@@ -118,6 +118,10 @@ bool increment(IPv4Address &addr);
 bool increment(IPv6Address &addr);
 bool decrement(IPv4Address &addr);
 bool decrement(IPv6Address &addr);
+
+inline bool is_dot3(const uint8_t *ptr, size_t sz) {
+    return (sz >= 13 && ptr[12] < 8);
+}
 } // namespace Internals
 } // namespace Tins
 /**

@@ -47,6 +47,8 @@
 #include "sll.h"
 #include "cxxstd.h"
 #include "exceptions.h"
+#include "internals.h"
+#include "ppi.h"
 
 namespace Tins {
     class SnifferIterator;
@@ -240,9 +242,7 @@ namespace Tins {
     
         BaseSniffer(const BaseSniffer&);
         BaseSniffer &operator=(const BaseSniffer&);
-        static bool is_dot3(const uint8_t *ptr, size_t sz) {
-            return (sz >= 13 && ptr[12] < 8);
-        }
+        
         
         template<class ConcretePDU, class Functor>
         static bool call_functor(LoopData<Functor> *data, const u_char *packet, const struct pcap_pkthdr *header);
@@ -321,7 +321,7 @@ namespace Tins {
         PCapLoopBreaker _(ret_val, data->handle);
         try {
             if(data->iface_type == DLT_EN10MB) {
-                ret_val = is_dot3((const uint8_t*)packet, header->caplen) ?
+                ret_val = Internals::is_dot3((const uint8_t*)packet, header->caplen) ?
                         call_functor<Tins::Dot3>(data, packet, header) :
                         call_functor<Tins::EthernetII>(data, packet, header);
             }
@@ -340,6 +340,8 @@ namespace Tins {
                 ret_val = call_functor<Tins::Loopback>(data, packet, header);
             else if(data->iface_type == DLT_LINUX_SLL)
                 ret_val = call_functor<Tins::SLL>(data, packet, header);
+            else if(data->iface_type == DLT_PPI)
+                ret_val = call_functor<Tins::PPI>(data, packet, header);
         }
         catch(malformed_packet&) { 
             ret_val = true;

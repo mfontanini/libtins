@@ -124,6 +124,17 @@ public:
         return "The provided socket type is invalid";
     }
 };
+
+/**
+ * \brief Exception thrown when an unkown link layer PDU type is 
+ * found while sniffing.
+ */
+class unknown_link_type : public std::exception {
+public:
+    const char *what() const throw() {
+        return "The sniffed link layer PDU type is unknown";
+    }
+};
 }
 
 #endif // TINS_EXCEPTIONS_H

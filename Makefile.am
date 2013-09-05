@@ -36,6 +36,7 @@ libtins_la_SOURCES=src/arp.cpp \
                     src/network_interface.cpp \
                     src/packet_sender.cpp \
                     src/packet_writer.cpp \
+                    src/ppi.cpp \
                     src/pdu.cpp \
                     src/radiotap.cpp \
                     src/rawpdu.cpp \
@@ -91,6 +92,7 @@ libtins_HEADERS = include/internals.h \
 							include/bootp.h \
 							include/network_interface.h \
 							include/sll.h \
+							include/ppi.h \
 							include/radiotap.h \
 							include/dns.h \
 							include/rawpdu.h \

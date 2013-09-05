@@ -71,7 +71,7 @@ PtrPacket BaseSniffer::next_packet() {
         if(content) {
             try {
                 if(iface_type == DLT_EN10MB) {
-                    if(is_dot3((const uint8_t*)content, header.caplen))
+                    if(Internals::is_dot3((const uint8_t*)content, header.caplen))
                         ret = new Dot3((const uint8_t*)content, header.caplen);
                     else
                         ret = new EthernetII((const uint8_t*)content, header.caplen);
@@ -84,6 +84,10 @@ PtrPacket BaseSniffer::next_packet() {
                     ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
                 else if(iface_type == DLT_LINUX_SLL)
                     ret = new Tins::SLL((const uint8_t*)content, header.caplen);
+                else if(iface_type == DLT_PPI)
+                    ret = new Tins::PPI((const uint8_t*)content, header.caplen);
+                else
+                    throw unknown_link_type();
             }
             catch(malformed_packet&) {}
         }
