@@ -119,6 +119,14 @@ bool BaseSniffer::set_filter(const std::string &filter) {
     return compile_set_filter(filter, actual_filter);
 }
 
+int BaseSniffer::proxy_pcap_loop(pcap_t *p1, int p2, pcap_handler p3, u_char *p4) {
+    return pcap_loop(p1, p2, p3, p4);
+}
+
+void BaseSniffer::PCapLoopBreaker::proxy_pcap_breakloop(pcap_t *p1) {
+    pcap_breakloop(p1);
+}
+
 // ****************************** Sniffer ******************************
 
 Sniffer::Sniffer(const string &device, unsigned max_packet_size, 

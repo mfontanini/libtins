@@ -231,17 +231,21 @@ namespace Tins {
             bool &went_well;
             pcap_t *handle;
             
+            void proxy_pcap_breakloop(pcap_t *);
+
             PCapLoopBreaker(bool &went_well, pcap_t *handle)
             : went_well(went_well), handle(handle) { }
             
             ~PCapLoopBreaker() {
                 if(!went_well)
-                    pcap_breakloop(handle);
+                    proxy_pcap_breakloop(handle);
             }
         };
     
         BaseSniffer(const BaseSniffer&);
         BaseSniffer &operator=(const BaseSniffer&);
+
+        int proxy_pcap_loop(pcap_t *, int, pcap_handler, u_char *);
         
         
         template<class ConcretePDU, class Functor>
@@ -301,7 +305,7 @@ namespace Tins {
     template<class Functor>
     void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
         LoopData<Functor> data(handle, function, iface_type);
-        pcap_loop(handle, max_packets, &BaseSniffer::callback_handler<Functor>, (u_char*)&data);
+        proxy_pcap_loop(handle, max_packets, &BaseSniffer::callback_handler<Functor>, (u_char*)&data);
     }
     
     template<class ConcretePDU, class Functor>
