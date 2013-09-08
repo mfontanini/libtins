@@ -174,16 +174,7 @@ bool increment(IPv4Address &addr) {
 }
 
 bool increment(IPv6Address &addr) {
-    IPv6Address::iterator it = addr.end() - 1;
-    while(it >= addr.begin() && *it == 0xff) {
-        *it = 0;
-        --it;
-    }
-    // reached end
-    if(it < addr.begin())
-        return true;
-    (*it)++;
-    return false;
+    return increment_buffer(addr);
 }
 
 bool decrement(IPv4Address &addr) {
@@ -194,16 +185,7 @@ bool decrement(IPv4Address &addr) {
 }
 
 bool decrement(IPv6Address &addr) {
-    IPv6Address::iterator it = addr.end() - 1;
-    while(it >= addr.begin() && *it == 0) {
-        *it = 0xff;
-        --it;
-    }
-    // reached end
-    if(it < addr.begin())
-        return true;
-    (*it)--;
-    return false;
+    return decrement_buffer(addr);
 }
 } // namespace Internals
 } // namespace Tins

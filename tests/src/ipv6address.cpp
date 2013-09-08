@@ -91,3 +91,12 @@ TEST(IPv6AddressTest, IsLoopback) {
     EXPECT_FALSE(IPv6Address("::2").is_loopback());
     EXPECT_FALSE(IPv6Address("ffff::2").is_loopback());
 }
+
+TEST(IPv6AddressTest, IsMulticast) {
+    EXPECT_TRUE(IPv6Address("ff00::1").is_multicast());
+    EXPECT_TRUE(IPv6Address("ff02::1").is_multicast());
+    EXPECT_TRUE(IPv6Address("ffff::ffff").is_multicast());
+    EXPECT_FALSE(IPv6Address("f000::").is_multicast());
+    EXPECT_FALSE(IPv6Address("feaa::dead").is_multicast());
+}
+

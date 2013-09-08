@@ -43,6 +43,7 @@ const AddressRange<IPv4Address> private_ranges[] = {
 };
 
 const AddressRange<IPv4Address> loopback_range = IPv4Address("127.0.0.0") / 8;
+const AddressRange<IPv4Address> multicast_range = IPv4Address("224.0.0.0") / 4;
     
 IPv4Address::IPv4Address(uint32_t ip) 
 : ip_addr(Endian::be_to_host(ip)) {
@@ -116,6 +117,10 @@ bool IPv4Address::is_private() const {
 
 bool IPv4Address::is_loopback() const {
     return loopback_range.contains(*this);
+}
+
+bool IPv4Address::is_multicast() const {
+    return multicast_range.contains(*this);
 }
 
 AddressRange<IPv4Address> operator/(const IPv4Address &addr, int mask) {

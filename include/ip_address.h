@@ -144,6 +144,14 @@ public:
      * 127.0.0.0/8, false otherwise.
      */
     bool is_loopback() const;
+
+    /**
+     * \brief Returns true if this is a multicast IPv4 address.
+     * 
+     * This method returns true if this address is in the address range
+     * 224.0.0.0/4, false otherwise.
+     */
+    bool is_multicast() const;
     
     /**
      * \brief Writes this address to a std::ostream.

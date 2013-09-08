@@ -45,6 +45,7 @@
 
 namespace Tins {
 const IPv6Address loopback_address = "::1";
+const AddressRange<IPv6Address> multicast_range = IPv6Address("ff00::") / 8;
 
 IPv6Address::IPv6Address() {
     std::fill(address, address + address_size, 0);
@@ -102,6 +103,10 @@ std::string IPv6Address::to_string() const {
 
 bool IPv6Address::is_loopback() const {
     return loopback_address == *this;
+}
+
+bool IPv6Address::is_multicast() const {
+    return multicast_range.contains(*this);
 }
 
 AddressRange<IPv6Address> operator/(const IPv6Address &addr, int mask) {

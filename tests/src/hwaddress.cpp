@@ -66,6 +66,13 @@ TEST_F(HWAddressTest, IsBroadcast) {
     EXPECT_TRUE(HWAddress<6>("ff:ff:ff:ff:ff:ff").is_broadcast());
 }
 
+TEST_F(HWAddressTest, IsMulticast) {
+    EXPECT_TRUE(HWAddress<6>("01:02:03:04:05:06").is_multicast());
+    EXPECT_TRUE(HWAddress<6>("09:02:03:04:05:06").is_multicast());
+    EXPECT_TRUE(HWAddress<6>("03:02:03:04:05:06").is_multicast());
+    EXPECT_FALSE(HWAddress<6>("00:02:03:04:05:06").is_multicast());
+    EXPECT_FALSE(HWAddress<6>("02:02:03:04:05:06").is_multicast());
+}
 
 TEST_F(HWAddressTest, CopyAssignmentOperator) {
     HWAddress<6> addr1(byte_address), addr2;

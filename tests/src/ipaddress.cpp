@@ -80,3 +80,11 @@ TEST(IPAddressTest, IsLoopback) {
     EXPECT_FALSE(IPv4Address("126.255.255.254").is_loopback());
     EXPECT_FALSE(IPv4Address("128.0.0.0").is_loopback());
 }
+
+TEST(IPAddressTest, IsMulticast) {
+    EXPECT_TRUE(IPv4Address("224.0.0.1").is_multicast());
+    EXPECT_TRUE(IPv4Address("226.3.54.132").is_multicast());
+    EXPECT_TRUE(IPv4Address("239.255.255.255").is_multicast());
+    EXPECT_FALSE(IPv4Address("223.255.255.255").is_multicast());
+    EXPECT_FALSE(IPv4Address("240.0.0.0").is_multicast());
+}

@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include "constants.h"
 #include "pdu.h"
+#include "hw_address.h"
 
 /**
  * \cond
@@ -42,6 +43,7 @@
 namespace Tins {
 class IPv4Address;
 class IPv6Address;
+
 namespace Internals {
 template<size_t n>
 class byte_array {
@@ -114,10 +116,46 @@ PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size);
 
 Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
 
+template<typename T>
+bool increment_buffer(T &addr) {
+    typename T::iterator it = addr.end() - 1;
+    while(it >= addr.begin() && *it == 0xff) {
+        *it = 0;
+        --it;
+    }
+    // reached end
+    if(it < addr.begin())
+        return true;
+    (*it)++;
+    return false;
+}
+
+template<typename T>
+bool decrement_buffer(T &addr) {
+    typename T::iterator it = addr.end() - 1;
+    while(it >= addr.begin() && *it == 0) {
+        *it = 0xff;
+        --it;
+    }
+    // reached end
+    if(it < addr.begin())
+        return true;
+    (*it)--;
+    return false;
+}
+
 bool increment(IPv4Address &addr);
 bool increment(IPv6Address &addr);
 bool decrement(IPv4Address &addr);
 bool decrement(IPv6Address &addr);
+template<size_t n>
+bool increment(HWAddress<n> &addr) {
+    return increment_buffer(addr);
+}
+template<size_t n>
+bool decrement(HWAddress<n> &addr) {
+    return decrement_buffer(addr);
+}
 
 inline bool is_dot3(const uint8_t *ptr, size_t sz) {
     return (sz >= 13 && ptr[12] < 8);

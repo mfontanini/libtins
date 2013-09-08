@@ -294,6 +294,16 @@ private:
     address_type first, last;
     bool only_hosts;
 };
+
+/**
+ * An IPv4 address range.
+ */
+typedef AddressRange<IPv4Address> IPv4Range;
+
+/**
+ * An IPv6 address range.
+ */
+typedef AddressRange<IPv6Address> IPv6Range;
 } // namespace Tins
 
 #endif // TINS_ADDRESS_RANGE

@@ -235,6 +235,13 @@ public:
     }
     
     /**
+     * \brief Indicates whether this is a multicast address
+     */
+    bool is_multicast() const {
+        return (buffer[0] & 0x01);
+    }
+
+    /**
      * \brief Convert this address to a hex-notation std::string address.
      * 
      * \return std::string containing the hex-notation address.
