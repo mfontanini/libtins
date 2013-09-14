@@ -35,6 +35,9 @@
 #include "small_uint.h"
 
 namespace Tins {
+/**
+ * Represents an IEEE 802.1q PDU.
+ */
 class Dot1Q : public PDU {
 public:
     /**
@@ -78,24 +81,24 @@ public:
     uint32_t trailer_size() const;
 
     /**
-     *  \brief Getter for the priority field.
-     *  \return The stored priority field value.
+     * \brief Getter for the priority field.
+     * \return The stored priority field value.
      */
     small_uint<3> priority() const {
         return _header.priority;
     }
 
     /**
-     *  \brief Getter for the cfi field.
-     *  \return The stored cfi field value.
+     * \brief Getter for the Canonical Format Identifier field.
+     * \return The stored CFI field value.
      */
     small_uint<1> cfi() const {
         return _header.cfi;
     }
 
     /**
-     *  \brief Getter for the id field.
-     *  \return The stored id field value.
+     * \brief Getter for the VLAN ID field.
+     * \return The stored VLAN ID field value.
      */
     small_uint<12> id() const {
         #if TINS_IS_LITTLE_ENDIAN
@@ -106,8 +109,8 @@ public:
     }
 
     /**
-     *  \brief Getter for the payload type field.
-     *  \return The stored type field value.
+     * \brief Getter for the payload type field.
+     * \return The stored type field value.
      */
     uint16_t payload_type() const {
         return Endian::be_to_host(_header.type);
@@ -137,31 +140,31 @@ public:
     // Setters
 
     /**
-     *  \brief Setter for the priority field.
-     *  \param new_priority The new priority field value.
+     * \brief Setter for the priority field.
+     * \param new_priority The new priority field value.
      */
     void priority(small_uint<3> new_priority);
 
     /**
-     *  \brief Setter for the cfi field.
-     *  \param new_cfi The new cfi field value.
+     * \brief Setter for the Canonical Format Identifie field.
+     * \param new_cfi The new CFI field value.
      */
     void cfi(small_uint<1> new_cfi);
 
     /**
-     *  \brief Setter for the id field.
-     *  \param new_id The new id field value.
+     * \brief Setter for the VLAN ID field.
+     * \param new_id The new VLAN ID field value.
      */
     void id(small_uint<12> new_id);
 
     /**
-     *  \brief Setter for the payload type field.
-     *  \param new_type The new type field value.
+     * \brief Setter for the payload type field.
+     * \param new_type The new type field value.
      */
     void payload_type(uint16_t new_type);
     
     /**
-     *  \brief Indicates whether the appropriate padding will be 
+     * \brief Indicates whether the appropriate padding will be 
      * at the end of the packet.
      * 
      * This flag could be disabled in case two or more contiguous Dot1Q 

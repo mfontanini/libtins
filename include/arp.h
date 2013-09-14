@@ -71,10 +71,18 @@ namespace Tins {
         };
 
         /**
-         * \brief Default constructor for ARP PDU objects.
-         *
+         * \brief Constructs an ARP object using the provided addresses.
+         * 
          * ARP requests and replies can be constructed easily using
-         * ARP::make_arp_request/reply static functions.
+         * ARP::make_arp_request/reply static member functions.
+         * 
+         * \sa ARP::make_arp_request
+         * \sa ARP::make_arp_reply
+         * 
+         * \param target_ip The target IP address.
+         * \param sender_ip The sender IP address.
+         * \param target_hw The target hardware address.
+         * \param sender_hw The sender hardware address.
          */
         ARP(ipaddress_type target_ip = ipaddress_type(), 
             ipaddress_type sender_ip = ipaddress_type(), 
@@ -125,41 +133,42 @@ namespace Tins {
         ipaddress_type target_ip_addr() const { return ipaddress_type(_arp.ar_tip); }
 
         /**
-         * \brief Getter for the hardware address format.
+         * \brief Getter for the hardware address format field.
          *
          * \return The hardware address format.
          */
         uint16_t hw_addr_format() const { return Endian::be_to_host(_arp.ar_hrd); }
 
         /**
-         * \brief Getter for the protocol address format.
+         * \brief Getter for the protocol address format field.
          *
          * \return The protocol address format.
          */
         uint16_t prot_addr_format() const { return Endian::be_to_host(_arp.ar_pro); }
 
         /**
-         * \brief Getter for the hardware address length.
+         * \brief Getter for the hardware address length field.
          *
          * \return The hardware address length.
          */
         uint8_t hw_addr_length() const { return _arp.ar_hln; }
 
         /**
-         * \brief Getter for the protocol address length.
+         * \brief Getter for the protocol address length field.
          *
          * \return The protocol address length.
          */
         uint8_t prot_addr_length() const { return _arp.ar_pln; }
 
         /**
-         * \brief Getter for the ARP opcode.
+         * \brief Getter for the ARP opcode field.
          *
          * \return The ARP opcode.
          */
         uint16_t opcode() const { return Endian::be_to_host(_arp.ar_op); }
 
-        /** \brief Getter for the header size.
+        /** 
+         * \brief Getter for the header size.
          * \return Returns the ARP header size.
          * \sa PDU::header_size
          */
@@ -195,35 +204,35 @@ namespace Tins {
         void target_ip_addr(ipaddress_type new_tgt_ip_addr);
 
         /**
-         * \brief Setter for the hardware address format.
+         * \brief Setter for the hardware address format field.
          *
          * \param new_hw_addr_fmt The new hardware address format.
          */
         void hw_addr_format(uint16_t new_hw_addr_fmt);
 
         /**
-         * \brief Setter for the protocol address format.
+         * \brief Setter for the protocol address format field.
          *
          * \param new_prot_addr_fmt The new protocol address format.
          */
         void prot_addr_format(uint16_t new_prot_addr_fmt);
 
         /**
-         * \brief Setter for the hardware address length.
+         * \brief Setter for the hardware address length field.
          *
          * \param new_hw_addr_len The new hardware address length.
          */
         void hw_addr_length(uint8_t new_hw_addr_len);
 
         /**
-         * \brief Setter for the protocol address length.
+         * \brief Setter for the protocol address length field.
          *
          * \param new_prot_addr_len The new protocol address length.
          */
         void prot_addr_length(uint8_t new_prot_addr_len);
 
         /**
-         * \brief Setter for the ARP opcode.
+         * \brief Setter for the ARP opcode field.
          *
          * \param new_opcode Flag enum value of the ARP opcode to set.
          */
@@ -233,18 +242,18 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::ARP; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \brief Creates an ARP Request within an EthernetII PDU.
          *
-         * Creates an ARP Request PDU and embeds it within a Layer 2 PDU ready to be
-         * sent. 
+         * Creates an ARP Request PDU and embeds it inside an EthernetII
+         * PDU.
          *
          * \param target The target's IP address.
          * \param sender The sender's IP address.
          * \param hw_snd The sender's hardware address.
-         * \return Returns a EthernetII containing the ARP Request.
+         * \return EthernetII object containing the ARP Request.
          */
         static EthernetII make_arp_request(ipaddress_type target, 
           ipaddress_type sender, const hwaddress_type &hw_snd = hwaddress_type());
@@ -252,20 +261,21 @@ namespace Tins {
         /**
          * \brief Creates an ARP Reply within an EthernetII PDU.
          *
-         * Creates an ARP Reply PDU and embeds it within a Layer 2 PDU ready to be
-         * sent. 
+         * Creates an ARP Reply PDU and embeds it inside an EthernetII 
+         * PDU.
          *
          * \param target The target's IP address.
          * \param sender The sender's IP address.
          * \param hw_tgt The target's hardware address.
          * \param hw_snd The sender's hardware address.
-         * \return Returns an EthetnetII containing the ARP Replay.
+         * \return EthetnetII containing the ARP Replay.
          */
         static EthernetII make_arp_reply(ipaddress_type target, 
           ipaddress_type sender, const hwaddress_type &hw_tgt = hwaddress_type(), 
           const hwaddress_type &hw_snd = hwaddress_type());
 
-        /** \brief Check wether ptr points to a valid response for this PDU.
+        /** 
+         * \brief Check wether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.

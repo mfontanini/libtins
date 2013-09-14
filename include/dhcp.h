@@ -162,12 +162,11 @@ namespace Tins {
          * \brief Constructs a DHCP object from a buffer.
          * 
          * If there is not enough size for a BootP header, or any of
-         * the TLV options contain an invalid size field, then a
+         * the TLV options contains an invalid size field, then a
          * malformed_packet exception is thrown.
          * 
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
-         * Subclasses might use 0 to provide their own interpretation of this field.
          */
         DHCP(const uint8_t *buffer, uint32_t total_sz);
         
@@ -199,13 +198,18 @@ namespace Tins {
         const option *search_option(OptionTypes opt) const;
         
         /** 
-         * \brief Adds a type option the the option list.
+         * \brief Adds a type option to the option list.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param type The type of this DHCP PDU.
          */
         void type(Flags type);
         
         /** 
-         * \brief Adds an end option the the option list.
+         * \brief Adds an end option to the option list.
+         * 
+         * The new option is appended at the end of the list.
          * 
          * The END option is not added automatically. You should explicitly
          * add it at the end of the DHCP options for the PDU to be
@@ -215,60 +219,90 @@ namespace Tins {
         
         /** 
          * \brief Adds a server identifier option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param ip The ip of the server.
          */
         void server_identifier(ipaddress_type ip);
         
         /** 
          * \brief Adds an IP address lease time option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param time The lease time.
          */
         void lease_time(uint32_t time);
         
         /** 
          * \brief Adds a lease renewal time option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param time The lease renew time.
          */
         void renewal_time(uint32_t time);
         
         /** 
          * \brief Adds a rebind time option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param time The lease rebind time.
          */
         void rebind_time(uint32_t time);
         
         /**
          * \brief Adds a subnet mask option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param mask The subnet mask.
          */
         void subnet_mask(ipaddress_type mask);
         
         /** 
          * \brief Adds a routers option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param routers A list of ip addresses.
          */
         void routers(const std::list<ipaddress_type> &routers);
         
         /** 
          * \brief Adds a domain name servers option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param dns A list of ip addresses.
          */
         void domain_name_servers(const std::list<ipaddress_type> &dns);
         
         /** 
          * \brief Adds a broadcast address option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param addr The broadcast address.
          */
         void broadcast(ipaddress_type addr);
         
         /** 
          * \brief Adds a requested address option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param addr The requested address.
          */
         void requested_ip(ipaddress_type addr);
         
         /** 
          * \brief Adds a domain name option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
          * \param name The domain name.
          */
         void domain_name(const std::string &name);
@@ -278,7 +312,7 @@ namespace Tins {
         /**
          * \brief Searchs for a type option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return uint8_t containing the type option.
@@ -288,7 +322,7 @@ namespace Tins {
         /**
          * \brief Searchs for a server identifier option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return ipaddress_type Containing the server identifier.
@@ -298,7 +332,7 @@ namespace Tins {
         /**
          * \brief Searchs for a lease time option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return uint32_t Containing the lease time.
@@ -308,7 +342,7 @@ namespace Tins {
         /**
          * \brief Searchs for a lease renewal time option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return uint32_t Containing the renewal time.
@@ -318,7 +352,7 @@ namespace Tins {
         /**
          * \brief Searchs for a rebind time option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return uint32_t Containing the rebind time.
@@ -328,7 +362,7 @@ namespace Tins {
         /**
          * \brief Searchs for a subnet mask option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return ipaddress_type Containing the subnet mask.
@@ -338,7 +372,7 @@ namespace Tins {
         /**
          * \brief Searchs for a routers option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return std::list<ipaddress_type> Containing the routers 
@@ -349,7 +383,7 @@ namespace Tins {
         /**
          * \brief Searchs for a dns option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return std::list<ipaddress_type> Contanining the DNS servers
@@ -360,7 +394,7 @@ namespace Tins {
         /**
          * \brief Searchs for a broadcast option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return ipaddress_type Containing the broadcast address.
@@ -370,7 +404,7 @@ namespace Tins {
         /**
          * \brief Searchs for a requested option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return ipaddress_type Containing the requested IP address.
@@ -380,14 +414,15 @@ namespace Tins {
         /**
          * \brief Searchs for a domain name option.
          * 
-         * If the option is not found, a option_not_found exception
+         * If the option is not found, an option_not_found exception
          * is thrown.
          * 
          * \return std::string Containing the domain name.
          */
         std::string domain_name() const;
         
-        /** \brief Getter for the options list.
+        /** 
+         * \brief Getter for the options list.
          * \return The option list.
          */
         const options_type options() const { return _options; }
@@ -396,7 +431,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::DHCP; }
+        PDUType pdu_type() const { return pdu_flag; }
         
         /** 
          * \brief Getter for the header size.

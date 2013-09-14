@@ -74,14 +74,14 @@ namespace Tins{
         typedef std::vector<uint8_t> serialization_type;
 
         /**
-         * \brief Creates an instance of RSNInformation.
+         * \brief Constructs an RSNInformation object.
          *
          * By default, the version is set to 1.
          */
         RSNInformation();
         
         /**
-         * \brief Creates an instance of RSNInformation from a 
+         * \brief Constructs an RSNInformation object from a 
          * serialization_type object.
          * 
          * \param buffer The buffer from which to construct this object.
@@ -113,7 +113,7 @@ namespace Tins{
         void add_pairwise_cypher(CypherSuites cypher);
 
         /**
-         * \brief Adds a akm suite.
+         * \brief Adds an akm suite.
          * \param akm The akm suite to be added.
          */
         void add_akm_cypher(AKMSuites akm);

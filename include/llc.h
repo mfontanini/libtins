@@ -55,6 +55,10 @@ namespace Tins {
          * \brief Represents the LLC global DSAP address.
          */
         static const uint8_t GLOBAL_DSAP_ADDR;
+        
+        /**
+         * \brief Represents the LLC NULL address.
+         */
         static const uint8_t NULL_ADDR;
 
         /**
@@ -302,7 +306,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::LLC; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
 		 * \brief Delete all the information fields added.

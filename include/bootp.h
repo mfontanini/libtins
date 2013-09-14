@@ -275,7 +275,8 @@ namespace Tins {
                 _bootp.chaddr
             );
             // Fill what's left with zeros
-            std::fill(end, _bootp.chaddr + chaddr_type::address_size, 0);
+            if(end < _bootp.chaddr + chaddr_type::address_size)
+                std::fill(end, _bootp.chaddr + chaddr_type::address_size, 0);
         }
 
         /** 
@@ -299,7 +300,7 @@ namespace Tins {
         /**
          * \brief Check wether ptr points to a valid response for this PDU.
          *
-         * This returns true, if the xid field is equal.
+         * This returns true if the xid field is equal.
          * 
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
@@ -311,7 +312,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::BOOTP; }
+        PDUType pdu_type() const { return pdu_flag; }
 
         /**
          * \sa PDU::clone

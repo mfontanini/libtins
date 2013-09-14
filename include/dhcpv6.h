@@ -442,7 +442,6 @@ public:
      * \return The stored options.
      */
     const options_type &options() const { return options_; }
- ;
 
     // Setters
     /**

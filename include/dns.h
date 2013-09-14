@@ -558,6 +558,9 @@ namespace Tins {
         
         /**
          * \brief Getter for this PDU's DNS queries.
+         * 
+         * This method is <b>not thread safe</b>.
+         * 
          * \return std::list<Query> containing the queries in this
          * record.
          */
@@ -565,6 +568,9 @@ namespace Tins {
         
         /**
          * \brief Getter for this PDU's DNS answers
+         * 
+         * This method is <b>not thread safe</b>.
+         * 
          * \return std::list<Resource> containing the answers in this
          * record.
          */
@@ -587,7 +593,7 @@ namespace Tins {
         }
         
         /**
-         * Helper function to create a resource record information
+         * Helper function to create a resource record information.
          * 
          * \param type The type of the query.
          * \param qclass The class of the query.
