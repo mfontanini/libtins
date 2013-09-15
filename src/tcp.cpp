@@ -56,41 +56,30 @@ TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
     if(total_sz < sizeof(tcphdr))
         throw malformed_packet();
     std::memcpy(&_tcp, buffer, sizeof(tcphdr));
+    if(data_offset() * sizeof(uint32_t) > total_sz || data_offset() * sizeof(uint32_t) < sizeof(tcphdr)) 
+        throw malformed_packet();
+    const uint8_t *header_end = buffer + (data_offset() * sizeof(uint32_t));
+    total_sz = total_sz - (header_end - buffer);
     buffer += sizeof(tcphdr);
-    total_sz -= sizeof(tcphdr);
     
     _total_options_size = 0;
     _options_size = 0;
-    
-    uint32_t index = 0, header_end = (data_offset() * sizeof(uint32_t)) - sizeof(tcphdr);
-    if(total_sz >= header_end) {
-        uint8_t args[2] = {0};
-        while(index < header_end) {
-            for(unsigned i(0); i < 2; ++i) {
-                if(index == header_end)
-                    throw malformed_packet();
-                args[i] = buffer[index++];
-                // NOP and EOL contain no length field
-                if(args[0] == NOP || args[0] == EOL)
-                    break;
-            }
-            // We don't want to store NOPs and EOLs
-            if(args[0] != NOP && args[0] != EOL)  {
-                // Not enough size for this option
-                args[1] -= (sizeof(uint8_t) << 1);
-                if(header_end - index < args[1])
-                    throw malformed_packet(); 
-                if(args[1])
-                    add_option(option((OptionTypes)args[0], buffer + index, buffer + index + args[1]));
-                else
-                    add_option(option((OptionTypes)args[0], args[1], 0));
-                index += args[1];
-            }
-            else
-                add_option(option((OptionTypes)args[0], 0));
+
+    while(buffer < header_end) {
+        if(*buffer <= NOP) {
+            add_option(option((OptionTypes)*buffer, 0));
+            ++buffer;
         }
-        buffer += index;
-        total_sz -= index;
+        else {
+            if(buffer + 1 == header_end)
+                throw malformed_packet();
+            const uint8_t len = buffer[1] - (sizeof(uint8_t) << 1);
+            const uint8_t *data_start = buffer + 2;
+            if(data_start + len > header_end)
+                throw malformed_packet(); 
+            add_option(option((OptionTypes)*buffer, data_start, data_start + len));
+            buffer = data_start + len;
+        }
     }
     if(total_sz)
         inner_pdu(new RawPDU(buffer, total_sz));
