@@ -35,14 +35,13 @@ using std::string;
 using std::runtime_error;
 
 namespace Tins {
-BaseSniffer::BaseSniffer() : handle(0), mask(0)
+BaseSniffer::BaseSniffer() 
+: handle(0), mask(0)
 {
-    actual_filter.bf_insns = 0;
+
 }
     
 BaseSniffer::~BaseSniffer() {
-    if(actual_filter.bf_insns)
-        pcap_freecode(&actual_filter);
     if(handle)
         pcap_close(handle);
 }
@@ -53,14 +52,8 @@ void BaseSniffer::init(pcap_t *phandle, const std::string &filter,
     handle = phandle;
     mask = if_mask;
     
-    iface_type = pcap_datalink(handle);
-    actual_filter.bf_insns = 0;
     if(!filter.empty() && !set_filter(filter))
         throw runtime_error("Invalid filter");
-}
-
-bool BaseSniffer::compile_set_filter(const string &filter, bpf_program &prog) {
-    return (pcap_compile(handle, &prog, filter.c_str(), 0, mask) != -1 && pcap_setfilter(handle, &prog) != -1);
 }
 
 PtrPacket BaseSniffer::next_packet() {
@@ -68,6 +61,7 @@ PtrPacket BaseSniffer::next_packet() {
     PDU *ret = 0;
     while(!ret) {
         const u_char *content = pcap_next(handle, &header);
+        const int iface_type = pcap_datalink(handle);
         if(content) {
             try {
                 if(iface_type == DLT_EN10MB) {
@@ -105,6 +99,10 @@ int BaseSniffer::get_fd() {
     return pcap_get_selectable_fd(handle);
 }
 
+int BaseSniffer::link_type() const {
+    return pcap_datalink(handle);
+}
+
 BaseSniffer::iterator BaseSniffer::begin() {
     return iterator(this);
 }
@@ -114,17 +112,12 @@ BaseSniffer::iterator BaseSniffer::end() {
 }
 
 bool BaseSniffer::set_filter(const std::string &filter) {
-    if(actual_filter.bf_insns)
-        pcap_freecode(&actual_filter);
-    return compile_set_filter(filter, actual_filter);
-}
-
-int BaseSniffer::proxy_pcap_loop(pcap_t *p1, int p2, pcap_handler p3, u_char *p4) {
-    return pcap_loop(p1, p2, p3, p4);
-}
-
-void BaseSniffer::PCapLoopBreaker::proxy_pcap_breakloop(pcap_t *p1) {
-    pcap_breakloop(p1);
+    bpf_program prog;
+    if(pcap_compile(handle, &prog, filter.c_str(), 0, mask) == -1)
+        return false;
+    bool result = pcap_setfilter(handle, &prog) != -1;
+    pcap_freecode(&prog);
+    return result;
 }
 
 // ****************************** Sniffer ******************************

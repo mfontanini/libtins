@@ -76,22 +76,20 @@ namespace Tins {
              * This constructor is available only in C++11.
              */
             BaseSniffer(BaseSniffer &&rhs) noexcept 
+            : handle(nullptr), mask()
             {
                 *this = std::move(rhs);
             }
             
             /**
              * \brief Move assignment operator.
-             * This opeartor is available only in C++11.
+             * This operator is available only in C++11.
              */
             BaseSniffer& operator=(BaseSniffer &&rhs) noexcept 
             {
-                handle = 0;
-                mask = rhs.mask;
-                iface_type = rhs.iface_type;
-                actual_filter.bf_insns = 0;
-                std::swap(handle, rhs.handle);
-                std::swap(actual_filter, rhs.actual_filter);
+                using std::swap;
+                swap(handle, rhs.handle);
+                swap(mask, rhs.mask);
                 return *this;
             }
         #endif
@@ -143,12 +141,12 @@ namespace Tins {
          * \brief Starts a sniffing loop, using a callback object for every
          * sniffed packet.
          * 
-         * The callback object must implement an operator with some of
-         * the following(or compatible) signatures:
+         * The callback object must implement an operator with one of the 
+         * following signatures:
          * 
          * \code
          * bool operator()(PDU&);
-         * bool operator()(RefPacket&);
+         * bool operator()(const PDU&);
          * \endcode
          * 
          * This operator will be called using the sniffed packets 
@@ -156,17 +154,29 @@ namespace Tins {
          * Calling PDU methods like PDU::release_inner_pdu is perfectly 
          * valid.
          * 
-         * The callback taking a RefPacket will contain a timestamp
-         * indicating the moment in which the packet was taken out of 
-         * the wire/pcap file. 
-         * 
          * Note that the Functor object will be copied using its copy
          * constructor, so that object should be some kind of proxy to
          * another object which will process the packets(e.g. std::bind).
+         *
+         * Sniffing will stop when either max_packets are sniffed(if it is != 0), 
+         * or when the functor returns false.
+         *
+         * This method catches both malformed_packet and pdu_not_found exceptions,
+         * which allows writing much cleaner code, since you can call PDU::rfind_pdu
+         * without worrying about catching the exception that can be thrown. This 
+         * allows writing code such as the following:
+         *
+        * \code
+         * bool callback(const PDU& pdu) {
+         *     // If either RawPDU is not found, or construction of the DNS 
+         *     // object fails, the BaseSniffer object will trap the exceptions, 
+         *     // so we don't need to worry about it.
+         *     DNS dns = pdu.rfind_pdu<RawPDU>().to<DNS>();
+         *     return true;
+         * }
+         * \endcode
          * 
-         * \sa RefPacket
-         * 
-         * \param cback_handler The callback handler object which should process packets.
+         * \param function The callback handler object which should process packets.
          * \param max_packets The maximum amount of packets to sniff. 0 == infinite.
          */
         template<class Functor>
@@ -181,6 +191,9 @@ namespace Tins {
         
         /**
          * \brief Stops sniffing loops.
+         *
+         * This method must be called from the same thread from which
+         * BaseSniffer::sniff_loop was called.
          */
         void stop_sniff();
 
@@ -188,6 +201,14 @@ namespace Tins {
          * \brief Gets the file descriptor associated with the sniffer.
          */
         int get_fd();
+
+        /**
+         * \brief Retrieves this sniffer's link type.
+         *
+         * This calls pcap_datalink on the stored pcap handle and
+         * returns its result.
+         */
+        int link_type() const;
 
         /**
          * Retrieves an iterator to the next packet in this sniffer.
@@ -215,62 +236,16 @@ namespace Tins {
          */
         void init(pcap_t *phandle, const std::string &filter, bpf_u_int32 if_mask);
     private:
-        template<class Functor>
-        struct LoopData {
-            pcap_t *handle;
-            Functor c_handler;
-            int iface_type;
-            
-            LoopData(pcap_t *_handle, const Functor _handler, 
-              int if_type) 
-            : handle(_handle), c_handler(_handler), iface_type(if_type)
-            { }
-        };
-        
-        struct PCapLoopBreaker {
-            bool &went_well;
-            pcap_t *handle;
-            
-            void proxy_pcap_breakloop(pcap_t *);
-
-            PCapLoopBreaker(bool &went_well, pcap_t *handle)
-            : went_well(went_well), handle(handle) { }
-            
-            ~PCapLoopBreaker() {
-                if(!went_well)
-                    proxy_pcap_breakloop(handle);
-            }
-        };
-    
         BaseSniffer(const BaseSniffer&);
         BaseSniffer &operator=(const BaseSniffer&);
-
-        int proxy_pcap_loop(pcap_t *, int, pcap_handler, u_char *);
-        
-        
-        template<class ConcretePDU, class Functor>
-        static bool call_functor(LoopData<Functor> *data, const u_char *packet, const struct pcap_pkthdr *header);
-        
-        bool compile_set_filter(const std::string &filter, bpf_program &prog);
-        
-        template<class Functor>
-        static void callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
         
         pcap_t *handle;
         bpf_u_int32 mask;
-        bpf_program actual_filter;
-        int iface_type;
     };
     
     /** 
      * \class Sniffer
-     * \brief Sniffs packets using pcap filters.
-     * 
-     * This class uses a given filter to sniff packets and allow the user
-     * to handle them. Each time a filter is set, it's used until a new one
-     * is set. Both Sniffer::next_packet and Sniffer::sniff_loop have an
-     * optional filter parameter. If a filter is set using those parameter,
-     * the previously set filter is freed and the new one is used.
+     * \brief Sniffs packets from a network interface.
      */
     class Sniffer : public BaseSniffer {
     public:
@@ -287,7 +262,7 @@ namespace Tins {
     
     /**
      * \class FileSniffer
-     * \brief Parses pcap files and interprets the packets in it.
+     * \brief Reads pcap files and interprets the packets in it.
      * 
      * This class acts exactly in the same way that Sniffer, but reads
      * packets from a pcap file instead of an interface.
@@ -301,59 +276,6 @@ namespace Tins {
          */
         FileSniffer(const std::string &file_name, const std::string &filter = "");
     };
-        
-    template<class Functor>
-    void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
-        LoopData<Functor> data(handle, function, iface_type);
-        proxy_pcap_loop(handle, max_packets, &BaseSniffer::callback_handler<Functor>, (u_char*)&data);
-    }
-    
-    template<class ConcretePDU, class Functor>
-    bool Tins::BaseSniffer::call_functor(LoopData<Functor> *data, const u_char *packet, 
-      const struct pcap_pkthdr *header) 
-    {
-        ConcretePDU some_pdu((const uint8_t*)packet, header->caplen);
-        Timestamp ts(header->ts);
-        RefPacket pck(some_pdu, ts);
-        return data->c_handler(pck);
-    }
-    
-    template<class Functor>
-    void Tins::BaseSniffer::callback_handler(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
-        bool ret_val(true);
-        LoopData<Functor> *data = reinterpret_cast<LoopData<Functor>*>(args);
-        PCapLoopBreaker _(ret_val, data->handle);
-        try {
-            if(data->iface_type == DLT_EN10MB) {
-                ret_val = Internals::is_dot3((const uint8_t*)packet, header->caplen) ?
-                        call_functor<Tins::Dot3>(data, packet, header) :
-                        call_functor<Tins::EthernetII>(data, packet, header);
-            }
-            else if(data->iface_type == DLT_IEEE802_11_RADIO)
-                ret_val = call_functor<Tins::RadioTap>(data, packet, header);
-            else if(data->iface_type == DLT_IEEE802_11) {
-                Internals::smart_ptr<PDU>::type pdu(
-                    Tins::Dot11::from_bytes((const uint8_t*)packet, header->caplen)
-                );
-                if(pdu.get()) {
-                    RefPacket pck(*pdu, header->ts);
-                    ret_val = data->c_handler(pck);
-                }
-            }
-            else if(data->iface_type == DLT_NULL) 
-                ret_val = call_functor<Tins::Loopback>(data, packet, header);
-            else if(data->iface_type == DLT_LINUX_SLL)
-                ret_val = call_functor<Tins::SLL>(data, packet, header);
-            else if(data->iface_type == DLT_PPI)
-                ret_val = call_functor<Tins::PPI>(data, packet, header);
-        }
-        catch(malformed_packet&) { 
-            ret_val = true;
-        }
-        catch(pdu_not_found&) { 
-            ret_val = true;
-        }
-    }
     
     template<class T>
     class HandlerProxy {
@@ -413,7 +335,7 @@ namespace Tins {
 
         /**
          * Dereferences the iterator.
-         * \return references to the current packet.
+         * \return reference to the current packet.
          */
         PDU &operator*() {
             return *pkt.pdu();
@@ -431,7 +353,7 @@ namespace Tins {
          * Compares this iterator for equality.
          * \param rhs The iterator to be compared to.
          */
-        bool operator==(const SnifferIterator &rhs) {
+        bool operator==(const SnifferIterator &rhs) const {
             return sniffer == rhs.sniffer;
         }
 
@@ -439,7 +361,7 @@ namespace Tins {
          * Compares this iterator for in-equality.
          * \param rhs The iterator to be compared to.
          */
-        bool operator!=(const SnifferIterator &rhs) {
+        bool operator!=(const SnifferIterator &rhs) const {
             return !(*this == rhs);
         }
     private:
@@ -452,6 +374,21 @@ namespace Tins {
         BaseSniffer *sniffer;
         Packet pkt;
     };
+
+    template<class Functor>
+    void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
+        for(iterator it = begin(); it != end(); ++it) {
+            try {
+                // If the functor returns false, we're done
+                if(!function(*it))
+                    return;
+            }
+            catch(malformed_packet&) { }
+            catch(pdu_not_found&) { }
+            if(max_packets && --max_packets == 0)
+                return;
+        }
+    }
 }
     
 #endif // TINS_SNIFFER_H
