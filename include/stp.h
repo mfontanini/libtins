@@ -80,94 +80,94 @@ public:
     // Getters
 
     /**
-     *  \brief Getter for the proto_id field.
-     *  \return The stored proto_id field value.
+     *  \brief Getter for the Protocol ID field.
+     *  \return The stored Protocol ID field value.
      */
     uint16_t proto_id() const {
         return Endian::be_to_host(_header.proto_id);
     }
 
     /**
-     *  \brief Getter for the proto_version field.
-     *  \return The stored proto_version field value.
+     *  \brief Getter for the Protocol Version field.
+     *  \return The stored Protocol Version field value.
      */
     uint8_t proto_version() const {
         return _header.proto_version;
     }
 
     /**
-     *  \brief Getter for the bpdu_type field.
-     *  \return The stored bpdu_type field value.
+     *  \brief Getter for the BDU Type field.
+     *  \return The stored BDU Type field value.
      */
     uint8_t bpdu_type() const {
         return _header.bpdu_type;
     }
 
     /**
-     *  \brief Getter for the bpdu_flags field.
-     *  \return The stored bpdu_flags field value.
+     *  \brief Getter for the BDU Flags field.
+     *  \return The stored BDU Flags field value.
      */
     uint8_t bpdu_flags() const {
         return _header.bpdu_flags;
     }
 
     /**
-     *  \brief Getter for the root_path_cost field.
-     *  \return The stored root_path_cost field value.
+     *  \brief Getter for the Root Path Cost field.
+     *  \return The stored Root Path Cost field value.
      */
     uint32_t root_path_cost() const {
         return Endian::be_to_host(_header.root_path_cost);
     }
 
     /**
-     *  \brief Getter for the port_id field.
-     *  \return The stored port_id field value.
+     *  \brief Getter for the Port ID field.
+     *  \return The stored Port ID field value.
      */
     uint16_t port_id() const {
         return Endian::be_to_host(_header.port_id);
     }
 
     /**
-     *  \brief Getter for the msg_age field.
-     *  \return The stored msg_age field value.
+     *  \brief Getter for the Message Age field.
+     *  \return The stored Message Age field value.
      */
     uint16_t msg_age() const {
         return Endian::be_to_host(_header.msg_age) / 256;
     }
 
     /**
-     *  \brief Getter for the max_age field.
-     *  \return The stored max_age field value.
+     *  \brief Getter for the Maximum Age field.
+     *  \return The stored Maximum Age field value.
      */
     uint16_t max_age() const {
         return Endian::be_to_host(_header.max_age) / 256;
     }
 
     /**
-     *  \brief Getter for the hello_time field.
-     *  \return The stored hello_time field value.
+     *  \brief Getter for the Hello Time field.
+     *  \return The stored Hello Time field value.
      */
     uint16_t hello_time() const {
         return Endian::be_to_host(_header.hello_time) / 256;
     }
 
     /**
-     *  \brief Getter for the fwd_delay field.
-     *  \return The stored fwd_delay field value.
+     *  \brief Getter for the Forward Delay field.
+     *  \return The stored Forward Delay field value.
      */
     uint16_t fwd_delay() const {
         return Endian::be_to_host(_header.fwd_delay) / 256;
     }
     
     /**
-     *  \brief Getter for the root id field.
-     *  \return The stored root id field value.
+     *  \brief Getter for the Root ID field.
+     *  \return The stored Root ID field value.
      */
     bpdu_id_type root_id() const;
     
     /**
-     *  \brief Getter for the bridge id field.
-     *  \return The stored bridge id field value.
+     *  \brief Getter for the Bridge ID field.
+     *  \return The stored Bridge ID field value.
      */
     bpdu_id_type bridge_id() const;
 
@@ -194,74 +194,74 @@ public:
     // Setters
 
     /**
-     *  \brief Setter for the proto_id field.
-     *  \param new_proto_id The new proto_id field value.
+     *  \brief Setter for the Protocol ID field.
+     *  \param new_proto_id The new Protocol ID field value.
      */
     void proto_id(uint16_t new_proto_id);
 
     /**
-     *  \brief Setter for the proto_version field.
-     *  \param new_proto_version The new proto_version field value.
+     *  \brief Setter for the Protocol Version field.
+     *  \param new_proto_version The new Protocol Version field value.
      */
     void proto_version(uint8_t new_proto_version);
 
     /**
-     *  \brief Setter for the bpdu_type field.
-     *  \param new_bpdu_type The new bpdu_type field value.
+     *  \brief Setter for the BPDU Type field.
+     *  \param new_bpdu_type The new BPDU Type field value.
      */
     void bpdu_type(uint8_t new_bpdu_type);
 
     /**
-     *  \brief Setter for the bpdu_flags field.
-     *  \param new_bpdu_flags The new bpdu_flags field value.
+     *  \brief Setter for the BPDU Flags field.
+     *  \param new_bpdu_flags The new BPDU Flags field value.
      */
     void bpdu_flags(uint8_t new_bpdu_flags);
 
     /**
-     *  \brief Setter for the root_path_cost field.
-     *  \param new_root_path_cost The new root_path_cost field value.
+     *  \brief Setter for the Root Path Cost field.
+     *  \param new_root_path_cost The new Root Path Cost field value.
      */
     void root_path_cost(uint32_t new_root_path_cost);
 
     /**
-     *  \brief Setter for the port_id field.
-     *  \param new_port_id The new port_id field value.
+     *  \brief Setter for the Port ID field.
+     *  \param new_port_id The new Port ID field value.
      */
     void port_id(uint16_t new_port_id);
 
     /**
-     *  \brief Setter for the msg_age field.
-     *  \param new_msg_age The new msg_age field value.
+     *  \brief Setter for the Message Age field.
+     *  \param new_msg_age The new Message Age field value.
      */
     void msg_age(uint16_t new_msg_age);
 
     /**
-     *  \brief Setter for the max_age field.
-     *  \param new_max_age The new max_age field value.
+     *  \brief Setter for the Maximum Age field.
+     *  \param new_max_age The new Maximum Age field value.
      */
     void max_age(uint16_t new_max_age);
 
     /**
-     *  \brief Setter for the hello_time field.
-     *  \param new_hello_time The new hello_time field value.
+     *  \brief Setter for the Hello Time field.
+     *  \param new_hello_time The new Hello Time field value.
      */
     void hello_time(uint16_t new_hello_time);
 
     /**
-     *  \brief Setter for the fwd_delay field.
-     *  \param new_fwd_delay The new fwd_delay field value.
+     *  \brief Setter for the Forward Delay field.
+     *  \param new_fwd_delay The new Forward Delay field value.
      */
     void fwd_delay(uint16_t new_fwd_delay);
     
     /**
-     *  \brief Setter for the root id field.
-     *  \param new_fwd_delay The new root id field value.
+     *  \brief Setter for the Root ID field.
+     *  \param new_fwd_delay The new Root ID field value.
      */
     void root_id(const bpdu_id_type &id);
     
     /**
-     *  \brief Setter for the bridge id field.
-     *  \param new_fwd_delay The new bridge id field value.
+     *  \brief Setter for the Bridge ID field.
+     *  \param new_fwd_delay The new Bridge ID field value.
      */
     void bridge_id(const bpdu_id_type &id);
 private:

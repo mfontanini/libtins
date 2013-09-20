@@ -76,40 +76,40 @@ namespace Tins {
         /* Setters */
         
         /**
-         * \brief Setter for the control field.
-         * \param new_id The new control to be set.
+         * \brief Setter for the Control field.
+         * \param new_id The new Control to be set.
          */
         void control(uint8_t new_control);
         
         /**
-         * \brief Setter for the org code field.
-         * \param new_org The new org code to be set.
+         * \brief Setter for the Organization Code field.
+         * \param new_org The new Organization Code to be set.
          */
         void org_code(small_uint<24> new_org);
         
         /**
-         * \brief Setter for the eth type field.
-         * \param new_eth The new eth type to be set.
+         * \brief Setter for the Ethernet Type field.
+         * \param new_eth The new Ethernet Type to be set.
          */
         void eth_type(uint16_t new_eth);
         
         /* Getters */
         
         /**
-         * \brief Getter for the dsap field.
-         * \return The dsap field.
+         * \brief Getter for the DSAP field.
+         * \return The DSAP field.
          */
         uint8_t dsap() const { return _snap.dsap; }
         
         /**
-         * \brief Getter for the ssap field.
-         * \return The ssap field.
+         * \brief Getter for the SSAP field.
+         * \return The SSAP field.
          */
         uint8_t ssap() const { return _snap.ssap; }
         
         /**
-         * \brief Getter for the control field.
-         * \return The control field.
+         * \brief Getter for the Control field.
+         * \return The Control field.
          */
         uint8_t control() const { 
             #if TINS_IS_LITTLE_ENDIAN
@@ -120,8 +120,8 @@ namespace Tins {
         }
         
         /**
-         * \brief Getter for the org code field.
-         * \return The org code field.
+         * \brief Getter for the Organization Code field.
+         * \return The Organization Code field.
          */        
         small_uint<24> org_code() const { 
             #if TINS_IS_LITTLE_ENDIAN
@@ -132,8 +132,8 @@ namespace Tins {
         }
         
         /**
-         * \brief Getter for the eth type field.
-         * \return The eth field.
+         * \brief Getter for the Ethernet Type field.
+         * \return The Ethernet Type field.
          */
         uint16_t eth_type() const { return Endian::be_to_host(_snap.eth_type); } 
         
@@ -149,7 +149,7 @@ namespace Tins {
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
-        PDUType pdu_type() const { return PDU::SNAP; }
+        PDUType pdu_type() const { return pdu_flag; }
         
         /**
          * \brief Clones this PDU.

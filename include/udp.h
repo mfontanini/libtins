@@ -51,8 +51,8 @@ namespace Tins {
         /** 
          * \brief UDP constructor.
          *
-         * Creates an instance of UDP. Destination and source port can
-         * be provided, otherwise both will be 0.
+         * Constructs an instance of UDP. The destination and source 
+         * port can be provided, otherwise both of them will be 0.
          * 
          * \param dport Destination port.
          * \param sport Source port.

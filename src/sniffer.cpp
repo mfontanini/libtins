@@ -36,12 +36,14 @@ using std::runtime_error;
 
 namespace Tins {
 BaseSniffer::BaseSniffer() 
-: handle(0), mask(0)
+: handle(0), mask(0), prog()
 {
-
+    
 }
     
 BaseSniffer::~BaseSniffer() {
+    if(prog.bf_insns)
+        pcap_freecode(&prog);
     if(handle)
         pcap_close(handle);
 }
@@ -112,11 +114,9 @@ BaseSniffer::iterator BaseSniffer::end() {
 }
 
 bool BaseSniffer::set_filter(const std::string &filter) {
-    bpf_program prog;
     if(pcap_compile(handle, &prog, filter.c_str(), 0, mask) == -1)
         return false;
     bool result = pcap_setfilter(handle, &prog) != -1;
-    pcap_freecode(&prog);
     return result;
 }
 

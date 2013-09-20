@@ -70,40 +70,40 @@ public:
     // Getters
 
     /**
-     *  \brief Getter for the packet_type field.
-     *  \return The stored packet_type field value.
+     *  \brief Getter for the Packet Type field.
+     *  \return The stored Packet Type field value.
      */
     uint16_t packet_type() const {
         return Endian::be_to_host(_header.packet_type);
     }
 
     /**
-     *  \brief Getter for the lladdr_type field.
-     *  \return The stored lladdr_type field value.
+     *  \brief Getter for the LLADDR Type field.
+     *  \return The stored LLADDR Type field value.
      */
     uint16_t lladdr_type() const {
         return Endian::be_to_host(_header.lladdr_type);
     }
 
     /**
-     *  \brief Getter for the lladdr_len field.
-     *  \return The stored lladdr_len field value.
+     *  \brief Getter for the LLADDR Length field.
+     *  \return The stored LLADDR Length field value.
      */
     uint16_t lladdr_len() const {
         return Endian::be_to_host(_header.lladdr_len);
     }
 
     /**
-     *  \brief Getter for the address field.
-     *  \return The stored address field value.
+     *  \brief Getter for the Address field.
+     *  \return The stored Address field value.
      */
     address_type address() const {
         return _header.address;
     }
 
     /**
-     *  \brief Getter for the protocol field.
-     *  \return The stored protocol field value.
+     *  \brief Getter for the Protocol field.
+     *  \return The stored Protocol field value.
      */
     uint16_t protocol() const {
         return Endian::be_to_host(_header.protocol);
@@ -118,32 +118,32 @@ public:
     // Setters
 
     /**
-     *  \brief Setter for the packet_type field.
-     *  \param new_packet_type The new packet_type field value.
+     *  \brief Setter for the Packet Type field.
+     *  \param new_packet_type The new Packet Type field value.
      */
     void packet_type(uint16_t new_packet_type);
 
     /**
-     *  \brief Setter for the lladdr_type field.
-     *  \param new_lladdr_type The new lladdr_type field value.
+     *  \brief Setter for the LLADDR Type field.
+     *  \param new_lladdr_type The new LLADDR Type field value.
      */
     void lladdr_type(uint16_t new_lladdr_type);
 
     /**
-     *  \brief Setter for the lladdr_len field.
-     *  \param new_lladdr_len The new lladdr_len field value.
+     *  \brief Setter for the LLADDR Length field.
+     *  \param new_lladdr_len The new LLADDR Length field value.
      */
     void lladdr_len(uint16_t new_lladdr_len);
 
     /**
-     *  \brief Setter for the address field.
-     *  \param new_address The new address field value.
+     *  \brief Setter for the Address field.
+     *  \param new_address The new Address field value.
      */
     void address(const address_type &new_address);
 
     /**
-     *  \brief Setter for the protocol field.
-     *  \param new_protocol The new protocol field value.
+     *  \brief Setter for the Protocol field.
+     *  \param new_protocol The new Protocol field value.
      */
     void protocol(uint16_t new_protocol);
     
