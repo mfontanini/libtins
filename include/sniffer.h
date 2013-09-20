@@ -76,7 +76,7 @@ namespace Tins {
              * This constructor is available only in C++11.
              */
             BaseSniffer(BaseSniffer &&rhs) noexcept 
-            : handle(nullptr), mask(), prog()
+            : handle(nullptr), mask()
             {
                 *this = std::move(rhs);
             }
@@ -90,7 +90,6 @@ namespace Tins {
                 using std::swap;
                 swap(handle, rhs.handle);
                 swap(mask, rhs.mask);
-                swap(prog, rhs.prog);
                 return *this;
             }
         #endif
@@ -242,7 +241,6 @@ namespace Tins {
         
         pcap_t *handle;
         bpf_u_int32 mask;
-        bpf_program prog;
     };
     
     /** 
