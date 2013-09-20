@@ -47,7 +47,20 @@ class RSNInformation;
  */
 class Dot11 : public PDU {
 public:
+    /**
+     * The type used to store hardware addresses.
+     */
     typedef HWAddress<6> address_type;
+
+    /**
+     * \brief IEEE 802.11 options struct.
+     */
+    typedef PDUOption<uint8_t> option;
+
+    /**
+     * The type used to store tagged options.
+     */
+    typedef std::list<option> options_type;
 
     /**
      * \brief This PDU's flag.
@@ -160,11 +173,6 @@ public:
         QOS_DATA_CF_ACK_POLL = 11,
         QOS_DATA_NULL = 12
     };
-
-    /**
-     * \brief IEEE 802.11 options struct.
-     */
-    typedef PDUOption<uint8_t> option;
     
     /**
      * \brief Constructor for creating an 802.11 PDU
@@ -425,6 +433,13 @@ public:
     bool matches_flag(PDUType flag) const {
        return flag == pdu_flag;
     }
+    
+    /**
+     * \brief Getter for the option list.
+     * 
+     * \return The options list.
+     */
+    const options_type &options() const { return _options; }
 
     /**
      * \brief Allocates an Dot11 PDU from a buffer.
@@ -491,7 +506,7 @@ private:
 
     ieee80211_header _header;
     uint32_t _options_size;
-    std::list<option> _options;
+    options_type _options;
 };
 }
 

@@ -50,11 +50,29 @@ TEST_F(AddressRangeTest, Contains) {
     contain_tests24(IPv6Range("dead::0", "dead::ffff"));
     contain_tests24(IPv6Range::from_mask("dead::0", "ffff:ffff:ffff:ffff:ffff:ffff:ffff:0"));
     
-    AddressRange<HWAddress<6> > range("00:00:00:00:00:00", "00:00:00:00:00:ff");
-    EXPECT_TRUE(range.contains("00:00:00:00:00:00"));
-    EXPECT_TRUE(range.contains("00:00:00:00:00:10"));
-    EXPECT_TRUE(range.contains("00:00:00:00:00:ff"));
-    EXPECT_FALSE(range.contains("00:00:00:00:01:00"));
+    {
+        AddressRange<HWAddress<6> > range("00:00:00:00:00:00", "00:00:00:00:00:ff");
+        EXPECT_TRUE(range.contains("00:00:00:00:00:00"));
+        EXPECT_TRUE(range.contains("00:00:00:00:00:10"));
+        EXPECT_TRUE(range.contains("00:00:00:00:00:ff"));
+        EXPECT_FALSE(range.contains("00:00:00:00:01:00"));
+    }
+    
+    {
+        AddressRange<HWAddress<6> > range = HWAddress<6>("00:00:00:00:00:00") / 40;
+        EXPECT_TRUE(range.contains("00:00:00:00:00:00"));
+        EXPECT_TRUE(range.contains("00:00:00:00:00:10"));
+        EXPECT_TRUE(range.contains("00:00:00:00:00:ff"));
+        EXPECT_FALSE(range.contains("00:00:00:00:01:00"));
+    }
+    
+    {
+        AddressRange<HWAddress<6> > range = HWAddress<6>("00:00:00:00:00:00") / 38;
+        EXPECT_TRUE(range.contains("00:00:00:00:00:00"));
+        EXPECT_TRUE(range.contains("00:00:00:00:02:00"));
+        EXPECT_TRUE(range.contains("00:00:00:00:03:ff"));
+        EXPECT_FALSE(range.contains("00:00:00:00:04:00"));
+    }
 }
 
 TEST_F(AddressRangeTest, Iterators) {

@@ -26,6 +26,11 @@ TEST_F(HWAddressTest, DefaultConstructor) {
     EXPECT_TRUE(std::equal(addr.begin(), addr.end(), empty_addr));
 }
 
+TEST_F(HWAddressTest, ShortStringConstructor) {
+    HWAddress<6> addr("33:34:35"), expected("33:34:35:00:00:00");
+    EXPECT_EQ(expected, addr);
+}
+
 TEST_F(HWAddressTest, EqualsOperator) {
     HWAddress<6> addr1(byte_address), addr2(byte_address);
     EXPECT_EQ(addr1, addr2);

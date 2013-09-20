@@ -138,11 +138,18 @@ public:
      */
     template<size_t i>
     HWAddress(const HWAddress<i> &rhs) {
-        std::copy(
-            rhs.begin(),
-            rhs.begin() + std::min(i, n),
-            begin()
+        // Fill extra bytes
+        std::fill(
+            // Copy as most as we can
+            std::copy(
+                rhs.begin(),
+                rhs.begin() + std::min(i, n),
+                begin()
+            ),
+            end(),
+            0
         );
+        
     }
     
     /**
@@ -319,13 +326,16 @@ void HWAddress<n, Storage>::convert(const std::string &hw_addr,
   OutputIterator output) 
 {
     unsigned i(0);
+    size_t count(0);
     storage_type tmp;
-    while(i < hw_addr.size()) {
+    while(i < hw_addr.size() && count < n) {
         const unsigned end = i+2;
         tmp = storage_type();
         while(i < end) {
             if(hw_addr[i] >= 'a' && hw_addr[i] <= 'f')
                 tmp = (tmp << 4) | (hw_addr[i] - 'a' + 10);
+            else if(hw_addr[i] >= 'A' && hw_addr[i] <= 'F')
+                tmp = (tmp << 4) | (hw_addr[i] - 'A' + 10);
             else if(hw_addr[i] >= '0' && hw_addr[i] <= '9')
                 tmp = (tmp << 4) | (hw_addr[i] - '0');
             else if(hw_addr[i] == ':')
@@ -335,12 +345,16 @@ void HWAddress<n, Storage>::convert(const std::string &hw_addr,
             i++;
         }
         *(output++) = tmp;
+        count++;
         if(i < hw_addr.size()) {
             if(hw_addr[i] == ':')
                 i++;
             else
                 throw std::runtime_error("Invalid separator");
         }
+    }
+    while(count++ < n) {
+        *(output++) = storage_type();
     }
 }
 } // namespace Tins

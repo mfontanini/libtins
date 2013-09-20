@@ -290,6 +290,15 @@ private:
         }
         return addr;
     }
+    
+    template<size_t n>
+    static address_type last_address_from_mask(HWAddress<n> addr, const HWAddress<n> &mask) {
+        typename HWAddress<n>::iterator addr_iter = addr.begin();
+        for(typename HWAddress<n>::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
+            *addr_iter = *addr_iter | ~*it;
+        }
+        return addr;
+    }
 
     address_type first, last;
     bool only_hosts;
@@ -304,6 +313,40 @@ typedef AddressRange<IPv4Address> IPv4Range;
  * An IPv6 address range.
  */
 typedef AddressRange<IPv6Address> IPv6Range;
+
+/**
+ * \brief Constructs an AddressRange from a base address and a mask.
+ * \param addr The range's first address.
+ * \param mask The bit-length of the prefix.
+ */
+template<size_t n>
+AddressRange<HWAddress<n> > operator/(const HWAddress<n> &addr, int mask) {
+    if(mask > 48)
+        throw std::logic_error("Prefix length cannot exceed 48");
+    HWAddress<n> last_addr;
+    typename HWAddress<n>::iterator it = last_addr.begin();
+    while(mask > 8) {
+        *it = 0xff;
+        ++it;
+        mask -= 8;
+    }
+    *it = 0xff << (8 - mask);
+    return AddressRange<HWAddress<6> >::from_mask(addr, last_addr);
+}
+
+/**
+ * \brief Constructs an IPv6Range from a base IPv6Address and a mask.
+ * \param addr The range's first address.
+ * \param mask The bit-length of the prefix.
+ */
+IPv6Range operator/(const IPv6Address &addr, int mask);
+
+/**
+ * \brief Constructs an IPv4Range from a base IPv4Address and a mask.
+ * \param addr The range's first address.
+ * \param mask The bit-length of the prefix.
+ */
+IPv4Range operator/(const IPv4Address &addr, int mask);
 } // namespace Tins
 
 #endif // TINS_ADDRESS_RANGE
