@@ -39,6 +39,7 @@ libtins_la_SOURCES=src/arp.cpp \
                     src/ppi.cpp \
                     src/pdu.cpp \
                     src/radiotap.cpp \
+                    src/address_range.cpp \
                     src/rawpdu.cpp \
                     src/rsn_information.cpp \
                     src/sll.cpp \

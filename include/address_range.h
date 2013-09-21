@@ -32,8 +32,6 @@
 
 #include <stdexcept>
 #include <iterator>
-#include "ip_address.h"
-#include "ipv6_address.h"
 #include "endianness.h"
 #include "internals.h"
 
@@ -214,7 +212,11 @@ public:
      * \param mask The network mask to be used.
      */
     static AddressRange from_mask(const address_type &first, const address_type &mask) {
-        return AddressRange<address_type>(first, last_address_from_mask(first, mask), true);
+        return AddressRange<address_type>(
+            first, 
+            Internals::last_address_from_mask(first, mask), 
+            true
+        );
     }
 
     /**
@@ -277,29 +279,6 @@ public:
         return addr < last || addr == last;
     }
 private:
-    static address_type last_address_from_mask(IPv4Address addr, IPv4Address mask) {
-        uint32_t addr_int = Endian::be_to_host<uint32_t>(addr),
-                mask_int = Endian::be_to_host<uint32_t>(mask);
-        return address_type(Endian::host_to_be(addr_int | ~mask_int));
-    }
-
-    static address_type last_address_from_mask(IPv6Address addr, const IPv6Address &mask) {
-        IPv6Address::iterator addr_iter = addr.begin();
-        for(IPv6Address::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
-            *addr_iter = *addr_iter | ~*it;
-        }
-        return addr;
-    }
-    
-    template<size_t n>
-    static address_type last_address_from_mask(HWAddress<n> addr, const HWAddress<n> &mask) {
-        typename HWAddress<n>::iterator addr_iter = addr.begin();
-        for(typename HWAddress<n>::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
-            *addr_iter = *addr_iter | ~*it;
-        }
-        return addr;
-    }
-
     address_type first, last;
     bool only_hosts;
 };

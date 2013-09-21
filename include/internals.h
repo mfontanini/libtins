@@ -157,6 +157,17 @@ bool decrement(HWAddress<n> &addr) {
     return decrement_buffer(addr);
 }
 
+IPv4Address last_address_from_mask(IPv4Address addr, IPv4Address mask);
+IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address &mask);
+template<size_t n>
+HWAddress<n> last_address_from_mask(HWAddress<n> addr, const HWAddress<n> &mask) {
+    typename HWAddress<n>::iterator addr_iter = addr.begin();
+    for(typename HWAddress<n>::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
+        *addr_iter = *addr_iter | ~*it;
+    }
+    return addr;
+}
+
 inline bool is_dot3(const uint8_t *ptr, size_t sz) {
     return (sz >= 13 && ptr[12] < 8);
 }

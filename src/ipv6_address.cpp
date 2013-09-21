@@ -108,19 +108,5 @@ bool IPv6Address::is_loopback() const {
 bool IPv6Address::is_multicast() const {
     return multicast_range.contains(*this);
 }
-
-AddressRange<IPv6Address> operator/(const IPv6Address &addr, int mask) {
-    if(mask > 128)
-        throw std::logic_error("Prefix length cannot exceed 128");
-    IPv6Address last_addr;
-    IPv6Address::iterator it = last_addr.begin();
-    while(mask > 8) {
-        *it = 0xff;
-        ++it;
-        mask -= 8;
-    }
-    *it = 0xff << (8 - mask);
-    return AddressRange<IPv6Address>::from_mask(addr, last_addr);
-}
 }
 

@@ -122,13 +122,4 @@ bool IPv4Address::is_loopback() const {
 bool IPv4Address::is_multicast() const {
     return multicast_range.contains(*this);
 }
-
-AddressRange<IPv4Address> operator/(const IPv4Address &addr, int mask) {
-    if(mask > 32)
-        throw std::logic_error("Prefix length cannot exceed 32");
-    return AddressRange<IPv4Address>::from_mask(
-        addr, 
-        IPv4Address(Endian::host_to_be(0xffffffff << (32 - mask)))
-    );
-}
 }

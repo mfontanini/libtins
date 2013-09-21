@@ -114,7 +114,7 @@ am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo \
 	src/ip.lo src/ip_address.lo src/ipv6.lo src/ipv6_address.lo \
 	src/llc.lo src/loopback.lo src/network_interface.lo \
 	src/packet_sender.lo src/packet_writer.lo src/ppi.lo \
-	src/pdu.lo src/radiotap.lo src/rawpdu.lo \
+	src/pdu.lo src/radiotap.lo src/address_range.lo src/rawpdu.lo \
 	src/rsn_information.lo src/sll.lo src/snap.lo src/sniffer.lo \
 	src/tcp.lo src/tcp_stream.lo src/udp.lo src/utils.lo \
 	src/dot11/dot11_base.lo src/dot11/dot11_data.lo \
@@ -327,6 +327,7 @@ libtins_la_SOURCES = src/arp.cpp \
                     src/ppi.cpp \
                     src/pdu.cpp \
                     src/radiotap.cpp \
+                    src/address_range.cpp \
                     src/rawpdu.cpp \
                     src/rsn_information.cpp \
                     src/sll.cpp \
@@ -538,6 +539,8 @@ src/packet_writer.lo: src/$(am__dirstamp) \
 src/ppi.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/pdu.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/radiotap.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/address_range.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/rawpdu.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/rsn_information.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
@@ -575,6 +578,8 @@ libtins.la: $(libtins_la_OBJECTS) $(libtins_la_DEPENDENCIES) $(EXTRA_libtins_la_
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f src/address_range.$(OBJEXT)
+	-rm -f src/address_range.lo
 	-rm -f src/arp.$(OBJEXT)
 	-rm -f src/arp.lo
 	-rm -f src/bootp.$(OBJEXT)
@@ -671,6 +676,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/address_range.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/arp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/bootp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/crypto.Plo@am__quote@
