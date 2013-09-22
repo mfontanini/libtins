@@ -47,7 +47,7 @@ PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz < sizeof(_header))
         throw malformed_packet();
     std::memcpy(&_header, buffer, sizeof(_header));
-    if(length() > total_sz)
+    if(length() > total_sz || length() < sizeof(_header))
         throw malformed_packet();
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);

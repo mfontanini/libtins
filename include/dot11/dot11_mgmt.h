@@ -363,7 +363,9 @@ public:
 
     } TINS_END_PACK;
     
-    TINS_BEGIN_PACK
+    /**
+     * The type used to store the FS parameters set option data.
+     */
     struct fh_params_set {
         uint16_t dwell_time;
         uint8_t hop_set, hop_pattern, hop_index;
@@ -374,9 +376,11 @@ public:
           uint8_t hop_pattern, uint8_t hop_index) 
         : dwell_time(dwell_time), hop_set(hop_set), 
           hop_pattern(hop_pattern), hop_index(hop_index) {}
-    } TINS_END_PACK;
+    };
     
-    TINS_BEGIN_PACK
+    /**
+     * The type used to store the CF parameters set option data.
+     */
     struct cf_params_set {
         uint8_t cfp_count, cfp_period;
         uint16_t cfp_max_duration, cfp_dur_remaining;
@@ -388,8 +392,11 @@ public:
         : cfp_count(cfp_count), cfp_period(cfp_period), 
           cfp_max_duration(cfp_max_duration), 
           cfp_dur_remaining(cfp_dur_remaining) {}
-    } TINS_END_PACK;
+    };
     
+    /**
+     * The type used to store the IBSS DFS parameters option data.
+     */
     struct ibss_dfs_params {
         static const size_t minimum_size = address_type::address_size + sizeof(uint8_t) + 2 * sizeof(uint8_t);
         
@@ -405,37 +412,44 @@ public:
           channel_map(channels) {}
     };
     
+    /**
+     * The type used to store the Country parameters option data.
+     */
     struct country_params {
-        typedef std::vector<uint8_t> container_type;
         // String identifier: 3 bytes
         static const size_t minimum_size = 3 + sizeof(uint8_t) * 3;
         
         std::string country;
-        container_type first_channel, number_channels, max_transmit_power;
+        byte_array first_channel, number_channels, max_transmit_power;
         
         country_params() {}
         
-        country_params(const std::string &country, const container_type &first,
-          const container_type &number, const container_type &max) 
+        country_params(const std::string &country, const byte_array &first,
+          const byte_array &number, const byte_array &max) 
         : country(country), first_channel(first), number_channels(number),
           max_transmit_power(max) {}
     };
     
+    /**
+     * The type used to store the FH pattern option data.
+     */
     struct fh_pattern_type {
-        typedef std::vector<uint8_t> container_type;
         static const size_t minimum_size = sizeof(uint8_t) * 4;
         
         uint8_t flag, number_of_sets, modulus, offset;
-        container_type random_table;
+        byte_array random_table;
         
         fh_pattern_type() {}
         
         fh_pattern_type(uint8_t flag, uint8_t sets, uint8_t modulus,
-          uint8_t offset, const container_type& table) 
+          uint8_t offset, const byte_array& table) 
         : flag(flag), number_of_sets(sets), modulus(modulus), 
           offset(offset), random_table(table) {}
     };
     
+    /**
+     * The type used to store the Channel Switch option data.
+     */
     struct channel_switch_type {
         uint8_t switch_mode, new_channel, switch_count;
         
@@ -445,6 +459,9 @@ public:
         : switch_mode(mode), new_channel(channel), switch_count(count) { }
     };
     
+    /**
+     * The type used to store the Quiet option data.
+     */
     struct quiet_type {
         uint8_t quiet_count, quiet_period;
         uint16_t quiet_duration, quiet_offset;
@@ -456,7 +473,10 @@ public:
         : quiet_count(count), quiet_period(period), 
         quiet_duration(duration), quiet_offset(offset) {}
     };
-    
+
+    /**
+     * The type used to store the BSS Load option data.
+     */
     struct bss_load_type {
         uint16_t station_count;
         uint16_t available_capacity;
@@ -470,18 +490,35 @@ public:
         channel_utilization(utilization) {}
     };
     
+    /**
+     * The type used to store the TIM option data.
+     */
     struct tim_type {
-        typedef std::vector<uint8_t> container_type;
-        
         uint8_t dtim_count, dtim_period, bitmap_control;
-        container_type partial_virtual_bitmap;
+        byte_array partial_virtual_bitmap;
         
         tim_type() {}
         
         tim_type(uint8_t count, uint8_t period, uint8_t control,
-          const container_type &bitmap) 
+          const byte_array &bitmap) 
         : dtim_count(count), dtim_period(period), bitmap_control(control),
         partial_virtual_bitmap(bitmap) {}
+    };
+
+    /**
+     * The type used to store the Vendor Specific option data.
+     */
+    struct vendor_specific_type {
+        typedef HWAddress<3> oui_type;
+
+        oui_type oui;
+        byte_array data;
+
+        vendor_specific_type(const oui_type &oui = oui_type(),
+            const byte_array &data = byte_array())
+        : oui(oui), data(data) { }
+
+        static vendor_specific_type from_bytes(const uint8_t *buffer, uint32_t sz);
     };
 
     /**
@@ -527,7 +564,7 @@ public:
     /**
      * \brief Getter for the fourth address.
      *
-     * \return address_type containing the fourth address.
+     * \return The stored fourth address.
      */
     const address_type &addr4() const { return _addr4; }
 
@@ -640,7 +677,7 @@ public:
      *
      * \param fh_params the fh parameter set.
      */
-    void fh_parameter_set(fh_params_set fh_params);
+    void fh_parameter_set(const fh_params_set &fh_params);
 
     /**
      * \brief Helper method to set the DS parameter.
@@ -654,7 +691,7 @@ public:
      *
      * \param params the CF parammeters to be set.
      */
-    void cf_parameter_set(cf_params_set params);
+    void cf_parameter_set(const cf_params_set &params);
 
     /**
      * \brief Helper method to set the IBSS parameter.
@@ -748,6 +785,13 @@ public:
      * \brief text The challenge text to be added.
      */
     void challenge_text(const std::string &text);
+
+    /**
+     * \brief Helper method to add a Vendor Specific tagged option.
+     *
+     * \brief text The option to be added.
+     */
+    void vendor_specific(const vendor_specific_type &data);
     
     // Option searching helpers
     
@@ -851,6 +895,17 @@ public:
      * \return uint8_t containing the ds parameter set.
      */
     uint8_t ds_parameter_set() const;
+
+    /**
+     * \brief Helper method to get the cf parameter set.
+     *
+     * An option_not_found exception is thrown if the option has not 
+     * been set.
+     * 
+     * \return uint8_t containing the cf parameter set.
+     */
+    cf_params_set cf_parameter_set() const;
+    
     
     /**
      * \brief Helper method to get the ibss parameter set.
@@ -982,6 +1037,16 @@ public:
      */
     std::string challenge_text() const;
     
+    /**
+     * \brief Helper method to get a Vendor Specific option.
+     *
+     * An option_not_found exception is thrown if the option has not 
+     * been set.
+     * 
+     * \return vendor_specific_type containing the option value.
+     */
+    vendor_specific_type vendor_specific() const;
+
     // ************************
 
     /**

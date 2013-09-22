@@ -111,7 +111,9 @@ void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
     }
     std::memcpy(buffer, &_header, sizeof(_header));
     
-    buffer += sizeof(_header) + inner_pdu()->size();
+    buffer += sizeof(_header);
+    if(inner_pdu())
+        buffer += inner_pdu()->size();
     std::fill(buffer, buffer + trailer, 0);
 }
 

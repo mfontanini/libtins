@@ -118,7 +118,8 @@ public:
         TCLAS_PROCESSING,
         QOS_CAPABILITY = 46,
         RSN = 48,
-        EXT_SUPPORTED_RATES = 50
+        EXT_SUPPORTED_RATES = 50,
+        VENDOR_SPECIFIC = 221
     };
 
     /**
@@ -175,10 +176,7 @@ public:
     };
     
     /**
-     * \brief Constructor for creating an 802.11 PDU
-     *
-     * Constructor that builds an 802.11 PDU taking the interface index,
-     * destination's and source's MAC.
+     * \brief Constructs an 802.11 PDU.
      *
      * \param dst_hw_addr The destination hardware address.
      */
@@ -199,163 +197,165 @@ public:
     Dot11(const uint8_t *buffer, uint32_t total_sz);
 
     /**
-     * \brief Getter for the protocol version.
+     * \brief Getter for the protocol version field.
      *
-     * \return uint8_t containing the protocol version.
+     * \return The stored protocol version field.
      */
     small_uint<2> protocol() const { return _header.control.protocol; }
 
     /**
-     * \brief Getter for the 802.11 frame's type.
+     * \brief Getter for the Type field.
      *
-     * \return uint8_t containing the type of this 802.11 frame.
+     * \return The stored Type field.
      */
     small_uint<2> type() const { return _header.control.type; }
 
     /**
-     * \brief Getter for the 802.11 frame's subtype.
+     * \brief Getter for the Subtype field.
      *
-     * \return uint8_t cotaining the subtype of this 802.11 frame.
+     * \return The stored Subtype field.
      */
     small_uint<4> subtype() const { return _header.control.subtype; }
 
     /**
-     * \brief Getter for the 802.11 frame's To-DS field.
+     * \brief Getter for the To-DS field.
      *
-     * \return small_uint<1> containing the To-DS field.
+     * \return The stored To-DS field.
      */
     small_uint<1> to_ds() const { return _header.control.to_ds; }
 
     /**
-     * \brief Getter for the 802.11 frame's From-DS field.
+     * \brief Getter for the From-DS field.
      *
-     * \return small_uint<1> containing the From-DS field.
+     * \return The stored From-DS field.
      */
     small_uint<1> from_ds() const { return _header.control.from_ds; }
 
     /**
-     * \brief Getter for the 802.11 frame's More-Frag field.
+     * \brief Getter for the More-Frag field.
      *
-     * \return small_uint<1> containing the More-Frag field.
+     * \return The stored More-Frag field.
      */
     small_uint<1> more_frag() const { return _header.control.more_frag; }
 
     /**
-     * \brief Getter for the 802.11 frame's Retry field.
+     * \brief Getter for the Retry field.
      *
-     * \return small_uint<1> containing the Retry field.
+     * \return The stored Retry field.
      */
     small_uint<1> retry() const { return _header.control.retry; }
 
     /**
-     * \brief Getter for the 802.11 frame's Power-Management field.
+     * \brief Getter for the Power-Management field.
      *
-     * \return small_uint<1> containing the Power-Management field.
+     * \return The stored Power-Management field.
      */
     small_uint<1> power_mgmt() const { return _header.control.power_mgmt; }
 
     /**
-     * \brief Getter for the 802.11 frame's WEP field.
+     * \brief Getter for the WEP field.
      *
-     * \return small_uint<1> containing the WEP field.
+     * \return The stored WEP field.
      */
     small_uint<1> wep() const { return _header.control.wep; }
 
     /**
-     * \brief Getter for the 802.11 frame's Order field.
+     * \brief Getter for the Order field.
      *
-     * \return small_uint<1> containing the Order field.
+     * \return The stored Order field.
      */
     small_uint<1> order() const { return _header.control.order; }
 
     /**
      * \brief Getter for the Duration-ID field.
      *
-     * \return uint16_t containing the Duration-ID field.
+     * \return The stored Duration-ID field.
      */
     uint16_t duration_id() const { return Endian::le_to_host(_header.duration_id); }
 
     /**
      * \brief Getter for the first address.
      *
-     * \return address_type containing the first address.
+     * \return The stored first address.
      */
     address_type addr1() const { return _header.addr1; }
 
+    // Setters
+
     /**
-     * \brief Setter for the protocol version.
+     * \brief Setter for the protocol version field.
      *
-     * \param new_proto The new protocol version.
+     * \param new_proto The new protocol version field value.
      */
     void protocol(small_uint<2> new_proto);
 
     /**
-     * \brief Setter for the 802.11 frame's type.
+     * \brief Setter for the type field.
      *
-     * \param new_type The new type of this 802.11 frame.
+     * \param new_type The new type field value.
      */
     void type(small_uint<2> new_type);
 
     /**
-     * \brief Setter for the 802.11 frame's subtype.
+     * \brief Setter for the subtype field.
      *
-     * \param new_subtype The new subtype of this 802.11 frame.
+     * \param new_subtype The new subtype field value.
      */
     void subtype(small_uint<4> new_subtype);
 
     /**
-     * \brief Setter for the 802.11 frame's To-DS field.
+     * \brief Setter for the To-DS field.
      *
-     * \param new_value The new value of the To-DS field.
+     * \param new_value The new To-DS field value.
      */
     void to_ds(small_uint<1> new_value);
 
     /**
-     * \brief Setter for the 802.11 frame's From-DS field.
+     * \brief Setter for the From-DS field.
      *
-     * \param new_value The new value of the From-DS field.
+     * \param new_value The new From-DS field value.
      */
     void from_ds(small_uint<1> new_value);
 
     /**
-     * \brief Setter for the 802.11 frame's More-Frag field.
+     * \brief Setter for the More-Frag field.
      *
-     * \param new_value The new value of the More-Frag field.
+     * \param new_value The new More-Frag field value.
      */
     void more_frag(small_uint<1> new_value);
 
     /**
-     * \brief Setter for the 802.11 frame's Retry field.
+     * \brief Setter for the Retry field.
      *
-     * \param new_value sThe new value of the Retry field.
+     * \param new_value The new Retry field value.
      */
     void retry(small_uint<1> new_value);
 
     /**
-     * \brief Setter for the 802.11 frame's Power-Management field.
+     * \brief Setter for the Power-Management field.
      *
-     * \param new_value The new value of the Power-Management field.
+     * \param new_value The new Power-Management field value.
      */
     void power_mgmt(small_uint<1> new_value);
 
     /**
-     * \brief Setter for the 802.11 frame's WEP field.
+     * \brief Setter for the WEP field.
      *
-     * \param new_value The new value of the WEP field.
+     * \param new_value The new WEP field value.
      */
     void wep(small_uint<1> new_value);
 
     /**
-     * \brief Setter for the 802.11 frame's Order field.
+     * \brief Setter for the Order field.
      *
-     * \param new_value The new value of the Order field.
+     * \param new_value The new Order field value.
      */
     void order(small_uint<1> new_value);
 
     /**
      * \brief Setter for the Duration-ID field.
      *
-     * \param new_duration_id The new value of the Duration-ID field.
+     * \param new_duration_id The new Duration-ID field value.
      */
     void duration_id(uint16_t new_duration_id);
 
@@ -445,7 +445,9 @@ public:
      * \brief Allocates an Dot11 PDU from a buffer.
      * 
      * This can be used somehow as a "virtual constructor". This 
-     * method instantiates a subclass of Dot11 from the given buffer.
+     * method instantiates the appropriate subclass of Dot11 from the 
+     * given buffer.
+     * 
      * The allocated class' type will be figured out from the
      * information provided in the buffer.
      * 

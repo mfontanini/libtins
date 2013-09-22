@@ -135,6 +135,16 @@ public:
         return "The sniffed link layer PDU type is unknown";
     }
 };
+
+/**
+ * \brief Exception thrown when a malformed option is found.
+ */
+class malformed_option : public std::exception {
+public:
+    const char *what() const throw() {
+        return "Malformed option";
+    }
+};
 }
 
 #endif // TINS_EXCEPTIONS_H

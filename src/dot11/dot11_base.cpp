@@ -96,7 +96,7 @@ void Dot11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
 
 void Dot11::add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t *val) {
     uint32_t opt_size = len + sizeof(uint8_t) * 2;
-    _options.push_back(option((uint8_t)opt, len, val));
+    _options.push_back(option((uint8_t)opt, val, val + len));
     _options_size += opt_size;
 }
 

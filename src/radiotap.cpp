@@ -72,7 +72,7 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
     check_size(total_sz, sizeof(_radio));
     const uint8_t *buffer_start = buffer;
     std::memcpy(&_radio, buffer, sizeof(_radio));
-    uint32_t radiotap_hdr_size = Endian::le_to_host(_radio.it_len);
+    uint32_t radiotap_hdr_size = length();
     check_size(total_sz, radiotap_hdr_size);
     buffer += sizeof(_radio);
     radiotap_hdr_size -= sizeof(_radio);
@@ -132,14 +132,14 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
         read_field(buffer, radiotap_hdr_size, _max_power);
     }
 
-    total_sz -= Endian::le_to_host(_radio.it_len);
+    total_sz -= length();
     buffer += radiotap_hdr_size;
 
     if(_radio.flags && (flags() & FCS) != 0) {
         check_size(total_sz, sizeof(uint32_t));
         total_sz -= sizeof(uint32_t);
         if((flags() & FAILED_FCS) !=0)
-                throw malformed_packet();
+            throw malformed_packet();
     }
 
     if(total_sz) 

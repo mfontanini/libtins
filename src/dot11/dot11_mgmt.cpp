@@ -189,12 +189,13 @@ void Dot11ManagementFrame::request_information(const request_info_type elements)
     delete[] buffer;
 }
 
-void Dot11ManagementFrame::fh_parameter_set(fh_params_set fh_params) {
-    fh_params.dwell_time = Endian::host_to_le(fh_params.dwell_time);
-    fh_params.hop_set = fh_params.hop_set;
-    fh_params.hop_pattern = fh_params.hop_pattern;
-    fh_params.hop_index = fh_params.hop_index;
-    add_tagged_option(FH_SET, sizeof(fh_params_set), (uint8_t*)&fh_params);
+void Dot11ManagementFrame::fh_parameter_set(const fh_params_set &fh_params) {
+    uint8_t data[5];
+    *(uint16_t*)data = Endian::host_to_le(fh_params.dwell_time);
+    data[2] = fh_params.hop_set;
+    data[3] = fh_params.hop_pattern;
+    data[4] = fh_params.hop_index;
+    add_tagged_option(FH_SET, sizeof(data), data);
 
 }
 
@@ -202,12 +203,17 @@ void Dot11ManagementFrame::ds_parameter_set(uint8_t current_channel) {
     add_tagged_option(DS_SET, 1, &current_channel);
 }
 
-void Dot11ManagementFrame::cf_parameter_set(cf_params_set params) {
-    params.cfp_count = params.cfp_count;
+void Dot11ManagementFrame::cf_parameter_set(const cf_params_set &params) {
+    uint8_t data[6];
+    data[0] = params.cfp_count;
+    data[1] = params.cfp_period;
+    *(uint16_t*)&data[2] = Endian::host_to_le(params.cfp_max_duration);
+    *(uint16_t*)&data[4] = Endian::host_to_le(params.cfp_dur_remaining);
+    /*params.cfp_count = params.cfp_count;
     params.cfp_period = params.cfp_period;
     params.cfp_max_duration = Endian::host_to_le(params.cfp_max_duration);
-    params.cfp_dur_remaining = Endian::host_to_le(params.cfp_dur_remaining);
-    add_tagged_option(CF_SET, sizeof(params), (uint8_t*)&params);
+    params.cfp_dur_remaining = Endian::host_to_le(params.cfp_dur_remaining);*/
+    add_tagged_option(CF_SET, sizeof(data), data);
 }
 
 void Dot11ManagementFrame::ibss_parameter_set(uint16_t atim_window) {
@@ -266,7 +272,7 @@ void Dot11ManagementFrame::fh_pattern_table(const fh_pattern_type &params) {
     *(ptr++) = params.number_of_sets;
     *(ptr++) = params.modulus;
     *(ptr++) = params.offset;
-    fh_pattern_type::container_type::const_iterator it(params.random_table.begin());
+    byte_array::const_iterator it(params.random_table.begin());
     for(; it != params.random_table.end(); ++it)
         *(ptr++) = *it;
     add_tagged_option(HOPPING_PATTERN_TABLE, data.size(), &data[0]);
@@ -355,6 +361,16 @@ void Dot11ManagementFrame::challenge_text(const std::string &text) {
     );
 }
 
+void Dot11ManagementFrame::vendor_specific(const vendor_specific_type &data) {
+    byte_array buffer(3 + data.data.size());
+    std::copy(
+        data.data.begin(),
+        data.data.end(),
+        data.oui.copy(buffer.begin())
+    );
+    add_tagged_option(VENDOR_SPECIFIC, buffer.size(), &buffer[0]);
+}
+
 // Getters
 
 RSNInformation Dot11ManagementFrame::rsn_information() {
@@ -428,13 +444,13 @@ Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_informatio
 
 Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() const {
     const Dot11::option *option = search_option(FH_SET);
-    if(!option || option->data_size() != sizeof(fh_params_set))
+    if(!option || option->data_size() != 5)
         throw option_not_found();
-    fh_params_set output = *reinterpret_cast<const fh_params_set*>(option->data_ptr());
-    output.dwell_time = Endian::le_to_host(output.dwell_time);
-    output.hop_set = output.hop_set;
-    output.hop_pattern = output.hop_pattern;
-    output.hop_index = output.hop_index;
+    fh_params_set output;
+    output.dwell_time = Endian::le_to_host(*(uint16_t*)option->data_ptr());
+    output.hop_set = option->data_ptr()[2];
+    output.hop_pattern = option->data_ptr()[3];
+    output.hop_index = option->data_ptr()[4];
     return output;
 }
 
@@ -443,6 +459,18 @@ uint8_t Dot11ManagementFrame::ds_parameter_set() const {
     if(!option || option->data_size() != sizeof(uint8_t))
         throw option_not_found();
     return *option->data_ptr();
+}
+
+Dot11ManagementFrame::cf_params_set Dot11ManagementFrame::cf_parameter_set() const {
+    const Dot11::option *option = search_option(CF_SET);
+    if(!option || option->data_size() != 6)
+        throw option_not_found();
+    cf_params_set output;
+    output.cfp_count = *option->data_ptr();
+    output.cfp_period = option->data_ptr()[1];
+    output.cfp_max_duration = Endian::le_to_host(*(uint16_t*)&option->data_ptr()[2]);
+    output.cfp_dur_remaining = Endian::le_to_host(*(uint16_t*)&option->data_ptr()[4]);
+    return output;
 }
 
 uint16_t Dot11ManagementFrame::ibss_parameter_set() const {
@@ -596,6 +624,24 @@ std::string Dot11ManagementFrame::challenge_text() const {
     if(!option || option->data_size() == 0)
         throw option_not_found();
     return std::string(option->data_ptr(), option->data_ptr() + option->data_size());
+}
+
+Dot11ManagementFrame::vendor_specific_type Dot11ManagementFrame::vendor_specific() const {
+    const Dot11::option *option = search_option(VENDOR_SPECIFIC);
+    if(!option || option->data_size() < 3)
+        throw option_not_found();
+    return vendor_specific_type::from_bytes(option->data_ptr(), option->data_size());
+}
+
+Dot11ManagementFrame::vendor_specific_type 
+  Dot11ManagementFrame::vendor_specific_type::from_bytes(const uint8_t *buffer, uint32_t sz) 
+{
+    if(sz < 3)
+        throw malformed_option();
+    return vendor_specific_type(
+        buffer, 
+        byte_array(buffer + 3, buffer + sz)
+    );
 }
 
 } // namespace Tins

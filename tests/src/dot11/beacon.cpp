@@ -210,6 +210,17 @@ TEST_F(Dot11BeaconTest, DSParameterSet) {
     EXPECT_EQ(dot11.ds_parameter_set(), 0x1e);
 }
 
+TEST_F(Dot11BeaconTest, CFParameterSet) {
+    Dot11Beacon dot11;
+    Dot11Beacon::cf_params_set params(67, 42, 0x482f, 0x9af1), output;
+    dot11.cf_parameter_set(params);
+    output = dot11.cf_parameter_set();
+    EXPECT_EQ(output.cfp_count, params.cfp_count);
+    EXPECT_EQ(output.cfp_period, params.cfp_period);
+    EXPECT_EQ(output.cfp_max_duration, params.cfp_max_duration);
+    EXPECT_EQ(output.cfp_dur_remaining, params.cfp_dur_remaining);
+}
+
 TEST_F(Dot11BeaconTest, IBSSParameterSet) {
     Dot11Beacon dot11;
     dot11.ibss_parameter_set(0x1ef3);
@@ -364,6 +375,17 @@ TEST_F(Dot11BeaconTest, ChallengeText) {
     EXPECT_EQ(dot11.challenge_text(), "libtins ftw");
 }
 
+TEST_F(Dot11BeaconTest, VendorSpecific) {
+    Dot11Beacon dot11;
+    Dot11Beacon::vendor_specific_type input("03:03:02"), output;
+    input.data.push_back(0x22);
+    input.data.push_back(0x35);
+    dot11.vendor_specific(input);
+    output = dot11.vendor_specific();
+    EXPECT_EQ(input.oui, output.oui);
+    EXPECT_EQ(input.data, output.data);
+}
+
 TEST_F(Dot11BeaconTest, RSNInformationTest) {
     Dot11Beacon dot11;
     RSNInformation rsn_info, found;
@@ -394,13 +416,13 @@ TEST_F(Dot11BeaconTest, PCAPLoad1) {
         221, 24, 0, 80, 242, 2, 1, 1, 3, 0, 3, 164, 0, 0, 39, 164, 0, 0, 66, 
         67, 94, 0, 98, 50, 47, 0, 221, 9, 0, 3, 127, 1, 1, 0, 0, 255, 127
     };
-    typedef Dot11Beacon::country_params::container_type country_container;
+    typedef byte_array country_container;
     Dot11Beacon dot11(buffer, sizeof(buffer));
     float rates[] = { 1.0f, 2.0f, 5.5f, 11.0f, 6.0f, 9.0f, 12.0f, 18.0f},
            ext_rates[] = { 24.0f, 36.0f, 48.0f, 54.0f };
     Dot11Beacon::rates_type rates_parsed = dot11.supported_rates();
     Dot11Beacon::rates_type ext_rates_parsed = dot11.extended_supported_rates();
-    Dot11Beacon::tim_type tim(0, 1, 0, Dot11Beacon::tim_type::container_type(1)), 
+    Dot11Beacon::tim_type tim(0, 1, 0, byte_array(1)), 
                              tim_parsed = dot11.tim();
     Dot11Beacon::country_params country("US ", 
                                             country_container(1, 1),

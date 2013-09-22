@@ -58,7 +58,7 @@ Dot11ControlTA::Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz) : Dot11
     buffer += sizeof(ieee80211_header);
     total_sz -= sizeof(ieee80211_header);
     if(total_sz < sizeof(_taddr))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 RTS frame in the buffer.");
+        throw malformed_packet();
     //std::memcpy(_taddr, buffer, sizeof(_taddr));
     _taddr = buffer;
 }
@@ -166,7 +166,7 @@ Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total
     buffer += padding;
     total_sz -= padding;
     if(total_sz < sizeof(_bar_control) + sizeof(_start_sequence))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 Block Ack frame in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_bar_control, buffer, sizeof(_bar_control));
     buffer += sizeof(_bar_control);
     std::memcpy(&_start_sequence, buffer, sizeof(_start_sequence));
@@ -230,7 +230,7 @@ Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11Co
     buffer += padding;
     total_sz -= padding;
     if(total_sz < sizeof(_bitmap) + sizeof(_bar_control) + sizeof(_start_sequence))
-        throw std::runtime_error("Not enough size for an IEEE 802.11 Block Ack frame in the buffer.");
+        throw malformed_packet();
     std::memcpy(&_bar_control, buffer, sizeof(_bar_control));
     buffer += sizeof(_bar_control);
     std::memcpy(&_start_sequence, buffer, sizeof(_start_sequence));
