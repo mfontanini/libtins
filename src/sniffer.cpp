@@ -56,39 +56,74 @@ void BaseSniffer::init(pcap_t *phandle, const std::string &filter,
         throw runtime_error("Invalid filter");
 }
 
-PtrPacket BaseSniffer::next_packet() {
-    pcap_pkthdr header;
-    PDU *ret = 0;
-    while(!ret) {
-        const u_char *content = pcap_next(handle, &header);
-        const int iface_type = pcap_datalink(handle);
-        if(content) {
-            try {
-                if(iface_type == DLT_EN10MB) {
-                    if(Internals::is_dot3((const uint8_t*)content, header.caplen))
-                        ret = new Dot3((const uint8_t*)content, header.caplen);
-                    else
-                        ret = new EthernetII((const uint8_t*)content, header.caplen);
-                }
-                else if(iface_type == DLT_IEEE802_11_RADIO)
-                    ret = new RadioTap((const uint8_t*)content, header.caplen);
-                else if(iface_type == DLT_IEEE802_11)
-                    ret = Dot11::from_bytes((const uint8_t*)content, header.caplen);
-                else if(iface_type == DLT_LOOP)
-                    ret = new Tins::Loopback((const uint8_t*)content, header.caplen);
-                else if(iface_type == DLT_LINUX_SLL)
-                    ret = new Tins::SLL((const uint8_t*)content, header.caplen);
-                else if(iface_type == DLT_PPI)
-                    ret = new Tins::PPI((const uint8_t*)content, header.caplen);
-                else
-                    throw unknown_link_type();
-            }
-            catch(malformed_packet&) {}
-        }
-        else
-            break;
+struct sniff_data {
+    struct timeval tv;
+    PDU *pdu;
+
+    sniff_data() : pdu(0) { }
+};
+
+template<typename T>
+T *safe_alloc(const u_char *bytes, bpf_u_int32 len) {
+    try {
+        return new T((const uint8_t*)bytes, len);
     }
-    return PtrPacket(ret, header.ts);
+    catch(malformed_packet&) {
+        return 0;
+    }
+}
+
+template<typename T>
+void sniff_loop_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
+    sniff_data *data = (sniff_data*)user;
+    data->tv = h->ts;
+    data->pdu = safe_alloc<T>(bytes, h->caplen);
+}
+
+void sniff_loop_eth_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
+    sniff_data *data = (sniff_data*)user;
+    data->tv = h->ts;
+    if(Internals::is_dot3((const uint8_t*)bytes, h->caplen))
+        data->pdu = safe_alloc<Dot3>((const uint8_t*)bytes, h->caplen);
+    else
+        data->pdu = safe_alloc<EthernetII>((const uint8_t*)bytes, h->caplen);
+}
+
+void sniff_loop_dot11_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
+    sniff_data *data = (sniff_data*)user;
+    data->tv = h->ts;
+    try {
+        data->pdu = Dot11::from_bytes(bytes, h->caplen);
+    }
+    catch(malformed_packet&) {
+        
+    }
+}
+
+PtrPacket BaseSniffer::next_packet() {
+    sniff_data data;
+    const int iface_type = pcap_datalink(handle);
+    pcap_handler handler = 0;
+    if(iface_type == DLT_EN10MB)
+        handler = sniff_loop_eth_handler;
+    else if(iface_type == DLT_IEEE802_11_RADIO)
+        handler = &sniff_loop_handler<RadioTap>;
+    else if(iface_type == DLT_IEEE802_11)
+        handler = sniff_loop_dot11_handler;
+    else if(iface_type == DLT_LOOP)
+        handler = &sniff_loop_handler<Tins::Loopback>;
+    else if(iface_type == DLT_LINUX_SLL)
+        handler = &sniff_loop_handler<SLL>;
+    else if(iface_type == DLT_PPI)
+        handler = &sniff_loop_handler<PPI>;
+    else
+        throw unknown_link_type();
+    // keep calling pcap_loop until a well-formed packet is found.
+    while(data.pdu == 0) {
+        if(pcap_dispatch(handle, 1, handler, (u_char*)&data) != 1)
+            return PtrPacket(0, Timestamp());
+    }
+    return PtrPacket(data.pdu, data.tv);
 }
 
 void BaseSniffer::stop_sniff() {
