@@ -59,8 +59,9 @@ void BaseSniffer::init(pcap_t *phandle, const std::string &filter,
 struct sniff_data {
     struct timeval tv;
     PDU *pdu;
+    bool packet_processed;
 
-    sniff_data() : pdu(0) { }
+    sniff_data() : pdu(0), packet_processed(true) { }
 };
 
 template<typename T>
@@ -76,12 +77,14 @@ T *safe_alloc(const u_char *bytes, bpf_u_int32 len) {
 template<typename T>
 void sniff_loop_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
     sniff_data *data = (sniff_data*)user;
+    data->packet_processed = true;
     data->tv = h->ts;
     data->pdu = safe_alloc<T>(bytes, h->caplen);
 }
 
 void sniff_loop_eth_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
     sniff_data *data = (sniff_data*)user;
+    data->packet_processed = true;
     data->tv = h->ts;
     if(Internals::is_dot3((const uint8_t*)bytes, h->caplen))
         data->pdu = safe_alloc<Dot3>((const uint8_t*)bytes, h->caplen);
@@ -91,6 +94,7 @@ void sniff_loop_eth_handler(u_char *user, const struct pcap_pkthdr *h, const u_c
 
 void sniff_loop_dot11_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
     sniff_data *data = (sniff_data*)user;
+    data->packet_processed = true;
     data->tv = h->ts;
     try {
         data->pdu = Dot11::from_bytes(bytes, h->caplen);
@@ -119,8 +123,9 @@ PtrPacket BaseSniffer::next_packet() {
     else
         throw unknown_link_type();
     // keep calling pcap_loop until a well-formed packet is found.
-    while(data.pdu == 0) {
-        if(pcap_dispatch(handle, 1, handler, (u_char*)&data) != 1)
+    while(data.pdu == 0 && data.packet_processed) {
+        data.packet_processed = false;
+        if(pcap_loop(handle, 1, handler, (u_char*)&data) < 0)
             return PtrPacket(0, Timestamp());
     }
     return PtrPacket(data.pdu, data.tv);
