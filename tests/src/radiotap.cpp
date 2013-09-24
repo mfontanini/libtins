@@ -66,8 +66,8 @@ TEST_F(RadioTapTest, DefaultConstructor) {
     RadioTap radio;
     EXPECT_TRUE(radio.flags() & RadioTap::FCS);
     EXPECT_EQ(Utils::mhz_to_channel(radio.channel_freq()), 1);
-    EXPECT_EQ(radio.channel_type(), 0xa0);
-    EXPECT_EQ(radio.tsft(), 0);
+    EXPECT_EQ(radio.channel_type(), 0xa0U);
+    EXPECT_EQ(radio.tsft(), 0U);
     EXPECT_EQ(radio.dbm_signal(), 0xce);
     EXPECT_EQ(radio.antenna(), 0);
     EXPECT_EQ(radio.rx_flags(), 0);
@@ -79,9 +79,17 @@ TEST_F(RadioTapTest, ConstructorFromBuffer) {
     EXPECT_EQ(radio.length(), 32);
     EXPECT_EQ(radio.rate(), 0xc);
     EXPECT_EQ(radio.flags(), 0x10);
+    
+    EXPECT_TRUE(radio.present() & RadioTap::TSTF);
+    EXPECT_TRUE(radio.present() & RadioTap::RATE);
+    EXPECT_TRUE(radio.present() & RadioTap::DBM_SIGNAL);
+    EXPECT_TRUE(radio.present() & RadioTap::ANTENNA);
+    EXPECT_TRUE(radio.present() & RadioTap::CHANNEL_PLUS);
+    
     EXPECT_TRUE(radio.flags() & RadioTap::FCS);
     EXPECT_EQ(radio.channel_type(), 0x140);
-    EXPECT_EQ(radio.tsft(), 616089172);
+    EXPECT_EQ(radio.channel_freq(), 5180);
+    EXPECT_EQ(radio.tsft(), 616089172U);
     EXPECT_EQ(radio.dbm_signal(), 0xda);
     EXPECT_EQ(radio.dbm_noise(), 0xa0);
     EXPECT_EQ(radio.antenna(), 2);
@@ -185,5 +193,5 @@ TEST_F(RadioTapTest, Rate) {
 TEST_F(RadioTapTest, TSFT) {
     RadioTap radio;
     radio.tsft(0x7afb9a8d);
-    EXPECT_EQ(radio.tsft(), 0x7afb9a8d);
+    EXPECT_EQ(radio.tsft(), 0x7afb9a8dU);
 }

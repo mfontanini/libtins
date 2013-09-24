@@ -32,7 +32,7 @@ TEST_F(PPITest, ConstructorFromBuffer) {
     EXPECT_EQ(0, pdu.version());
     EXPECT_EQ(0, pdu.flags());
     EXPECT_EQ(84, pdu.length());
-    EXPECT_EQ(105, pdu.dlt());
+    EXPECT_EQ(105U, pdu.dlt());
     EXPECT_TRUE(pdu.find_pdu<Dot11Data>());
     EXPECT_TRUE(pdu.find_pdu<UDP>());
 }

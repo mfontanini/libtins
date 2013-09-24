@@ -32,6 +32,7 @@
 #include <cassert>
 #endif
 #include <stdexcept>
+ #include <iostream> // borrame
 #include "eapol.h"
 #include "rsn_information.h"
 #include "exceptions.h"
@@ -56,7 +57,12 @@ EAPOL *EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz < sizeof(eapolhdr))
         throw malformed_packet();
     const eapolhdr *ptr = (const eapolhdr*)buffer;
-    total_sz = std::min(total_sz, (uint32_t)ptr->length);
+    uint32_t data_len = Endian::be_to_host<uint16_t>(ptr->length);
+    // at least 4 for fields always present
+    total_sz = std::min(
+        total_sz, 
+        data_len + 4
+    );
     switch(ptr->type) {
         case RC4:
             return new Tins::RC4EAPOL(buffer, total_sz);

@@ -33,7 +33,7 @@ TEST_F(LLCTest, DefaultConstructor) {
 	EXPECT_EQ(llc.ssap(), 0);
 	EXPECT_EQ(llc.dsap(), 0);
     EXPECT_EQ(llc.type(), LLC::INFORMATION);
-    EXPECT_EQ(llc.header_size(), 4);
+    EXPECT_EQ(llc.header_size(), 4U);
     EXPECT_EQ(llc.pdu_type(), PDU::LLC);
 }
 
@@ -42,7 +42,7 @@ TEST_F(LLCTest, ParamsConstructor) {
 	EXPECT_EQ(0xAD, llc.dsap());
 	EXPECT_EQ(0x16, llc.ssap());
 	EXPECT_EQ(LLC::INFORMATION, llc.type());
-	EXPECT_EQ(4, llc.header_size());
+	EXPECT_EQ(4U, llc.header_size());
     EXPECT_EQ(PDU::LLC, llc.pdu_type());
 }
 
@@ -91,11 +91,11 @@ TEST_F(LLCTest, Type) {
 TEST_F(LLCTest, HeadSize) {
 	LLC llc;
 	llc.type(LLC::INFORMATION);
-	EXPECT_EQ(llc.header_size(), 4);
+	EXPECT_EQ(llc.header_size(), 4U);
 	llc.type(LLC::SUPERVISORY);
-	EXPECT_EQ(llc.header_size(), 4);
+	EXPECT_EQ(llc.header_size(), 4U);
 	llc.type(LLC::UNNUMBERED);
-	EXPECT_EQ(llc.header_size(), 3);
+	EXPECT_EQ(llc.header_size(), 3U);
 }
 
 TEST_F(LLCTest, SendSeqNumber) {
@@ -176,7 +176,7 @@ TEST_F(LLCTest, ModifierFunction) {
 TEST_F(LLCTest, ConstructorFromBuffer) {
 	LLC llc(LLCTest::from_buffer_info, 4);
 	EXPECT_EQ(LLC::INFORMATION, llc.type());
-	EXPECT_EQ(4, llc.header_size());
+	EXPECT_EQ(4U, llc.header_size());
 	EXPECT_EQ(0xFE, llc.dsap());
 	EXPECT_EQ(0x48, llc.ssap());
 	EXPECT_FALSE(llc.group());
@@ -186,7 +186,7 @@ TEST_F(LLCTest, ConstructorFromBuffer) {
 	EXPECT_EQ(29, llc.receive_seq_number());
 
 	LLC llc_super(LLCTest::from_buffer_super, sizeof(LLCTest::from_buffer_super));
-	EXPECT_EQ(4, llc_super.header_size());
+	EXPECT_EQ(4U, llc_super.header_size());
 	EXPECT_EQ(0x4B, llc_super.dsap());
 	EXPECT_EQ(0x19, llc_super.ssap());
 	EXPECT_TRUE(llc_super.group());
@@ -196,7 +196,7 @@ TEST_F(LLCTest, ConstructorFromBuffer) {
 	EXPECT_EQ(LLC::RECEIVE_NOT_READY, llc_super.supervisory_function());
 
 	LLC llc_unnum(LLCTest::from_buffer_unnumbered, sizeof(LLCTest::from_buffer_unnumbered));
-	EXPECT_EQ(llc_unnum.header_size(), 3);
+	EXPECT_EQ(llc_unnum.header_size(), 3U);
 	EXPECT_EQ(llc_unnum.dsap(), 0xaa);
 	EXPECT_EQ(llc_unnum.ssap(), 0x17);
 	EXPECT_FALSE(llc_unnum.group());

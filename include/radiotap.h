@@ -89,7 +89,8 @@ namespace Tins {
             ANTENNA             = 2048,
             DB_SIGNAL           = 4096,
             DB_NOISE            = 8192,
-            RX_FLAGS            = 16382
+            RX_FLAGS            = 16382,
+            CHANNEL_PLUS        = 262144
         };
         
         /**
@@ -295,7 +296,7 @@ namespace Tins {
          * \brief Getter for the channel+ field.
          * \return The channel+ field.
          */
-        uint32_t channel_plus() const { return Endian::le_to_host(_channel_type); }
+        uint32_t channel_plus() const { return Endian::le_to_host<uint32_t>(_channel_type); }
         
         /**
          * \brief Getter for the rx flags field.
@@ -313,7 +314,8 @@ namespace Tins {
          * if its corresponding bit flag is set in the present field.
          */
         PresentFlags present() const { 
-            return (PresentFlags)*(uint32_t*)(&_radio.it_len + 1); 
+            //return (PresentFlags)*(uint32_t*)(&_radio.it_len + 1); 
+            return (PresentFlags)Endian::le_to_host(_radio.flags_32);
         }
         
         /** \brief Check wether ptr points to a valid response for this PDU.
@@ -357,50 +359,60 @@ namespace Tins {
             uint8_t it_version;	
             uint8_t it_pad;
             uint16_t it_len;
-            uint32_t tsft:1,
-                flags:1,
-                rate:1,
-                channel:1,
-                fhss:1,
-                dbm_signal:1,
-                dbm_noise:1,
-                lock_quality:1,
-                tx_attenuation:1,
-                db_tx_attenuation:1,
-                dbm_tx_attenuation:1,
-                antenna:1,
-                db_signal:1,
-                db_noise:1,
-                rx_flags:1,
-                reserved1:3,
-                channel_plus:1,
-                reserved2:12,
-                ext:1;
+            union {
+                struct {
+                    uint32_t tsft:1,
+                        flags:1,
+                        rate:1,
+                        channel:1,
+                        fhss:1,
+                        dbm_signal:1,
+                        dbm_noise:1,
+                        lock_quality:1,
+                        tx_attenuation:1,
+                        db_tx_attenuation:1,
+                        dbm_tx_attenuation:1,
+                        antenna:1,
+                        db_signal:1,
+                        db_noise:1,
+                        rx_flags:1,
+                        reserved1:3,
+                        channel_plus:1,
+                        reserved2:12,
+                        ext:1;
+                } flags;
+                uint32_t flags_32;
+            };
         #else
             uint8_t it_pad;
             uint8_t it_version;	
             uint16_t it_len;
-            uint32_t lock_quality:1,
-                dbm_noise:1,
-                dbm_signal:1,
-                fhss:1,
-                channel:1,
-                rate:1,
-                flags:1,
-                tsft:1,
-                reserved3:1,
-                rx_flags:1,
-                db_tx_attenuation:1,
-                dbm_tx_attenuation:1,
-                antenna:1,
-                db_signal:1,
-                db_noise:1,
-                tx_attenuation:1,
-                reserved2:5,
-                channel_plus:1,
-                reserved1:2,
-                reserved4:7,
-                ext:1;
+            union {
+                struct {
+                    uint32_t lock_quality:1,
+                        dbm_noise:1,
+                        dbm_signal:1,
+                        fhss:1,
+                        channel:1,
+                        rate:1,
+                        flags:1,
+                        tsft:1,
+                        reserved3:1,
+                        rx_flags:1,
+                        db_tx_attenuation:1,
+                        dbm_tx_attenuation:1,
+                        antenna:1,
+                        db_signal:1,
+                        db_noise:1,
+                        tx_attenuation:1,
+                        reserved2:5,
+                        channel_plus:1,
+                        reserved1:2,
+                        reserved4:7,
+                        ext:1;
+                } flags;
+                uint32_t flags_32;
+            };
         #endif
         } TINS_END_PACK;
         
@@ -411,8 +423,7 @@ namespace Tins {
         radiotap_hdr _radio;
         // present fields...
         uint64_t _tsft;
-        uint32_t _channel_type;
-        uint16_t _channel_freq, _rx_flags, _signal_quality;
+        uint16_t _channel_type, _channel_freq, _rx_flags, _signal_quality;
         uint8_t _antenna, _flags, _rate, _dbm_signal, _dbm_noise, _channel, _max_power, _db_signal;
     };
 }

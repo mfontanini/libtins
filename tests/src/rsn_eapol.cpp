@@ -79,7 +79,7 @@ TEST_F(RSNEAPOLTest, DefaultConstructor) {
     EXPECT_EQ(EAPOL::RSN, eapol.type());
     EXPECT_EQ(0, eapol.length());
     EXPECT_EQ(0, eapol.key_length());
-    EXPECT_EQ(0, eapol.replay_counter());
+    EXPECT_EQ(0U, eapol.replay_counter());
     EXPECT_TRUE(std::equal(empty_iv, empty_iv + sizeof(empty_iv), eapol.key_iv()));
     EXPECT_TRUE(std::equal(empty_rsc, empty_rsc + sizeof(empty_rsc), eapol.id()));
     EXPECT_TRUE(std::equal(empty_rsc, empty_rsc + sizeof(empty_rsc), eapol.rsc()));
@@ -107,7 +107,7 @@ TEST_F(RSNEAPOLTest, ConstructorFromBuffer) {
     EXPECT_EQ(1, eapol.encrypted());
     
     EXPECT_EQ(16, eapol.key_length());
-    EXPECT_EQ(2, eapol.replay_counter());
+    EXPECT_EQ(2U, eapol.replay_counter());
     EXPECT_TRUE(std::equal(nonce, nonce + sizeof(nonce), eapol.nonce()));
     EXPECT_TRUE(std::equal(empty_iv, empty_iv + sizeof(empty_iv), eapol.key_iv()));
     EXPECT_TRUE(std::equal(rsc, rsc + sizeof(rsc), eapol.rsc()));
@@ -115,7 +115,7 @@ TEST_F(RSNEAPOLTest, ConstructorFromBuffer) {
     EXPECT_TRUE(std::equal(mic, mic + sizeof(mic), eapol.mic()));
     ASSERT_EQ(56, eapol.wpa_length());
     RSNEAPOL::key_type key_found = eapol.key();
-    ASSERT_EQ(56, key_found.size());
+    ASSERT_EQ(56U, key_found.size());
     EXPECT_TRUE(std::equal(key, key + sizeof(key), key_found.begin()));
 }
 
@@ -159,8 +159,8 @@ TEST_F(RSNEAPOLTest, ConstructionTest) {
 
 TEST_F(RSNEAPOLTest, ReplayCounter) {
     RSNEAPOL eapol;
-    eapol.replay_counter(0x7af3d91a1fd3abLL);
-    EXPECT_EQ(0x7af3d91a1fd3abLL, eapol.replay_counter());
+    eapol.replay_counter(0x7af3d91a1fd3abULL);
+    EXPECT_EQ(0x7af3d91a1fd3abULL, eapol.replay_counter());
 }
 
 TEST_F(RSNEAPOLTest, WPALength) {

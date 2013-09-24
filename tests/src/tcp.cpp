@@ -92,13 +92,13 @@ TEST_F(TCPTest, SPort) {
 TEST_F(TCPTest, Seq) {
     TCP tcp;
     tcp.seq(0x5fad65fb);
-    EXPECT_EQ(tcp.seq(), 0x5fad65fb);
+    EXPECT_EQ(tcp.seq(), 0x5fad65fbU);
 }
 
 TEST_F(TCPTest, AckSeq) {
     TCP tcp;
     tcp.ack_seq(0x5fad65fb);
-    EXPECT_EQ(tcp.ack_seq(), 0x5fad65fb);
+    EXPECT_EQ(tcp.ack_seq(), 0x5fad65fbU);
 }
 
 TEST_F(TCPTest, Window) {
@@ -204,7 +204,7 @@ TEST_F(TCPTest, ConstructorFromBuffer) {
     EXPECT_EQ(tcp1.dport(), 0x4f1d);
     EXPECT_EQ(tcp1.sport(), 0x7f4d);
     EXPECT_EQ(tcp1.seq(), 0xf1dae546);
-    EXPECT_EQ(tcp1.ack_seq(), 0x5faed123);
+    EXPECT_EQ(tcp1.ack_seq(), 0x5faed123U);
     EXPECT_EQ(tcp1.window(), 0x71da);
     EXPECT_EQ(tcp1.urg_ptr(), 0x1fae);
     EXPECT_EQ(tcp1.data_offset(), 0xd);
@@ -219,9 +219,9 @@ TEST_F(TCPTest, ConstructorFromBuffer) {
     
     TCP::sack_type edges = tcp1.sack();
     TCP::sack_type::const_iterator iter = edges.begin();
-    ASSERT_EQ(edges.size(), 2);
-    EXPECT_EQ(*iter++, 0x00010203);
-    EXPECT_EQ(*iter++, 0x04050607); 
+    ASSERT_EQ(edges.size(), 2U);
+    EXPECT_EQ(*iter++, 0x00010203U);
+    EXPECT_EQ(*iter++, 0x04050607U); 
     
     PDU::serialization_type buffer = tcp1.serialize();
     
@@ -249,6 +249,6 @@ TEST_F(TCPTest, SpoofedOptions) {
         TCP::option(TCP::SACK, 250, a, a + sizeof(a))
     );
     // probably we'd expect it to crash if it's not working, valgrind plx
-    EXPECT_EQ(3, pdu.options().size());
+    EXPECT_EQ(3U, pdu.options().size());
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
 }

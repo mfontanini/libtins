@@ -23,13 +23,13 @@ TEST_F(DHCPv6Test, DefaultConstructor) {
     DHCPv6 dhcp;
     EXPECT_EQ(0, (int)dhcp.msg_type());
     EXPECT_EQ(0, dhcp.hop_count());
-    EXPECT_EQ(0, dhcp.transaction_id());
+    EXPECT_EQ(0U, dhcp.transaction_id());
 }
 
 TEST_F(DHCPv6Test, ConstructorFromBuffer) {
     DHCPv6 dhcp(expected_packet, sizeof(expected_packet));
     EXPECT_EQ(DHCPv6::SOLICIT, dhcp.msg_type());
-    EXPECT_EQ(0xe828b9, dhcp.transaction_id());
+    EXPECT_EQ(0xe828b9U, dhcp.transaction_id());
     EXPECT_TRUE(dhcp.search_option(DHCPv6::CLIENTID));
     EXPECT_TRUE(dhcp.search_option(DHCPv6::IA_NA));
     EXPECT_TRUE(dhcp.search_option(DHCPv6::ELAPSED_TIME));
@@ -62,7 +62,7 @@ TEST_F(DHCPv6Test, HopCount) {
 TEST_F(DHCPv6Test, TransactionId) {
     DHCPv6 dhcp;
     dhcp.transaction_id(0x8af2ad);
-    EXPECT_EQ(0x8af2ad, dhcp.transaction_id());
+    EXPECT_EQ(0x8af2adU, dhcp.transaction_id());
 }
 
 // Options
@@ -160,7 +160,7 @@ TEST_F(DHCPv6Test, Authentication) {
     data.protocol = 0x92;
     data.algorithm = 0x8f;
     data.rdm = 0xa1;
-    data.replay_detection = 0x78ad6d5290398df7;
+    data.replay_detection = 0x78ad6d5290398df7ULL;
     data.auth_info.push_back(0);
     data.auth_info.push_back(1);
     data.auth_info.push_back(2);

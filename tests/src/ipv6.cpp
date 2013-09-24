@@ -65,7 +65,7 @@ TEST_F(IPv6Test, Constructor) {
     IPv6 ipv6("::1:2:3", "f0aa:beef::1");
     EXPECT_EQ(ipv6.version(), 6);
     EXPECT_EQ(ipv6.traffic_class(), 0);
-    EXPECT_EQ(ipv6.flow_label(), 0);
+    EXPECT_EQ(ipv6.flow_label(), 0U);
     EXPECT_EQ(ipv6.payload_length(), 0);
     EXPECT_EQ(ipv6.next_header(), 0);
     EXPECT_EQ(ipv6.hop_limit(), 0);
@@ -77,7 +77,7 @@ TEST_F(IPv6Test, ConstructorFromBuffer) {
     IPv6 ipv6(expected_packet1, sizeof(expected_packet1));
     EXPECT_EQ(ipv6.version(), 6);
     EXPECT_EQ(ipv6.traffic_class(), 0x9a);
-    EXPECT_EQ(ipv6.flow_label(), 0x82734);
+    EXPECT_EQ(ipv6.flow_label(), 0x82734U);
     EXPECT_EQ(ipv6.payload_length(), 40);
     EXPECT_EQ(ipv6.next_header(), 6);
     EXPECT_EQ(ipv6.hop_limit(), 64);
@@ -95,7 +95,7 @@ TEST_F(IPv6Test, ConstructorFromBuffer2) {
     IPv6 ipv6(expected_packet2, sizeof(expected_packet2));
     EXPECT_EQ(ipv6.version(), 6);
     EXPECT_EQ(ipv6.traffic_class(), 0);
-    EXPECT_EQ(ipv6.flow_label(), 0);
+    EXPECT_EQ(ipv6.flow_label(), 0U);
     EXPECT_EQ(ipv6.payload_length(), 36);
     EXPECT_EQ(ipv6.next_header(), IPv6::HOP_BY_HOP);
     EXPECT_EQ(ipv6.hop_limit(), 1);
@@ -111,7 +111,7 @@ TEST_F(IPv6Test, ConstructorFromBuffer2) {
     
     const IPv6::ext_header *header = ipv6.search_header(IPv6::HOP_BY_HOP);
     ASSERT_TRUE(header);
-    EXPECT_EQ(header->data_size(), 6);
+    EXPECT_EQ(header->data_size(), 6U);
 }
 
 TEST_F(IPv6Test, Serialize) {
@@ -138,13 +138,13 @@ TEST_F(IPv6Test, TrafficClass) {
 TEST_F(IPv6Test, FlowLabel) {
     IPv6 ipv6;
     ipv6.flow_label(0x918d7);
-    EXPECT_EQ(ipv6.flow_label(), 0x918d7);
+    EXPECT_EQ(ipv6.flow_label(), 0x918d7U);
 }
 
 TEST_F(IPv6Test, PayloadLength) {
     IPv6 ipv6;
     ipv6.payload_length(0xaf71);
-    EXPECT_EQ(ipv6.payload_length(), 0xaf71);
+    EXPECT_EQ(ipv6.payload_length(), 0xaf71U);
 }
 
 TEST_F(IPv6Test, NextHeader) {

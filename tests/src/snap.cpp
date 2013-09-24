@@ -25,7 +25,7 @@ TEST_F(SNAPTest, DefaultConstructor) {
     EXPECT_EQ(snap.dsap(), 0xaa);
     EXPECT_EQ(snap.ssap(), 0xaa);
     EXPECT_EQ(snap.eth_type(), 0);
-    EXPECT_EQ(snap.org_code(), 0);
+    EXPECT_EQ(snap.org_code(), 0U);
     EXPECT_EQ(snap.control(), 3);
 }
 
@@ -51,7 +51,7 @@ TEST_F(SNAPTest, OrgCode) {
     SNAP snap; 
     snap.org_code(0xfab1c3); 
     
-    EXPECT_EQ(snap.org_code(), 0xfab1c3);
+    EXPECT_EQ(snap.org_code(), 0xfab1c3U);
     EXPECT_EQ(snap.control(), 3);
 }
 
@@ -60,7 +60,7 @@ TEST_F(SNAPTest, Control) {
     snap.control(0xfa); 
     
     EXPECT_EQ(snap.control(), 0xfa);
-    EXPECT_EQ(snap.org_code(), 0);
+    EXPECT_EQ(snap.org_code(), 0U);
 }
 
 TEST_F(SNAPTest, EthType) {
@@ -102,7 +102,7 @@ TEST_F(SNAPTest, ConstructorFromBuffer) {
     EXPECT_EQ(0xaa, snap1.dsap());
     EXPECT_EQ(0xaa, snap1.ssap());
     EXPECT_EQ(0x0800, snap1.eth_type()); 
-    EXPECT_EQ(1, snap1.org_code()); 
+    EXPECT_EQ(1U, snap1.org_code()); 
     
     SNAP snap2(&buffer[0], buffer.size());
     test_equals(snap1, snap2);

@@ -33,7 +33,7 @@ TEST_F(PPPoETest, ConstructorFromBuffer) {
     EXPECT_EQ(0x09, pdu.code());
     EXPECT_EQ(0, pdu.session_id());
     EXPECT_EQ(16, pdu.payload_length());
-    EXPECT_EQ(3, pdu.tags().size());
+    EXPECT_EQ(3U, pdu.tags().size());
     
     EXPECT_EQ("", pdu.service_name());
     ASSERT_TRUE(pdu.search_tag(PPPoE::SERVICE_NAME));
@@ -186,6 +186,6 @@ TEST_F(PPPoETest, SpoofedOptions) {
         PPPoE::tag(PPPoE::VENDOR_SPECIFIC, 65000, a, a + sizeof(a))
     );
     // probably we'd expect it to crash if it's not working, valgrind plx
-    EXPECT_EQ(3, pdu.tags().size());
+    EXPECT_EQ(3U, pdu.tags().size());
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
 }

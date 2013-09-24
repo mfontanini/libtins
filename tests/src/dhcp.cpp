@@ -105,7 +105,7 @@ TEST_F(DHCPTest, HOps) {
 TEST_F(DHCPTest, Xid) {
     DHCP dhcp;
     dhcp.xid(0x71bd167c);
-    EXPECT_EQ(dhcp.xid(), 0x71bd167c);
+    EXPECT_EQ(dhcp.xid(), 0x71bd167cU);
 }
 
 TEST_F(DHCPTest, Secs) {
@@ -284,7 +284,7 @@ TEST_F(DHCPTest, ConstructorFromBuffer) {
     EXPECT_EQ(dhcp1.htype(), 1);
     ASSERT_EQ(dhcp1.hlen(), (const size_t)EthernetII::address_type::address_size);
     EXPECT_EQ(dhcp1.hops(), 0x1f);
-    EXPECT_EQ(dhcp1.xid(), 0x3fab23de);
+    EXPECT_EQ(dhcp1.xid(), 0x3fab23deU);
     EXPECT_EQ(dhcp1.secs(), 0x9f1a);
     EXPECT_EQ(dhcp1.padding(), 0);
     EXPECT_EQ(dhcp1.ciaddr(), IPv4Address("192.168.0.102"));

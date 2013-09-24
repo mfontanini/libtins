@@ -69,7 +69,7 @@ public:
      *  \return The stored version field value.
      */
     uint8_t version() const {
-        return Endian::le_to_host(_header.version);
+        return _header.version;
     }
 
     /**
@@ -77,7 +77,7 @@ public:
      *  \return The stored flags field value.
      */
     uint8_t flags() const {
-        return Endian::le_to_host(_header.flags);
+        return _header.flags;
     }
 
     /**
@@ -85,7 +85,7 @@ public:
      *  \return The stored length field value.
      */
     uint16_t length() const {
-        return Endian::le_to_host(_header.length);
+        return _header.length;
     }
 
     /**
@@ -93,7 +93,7 @@ public:
      *  \return The stored Data Link Type field value.
      */
     uint32_t dlt() const {
-        return Endian::le_to_host(_header.dlt);
+        return _header.dlt;
     }
 
     /**

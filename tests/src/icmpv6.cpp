@@ -70,20 +70,20 @@ TEST_F(ICMPv6Test, ConstructorFromBuffer2) {
     EXPECT_EQ(icmp.other(), 0);
     EXPECT_EQ(icmp.router_pref(), 0);
     EXPECT_EQ(icmp.router_lifetime(), 1800);
-    EXPECT_EQ(icmp.reachable_time(), 30000);
-    EXPECT_EQ(icmp.retransmit_timer(), 1000);
+    EXPECT_EQ(icmp.reachable_time(), 30000U);
+    EXPECT_EQ(icmp.retransmit_timer(), 1000U);
     const ICMPv6::option *opt = icmp.search_option(ICMPv6::SOURCE_ADDRESS);
     ASSERT_TRUE(opt);
-    EXPECT_EQ(opt->data_size(), 6);
+    EXPECT_EQ(opt->data_size(), 6U);
     EXPECT_EQ(HWAddress<6>(opt->data_ptr()), "00:60:97:07:69:ea");
     
     opt = icmp.search_option(ICMPv6::MTU);
     ASSERT_TRUE(opt);
-    EXPECT_EQ(opt->data_size(), 6);
+    EXPECT_EQ(opt->data_size(), 6U);
     
     opt = icmp.search_option(ICMPv6::PREFIX_INFO);
     ASSERT_TRUE(opt);
-    EXPECT_EQ(opt->data_size(), 30);
+    EXPECT_EQ(opt->data_size(), 30U);
 }
 
 TEST_F(ICMPv6Test, Type) {
@@ -216,7 +216,7 @@ TEST_F(ICMPv6Test, RedirectHeader) {
 TEST_F(ICMPv6Test, MTU) {
     ICMPv6 icmp;
     icmp.mtu(0x9a8df7);
-    EXPECT_EQ(icmp.mtu(), 0x9a8df7);
+    EXPECT_EQ(icmp.mtu(), 0x9a8df7U);
 }
 
 TEST_F(ICMPv6Test, ShortcutLimit) {
@@ -228,7 +228,7 @@ TEST_F(ICMPv6Test, ShortcutLimit) {
 TEST_F(ICMPv6Test, NewAdvertisementInterval) {
     ICMPv6 icmp;
     icmp.new_advert_interval(0x9a8df7);
-    EXPECT_EQ(icmp.new_advert_interval(), 0x9a8df7);
+    EXPECT_EQ(icmp.new_advert_interval(), 0x9a8df7U);
 }
 
 TEST_F(ICMPv6Test, NewHomeAgentInformation) {
@@ -277,8 +277,8 @@ TEST_F(ICMPv6Test, RSASignature) {
 
 TEST_F(ICMPv6Test, Timestamp) {
     ICMPv6 icmp;
-    icmp.timestamp(0x2837d6aaa231L);
-    EXPECT_EQ(icmp.timestamp(), 0x2837d6aaa231L);
+    icmp.timestamp(0x2837d6aaa231ULL);
+    EXPECT_EQ(icmp.timestamp(), 0x2837d6aaa231ULL);
 }
 
 TEST_F(ICMPv6Test, Nonce) {
@@ -431,6 +431,6 @@ TEST_F(ICMPv6Test, SpoofedOptions) {
         ICMPv6::option(ICMPv6::NAACK, 250, a, a + sizeof(a))
     );
     // probably we'd expect it to crash if it's not working, valgrind plx
-    EXPECT_EQ(3, pdu.options().size());
+    EXPECT_EQ(3U, pdu.options().size());
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
 }

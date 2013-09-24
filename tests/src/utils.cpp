@@ -70,7 +70,7 @@ TEST_F(UtilsTest, Crc32) {
 
     uint32_t crc = Utils::crc32(data, data_len);
 
-    EXPECT_EQ(crc, 0x78840f54);
+    EXPECT_EQ(crc, 0x78840f54U);
 
 }
 

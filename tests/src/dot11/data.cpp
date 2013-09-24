@@ -139,6 +139,8 @@ TEST_F(Dot11DataTest, Serialize) {
 
 TEST_F(Dot11DataTest, Source_Dest_BSSID_Address1) {
     Dot11Data data(from_to_ds10, sizeof(from_to_ds10));
+    EXPECT_EQ(1, data.from_ds());
+    EXPECT_EQ(0, data.to_ds());
     EXPECT_EQ(data.src_addr(), "00:18:f8:f5:c2:c6");
     EXPECT_EQ(data.dst_addr(), "00:25:9c:74:95:92");
     EXPECT_EQ(data.bssid_addr(), "00:18:f8:f5:c2:c6");
@@ -146,13 +148,17 @@ TEST_F(Dot11DataTest, Source_Dest_BSSID_Address1) {
 
 TEST_F(Dot11DataTest, Source_Dest_BSSID_Address2) {
     Dot11Data data(from_to_ds01, sizeof(from_to_ds01));
+    EXPECT_EQ(0, data.from_ds());
+    EXPECT_EQ(1, data.to_ds());
     EXPECT_EQ(data.src_addr(), "00:25:9c:74:95:92");
     EXPECT_EQ(data.dst_addr(), "00:18:f8:f5:c2:c6");
     EXPECT_EQ(data.bssid_addr(), "00:18:f8:f5:c2:c6");
 }
 
 TEST_F(Dot11DataTest, Source_Dest_BSSID_Address3) {
-    Dot11Data data(from_to_ds01, sizeof(from_to_ds00));
+    Dot11Data data(from_to_ds00, sizeof(from_to_ds00));
+    EXPECT_EQ(0, data.from_ds());
+    EXPECT_EQ(0, data.to_ds());
     EXPECT_EQ(data.src_addr(), "00:25:9c:74:95:92");
     EXPECT_EQ(data.dst_addr(), "00:18:f8:f5:c2:c6");
     EXPECT_EQ(data.bssid_addr(), "00:18:f8:f5:c2:c6");

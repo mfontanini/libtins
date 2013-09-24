@@ -23,7 +23,7 @@ TEST_F(RC4EAPOLTest, DefaultConstructor) {
     EXPECT_EQ(EAPOL::RC4, eapol.type());
     EXPECT_EQ(0, eapol.length());
     EXPECT_EQ(0, eapol.key_length());
-    EXPECT_EQ(0, eapol.replay_counter());
+    EXPECT_EQ(0U, eapol.replay_counter());
     EXPECT_TRUE(std::equal(empty_iv, empty_iv + sizeof(empty_iv), eapol.key_iv()));
     EXPECT_EQ(0, eapol.key_flag());
     EXPECT_EQ(0, eapol.key_index());
@@ -64,7 +64,7 @@ TEST_F(RC4EAPOLTest, KeyLength) {
 TEST_F(RC4EAPOLTest, ReplayCounter) {
     RC4EAPOL eapol;
     eapol.replay_counter(0x7af3d91a1fd3abLL);
-    EXPECT_EQ(0x7af3d91a1fd3abLL, eapol.replay_counter());
+    EXPECT_EQ(0x7af3d91a1fd3abULL, eapol.replay_counter());
 }
 
 TEST_F(RC4EAPOLTest, KeyIV) {

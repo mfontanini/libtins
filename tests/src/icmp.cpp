@@ -90,7 +90,7 @@ TEST_F(ICMPTest, Checksum) {
 TEST_F(ICMPTest, Gateway) {
     ICMP icmp;
     icmp.gateway(0x31fdb5cd);
-    EXPECT_EQ(icmp.gateway(), 0x31fdb5cd);
+    EXPECT_EQ(icmp.gateway(), 0x31fdb5cdU);
 }
 
 TEST_F(ICMPTest, MTU) {
@@ -176,7 +176,7 @@ TEST_F(ICMPTest, SetRedirect) {
     icmp.set_redirect(0x3d, 0xf1dc);
     EXPECT_EQ(icmp.type(), ICMP::REDIRECT);
     EXPECT_EQ(icmp.code(), 0x3d);
-    EXPECT_EQ(icmp.gateway(), 0xf1dc);
+    EXPECT_EQ(icmp.gateway(), 0xf1dcU);
 }
 
 void ICMPTest::test_equals(const ICMP &icmp1, const ICMP &icmp2) {

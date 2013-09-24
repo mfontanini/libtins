@@ -33,7 +33,7 @@ TEST_F(STPTest, DefaultConstructor) {
     EXPECT_EQ(0, pdu.proto_version());
     EXPECT_EQ(0, pdu.bpdu_type());
     EXPECT_EQ(0, pdu.bpdu_flags());
-    EXPECT_EQ(0, pdu.root_path_cost());
+    EXPECT_EQ(0U, pdu.root_path_cost());
     EXPECT_EQ(0, pdu.port_id());
     EXPECT_EQ(0, pdu.msg_age());
     EXPECT_EQ(0, pdu.max_age());
@@ -50,7 +50,7 @@ TEST_F(STPTest, ConstructorFromBuffer) {
     EXPECT_EQ(0x92, pdu.bpdu_flags());
     test_equals(bpdu, pdu.root_id());
     // root identifier(32768. 0, 00:90:4c:08:17:b5
-    EXPECT_EQ(0x928378, pdu.root_path_cost());
+    EXPECT_EQ(0x928378U, pdu.root_path_cost());
     test_equals(bpdu, pdu.bridge_id());
     // bridge identifier(32768. 0, 00:90:4c:08:17:b5
     EXPECT_EQ(0x8001, pdu.port_id());
@@ -129,7 +129,7 @@ TEST_F(STPTest, BPDUFlags) {
 TEST_F(STPTest, RootPathCost) {
     STP pdu;
     pdu.root_path_cost(0x28378462);
-    EXPECT_EQ(0x28378462, pdu.root_path_cost());
+    EXPECT_EQ(0x28378462U, pdu.root_path_cost());
 }
 
 TEST_F(STPTest, PortID) {

@@ -27,8 +27,8 @@ const uint8_t IPTest::expected_packet[] = {
 
 TEST_F(IPTest, DefaultConstructor) {
     IP ip;
-    EXPECT_EQ(ip.dst_addr(), 0);
-    EXPECT_EQ(ip.src_addr(), 0);
+    EXPECT_EQ(ip.dst_addr(), "0.0.0.0");
+    EXPECT_EQ(ip.src_addr(), "0.0.0.0");
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
     EXPECT_EQ(ip.pdu_type(), PDU::IP);
@@ -144,7 +144,7 @@ TEST_F(IPTest, SecOption) {
     EXPECT_EQ(found.security, 0x746a);
     EXPECT_EQ(found.compartments, 26539);
     EXPECT_EQ(found.handling_restrictions, 0x77ab);
-    EXPECT_EQ(found.transmission_control, 0x68656c);
+    EXPECT_EQ(found.transmission_control, 0x68656cU);
 }
 
 TEST_F(IPTest, LSRROption) {
@@ -224,7 +224,7 @@ TEST_F(IPTest, ConstructorFromBuffer) {
     EXPECT_EQ(sec.security, 0x746a);
     EXPECT_EQ(sec.compartments, 26539);
     EXPECT_EQ(sec.handling_restrictions, 0x77ab);
-    EXPECT_EQ(sec.transmission_control, 0x68656c);
+    EXPECT_EQ(sec.transmission_control, 0x68656cU);
 }
 
 TEST_F(IPTest, Serialize) {
@@ -261,6 +261,6 @@ TEST_F(IPTest, SpoofedOptions) {
         IP::option(IP::NOOP, 250, a, a + sizeof(a))
     );
     // probably we'd expect it to crash if it's not working, valgrind plx
-    EXPECT_EQ(3, pdu.options().size());
+    EXPECT_EQ(3U, pdu.options().size());
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
 }

@@ -26,7 +26,7 @@ const uint8_t Dot11BeaconTest::expected_packet[] = {
 
 void test_equals_expected(const Dot11Beacon &dot11) {
     EXPECT_EQ(dot11.subtype(), 8);
-    EXPECT_EQ(dot11.timestamp(), 0x1fad2341289301faLL);
+    EXPECT_EQ(dot11.timestamp(), 0x1fad2341289301faULL);
     EXPECT_EQ(dot11.interval(), 0x14fa);
     
     const Dot11Beacon::capability_information &info = dot11.capabilities();
@@ -68,7 +68,7 @@ TEST_F(Dot11BeaconTest, DefaultConstructor) {
     test_equals_empty(dot11.capabilities());
     
     EXPECT_EQ(dot11.interval(), 0);
-    EXPECT_EQ(dot11.timestamp(), 0);
+    EXPECT_EQ(dot11.timestamp(), 0U);
     EXPECT_EQ(dot11.subtype(), Dot11::BEACON);
 }
 
@@ -116,7 +116,7 @@ TEST_F(Dot11BeaconTest, FromBytes) {
 TEST_F(Dot11BeaconTest, Timestamp) {
     Dot11Beacon dot11;
     dot11.timestamp(0x1fad2341289301faLL);
-    EXPECT_EQ(dot11.timestamp(), 0x1fad2341289301faLL);
+    EXPECT_EQ(dot11.timestamp(), 0x1fad2341289301faULL);
 }
 
 TEST_F(Dot11BeaconTest, Interval) {

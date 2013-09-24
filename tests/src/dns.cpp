@@ -76,11 +76,11 @@ TEST_F(DNSTest, ConstructorFromBuffer) {
     EXPECT_EQ(dns.answers_count(), 1);
     
     std::list<DNS::Query> queries = dns.queries();
-    ASSERT_EQ(queries.size(), 1);
+    ASSERT_EQ(queries.size(), 1U);
     test_equals(queries.front(), DNS::Query("www.example.com", DNS::A, DNS::IN));
     
     std::list<DNS::Resource> answers = dns.answers();
-    ASSERT_EQ(answers.size(), 1);
+    ASSERT_EQ(answers.size(), 1U);
     test_equals(answers.front(), DNS::Resource("www.example.com", "192.168.0.1", DNS::A, DNS::IN, 0x1234));
 }
 
@@ -212,13 +212,13 @@ TEST_F(DNSTest, Answers) {
         EXPECT_TRUE(it->dname() == "www.example.com" || it->dname() == "www.example2.com");
         if(it->dname() == "www.example.com") {
             EXPECT_EQ(it->type(), DNS::A);
-            EXPECT_EQ(it->ttl(), 0x762);
+            EXPECT_EQ(it->ttl(), 0x762U);
             EXPECT_EQ(it->data(), "127.0.0.1");
             EXPECT_EQ(it->query_class(), DNS::IN);
         }
         else if(it->dname() == "www.example2.com") {
             EXPECT_EQ(it->type(), DNS::MX);
-            EXPECT_EQ(it->ttl(), 0x762);
+            EXPECT_EQ(it->ttl(), 0x762U);
             EXPECT_EQ(it->data(), "mail.example.com");
             EXPECT_EQ(it->query_class(), DNS::IN);
         }
@@ -235,7 +235,7 @@ TEST_F(DNSTest, AnswersWithSameName) {
         EXPECT_TRUE(it->data() == "127.0.0.1" || it->data() == "127.0.0.2");
         EXPECT_EQ(it->dname(), "www.example.com");
         EXPECT_EQ(it->type(), DNS::A);
-        EXPECT_EQ(it->ttl(), 0x762);
+        EXPECT_EQ(it->ttl(), 0x762U);
         EXPECT_EQ(it->query_class(), DNS::IN);
     }
 }
@@ -250,7 +250,7 @@ TEST_F(DNSTest, AnswersV6) {
     for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
         EXPECT_EQ(it->dname(), "www.example.com");
         EXPECT_EQ(it->type(), DNS::AAAA);
-        EXPECT_EQ(it->ttl(), 0x762);
+        EXPECT_EQ(it->ttl(), 0x762U);
         EXPECT_EQ(it->data(), "f9a8:239::1:1");
         EXPECT_EQ(it->query_class(), DNS::IN);
     }
