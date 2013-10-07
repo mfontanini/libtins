@@ -54,7 +54,11 @@ public:
         
         PacketSender sender;
         // Create our handler
-        auto handler = make_sniffer_handler(this, &Traceroute::sniff_callback);
+        auto handler = std::bind(
+            &Traceroute::sniff_callback, 
+            this, 
+            std::placeholders::_1
+        );
         // We're running
         running = true;
         // Start the sniff thread
@@ -98,10 +102,10 @@ private:
     }
 
     bool sniff_callback(PDU &pdu) {
-        IP &ip = pdu.rfind_pdu<IP>();
+        const IP &ip = pdu.rfind_pdu<IP>();
         ttl_map::const_iterator iter;
         // Fetch the IP PDU attached to the ICMP response
-        IP inner_ip = pdu.rfind_pdu<RawPDU>().to<IP>();
+        const IP inner_ip = pdu.rfind_pdu<RawPDU>().to<IP>();
         // Critical section
         {
             std::lock_guard<std::mutex> _(lock);

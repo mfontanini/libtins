@@ -103,7 +103,7 @@ namespace Tins {
         /**
          * \brief Compiles a filter and uses it to capture one packet.
          * 
-         * This method returns the first sniffed packet that matches the 
+         * This method returns the first valid sniffed packet that matches the 
          * sniffer's filter, or the first sniffed packet if no filter has
          * been set.
          * 
@@ -123,39 +123,36 @@ namespace Tins {
          * \code
          * // bad!!
          * PtrPacket p = s.next_packet();
-         * 
          * \endcode
          * 
          * Is not, since PtrPacket can't be copy constructed. 
          * 
          * \sa Packet::release_pdu
          * 
-         * \return The captured packet, matching the given filter.
-         * If an error occured(probably compiling the filter), PtrPacket::pdu
-         * will return 0. Caller takes ownership of the PDU * stored in
+         * \return A captured packet. If an error occured, PtrPacket::pdu 
+         * will return 0. Caller takes ownership of the PDU pointer stored in 
          * the PtrPacket.
          */
         PtrPacket next_packet();
         
         /**
-         * \brief Starts a sniffing loop, using a callback object for every
+         * \brief Starts a sniffing loop, using a callback functor for every
          * sniffed packet.
          * 
-         * The callback object must implement an operator with one of the 
+         * The functor must implement an operator with one of the 
          * following signatures:
          * 
          * \code
-         * bool operator()(PDU&);
-         * bool operator()(const PDU&);
+         * bool(PDU&);
+         * bool(const PDU&);
          * \endcode
          * 
-         * This operator will be called using the sniffed packets 
-         * as arguments. You can modify the parameter argument as you wish. 
-         * Calling PDU methods like PDU::release_inner_pdu is perfectly 
-         * valid.
+         * This functor will be called using the each of the sniffed packets 
+         * as its argument. Using PDU member functions that modify the PDU,
+         * such as PDU::release_inner_pdu, is perfectly valid.
          * 
-         * Note that the Functor object will be copied using its copy
-         * constructor, so that object should be some kind of proxy to
+         * Note that if you're using a functor object, it will be copied using 
+         * its copy constructor, so it should be some kind of proxy to
          * another object which will process the packets(e.g. std::bind).
          *
          * Sniffing will stop when either max_packets are sniffed(if it is != 0), 

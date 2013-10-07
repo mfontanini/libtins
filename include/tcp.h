@@ -207,14 +207,6 @@ namespace Tins {
          * \param tcp_flag The polled flag.
          * \return The value of the flag.
          */
-        small_uint<1> get_flag(Flags tcp_flag);
-
-        /**
-         * \brief Gets the value of a flag.
-         * 
-         * \param tcp_flag The polled flag.
-         * \return The value of the flag.
-         */
         small_uint<1> get_flag(Flags tcp_flag) const;
 
         /**

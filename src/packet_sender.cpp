@@ -119,7 +119,7 @@ void PacketSender::default_interface(const NetworkInterface &iface) {
     default_iface = iface;
 }
 
-const NetworkInterface& PacketSender::default_interface() {
+const NetworkInterface& PacketSender::default_interface() const {
     return default_iface;
 }
 

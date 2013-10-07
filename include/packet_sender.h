@@ -76,6 +76,7 @@ namespace Tins {
         /**
          * \brief Constructor for PacketSender objects.
          * 
+         * \param iface The default interface in which to send the packets.
          * \param recv_timeout The timeout which will be used when receiving responses.
          */
         PacketSender(const NetworkInterface &iface = NetworkInterface(), 
@@ -168,7 +169,7 @@ namespace Tins {
          * 
          * \sa PacketSender::default_interface
          */
-        const NetworkInterface& default_interface();
+        const NetworkInterface& default_interface() const;
 
         /** 
          * \brief Sends a PDU. 

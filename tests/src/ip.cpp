@@ -63,22 +63,10 @@ TEST_F(IPTest, Constructor) {
     EXPECT_EQ(ip.id(), 1);
 }
 
-TEST_F(IPTest, HeadLen) {
-    IP ip;
-    ip.head_len(14);
-    EXPECT_EQ(ip.head_len(), 14);
-}
-
 TEST_F(IPTest, TOS) {
     IP ip;
     ip.tos(0x7a);
     EXPECT_EQ(ip.tos(), 0x7a);
-}
-
-TEST_F(IPTest, TotLen) {
-    IP ip;
-    ip.tot_len(0x7f1a);
-    EXPECT_EQ(ip.tot_len(), 0x7f1a);
 }
 
 TEST_F(IPTest, ID) {

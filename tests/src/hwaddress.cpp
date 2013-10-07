@@ -71,6 +71,12 @@ TEST_F(HWAddressTest, IsBroadcast) {
     EXPECT_TRUE(HWAddress<6>("ff:ff:ff:ff:ff:ff").is_broadcast());
 }
 
+TEST_F(HWAddressTest, IsUnicast) {
+    EXPECT_FALSE(HWAddress<6>("ff:ff:ff:ff:ff:ff").is_unicast());
+    EXPECT_FALSE(HWAddress<6>("03:02:03:04:05:06").is_unicast());
+    EXPECT_TRUE(HWAddress<6>("de:ad:be:ef:00:00").is_unicast());
+}
+
 TEST_F(HWAddressTest, IsMulticast) {
     EXPECT_TRUE(HWAddress<6>("01:02:03:04:05:06").is_multicast());
     EXPECT_TRUE(HWAddress<6>("09:02:03:04:05:06").is_multicast());

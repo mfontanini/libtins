@@ -54,7 +54,7 @@ typedef std::pair<Sniffer*, std::string> sniffer_data;
  * the scanned port's status.
  */
 bool handler(PDU &pdu) {
-    TCP &tcp = pdu.rfind_pdu<TCP>();
+    const TCP &tcp = pdu.rfind_pdu<TCP>();
     // Ok, it's a TCP PDU. Is RST flag on? Then port is closed.
     if(tcp.get_flag(TCP::RST)) {
         // This indicates we should stop sniffing.
@@ -63,7 +63,7 @@ bool handler(PDU &pdu) {
         cout << "Port: " << setw(5) << tcp.sport() << " closed\n";
     }
     // Is SYN flag on? Then port is open!
-    else if(tcp.get_flag(TCP::SYN) && tcp.get_flag(TCP::ACK))
+    else if(tcp.flags() == (TCP::SYN | TCP::ACK))
         cout << "Port: " << setw(5) << tcp.sport() << " open\n";
     return true;
 }
@@ -79,7 +79,7 @@ void send_syns(const NetworkInterface &iface, IPv4Address dest_ip, const vector<
     TCP &tcp = ip.rfind_pdu<TCP>();
     // Set the SYN flag on.
     tcp.set_flag(TCP::SYN, 1);
-    // Just some arbitrary port. 
+    // Just some random port. 
     tcp.sport(1337);
     cout << "Sending SYNs..." << endl;
     for(vector<string>::const_iterator it = ips.begin(); it != ips.end(); ++it) {

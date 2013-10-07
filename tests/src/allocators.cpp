@@ -59,7 +59,7 @@ public:
     std::vector<uint8_t> buffer;
 };
 
-const PDU::PDUType DummyPDU::pdu_flag = static_cast<PDU::PDUType>(0xefff);
+const PDU::PDUType DummyPDU::pdu_flag = USER_DEFINED_PDU;
 
 TEST_F(AllocatorsTest, LinkLayerPDUs) {
     Allocators::register_allocator<EthernetII, DummyPDU>(1638);

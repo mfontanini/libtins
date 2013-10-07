@@ -197,10 +197,6 @@ TCP::AltChecksums TCP::altchecksum() const {
     return static_cast<AltChecksums>(generic_search<uint8_t>(ALTCHK));
 }
 
-small_uint<1> TCP::get_flag(Flags tcp_flag) {
-    return static_cast<const TCP&>(*this).get_flag(tcp_flag);
-}
-
 small_uint<1> TCP::get_flag(Flags tcp_flag) const {
     switch(tcp_flag) {
         case FIN:

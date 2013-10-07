@@ -334,25 +334,11 @@ namespace Tins {
         /* Setters */
 
         /**
-         * \brief Setter for the header length field.
-         *
-         * \param new_head_len The new header length.
-         */
-        void head_len(small_uint<4> new_head_len);
-
-        /**
          * \brief Setter for the type of service field.
          *
          * \param new_tos The new type of service.
          */
         void tos(uint8_t new_tos);
-
-        /**
-         * \brief Setter for the total length field.
-         *
-         * \param new_tot_len The new total length.
-         */
-        void tot_len(uint16_t new_tot_len);
 
         /**
          * \brief Setter for the id field.
@@ -617,6 +603,10 @@ namespace Tins {
             uint32_t daddr;
             /*The options start here. */
         } TINS_END_PACK;
+
+
+        void head_len(small_uint<4> new_head_len);
+        void tot_len(uint16_t new_tot_len);
 
         void prepare_for_serialize(const PDU *parent);
         void internal_add_option(const option &option);

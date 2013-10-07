@@ -118,7 +118,8 @@ namespace Tins {
             DOT1Q,
             PPPOE,
             STP,
-            PPI
+            PPI,
+            USER_DEFINED_PDU = 1000
         };
 
         /** 

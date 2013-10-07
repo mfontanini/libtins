@@ -88,3 +88,16 @@ TEST(IPAddressTest, IsMulticast) {
     EXPECT_FALSE(IPv4Address("223.255.255.255").is_multicast());
     EXPECT_FALSE(IPv4Address("240.0.0.0").is_multicast());
 }
+
+TEST(IPAddressTest, IsBroadcast) {
+    EXPECT_TRUE(IPv4Address("255.255.255.255").is_broadcast());
+    EXPECT_FALSE(IPv4Address("226.3.54.132").is_broadcast());
+    EXPECT_FALSE(IPv4Address("127.0.0.1").is_broadcast());
+}
+
+TEST(IPAddressTest, IsUnicast) {
+    EXPECT_FALSE(IPv4Address("255.255.255.255").is_unicast());
+    EXPECT_FALSE(IPv4Address("224.0.0.1").is_unicast());
+    EXPECT_TRUE(IPv4Address("240.0.0.0").is_unicast());
+    EXPECT_TRUE(IPv4Address("127.0.0.1").is_unicast());
+}

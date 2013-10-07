@@ -36,6 +36,8 @@
 using std::string;
 
 namespace Tins{
+const IPv4Address IPv4Address::broadcast("255.255.255.255");
+
 const AddressRange<IPv4Address> private_ranges[] = {
     IPv4Address("192.168.0.0") / 16,
     IPv4Address("10.0.0.0") / 8,
@@ -121,5 +123,13 @@ bool IPv4Address::is_loopback() const {
 
 bool IPv4Address::is_multicast() const {
     return multicast_range.contains(*this);
+}
+
+bool IPv4Address::is_unicast() const {
+    return !is_multicast() && !is_broadcast();
+}
+
+bool IPv4Address::is_broadcast() const {
+    return *this == broadcast;
 }
 }

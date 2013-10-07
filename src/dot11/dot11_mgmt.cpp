@@ -159,14 +159,13 @@ void Dot11ManagementFrame::power_capability(uint8_t min_power, uint8_t max_power
 }
 
 void Dot11ManagementFrame::supported_channels(const channels_type &new_channels) {
-    uint8_t* buffer = new uint8_t[new_channels.size() * 2];
-    uint8_t* ptr = buffer;
+    std::vector<uint8_t> buffer(new_channels.size() * 2);
+    uint8_t* ptr = &buffer[0];
     for(channels_type::const_iterator it = new_channels.begin(); it != new_channels.end(); ++it) {
         *(ptr++) = it->first;
         *(ptr++) = it->second;
     }
-    add_tagged_option(SUPPORTED_CHANNELS, new_channels.size() * 2, buffer);
-    delete[] buffer;
+    add_tagged_option(SUPPORTED_CHANNELS, buffer.size(), &buffer[0]);
 }
 
 void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
@@ -182,16 +181,13 @@ void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, ui
 }
 
 void Dot11ManagementFrame::request_information(const request_info_type elements) {
-    uint8_t *buffer = new uint8_t[elements.size()], *ptr = buffer;
-    for (request_info_type::const_iterator it = elements.begin(); it != elements.end(); ++it)
-        *(ptr++) = *it;
-    add_tagged_option(REQUEST_INFORMATION, elements.size(), buffer);
-    delete[] buffer;
+    add_tagged_option(REQUEST_INFORMATION, elements.size(), &elements[0]);
 }
 
 void Dot11ManagementFrame::fh_parameter_set(const fh_params_set &fh_params) {
     uint8_t data[5];
-    *(uint16_t*)data = Endian::host_to_le(fh_params.dwell_time);
+    uint16_t dwell = Endian::host_to_le(fh_params.dwell_time);
+    std::memcpy(data, &dwell, sizeof(dwell));
     data[2] = fh_params.hop_set;
     data[3] = fh_params.hop_pattern;
     data[4] = fh_params.hop_index;
@@ -207,12 +203,10 @@ void Dot11ManagementFrame::cf_parameter_set(const cf_params_set &params) {
     uint8_t data[6];
     data[0] = params.cfp_count;
     data[1] = params.cfp_period;
-    *(uint16_t*)&data[2] = Endian::host_to_le(params.cfp_max_duration);
-    *(uint16_t*)&data[4] = Endian::host_to_le(params.cfp_dur_remaining);
-    /*params.cfp_count = params.cfp_count;
-    params.cfp_period = params.cfp_period;
-    params.cfp_max_duration = Endian::host_to_le(params.cfp_max_duration);
-    params.cfp_dur_remaining = Endian::host_to_le(params.cfp_dur_remaining);*/
+    uint16_t dummy = Endian::host_to_le(params.cfp_max_duration);
+    std::memcpy(data + 2, &dummy, sizeof(uint16_t));
+    dummy = Endian::host_to_le(params.cfp_dur_remaining);
+    std::memcpy(data + 4, &dummy, sizeof(uint16_t));
     add_tagged_option(CF_SET, sizeof(data), data);
 }
 
