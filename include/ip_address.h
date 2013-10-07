@@ -46,7 +46,12 @@ public:
      * The address size.
      */
     static const size_t address_size = sizeof(uint32_t);
-    
+
+    /**
+     * The broadcast address.
+     */
+    static const IPv4Address broadcast;
+
     /**
      * \brief Constructor taking a const char*.
      * 
@@ -149,6 +154,16 @@ public:
      * 224.0.0.0/4, false otherwise.
      */
     bool is_multicast() const;
+
+    /**
+     * \brief Returns true if this is an unicast IPv4 address.
+     */
+    bool is_unicast() const;
+
+    /**
+     * \brief Returns true if this is a broadcast IPv4 address.
+     */
+    bool is_broadcast() const;
     
     /**
      * \brief Writes this address to a std::ostream.

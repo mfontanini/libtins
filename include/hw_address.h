@@ -69,6 +69,11 @@ public:
      * elements in this address.
      */
     static const size_t address_size = n;
+
+    /**
+     * \brief The broadcast address.
+     */
+    static const HWAddress<n, Storage> broadcast;
     
     /**
      * \brief Constructor from a const storage_type*.
@@ -235,17 +240,24 @@ public:
     }
     
     /**
-     * \brief Indicates whether this is a broadcast address
+     * \brief Indicates whether this is a broadcast address.
      */
     bool is_broadcast() const {
-        return *std::min_element(begin(), end()) == 0xff;
+        return *this == broadcast;
     }
     
     /**
-     * \brief Indicates whether this is a multicast address
+     * \brief Indicates whether this is a multicast address.
      */
     bool is_multicast() const {
         return (buffer[0] & 0x01);
+    }
+
+    /**
+     * \brief Indicates whether this is an unicast address.
+     */
+    bool is_unicast() const {
+        return !is_broadcast() && !is_multicast();
     }
 
     /**
@@ -357,6 +369,9 @@ void HWAddress<n, Storage>::convert(const std::string &hw_addr,
         *(output++) = storage_type();
     }
 }
+
+template<size_t n, typename Storage>
+const HWAddress<n, Storage> HWAddress<n, Storage>::broadcast("ff:ff:ff:ff:ff:ff");
 } // namespace Tins
 #if TINS_IS_CXX11
 namespace std
