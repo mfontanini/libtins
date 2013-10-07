@@ -606,9 +606,9 @@ public:
     // Option setter helpers
 
     /**
-     * \brief Helper method to set the ssid.
+     * \brief Helper method to set the SSID.
      *
-     * \param new_ssid The ssid to be set.
+     * \param new_ssid The SSID to be set.
      */
     void ssid(const std::string &new_ssid);
 
@@ -620,28 +620,28 @@ public:
     void rsn_information(const RSNInformation& info);
 
     /**
-     * \brief Helper method to set the supported rates.
+     * \brief Helper method to set the supported rates option.
      *
      * \param new_rates The new rates to be set.
      */
     void supported_rates(const rates_type &new_rates);
 
     /**
-     * \brief Helper method to set the extended supported rates.
+     * \brief Helper method to set the extended supported rates option.
      *
      * \param new_rates The new rates to be set.
      */
     void extended_supported_rates(const rates_type &new_rates);
 
     /**
-     * \brief Helper method to set the QoS capabilities.
+     * \brief Helper method to set the QoS capabilities option.
      *
      * \param new_qos_capabilities uint8_t with the capabilities.
      */
     void qos_capability(uint8_t new_qos_capability);
 
     /**
-     * \brief Helper method to set the power capabilities.
+     * \brief Helper method to set the power capabilities option.
      *
      * \param min_power uint8_t indicating the minimum transmiting power capability.
      * \param max_power uint8_t indicating the maximum transmiting power capability.
@@ -649,7 +649,11 @@ public:
     void power_capability(uint8_t min_power, uint8_t max_power);
 
     /**
-     * \brief Helper method to set the supported channels.
+     * \brief Helper method to set the supported channels option.
+     * 
+     * Each element in the provided vector should be a tuple 
+     * (First channel number, number of channels), as defined in the
+     * standard.
      *
      * \param new_channels A list of channels to be set.
      */
@@ -666,35 +670,35 @@ public:
     void edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo);
 
     /**
-     * \brief Helper method to set the Request Information element.
+     * \brief Helper method to set the Request Information element tagged option.
      *
-     * \param elements A list of elements.
+     * \param elements The new list of elements.
      */
     void request_information(const request_info_type elements);
 
     /**
-     * \brief Helper method to set the FH parameter.
+     * \brief Helper method to set the FH parameter set tagged option.
      *
-     * \param fh_params the fh parameter set.
+     * \param fh_params The new FH parameter set value.
      */
     void fh_parameter_set(const fh_params_set &fh_params);
 
     /**
-     * \brief Helper method to set the DS parameter.
+     * \brief Helper method to set the DS parameter tagged option.
      *
-     * \param current_channel uint8_t with the value of the current_channel field.
+     * \param current_channel The access point's new current channel.
      */
     void ds_parameter_set(uint8_t current_channel);
 
     /**
-     * \brief Helper method to set the CF parameter.
+     * \brief Helper method to set the CF parameter set tagged option.
      *
-     * \param params the CF parammeters to be set.
+     * \param params The new CF parameter set value.
      */
     void cf_parameter_set(const cf_params_set &params);
 
     /**
-     * \brief Helper method to set the IBSS parameter.
+     * \brief Helper method to set the IBSS parameter set tagged option.
      *
      * \param atim_window uint16_t with the value of the ATIM window field.
      */
@@ -715,17 +719,17 @@ public:
     void country(const country_params &params);
 
     /**
-     * \brief Helper method to set the FH parameters.
+     * \brief Helper method to set the FH parameters set tagged option.
      *
-     * \param prime_radix uint8_t with the value of the prime radix field.
-     * \param number_channels uint8_t with the value of the number channels field.
+     * \param prime_radix The value of the prime radix field.
+     * \param number_channels The value of the number channels field.
      */
     void fh_parameters(uint8_t prime_radix, uint8_t number_channels);
 
     /**
-     * \brief Helper method to set the FH pattern table.
+     * \brief Helper method to set the FH pattern table tagged option.
      *
-     * \param params The data to be used for this fh_pattern_table option.
+     * \param params The data to be used for this FH pattern table option.
      */
     void fh_pattern_table(const fh_pattern_type &params);
 
@@ -807,12 +811,12 @@ public:
     RSNInformation rsn_information();
     
     /**
-     * \brief Helper method to search for this PDU's ssid.
+     * \brief Helper method to search for this PDU's SSID.
      * 
      * An option_not_found exception is thrown if the option has not 
      * been set.
      * 
-     * \return std::string containing the ssid.
+     * \return std::string containing the SSID.
      */
     std::string ssid() const;
 
@@ -859,6 +863,10 @@ public:
     /**
      * \brief Helper method to get the supported channels.
      *
+     * Each element in the provided vector is a tuple 
+     * (First channel number, number of channels), as defined in the
+     * standard.
+     * 
      * An option_not_found exception is thrown if the option has not 
      * been set.
      * 
@@ -887,22 +895,22 @@ public:
     fh_params_set fh_parameter_set() const;
     
     /**
-     * \brief Helper method to get the ds parameter set.
-     *
+     * \brief Helper method to get the DSSS parameter set.
+     * 
      * An option_not_found exception is thrown if the option has not 
      * been set.
      * 
-     * \return uint8_t containing the ds parameter set.
+     * \return The access point's current channel.
      */
     uint8_t ds_parameter_set() const;
 
     /**
-     * \brief Helper method to get the cf parameter set.
+     * \brief Helper method to get the CF parameter set.
      *
      * An option_not_found exception is thrown if the option has not 
      * been set.
      * 
-     * \return uint8_t containing the cf parameter set.
+     * \return The CF parameter set.
      */
     cf_params_set cf_parameter_set() const;
     
