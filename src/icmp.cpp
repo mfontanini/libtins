@@ -153,15 +153,16 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
     #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(icmphdr));
     #endif
-    if(!_icmp.check) {
-        uint32_t checksum = Utils::do_checksum(buffer + sizeof(icmphdr), buffer + total_sz) + 
-                            Utils::do_checksum((uint8_t*)&_icmp, ((uint8_t*)&_icmp) + sizeof(icmphdr));
-        while (checksum >> 16)
-            checksum = (checksum & 0xffff) + (checksum >> 16);
-        _icmp.check = Endian::host_to_be<uint16_t>(~checksum);
-    }
-    memcpy(buffer, &_icmp, sizeof(icmphdr));
+
     _icmp.check = 0;
+    
+    uint32_t checksum = Utils::do_checksum(buffer + sizeof(icmphdr), buffer + total_sz) + 
+                        Utils::do_checksum((uint8_t*)&_icmp, ((uint8_t*)&_icmp) + sizeof(icmphdr));
+    while (checksum >> 16)
+        checksum = (checksum & 0xffff) + (checksum >> 16);
+
+    _icmp.check = Endian::host_to_be<uint16_t>(~checksum);
+    memcpy(buffer, &_icmp, sizeof(icmphdr));
 }
 
 bool ICMP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {

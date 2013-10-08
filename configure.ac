@@ -1,4 +1,4 @@
-AC_INIT([libtins], [1.1], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
+AC_INIT([libtins], [1.2], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_HEADER(include/config.h)
 AM_INIT_AUTOMAKE([-Wall -Werror -Wno-extra-portability foreign])

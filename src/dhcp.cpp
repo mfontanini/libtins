@@ -100,7 +100,7 @@ void DHCP::type(Flags type) {
 }
 
 void DHCP::end() {
-    add_option(option(DHCP_MESSAGE_TYPE));
+    add_option(option(END));
 }
 
 uint8_t DHCP::type() const {

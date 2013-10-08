@@ -112,7 +112,7 @@ public:
      * 
      * The template parameter T must at some point yield a PDU& after
      * applying operator* one or more than one time. This accepts both
-     * raw and smartpointers.
+     * raw and smart pointers.
      */
     template<typename T>
     void write(T &pdu) {

@@ -29,7 +29,7 @@
 
 #include "address_range.h"
 #include "ip_address.h"
- #include "ipv6_address.h"
+#include "ipv6_address.h"
 
 namespace Tins {
 IPv4Range operator/(const IPv4Address &addr, int mask) {

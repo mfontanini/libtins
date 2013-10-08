@@ -40,8 +40,10 @@
 namespace Tins {
     /** 
      * \brief Class that represents the DHCP PDU.
-     * 
-     * The end option is added automatically at the end of the option list.
+     *
+     * When adding options, the "End" option is not added automatically. 
+     *
+     * \sa DHCP::end
      */
     class DHCP : public BootP {
     public:
@@ -222,7 +224,7 @@ namespace Tins {
          * 
          * The new option is appended at the end of the list.
          * 
-         * \param ip The ip of the server.
+         * \param ip The server's IP address.
          */
         void server_identifier(ipaddress_type ip);
         

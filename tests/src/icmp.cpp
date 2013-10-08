@@ -81,12 +81,6 @@ TEST_F(ICMPTest, Type) {
     EXPECT_EQ(icmp.type(), ICMP::ECHO_REPLY);
 }
 
-TEST_F(ICMPTest, Checksum) {
-    ICMP icmp;
-    icmp.check(0x31fd);
-    EXPECT_EQ(icmp.check(), 0x31fd);
-}
-
 TEST_F(ICMPTest, Gateway) {
     ICMP icmp;
     icmp.gateway(0x31fdb5cd);
@@ -198,6 +192,7 @@ TEST_F(ICMPTest, Serialize) {
     
     ICMP icmp2(icmp1);
     PDU::serialization_type buffer2 = icmp2.serialize();
+    
     EXPECT_EQ(buffer, buffer2);
 }
 

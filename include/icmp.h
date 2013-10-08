@@ -97,13 +97,6 @@ namespace Tins {
         void type(Flags type);
 
         /**
-         * \brief Setter for checksum field.
-         *
-         * \param new_check uint16_t with the new checksum.
-         */
-        void check(uint16_t new_check);
-
-        /**
          * \brief Setter for the id field.
          *
          * \param new_id uint16_t with the new id.
@@ -227,7 +220,7 @@ namespace Tins {
          *
          * \return Returns the checksum as an unit16_t.
          */
-        uint16_t check() const { return Endian::be_to_host(this->_icmp.check); }
+        uint16_t check() const { return Endian::be_to_host(_icmp.check); }
 
         /**
          * \brief Getter for the echo id.
@@ -248,7 +241,7 @@ namespace Tins {
          *
          * \return Returns the gateways in an unit32_t.
          */
-         uint32_t gateway() const { return Endian::be_to_host(this->_icmp.un.gateway); }
+         uint32_t gateway() const { return Endian::be_to_host(_icmp.un.gateway); }
 
          /**
           * \brief Getter for the pointer field.
@@ -262,7 +255,7 @@ namespace Tins {
           *
           * \return Returns the mtu value in an uint16_t.
           */
-        uint16_t mtu() const { return Endian::be_to_host(this->_icmp.un.frag.mtu); }
+        uint16_t mtu() const { return Endian::be_to_host(_icmp.un.frag.mtu); }
 
         /**
          * \brief Returns the header size.
@@ -313,6 +306,8 @@ namespace Tins {
                 uint8_t pointer;
             } un;
         } TINS_END_PACK;
+
+        void check(uint16_t new_check);
         
         /** \brief Serialices this ICMP PDU.
          * \param buffer The buffer in which the PDU will be serialized.
