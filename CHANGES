@@ -1,3 +1,36 @@
+v1.2 - Mon oct  7 23:33:49 ART 2013
+
+- Added BaseSniffer::begin and BaseSniffer::end.
+
+- BaseSniffer::next_packet uses pcap_loop instead of pcap_next, which
+doesn't work well on some linux distributions.
+
+- Added PPI PDU class.
+
+- Fixed a bug in EthernetII triggered when the size of the whole frame 
+was lower than 60 bytes.
+
+- Added AddressRange class and IPv4Address, IPv6Address and 
+HWAddress<>::operator/.
+
+- Added is_broadcast, is_multicast and is_unicast to IPv4, IPv6
+and HWAddress.
+
+- Added is_private and is_loopback methods to IPv4 and IPv6 addresses.
+
+- Done some optimizations on TCP's constructor from buffer.
+
+- Added helper functions to Dot11Data to retrieve the source, 
+destination and BSSID addresses.
+
+- Fixed bugs in DNS triggered when parsing MX and unknown records.
+
+- BaseSniffer::next_packet now iterates until a valid packet is found.
+
+- TCP::get_flag is now const.
+
+- The --disable-wpa2 now works as expected.
+
 v1.1 - Wed Jun  5 09:03:37 ART 2013
 
 - Implemented std::hash specialization for IPv4, IPv6 and HWAddress<>
