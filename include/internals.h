@@ -57,7 +57,7 @@ public:
     
     template<typename InputIterator>
     byte_array(InputIterator start, InputIterator last) {
-        std::copy(start, end, data);
+        std::copy(start, last, data);
     }
     
     template<typename InputIterator>
