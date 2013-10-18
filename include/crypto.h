@@ -49,7 +49,7 @@ namespace Crypto {
     /**
      * \cond
      */
-    class RC4Key;
+    struct RC4Key;
     #ifdef HAVE_WPA2_DECRYPTION
     namespace WPA2 {
         class invalid_handshake : public std::exception {

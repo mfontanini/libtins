@@ -276,7 +276,7 @@ void RadioTap::send(PacketSender &sender, const NetworkInterface &iface) {
         addr.sll_halen = 6;
         addr.sll_ifindex = iface.id();
         
-        Tins::Dot11 *wlan = dynamic_cast<Tins::Dot11*>(inner_pdu());
+        const Tins::Dot11 *wlan = tins_cast<Tins::Dot11*>(inner_pdu());
         if(wlan) {
             Tins::Dot11::address_type dot11_addr(wlan->addr1());
             std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);

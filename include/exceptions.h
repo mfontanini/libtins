@@ -145,6 +145,16 @@ public:
         return "Malformed option";
     }
 };
+
+/**
+ * \brief Exception thrown when a call to tins_cast fails.
+ */
+class bad_tins_cast : public std::exception {
+public:
+    const char *what() const throw() {
+        return "Bad Tins cast";
+    }
+};
 }
 
 #endif // TINS_EXCEPTIONS_H

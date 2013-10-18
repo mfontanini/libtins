@@ -225,7 +225,7 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
         buffer = write_option(*it, buffer);
     }
     if(!_header.cksum) {
-        const Tins::IPv6 *ipv6 = dynamic_cast<const Tins::IPv6*>(parent);
+        const Tins::IPv6 *ipv6 = tins_cast<const Tins::IPv6*>(parent);
         if(ipv6) {
             uint32_t checksum = Utils::pseudoheader_checksum(
                                     ipv6->src_addr(),  

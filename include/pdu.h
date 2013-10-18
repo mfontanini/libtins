@@ -456,6 +456,34 @@ namespace Tins {
         *lop /= rop;
         return lop;
     }
+
+    namespace Internals {
+        template<typename T>
+        struct remove_pointer {
+            typedef T type;
+        };
+
+        template<typename T>
+        struct remove_pointer<T*> {
+            typedef T type;
+        };
+    }
+
+    template<typename T, typename U>
+    T tins_cast(U *pdu) {
+        typedef typename Internals::remove_pointer<T>::type TrueT;
+        return pdu && (TrueT::pdu_flag == pdu->pdu_type()) ?
+            static_cast<T>(pdu) :
+            0;
+    }
+
+    template<typename T, typename U>
+    T &tins_cast(U &pdu) {
+        T *ptr = tins_cast<T*>(&pdu);
+        if(!ptr)
+            throw bad_tins_cast();
+        return *ptr;
+    }
 }
 
 #endif // TINS_PDU_H

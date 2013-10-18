@@ -309,7 +309,7 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
 
     memcpy(tcp_start, &_tcp, sizeof(tcphdr));
 
-    const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
+    const Tins::IP *ip_packet = tins_cast<const Tins::IP*>(parent);
     if(ip_packet) {
         uint32_t check = Utils::pseudoheader_checksum(ip_packet->src_addr(),  
                                                          ip_packet->dst_addr(), 
@@ -321,7 +321,7 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
         ((tcphdr*)tcp_start)->check = _tcp.check;
     }
     else {
-        const Tins::IPv6 *ipv6_packet = dynamic_cast<const Tins::IPv6*>(parent);
+        const Tins::IPv6 *ipv6_packet = tins_cast<const Tins::IPv6*>(parent);
         if(ipv6_packet) {
             uint32_t check = Utils::pseudoheader_checksum(ipv6_packet->src_addr(),  
                                                          ipv6_packet->dst_addr(), 

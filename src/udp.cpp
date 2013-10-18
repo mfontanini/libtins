@@ -85,7 +85,7 @@ void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     else
         length(sizeof(udphdr));
     std::memcpy(buffer, &_udp, sizeof(udphdr));
-    const Tins::IP *ip_packet = dynamic_cast<const Tins::IP*>(parent);
+    const Tins::IP *ip_packet = tins_cast<const Tins::IP*>(parent);
     if(ip_packet) {
         uint32_t checksum = Utils::pseudoheader_checksum(
                                 ip_packet->src_addr(), 
@@ -99,7 +99,7 @@ void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
         ((udphdr*)buffer)->check = _udp.check;
     }
     else {
-        const Tins::IPv6 *ip6_packet = dynamic_cast<const Tins::IPv6*>(parent);
+        const Tins::IPv6 *ip6_packet = tins_cast<const Tins::IPv6*>(parent);
         if(ip6_packet) {
             uint32_t checksum = Utils::pseudoheader_checksum(
                         ip6_packet->src_addr(), 

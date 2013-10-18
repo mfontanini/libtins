@@ -67,3 +67,15 @@ TEST_F(PDUTest, OperatorConcatOnPacket) {
     ASSERT_EQ(raw->payload_size(), raw_payload.size());
     EXPECT_TRUE(std::equal(raw->payload().begin(), raw->payload().end(), raw_payload.begin()));
 }
+
+TEST_F(PDUTest, TinsCast) {
+    PDU *null_pdu = 0;
+    TCP tcp;
+    PDU *pdu = &tcp;
+    EXPECT_EQ(tins_cast<TCP*>(pdu), &tcp);
+    EXPECT_EQ(tins_cast<const TCP*>(pdu), &tcp);
+    EXPECT_EQ(tins_cast<TCP*>(null_pdu), null_pdu);
+    EXPECT_EQ(tins_cast<UDP*>(pdu), null_pdu);
+    EXPECT_THROW(tins_cast<UDP>(*pdu), bad_tins_cast);
+}
+
