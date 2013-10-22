@@ -246,14 +246,35 @@ namespace Tins {
      */
     class Sniffer : public BaseSniffer {
     public:
+        enum promisc_type {
+            NON_PROMISC,
+            PROMISC
+        };
+
         /**
-         * \brief Constructs an instance of Sniffer.
+         * Constructs an instance of Sniffer.
          * \param device The device which will be sniffed.
          * \param max_packet_size The maximum packet size to be read.
          * \param promisc bool indicating wether to put the interface in promiscuous mode.(optional)
          * \param filter A capture filter to be used on the sniffing session.(optional);
          */
         Sniffer(const std::string &device, unsigned max_packet_size,
+          bool promisc = false, const std::string &filter = "");
+
+        /**
+         * \brief Constructs an instance of Sniffer.
+         *
+         * The maximum capture size is set to 65535. By default the interface won't
+         * be put into promiscuous mode.
+         * 
+         * \param device The device which will be sniffed.
+         * \param promisc Indicates if the interface should be put in promiscuous mode.
+         * \param filter A capture filter to be used on the sniffing session.(optional);
+         */
+        Sniffer(const std::string &device, promisc_type promisc = NON_PROMISC, 
+          const std::string &filter = "");
+    private:
+        void init_sniffer(const std::string &device, unsigned max_packet_size,
           bool promisc = false, const std::string &filter = "");
     };
     

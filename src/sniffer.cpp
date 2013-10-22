@@ -165,7 +165,19 @@ bool BaseSniffer::set_filter(const std::string &filter) {
 Sniffer::Sniffer(const string &device, unsigned max_packet_size, 
   bool promisc, const string &filter)
 {
-    char error[PCAP_ERRBUF_SIZE];
+    init_sniffer(device, max_packet_size, promisc, filter);
+}
+
+Sniffer::Sniffer(const std::string &device, promisc_type promisc, 
+  const std::string &filter)
+{
+    init_sniffer(device, 65535, promisc == PROMISC, filter);
+}
+
+void Sniffer::init_sniffer(const std::string &device, unsigned max_packet_size,
+  bool promisc, const std::string &filter)
+{
+        char error[PCAP_ERRBUF_SIZE];
     bpf_u_int32 ip, if_mask;
     if (pcap_lookupnet(device.c_str(), &ip, &if_mask, error) == -1) {
         ip = 0;
@@ -177,6 +189,7 @@ Sniffer::Sniffer(const string &device, unsigned max_packet_size,
     
     init(phandle, filter, if_mask);
 }
+
 
 // **************************** FileSniffer ****************************
 
