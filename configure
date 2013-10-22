@@ -15416,7 +15416,7 @@ fi
 
 
 
-LIBTINS_VERSION=1:1:0
+LIBTINS_VERSION=1:2:0
 
 ac_config_files="$ac_config_files Makefile libtins.pc"
 
