@@ -168,12 +168,19 @@ namespace Tins {
         
         
         /**
-         * \brief Retrieves entries int the routing table.
+         * \brief Retrieves entries in the routing table.
          * 
          * \brief output ForwardIterator in which entries will be stored.
          */
         template<class ForwardIterator>
         void route_entries(ForwardIterator output);
+
+        /**
+         * \brief Retrieves entries in the routing table.
+         * 
+         * \return a vector which contains all of the route entries.
+         */
+        std::vector<RouteEntry> route_entries();
 
         /** \brief Returns the 32 bit crc of the given buffer.
          *

@@ -62,12 +62,12 @@ struct InterfaceCollector {
     #ifdef WIN32
     bool operator() (PIP_ADAPTER_ADDRESSES addr) {
         ifaces.insert(addr->AdapterName);
-        return true;
+        return false;
     }
     #else
     bool operator() (struct ifaddrs *addr) {
         ifaces.insert(addr->ifa_name);
-        return true;
+        return false;
     }
     #endif
 };
@@ -119,6 +119,12 @@ HWAddress<6> resolve_hwaddr(const NetworkInterface &iface, IPv4Address ip, Packe
 
 HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender &sender) {
     return resolve_hwaddr(sender.default_interface(), ip, sender);
+}
+
+std::vector<RouteEntry> route_entries() {
+    std::vector<RouteEntry> entries;
+    route_entries(std::back_inserter(entries));
+    return entries;
 }
 
 bool gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr) {
