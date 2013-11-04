@@ -34,6 +34,10 @@
 #include "radiotap.h"
 #include "dot11/dot11_base.h"
 #include "ipv6.h"
+#include "tcp.h"
+#include "udp.h"
+#include "icmp.h"
+#include "icmpv6.h"
 #include "arp.h"
 #include "eapol.h"
 #include "rawpdu.h"
@@ -98,6 +102,30 @@ Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
             }
             return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
     };
+}
+
+Tins::PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer, 
+  uint32_t size, bool rawpdu_on_no_match) 
+{
+    switch(flag) {
+        case Constants::IP::PROTO_IPIP:
+            return new Tins::TCP(buffer, size);
+        case Constants::IP::PROTO_TCP:
+            return new Tins::TCP(buffer, size);
+        case Constants::IP::PROTO_UDP:
+            return new Tins::UDP(buffer, size);
+        case Constants::IP::PROTO_ICMP:
+            return new Tins::ICMP(buffer, size);
+        case Constants::IP::PROTO_ICMPV6:
+            return new Tins::ICMPv6(buffer, size);
+        case Constants::IP::PROTO_IPV6:
+            return new Tins::IPv6(buffer, size);
+        default:
+            break;
+    }
+    if(rawpdu_on_no_match)
+        return new Tins::RawPDU(buffer, size);
+    return 0;
 }
 
 Tins::PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size) 

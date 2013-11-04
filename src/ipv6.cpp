@@ -49,6 +49,7 @@
 #include "rawpdu.h"
 #include "exceptions.h"
 #include "pdu_allocator.h"
+#include "internals.h"
 
 namespace Tins {
 
@@ -88,30 +89,24 @@ IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz)
             total_sz -= size;
         }
         else {
-            switch(current_header) {
-                case Constants::IP::PROTO_TCP:
-                    inner_pdu(new Tins::TCP(buffer, total_sz));
-                    break;
-                case Constants::IP::PROTO_UDP:
-                    inner_pdu(new Tins::UDP(buffer, total_sz));
-                    break;
-                case Constants::IP::PROTO_ICMP:
-                    inner_pdu(new Tins::ICMP(buffer, total_sz));
-                    break;
-                case Constants::IP::PROTO_ICMPV6:
-                    inner_pdu(new Tins::ICMPv6(buffer, total_sz));
-                    break;
-                default:
-                    inner_pdu(
-                        Internals::allocate<IPv6>(
-                            current_header,
-                            buffer, 
-                            total_sz
-                        )
-                    );
-                    if(!inner_pdu())
-                        inner_pdu(new Tins::RawPDU(buffer, total_sz));
-                    break;
+            inner_pdu(
+                Internals::pdu_from_flag(
+                    static_cast<Constants::IP::e>(current_header),
+                    buffer, 
+                    total_sz,
+                    false
+                )
+            );
+            if(!inner_pdu()) {
+                inner_pdu(
+                    Internals::allocate<IPv6>(
+                        current_header,
+                        buffer, 
+                        total_sz
+                    )
+                );
+                if(!inner_pdu())
+                    inner_pdu(new Tins::RawPDU(buffer, total_sz));
             }
             total_sz = 0;
         }

@@ -121,30 +121,24 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
         throw malformed_packet();
     total_sz -= head_len() * sizeof(uint32_t);
     if (total_sz) {
-        switch(_ip.protocol) {
-            case Constants::IP::PROTO_TCP:
-                inner_pdu(new Tins::TCP(buffer, total_sz));
-                break;
-            case Constants::IP::PROTO_UDP:
-                inner_pdu(new Tins::UDP(buffer, total_sz));
-                break;
-            case Constants::IP::PROTO_ICMP:
-                inner_pdu(new Tins::ICMP(buffer, total_sz));
-                break;
-            case Constants::IP::PROTO_IPV6:
-                inner_pdu(new Tins::IPv6(buffer, total_sz));
-                break;
-            default:
-                inner_pdu(
-                    Internals::allocate<IP>(
-                        _ip.protocol,
-                        buffer, 
-                        total_sz
-                    )
-                );
-                if(!inner_pdu())
-                    inner_pdu(new RawPDU(buffer, total_sz));
-                break;
+        inner_pdu(
+            Internals::pdu_from_flag(
+                static_cast<Constants::IP::e>(_ip.protocol),
+                buffer, 
+                total_sz,
+                false
+            )
+        );
+        if(!inner_pdu()) {
+            inner_pdu(
+                Internals::allocate<IP>(
+                    _ip.protocol,
+                    buffer, 
+                    total_sz
+                )
+            );
+            if(!inner_pdu())
+                inner_pdu(new RawPDU(buffer, total_sz));
         }
     }
 }

@@ -111,6 +111,8 @@ struct enable_if<true, T> {
 
 PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer, 
   uint32_t size, bool rawpdu_on_no_match = true);
+PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer, 
+  uint32_t size, bool rawpdu_on_no_match = true);
 
 PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size);
 
