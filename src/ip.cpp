@@ -42,10 +42,6 @@
     #include <winsock2.h>
 #endif
 #include "ip.h"
-#include "ipv6.h"
-#include "tcp.h"
-#include "udp.h"
-#include "icmp.h"
 #include "rawpdu.h"
 #include "utils.h"
 #include "packet_sender.h"
