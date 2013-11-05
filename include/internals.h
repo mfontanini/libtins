@@ -113,10 +113,10 @@ PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
 PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer, 
   uint32_t size, bool rawpdu_on_no_match = true);
-
 PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size);
 
 Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
+Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag);
 
 template<typename T>
 bool increment_buffer(T &addr) {

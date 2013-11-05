@@ -385,29 +385,12 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     #endif
     checksum(0);
     if(inner_pdu()) {
-        uint32_t new_flag;
-        switch(inner_pdu()->pdu_type()) {
-            case PDU::IP:
-                new_flag = Constants::IP::PROTO_IPIP;
-                break;
-            case PDU::TCP:
-                new_flag = Constants::IP::PROTO_TCP;
-                break;
-            case PDU::UDP:
-                new_flag = Constants::IP::PROTO_UDP;
-                break;
-            case PDU::ICMP:
-                new_flag = Constants::IP::PROTO_ICMP;
-                break;
-            default:
-                if(Internals::pdu_type_registered<IP>(inner_pdu()->pdu_type()))
-                    new_flag = static_cast<Constants::IP::e>(
-                        Internals::pdu_type_to_id<IP>(inner_pdu()->pdu_type())
-                    );
-                else
-                    // check for other protos
-                    new_flag = 0xff;
-        };
+        uint32_t new_flag = Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type());
+        if(new_flag == 0xff && Internals::pdu_type_registered<IP>(inner_pdu()->pdu_type())) {
+            new_flag = static_cast<Constants::IP::e>(
+                Internals::pdu_type_to_id<IP>(inner_pdu()->pdu_type())
+            );
+        }
         protocol(new_flag);
         //flag(new_flag);
     }

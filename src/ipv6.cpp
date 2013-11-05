@@ -200,30 +200,12 @@ void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
     assert(total_sz >= header_size());
     #endif
     if(inner_pdu()) {
-        uint8_t new_flag = 0xff;
-        switch(inner_pdu()->pdu_type()) {
-            case PDU::IP:
-                new_flag = Constants::IP::PROTO_IPIP;
-                break;
-            case PDU::TCP:
-                new_flag = Constants::IP::PROTO_TCP;
-                break;
-            case PDU::UDP:
-                new_flag = Constants::IP::PROTO_UDP;
-                break;
-            case PDU::ICMP:
-                new_flag = Constants::IP::PROTO_ICMP;
-                break;
-            case PDU::ICMPv6:
-                new_flag = Constants::IP::PROTO_ICMPV6;
-                break;
-            default:
-                if(Internals::pdu_type_registered<IPv6>(inner_pdu()->pdu_type()))
-                    new_flag = static_cast<Constants::IP::e>(
-                        Internals::pdu_type_to_id<IPv6>(inner_pdu()->pdu_type())
-                    );
-                break;
-        };
+        uint8_t new_flag = Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type());
+        if(new_flag == 0xff && Internals::pdu_type_registered<IPv6>(inner_pdu()->pdu_type())) {
+            new_flag = static_cast<Constants::IP::e>(
+                Internals::pdu_type_to_id<IPv6>(inner_pdu()->pdu_type())
+            );
+        }
         set_last_next_header(new_flag);
     }
     payload_length(total_sz - sizeof(_header));

@@ -36,6 +36,7 @@
 #include "ipv6.h"
 #include "tcp.h"
 #include "udp.h"
+#include "ipsec.h"
 #include "icmp.h"
 #include "icmpv6.h"
 #include "arp.h"
@@ -120,6 +121,10 @@ Tins::PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer,
             return new Tins::ICMPv6(buffer, size);
         case Constants::IP::PROTO_IPV6:
             return new Tins::IPv6(buffer, size);
+        case Constants::IP::PROTO_AH:
+            return new Tins::IPSecAH(buffer, size);
+        case Constants::IP::PROTO_ESP:
+            return new Tins::IPSecESP(buffer, size);
         default:
             break;
     }
@@ -192,6 +197,27 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
                 );
             return Constants::Ethernet::UNKNOWN;
     }
+}
+
+Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag) {
+    switch(flag) {
+        case PDU::IP:
+            return Constants::IP::PROTO_IPIP;
+        case PDU::TCP:
+            return Constants::IP::PROTO_TCP;
+        case PDU::UDP:
+            return Constants::IP::PROTO_UDP;
+        case PDU::ICMP:
+            return Constants::IP::PROTO_ICMP;
+        case PDU::ICMPv6:
+            return Constants::IP::PROTO_ICMPV6;
+        case PDU::IPSEC_AH:
+            return Constants::IP::PROTO_AH;
+        case PDU::IPSEC_ESP:
+            return Constants::IP::PROTO_ESP;
+        default:
+            return static_cast<Constants::IP::e>(0xff);
+    };
 }
 
 bool increment(IPv4Address &addr) {

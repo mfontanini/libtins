@@ -119,6 +119,8 @@ namespace Tins {
             PPPOE,
             STP,
             PPI,
+            IPSEC_AH,
+            IPSEC_ESP,
             USER_DEFINED_PDU = 1000
         };
 

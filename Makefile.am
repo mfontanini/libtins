@@ -28,9 +28,11 @@ libtins_la_SOURCES=src/arp.cpp \
                     src/icmp.cpp \
                     src/icmpv6.cpp \
                     src/internals.cpp \
-                    src/ip.cpp src/ip_address.cpp \
+                    src/ip.cpp \
+                    src/ip_address.cpp \
                     src/ipv6.cpp \
                     src/ipv6_address.cpp \
+                    src/ipsec.cpp \
                     src/llc.cpp \
                     src/loopback.cpp \
                     src/network_interface.cpp \
@@ -67,6 +69,7 @@ libtins_HEADERS = include/internals.h \
 							include/dot3.h \
 							include/small_uint.h \
 							include/ip.h \
+							include/ipsec.h \
 							include/dns_record.h \
 							include/eapol.h \
 							include/tcp_stream.h \
