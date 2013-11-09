@@ -1,3 +1,7 @@
+#include "config.h"
+
+#ifdef HAVE_DOT11
+
 #include <gtest/gtest.h>
 #include "tests/dot11_control.h"
 
@@ -74,3 +78,4 @@ TEST_F(Dot11EndCFAckTest, Serialize) {
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
 
+#endif // HAVE_DOT11

@@ -27,7 +27,9 @@
  *
  */
 
-#ifndef TINS_HANDSHAKE_CAPTURER_H
+#include "config.h"
+
+#if !defined(TINS_HANDSHAKE_CAPTURER_H)  && defined(HAVE_DOT11)
 #define TINS_HANDSHAKE_CAPTURER_H
 
 #include <vector>

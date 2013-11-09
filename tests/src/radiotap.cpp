@@ -1,8 +1,11 @@
+#include "radiotap.h"
+
+#ifdef HAVE_DOT11
+
 #include <gtest/gtest.h>
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "radiotap.h"
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
 #include "utils.h"
@@ -195,3 +198,5 @@ TEST_F(RadioTapTest, TSFT) {
     radio.tsft(0x7afb9a8d);
     EXPECT_EQ(radio.tsft(), 0x7afb9a8dU);
 }
+
+#endif // HAVE_DOT11

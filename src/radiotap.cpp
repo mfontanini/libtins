@@ -27,6 +27,10 @@
  *
  */
 
+#include "radiotap.h"
+
+#ifdef HAVE_DOT11
+
 #include <cstring>
 #ifdef TINS_DEBUG
 #include <cassert>
@@ -41,7 +45,6 @@
     #endif
     #include <net/ethernet.h>
 #endif
-#include "radiotap.h"
 #include "dot11/dot11_base.h"
 #include "utils.h"
 #include "packet_sender.h"
@@ -385,3 +388,5 @@ void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     }
 }
 }
+
+#endif // HAVE_DOT11

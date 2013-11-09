@@ -27,6 +27,9 @@
  *
  */
 
+#include "dot11/dot11_base.h"
+
+#ifdef HAVE_DOT11
 
 #include <cassert>
 #include <cstring>
@@ -35,7 +38,6 @@
 #include <utility>
 #include "macros.h"
 #include "exceptions.h"
-#include "dot11/dot11_base.h"
 
 #ifndef WIN32
     #if defined(__FreeBSD_kernel__) || defined(BSD) || defined(__APPLE__)
@@ -273,3 +275,5 @@ Dot11 *Dot11::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
     return ret;
 }
 } // namespace Tins
+
+#endif // HAVE_DOT11

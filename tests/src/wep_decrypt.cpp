@@ -1,3 +1,7 @@
+#include "config.h"
+
+#ifdef HAVE_DOT11
+
 #include <gtest/gtest.h>
 #include <cstring>
 #include <string>
@@ -41,3 +45,5 @@ TEST_F(WEPDecryptTest, Decrypt1) {
     decrypter.add_password("00:12:bf:12:32:29", "\x1f\x1f\x1f\x1f\x1e");
     EXPECT_FALSE(decrypter.decrypt(dot11));
 }
+
+#endif // HAVE_DOT11

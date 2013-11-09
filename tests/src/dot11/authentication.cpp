@@ -1,5 +1,8 @@
-#include <gtest/gtest.h>
 #include "dot11/dot11_auth.h"
+
+#ifdef HAVE_DOT11
+
+#include <gtest/gtest.h>
 #include "tests/dot11_mgmt.h"
 
 
@@ -103,3 +106,4 @@ TEST_F(Dot11AuthenticationTest, Serialize) {
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
 
+#endif // HAVE_DOT11

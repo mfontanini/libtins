@@ -27,7 +27,9 @@
  *
  */
 
-#ifndef TINS_DOT_11
+#include "config.h"
+
+#if !defined(TINS_DOT_11) && defined(HAVE_DOT11)
 #define TINS_DOT_11
 
 #include "dot11/dot11_base.h"

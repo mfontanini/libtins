@@ -29,7 +29,13 @@
 
 #include <algorithm>
 #include "sniffer.h"
-
+#include "dot11/dot11_base.h"
+#include "ethernetII.h"
+#include "radiotap.h"
+#include "loopback.h"
+#include "dot3.h"
+#include "sll.h"
+#include "ppi.h"
 
 using std::string;
 using std::runtime_error;
@@ -92,6 +98,7 @@ void sniff_loop_eth_handler(u_char *user, const struct pcap_pkthdr *h, const u_c
         data->pdu = safe_alloc<EthernetII>((const uint8_t*)bytes, h->caplen);
 }
 
+#ifdef HAVE_DOT11
 void sniff_loop_dot11_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
     sniff_data *data = (sniff_data*)user;
     data->packet_processed = true;
@@ -103,6 +110,7 @@ void sniff_loop_dot11_handler(u_char *user, const struct pcap_pkthdr *h, const u
         
     }
 }
+#endif
 
 PtrPacket BaseSniffer::next_packet() {
     sniff_data data;
@@ -110,10 +118,20 @@ PtrPacket BaseSniffer::next_packet() {
     pcap_handler handler = 0;
     if(iface_type == DLT_EN10MB)
         handler = sniff_loop_eth_handler;
-    else if(iface_type == DLT_IEEE802_11_RADIO)
-        handler = &sniff_loop_handler<RadioTap>;
-    else if(iface_type == DLT_IEEE802_11)
-        handler = sniff_loop_dot11_handler;
+    else if(iface_type == DLT_IEEE802_11_RADIO) {
+        #ifdef HAVE_DOT11
+            handler = &sniff_loop_handler<RadioTap>;
+        #else
+            throw protocol_disabled();
+        #endif
+    }
+    else if(iface_type == DLT_IEEE802_11) {
+        #ifdef HAVE_DOT11
+            handler = sniff_loop_dot11_handler;
+        #else
+            throw protocol_disabled();
+        #endif
+    }
     else if(iface_type == DLT_LOOP)
         handler = &sniff_loop_handler<Tins::Loopback>;
     else if(iface_type == DLT_LINUX_SLL)

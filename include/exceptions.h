@@ -155,6 +155,18 @@ public:
         return "Bad Tins cast";
     }
 };
-}
+
+/**
+ * \brief Exception thrown when sniffing a protocol that
+ * has been disabled at compile time.
+ */
+class protocol_disabled : public std::exception {
+public:
+    const char *what() const throw() {
+        return "Protocol disabled";
+    }
+};
+
+} // Tins
 
 #endif // TINS_EXCEPTIONS_H

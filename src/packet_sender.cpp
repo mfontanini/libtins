@@ -235,12 +235,14 @@ void PacketSender::send(PDU &pdu, const NetworkInterface &iface) {
         case PDU::ETHERNET_II:
             send<Tins::EthernetII>(pdu, iface);
             break;
-        case PDU::DOT11:
-            send<Tins::Dot11>(pdu, iface);
-            break;
-        case PDU::RADIOTAP:
-            send<Tins::RadioTap>(pdu, iface);
-            break;
+        #ifdef HAVE_DOT11
+            case PDU::DOT11:
+                send<Tins::Dot11>(pdu, iface);
+                break;
+            case PDU::RADIOTAP:
+                send<Tins::RadioTap>(pdu, iface);
+                break;
+        #endif // HAVE_DOT11
         case PDU::IEEE802_3:
             send<Tins::IEEE802_3>(pdu, iface);
             break;

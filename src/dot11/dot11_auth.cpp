@@ -27,9 +27,11 @@
  *
  */
 
+#include "dot11/dot11_auth.h"
+#ifdef HAVE_DOT11
+
 #include <cassert>
 #include <cstring>
-#include "dot11/dot11_auth.h"
 
 namespace Tins {
 /* Auth */
@@ -121,3 +123,5 @@ uint32_t Dot11Deauthentication::write_fixed_parameters(uint8_t *buffer, uint32_t
     return sz;
 }
 } // namespace Tins
+
+#endif // HAVE_DOT11

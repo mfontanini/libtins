@@ -28,6 +28,9 @@
  */
 
 #include "crypto.h"
+
+#ifdef HAVE_DOT11
+
 #ifdef HAVE_WPA2_DECRYPTION
     #include <openssl/evp.h>
     #include <openssl/hmac.h>
@@ -542,3 +545,5 @@ bool WPA2Decrypter::decrypt(PDU &pdu) {
 #endif // HAVE_WPA2_DECRYPTION
 } // namespace Crypto
 } // namespace Tins
+
+#endif // HAVE_DOT11

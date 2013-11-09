@@ -41,6 +41,7 @@
 #include "sll.h"
 #include "ppi.h"
 #include "internals.h"
+#include "exceptions.h"
 
 namespace Tins {
 PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
@@ -61,7 +62,11 @@ PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz > 0) {
         switch(dlt()) {
             case DLT_IEEE802_11:
-                inner_pdu(Dot11::from_bytes(buffer, total_sz));
+                #ifdef HAVE_DOT11
+                    inner_pdu(Dot11::from_bytes(buffer, total_sz));
+                #else
+                    throw protocol_disabled();
+                #endif
                 break;
             case DLT_EN10MB:
                 if(Internals::is_dot3(buffer, total_sz))
@@ -70,7 +75,11 @@ PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
                     inner_pdu(new EthernetII(buffer, total_sz));
                 break;
             case DLT_IEEE802_11_RADIO:
-                inner_pdu(new RadioTap(buffer, total_sz));
+                #ifdef HAVE_DOT11
+                    inner_pdu(new RadioTap(buffer, total_sz));
+                #else
+                    throw protocol_disabled();
+                #endif
                 break;
             case DLT_NULL:
                 inner_pdu(new Loopback(buffer, total_sz));

@@ -146,33 +146,35 @@ Tins::PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size
             return new Tins::ARP(buffer, size);
         case Tins::PDU::IEEE802_3:
             return new Tins::IEEE802_3(buffer, size);
-        case Tins::PDU::RADIOTAP:
-            return new Tins::RadioTap(buffer, size);
         case Tins::PDU::PPPOE:
             return new Tins::PPPoE(buffer, size);
-        case Tins::PDU::DOT11:
-        case Tins::PDU::DOT11_ACK:
-        case Tins::PDU::DOT11_ASSOC_REQ:
-        case Tins::PDU::DOT11_ASSOC_RESP:
-        case Tins::PDU::DOT11_AUTH:
-        case Tins::PDU::DOT11_BEACON:
-        case Tins::PDU::DOT11_BLOCK_ACK:
-        case Tins::PDU::DOT11_BLOCK_ACK_REQ:
-        case Tins::PDU::DOT11_CF_END:
-        case Tins::PDU::DOT11_DATA:
-        case Tins::PDU::DOT11_CONTROL:
-        case Tins::PDU::DOT11_DEAUTH:
-        case Tins::PDU::DOT11_DIASSOC:
-        case Tins::PDU::DOT11_END_CF_ACK:
-        case Tins::PDU::DOT11_MANAGEMENT:
-        case Tins::PDU::DOT11_PROBE_REQ:
-        case Tins::PDU::DOT11_PROBE_RESP:
-        case Tins::PDU::DOT11_PS_POLL:
-        case Tins::PDU::DOT11_REASSOC_REQ:
-        case Tins::PDU::DOT11_REASSOC_RESP:
-        case Tins::PDU::DOT11_RTS:
-        case Tins::PDU::DOT11_QOS_DATA:
-            return Tins::Dot11::from_bytes(buffer, size);
+        #ifdef HAVE_DOT11
+            case Tins::PDU::RADIOTAP:
+                return new Tins::RadioTap(buffer, size);
+            case Tins::PDU::DOT11:
+            case Tins::PDU::DOT11_ACK:
+            case Tins::PDU::DOT11_ASSOC_REQ:
+            case Tins::PDU::DOT11_ASSOC_RESP:
+            case Tins::PDU::DOT11_AUTH:
+            case Tins::PDU::DOT11_BEACON:
+            case Tins::PDU::DOT11_BLOCK_ACK:
+            case Tins::PDU::DOT11_BLOCK_ACK_REQ:
+            case Tins::PDU::DOT11_CF_END:
+            case Tins::PDU::DOT11_DATA:
+            case Tins::PDU::DOT11_CONTROL:
+            case Tins::PDU::DOT11_DEAUTH:
+            case Tins::PDU::DOT11_DIASSOC:
+            case Tins::PDU::DOT11_END_CF_ACK:
+            case Tins::PDU::DOT11_MANAGEMENT:
+            case Tins::PDU::DOT11_PROBE_REQ:
+            case Tins::PDU::DOT11_PROBE_RESP:
+            case Tins::PDU::DOT11_PS_POLL:
+            case Tins::PDU::DOT11_REASSOC_REQ:
+            case Tins::PDU::DOT11_REASSOC_RESP:
+            case Tins::PDU::DOT11_RTS:
+            case Tins::PDU::DOT11_QOS_DATA:
+                return Tins::Dot11::from_bytes(buffer, size);
+        #endif // HAVE_DOT11
         default:
             return 0;
     };

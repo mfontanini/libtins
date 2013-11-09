@@ -27,9 +27,11 @@
  *
  */  
 
+#include "dot11/dot11_beacon.h"
+#ifdef HAVE_DOT11
+
 #include <cstring>
 #include <cassert>
-#include "dot11/dot11_beacon.h"
 
 namespace Tins {
  /* Dot11Beacon */
@@ -77,3 +79,5 @@ uint32_t Dot11Beacon::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz)
     return sz;
 }
 } // namespace Tins
+
+#endif // HAVE_DOT11

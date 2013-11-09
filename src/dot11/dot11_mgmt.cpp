@@ -27,8 +27,10 @@
  *
  */   
 
-#include <cstring>
 #include "dot11/dot11_mgmt.h"
+#ifdef HAVE_DOT11
+
+#include <cstring>
 #include "rsn_information.h"
 
 namespace Tins {
@@ -639,3 +641,5 @@ Dot11ManagementFrame::vendor_specific_type
 }
 
 } // namespace Tins
+
+#endif // HAVE_DOT11

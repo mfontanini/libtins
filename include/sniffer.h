@@ -38,17 +38,10 @@
 #include <stdexcept>
 #include <iterator>
 #include "pdu.h"
-#include "ethernetII.h"
-#include "radiotap.h"
 #include "packet.h"
-#include "loopback.h"
-#include "dot11/dot11_base.h"
-#include "dot3.h"
-#include "sll.h"
 #include "cxxstd.h"
 #include "exceptions.h"
 #include "internals.h"
-#include "ppi.h"
 
 namespace Tins {
     class SnifferIterator;

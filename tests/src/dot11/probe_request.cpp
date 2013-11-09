@@ -1,5 +1,8 @@
-#include <gtest/gtest.h>
 #include "dot11/dot11_probe.h"
+
+#ifdef HAVE_DOT11
+
+#include <gtest/gtest.h>
 #include "tests/dot11_mgmt.h"
 
 
@@ -69,3 +72,4 @@ TEST_F(Dot11ProbeRequestTest, FromBytes) {
     test_equals_expected(*inner);
 }
 
+#endif // HAVE_DOT11

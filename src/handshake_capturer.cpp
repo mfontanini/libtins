@@ -28,6 +28,9 @@
  */
 
 #include "handshake_capturer.h"
+
+#ifdef HAVE_DOT11
+
 #include "dot11/dot11_data.h"
 
 namespace Tins {
@@ -93,3 +96,5 @@ namespace Tins {
         return false;
     }
 } // namespace Tins;
+
+#endif // HAVE_DOT11

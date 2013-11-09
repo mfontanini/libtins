@@ -1,3 +1,7 @@
+#include "config.h"
+
+#ifdef HAVE_DOT11
+
 #include <gtest/gtest.h>
 #include <cstring>
 #include <string>
@@ -216,3 +220,5 @@ TEST_F(WPA2DecryptTest, DecryptCCMPAndTKIPWithoutUsingBeacon) {
             ASSERT_FALSE(decrypter.decrypt(radio));
     }
 }
+
+#endif // HAVE_DOT11

@@ -1,5 +1,8 @@
-#include <gtest/gtest.h>
 #include "dot11/dot11_probe.h"
+
+#ifdef HAVE_DOT11
+
+#include <gtest/gtest.h>
 #include "tests/dot11_mgmt.h"
 
 
@@ -93,3 +96,5 @@ TEST_F(Dot11ProbeResponseTest, Serialize) {
     ASSERT_EQ(sizeof(expected_packet), buffer.size());
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
+
+#endif // HAVE_DOT11

@@ -1,9 +1,12 @@
+#include "dot11/dot11_data.h"
+
+#ifdef HAVE_DOT11
+
 #include <gtest/gtest.h>
 #include <vector>
 #include <algorithm>
 #include <stdint.h>
 #include "ppi.h"
-#include "dot11/dot11_data.h"
 #include "udp.h"
 
 using namespace Tins;
@@ -36,3 +39,5 @@ TEST_F(PPITest, ConstructorFromBuffer) {
     EXPECT_TRUE(pdu.find_pdu<Dot11Data>());
     EXPECT_TRUE(pdu.find_pdu<UDP>());
 }
+
+#endif // HAVE_DOT11

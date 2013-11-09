@@ -45,6 +45,15 @@ AC_ARG_ENABLE(
 )
 
 AC_ARG_ENABLE(
+    dot11, 
+    [  --disable-dot11         disable IEEE 802.11 support], 
+    [],
+    [
+        AC_DEFINE([HAVE_DOT11], 1, Have IEEE 802.11 support)
+    ]
+)
+
+AC_ARG_ENABLE(
     wpa2, 
     [  --disable-wpa2          disable WPA2 decryption features], 
     [],

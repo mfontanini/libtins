@@ -27,9 +27,11 @@
  *
  */
 
+#include "dot11/dot11_data.h"
+#ifdef HAVE_DOT11
+
 #include <cstring>
 #include <cassert>
-#include "dot11/dot11_data.h"
 #include "rawpdu.h"
 #include "snap.h"
 
@@ -180,3 +182,5 @@ uint32_t Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz
     return sz;
 }
 } // namespace Tins
+
+#endif // HAVE_DOT11

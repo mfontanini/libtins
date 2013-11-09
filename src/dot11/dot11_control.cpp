@@ -27,9 +27,11 @@
  *
  */
 
+#include "dot11/dot11_control.h"
+#ifdef HAVE_DOT11
+
 #include <cassert>
 #include <cstring>
-#include "dot11/dot11_control.h"
 
 namespace Tins {
  /* Dot11Control */
@@ -281,3 +283,5 @@ uint32_t Dot11BlockAck::header_size() const {
     return Dot11ControlTA::header_size() + sizeof(_start_sequence) + sizeof(_start_sequence) + sizeof(_bitmap);
 }
 } // namespace Tins
+
+#endif // HAVE_DOT11

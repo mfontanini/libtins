@@ -27,7 +27,10 @@
  *
  */
 
-#ifndef TINS_DOT11_DOT11_MGMT_H
+#include "config.h"
+
+#if !defined(TINS_DOT11_DOT11_MGMT_H) && defined(HAVE_DOT11)
+
 #define TINS_DOT11_DOT11_MGMT_H
 
 #include <vector>

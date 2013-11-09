@@ -27,7 +27,9 @@
  *
  */
 
-#ifndef TINS_CRYPTO_H
+#include "config.h"
+
+#if !defined(TINS_CRYPTO_H) && defined(HAVE_DOT11)
 #define TINS_CRYPTO_H
 
 #include <map>
@@ -38,7 +40,6 @@
 #include "snap.h"
 #include "rawpdu.h"
 #include "handshake_capturer.h"
-#include "config.h"
 
 namespace Tins {
 class PDU;
