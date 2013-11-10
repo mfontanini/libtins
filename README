@@ -1,23 +1,26 @@
 ------------------------------------------------------------------------
-       libtins v1.1
+       libtins v1.3
 ------------------------------------------------------------------------
 
 
 -------------------------------- About ---------------------------------
 
-libtins is a C++ library for crafting, sending, sniffing and 
-interpreting raw network packets.
+libtins is a high-level, multiplatform C++ network packet sniffing and 
+crafting library. 
 
 Its main purpose is to provide the C++ developer an easy, efficient, 
 platform and endianess-independent way to create tools which need to 
 send, receive and manipulate specially crafted packets. 
 
-In order to read tutorials, examples and checkout some benchmarks which 
-show libtins' actual performance, please visit:
+In order to read tutorials, examples and checkout some benchmarks of the
+library, please visit:
 
-http://libtins.sourceforge.net 
+http://libtins.sourceforge.net/
 
 ------------------------------- Compiling ------------------------------
+
+libtins depends on libpcap and openssl, although the latter is not 
+necessary if some features of the library are disabled.
 
 In order to compile, execute:
 
@@ -32,10 +35,22 @@ like to generate a static library file as well, run:
 The generated static/shared library files will be located in the .libs
 directory.
 
-If you want to enable C++11 features, such as move semantics, use the
---enable-c++11 switch:
+libtins is noticeable faster if you enable C++11 support. Therefore, if
+your compiler supports this standard, then you should enable it. In 
+order to do so, use the --enable-c++11 switch:
 
 ./configure --enable-c++11
+
+If you want to disable WPA2 decryption support, which will remove 
+openssl as a dependency for compilation, use the --disable-wpa2 switch:
+
+./configure --disable-wpa2
+
+If you want to disable IEEE 802.11 support(this will also disable 
+RadioTap and WPA2 decryption), which will reduce the size of the 
+resulting library in around 20%, use the --disable-dot11 switch:
+
+./configure --disable-dot11
 
 ------------------------------ Installing-------------------------------
 
@@ -55,4 +70,4 @@ ldconfig
 You might want to have a look at the examples located  in the "examples"
 directory. The same samples can be found online at:
 
-http://libtins.sourceforge.net/index.php?page=examples
+http://libtins.sourceforge.net/examples/
