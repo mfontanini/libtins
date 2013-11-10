@@ -27,7 +27,7 @@
  *
  */
 
-#include "config.h"
+#include "../config.h"
 
 #if !defined(TINS_DOT11_DOT11_PROBE_H) && defined(HAVE_DOT11)
 
