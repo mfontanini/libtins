@@ -14,7 +14,7 @@ using namespace Tins;
 
 class IPTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[];
+    static const uint8_t expected_packet[], fragmented_packet[];
     
     void test_equals(const IP &ip1, const IP &ip2);
 };
@@ -22,6 +22,12 @@ public:
 const uint8_t IPTest::expected_packet[] = { 
     40, 127, 0, 32, 0, 122, 0, 67, 21, 1, 0, 0, 84, 52, 254, 5, 192, 
     168, 9, 43, 130, 11, 116, 106, 103, 171, 119, 171, 104, 101, 108, 0
+};
+
+const uint8_t IPTest::fragmented_packet[] = { 
+    69, 0, 0, 60, 0, 242, 7, 223, 64, 17, 237, 220, 192, 0, 2, 1, 192, 
+    0, 2, 2, 192, 0, 192, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 
@@ -61,6 +67,12 @@ TEST_F(IPTest, Constructor) {
     EXPECT_EQ(ip.src_addr(), "192.168.0.100");
     EXPECT_EQ(ip.version(), 4);
     EXPECT_EQ(ip.id(), 1);
+}
+
+TEST_F(IPTest, ConstructorFromFragmentedPacket) {
+    IP ip(fragmented_packet, sizeof(fragmented_packet));
+    ASSERT_TRUE(ip.inner_pdu());
+    EXPECT_EQ(PDU::RAW, ip.inner_pdu()->pdu_type());
 }
 
 TEST_F(IPTest, TOS) {

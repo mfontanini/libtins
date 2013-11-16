@@ -117,24 +117,31 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
         throw malformed_packet();
     total_sz -= head_len() * sizeof(uint32_t);
     if (total_sz) {
-        inner_pdu(
-            Internals::pdu_from_flag(
-                static_cast<Constants::IP::e>(_ip.protocol),
-                buffer, 
-                total_sz,
-                false
-            )
-        );
-        if(!inner_pdu()) {
+        // Don't try to decode it if it's fragmented
+        if(frag_off() == 0 || frag_off() == 0x4000) {
             inner_pdu(
-                Internals::allocate<IP>(
-                    _ip.protocol,
+                Internals::pdu_from_flag(
+                    static_cast<Constants::IP::e>(_ip.protocol),
                     buffer, 
-                    total_sz
+                    total_sz,
+                    false
                 )
             );
-            if(!inner_pdu())
-                inner_pdu(new RawPDU(buffer, total_sz));
+            if(!inner_pdu()) {
+                inner_pdu(
+                    Internals::allocate<IP>(
+                        _ip.protocol,
+                        buffer, 
+                        total_sz
+                    )
+                );
+                if(!inner_pdu())
+                    inner_pdu(new RawPDU(buffer, total_sz));
+            }
+        }
+        else {
+            // It's fragmented, just use RawPDU
+            inner_pdu(new RawPDU(buffer, total_sz));
         }
     }
 }
