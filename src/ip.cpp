@@ -118,7 +118,7 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
     total_sz -= head_len() * sizeof(uint32_t);
     if (total_sz) {
         // Don't try to decode it if it's fragmented
-        if(frag_off() == 0 || frag_off() == 0x4000) {
+        if(!is_fragmented()) {
             inner_pdu(
                 Internals::pdu_from_flag(
                     static_cast<Constants::IP::e>(_ip.protocol),
@@ -153,6 +153,12 @@ void IP::init_ip_fields() {
     id(1);
     _options_size = 0;
     _padded_options_size = 0;
+}
+
+bool IP::is_fragmented() const {
+    // It's 0 if offset == 0 && more_frag == 0
+    // It's 0x4000 if dont_fragment = 1
+    return frag_off() != 0 && frag_off() != 0x4000;
 }
 
 /* Setters */

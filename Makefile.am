@@ -28,6 +28,7 @@ libtins_la_SOURCES=src/arp.cpp \
                     src/icmp.cpp \
                     src/icmpv6.cpp \
                     src/internals.cpp \
+                    src/ip_reassembler.cpp \
                     src/ip.cpp \
                     src/ip_address.cpp \
                     src/ipv6.cpp \
@@ -85,6 +86,7 @@ libtins_HEADERS = include/internals.h \
 							include/crypto.h \
 							include/packet.h \
 							include/llc.h \
+							include/ip_reassembler.h \
 							include/icmp.h \
 							include/hw_address.h \
 							include/packet_writer.h \

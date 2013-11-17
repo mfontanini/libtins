@@ -70,5 +70,7 @@
 #include "handshake_capturer.h"
 #include "address_range.h"
 #include "pdu_allocator.h"
+#include "ipsec.h"
+#include "ip_reassembler.h"
 
 #endif // TINS_TINS_H

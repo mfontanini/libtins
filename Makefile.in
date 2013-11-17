@@ -111,8 +111,8 @@ am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo \
 	src/crypto.lo src/dhcp.lo src/dhcpv6.lo src/dns.lo \
 	src/dns_record.lo src/dot3.lo src/dot1q.lo src/eapol.lo \
 	src/ethernetII.lo src/icmp.lo src/icmpv6.lo src/internals.lo \
-	src/ip.lo src/ip_address.lo src/ipv6.lo src/ipv6_address.lo \
-	src/ipsec.lo src/llc.lo src/loopback.lo \
+	src/ip_reassembler.lo src/ip.lo src/ip_address.lo src/ipv6.lo \
+	src/ipv6_address.lo src/ipsec.lo src/llc.lo src/loopback.lo \
 	src/network_interface.lo src/packet_sender.lo \
 	src/packet_writer.lo src/ppi.lo src/pdu.lo src/radiotap.lo \
 	src/address_range.lo src/rawpdu.lo src/rsn_information.lo \
@@ -317,6 +317,7 @@ libtins_la_SOURCES = src/arp.cpp \
                     src/icmp.cpp \
                     src/icmpv6.cpp \
                     src/internals.cpp \
+                    src/ip_reassembler.cpp \
                     src/ip.cpp \
                     src/ip_address.cpp \
                     src/ipv6.cpp \
@@ -373,6 +374,7 @@ libtins_HEADERS = include/internals.h \
 							include/crypto.h \
 							include/packet.h \
 							include/llc.h \
+							include/ip_reassembler.h \
 							include/icmp.h \
 							include/hw_address.h \
 							include/packet_writer.h \
@@ -528,6 +530,8 @@ src/ethernetII.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/icmp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/icmpv6.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/internals.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
+src/ip_reassembler.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/ip.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/ip_address.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/ipv6.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -635,6 +639,8 @@ mostlyclean-compile:
 	-rm -f src/ip.lo
 	-rm -f src/ip_address.$(OBJEXT)
 	-rm -f src/ip_address.lo
+	-rm -f src/ip_reassembler.$(OBJEXT)
+	-rm -f src/ip_reassembler.lo
 	-rm -f src/ipsec.$(OBJEXT)
 	-rm -f src/ipsec.lo
 	-rm -f src/ipv6.$(OBJEXT)
@@ -701,6 +707,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/internals.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ip_address.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ip_reassembler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ipsec.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ipv6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/ipv6_address.Plo@am__quote@

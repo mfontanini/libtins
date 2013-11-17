@@ -569,6 +569,13 @@ namespace Tins {
         PDU *recv_response(PacketSender &sender, const NetworkInterface &);
 
         /**
+         * Indicates whether this PDU is fragmented.
+         *
+         * \return true if this PDU is fragmented, false otherwise.
+         */
+        bool is_fragmented() const;
+
+        /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
