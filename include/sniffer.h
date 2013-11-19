@@ -193,6 +193,14 @@ namespace Tins {
         int get_fd();
 
         /**
+         * \brief Sets the read timeout for this sniffer.
+         *
+         * This calls pcap_set_timeout using the provided parameter.
+         * \param ms The amount of milliseconds.
+         */
+        void set_timeout(int ms);
+
+        /**
          * \brief Retrieves this sniffer's link type.
          *
          * This calls pcap_datalink on the stored pcap handle and

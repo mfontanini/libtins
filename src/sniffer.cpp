@@ -178,6 +178,10 @@ bool BaseSniffer::set_filter(const std::string &filter) {
     return result;
 }
 
+void BaseSniffer::set_timeout(int ms) {
+    pcap_set_timeout(handle, ms);
+}
+
 // ****************************** Sniffer ******************************
 
 Sniffer::Sniffer(const string &device, unsigned max_packet_size, 
@@ -201,7 +205,7 @@ void Sniffer::init_sniffer(const std::string &device, unsigned max_packet_size,
         ip = 0;
         if_mask = 0;
     }
-    pcap_t *phandle = pcap_open_live(device.c_str(), max_packet_size, promisc, 0, error);
+    pcap_t *phandle = pcap_open_live(device.c_str(), max_packet_size, promisc, 1000, error);
     if(!phandle)
         throw runtime_error(error);
     
