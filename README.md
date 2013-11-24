@@ -14,7 +14,6 @@ library, please visit:
 http://libtins.github.io/
 
 ## Compiling ##
----------------
 
 libtins depends on libpcap and openssl, although the latter is not 
 necessary if some features of the library are disabled.
@@ -60,7 +59,6 @@ resulting library in around 20%, use the --disable-dot11 switch:
 ```
 
 ## Installing ##
-----------------
 
 Once you're done, if you want to install the header files and the 
 shared object, execute as root:
