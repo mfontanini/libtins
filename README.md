@@ -15,8 +15,10 @@ http://libtins.github.io/
 
 ## Compiling ##
 
-libtins depends on libpcap and openssl, although the latter is not 
-necessary if some features of the library are disabled.
+[libtins](http://libtins.github.io/) depends on 
+[libpcap](http://www.tcpdump.org/) and 
+[openssl](http://www.openssl.org/), although the latter is not necessary 
+if some features of the library are disabled.
 
 In order to compile, execute:
 
