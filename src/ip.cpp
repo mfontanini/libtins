@@ -400,8 +400,8 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
                 Internals::pdu_type_to_id<IP>(inner_pdu()->pdu_type())
             );
         }
-        protocol(new_flag);
-        //flag(new_flag);
+        if(!is_fragmented() || new_flag != 0xff)
+            protocol(new_flag);
     }
     
     #if __FreeBSD__ || defined(__FreeBSD_kernel__)

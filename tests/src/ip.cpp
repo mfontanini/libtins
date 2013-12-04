@@ -8,13 +8,14 @@
 #include "icmp.h"
 #include "ip_address.h"
 #include "utils.h"
+#include "ethernetII.h"
 
 using namespace std;
 using namespace Tins;
 
 class IPTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[], fragmented_packet[];
+    static const uint8_t expected_packet[], fragmented_packet[], fragmented_ether_ip_packet[];
     
     void test_equals(const IP &ip1, const IP &ip2);
 };
@@ -28,6 +29,13 @@ const uint8_t IPTest::fragmented_packet[] = {
     69, 0, 0, 60, 0, 242, 7, 223, 64, 17, 237, 220, 192, 0, 2, 1, 192, 
     0, 2, 2, 192, 0, 192, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+const uint8_t IPTest::fragmented_ether_ip_packet[] = {
+    0, 10, 94, 83, 216, 229, 0, 21, 197, 50, 245, 6, 8, 0, 69, 0, 0, 60, 
+    0, 242, 7, 223, 64, 17, 237, 220, 192, 0, 2, 1, 192, 0, 2, 2, 192, 0, 
+    192, 0, 0, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
 
@@ -73,6 +81,18 @@ TEST_F(IPTest, ConstructorFromFragmentedPacket) {
     IP ip(fragmented_packet, sizeof(fragmented_packet));
     ASSERT_TRUE(ip.inner_pdu());
     EXPECT_EQ(PDU::RAW, ip.inner_pdu()->pdu_type());
+}
+
+TEST_F(IPTest, SerializeFragmentedPacket) {
+    EthernetII pkt(fragmented_ether_ip_packet, sizeof(fragmented_ether_ip_packet));
+    PDU::serialization_type buffer = pkt.serialize();
+    EXPECT_EQ(
+        PDU::serialization_type(
+            fragmented_ether_ip_packet, 
+            fragmented_ether_ip_packet + sizeof(fragmented_ether_ip_packet)
+        ),
+        buffer
+    );
 }
 
 TEST_F(IPTest, TOS) {

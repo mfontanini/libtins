@@ -364,6 +364,17 @@ namespace Tins {
         /**
          * \brief Setter for the protocol field.
          *
+         * Note that this protocol will be overwritten using the 
+         * inner_pdu's protocol type during serialization unless the IP 
+         * datagram is fragmented. 
+         * 
+         * If the packet is fragmented and was originally sniffed, the
+         * original protocol type will be kept when serialized.
+         * 
+         * If this packet has been crafted manually and the inner_pdu
+         * is, for example, a RawPDU, then setting the protocol yourself
+         * is necessary.
+         * 
          * \param new_protocol The new protocol.
          */
         void protocol(uint8_t new_protocol);
