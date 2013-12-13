@@ -11,6 +11,7 @@ using namespace Tins;
 class ICMPTest : public testing::Test {
 public:
     static const uint8_t expected_packets[][8];
+    static const uint8_t ts_request[], ts_reply[];
     static const uint32_t expected_packet_count;
     
     void test_equals(const ICMP &icmp1, const ICMP &icmp2);
@@ -20,7 +21,16 @@ const uint8_t ICMPTest::expected_packets[][8] = {
     { 8, 1, 173, 123, 86, 209, 243, 177 },
     { 12, 0, 116, 255, 127, 0, 0, 0 }
 };
+
 const uint32_t ICMPTest::expected_packet_count = 1;
+
+const uint8_t ICMPTest::ts_request[] = { 
+    13, 0, 180, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 106, 97, 106, 97, 106
+};
+
+const uint8_t ICMPTest::ts_reply[] = { 
+    14, 0, 172, 45, 0, 0, 0, 0, 0, 0, 0, 0, 4, 144, 30, 89, 4, 144, 30, 89, 0, 0, 0, 0, 0, 0
+};
 
 
 TEST_F(ICMPTest, DefaultConstructor) {
@@ -97,6 +107,24 @@ TEST_F(ICMPTest, Pointer) {
     ICMP icmp;
     icmp.pointer(0xf1);
     EXPECT_EQ(icmp.pointer(), 0xf1);
+}
+
+TEST_F(ICMPTest, OriginalTimestamp) {
+    ICMP icmp;
+    icmp.original_timestamp(0x1f8172da);
+    EXPECT_EQ(0x1f8172da, icmp.original_timestamp());
+}
+
+TEST_F(ICMPTest, ReceiveTimestamp) {
+    ICMP icmp;
+    icmp.receive_timestamp(0x1f8172da);
+    EXPECT_EQ(0x1f8172da, icmp.receive_timestamp());
+}
+
+TEST_F(ICMPTest, TransmitTimestamp) {
+    ICMP icmp;
+    icmp.transmit_timestamp(0x1f8172da);
+    EXPECT_EQ(0x1f8172da, icmp.transmit_timestamp());
 }
 
 TEST_F(ICMPTest, SetEchoRequest) {
@@ -194,6 +222,11 @@ TEST_F(ICMPTest, Serialize) {
     PDU::serialization_type buffer2 = icmp2.serialize();
     
     EXPECT_EQ(buffer, buffer2);
+}
+
+TEST_F(ICMPTest, TimestampMatchesResponse) {
+    ICMP request(ts_request, sizeof(ts_request));
+    EXPECT_TRUE(request.matches_response(ts_reply, sizeof(ts_reply)));
 }
 
 TEST_F(ICMPTest, ConstructorFromBuffer) {

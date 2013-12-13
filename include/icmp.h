@@ -58,6 +58,8 @@ namespace Tins {
             ECHO_REQUEST     = 8,
             TIME_EXCEEDED    = 11,
             PARAM_PROBLEM    = 12,
+            TIMESTAMP_REQUEST = 13,
+            TIMESTAMP_REPLY  = 14,
             INFO_REQUEST     = 15,
             INFO_REPLY       = 16
         };
@@ -130,6 +132,27 @@ namespace Tins {
          * \param new_pointer uint8_t with the new pointer.
          */
         void pointer(uint8_t new_pointer);
+
+        /**
+         * \brief Setter for the original timestamp field.
+         *
+         * \param new_pointer the value to be set.
+         */
+        void original_timestamp(uint32_t new_timestamp);
+
+        /**
+         * \brief Setter for the receive timestamp field.
+         *
+         * \param new_pointer the value to be set.
+         */
+        void receive_timestamp(uint32_t new_timestamp);
+
+        /**
+         * \brief Setter for the transmit timestamp field.
+         *
+         * \param new_pointer the value to be set.
+         */
+        void transmit_timestamp(uint32_t new_timestamp);
 
         /**
          * \brief Sets echo request flag for this PDU.
@@ -239,23 +262,44 @@ namespace Tins {
         /**
          * \brief Getter for the gateway field.
          *
-         * \return Returns the gateways in an unit32_t.
+         * \return Returns the gateway field value.
          */
          uint32_t gateway() const { return Endian::be_to_host(_icmp.un.gateway); }
 
          /**
           * \brief Getter for the pointer field.
           *
-          * \return Returns the pointer value.
+          * \return Returns the pointer field value.
           */
         uint8_t pointer() const { return this->_icmp.un.pointer; }
         
         /**
           * \brief Getter for the mtu field.
           *
-          * \return Returns the mtu value in an uint16_t.
+          * \return Returns the mtu field value.
           */
         uint16_t mtu() const { return Endian::be_to_host(_icmp.un.frag.mtu); }
+
+        /**
+          * \brief Getter for the original timestamp field.
+          *
+          * \return Returns the original timestamp value.
+          */
+        uint32_t original_timestamp() const { return Endian::be_to_host(_orig_timestamp); }
+
+        /**
+          * \brief Getter for the receive timestamp field.
+          *
+          * \return Returns the receive timestamp value.
+          */
+        uint32_t receive_timestamp() const { return Endian::be_to_host(_recv_timestamp); }
+
+        /**
+          * \brief Getter for the transmit timestamp field.
+          *
+          * \return Returns the transmit timestamp value.
+          */
+        uint32_t transmit_timestamp() const { return Endian::be_to_host(_trans_timestamp); }
 
         /**
          * \brief Returns the header size.
@@ -317,6 +361,7 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         icmphdr _icmp;
+        uint32_t _orig_timestamp, _recv_timestamp, _trans_timestamp;
     };
 }
 

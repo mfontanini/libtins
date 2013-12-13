@@ -43,6 +43,7 @@
 
 namespace Tins {
 ICMP::ICMP(Flags flag) 
+: _orig_timestamp(), _recv_timestamp(), _trans_timestamp()
 {
     std::memset(&_icmp, 0, sizeof(icmphdr));
     type(flag);
@@ -53,9 +54,16 @@ ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz)
     if(total_sz < sizeof(icmphdr))
         throw malformed_packet();
     std::memcpy(&_icmp, buffer, sizeof(icmphdr));
+    buffer += sizeof(icmphdr);
     total_sz -= sizeof(icmphdr);
+    if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
+        const uint32_t *ptr = reinterpret_cast<const uint32_t*>(buffer);
+        original_timestamp(*ptr++);
+        receive_timestamp(*ptr++);
+        transmit_timestamp(*ptr++);
+    }
     if(total_sz)
-        inner_pdu(new RawPDU(buffer + sizeof(icmphdr), total_sz));
+        inner_pdu(new RawPDU(buffer, total_sz));
 }
 
 void ICMP::code(uint8_t new_code) {
@@ -90,8 +98,23 @@ void ICMP::pointer(uint8_t new_pointer) {
     _icmp.un.pointer = new_pointer;
 }
 
+void ICMP::original_timestamp(uint32_t new_timestamp) {
+    _orig_timestamp = Endian::host_to_be(new_timestamp);
+}
+
+void ICMP::receive_timestamp(uint32_t new_timestamp) {
+    _recv_timestamp = Endian::host_to_be(new_timestamp);
+}
+
+void ICMP::transmit_timestamp(uint32_t new_timestamp) {
+    _trans_timestamp = Endian::host_to_be(new_timestamp);
+}
+
 uint32_t ICMP::header_size() const {
-    return sizeof(icmphdr);
+    uint32_t extra = 0;
+    if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) 
+        extra += sizeof(uint32_t) * 3;
+    return sizeof(icmphdr) + extra;
 }
 
 void ICMP::set_echo_request(uint16_t id, uint16_t seq) {
@@ -154,10 +177,18 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
     assert(total_sz >= sizeof(icmphdr));
     #endif
 
+    if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
+        uint32_t *ptr = reinterpret_cast<uint32_t*>(buffer + sizeof(icmphdr));
+        *ptr++ = original_timestamp();
+        *ptr++ = receive_timestamp();
+        *ptr++ = transmit_timestamp();
+    }
+
+    // checksum calc
     _icmp.check = 0;
     
-    uint32_t checksum = Utils::do_checksum(buffer + sizeof(icmphdr), buffer + total_sz) + 
-                        Utils::do_checksum((uint8_t*)&_icmp, ((uint8_t*)&_icmp) + sizeof(icmphdr));
+    uint32_t checksum = Utils::do_checksum(buffer + ICMP::header_size(), buffer + total_sz) + 
+                        Utils::do_checksum((uint8_t*)&_icmp, ((uint8_t*)&_icmp) + ICMP::header_size());
     while (checksum >> 16)
         checksum = (checksum & 0xffff) + (checksum >> 16);
 
@@ -169,7 +200,8 @@ bool ICMP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(icmphdr))
         return false;
     const icmphdr *icmp_ptr = (const icmphdr*)ptr;
-    if(_icmp.type == ECHO_REQUEST && icmp_ptr->type == ECHO_REPLY) {
+    if((_icmp.type == ECHO_REQUEST && icmp_ptr->type == ECHO_REPLY) || 
+        (_icmp.type == TIMESTAMP_REQUEST && icmp_ptr->type == TIMESTAMP_REPLY)) {
         return icmp_ptr->un.echo.id == _icmp.un.echo.id && icmp_ptr->un.echo.sequence == _icmp.un.echo.sequence;
     }
     return false;
