@@ -252,7 +252,7 @@ void PacketSender::send(PDU &pdu, const NetworkInterface &iface) {
 }
 
 PDU *PacketSender::send_recv(PDU &pdu) {
-    return send_recv(pdu, NetworkInterface());
+    return send_recv(pdu, default_iface);
 }
 
 PDU *PacketSender::send_recv(PDU &pdu, const NetworkInterface &iface) {
@@ -313,9 +313,8 @@ PDU *PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_add
     while(true) {
         FD_ZERO(&readfds);
         FD_SET(sock, &readfds);
-        if((read = select(sock + 1, &readfds, 0, 0, &timeout)) == -1) {
+        if((read = select(sock + 1, &readfds, 0, 0, &timeout)) == -1)
             return 0;
-        }
         if(FD_ISSET(sock, &readfds)) {
             #ifdef WIN32
                 int length = addrlen;
