@@ -3,6 +3,8 @@
 #include <string>
 #include <stdint.h>
 #include "icmp.h"
+#include "ip.h"
+#include "ethernetII.h"
 #include "utils.h"
 
 using namespace std;
@@ -65,6 +67,19 @@ TEST_F(ICMPTest, NestedCopy) {
 TEST_F(ICMPTest, FlagConstructor) {
     ICMP icmp(ICMP::ECHO_REPLY);
     EXPECT_EQ(icmp.type(), ICMP::ECHO_REPLY);
+}
+
+TEST_F(ICMPTest, ChecksumOnTimestamp) {
+    const uint8_t raw_pkt[] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 69, 0, 0, 45, 0, 1, 0, 
+        0, 128, 1, 185, 25, 192, 168, 0, 100, 192, 168, 0, 1, 13, 0, 237, 
+        141, 0, 0, 0, 0, 159, 134, 1, 0, 151, 134, 1, 0, 152, 134, 1, 0, 
+        98, 111, 105, 110, 103, 0
+    };
+    EthernetII pkt(raw_pkt, sizeof(raw_pkt));
+    pkt.serialize();
+    EXPECT_EQ(0xb919, pkt.rfind_pdu<IP>().checksum());
+    EXPECT_EQ(0xed8d, pkt.rfind_pdu<ICMP>().check());
 }
 
 TEST_F(ICMPTest, Code) {

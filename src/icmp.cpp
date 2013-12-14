@@ -57,10 +57,14 @@ ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz)
     buffer += sizeof(icmphdr);
     total_sz -= sizeof(icmphdr);
     if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
+        if(total_sz < sizeof(uint32_t) * 3)
+            throw malformed_packet();
         const uint32_t *ptr = reinterpret_cast<const uint32_t*>(buffer);
         original_timestamp(*ptr++);
         receive_timestamp(*ptr++);
         transmit_timestamp(*ptr++);
+        total_sz -= sizeof(uint32_t) * 3;
+        buffer += sizeof(uint32_t) * 3;
     }
     if(total_sz)
         inner_pdu(new RawPDU(buffer, total_sz));
@@ -183,17 +187,16 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
         *ptr++ = receive_timestamp();
         *ptr++ = transmit_timestamp();
     }
-
     // checksum calc
     _icmp.check = 0;
-    
-    uint32_t checksum = Utils::do_checksum(buffer + ICMP::header_size(), buffer + total_sz) + 
-                        Utils::do_checksum((uint8_t*)&_icmp, ((uint8_t*)&_icmp) + ICMP::header_size());
+    memcpy(buffer, &_icmp, sizeof(icmphdr));
+    uint32_t checksum = Utils::do_checksum(buffer, buffer + total_sz);
+
     while (checksum >> 16)
         checksum = (checksum & 0xffff) + (checksum >> 16);
 
     _icmp.check = Endian::host_to_be<uint16_t>(~checksum);
-    memcpy(buffer, &_icmp, sizeof(icmphdr));
+    ((icmphdr*)buffer)->check = _icmp.check;
 }
 
 bool ICMP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
