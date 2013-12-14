@@ -432,6 +432,20 @@ bool IP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(iphdr))
         return false;
     const iphdr *ip_ptr = (const iphdr*)ptr;
+    // dest unreachable?
+    if(ip_ptr->protocol == Constants::IP::PROTO_ICMP) {
+        const uint8_t *pkt_ptr = ptr + sizeof(iphdr);
+        uint32_t pkt_sz = total_sz - sizeof(iphdr);
+        // It's an ICMP dest unreachable
+        if(pkt_sz > 4 && pkt_ptr[0] == 3) {
+            pkt_ptr += 4;
+            pkt_sz -= 4;
+            // If our IP header is in the ICMP payload, then it's the same packet.
+            // This keeps in mind checksum and IP identifier, so I guess it's enough.
+            if(pkt_sz >= sizeof(iphdr) && std::memcmp(&_ip, pkt_ptr, sizeof(iphdr))) 
+                return true;
+        }
+    }
     // checks for broadcast addr
     if((_ip.saddr == ip_ptr->daddr && (_ip.daddr == ip_ptr->saddr || dst_addr().is_broadcast())) ||
         (dst_addr().is_broadcast() && _ip.saddr == 0)) {

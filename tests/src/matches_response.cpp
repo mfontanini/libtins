@@ -5,6 +5,7 @@
 #include "udp.h"
 #include "dhcp.h"
 #include "dhcpv6.h"
+#include "ip.h"
 
 using namespace Tins;
 
@@ -31,6 +32,38 @@ TEST_F(MatchesResponseTest, TCPSynAck) {
     EthernetII sent(syn_data, sizeof(syn_data));
     EXPECT_TRUE(sent.matches_response(resp_data, sizeof(resp_data)));
     EXPECT_FALSE(sent.matches_response(syn_data, sizeof(syn_data)));
+}
+
+TEST_F(MatchesResponseTest, UDPMatchesICMPResponse) {
+    const uint8_t udp_pkt[] = {
+        69, 0, 0, 36, 44, 89, 64, 0, 64, 17, 140, 186, 192, 168, 0, 100, 192, 
+        168, 0, 1, 136, 167, 39, 15, 0, 16, 129, 215, 74, 69, 74, 69, 74, 69, 
+        74, 10
+    }, 
+    udp_pkt_resp[] = {
+        69, 192, 0, 64, 150, 102, 0, 0, 64, 1, 97, 225, 192, 168, 0, 1, 192, 
+        168, 0, 100, 3, 3, 126, 212, 0, 0, 0, 0, 69, 0, 0, 36, 44, 89, 64, 0, 
+        64, 17, 140, 186, 192, 168, 0, 100, 192, 168, 0, 1, 136, 167, 39, 15, 
+        0, 16, 165, 135, 74, 69, 74, 69, 74, 69, 74, 10
+    };
+    IP ip(udp_pkt, sizeof(udp_pkt));
+    EXPECT_TRUE(ip.matches_response(udp_pkt_resp, sizeof(udp_pkt_resp)));
+}
+
+TEST_F(MatchesResponseTest, UDPMatchesICMPResponse2) {
+    const uint8_t udp_pkt[] = {
+        69, 0, 0, 33, 0, 1, 0, 0, 128, 17, 185, 21, 192, 168, 0, 100, 
+        192, 168, 0, 1, 0, 0, 13, 5, 0, 13, 62, 59, 98, 111, 105, 110, 
+        103
+    }, 
+    udp_pkt_resp[] = {
+        69, 192, 0, 61, 150, 255, 0, 0, 64, 1, 97, 75, 192, 168, 0, 1, 
+        192, 168, 0, 100, 3, 3, 126, 209, 0, 0, 0, 0, 69, 0, 0, 33, 0, 
+        1, 0, 0, 128, 17, 185, 21, 192, 168, 0, 100, 192, 168, 0, 1, 0, 
+        0, 13, 5, 0, 13, 62, 59, 98, 111, 105, 110, 103
+    };
+    IP ip(udp_pkt, sizeof(udp_pkt));
+    EXPECT_TRUE(ip.matches_response(udp_pkt_resp, sizeof(udp_pkt_resp)));
 }
 
 TEST_F(MatchesResponseTest, DHCP) {
