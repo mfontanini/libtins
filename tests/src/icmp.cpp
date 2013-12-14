@@ -82,6 +82,19 @@ TEST_F(ICMPTest, ChecksumOnTimestamp) {
     EXPECT_EQ(0xed8d, pkt.rfind_pdu<ICMP>().check());
 }
 
+TEST_F(ICMPTest, AddressMaskRequest) {
+    const uint8_t raw_pkt[] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 69, 0, 0, 32, 0, 1, 0, 
+        0, 64, 1, 249, 38, 192, 168, 0, 100, 192, 168, 0, 1, 17, 0, 234, 
+        249, 0, 0, 0, 0, 1, 2, 3, 4 
+    };
+    EthernetII pkt(raw_pkt, sizeof(raw_pkt));
+    IP::serialization_type buffer = pkt.serialize();
+    EXPECT_EQ(0xf926, pkt.rfind_pdu<IP>().checksum());
+    EXPECT_EQ(0xeaf9, pkt.rfind_pdu<ICMP>().check());
+    EXPECT_EQ(IPv4Address("1.2.3.4"), pkt.rfind_pdu<ICMP>().address_mask());
+}
+
 TEST_F(ICMPTest, Code) {
     ICMP icmp;
     icmp.code(0x7a);
@@ -140,6 +153,12 @@ TEST_F(ICMPTest, TransmitTimestamp) {
     ICMP icmp;
     icmp.transmit_timestamp(0x1f8172da);
     EXPECT_EQ(0x1f8172da, icmp.transmit_timestamp());
+}
+
+TEST_F(ICMPTest, AddressMask) {
+    ICMP icmp;
+    icmp.address_mask("192.168.0.1");
+    EXPECT_EQ(IPv4Address("192.168.0.1"), icmp.address_mask());
 }
 
 TEST_F(ICMPTest, SetEchoRequest) {

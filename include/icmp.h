@@ -33,6 +33,7 @@
 #include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
+#include "ip_address.h"
 
 namespace Tins {
 
@@ -61,7 +62,9 @@ namespace Tins {
             TIMESTAMP_REQUEST = 13,
             TIMESTAMP_REPLY  = 14,
             INFO_REQUEST     = 15,
-            INFO_REPLY       = 16
+            INFO_REPLY       = 16,
+            ADDRESS_MASK_REQUEST = 17,
+            ADDRESS_MASK_REPLY = 18
         };
 
         /**
@@ -136,23 +139,30 @@ namespace Tins {
         /**
          * \brief Setter for the original timestamp field.
          *
-         * \param new_pointer the value to be set.
+         * \param new_timestamp the value to be set.
          */
         void original_timestamp(uint32_t new_timestamp);
 
         /**
          * \brief Setter for the receive timestamp field.
          *
-         * \param new_pointer the value to be set.
+         * \param new_timestamp the value to be set.
          */
         void receive_timestamp(uint32_t new_timestamp);
 
         /**
          * \brief Setter for the transmit timestamp field.
          *
-         * \param new_pointer the value to be set.
+         * \param new_timestamp the value to be set.
          */
         void transmit_timestamp(uint32_t new_timestamp);
+
+        /**
+         * \brief Setter for the address mask field.
+         *
+         * \param new_mask the value to be set.
+         */
+        void address_mask(IPv4Address new_mask);
 
         /**
          * \brief Sets echo request flag for this PDU.
@@ -285,7 +295,7 @@ namespace Tins {
           *
           * \return Returns the original timestamp value.
           */
-        uint32_t original_timestamp() const { return Endian::be_to_host(_orig_timestamp); }
+        uint32_t original_timestamp() const { return Endian::be_to_host(_orig_timestamp_or_address_mask); }
 
         /**
           * \brief Getter for the receive timestamp field.
@@ -300,6 +310,15 @@ namespace Tins {
           * \return Returns the transmit timestamp value.
           */
         uint32_t transmit_timestamp() const { return Endian::be_to_host(_trans_timestamp); }
+
+        /**
+          * \brief Getter for the address mask field.
+          *
+          * \return Returns the address mask value.
+          */
+        IPv4Address address_mask() const { 
+            return IPv4Address(Endian::be_to_host(_orig_timestamp_or_address_mask)); 
+        }
 
         /**
          * \brief Returns the header size.
@@ -361,7 +380,7 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         icmphdr _icmp;
-        uint32_t _orig_timestamp, _recv_timestamp, _trans_timestamp;
+        uint32_t _orig_timestamp_or_address_mask, _recv_timestamp, _trans_timestamp;
     };
 }
 

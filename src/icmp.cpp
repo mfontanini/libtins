@@ -43,7 +43,7 @@
 
 namespace Tins {
 ICMP::ICMP(Flags flag) 
-: _orig_timestamp(), _recv_timestamp(), _trans_timestamp()
+: _orig_timestamp_or_address_mask(), _recv_timestamp(), _trans_timestamp()
 {
     std::memset(&_icmp, 0, sizeof(icmphdr));
     type(flag);
@@ -65,6 +65,14 @@ ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz)
         transmit_timestamp(*ptr++);
         total_sz -= sizeof(uint32_t) * 3;
         buffer += sizeof(uint32_t) * 3;
+    }
+    else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
+        if(total_sz < sizeof(uint32_t))
+            throw malformed_packet();
+        const uint32_t *ptr = reinterpret_cast<const uint32_t*>(buffer);
+        address_mask(IPv4Address(*ptr++));
+        total_sz -= sizeof(uint32_t);
+        buffer += sizeof(uint32_t);
     }
     if(total_sz)
         inner_pdu(new RawPDU(buffer, total_sz));
@@ -103,7 +111,7 @@ void ICMP::pointer(uint8_t new_pointer) {
 }
 
 void ICMP::original_timestamp(uint32_t new_timestamp) {
-    _orig_timestamp = Endian::host_to_be(new_timestamp);
+    _orig_timestamp_or_address_mask = Endian::host_to_be(new_timestamp);
 }
 
 void ICMP::receive_timestamp(uint32_t new_timestamp) {
@@ -114,10 +122,16 @@ void ICMP::transmit_timestamp(uint32_t new_timestamp) {
     _trans_timestamp = Endian::host_to_be(new_timestamp);
 }
 
+void ICMP::address_mask(IPv4Address new_mask) {
+    _orig_timestamp_or_address_mask = Endian::host_to_be(static_cast<uint32_t>(new_mask));
+}
+
 uint32_t ICMP::header_size() const {
     uint32_t extra = 0;
     if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) 
-        extra += sizeof(uint32_t) * 3;
+        extra = sizeof(uint32_t) * 3;
+    else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) 
+        extra = sizeof(uint32_t);
     return sizeof(icmphdr) + extra;
 }
 
@@ -187,6 +201,10 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
         *ptr++ = receive_timestamp();
         *ptr++ = transmit_timestamp();
     }
+    else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
+        uint32_t *ptr = reinterpret_cast<uint32_t*>(buffer + sizeof(icmphdr));
+        *ptr++ = address_mask();
+    }
     // checksum calc
     _icmp.check = 0;
     memcpy(buffer, &_icmp, sizeof(icmphdr));
@@ -204,7 +222,8 @@ bool ICMP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
         return false;
     const icmphdr *icmp_ptr = (const icmphdr*)ptr;
     if((_icmp.type == ECHO_REQUEST && icmp_ptr->type == ECHO_REPLY) || 
-        (_icmp.type == TIMESTAMP_REQUEST && icmp_ptr->type == TIMESTAMP_REPLY)) {
+        (_icmp.type == TIMESTAMP_REQUEST && icmp_ptr->type == TIMESTAMP_REPLY) ||
+        (_icmp.type == ADDRESS_MASK_REQUEST && icmp_ptr->type == ADDRESS_MASK_REPLY)) {
         return icmp_ptr->un.echo.id == _icmp.un.echo.id && icmp_ptr->un.echo.sequence == _icmp.un.echo.sequence;
     }
     return false;
