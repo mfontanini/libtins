@@ -70,7 +70,7 @@ ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz)
         if(total_sz < sizeof(uint32_t))
             throw malformed_packet();
         const uint32_t *ptr = reinterpret_cast<const uint32_t*>(buffer);
-        address_mask(IPv4Address(*ptr++));
+        address_mask(address_type(*ptr++));
         total_sz -= sizeof(uint32_t);
         buffer += sizeof(uint32_t);
     }
@@ -98,8 +98,8 @@ void ICMP::sequence(uint16_t new_seq) {
     _icmp.un.echo.sequence = Endian::host_to_be(new_seq);
 }
 
-void ICMP::gateway(uint32_t new_gw) {
-    _icmp.un.gateway = Endian::host_to_be(new_gw);
+void ICMP::gateway(address_type new_gw) {
+    _icmp.un.gateway = Endian::host_to_be(static_cast<uint32_t>(new_gw));
 }
 
 void ICMP::mtu(uint16_t new_mtu) {
@@ -122,7 +122,7 @@ void ICMP::transmit_timestamp(uint32_t new_timestamp) {
     _trans_timestamp = Endian::host_to_be(new_timestamp);
 }
 
-void ICMP::address_mask(IPv4Address new_mask) {
+void ICMP::address_mask(address_type new_mask) {
     _orig_timestamp_or_address_mask = Endian::host_to_be(static_cast<uint32_t>(new_mask));
 }
 
@@ -184,7 +184,7 @@ void ICMP::set_source_quench() {
     type(SOURCE_QUENCH);
 }
 
-void ICMP::set_redirect(uint8_t icode, uint32_t address) {
+void ICMP::set_redirect(uint8_t icode, address_type address) {
     type(REDIRECT);
     code(icode);
     gateway(address);

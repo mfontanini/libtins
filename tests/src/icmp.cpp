@@ -121,8 +121,8 @@ TEST_F(ICMPTest, Type) {
 
 TEST_F(ICMPTest, Gateway) {
     ICMP icmp;
-    icmp.gateway(0x31fdb5cd);
-    EXPECT_EQ(icmp.gateway(), 0x31fdb5cdU);
+    icmp.gateway("1.2.3.4");
+    EXPECT_EQ(IPv4Address("1.2.3.4"), icmp.gateway());
 }
 
 TEST_F(ICMPTest, MTU) {
@@ -229,10 +229,10 @@ TEST_F(ICMPTest, SetSourceQuench) {
 
 TEST_F(ICMPTest, SetRedirect) {
     ICMP icmp;
-    icmp.set_redirect(0x3d, 0xf1dc);
+    icmp.set_redirect(0x3d, "1.2.3.4");
     EXPECT_EQ(icmp.type(), ICMP::REDIRECT);
-    EXPECT_EQ(icmp.code(), 0x3d);
-    EXPECT_EQ(icmp.gateway(), 0xf1dcU);
+    EXPECT_EQ(0x3d, icmp.code());
+    EXPECT_EQ(IPv4Address("1.2.3.4"), icmp.gateway());
 }
 
 void ICMPTest::test_equals(const ICMP &icmp1, const ICMP &icmp2) {

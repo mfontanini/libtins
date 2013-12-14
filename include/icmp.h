@@ -49,6 +49,11 @@ namespace Tins {
          */
         static const PDU::PDUType pdu_flag = PDU::ICMP;
     
+        /**
+         * The type used to store addresses.
+         */
+        typedef IPv4Address address_type;
+
         /** \brief ICMP flags
          */
         enum Flags {
@@ -118,9 +123,9 @@ namespace Tins {
         /**
          * \brief Setter for the gateway field.
          *
-         * \param new_gw uint32_t with the new gateway.
+         * \param new_gw The new value for the gateway field.
          */
-        void gateway(uint32_t new_gw);
+        void gateway(address_type new_gw);
 
         /**
          * \brief Setter for the mtu field.
@@ -162,7 +167,7 @@ namespace Tins {
          *
          * \param new_mask the value to be set.
          */
-        void address_mask(IPv4Address new_mask);
+        void address_mask(address_type new_mask);
 
         /**
          * \brief Sets echo request flag for this PDU.
@@ -232,7 +237,7 @@ namespace Tins {
          * \param address Address of the gateway to which traffic should
          * be sent.
          */
-        void set_redirect(uint8_t icode, uint32_t address);
+        void set_redirect(uint8_t icode, address_type address);
 
         /**
          * \brief Getter for the ICMP type flag.
@@ -274,7 +279,9 @@ namespace Tins {
          *
          * \return Returns the gateway field value.
          */
-         uint32_t gateway() const { return Endian::be_to_host(_icmp.un.gateway); }
+        address_type gateway() const { 
+            return address_type(Endian::be_to_host(_icmp.un.gateway)); 
+        }
 
          /**
           * \brief Getter for the pointer field.
@@ -316,8 +323,8 @@ namespace Tins {
           *
           * \return Returns the address mask value.
           */
-        IPv4Address address_mask() const { 
-            return IPv4Address(Endian::be_to_host(_orig_timestamp_or_address_mask)); 
+        address_type address_mask() const { 
+            return address_type(Endian::be_to_host(_orig_timestamp_or_address_mask)); 
         }
 
         /**
