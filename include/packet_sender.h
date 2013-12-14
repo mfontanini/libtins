@@ -310,7 +310,8 @@ namespace Tins {
             static_cast<T&>(pdu).send(*this, iface);
         }
         
-        PDU *recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen);
+        PDU *recv_match_loop(const std::vector<int>& sockets, PDU &pdu, struct sockaddr* link_addr, 
+            uint32_t addrlen);
 
         std::vector<int> _sockets;
         #ifndef WIN32

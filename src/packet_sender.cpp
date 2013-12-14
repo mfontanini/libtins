@@ -55,6 +55,7 @@
 #endif
 #include <cstring>
 #include <ctime>
+#include <algorithm>
 #include "pdu.h"
 #include "macros.h"
 #include "network_interface.h"
@@ -285,13 +286,19 @@ PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr,
   uint32_t len_addr, const NetworkInterface &iface) 
 {
     int sock = get_ether_socket(iface);
-    return recv_match_loop(sock, pdu, link_addr, len_addr);
+    std::vector<int> sockets(1, sock);
+    return recv_match_loop(sockets, pdu, link_addr, len_addr);
 }
 #endif // WIN32
 
 PDU *PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
     open_l3_socket(type);
-    return recv_match_loop(_sockets[type], pdu, link_addr, len_addr);
+    std::vector<int> sockets(1, _sockets[type]);
+    if(type == IP_TCP_SOCKET || type == IP_UDP_SOCKET) {
+        open_l3_socket(ICMP_SOCKET);
+        sockets.push_back(_sockets[ICMP_SOCKET]);
+    }
+    return recv_match_loop(sockets, pdu, link_addr, len_addr);
 }
 
 void PacketSender::send_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
@@ -302,7 +309,14 @@ void PacketSender::send_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_ad
         throw socket_write_error(make_error_string());
 }
 
-PDU *PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen) {
+PDU *PacketSender::recv_match_loop(const std::vector<int>& sockets, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen) {
+    #ifdef WIN32
+        typedef int socket_len_type;
+        typedef int recvfrom_ret_type;
+    #else
+        typedef socklen_t socket_len_type;
+        typedef ssize_t recvfrom_ret_type;
+    #endif
     fd_set readfds;
     struct timeval timeout,  end_time;
     int read;
@@ -312,20 +326,21 @@ PDU *PacketSender::recv_match_loop(int sock, PDU &pdu, struct sockaddr* link_add
     end_time.tv_usec = timeout.tv_usec = _timeout_usec;
     while(true) {
         FD_ZERO(&readfds);
-        FD_SET(sock, &readfds);
-        if((read = select(sock + 1, &readfds, 0, 0, &timeout)) == -1)
+        int max_fd = 0;
+        for(std::vector<int>::const_iterator it = sockets.begin(); it != sockets.end(); ++it) {
+            FD_SET(*it, &readfds);
+            max_fd = std::max(max_fd, *it);
+        }
+        if((read = select(max_fd + 1, &readfds, 0, 0, &timeout)) == -1)
             return 0;
-        if(FD_ISSET(sock, &readfds)) {
-            #ifdef WIN32
-                int length = addrlen;
-                int size;
-            #else
-                socklen_t length = addrlen;
-                ssize_t size;
-            #endif
-            size = recvfrom(sock, (char*)buffer, 2048, 0, link_addr, &length);
-            if(pdu.matches_response(buffer, size)) {
-                return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
+        for(std::vector<int>::const_iterator it = sockets.begin(); it != sockets.end(); ++it) {
+            if(FD_ISSET(*it, &readfds)) {
+                socket_len_type length = addrlen;
+                recvfrom_ret_type size;
+                size = recvfrom(*it, (char*)buffer, 2048, 0, link_addr, &length);
+                if(pdu.matches_response(buffer, size)) {
+                    return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
+                }
             }
         }
         struct timeval this_time, diff;
