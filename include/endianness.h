@@ -111,6 +111,11 @@ namespace Endian {
     struct conversion_dispatcher;
     
     template<>
+    struct conversion_dispatcher<sizeof(uint8_t)> 
+    : public conversion_dispatch_helper<uint8_t> 
+    { };
+    
+    template<>
     struct conversion_dispatcher<sizeof(uint16_t)> 
     : public conversion_dispatch_helper<uint16_t> 
     { };

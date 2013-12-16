@@ -495,9 +495,6 @@ namespace Tins {
             if(!opt)
                 throw option_not_found();
             return opt->to<T>();
-            /*if(option && option->data_size() == sizeof(T))
-                return *(const T*)(&option->data_ptr()[0]);
-            throw option_not_found();*/
         }
         
         void internal_add_option(const option &option);

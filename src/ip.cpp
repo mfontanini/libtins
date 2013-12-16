@@ -271,40 +271,24 @@ void IP::add_route_option(option_identifier id, const generic_route_option_type 
 }
 
 IP::generic_route_option_type IP::search_route_option(option_identifier id) const {
-    const option *option = search_option(id);
-    if(!option || option->data_size() < 1 + sizeof(uint32_t) || 
-      ((option->data_size() - 1) % sizeof(uint32_t)) != 0)
+    const option *opt = search_option(id);
+    if(!opt)
         throw option_not_found();
-    generic_route_option_type output;
-    output.pointer = *option->data_ptr();
-    const uint32_t *route = (const uint32_t*)(option->data_ptr() + 1),
-                    *end = route + (option->data_size() - 1) / sizeof(uint32_t);
-    while(route < end)
-        output.routes.push_back(address_type(*route++));
-    return output;
+    return opt->to<generic_route_option_type>();
 }
 
 IP::security_type IP::security() const {
-    const option *option = search_option(130);
-    if(!option || option->data_size() < 9)
+    const option *opt = search_option(130);
+    if(!opt)
         throw option_not_found();
-    security_type output;
-    const uint16_t *ptr = reinterpret_cast<const uint16_t*>(option->data_ptr());
-    output.security = Endian::be_to_host(*ptr++);
-    output.compartments = Endian::be_to_host(*ptr++);
-    output.handling_restrictions = Endian::be_to_host(*ptr++);
-    uint32_t tcc = option->data_ptr()[6];
-    tcc = (tcc << 8) | option->data_ptr()[7];
-    tcc = (tcc << 8) | option->data_ptr()[8];
-    output.transmission_control = tcc;
-    return output;
+    return opt->to<security_type>();
 }
 
 uint16_t IP::stream_identifier() const {
-    const option *option = search_option(136);
-    if(!option || option->data_size() != sizeof(uint16_t))
+    const option *opt = search_option(136);
+    if(!opt)
         throw option_not_found();
-    return Endian::be_to_host(*(const uint16_t*)option->data_ptr());
+    return opt->to<uint16_t>();
 }
 
 void IP::add_option(const option &opt) {
@@ -453,5 +437,37 @@ bool IP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
     return false;
+}
+
+// Option static constructors from options
+
+IP::security_type IP::security_type::from_option(const option &opt) 
+{
+    if(opt.data_size() != 9)
+        throw malformed_option();
+    security_type output;
+    const uint16_t *ptr = reinterpret_cast<const uint16_t*>(opt.data_ptr());
+    output.security = Endian::be_to_host(*ptr++);
+    output.compartments = Endian::be_to_host(*ptr++);
+    output.handling_restrictions = Endian::be_to_host(*ptr++);
+    uint32_t tcc = opt.data_ptr()[6];
+    tcc = (tcc << 8) | opt.data_ptr()[7];
+    tcc = (tcc << 8) | opt.data_ptr()[8];
+    output.transmission_control = tcc;
+    return output;
+}
+
+IP::generic_route_option_type IP::generic_route_option_type::from_option(
+  const option &opt) 
+{
+    if(opt.data_size() < 1 + sizeof(uint32_t) || ((opt.data_size() - 1) % sizeof(uint32_t)) != 0)
+        throw malformed_option();
+    generic_route_option_type output;
+    output.pointer = *opt.data_ptr();
+    const uint32_t *route = (const uint32_t*)(opt.data_ptr() + 1),
+                    *end = route + (opt.data_size() - 1) / sizeof(uint32_t);
+    while(route < end)
+        output.routes.push_back(address_type(*route++));
+    return output;
 }
 }

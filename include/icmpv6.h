@@ -145,16 +145,26 @@ public:
     /**
      * \brief The type used to store the new home agent information 
      * option data.
-     * 
-     * The first member contains the home agent preference field, while
-     * the second one contains the home agent lifetime.
      */
-    typedef std::pair<uint16_t, uint16_t> new_ha_info_type;
+    typedef std::vector<uint16_t> new_ha_info_type;
     
     /**
      * The type used to store the source/target address list options.
      */
-    typedef std::vector<ipaddress_type> addr_list_type;
+    struct addr_list_type {
+        typedef std::vector<ipaddress_type> addresses_type;
+        
+        uint8_t reserved[6];
+        addresses_type addresses;
+        
+        addr_list_type(const addresses_type &addresses = addresses_type())
+        : addresses(addresses) 
+        {
+            std::fill(reserved, reserved + sizeof(reserved), 0);
+        }
+        
+        static addr_list_type from_option(const option &opt);
+    };
     
     /**
      * The type used to store the nonce option data.
@@ -162,13 +172,26 @@ public:
     typedef std::vector<uint8_t> nonce_type;
     
     /**
+     * The type used to store the MTU option.
+     */
+    typedef std::pair<uint16_t, uint32_t> mtu_type;
+    
+    /**
      * \brief The type used to store the neighbour advertisement 
      * acknowledgement option data.
-     * 
-     * The first member contains the option code field, while
-     * the second one contains the status.
      */
-    typedef std::pair<uint8_t, uint8_t> naack_type;
+    struct naack_type {
+        uint8_t code, status;
+        uint8_t reserved[4];
+        
+        naack_type(uint8_t code = 0, uint8_t status = 0)
+        : code(code), status(status)
+        {
+            std::fill(reserved, reserved + 4, 0);
+        }
+        
+        static naack_type from_option(const option &opt);
+    };
     
     /**
      * \brief The type used to store the link layer address option data.
@@ -207,6 +230,8 @@ public:
         {
             
         }
+        
+        static lladdr_type from_option(const option &opt);
     };
     
     /**
@@ -226,6 +251,8 @@ public:
         : prefix_len(prefix_len), A(A), L(L), 
           valid_lifetime(valid_lifetime), preferred_lifetime(preferred_lifetime),
           prefix(prefix) { }
+          
+        static prefix_info_type from_option(const option &opt);
     };
     
     /**
@@ -832,7 +859,7 @@ public:
      * 
      * \param value The MTU option data.
      */
-    void mtu(uint32_t value);
+    void mtu(const mtu_type& value);
     
     /**
      * \brief Setter for the shortcut limit option.
@@ -1009,7 +1036,7 @@ public:
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
-    uint32_t mtu() const;
+    mtu_type mtu() const;
     
     /**
      * \brief Getter for the shortcut limit option.

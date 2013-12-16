@@ -184,6 +184,8 @@ namespace Tins {
             : security(sec), compartments(comp), 
               handling_restrictions(hand_res), transmission_control(tcc) 
               {}
+            
+            static security_type from_option(const option &opt);
         };
         
         /**
@@ -198,6 +200,8 @@ namespace Tins {
             generic_route_option_type(uint8_t ptr = 0, 
               routes_type rts = routes_type())
             : pointer(ptr), routes(rts) {}
+            
+            static generic_route_option_type from_option(const option &opt);
         };
         
         /**

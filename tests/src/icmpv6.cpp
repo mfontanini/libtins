@@ -215,8 +215,9 @@ TEST_F(ICMPv6Test, RedirectHeader) {
 
 TEST_F(ICMPv6Test, MTU) {
     ICMPv6 icmp;
-    icmp.mtu(0x9a8df7);
-    EXPECT_EQ(icmp.mtu(), 0x9a8df7U);
+    ICMPv6::mtu_type data(0, 0x9a8df7);
+    icmp.mtu(data);
+    EXPECT_EQ(data, icmp.mtu());
 }
 
 TEST_F(ICMPv6Test, ShortcutLimit) {
@@ -233,7 +234,10 @@ TEST_F(ICMPv6Test, NewAdvertisementInterval) {
 
 TEST_F(ICMPv6Test, NewHomeAgentInformation) {
     ICMPv6 icmp;
-    ICMPv6::new_ha_info_type data(0x92fa, 0xaab3);
+    ICMPv6::new_ha_info_type data;
+    data.push_back(0);
+    data.push_back(0x92fa);
+    data.push_back(0xaab3);
     icmp.new_home_agent_info(data);
     EXPECT_EQ(icmp.new_home_agent_info(), data);
 }
@@ -241,19 +245,19 @@ TEST_F(ICMPv6Test, NewHomeAgentInformation) {
 TEST_F(ICMPv6Test, SourceAddressList) {
     ICMPv6 icmp;
     ICMPv6::addr_list_type data;
-    data.push_back("827d:adae::1");
-    data.push_back("2929:1234:fefe::2");
+    data.addresses.push_back("827d:adae::1");
+    data.addresses.push_back("2929:1234:fefe::2");
     icmp.source_addr_list(data);
-    EXPECT_EQ(icmp.source_addr_list(), data);
+    EXPECT_EQ(icmp.source_addr_list().addresses, data.addresses);
 }
 
 TEST_F(ICMPv6Test, TargetAddressList) {
     ICMPv6 icmp;
     ICMPv6::addr_list_type data;
-    data.push_back("827d:adae::1");
-    data.push_back("2929:1234:fefe::2");
+    data.addresses.push_back("827d:adae::1");
+    data.addresses.push_back("2929:1234:fefe::2");
     icmp.target_addr_list(data);
-    EXPECT_EQ(icmp.target_addr_list(), data);
+    EXPECT_EQ(icmp.target_addr_list().addresses, data.addresses);
 }
 
 TEST_F(ICMPv6Test, RSASignature) {
@@ -316,9 +320,11 @@ TEST_F(ICMPv6Test, LinkLayerAddress) {
 
 TEST_F(ICMPv6Test, NAACK) {
     ICMPv6 icmp;
-    ICMPv6::naack_type data(0x92, 0xb3);
+    ICMPv6::naack_type data(0x92, 0xb3), result;
     icmp.naack(data);
-    EXPECT_EQ(icmp.naack(), data);
+    result = icmp.naack();
+    EXPECT_EQ(result.code, data.code);
+    EXPECT_EQ(result.status, data.status);
 }
 
 TEST_F(ICMPv6Test, MAP) {

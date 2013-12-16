@@ -37,6 +37,8 @@
 #include "exceptions.h"
 #include "endianness.h"
 #include "internals.h"
+#include "ip_address.h"
+#include "ipv6_address.h"
 
 namespace Tins {
 /**
@@ -107,35 +109,73 @@ namespace Internals {
             if(opt.data_size() % sizeof(T) != 0)
                 throw malformed_option();
             const T *ptr = (const T*)opt.data_ptr();
-            const T *end = ptr + (opt.data_size() / sizeof(T));
+            const T *end = (const T*)(opt.data_ptr() + opt.data_size());
             
             std::vector<T> output(std::distance(ptr, end));
             typename std::vector<T>::iterator it = output.begin();
             while(ptr < end) {
                 if(PDUType::endianness == PDUType::BE)
-                    *it++ = Endian::be_to_host(*(ptr++));
+                    *it++ = Endian::be_to_host(*ptr++);
                 else
-                    *it++ = Endian::le_to_host(*(ptr++));
+                    *it++ = Endian::le_to_host(*ptr++);
             }
             return output;
         }
     };
     
-    template<typename T>
-    struct converter<std::pair<T, T>, typename enable_if<is_unsigned_integral<T>::value>::type> {
+    template<>
+    struct converter<std::vector<IPv4Address> > {
         template<typename X, typename PDUType>
-        static std::pair<T, T> convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() != sizeof(T) * 2)
+        static std::vector<IPv4Address> convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() % 4 != 0)
                 throw malformed_option();
-            const T *ptr = (const T*)opt.data_ptr();
-            std::pair<T, T> output;
+            const uint32_t *ptr = (const uint32_t*)opt.data_ptr();
+            const uint32_t *end = (const uint32_t*)(opt.data_ptr() + opt.data_size());
+            
+            std::vector<IPv4Address> output(std::distance(ptr, end));
+            std::vector<IPv4Address>::iterator it = output.begin();
+            while(ptr < end) {
+                if(PDUType::endianness == PDUType::BE)
+                    *it++ = IPv4Address(*ptr++);
+                else
+                    *it++ = Endian::change_endian(*ptr++);
+            }
+            return output;
+        }
+    };
+    
+    template<>
+    struct converter<std::vector<IPv6Address> > {
+        template<typename X, typename PDUType>
+        static std::vector<IPv6Address> convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() % IPv6Address::address_size != 0)
+                throw malformed_option();
+            const uint8_t *ptr = opt.data_ptr(), *end = opt.data_ptr() + opt.data_size();
+            std::vector<IPv6Address> output;
+            while(ptr < end) {
+                output.push_back(IPv6Address(ptr));
+                ptr += IPv6Address::address_size;
+            }
+            return output;
+        }
+    };
+    
+    template<typename T, typename U>
+    struct converter<std::pair<T, U>, typename enable_if<is_unsigned_integral<T>::value>::type> {
+        template<typename X, typename PDUType>
+        static std::pair<T, U> convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() != sizeof(T) + sizeof(U))
+                throw malformed_option();
+            std::pair<T, U> output;
+            output.first = *(const T*)opt.data_ptr();
+            output.second = *(const U*)(opt.data_ptr() + sizeof(T));
             if(PDUType::endianness == PDUType::BE) {
-                output.first = Endian::be_to_host(*ptr++);
-                output.second = Endian::be_to_host(*ptr);
+                output.first = Endian::be_to_host(output.first);
+                output.second = Endian::be_to_host(output.second);
             }
             else {
-                output.first = Endian::le_to_host(*ptr++);
-                output.second = Endian::le_to_host(*ptr);
+                output.first = Endian::le_to_host(output.first);
+                output.second = Endian::le_to_host(output.second);
             }
             return output;
         }

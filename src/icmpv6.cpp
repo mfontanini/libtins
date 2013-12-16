@@ -305,9 +305,10 @@ void ICMPv6::redirect_header(PDU::serialization_type data) {
     add_option(option(REDIRECT_HEADER, data.begin(), data.end()));
 }
 
-void ICMPv6::mtu(uint32_t value) {
+void ICMPv6::mtu(const mtu_type& value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
-    *((uint32_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value);
+    *(uint32_t*)buffer = Endian::host_to_be(value.first);
+    *(uint32_t*)(buffer + sizeof(uint16_t)) = Endian::host_to_be(value.second);
     add_option(option(MTU, sizeof(buffer), buffer));
 }
 
@@ -324,9 +325,12 @@ void ICMPv6::new_advert_interval(uint32_t value) {
 }
 
 void ICMPv6::new_home_agent_info(const new_ha_info_type &value) {
+    if(value.size() != 3)
+        throw malformed_option();
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
-    *((uint16_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value.first);
-    *((uint16_t*)(buffer + sizeof(uint16_t) * 2)) = Endian::host_to_be(value.second);
+    *((uint16_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value[0]);
+    *((uint16_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value[1]);
+    *((uint16_t*)(buffer + sizeof(uint16_t) * 2)) = Endian::host_to_be(value[2]);
     add_option(option(HOME_AGENT_INFO, sizeof(buffer), buffer));
 }
 
@@ -339,10 +343,12 @@ void ICMPv6::target_addr_list(const addr_list_type &value) {
 }
 
 void ICMPv6::add_addr_list(uint8_t type, const addr_list_type &value) {
+    typedef addr_list_type::addresses_type::const_iterator iterator;
+    
     std::vector<uint8_t> buffer;
-    buffer.reserve(value.size() + 6);
-    buffer.insert(buffer.end(), 6, 0);
-    for(addr_list_type::const_iterator it(value.begin()); it != value.end(); ++it)
+    buffer.reserve(value.addresses.size() + 6);
+    buffer.insert(buffer.end(), value.reserved, value.reserved + 6);
+    for(iterator it = value.addresses.begin(); it != value.addresses.end(); ++it)
         buffer.insert(buffer.end(), it->begin(), it->end());
     add_option(option(type, buffer.begin(), buffer.end()));
 }
@@ -394,8 +400,9 @@ void ICMPv6::link_layer_addr(lladdr_type value) {
 
 void ICMPv6::naack(const naack_type &value) {
     uint8_t buffer[6];
-    buffer[0] = value.first;
-    buffer[1] = value.second;
+    buffer[0] = value.code;
+    buffer[1] = value.status;
+    std::copy(value.reserved, value.reserved + 4, buffer + 2);
     add_option(option(NAACK, buffer, buffer + sizeof(buffer)));
 }
 
@@ -551,18 +558,9 @@ ICMPv6::hwaddress_type ICMPv6::target_link_layer_addr() const {
 
 ICMPv6::prefix_info_type ICMPv6::prefix_info() const {
     const option *opt = search_option(PREFIX_INFO);
-    if(!opt || opt->data_size() != 2 + sizeof(uint32_t) * 3 + ipaddress_type::address_size)
+    if(!opt)
         throw option_not_found();
-    const uint8_t *ptr = opt->data_ptr();
-    prefix_info_type output;
-    output.prefix_len = *ptr++;
-    output.L = (*ptr >> 7) & 0x1;
-    output.A = (*ptr++ >> 6) & 0x1;
-    output.valid_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
-    ptr += sizeof(uint32_t);
-    output.preferred_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
-    output.prefix = ptr + sizeof(uint32_t) * 2;
-    return output;
+    return opt->to<prefix_info_type>();
 }
 
 PDU::serialization_type ICMPv6::redirect_header() const {
@@ -573,11 +571,11 @@ PDU::serialization_type ICMPv6::redirect_header() const {
     return serialization_type(ptr, ptr + opt->data_size() - 6);
 }
 
-uint32_t ICMPv6::mtu() const {
+ICMPv6::mtu_type ICMPv6::mtu() const {
     const option *opt = search_option(MTU);
-    if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
+    if(!opt)
         throw option_not_found();
-    return Endian::be_to_host(*(const uint32_t*)(opt->data_ptr() + sizeof(uint16_t)));
+    return opt->to<mtu_type>();
 }
 
 uint8_t ICMPv6::shortcut_limit() const {
@@ -596,12 +594,9 @@ uint32_t ICMPv6::new_advert_interval() const {
 
 ICMPv6::new_ha_info_type ICMPv6::new_home_agent_info() const {
     const option *opt = search_option(HOME_AGENT_INFO);
-    if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
+    if(!opt)
         throw option_not_found();
-    return std::make_pair(
-        Endian::be_to_host(*(const uint16_t*)(opt->data_ptr() + sizeof(uint16_t))),
-        Endian::be_to_host(*(const uint16_t*)(opt->data_ptr() + sizeof(uint16_t) * 2))
-    );
+    return opt->to<new_ha_info_type>();
 }
 
 ICMPv6::addr_list_type ICMPv6::source_addr_list() const {
@@ -614,17 +609,9 @@ ICMPv6::addr_list_type ICMPv6::target_addr_list() const {
 
 ICMPv6::addr_list_type ICMPv6::search_addr_list(OptionTypes type) const {
     const option *opt = search_option(type);
-    if(!opt || opt->data_size() < 6 + ipaddress_type::address_size)
+    if(!opt)
         throw option_not_found();
-    addr_list_type output;
-    const uint8_t *ptr = opt->data_ptr() + 6, *end = opt->data_ptr() + opt->data_size();
-    while(ptr < end) {
-        if(ptr + ipaddress_type::address_size > end)
-            throw option_not_found();
-        output.push_back(ipaddress_type(ptr));
-        ptr += ipaddress_type::address_size;
-    }
-    return output;
+    return opt->to<addr_list_type>();
 }
 
 ICMPv6::rsa_sign_type ICMPv6::rsa_signature() const {
@@ -650,10 +637,10 @@ uint64_t ICMPv6::timestamp() const {
 }
 
 ICMPv6::nonce_type ICMPv6::nonce() const {
-    const option *opt = safe_search_option<std::equal_to>(
-        NONCE, 0
-    );
-    return nonce_type(opt->data_ptr(), opt->data_ptr() + opt->data_size());
+    const option *opt = search_option(NONCE);
+    if(!opt)
+        throw option_not_found();
+    return opt->to<nonce_type>();
 }
 
 ICMPv6::ip_prefix_type ICMPv6::ip_prefix() const {
@@ -671,22 +658,17 @@ ICMPv6::ip_prefix_type ICMPv6::ip_prefix() const {
 }   
 
 ICMPv6::lladdr_type ICMPv6::link_layer_addr() const {
-    // at least the option_code and 1 byte from the link layer address
-    const option *opt = safe_search_option<std::less>(
-        LINK_ADDRESS, 2
-    );
-    const uint8_t *ptr = opt->data_ptr();
-    lladdr_type output(*ptr++);
-    output.address.assign(ptr, opt->data_ptr() + opt->data_size());
-    return output;
+    const option *opt = search_option(LINK_ADDRESS);
+    if(!opt)
+        throw option_not_found();
+    return opt->to<lladdr_type>();
 }
 
 ICMPv6::naack_type ICMPv6::naack() const {
-    const option *opt = safe_search_option<std::not_equal_to>(
-        NAACK, 6
-    );
-    const uint8_t *ptr = opt->data_ptr();
-    return naack_type(ptr[0], ptr[1]);
+    const option *opt = search_option(NAACK);
+    if(!opt)
+        throw option_not_found();
+    return opt->to<naack_type>();
 }
 
 ICMPv6::map_type ICMPv6::map() const {
@@ -813,6 +795,56 @@ ICMPv6::dns_search_list_type ICMPv6::dns_search_list() const {
         output.domains.push_back(domain);
         ptr++;
     }
+    return output;
+}
+
+// Options stuff
+
+ICMPv6::addr_list_type ICMPv6::addr_list_type::from_option(const option &opt) 
+{
+    if(opt.data_size() < 6 + ipaddress_type::address_size || (opt.data_size() - 6) % ipaddress_type::address_size != 0)
+        throw malformed_option();
+    addr_list_type output;
+    const uint8_t *ptr = opt.data_ptr(), *end = opt.data_ptr() + opt.data_size();
+    std::copy(ptr, ptr + 6, output.reserved);
+    ptr += 6;
+    while(ptr < end) {
+        output.addresses.push_back(ICMPv6::ipaddress_type(ptr));
+        ptr += ICMPv6::ipaddress_type::address_size;
+    }
+    return output;
+}
+
+ICMPv6::naack_type ICMPv6::naack_type::from_option(const option &opt) 
+{
+    if(opt.data_size() != 6)
+        throw malformed_option();
+    return naack_type(*opt.data_ptr(), opt.data_ptr()[1]);
+}
+
+ICMPv6::lladdr_type ICMPv6::lladdr_type::from_option(const option &opt)
+{
+    if(opt.data_size() < 2)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr();
+    lladdr_type output(*ptr++);
+    output.address.assign(ptr, opt.data_ptr() + opt.data_size());
+    return output;
+}
+
+ICMPv6::prefix_info_type ICMPv6::prefix_info_type::from_option(const option &opt) 
+{
+    if(opt.data_size() != 2 + sizeof(uint32_t) * 3 + ICMPv6::ipaddress_type::address_size)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr();
+    prefix_info_type output;
+    output.prefix_len = *ptr++;
+    output.L = (*ptr >> 7) & 0x1;
+    output.A = (*ptr++ >> 6) & 0x1;
+    output.valid_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    ptr += sizeof(uint32_t);
+    output.preferred_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    output.prefix = ptr + sizeof(uint32_t) * 2;
     return output;
 }
 }
