@@ -46,7 +46,7 @@ public:
     /**
      * Represents a DHCPv6 option. 
      */
-    typedef PDUOption<uint16_t> option;
+    typedef PDUOption<uint16_t, DHCPv6> option;
 
     /**
      * The message types.

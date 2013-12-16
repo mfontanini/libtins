@@ -135,7 +135,7 @@ public:
     /**
      * The type used to represent ICMPv6 options.
      */
-    typedef PDUOption<uint8_t> option;
+    typedef PDUOption<uint8_t, ICMPv6> option;
     
     /**
      * The type used to store options.

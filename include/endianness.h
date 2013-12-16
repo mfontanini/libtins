@@ -56,6 +56,16 @@
 namespace Tins {
 namespace Endian {
     /** 
+     * \brief "Changes" a 8-bit integral value's endianess. This is an
+     * identity function.
+     *
+     * \param data The data to convert.
+     */
+    inline uint8_t do_change_endian(uint8_t data) {
+        return data;
+    }
+    
+    /** 
      * \brief Changes a 16-bit integral value's endianess.
      *
      * \param data The data to convert.

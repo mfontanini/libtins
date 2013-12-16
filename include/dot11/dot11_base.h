@@ -57,7 +57,7 @@ public:
     /**
      * \brief IEEE 802.11 options struct.
      */
-    typedef PDUOption<uint8_t> option;
+    typedef PDUOption<uint8_t, Dot11> option;
 
     /**
      * The type used to store tagged options.

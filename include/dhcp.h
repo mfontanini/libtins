@@ -145,7 +145,7 @@ namespace Tins {
         /**
          * The DHCP option type.
          */
-        typedef PDUOption<uint8_t> option;
+        typedef PDUOption<uint8_t, DHCP> option;
         
         /**
          * The type used to store the DHCP options.

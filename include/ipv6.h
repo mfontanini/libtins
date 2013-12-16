@@ -60,7 +60,7 @@ public:
     /**
      * The type used to represent IPv6 extension headers.
      */
-    typedef PDUOption<uint8_t> ext_header;
+    typedef PDUOption<uint8_t, IPv6> ext_header;
     
     /**
      * The type used to store the extension headers.

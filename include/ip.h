@@ -169,7 +169,7 @@ namespace Tins {
         /**
          * The IP options type.
          */
-        typedef PDUOption<option_identifier> option;
+        typedef PDUOption<option_identifier, IP> option;
 
         /**
          * The type of the security option.

@@ -72,7 +72,7 @@ public:
     /**
      * The type used to store a TLV option.
      */
-    typedef PDUOption<TagTypes> tag;
+    typedef PDUOption<TagTypes, PPPoE> tag;
     
     /**
      * The type used to store the options.

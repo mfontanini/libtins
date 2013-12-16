@@ -66,6 +66,14 @@ namespace Tins {
         typedef byte_array serialization_type;
 
         /**
+         * The typep used to identify the endianness of every PDU.
+         */
+        enum endian_type {
+            BE,
+            LE
+        };
+
+        /**
          * \brief Enum which identifies each type of PDU.
          *
          * This enum is used to identify the PDU type.
@@ -123,6 +131,12 @@ namespace Tins {
             IPSEC_ESP,
             USER_DEFINED_PDU = 1000
         };
+        
+        /**
+         * The endianness used by this PDU. This can be overriden
+         * by subclasses.
+         */
+        static const endian_type endianness = BE;
 
         /** 
          * \brief Default constructor.

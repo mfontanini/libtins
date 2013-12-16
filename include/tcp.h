@@ -102,7 +102,7 @@ namespace Tins {
         /**
          * The type used to store TCP options.
          */
-        typedef PDUOption<uint8_t> option;
+        typedef PDUOption<uint8_t, TCP> option;
 
         /**
          * The type used to store the options.
@@ -490,11 +490,14 @@ namespace Tins {
         static const uint16_t DEFAULT_WINDOW;
         
         template<class T> 
-        T generic_search(OptionTypes opt) const {
-            const option *option = search_option(opt);
-            if(option && option->data_size() == sizeof(T))
+        T generic_search(OptionTypes opt_type) const {
+            const option *opt = search_option(opt_type);
+            if(!opt)
+                throw option_not_found();
+            return opt->to<T>();
+            /*if(option && option->data_size() == sizeof(T))
                 return *(const T*)(&option->data_ptr()[0]);
-            throw option_not_found();
+            throw option_not_found();*/
         }
         
         void internal_add_option(const option &option);

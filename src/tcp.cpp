@@ -123,7 +123,7 @@ void TCP::mss(uint16_t value) {
 }
 
 uint16_t TCP::mss() const {
-    return Endian::host_to_be(generic_search<uint16_t>(MSS));
+    return generic_search<uint16_t>(MSS);
 }
 
 void TCP::winscale(uint8_t value) {
@@ -161,16 +161,10 @@ void TCP::sack(const sack_type &edges) {
 }
 
 TCP::sack_type TCP::sack() const {
-    const option *option = search_option(SACK);
-    if(!option || (option->data_size() % sizeof(uint32_t)) != 0)
+    const option *opt = search_option(SACK);
+    if(!opt) 
         throw option_not_found();
-    const uint32_t *ptr = (const uint32_t*)option->data_ptr();
-    const uint32_t *end = ptr + (option->data_size() / sizeof(uint32_t));
-    sack_type edges(end - ptr);
-    sack_type::iterator it = edges.begin();
-    while(ptr < end)
-        *it++ = Endian::host_to_be(*(ptr++));
-    return edges;
+    return opt->to<sack_type>();
 }
 
 void TCP::timestamp(uint32_t value, uint32_t reply) {
@@ -180,12 +174,10 @@ void TCP::timestamp(uint32_t value, uint32_t reply) {
 }
 
 std::pair<uint32_t, uint32_t> TCP::timestamp() const {
-    const option *option = search_option(TSOPT);
-    if(!option || option->data_size() != (sizeof(uint32_t) << 1))
+    const option *opt = search_option(TSOPT);
+    if(!opt)
         throw option_not_found();
-    uint64_t buffer = *(const uint64_t*)option->data_ptr();
-    buffer = Endian::be_to_host(buffer);
-    return std::make_pair(static_cast<uint32_t>(buffer >> 32), buffer & 0xffffffff);
+    return opt->to<std::pair<uint32_t, uint32_t> >();
 }
 
 void TCP::altchecksum(AltChecksums value) {

@@ -32,10 +32,120 @@
 
 #include <vector>
 #include <iterator>
+#include <algorithm>
 #include <stdint.h>
 #include "exceptions.h"
+#include "endianness.h"
+#include "internals.h"
 
 namespace Tins {
+/**
+ * \cond
+ */
+template<typename OptionType, class PDUType>
+class PDUOption;
+
+namespace Internals {
+    template<typename T, typename X, typename PDUType>
+    T convert_to_integral(const PDUOption<X, PDUType> & opt) {
+        if(opt.data_size() != sizeof(T))
+            throw malformed_option();
+        T data = *(T*)opt.data_ptr();
+        if(PDUType::endianness == PDUType::BE)
+            data = Endian::be_to_host(data);
+        else
+            data = Endian::le_to_host(data);
+        return data;
+    }
+    
+    template<typename T, typename = void>
+    struct converter {
+        template<typename X, typename PDUType>
+        static T convert(const PDUOption<X, PDUType>& opt) {
+            return T::from_option(opt);
+        }
+    };
+    
+    template<>
+    struct converter<uint8_t> {
+        template<typename X, typename PDUType>
+        static uint8_t convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() != 1)
+                throw malformed_option();
+            return *opt.data_ptr();
+        }
+    };
+    
+    template<>
+    struct converter<uint16_t> {
+        template<typename X, typename PDUType>
+        static uint16_t convert(const PDUOption<X, PDUType>& opt) {
+            return convert_to_integral<uint16_t>(opt);
+        }
+    };
+    
+    template<>
+    struct converter<uint32_t> {
+        template<typename X, typename PDUType>
+        static uint32_t convert(const PDUOption<X, PDUType>& opt) {
+            return convert_to_integral<uint32_t>(opt);
+        }
+    };
+    
+    template<>
+    struct converter<uint64_t> {
+        template<typename X, typename PDUType>
+        static uint64_t convert(const PDUOption<X, PDUType>& opt) {
+            return convert_to_integral<uint64_t>(opt);
+        }
+    };
+    
+    template<typename T>
+    struct converter<std::vector<T>, typename enable_if<is_unsigned_integral<T>::value>::type> {
+        template<typename X, typename PDUType>
+        static std::vector<T> convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() % sizeof(T) != 0)
+                throw malformed_option();
+            const T *ptr = (const T*)opt.data_ptr();
+            const T *end = ptr + (opt.data_size() / sizeof(T));
+            
+            std::vector<T> output(std::distance(ptr, end));
+            typename std::vector<T>::iterator it = output.begin();
+            while(ptr < end) {
+                if(PDUType::endianness == PDUType::BE)
+                    *it++ = Endian::be_to_host(*(ptr++));
+                else
+                    *it++ = Endian::le_to_host(*(ptr++));
+            }
+            return output;
+        }
+    };
+    
+    template<typename T>
+    struct converter<std::pair<T, T>, typename enable_if<is_unsigned_integral<T>::value>::type> {
+        template<typename X, typename PDUType>
+        static std::pair<T, T> convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() != sizeof(T) * 2)
+                throw malformed_option();
+            const T *ptr = (const T*)opt.data_ptr();
+            std::pair<T, T> output;
+            if(PDUType::endianness == PDUType::BE) {
+                output.first = Endian::be_to_host(*ptr++);
+                output.second = Endian::be_to_host(*ptr);
+            }
+            else {
+                output.first = Endian::le_to_host(*ptr++);
+                output.second = Endian::le_to_host(*ptr);
+            }
+            return output;
+        }
+    };
+}
+
+/**
+ * \endcond
+ */
+
 /**
  * \class PDUOption
  * \brief Represents a PDU option field.
@@ -46,16 +156,11 @@ namespace Tins {
  * 
  * The OptionType template parameter indicates the type that will be
  * used to store this option's identifier.
- * 
- * The Container template parameter indicates the container which will
- * be used to store this option's data. The container <b>must</b>
- * store data sequentially. std::vector<uint8_t> is the default
- * container.
  */
-template<typename OptionType, class Container = std::vector<uint8_t> >
+template<typename OptionType, class PDUType>
 class PDUOption {
 public:
-    typedef Container container_type;
+    typedef std::vector<uint8_t> container_type;
     typedef typename container_type::value_type data_type;
     typedef OptionType option_type;
 
@@ -157,6 +262,18 @@ public:
      */
     size_t length_field() const {
         return size_;
+    }
+    
+    /**
+     * \brief Constructs a T from this PDUOption.
+     * 
+     * Use this method to convert a PDUOption to the specific type that
+     * represents it. For example, if you know an option is of type
+     * PDU::SACK, you could use option.to<TCP::sack_type>().
+     */
+    template<typename T>
+    T to() const {
+        return Internals::converter<T>::convert(*this);
     }
 private:
     option_type option_;
