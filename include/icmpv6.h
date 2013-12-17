@@ -481,7 +481,39 @@ public:
 
         static timestamp_type from_option(const option &opt);
     };
-    
+
+    /**
+     * The type used to store the shortcut limit option.
+     */
+    struct shortcut_limit_type {
+        uint8_t limit, reserved1;
+        uint32_t reserved2;
+
+        shortcut_limit_type(uint8_t limit = 0)
+        : limit(limit), reserved1(), reserved2()
+        {
+
+        }
+
+        static shortcut_limit_type from_option(const option &opt);
+    };
+
+    /**
+     * The type used to store new advertisement interval option.
+     */
+    struct new_advert_interval_type {
+        uint16_t reserved;
+        uint32_t interval;
+
+        new_advert_interval_type(uint32_t interval = 0)
+        : reserved(), interval(interval)
+        {
+
+        }
+
+        static new_advert_interval_type from_option(const option &opt);
+    };
+
     /**
      * \brief Constructs an ICMPv6 object.
      * 
@@ -883,12 +915,9 @@ public:
     /**
      * \brief Setter for the redirect header option.
      * 
-     * This method appends the 6 reserved bytes and inserts the 
-     * necessary padding at the end.
-     * 
      * \param data The redirect header option data.
      */
-    void redirect_header(PDU::serialization_type data);
+    void redirect_header(const byte_array &data);
     
     /**
      * \brief Setter for the MTU option.
@@ -902,14 +931,14 @@ public:
      * 
      * \param value The shortcut limit option data.
      */
-    void shortcut_limit(uint8_t value);
+    void shortcut_limit(const shortcut_limit_type& value);
     
     /**
      * \brief Setter for the new advertisement interval option.
      * 
      * \param value The new advertisement interval option data.
      */
-    void new_advert_interval(uint32_t value);
+    void new_advert_interval(const new_advert_interval_type &value);
     
     /**
      * \brief Setter for the new home agent information option.
@@ -1064,7 +1093,7 @@ public:
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
-    PDU::serialization_type redirect_header() const;
+    byte_array redirect_header() const;
     
     /**
      * \brief Getter for the MTU option.
@@ -1080,7 +1109,7 @@ public:
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
-    uint8_t shortcut_limit() const;
+    shortcut_limit_type shortcut_limit() const;
     
     /**
      * \brief Getter for the new advertisement interval option.
@@ -1088,7 +1117,7 @@ public:
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
-    uint32_t new_advert_interval() const;
+    new_advert_interval_type new_advert_interval() const;
     
     /**
      * \brief Getter for the new home agent information option.

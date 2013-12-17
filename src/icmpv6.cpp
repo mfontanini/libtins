@@ -294,33 +294,29 @@ void ICMPv6::prefix_info(prefix_info_type info) {
     );
 }
 
-void ICMPv6::redirect_header(PDU::serialization_type data) {
-    // Reserved fields
-    data.insert(data.begin(), 6, 0);
-    // Padding(if necessary)
-    uint8_t padding = 8 - (data.size() + sizeof(uint8_t) * 2) % 8;
-    if(padding == 8)
-        padding = 0;
-    data.insert(data.end(), padding, 0);
+void ICMPv6::redirect_header(const byte_array& data) {
     add_option(option(REDIRECT_HEADER, data.begin(), data.end()));
 }
 
 void ICMPv6::mtu(const mtu_type& value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
-    *(uint32_t*)buffer = Endian::host_to_be(value.first);
+    *(uint16_t*)buffer = Endian::host_to_be(value.first);
     *(uint32_t*)(buffer + sizeof(uint16_t)) = Endian::host_to_be(value.second);
     add_option(option(MTU, sizeof(buffer), buffer));
 }
 
-void ICMPv6::shortcut_limit(uint8_t value) {
+void ICMPv6::shortcut_limit(const shortcut_limit_type &value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
-    buffer[0] = value;
+    buffer[0] = value.limit;
+    buffer[1] = value.reserved1;
+    *(uint32_t*)&buffer[2] = Endian::host_to_be(value.reserved2);
     add_option(option(NBMA_SHORT_LIMIT, sizeof(buffer), buffer));
 }
 
-void ICMPv6::new_advert_interval(uint32_t value) {
+void ICMPv6::new_advert_interval(const new_advert_interval_type &value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
-    *((uint32_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value);
+    *(uint16_t*)buffer = Endian::host_to_be(value.reserved);
+    *((uint32_t*)(buffer + sizeof(uint16_t))) = Endian::host_to_be(value.interval);
     add_option(option(ADVERT_INTERVAL, sizeof(buffer), buffer));
 }
 
@@ -554,30 +550,20 @@ ICMPv6::prefix_info_type ICMPv6::prefix_info() const {
     return search_and_convert<prefix_info_type>(PREFIX_INFO);
 }
 
-PDU::serialization_type ICMPv6::redirect_header() const {
-    const option *opt = search_option(REDIRECT_HEADER);
-    if(!opt || opt->data_size() < 6)
-        throw option_not_found();
-    const uint8_t *ptr = opt->data_ptr() + 6;
-    return serialization_type(ptr, ptr + opt->data_size() - 6);
+byte_array ICMPv6::redirect_header() const {
+    return search_and_convert<PDU::serialization_type>(REDIRECT_HEADER);
 }
 
 ICMPv6::mtu_type ICMPv6::mtu() const {
     return search_and_convert<mtu_type>(MTU);
 }
 
-uint8_t ICMPv6::shortcut_limit() const {
-    const option *opt = search_option(NBMA_SHORT_LIMIT);
-    if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
-        throw option_not_found();
-    return *opt->data_ptr();
+ICMPv6::shortcut_limit_type ICMPv6::shortcut_limit() const {
+    return search_and_convert<shortcut_limit_type>(NBMA_SHORT_LIMIT);
 }
 
-uint32_t ICMPv6::new_advert_interval() const {
-    const option *opt = search_option(ADVERT_INTERVAL);
-    if(!opt || opt->data_size() != sizeof(uint16_t) + sizeof(uint32_t))
-        throw option_not_found();
-    return Endian::be_to_host(*(const uint32_t*)(opt->data_ptr() + sizeof(uint16_t)));
+ICMPv6::new_advert_interval_type ICMPv6::new_advert_interval() const {
+    return search_and_convert<new_advert_interval_type>(ADVERT_INTERVAL);
 }
 
 ICMPv6::new_ha_info_type ICMPv6::new_home_agent_info() const {
@@ -865,6 +851,27 @@ ICMPv6::timestamp_type ICMPv6::timestamp_type::from_option(const option &opt)
         throw malformed_option();
     timestamp_type output(Endian::be_to_host(*(uint64_t*)(opt.data_ptr() + 6)));
     std::copy(opt.data_ptr(), opt.data_ptr() + 6, output.reserved);
+    return output;
+}
+
+ICMPv6::shortcut_limit_type ICMPv6::shortcut_limit_type::from_option(const option &opt)
+{
+    if(opt.data_size() != 6)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr();
+    shortcut_limit_type output(*ptr++);
+    output.reserved1 = *ptr++;
+    output.reserved2 = Endian::be_to_host(*(uint32_t*)ptr);
+    return output;
+}
+
+ICMPv6::new_advert_interval_type ICMPv6::new_advert_interval_type::from_option(const option &opt)
+{
+    if(opt.data_size() != 6)
+        throw malformed_option();
+    new_advert_interval_type output;
+    output.reserved = Endian::be_to_host(*(uint16_t*)opt.data_ptr());
+    output.interval = Endian::be_to_host(*(uint32_t*)(opt.data_ptr() + sizeof(uint16_t)));
     return output;
 }
 }

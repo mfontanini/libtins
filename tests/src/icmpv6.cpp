@@ -209,6 +209,7 @@ TEST_F(ICMPv6Test, RedirectHeader) {
     ICMPv6 icmp;
     IP ip = IP("127.0.0.1") / TCP(22);
     PDU::serialization_type buffer = ip.serialize();
+    buffer.insert(buffer.begin(), 6, 0);
     icmp.redirect_header(buffer);
     EXPECT_EQ(buffer, icmp.redirect_header());
 }
@@ -223,13 +224,18 @@ TEST_F(ICMPv6Test, MTU) {
 TEST_F(ICMPv6Test, ShortcutLimit) {
     ICMPv6 icmp;
     icmp.shortcut_limit(123);
-    EXPECT_EQ(icmp.shortcut_limit(), 123);
+    ICMPv6::shortcut_limit_type sl = icmp.shortcut_limit();
+    EXPECT_EQ(123, sl.limit);
+    EXPECT_EQ(0, sl.reserved1);
+    EXPECT_EQ(0, sl.reserved2);
 }
 
 TEST_F(ICMPv6Test, NewAdvertisementInterval) {
     ICMPv6 icmp;
     icmp.new_advert_interval(0x9a8df7);
-    EXPECT_EQ(icmp.new_advert_interval(), 0x9a8df7U);
+    ICMPv6::new_advert_interval_type data = icmp.new_advert_interval();
+    EXPECT_EQ(0x9a8df7U, data.interval);
+    EXPECT_EQ(0, data.reserved);
 }
 
 TEST_F(ICMPv6Test, NewHomeAgentInformation) {
