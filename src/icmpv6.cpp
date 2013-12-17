@@ -367,10 +367,10 @@ void ICMPv6::rsa_signature(const rsa_sign_type &value) {
     add_option(option(RSA_SIGN, buffer.begin(), buffer.end()));
 }
 
-void ICMPv6::timestamp(uint64_t value) {
+void ICMPv6::timestamp(const timestamp_type &value) {
     std::vector<uint8_t> buffer(6 + sizeof(uint64_t));
-    buffer.insert(buffer.begin(), 6, 0);
-    *((uint64_t*)&buffer[6]) = Endian::host_to_be(value);
+    std::copy(value.reserved, value.reserved + 6, buffer.begin());
+    *((uint64_t*)&buffer[6]) = Endian::host_to_be(value.timestamp);
     add_option(option(TIMESTAMP, buffer.begin(), buffer.end()));
 }
 
@@ -543,24 +543,15 @@ void ICMPv6::dns_search_list(const dns_search_list_type &value) {
 // ********************************************************************
 
 ICMPv6::hwaddress_type ICMPv6::source_link_layer_addr() const {
-    const option *opt = search_option(SOURCE_ADDRESS);
-    if(!opt || opt->data_size() != hwaddress_type::address_size)
-        throw option_not_found();
-    return hwaddress_type(opt->data_ptr());
+    return search_and_convert<hwaddress_type>(SOURCE_ADDRESS);
 }
 
 ICMPv6::hwaddress_type ICMPv6::target_link_layer_addr() const {
-    const option *opt = search_option(TARGET_ADDRESS);
-    if(!opt || opt->data_size() != hwaddress_type::address_size)
-        throw option_not_found();
-    return hwaddress_type(opt->data_ptr());
+    return search_and_convert<hwaddress_type>(TARGET_ADDRESS);
 }
 
 ICMPv6::prefix_info_type ICMPv6::prefix_info() const {
-    const option *opt = search_option(PREFIX_INFO);
-    if(!opt)
-        throw option_not_found();
-    return opt->to<prefix_info_type>();
+    return search_and_convert<prefix_info_type>(PREFIX_INFO);
 }
 
 PDU::serialization_type ICMPv6::redirect_header() const {
@@ -572,10 +563,7 @@ PDU::serialization_type ICMPv6::redirect_header() const {
 }
 
 ICMPv6::mtu_type ICMPv6::mtu() const {
-    const option *opt = search_option(MTU);
-    if(!opt)
-        throw option_not_found();
-    return opt->to<mtu_type>();
+    return search_and_convert<mtu_type>(MTU);
 }
 
 uint8_t ICMPv6::shortcut_limit() const {
@@ -593,10 +581,7 @@ uint32_t ICMPv6::new_advert_interval() const {
 }
 
 ICMPv6::new_ha_info_type ICMPv6::new_home_agent_info() const {
-    const option *opt = search_option(HOME_AGENT_INFO);
-    if(!opt)
-        throw option_not_found();
-    return opt->to<new_ha_info_type>();
+    return search_and_convert<new_ha_info_type>(HOME_AGENT_INFO);
 }
 
 ICMPv6::addr_list_type ICMPv6::source_addr_list() const {
@@ -608,194 +593,63 @@ ICMPv6::addr_list_type ICMPv6::target_addr_list() const {
 }
 
 ICMPv6::addr_list_type ICMPv6::search_addr_list(OptionTypes type) const {
-    const option *opt = search_option(type);
-    if(!opt)
-        throw option_not_found();
-    return opt->to<addr_list_type>();
+    return search_and_convert<addr_list_type>(type);
 }
 
 ICMPv6::rsa_sign_type ICMPv6::rsa_signature() const {
-    const option *opt = search_option(RSA_SIGN);
-    // 2 bytes reserved + at least 1 byte signature.
-    // 16 == sizeof(rsa_sign_type::key_hash), removed the sizeof
-    // expression since gcc 4.2 doesn't like it
-    if(!opt || opt->data_size() < 2 + 16 + 1)
-        throw option_not_found();
-    const uint8_t *ptr = opt->data_ptr() + 2;
-    rsa_sign_type output;
-    std::copy(ptr, ptr + sizeof(output.key_hash), output.key_hash);
-    ptr += sizeof(output.key_hash);
-    output.signature.assign(ptr, opt->data_ptr() + opt->data_size());
-    return output;
+    return search_and_convert<rsa_sign_type>(RSA_SIGN);
 }
 
-uint64_t ICMPv6::timestamp() const {
-    const option *opt = safe_search_option<std::less>(
-        TIMESTAMP, 6 + sizeof(uint64_t)
-    );
-    return Endian::be_to_host(*(uint64_t*)(opt->data_ptr() + 6));
+ICMPv6::timestamp_type ICMPv6::timestamp() const {
+    return search_and_convert<timestamp_type>(TIMESTAMP);
 }
 
 ICMPv6::nonce_type ICMPv6::nonce() const {
-    const option *opt = search_option(NONCE);
-    if(!opt)
-        throw option_not_found();
-    return opt->to<nonce_type>();
+    return search_and_convert<nonce_type>(NONCE);
 }
 
 ICMPv6::ip_prefix_type ICMPv6::ip_prefix() const {
-    const option *opt = safe_search_option<std::less>(
-        IP_PREFIX, 2
-    );
-    const uint8_t *ptr = opt->data_ptr();
-    ip_prefix_type output;
-    output.option_code = *ptr++;
-    output.prefix_len = *ptr++;
-    // skip padding
-    ptr += sizeof(uint32_t);
-    output.address = ipaddress_type(ptr);
-    return output;
+    return search_and_convert<ip_prefix_type>(IP_PREFIX);
 }   
 
 ICMPv6::lladdr_type ICMPv6::link_layer_addr() const {
-    const option *opt = search_option(LINK_ADDRESS);
-    if(!opt)
-        throw option_not_found();
-    return opt->to<lladdr_type>();
+    return search_and_convert<lladdr_type>(LINK_ADDRESS);
 }
 
 ICMPv6::naack_type ICMPv6::naack() const {
-    const option *opt = search_option(NAACK);
-    if(!opt)
-        throw option_not_found();
-    return opt->to<naack_type>();
+    return search_and_convert<naack_type>(NAACK);
 }
 
 ICMPv6::map_type ICMPv6::map() const {
-    const option *opt = safe_search_option<std::not_equal_to>(
-        MAP, 2 + sizeof(uint32_t) + ipaddress_type::address_size
-    );
-    const uint8_t *ptr = opt->data_ptr();
-    map_type output;
-    output.dist = (*ptr >> 4) & 0x0f;
-    output.pref = *ptr++ & 0x0f;
-    output.r = (*ptr++ >> 7) & 0x01;
-    output.valid_lifetime = *(uint32_t*)ptr;
-    ptr += sizeof(uint32_t);
-    output.address = ptr;
-    return output;
+    return search_and_convert<map_type>(MAP);
 }
 
 ICMPv6::route_info_type ICMPv6::route_info() const {
-    const option *opt = safe_search_option<std::less>(
-        ROUTE_INFO, 2 + sizeof(uint32_t)
-    );
-    const uint8_t *ptr = opt->data_ptr();
-    route_info_type output;
-    output.prefix_len = *ptr++;
-    output.pref = (*ptr++ >> 3) & 0x3;
-    output.route_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
-    ptr += sizeof(uint32_t);
-    output.prefix.assign(ptr, opt->data_ptr() + opt->data_size());
-    return output;
+    return search_and_convert<route_info_type>(ROUTE_INFO);
 }
 
 ICMPv6::recursive_dns_type ICMPv6::recursive_dns_servers() const {
-    const option *opt = safe_search_option<std::less>(
-        RECURSIVE_DNS_SERV, 2 + sizeof(uint32_t) + ipaddress_type::address_size
-    );
-    const uint8_t *ptr = opt->data_ptr() + 2, *end = opt->data_ptr() + opt->data_size();
-    recursive_dns_type output;
-    output.lifetime = Endian::be_to_host(*(uint32_t*)ptr);
-    ptr += sizeof(uint32_t);
-    while(ptr < end) {
-        if(ptr + ipaddress_type::address_size > end)
-            throw option_not_found();
-        output.servers.push_back(ptr);
-        ptr += ipaddress_type::address_size;
-    }
-    return output;
+    return search_and_convert<recursive_dns_type>(RECURSIVE_DNS_SERV);
 }
 
 ICMPv6::handover_key_req_type ICMPv6::handover_key_request() const {
-    const option *opt = safe_search_option<std::less>(
-        HANDOVER_KEY_REQ, 2 + sizeof(uint32_t)
-    );
-    const uint8_t *ptr = opt->data_ptr() + 1, *end = opt->data_ptr() + opt->data_size();
-    handover_key_req_type output;
-    output.AT = (*ptr++ >> 4) & 0x3;
-    // is there enough size for the indicated padding?
-    if(end - ptr < *opt->data_ptr())
-        throw option_not_found();
-    output.key.assign(ptr, ptr + ((end - ptr) - *opt->data_ptr()));
-    return output;
+    return search_and_convert<handover_key_req_type>(HANDOVER_KEY_REQ);
 }
 
 ICMPv6::handover_key_reply_type ICMPv6::handover_key_reply() const {
-    const option *opt = safe_search_option<std::less>(
-        HANDOVER_KEY_REPLY, 2 + sizeof(uint32_t)
-    );
-    const uint8_t *ptr = opt->data_ptr() + 1, *end = opt->data_ptr() + opt->data_size();
-    handover_key_reply_type output;
-    output.AT = (*ptr++ >> 4) & 0x3;
-    output.lifetime = Endian::be_to_host(*(uint16_t*)ptr);
-    ptr += sizeof(uint16_t);
-    // is there enough size for the indicated padding?
-    if(end - ptr < *opt->data_ptr())
-        throw option_not_found();
-    output.key.assign(ptr, ptr + ((end - ptr) - *opt->data_ptr()));
-    return output;
+    return search_and_convert<handover_key_reply_type>(HANDOVER_KEY_REPLY);
 }
 
 ICMPv6::handover_assist_info_type ICMPv6::handover_assist_info() const {
-    const option *opt = safe_search_option<std::less>(
-        HANDOVER_ASSIST_INFO, 2
-    );
-    const uint8_t *ptr = opt->data_ptr(), *end = ptr + opt->data_size();
-    handover_assist_info_type output;
-    output.option_code = *ptr++;
-    if((end - ptr - 1) < *ptr)
-        throw option_not_found();
-    output.hai.assign(ptr + 1, ptr + 1 + *ptr);
-    return output;
+    return search_and_convert<handover_assist_info_type>(HANDOVER_ASSIST_INFO);
 }
 
 ICMPv6::mobile_node_id_type ICMPv6::mobile_node_identifier() const {
-    const option *opt = safe_search_option<std::less>(
-        MOBILE_NODE_ID, 2
-    );
-    const uint8_t *ptr = opt->data_ptr(), *end = ptr + opt->data_size();
-    mobile_node_id_type output;
-    output.option_code = *ptr++;
-    if((end - ptr - 1) < *ptr)
-        throw option_not_found();
-    output.mn.assign(ptr + 1, ptr + 1 + *ptr);
-    return output;
+    return search_and_convert<mobile_node_id_type>(MOBILE_NODE_ID);
 }
 
 ICMPv6::dns_search_list_type ICMPv6::dns_search_list() const {
-    const option *opt = safe_search_option<std::less>(
-        DNS_SEARCH_LIST, 2 + sizeof(uint32_t)
-    );
-    const uint8_t *ptr = opt->data_ptr(), *end = ptr + opt->data_size();
-    dns_search_list_type output;
-    output.lifetime = Endian::be_to_host(*(uint32_t*)(ptr + 2));
-    ptr += 2 + sizeof(uint32_t);
-    while(ptr < end && *ptr) {
-        std::string domain;
-        while(ptr < end && *ptr && *ptr < (end - ptr)) {
-            if(!domain.empty())
-                domain.push_back('.');
-            domain.insert(domain.end(), ptr + 1, ptr + *ptr + 1);
-            ptr += *ptr + 1;
-        }
-        // not enough size
-        if(ptr < end && *ptr != 0)
-            throw option_not_found();
-        output.domains.push_back(domain);
-        ptr++;
-    }
-    return output;
+    return search_and_convert<dns_search_list_type>(DNS_SEARCH_LIST);
 }
 
 // Options stuff
@@ -845,6 +699,172 @@ ICMPv6::prefix_info_type ICMPv6::prefix_info_type::from_option(const option &opt
     ptr += sizeof(uint32_t);
     output.preferred_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
     output.prefix = ptr + sizeof(uint32_t) * 2;
+    return output;
+}
+
+ICMPv6::rsa_sign_type ICMPv6::rsa_sign_type::from_option(const option &opt)
+{
+    // 2 bytes reserved + at least 1 byte signature.
+    // 16 == sizeof(rsa_sign_type::key_hash), removed the sizeof
+    // expression since gcc 4.2 doesn't like it
+    if(opt.data_size() < 2 + 16 + 1)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr() + 2;
+    rsa_sign_type output;
+    std::copy(ptr, ptr + sizeof(output.key_hash), output.key_hash);
+    ptr += sizeof(output.key_hash);
+    output.signature.assign(ptr, opt.data_ptr() + opt.data_size());
+    return output;
+}
+
+ICMPv6::ip_prefix_type ICMPv6::ip_prefix_type::from_option(const option &opt)
+{
+    // 2 bytes + 4 padding + ipv6 address
+    if(opt.data_size() != 2 + 4 + ICMPv6::ipaddress_type::address_size)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr();
+    ip_prefix_type output;
+    output.option_code = *ptr++;
+    output.prefix_len = *ptr++;
+    // skip padding
+    ptr += sizeof(uint32_t);
+    output.address = ICMPv6::ipaddress_type(ptr);
+    return output;
+}
+
+ICMPv6::map_type ICMPv6::map_type::from_option(const option &opt)
+{
+    if(opt.data_size() != 2 + sizeof(uint32_t) + ipaddress_type::address_size)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr();
+    map_type output;
+    output.dist = (*ptr >> 4) & 0x0f;
+    output.pref = *ptr++ & 0x0f;
+    output.r = (*ptr++ >> 7) & 0x01;
+    output.valid_lifetime = *(uint32_t*)ptr;
+    ptr += sizeof(uint32_t);
+    output.address = ptr;
+    return output;
+}
+
+ICMPv6::route_info_type ICMPv6::route_info_type::from_option(const option &opt) 
+{
+    if(opt.data_size() < 2 + sizeof(uint32_t))
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr();
+    route_info_type output;
+    output.prefix_len = *ptr++;
+    output.pref = (*ptr++ >> 3) & 0x3;
+    output.route_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    ptr += sizeof(uint32_t);
+    output.prefix.assign(ptr, opt.data_ptr() + opt.data_size());
+    return output;
+}
+
+ICMPv6::recursive_dns_type ICMPv6::recursive_dns_type::from_option(const option &opt)
+{
+    if(opt.data_size() < 2 + sizeof(uint32_t) + ICMPv6::ipaddress_type::address_size)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr() + 2, *end = opt.data_ptr() + opt.data_size();
+    recursive_dns_type output;
+    output.lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    ptr += sizeof(uint32_t);
+    while(ptr < end) {
+        if(ptr + ICMPv6::ipaddress_type::address_size > end)
+            throw option_not_found();
+        output.servers.push_back(ptr);
+        ptr += ICMPv6::ipaddress_type::address_size;
+    }
+    return output;
+}
+
+ICMPv6::handover_key_req_type ICMPv6::handover_key_req_type::from_option(const option &opt)
+{
+    if(opt.data_size() < 2 + sizeof(uint32_t))
+        throw option_not_found();
+    const uint8_t *ptr = opt.data_ptr() + 1, *end = opt.data_ptr() + opt.data_size();
+    handover_key_req_type output;
+    output.AT = (*ptr++ >> 4) & 0x3;
+    // is there enough size for the indicated padding?
+    if(end - ptr < *opt.data_ptr())
+        throw malformed_option();
+    output.key.assign(ptr, ptr + ((end - ptr) - *opt.data_ptr()));
+    return output;
+}
+
+ICMPv6::handover_key_reply_type ICMPv6::handover_key_reply_type::from_option(const option &opt)
+{
+    if(opt.data_size() < 2 + sizeof(uint32_t))
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr() + 1, *end = opt.data_ptr() + opt.data_size();
+    handover_key_reply_type output;
+    output.AT = (*ptr++ >> 4) & 0x3;
+    output.lifetime = Endian::be_to_host(*(uint16_t*)ptr);
+    ptr += sizeof(uint16_t);
+    // is there enough size for the indicated padding?
+    if(end - ptr < *opt.data_ptr())
+        throw malformed_option();
+    output.key.assign(ptr, ptr + ((end - ptr) - *opt.data_ptr()));
+    return output;
+}
+
+ICMPv6::handover_assist_info_type ICMPv6::handover_assist_info_type::from_option(const option &opt)
+{
+    if(opt.data_size() < 2)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    handover_assist_info_type output;
+    output.option_code = *ptr++;
+    if((end - ptr - 1) < *ptr)
+        throw malformed_option();
+    output.hai.assign(ptr + 1, ptr + 1 + *ptr);
+    return output;
+}
+
+ICMPv6::mobile_node_id_type ICMPv6::mobile_node_id_type::from_option(const option &opt)
+{
+    if(opt.data_size() < 2)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    mobile_node_id_type output;
+    output.option_code = *ptr++;
+    if((end - ptr - 1) < *ptr)
+        throw malformed_option();
+    output.mn.assign(ptr + 1, ptr + 1 + *ptr);
+    return output;
+}
+
+ICMPv6::dns_search_list_type ICMPv6::dns_search_list_type::from_option(const option &opt)
+{
+    if(opt.data_size() < 2 + sizeof(uint32_t))
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    dns_search_list_type output;
+    output.lifetime = Endian::be_to_host(*(uint32_t*)(ptr + 2));
+    ptr += 2 + sizeof(uint32_t);
+    while(ptr < end && *ptr) {
+        std::string domain;
+        while(ptr < end && *ptr && *ptr < (end - ptr)) {
+            if(!domain.empty())
+                domain.push_back('.');
+            domain.insert(domain.end(), ptr + 1, ptr + *ptr + 1);
+            ptr += *ptr + 1;
+        }
+        // not enough size
+        if(ptr < end && *ptr != 0)
+            throw option_not_found();
+        output.domains.push_back(domain);
+        ptr++;
+    }
+    return output;
+}
+
+ICMPv6::timestamp_type ICMPv6::timestamp_type::from_option(const option &opt)
+{
+    if(opt.data_size() != 6 + sizeof(uint64_t))
+        throw malformed_option();
+    timestamp_type output(Endian::be_to_host(*(uint64_t*)(opt.data_ptr() + 6)));
+    std::copy(opt.data_ptr(), opt.data_ptr() + 6, output.reserved);
     return output;
 }
 }

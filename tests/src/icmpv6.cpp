@@ -281,8 +281,9 @@ TEST_F(ICMPv6Test, RSASignature) {
 
 TEST_F(ICMPv6Test, Timestamp) {
     ICMPv6 icmp;
-    icmp.timestamp(0x2837d6aaa231ULL);
-    EXPECT_EQ(icmp.timestamp(), 0x2837d6aaa231ULL);
+    ICMPv6::timestamp_type ts(0x2837d6aaa231ULL);
+    icmp.timestamp(ts);
+    EXPECT_EQ(ts.timestamp, icmp.timestamp().timestamp);
 }
 
 TEST_F(ICMPv6Test, Nonce) {

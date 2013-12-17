@@ -317,6 +317,8 @@ public:
         {
             std::fill(key_hash, key_hash + sizeof(key_hash), 0);
         }
+
+        static rsa_sign_type from_option(const option &opt);
     };
     
     /**
@@ -330,6 +332,8 @@ public:
           const ipaddress_type &address = ipaddress_type())
         : option_code(option_code), prefix_len(prefix_len), address(address)
         {}
+
+        static ip_prefix_type from_option(const option &opt);
     };
     
     /**
@@ -346,6 +350,8 @@ public:
           const ipaddress_type &address = ipaddress_type())
         : dist(dist), pref(pref), r(r), valid_lifetime(valid_lifetime),
           address(address) { }
+
+        static map_type from_option(const option &opt);
     };
     
     /**
@@ -363,6 +369,8 @@ public:
           uint32_t route_lifetime = 0, const prefix_type &prefix = prefix_type())
         : prefix_len(prefix_len), pref(pref), route_lifetime(route_lifetime),
           prefix(prefix) { }
+
+        static route_info_type from_option(const option &opt);
     };
     
     /**
@@ -377,6 +385,8 @@ public:
         recursive_dns_type(uint32_t lifetime = 0, 
           const servers_type &servers = servers_type())
         : lifetime(lifetime), servers(servers) {}
+
+        static recursive_dns_type from_option(const option &opt);
     };
     
     /**
@@ -391,6 +401,8 @@ public:
         handover_key_req_type(small_uint<4> AT = 0,
           const key_type &key = key_type())
         : AT(AT), key(key) { }
+
+        static handover_key_req_type from_option(const option &opt);
     };
     
     /**
@@ -402,6 +414,8 @@ public:
         handover_key_reply_type(uint16_t lifetime = 0, small_uint<4> AT = 0,
           const key_type &key = key_type())
         : handover_key_req_type(AT, key), lifetime(lifetime) { }
+
+        static handover_key_reply_type from_option(const option &opt);
     };
     
     /**
@@ -416,6 +430,8 @@ public:
         handover_assist_info_type(uint8_t option_code=0, 
           const hai_type &hai = hai_type())
         : option_code(option_code), hai(hai) { }
+
+        static handover_assist_info_type from_option(const option &opt);
     };
     
     /**
@@ -430,6 +446,8 @@ public:
         mobile_node_id_type(uint8_t option_code=0, 
           const mn_type &mn = mn_type())
         : option_code(option_code), mn(mn) { }
+
+        static mobile_node_id_type from_option(const option &opt);
     };
     
     /**
@@ -444,6 +462,24 @@ public:
         dns_search_list_type(uint32_t lifetime = 0,
           const domains_type &domains = domains_type())
         : lifetime(lifetime), domains(domains) { }
+
+        static dns_search_list_type from_option(const option &opt);
+    };
+
+    /**
+     * The type used to store the timestamp option.
+     */
+    struct timestamp_type {
+        uint8_t reserved[6];
+        uint64_t timestamp;
+
+        timestamp_type(uint64_t timestamp = 0)
+        : timestamp(timestamp)
+        {
+            std::fill(reserved, reserved + sizeof(reserved), 0);
+        }
+
+        static timestamp_type from_option(const option &opt);
     };
     
     /**
@@ -908,7 +944,7 @@ public:
      * 
      * \param value The new timestamp option data.
      */
-    void timestamp(uint64_t value);
+    void timestamp(const timestamp_type &value);
     
     /**
      * \brief Setter for the new nonce option.
@@ -1092,7 +1128,7 @@ public:
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
-    uint64_t timestamp() const;
+    timestamp_type timestamp() const;
     
     /**
      * \brief Getter for the nonce option.
@@ -1250,6 +1286,14 @@ private:
         if(!option || Functor<uint32_t>()(option->data_size(), size))
             throw option_not_found();
         return option;
+    }
+
+    template<typename T>
+    T search_and_convert(OptionTypes type) const {
+        const option *opt = search_option(type);
+        if(!opt)
+            throw option_not_found();
+        return opt->to<T>();
     }
 
     icmp6hdr _header;

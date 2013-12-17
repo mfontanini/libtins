@@ -38,6 +38,7 @@
 #include "endianness.h"
 #include "internals.h"
 #include "ip_address.h"
+#include "hw_address.h"
 #include "ipv6_address.h"
 
 namespace Tins {
@@ -99,6 +100,16 @@ namespace Internals {
         template<typename X, typename PDUType>
         static uint64_t convert(const PDUOption<X, PDUType>& opt) {
             return convert_to_integral<uint64_t>(opt);
+        }
+    };
+
+    template<size_t n>
+    struct converter<HWAddress<n> > {
+        template<typename X, typename PDUType>
+        static HWAddress<n> convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() != n)
+                throw malformed_option();
+            return HWAddress<n>(opt.data_ptr());
         }
     };
     
