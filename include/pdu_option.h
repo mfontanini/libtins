@@ -33,6 +33,7 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
+#include <string>
 #include <stdint.h>
 #include "exceptions.h"
 #include "endianness.h"
@@ -113,6 +114,30 @@ namespace Internals {
         }
     };
     
+    template<>
+    struct converter<std::string> {
+        template<typename X, typename PDUType>
+        static std::string convert(const PDUOption<X, PDUType>& opt) {
+            return std::string(
+                opt.data_ptr(),
+                opt.data_ptr() + opt.data_size()
+            );
+        }
+    };
+    
+    template<>
+    struct converter<std::vector<float> > {
+        template<typename X, typename PDUType>
+        static std::vector<float> convert(const PDUOption<X, PDUType>& opt) {
+            std::vector<float> output;
+            const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+            while(ptr != end) {
+                output.push_back(float(*(ptr++) & 0x7f) / 2);
+            }
+            return output;
+        }
+    };
+    
     template<typename T>
     struct converter<std::vector<T>, typename enable_if<is_unsigned_integral<T>::value>::type> {
         template<typename X, typename PDUType>
@@ -129,6 +154,40 @@ namespace Internals {
                     *it++ = Endian::be_to_host(*ptr++);
                 else
                     *it++ = Endian::le_to_host(*ptr++);
+            }
+            return output;
+        }
+    };
+    
+    template<typename T, typename U>
+    struct converter<
+            std::vector<std::pair<T, U> >, 
+            typename enable_if<
+                is_unsigned_integral<T>::value && is_unsigned_integral<U>::value
+            >::type
+    > {
+        template<typename X, typename PDUType>
+        static std::vector<std::pair<T, U> > convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() % (sizeof(T) + sizeof(U)) != 0)
+                throw malformed_option();
+            const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+            
+            std::vector<std::pair<T, U> > output;
+            while(ptr < end) {
+                std::pair<T, U> data;
+                data.first = *(const T*)ptr;
+                ptr += sizeof(T);
+                data.second = *(const U*)ptr;
+                ptr += sizeof(U);
+                if(PDUType::endianness == PDUType::BE) {
+                    data.first = Endian::be_to_host(data.first);
+                    data.second = Endian::be_to_host(data.second);
+                }
+                else {
+                    data.first = Endian::le_to_host(data.first);
+                    data.second = Endian::le_to_host(data.second);
+                }
+                output.push_back(data);
             }
             return output;
         }
@@ -172,7 +231,12 @@ namespace Internals {
     };
     
     template<typename T, typename U>
-    struct converter<std::pair<T, U>, typename enable_if<is_unsigned_integral<T>::value>::type> {
+    struct converter<
+            std::pair<T, U>, 
+            typename enable_if<
+                is_unsigned_integral<T>::value && is_unsigned_integral<U>::value
+            >::type
+    > {
         template<typename X, typename PDUType>
         static std::pair<T, U> convert(const PDUOption<X, PDUType>& opt) {
             if(opt.data_size() != sizeof(T) + sizeof(U))

@@ -75,6 +75,11 @@ public:
     static const address_type BROADCAST;
 
     /**
+     * The endianness used by Dot11.
+     */
+    static const endian_type endianness = LE;
+
+    /**
      * \brief Enum for the different types of 802.11 frames.
      *
      */

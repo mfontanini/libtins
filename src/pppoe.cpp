@@ -192,48 +192,54 @@ void PPPoE::generic_error(const std::string &value) {
 // *********************** Getters *************************
 
 std::string PPPoE::service_name() const {
-    return retrieve_tag_iterable<std::string>(SERVICE_NAME);
+    return search_and_convert<std::string>(SERVICE_NAME);
 }
 
 std::string PPPoE::ac_name() const {
-    return retrieve_tag_iterable<std::string>(AC_NAME);
+    return search_and_convert<std::string>(AC_NAME);
 }
 
 byte_array PPPoE::host_uniq() const {
-    return retrieve_tag_iterable<byte_array>(HOST_UNIQ);
+    return search_and_convert<byte_array>(HOST_UNIQ);
 }
 
 byte_array PPPoE::ac_cookie() const {
-    return retrieve_tag_iterable<byte_array>(AC_COOKIE);
+    return search_and_convert<byte_array>(AC_COOKIE);
 }
 
 PPPoE::vendor_spec_type PPPoE::vendor_specific() const {
-    const tag *tag = safe_search_tag<std::less>(
-        VENDOR_SPECIFIC, sizeof(uint32_t)
-    );
-    vendor_spec_type output;
-    output.vendor_id = Endian::be_to_host(*(const uint32_t*)tag->data_ptr());
-    output.data.assign(
-        tag->data_ptr() + sizeof(uint32_t), 
-        tag->data_ptr() + tag->data_size()
-    );
-    return output;
+    const tag *t = search_tag(VENDOR_SPECIFIC);
+    if(!t)
+        throw option_not_found();
+    return t->to<vendor_spec_type>();
 }
 
 byte_array PPPoE::relay_session_id() const {
-    return retrieve_tag_iterable<byte_array>(RELAY_SESSION_ID);
+    return search_and_convert<byte_array>(RELAY_SESSION_ID);
 }
 
 std::string PPPoE::service_name_error() const {
-    return retrieve_tag_iterable<std::string>(SERVICE_NAME_ERROR);
+    return search_and_convert<std::string>(SERVICE_NAME_ERROR);
 }
 
 std::string PPPoE::ac_system_error() const {
-    return retrieve_tag_iterable<std::string>(AC_SYSTEM_ERROR);
+    return search_and_convert<std::string>(AC_SYSTEM_ERROR);
 }
 
 std::string PPPoE::generic_error() const {
-    return retrieve_tag_iterable<std::string>(GENERIC_ERROR);
+    return search_and_convert<std::string>(GENERIC_ERROR);
+}
+
+PPPoE::vendor_spec_type PPPoE::vendor_spec_type::from_option(const tag &opt) {
+    if(opt.data_size() < sizeof(uint32_t))
+        throw malformed_option();
+    vendor_spec_type output;
+    output.vendor_id = Endian::be_to_host(*(const uint32_t*)opt.data_ptr());
+    output.data.assign(
+        opt.data_ptr() + sizeof(uint32_t), 
+        opt.data_ptr() + opt.data_size()
+    );
+    return output;
 }
 } //namespace Tins
 

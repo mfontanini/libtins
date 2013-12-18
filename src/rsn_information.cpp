@@ -30,6 +30,7 @@
 #include <stdexcept>
 #include "rsn_information.h"
 #include "exceptions.h"
+#include "dot11/dot11_base.h"
 
 namespace Tins {
 template<typename T>
@@ -142,5 +143,11 @@ RSNInformation RSNInformation::wpa2_psk() {
     info.add_pairwise_cypher(RSNInformation::CCMP);
     info.add_akm_cypher(RSNInformation::PSK);
     return info;
+}
+
+RSNInformation RSNInformation::from_option(const PDUOption<uint8_t, Dot11> &opt) {
+    if(opt.data_size() < sizeof(uint16_t) * 2 + sizeof(uint32_t))
+        throw malformed_option();
+    return RSNInformation(opt.data_ptr(), opt.data_size());
 }
 }

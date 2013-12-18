@@ -149,7 +149,7 @@ void Dot11ManagementFrame::extended_supported_rates(const rates_type &new_rates)
     delete[] buffer;
 }
 
-void Dot11ManagementFrame::qos_capability(uint8_t new_qos_capability) {
+void Dot11ManagementFrame::qos_capability(qos_capability_type new_qos_capability) {
     add_tagged_option(QOS_CAPABILITY, 1, &new_qos_capability);
 }
 
@@ -370,10 +370,7 @@ void Dot11ManagementFrame::vendor_specific(const vendor_specific_type &data) {
 // Getters
 
 RSNInformation Dot11ManagementFrame::rsn_information() {
-    const Dot11::option *option = search_option(RSN);
-    if(!option || option->data_size() < (sizeof(uint16_t) << 1) + sizeof(uint32_t))
-        throw option_not_found();
-    return RSNInformation(option->data_ptr(), option->data_size());
+    return search_and_convert<RSNInformation>(RSN);
 }
 
 std::string Dot11ManagementFrame::ssid() const {
@@ -387,55 +384,27 @@ std::string Dot11ManagementFrame::ssid() const {
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::supported_rates() const {
-    const Dot11::option *option = search_option(SUPPORTED_RATES);
-    if(!option || option->data_size() == 0)
-        throw option_not_found();
-    return deserialize_rates(option);
+    return search_and_convert<rates_type>(SUPPORTED_RATES);
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::extended_supported_rates() const {
-    const Dot11::option *option = search_option(EXT_SUPPORTED_RATES);
-    if(!option || option->data_size() == 0)
-        throw option_not_found();
-    return deserialize_rates(option);
+    return search_and_convert<rates_type>(EXT_SUPPORTED_RATES);
 }
 
-uint8_t Dot11ManagementFrame::qos_capability() const {
-    const Dot11::option *option = search_option(QOS_CAPABILITY);
-    if(!option || option->data_size() != 1)
-        throw option_not_found();
-    return *option->data_ptr();
+Dot11ManagementFrame::qos_capability_type Dot11ManagementFrame::qos_capability() const {
+    return search_and_convert<uint8_t>(QOS_CAPABILITY);
 }
 
 std::pair<uint8_t, uint8_t> Dot11ManagementFrame::power_capability() const {
-    const Dot11::option *option = search_option(POWER_CAPABILITY);
-    if(!option || option->data_size() != 2)
-        throw option_not_found();
-    return std::make_pair(*option->data_ptr(), *(option->data_ptr() + 1));
+    return search_and_convert<std::pair<uint8_t, uint8_t> >(POWER_CAPABILITY);
 }
 
 Dot11ManagementFrame::channels_type Dot11ManagementFrame::supported_channels() const {
-    const Dot11::option *option = search_option(SUPPORTED_CHANNELS);
-    // We need a multiple of two
-    if(!option || ((option->data_size() & 0x1) == 1))
-        throw option_not_found();
-    channels_type output;
-    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
-    while(ptr != end) {
-        uint8_t first = *(ptr++);
-        output.push_back(std::make_pair(first, *(ptr++)));
-    }
-    return output;
+    return search_and_convert<channels_type>(SUPPORTED_CHANNELS);
 }
 
 Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_information() const {
-    const Dot11::option *option = search_option(REQUEST_INFORMATION);
-    if(!option || option->data_size() == 0)
-        throw option_not_found();
-    request_info_type output;
-    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
-    output.assign(ptr, end);
-    return output;
+    return search_and_convert<request_info_type>(REQUEST_INFORMATION);
 }
 
 Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() const {
@@ -451,10 +420,7 @@ Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() con
 }
 
 uint8_t Dot11ManagementFrame::ds_parameter_set() const {
-    const Dot11::option *option = search_option(DS_SET);
-    if(!option || option->data_size() != sizeof(uint8_t))
-        throw option_not_found();
-    return *option->data_ptr();
+    return search_and_convert<uint8_t>(DS_SET);
 }
 
 Dot11ManagementFrame::cf_params_set Dot11ManagementFrame::cf_parameter_set() const {
@@ -470,10 +436,7 @@ Dot11ManagementFrame::cf_params_set Dot11ManagementFrame::cf_parameter_set() con
 }
 
 uint16_t Dot11ManagementFrame::ibss_parameter_set() const {
-    const Dot11::option *option = search_option(IBSS_SET);
-    if(!option || option->data_size() != sizeof(uint16_t))
-        throw option_not_found();
-    return Endian::le_to_host(*reinterpret_cast<const uint16_t*>(option->data_ptr()));
+    return search_and_convert<uint16_t>(IBSS_SET);
 }
 
 Dot11ManagementFrame::ibss_dfs_params Dot11ManagementFrame::ibss_dfs() const {
@@ -513,12 +476,7 @@ Dot11ManagementFrame::country_params Dot11ManagementFrame::country() const {
 }
 
 std::pair<uint8_t, uint8_t> Dot11ManagementFrame::fh_parameters() const {
-    const Dot11::option *option = search_option(HOPPING_PATTERN_PARAMS);
-    if(!option || option->data_size() != sizeof(uint8_t) * 2)
-        throw option_not_found();
-    const uint8_t *ptr = option->data_ptr();
-    uint8_t first = *(ptr++);
-    return std::make_pair(first, *ptr);
+    return search_and_convert<std::pair<uint8_t, uint8_t> >(HOPPING_PATTERN_PARAMS);
 }
 
 Dot11ManagementFrame::fh_pattern_type Dot11ManagementFrame::fh_pattern_table() const {
@@ -538,10 +496,7 @@ Dot11ManagementFrame::fh_pattern_type Dot11ManagementFrame::fh_pattern_table() c
 }
 
 uint8_t Dot11ManagementFrame::power_constraint() const {
-    const Dot11::option *option = search_option(POWER_CONSTRAINT);
-    if(!option || option->data_size() != 1)
-        throw option_not_found();
-    return *option->data_ptr();
+    return search_and_convert<uint8_t>(POWER_CONSTRAINT);
 }
 
 Dot11ManagementFrame::channel_switch_type Dot11ManagementFrame::channel_switch() const {

@@ -523,6 +523,11 @@ public:
 
         static vendor_specific_type from_bytes(const uint8_t *buffer, uint32_t sz);
     };
+    
+    /**
+     * The type used to store the QOS capability tagged option data.
+     */
+    typedef uint8_t qos_capability_type;
 
     /**
      * \brief Getter for the second address.
@@ -641,7 +646,7 @@ public:
      *
      * \param new_qos_capabilities uint8_t with the capabilities.
      */
-    void qos_capability(uint8_t new_qos_capability);
+    void qos_capability(qos_capability_type new_qos_capability);
 
     /**
      * \brief Helper method to set the power capabilities option.
@@ -851,7 +856,7 @@ public:
      * 
      * \return uint8_t containing the QOS capability.
      */
-    uint8_t qos_capability() const;
+    qos_capability_type qos_capability() const;
 
     /**
      * \brief Helper method to get the power capability.
@@ -1120,6 +1125,14 @@ protected:
 private:
     static uint8_t *serialize_rates(const rates_type &rates);
     static rates_type deserialize_rates(const option *option);
+    
+    template<typename T>
+    T search_and_convert(OptionTypes opt_type) const {
+        const option *opt = search_option(opt_type);
+        if(!opt)
+            throw option_not_found();
+        return opt->to<T>();
+    }
 
     ExtendedHeader _ext_header;
     address_type _addr4;

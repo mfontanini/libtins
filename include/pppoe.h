@@ -90,6 +90,8 @@ public:
         
         vendor_spec_type(uint32_t vendor_id = 0, const data_type &data = data_type())
         : vendor_id(vendor_id), data(data) { }
+        
+        static vendor_spec_type from_option(const tag &opt);
     };
     
     /**
@@ -397,19 +399,11 @@ private:
     }
     
     template<typename T>
-    T retrieve_tag_iterable(TagTypes id) const {
-        const tag *tag = search_tag(id);
-        if(!tag)
+    T search_and_convert(TagTypes id) const {
+        const tag *t = search_tag(id);
+        if(!t)
             throw option_not_found();
-        return T(tag->data_ptr(), tag->data_ptr() + tag->data_size());
-    }
-
-    template<template <typename> class Functor>
-    const tag *safe_search_tag(TagTypes opt, uint32_t size) const {
-        const tag *option = search_tag(opt);
-        if(!option || Functor<uint32_t>()(option->data_size(), size))
-            throw option_not_found();
-        return option;
+        return t->to<T>();
     }
 
     TINS_BEGIN_PACK
