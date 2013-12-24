@@ -203,34 +203,24 @@ TEST_F(DHCPTest, SubnetMaskOption) {
 
 TEST_F(DHCPTest, RoutersOption) {
     DHCP dhcp;
-    list<IPv4Address> routers;
+    std::vector<IPv4Address> routers;
     routers.push_back("192.168.0.253");
     routers.push_back("10.123.45.67");
     dhcp.routers(routers);
 
-    list<IPv4Address> routers2 = dhcp.routers();
-    ASSERT_EQ(routers.size(), routers2.size());
-    while(routers.size()) {
-        EXPECT_EQ(routers.front(), routers2.front());
-        routers.pop_front();
-        routers2.pop_front();
-    }
+    std::vector<IPv4Address> routers2 = dhcp.routers();
+    EXPECT_EQ(routers, routers2);
 }
 
 TEST_F(DHCPTest, DNSOption) {
     DHCP dhcp;
-    list<IPv4Address> dns;
+    std::vector<IPv4Address> dns;
     dns.push_back("192.168.0.253");
     dns.push_back("10.123.45.67");
     dhcp.domain_name_servers(dns);
 
-    list<IPv4Address> dns2 = dhcp.domain_name_servers();
-    ASSERT_EQ(dns.size(), dns2.size());
-    while(dns.size()) {
-        EXPECT_EQ(dns.front(), dns2.front());
-        dns.pop_front();
-        dns2.pop_front();
-    }
+    std::vector<IPv4Address> dns2 = dhcp.domain_name_servers();
+    EXPECT_EQ(dns, dns2);
 }
 
 TEST_F(DHCPTest, DomainNameOption) {
@@ -277,8 +267,9 @@ void DHCPTest::test_equals(const DHCP &dhcp1, const DHCP &dhcp2) {
 
 TEST_F(DHCPTest, ConstructorFromBuffer) {
     DHCP dhcp1(expected_packet, sizeof(expected_packet));
-    std::list<IPv4Address> routers;
-    IPv4Address expected_routers[] = { "192.168.0.1", "127.0.0.1" };
+    std::vector<IPv4Address> routers, expected_routers;
+    expected_routers.push_back("192.168.0.1");
+     expected_routers.push_back("127.0.0.1");
 
     EXPECT_EQ(dhcp1.opcode(), DHCP::DISCOVER);
     EXPECT_EQ(dhcp1.htype(), 1);
@@ -293,9 +284,7 @@ TEST_F(DHCPTest, ConstructorFromBuffer) {
     EXPECT_EQ(dhcp1.siaddr(), IPv4Address("167.32.11.154"));
     EXPECT_EQ(dhcp1.server_identifier(), IPv4Address("192.168.4.2"));
     routers = dhcp1.routers();
-    ASSERT_EQ(routers.size(), sizeof(expected_routers) / sizeof(IPv4Address));
-
-    ASSERT_TRUE(std::equal(routers.begin(), routers.end(), expected_routers));
+    EXPECT_EQ(expected_routers, routers);
 }
 
 TEST_F(DHCPTest, Serialize) {

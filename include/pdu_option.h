@@ -39,8 +39,8 @@
 #include "endianness.h"
 #include "internals.h"
 #include "ip_address.h"
-#include "hw_address.h"
 #include "ipv6_address.h"
+#include "hw_address.h"
 
 namespace Tins {
 /**
@@ -111,6 +111,30 @@ namespace Internals {
             if(opt.data_size() != n)
                 throw malformed_option();
             return HWAddress<n>(opt.data_ptr());
+        }
+    };
+
+    template<>
+    struct converter<IPv4Address> {
+        template<typename X, typename PDUType>
+        static IPv4Address convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() != sizeof(uint32_t))
+                throw malformed_option();
+            const uint32_t *ptr = (const uint32_t*)opt.data_ptr();
+            if(PDUType::endianness == PDUType::BE)
+                return IPv4Address(*ptr);
+            else
+                return IPv4Address(Endian::change_endian(*ptr));
+        }
+    };
+
+    template<>
+    struct converter<IPv6Address> {
+        template<typename X, typename PDUType>
+        static IPv6Address convert(const PDUOption<X, PDUType>& opt) {
+            if(opt.data_size() != IPv6Address::address_size)
+                throw malformed_option();
+            return IPv6Address(opt.data_ptr());
         }
     };
     
@@ -208,7 +232,7 @@ namespace Internals {
                 if(PDUType::endianness == PDUType::BE)
                     *it++ = IPv4Address(*ptr++);
                 else
-                    *it++ = Endian::change_endian(*ptr++);
+                    *it++ = IPv4Address(Endian::change_endian(*ptr++));
             }
             return output;
         }

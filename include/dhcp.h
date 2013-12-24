@@ -32,6 +32,7 @@
 
 
 #include <list>
+#include <vector>
 #include <string>
 #include "bootp.h"
 #include "pdu_option.h"
@@ -271,7 +272,7 @@ namespace Tins {
          * 
          * \param routers A list of ip addresses.
          */
-        void routers(const std::list<ipaddress_type> &routers);
+        void routers(const std::vector<ipaddress_type> &routers);
         
         /** 
          * \brief Adds a domain name servers option.
@@ -280,7 +281,7 @@ namespace Tins {
          * 
          * \param dns A list of ip addresses.
          */
-        void domain_name_servers(const std::list<ipaddress_type> &dns);
+        void domain_name_servers(const std::vector<ipaddress_type> &dns);
         
         /** 
          * \brief Adds a broadcast address option.
@@ -377,10 +378,10 @@ namespace Tins {
          * If the option is not found, an option_not_found exception
          * is thrown.
          * 
-         * \return std::list<ipaddress_type> Containing the routers 
+         * \return std::vector<ipaddress_type> Containing the routers 
          * option data.
          */
-        std::list<ipaddress_type> routers() const;
+        std::vector<ipaddress_type> routers() const;
         
         /**
          * \brief Searchs for a dns option.
@@ -391,7 +392,7 @@ namespace Tins {
          * \return std::list<ipaddress_type> Contanining the DNS servers
          * provided.
          */
-        std::list<ipaddress_type> domain_name_servers() const; 
+        std::vector<ipaddress_type> domain_name_servers() const; 
         
         /**
          * \brief Searchs for a broadcast option.
@@ -450,27 +451,19 @@ namespace Tins {
         }
     private:
         static const uint32_t MAX_DHCP_SIZE;
-        
-        template<typename T>
-        struct type2type {};
       
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-        
+
         template<class T> 
-        T generic_search(OptionTypes opt, type2type<T>) const {
+        T search_and_convert(OptionTypes opt) const {
             const option *option = search_option(opt);
-            if(option && option->data_size() == sizeof(T))
-                return *(const T*)option->data_ptr();
-            else
+            if(!option)
                 throw option_not_found();
+            return option->to<T>();
         }
         
         void internal_add_option(const option &opt);
-        std::list<ipaddress_type> generic_search(OptionTypes opt, type2type<std::list<ipaddress_type> >) const;
-        std::string generic_search(OptionTypes opt, type2type<std::string>) const;
-        ipaddress_type generic_search(OptionTypes opt, type2type<ipaddress_type>) const;
-        
-        serialization_type serialize_list(const std::list<ipaddress_type> &ip_list);
+        serialization_type serialize_list(const std::vector<ipaddress_type> &ip_list);
         
         options_type _options;
         uint32_t _size;

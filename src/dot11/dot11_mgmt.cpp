@@ -408,15 +408,7 @@ Dot11ManagementFrame::request_info_type Dot11ManagementFrame::request_informatio
 }
 
 Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_parameter_set() const {
-    const Dot11::option *option = search_option(FH_SET);
-    if(!option || option->data_size() != 5)
-        throw option_not_found();
-    fh_params_set output;
-    output.dwell_time = Endian::le_to_host(*(uint16_t*)option->data_ptr());
-    output.hop_set = option->data_ptr()[2];
-    output.hop_pattern = option->data_ptr()[3];
-    output.hop_index = option->data_ptr()[4];
-    return output;
+    return search_and_convert<fh_params_set>(FH_SET);
 }
 
 uint8_t Dot11ManagementFrame::ds_parameter_set() const {
@@ -424,15 +416,7 @@ uint8_t Dot11ManagementFrame::ds_parameter_set() const {
 }
 
 Dot11ManagementFrame::cf_params_set Dot11ManagementFrame::cf_parameter_set() const {
-    const Dot11::option *option = search_option(CF_SET);
-    if(!option || option->data_size() != 6)
-        throw option_not_found();
-    cf_params_set output;
-    output.cfp_count = *option->data_ptr();
-    output.cfp_period = option->data_ptr()[1];
-    output.cfp_max_duration = Endian::le_to_host(*(uint16_t*)&option->data_ptr()[2]);
-    output.cfp_dur_remaining = Endian::le_to_host(*(uint16_t*)&option->data_ptr()[4]);
-    return output;
+    return search_and_convert<cf_params_set>(CF_SET);
 }
 
 uint16_t Dot11ManagementFrame::ibss_parameter_set() const {
@@ -440,39 +424,11 @@ uint16_t Dot11ManagementFrame::ibss_parameter_set() const {
 }
 
 Dot11ManagementFrame::ibss_dfs_params Dot11ManagementFrame::ibss_dfs() const {
-    const Dot11::option *option = search_option(IBSS_DFS);
-    if(!option || option->data_size() < ibss_dfs_params::minimum_size)
-        throw option_not_found();
-    ibss_dfs_params output;
-    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
-    output.dfs_owner = ptr;
-    ptr += output.dfs_owner.size();
-    output.recovery_interval = *(ptr++);
-    while(ptr != end) {
-        uint8_t first = *(ptr++);
-        if(ptr == end)
-            throw option_not_found();
-        output.channel_map.push_back(std::make_pair(first, *(ptr++)));
-    }
-    return output;
+    return search_and_convert<ibss_dfs_params>(IBSS_DFS);
 }
 
 Dot11ManagementFrame::country_params Dot11ManagementFrame::country() const {
-    const Dot11::option *option = search_option(COUNTRY);
-    if(!option || option->data_size() < country_params::minimum_size)
-        throw option_not_found();
-    country_params output;
-    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
-    std::copy(ptr, ptr + 3, std::back_inserter(output.country));
-    ptr += output.country.size();
-    while(end - ptr >= 3) {
-        output.first_channel.push_back(*(ptr++));
-        output.number_channels.push_back(*(ptr++));
-        output.max_transmit_power.push_back(*(ptr++));
-    }
-    if(ptr != end)
-        throw option_not_found();
-    return output;
+    return search_and_convert<country_params>(COUNTRY);
 }
 
 std::pair<uint8_t, uint8_t> Dot11ManagementFrame::fh_parameters() const {
@@ -480,19 +436,7 @@ std::pair<uint8_t, uint8_t> Dot11ManagementFrame::fh_parameters() const {
 }
 
 Dot11ManagementFrame::fh_pattern_type Dot11ManagementFrame::fh_pattern_table() const {
-    const Dot11::option *option = search_option(HOPPING_PATTERN_TABLE);
-    if(!option || option->data_size() < fh_pattern_type::minimum_size)
-        throw option_not_found();
-    fh_pattern_type output;
-    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
-    
-    output.flag = *(ptr++);
-    output.number_of_sets = *(ptr++);
-    output.modulus = *(ptr++);
-    output.offset = *(ptr++);
-    
-    output.random_table.assign(ptr, end);
-    return output;
+    return search_and_convert<fh_pattern_type>(HOPPING_PATTERN_TABLE);
 }
 
 uint8_t Dot11ManagementFrame::power_constraint() const {
@@ -500,81 +444,31 @@ uint8_t Dot11ManagementFrame::power_constraint() const {
 }
 
 Dot11ManagementFrame::channel_switch_type Dot11ManagementFrame::channel_switch() const {
-    const Dot11::option *option = search_option(CHANNEL_SWITCH);
-    if(!option || option->data_size() != sizeof(uint8_t) * 3)
-        throw option_not_found();
-    const uint8_t *ptr = option->data_ptr();
-    channel_switch_type output;
-    output.switch_mode = *(ptr++);
-    output.new_channel = *(ptr++);
-    output.switch_count = *(ptr++);
-    return output;
+    return search_and_convert<channel_switch_type>(CHANNEL_SWITCH);
 }
 
 Dot11ManagementFrame::quiet_type Dot11ManagementFrame::quiet() const {
-    const Dot11::option *option = search_option(QUIET);
-    if(!option || option->data_size() != (sizeof(uint8_t) * 2 + sizeof(uint16_t) * 2))
-        throw option_not_found();
-    const uint8_t *ptr = option->data_ptr();
-    quiet_type output;
-    
-    output.quiet_count = *(ptr++);
-    output.quiet_period = *(ptr++);
-    const uint16_t *ptr_16 = (const uint16_t*)ptr;
-    output.quiet_duration = Endian::le_to_host(*(ptr_16++));
-    output.quiet_offset = Endian::le_to_host(*ptr_16);
-    return output;
+    return search_and_convert<quiet_type>(QUIET);
 }
 
 std::pair<uint8_t, uint8_t> Dot11ManagementFrame::tpc_report() const {
-    const Dot11::option *option = search_option(TPC_REPORT);
-    if(!option || option->data_size() != sizeof(uint8_t) * 2)
-        throw option_not_found();
-    const uint8_t *ptr = option->data_ptr();
-    uint8_t first = *(ptr++);
-    return std::make_pair(first, *ptr);
+    return search_and_convert<std::pair<uint8_t, uint8_t> >(TPC_REPORT);
 }
 
 uint8_t Dot11ManagementFrame::erp_information() const {
-    const Dot11::option *option = search_option(ERP_INFORMATION);
-    if(!option || option->data_size() != sizeof(uint8_t))
-        throw option_not_found();
-    return *option->data_ptr();
+    return search_and_convert<uint8_t>(ERP_INFORMATION);
 }
 
 Dot11ManagementFrame::bss_load_type Dot11ManagementFrame::bss_load() const {
-    const Dot11::option *option = search_option(BSS_LOAD);
-    if(!option || option->data_size() != sizeof(uint8_t) + 2 * sizeof(uint16_t))
-        throw option_not_found();
-    bss_load_type output;
-    
-    const uint8_t *ptr = option->data_ptr();
-    output.station_count = Endian::le_to_host(*(uint16_t*)ptr);
-    output.channel_utilization = ptr[2];
-    output.available_capacity = Endian::le_to_host(*(uint16_t*)(ptr + 3));
-    return output;
+    return search_and_convert<bss_load_type>(BSS_LOAD);
 }
 
 Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim() const {
-    const Dot11::option *option = search_option(TIM);
-    if(!option || option->data_size() < 4 * sizeof(uint8_t))
-        throw option_not_found();
-    const uint8_t *ptr = option->data_ptr(), *end = ptr + option->data_size();
-    tim_type output;
-    
-    output.dtim_count = *(ptr++);
-    output.dtim_period = *(ptr++);
-    output.bitmap_control = *(ptr++);
-    
-    output.partial_virtual_bitmap.assign(ptr, end);
-    return output;
+    return search_and_convert<tim_type>(TIM);
 }
 
 std::string Dot11ManagementFrame::challenge_text() const {
-    const Dot11::option *option = search_option(CHALLENGE_TEXT);
-    if(!option || option->data_size() == 0)
-        throw option_not_found();
-    return std::string(option->data_ptr(), option->data_ptr() + option->data_size());
+    return search_and_convert<std::string>(CHALLENGE_TEXT);
 }
 
 Dot11ManagementFrame::vendor_specific_type Dot11ManagementFrame::vendor_specific() const {
@@ -595,6 +489,138 @@ Dot11ManagementFrame::vendor_specific_type
     );
 }
 
+// Options
+
+Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_params_set::from_option(const option &opt)
+{
+    if(opt.data_size() != 5)
+        throw malformed_option();
+    fh_params_set output;
+    output.dwell_time = Endian::le_to_host(*(uint16_t*)opt.data_ptr());
+    output.hop_set = opt.data_ptr()[2];
+    output.hop_pattern = opt.data_ptr()[3];
+    output.hop_index = opt.data_ptr()[4];
+    return output;
+}
+
+Dot11ManagementFrame::cf_params_set Dot11ManagementFrame::cf_params_set::from_option(const option &opt) 
+{
+    if(opt.data_size() != 6)
+        throw malformed_option();
+    cf_params_set output;
+    output.cfp_count = *opt.data_ptr();
+    output.cfp_period = opt.data_ptr()[1];
+    output.cfp_max_duration = Endian::le_to_host(*(uint16_t*)&opt.data_ptr()[2]);
+    output.cfp_dur_remaining = Endian::le_to_host(*(uint16_t*)&opt.data_ptr()[4]);
+    return output;
+}
+
+Dot11ManagementFrame::ibss_dfs_params Dot11ManagementFrame::ibss_dfs_params::from_option(const option &opt)
+{
+    if(opt.data_size() < ibss_dfs_params::minimum_size)
+        throw malformed_option();
+    ibss_dfs_params output;
+    const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    output.dfs_owner = ptr;
+    ptr += output.dfs_owner.size();
+    output.recovery_interval = *(ptr++);
+    while(ptr != end) {
+        uint8_t first = *(ptr++);
+        if(ptr == end)
+            throw option_not_found();
+        output.channel_map.push_back(std::make_pair(first, *(ptr++)));
+    }
+    return output;
+}
+
+Dot11ManagementFrame::country_params Dot11ManagementFrame::country_params::from_option(const option &opt)
+{
+    if(opt.data_size() < country_params::minimum_size)
+        throw malformed_option();
+    country_params output;
+    const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    std::copy(ptr, ptr + 3, std::back_inserter(output.country));
+    ptr += output.country.size();
+    while(end - ptr >= 3) {
+        output.first_channel.push_back(*(ptr++));
+        output.number_channels.push_back(*(ptr++));
+        output.max_transmit_power.push_back(*(ptr++));
+    }
+    if(ptr != end)
+        throw malformed_option();
+    return output; 
+}
+
+Dot11ManagementFrame::fh_pattern_type Dot11ManagementFrame::fh_pattern_type::from_option(const option &opt)
+{
+    if(opt.data_size() < fh_pattern_type::minimum_size)
+        throw malformed_option();
+    fh_pattern_type output;
+    const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    
+    output.flag = *(ptr++);
+    output.number_of_sets = *(ptr++);
+    output.modulus = *(ptr++);
+    output.offset = *(ptr++);
+    
+    output.random_table.assign(ptr, end);
+    return output;
+}
+
+Dot11ManagementFrame::channel_switch_type Dot11ManagementFrame::channel_switch_type::from_option(const option &opt)
+{
+    if(opt.data_size() != sizeof(uint8_t) * 3)
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr();
+    channel_switch_type output;
+    output.switch_mode = *(ptr++);
+    output.new_channel = *(ptr++);
+    output.switch_count = *(ptr++);
+    return output;
+}
+
+Dot11ManagementFrame::quiet_type Dot11ManagementFrame::quiet_type::from_option(const option &opt)
+{
+    if(opt.data_size() != (sizeof(uint8_t) * 2 + sizeof(uint16_t) * 2))
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr();
+    quiet_type output;
+    
+    output.quiet_count = *(ptr++);
+    output.quiet_period = *(ptr++);
+    const uint16_t *ptr_16 = (const uint16_t*)ptr;
+    output.quiet_duration = Endian::le_to_host(*(ptr_16++));
+    output.quiet_offset = Endian::le_to_host(*ptr_16);
+    return output;
+}
+
+Dot11ManagementFrame::bss_load_type Dot11ManagementFrame::bss_load_type::from_option(const option &opt)
+{
+    if(opt.data_size() != sizeof(uint8_t) + 2 * sizeof(uint16_t))
+        throw malformed_option();
+    bss_load_type output;
+    
+    const uint8_t *ptr = opt.data_ptr();
+    output.station_count = Endian::le_to_host(*(uint16_t*)ptr);
+    output.channel_utilization = ptr[2];
+    output.available_capacity = Endian::le_to_host(*(uint16_t*)(ptr + 3));
+    return output;
+}
+
+Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim_type::from_option(const option &opt)
+{
+    if(opt.data_size() < 4 * sizeof(uint8_t))
+        throw malformed_option();
+    const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    tim_type output;
+    
+    output.dtim_count = *(ptr++);
+    output.dtim_period = *(ptr++);
+    output.bitmap_control = *(ptr++);
+    
+    output.partial_virtual_bitmap.assign(ptr, end);
+    return output;
+}
 } // namespace Tins
 
 #endif // HAVE_DOT11

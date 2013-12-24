@@ -379,6 +379,8 @@ public:
           uint8_t hop_pattern, uint8_t hop_index) 
         : dwell_time(dwell_time), hop_set(hop_set), 
           hop_pattern(hop_pattern), hop_index(hop_index) {}
+
+        static fh_params_set from_option(const option &opt);
     };
     
     /**
@@ -395,6 +397,8 @@ public:
         : cfp_count(cfp_count), cfp_period(cfp_period), 
           cfp_max_duration(cfp_max_duration), 
           cfp_dur_remaining(cfp_dur_remaining) {}
+
+        static cf_params_set from_option(const option &opt);
     };
     
     /**
@@ -413,6 +417,8 @@ public:
           uint8_t recovery_interval, const channels_type &channels)
         : dfs_owner(addr), recovery_interval(recovery_interval),
           channel_map(channels) {}
+
+        static ibss_dfs_params from_option(const option &opt);
     };
     
     /**
@@ -431,6 +437,8 @@ public:
           const byte_array &number, const byte_array &max) 
         : country(country), first_channel(first), number_channels(number),
           max_transmit_power(max) {}
+
+        static country_params from_option(const option &opt);
     };
     
     /**
@@ -448,6 +456,8 @@ public:
           uint8_t offset, const byte_array& table) 
         : flag(flag), number_of_sets(sets), modulus(modulus), 
           offset(offset), random_table(table) {}
+
+        static fh_pattern_type from_option(const option &opt);
     };
     
     /**
@@ -460,6 +470,8 @@ public:
         
         channel_switch_type(uint8_t mode, uint8_t channel, uint8_t count)
         : switch_mode(mode), new_channel(channel), switch_count(count) { }
+
+        static channel_switch_type from_option(const option &opt);
     };
     
     /**
@@ -475,6 +487,8 @@ public:
           uint16_t offset)
         : quiet_count(count), quiet_period(period), 
         quiet_duration(duration), quiet_offset(offset) {}
+
+        static quiet_type from_option(const option &opt);
     };
 
     /**
@@ -491,6 +505,8 @@ public:
           uint16_t capacity) 
         : station_count(count), available_capacity(capacity),
         channel_utilization(utilization) {}
+
+        static bss_load_type from_option(const option &opt);
     };
     
     /**
@@ -506,6 +522,8 @@ public:
           const byte_array &bitmap) 
         : dtim_count(count), dtim_period(period), bitmap_control(control),
         partial_virtual_bitmap(bitmap) {}
+
+        static tim_type from_option(const option &opt);
     };
 
     /**
