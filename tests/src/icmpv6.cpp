@@ -216,7 +216,7 @@ TEST_F(ICMPv6Test, RedirectHeader) {
 
 TEST_F(ICMPv6Test, MTU) {
     ICMPv6 icmp;
-    ICMPv6::mtu_type data(0, 0x9a8df7);
+    ICMPv6::mtu_type data(0x1234, 0x9a8df7);
     icmp.mtu(data);
     EXPECT_EQ(data, icmp.mtu());
 }
