@@ -276,7 +276,19 @@ public:
     /**
      * The type used to store the User Class option.
      */
-    typedef std::vector<class_option_data_type> user_class_type;
+    //typedef std::vector<class_option_data_type> user_class_type;
+    struct user_class_type {
+        typedef std::vector<class_option_data_type> data_type;
+        data_type data;
+
+        user_class_type(const data_type &data = data_type())
+        : data(data)
+        {
+
+        }
+
+        static user_class_type from_option(const option &opt);
+    };
     
     /**
      * The type used to store the Vendor Class option.
@@ -861,46 +873,6 @@ private:
             throw option_not_found();
         return option->to<T>();
     }
-    
-    template<typename InputIterator>
-    void class_option_data2option(InputIterator start, InputIterator end, 
-      std::vector<uint8_t>& buffer, size_t start_index = 0) 
-    {
-        size_t index = start_index;
-        while(start != end) {
-            buffer.resize(buffer.size() + sizeof(uint16_t) + start->size());
-            *(uint16_t*)&buffer[index] = Endian::host_to_be<uint16_t>(start->size());
-            index += sizeof(uint16_t);
-            std::copy(start->begin(), start->end(), buffer.begin() + index);
-            index += start->size();
-            
-            start++;
-        }
-    }
-    
-    template<typename OutputType>
-    OutputType option2class_option_data(const uint8_t *ptr, uint32_t total_sz) const
-    {
-        typedef typename OutputType::value_type value_type;
-        OutputType output;
-        size_t index = 0;
-        while(index + 2 < total_sz) {
-            uint16_t size = Endian::be_to_host(
-                *(const uint16_t*)(ptr + index)
-            );
-            index += sizeof(uint16_t);
-            if(index + size > total_sz)
-                throw option_not_found();
-            output.push_back(
-                value_type(ptr + index, ptr + index + size)
-            );
-            index += size;
-        }
-        if(index != total_sz)
-            throw option_not_found();
-        return output;
-    }
-    
 
     uint8_t header_data[4];
     uint32_t options_size;

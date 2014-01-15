@@ -201,12 +201,7 @@ bool DHCPv6::has_rapid_commit() const {
 }
 
 DHCPv6::user_class_type DHCPv6::user_class() const {
-    const option *opt = safe_search_option<std::less>(
-        USER_CLASS, sizeof(uint16_t)
-    );
-    return option2class_option_data<user_class_type>(
-        opt->data_ptr(), opt->data_size()
-    );
+    return search_and_convert<user_class_type>(USER_CLASS);
 }
 
 DHCPv6::vendor_class_type DHCPv6::vendor_class() const {
@@ -364,10 +359,10 @@ void DHCPv6::rapid_commit() {
 }
 
 void DHCPv6::user_class(const user_class_type &value) {
-    typedef user_class_type::const_iterator iterator;
+    typedef user_class_type::data_type::const_iterator iterator;
     
     std::vector<uint8_t> buffer;
-    class_option_data2option(value.begin(), value.end(), buffer);
+    Internals::class_option_data2option(value.data.begin(), value.data.end(), buffer);
     add_option(
         option(USER_CLASS, buffer.begin(), buffer.end())
     );
@@ -378,7 +373,7 @@ void DHCPv6::vendor_class(const vendor_class_type &value) {
         sizeof(uint32_t)
     );
     *(uint32_t*)&buffer[0] = Endian::host_to_be(value.enterprise_number);
-    class_option_data2option(
+    Internals::class_option_data2option(
         value.vendor_class_data.begin(),
         value.vendor_class_data.end(),
         buffer,
@@ -637,5 +632,16 @@ DHCPv6::duid_type DHCPv6::duid_type::from_option(const option &opt)
             opt.data_ptr() + opt.data_size()
         )
     );
+}
+
+DHCPv6::user_class_type DHCPv6::user_class_type::from_option(const option &opt)
+{
+    if(opt.data_size() < sizeof(uint16_t))
+        throw malformed_option();
+    user_class_type output;
+    output.data = Internals::option2class_option_data<data_type>(
+        opt.data_ptr(), opt.data_size()
+    );
+    return output;
 }
 } // namespace Tins

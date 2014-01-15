@@ -202,16 +202,16 @@ TEST_F(DHCPv6Test, UserClass) {
     DHCPv6::class_option_data_type user_data;
     user_data.push_back(22);
     user_data.push_back(176);
-    data.push_back(user_data);
+    data.data.push_back(user_data);
     
     user_data.push_back(99);
     user_data.push_back(231);
-    data.push_back(user_data);
+    data.data.push_back(user_data);
     
     dhcp.user_class(data);
     output = dhcp.user_class();
     
-    EXPECT_EQ(data, output);
+    EXPECT_EQ(data.data, output.data);
 }
 
 TEST_F(DHCPv6Test, VendorClass) {
