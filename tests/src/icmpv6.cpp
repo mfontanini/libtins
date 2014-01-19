@@ -223,19 +223,24 @@ TEST_F(ICMPv6Test, MTU) {
 
 TEST_F(ICMPv6Test, ShortcutLimit) {
     ICMPv6 icmp;
-    icmp.shortcut_limit(123);
+    ICMPv6::shortcut_limit_type slimit(123);
+    slimit.reserved1 = 0x7f;
+    slimit.reserved2 = 0x12345678;
+    icmp.shortcut_limit(slimit);
     ICMPv6::shortcut_limit_type sl = icmp.shortcut_limit();
     EXPECT_EQ(123, sl.limit);
-    EXPECT_EQ(0, sl.reserved1);
-    EXPECT_EQ(0, sl.reserved2);
+    EXPECT_EQ(0x7f, sl.reserved1);
+    EXPECT_EQ(0x12345678, sl.reserved2);
 }
 
 TEST_F(ICMPv6Test, NewAdvertisementInterval) {
     ICMPv6 icmp;
-    icmp.new_advert_interval(0x9a8df7);
+    ICMPv6::new_advert_interval_type adv(0x9a8df7);
+    adv.reserved = 0x1234;
+    icmp.new_advert_interval(adv);
     ICMPv6::new_advert_interval_type data = icmp.new_advert_interval();
     EXPECT_EQ(0x9a8df7U, data.interval);
-    EXPECT_EQ(0, data.reserved);
+    EXPECT_EQ(0x1234, data.reserved);
 }
 
 TEST_F(ICMPv6Test, NewHomeAgentInformation) {

@@ -85,7 +85,7 @@ public:
      *  \return The stored length field value.
      */
     uint16_t length() const {
-        return _header.length;
+        return Endian::le_to_host(_header.length);
     }
 
     /**
@@ -93,7 +93,7 @@ public:
      *  \return The stored Data Link Type field value.
      */
     uint32_t dlt() const {
-        return _header.dlt;
+        return Endian::le_to_host(_header.dlt);
     }
 
     /**

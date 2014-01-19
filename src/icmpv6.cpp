@@ -300,39 +300,41 @@ void ICMPv6::redirect_header(const byte_array& data) {
 
 void ICMPv6::mtu(const mtu_type& value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
-    const uint16_t u16_tmp = Endian::host_to_be(value.first);
-    const uint32_t u32_tmp = Endian::host_to_be(value.second);
-    buffer[0] = u16_tmp & 0xff;
-    buffer[1] = u16_tmp >> 8;
-    buffer[2] = u32_tmp & 0xff;
-    buffer[3] = u32_tmp >> 8;
-    buffer[4] = u32_tmp >> 16;
-    buffer[5] = u32_tmp >> 24;
+    const uint16_t u16_tmp = value.first; 
+    const uint32_t u32_tmp = value.second; 
+    buffer[0] = u16_tmp >> 8;
+    buffer[1] = u16_tmp & 0xff;
+
+    buffer[2] = u32_tmp >> 24;
+    buffer[3] = u32_tmp >> 16;
+    buffer[4] = u32_tmp >> 8;
+    buffer[5] = u32_tmp & 0xff;
     add_option(option(MTU, sizeof(buffer), buffer));
 }
 
 void ICMPv6::shortcut_limit(const shortcut_limit_type &value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
-    const uint32_t u32_tmp = Endian::host_to_be(value.reserved2);
+    const uint32_t u32_tmp = value.reserved2; 
     buffer[0] = value.limit;
     buffer[1] = value.reserved1;
-    buffer[2] = u32_tmp & 0xff;
-    buffer[3] = u32_tmp >> 8;
-    buffer[4] = u32_tmp >> 16;
-    buffer[5] = u32_tmp >> 24;
+    buffer[2] = u32_tmp >> 24;
+    buffer[3] = u32_tmp >> 16;
+    buffer[4] = u32_tmp >> 8;
+    buffer[5] = u32_tmp & 0xff;
     add_option(option(NBMA_SHORT_LIMIT, sizeof(buffer), buffer));
 }
 
 void ICMPv6::new_advert_interval(const new_advert_interval_type &value) {
     uint8_t buffer[sizeof(uint16_t) + sizeof(uint32_t)] = {0};
-    const uint16_t u16_tmp = Endian::host_to_be(value.reserved);
-    const uint32_t u32_tmp = Endian::host_to_be(value.interval);
-    buffer[0] = u16_tmp & 0xff;
-    buffer[1] = u16_tmp >> 8;
-    buffer[2] = u32_tmp & 0xff;
-    buffer[3] = u32_tmp >> 8;
-    buffer[4] = u32_tmp >> 16;
-    buffer[5] = u32_tmp >> 24;
+    const uint16_t u16_tmp = value.reserved;
+    const uint32_t u32_tmp = value.interval;
+    buffer[0] = u16_tmp >> 8;
+    buffer[1] = u16_tmp & 0xff;
+
+    buffer[2] = u32_tmp >> 24;
+    buffer[3] = u32_tmp >> 16;
+    buffer[4] = u32_tmp >> 8;
+    buffer[5] = u32_tmp & 0xff;
     add_option(option(ADVERT_INTERVAL, sizeof(buffer), buffer));
 }
 
