@@ -72,5 +72,6 @@
 #include "pdu_allocator.h"
 #include "ipsec.h"
 #include "ip_reassembler.h"
+#include "ppi.h"
 
 #endif // TINS_TINS_H
