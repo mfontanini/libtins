@@ -39,7 +39,6 @@
 #include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
-#include "dns_record.h"
 
 namespace Tins {
     class IPv4Address;
@@ -200,14 +199,24 @@ namespace Tins {
          */
         class Resource {
         public:
-            Resource(const std::string &nm, const std::string &ad, 
-              uint16_t t, uint16_t c, uint32_t tt) 
-            : dname_(nm), addr_(ad), type_(t), qclass_(c), ttl_(tt) {}
+            /**
+             * Constructs a Resource object.
+             *
+             * \param dname The domain name for which this records 
+             * provides an answer.
+             * \param data The resource's payload.
+             * \param type The type of this record.
+             * \param rclass The class of this record.
+             * \param ttl The time-to-live of this record.
+             */
+            Resource(const std::string &dname, const std::string &data, 
+              uint16_t type, uint16_t rclass, uint32_t ttl) 
+            : dname_(dname), data_(data), type_(type), qclass_(rclass), ttl_(ttl) {}
             
             Resource() : type_(), qclass_(), ttl_() {}
             
             /**
-             * \brief Getter for the dname field.
+             * \brief Getter for the domain name field.
              * 
              * This returns the domain name for which this record 
              * provides an answer.
@@ -215,9 +224,9 @@ namespace Tins {
             const std::string &dname() const { return dname_; }
             
             /**
-             * Getter for the type field.
+             * Getter for the data field. 
              */
-            const std::string &data() const { return addr_; }
+            const std::string &data() const { return data_; }
             
             /**
              * Getter for the query type field.
@@ -233,8 +242,52 @@ namespace Tins {
              * Getter for the type field.
              */
             uint32_t ttl() const { return ttl_; }
+
+            /**
+             * Setter for the domain name field.
+             */
+            void dname(const std::string &data) {
+                dname_ = data;
+            }
+
+            /**
+             * \brief Setter for the data field.
+             *
+             * The data will be encoded properly by the DNS class before
+             * being added to this packet. That means that if the type is
+             * A or AAAA, it will be properly encoded as an IPv4 or
+             * IPv6 address. 
+             * 
+             * The same happens for records that contain domain names,
+             * such as NS or CNAME. This data will be encoded using 
+             * DNS domain name encoding.
+             */
+            void data(const std::string &data) {
+                data_ = data;
+            }
+
+            /**
+             * Setter for the type field.
+             */
+            void type(uint16_t data) {
+                type_ = data;
+            }
+
+            /**
+             * Setter for the class field.
+             */
+            void query_class(uint16_t data) {
+                qclass_ = data;
+            }
+
+            /**
+             * Setter for the time-to-live field.
+             */
+            void ttl(uint16_t data) {
+                ttl_ = data;
+            }
         private:
-            std::string dname_, addr_;
+            std::string dname_, data_;
             uint16_t type_, qclass_;
             uint32_t ttl_;
         };
@@ -482,79 +535,25 @@ namespace Tins {
         void add_query(const Query &query);
         
         /**
-         * \brief Add a query response.
+         * \brief Add an answer resource record.
          * 
-         * \param name The resolved name.
-         * \param type The type of this answer.
-         * \param qclass The class of this answer.
-         * \param ttl The time-to-live of this answer.
-         * \param ip The ip address of the resolved name.
+         * \param resource The resource to be added.
          */
-        void add_answer(const std::string &name, 
-          const DNSResourceRecord::info &info, address_type ip);
-          
+        void add_answer(const Resource &resource);
+
         /**
-         * \brief Add a query response.
+         * \brief Add an authority resource record.
          * 
-         * \param name The resolved name.
-         * \param type The type of this answer.
-         * \param qclass The class of this answer.
-         * \param ttl The time-to-live of this answer.
-         * \param ip The ip address of the resolved name.
+         * \param resource The resource to be added.
          */
-        void add_answer(const std::string &name, 
-          const DNSResourceRecord::info &info, address_v6_type ip);
-                        
-        /**
-         * \brief Add a query response.
-         * 
-         * \param name The resolved name.
-         * \param type The type of this answer.
-         * \param qclass The class of this answer.
-         * \param ttl The time-to-live of this answer.
-         * \param dname The domain of the resolved name.
-         */
-        void add_answer(const std::string &name, 
-          const DNSResourceRecord::info &info, const std::string &dname);
-                        
-        /**
-         * \brief Add a query response.
-         * 
-         * \param name The resolved name.
-         * \param type The type of this answer.
-         * \param qclass The class of this answer.
-         * \param ttl The time-to-live of this answer.
-         * \param data The data of this option.
-         * \param sz The size of the data.
-         */
-        void add_answer(const std::string &name, 
-          const DNSResourceRecord::info &info, const uint8_t *data, uint32_t sz);
+        void add_authority(const Resource &resource);
         
         /**
-         * \brief Add an authority record.
+         * \brief Add an additional resource record.
          * 
-         * \param name The resolved name.
-         * \param type The type of this record.
-         * \param qclass The class of this record.
-         * \param ttl The time-to-live of this record.
-         * \param data The data of this option.
-         * \param sz The size of the data.
+         * \param resource The resource to be added.
          */
-        void add_authority(const std::string &name, 
-          const DNSResourceRecord::info &info, const uint8_t *data, uint32_t sz);
-        
-        /**
-         * \brief Add an additional record.
-         * 
-         * \param name The resolved name.
-         * \param type The type of this record.
-         * \param qclass The class of this record.
-         * \param ttl The time-to-live of this record.
-         * \param ip The ip address of the resolved name.
-         */
-        void add_additional(const std::string &name, 
-          const DNSResourceRecord::info &info, const uint8_t *data, uint32_t sz);
-                        
+        void add_additional(const Resource &resource);
         
         /**
          * \brief Getter for this PDU's DNS queries.
@@ -616,17 +615,6 @@ namespace Tins {
         DNS *clone() const {
             return new DNS(*this);
         }
-        
-        /**
-         * Helper function to create a resource record information.
-         * 
-         * \param type The type of the query.
-         * \param qclass The class of the query.
-         * \param ttl The time-to-live of the query.
-         */
-        static DNSResourceRecord::info make_info(QueryType type, QueryClass qclass, uint32_t ttl) {
-            return DNSResourceRecord::info((uint16_t)type, (uint16_t)qclass, ttl);
-        }
     private:
         TINS_BEGIN_PACK
         struct dnshdr {
@@ -672,8 +660,7 @@ namespace Tins {
         static void inline_convert_v4(uint32_t value, char *output);
         static bool contains_dname(uint16_t type);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-        void add_record(const std::string &name, const DNSResourceRecord::info &info, 
-            const uint8_t *data, uint32_t sz, const sections_type &sections);
+        void add_record(const Resource &resource, const sections_type &sections);
         
         dnshdr dns;
         byte_array records_data;

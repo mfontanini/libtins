@@ -108,16 +108,15 @@ libtins_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libtins_la_OBJECTS = src/arp.lo src/bootp.lo \
 	src/handshake_capturer.lo src/stp.lo src/pppoe.lo \
-	src/crypto.lo src/dhcp.lo src/dhcpv6.lo src/dns.lo \
-	src/dns_record.lo src/dot3.lo src/dot1q.lo src/eapol.lo \
-	src/ethernetII.lo src/icmp.lo src/icmpv6.lo src/internals.lo \
-	src/ip_reassembler.lo src/ip.lo src/ip_address.lo src/ipv6.lo \
-	src/ipv6_address.lo src/ipsec.lo src/llc.lo src/loopback.lo \
-	src/network_interface.lo src/packet_sender.lo \
-	src/packet_writer.lo src/ppi.lo src/pdu.lo src/radiotap.lo \
-	src/address_range.lo src/rawpdu.lo src/rsn_information.lo \
-	src/sll.lo src/snap.lo src/sniffer.lo src/tcp.lo \
-	src/tcp_stream.lo src/udp.lo src/utils.lo \
+	src/crypto.lo src/dhcp.lo src/dhcpv6.lo src/dns.lo src/dot3.lo \
+	src/dot1q.lo src/eapol.lo src/ethernetII.lo src/icmp.lo \
+	src/icmpv6.lo src/internals.lo src/ip_reassembler.lo src/ip.lo \
+	src/ip_address.lo src/ipv6.lo src/ipv6_address.lo src/ipsec.lo \
+	src/llc.lo src/loopback.lo src/network_interface.lo \
+	src/packet_sender.lo src/packet_writer.lo src/ppi.lo \
+	src/pdu.lo src/radiotap.lo src/address_range.lo src/rawpdu.lo \
+	src/rsn_information.lo src/sll.lo src/snap.lo src/sniffer.lo \
+	src/tcp.lo src/tcp_stream.lo src/udp.lo src/utils.lo \
 	src/dot11/dot11_base.lo src/dot11/dot11_data.lo \
 	src/dot11/dot11_mgmt.lo src/dot11/dot11_beacon.lo \
 	src/dot11/dot11_assoc.lo src/dot11/dot11_auth.lo \
@@ -309,7 +308,6 @@ libtins_la_SOURCES = src/arp.cpp \
                     src/dhcp.cpp \
                     src/dhcpv6.cpp \
                     src/dns.cpp \
-                    src/dns_record.cpp \
                     src/dot3.cpp \
                     src/dot1q.cpp \
                     src/eapol.cpp \
@@ -359,7 +357,6 @@ libtins_HEADERS = include/internals.h \
 							include/small_uint.h \
 							include/ip.h \
 							include/ipsec.h \
-							include/dns_record.h \
 							include/eapol.h \
 							include/tcp_stream.h \
 							include/pppoe.h \
@@ -522,7 +519,6 @@ src/crypto.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dhcp.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dhcpv6.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dns.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
-src/dns_record.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dot3.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/dot1q.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
 src/eapol.lo: src/$(am__dirstamp) src/$(DEPDIR)/$(am__dirstamp)
@@ -601,8 +597,6 @@ mostlyclean-compile:
 	-rm -f src/dhcpv6.lo
 	-rm -f src/dns.$(OBJEXT)
 	-rm -f src/dns.lo
-	-rm -f src/dns_record.$(OBJEXT)
-	-rm -f src/dns_record.lo
 	-rm -f src/dot11/dot11_assoc.$(OBJEXT)
 	-rm -f src/dot11/dot11_assoc.lo
 	-rm -f src/dot11/dot11_auth.$(OBJEXT)
@@ -696,7 +690,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dhcp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dhcpv6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dns.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dns_record.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dot1q.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/dot3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/eapol.Plo@am__quote@

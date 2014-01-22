@@ -119,7 +119,9 @@ TEST_F(DNSTest, ConstructorFromBuffer2) {
         if(i == 0) {
             dns.add_query(DNS::Query("google.com", DNS::A, DNS::IN));
             dns.add_query(DNS::Query("google.com", DNS::MX, DNS::IN));
-            dns.add_answer("google.com", DNS::make_info(DNS::MX, DNS::IN, 0x762), std::string("alt5.aspmx.l.google.com"));
+            dns.add_answer(
+                DNS::Resource("google.com", "alt5.aspmx.l.google.com", DNS::MX, DNS::IN, 0x762)
+            );
         }
     }
 }
@@ -243,8 +245,12 @@ TEST_F(DNSTest, Question) {
 
 TEST_F(DNSTest, Answers) {
     DNS dns;
-    dns.add_answer("www.example.com", DNS::make_info(DNS::A, DNS::IN, 0x762), IPv4Address("127.0.0.1"));
-    dns.add_answer("www.example2.com", DNS::make_info(DNS::MX, DNS::IN, 0x762), std::string("mail.example.com"));
+    dns.add_answer(
+        DNS::Resource("www.example.com", "127.0.0.1", DNS::A, DNS::IN, 0x762)
+    );
+    dns.add_answer(
+        DNS::Resource("www.example2.com", "mail.example.com", DNS::MX, DNS::IN, 0x762)
+    );
     
     ASSERT_EQ(dns.answers_count(), 2);
     
@@ -269,9 +275,13 @@ TEST_F(DNSTest, Answers) {
 TEST_F(DNSTest, Authority) {
     DNS dns;
     
-    std::string encoded = DNS::encode_domain_name("carlos.example.com");
-    dns.add_authority("www.example.com", DNS::make_info(DNS::CNAME, DNS::IN, 0x762), (const uint8_t*)encoded.c_str(), encoded.size());
-    dns.add_authority("www.example.com", DNS::make_info(DNS::CNAME, DNS::IN, 0x762), (const uint8_t*)encoded.c_str(), encoded.size());
+    const char *domain = "carlos.example.com";
+    dns.add_authority(
+        DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
+    );
+    dns.add_authority(
+        DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
+    );
     
     ASSERT_EQ(dns.authority_count(), 2);
     
@@ -281,7 +291,7 @@ TEST_F(DNSTest, Authority) {
         EXPECT_EQ("www.example.com", it->dname());
         EXPECT_EQ(it->type(), DNS::CNAME);
         EXPECT_EQ(it->ttl(), 0x762U);
-        EXPECT_EQ(it->data(), "carlos.example.com");
+        EXPECT_EQ(it->data(), domain);
         EXPECT_EQ(it->query_class(), DNS::IN);
     }
 }
@@ -289,9 +299,13 @@ TEST_F(DNSTest, Authority) {
 TEST_F(DNSTest, Additional) {
     DNS dns;
     
-    std::string encoded = DNS::encode_domain_name("carlos.example.com");
-    dns.add_additional("www.example.com", DNS::make_info(DNS::CNAME, DNS::IN, 0x762), (const uint8_t*)encoded.c_str(), encoded.size());
-    dns.add_additional("www.example.com", DNS::make_info(DNS::CNAME, DNS::IN, 0x762), (const uint8_t*)encoded.c_str(), encoded.size());
+    const char *domain = "carlos.example.com";
+    dns.add_additional(
+        DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
+    );
+    dns.add_additional(
+        DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
+    );
     
     ASSERT_EQ(dns.additional_count(), 2);
     
@@ -300,15 +314,19 @@ TEST_F(DNSTest, Additional) {
         EXPECT_EQ("www.example.com", it->dname());
         EXPECT_EQ(it->type(), DNS::CNAME);
         EXPECT_EQ(it->ttl(), 0x762U);
-        EXPECT_EQ(it->data(), "carlos.example.com");
+        EXPECT_EQ(it->data(), domain);
         EXPECT_EQ(it->query_class(), DNS::IN);
     }
 }
 
 TEST_F(DNSTest, AnswersWithSameName) {
     DNS dns;
-    dns.add_answer("www.example.com", DNS::make_info(DNS::A, DNS::IN, 0x762), IPv4Address("127.0.0.1"));
-    dns.add_answer("www.example.com", DNS::make_info(DNS::A, DNS::IN, 0x762), IPv4Address("127.0.0.2"));
+    dns.add_answer(
+        DNS::Resource("www.example.com", "127.0.0.1", DNS::A, DNS::IN, 0x762)
+    );
+    dns.add_answer(
+        DNS::Resource("www.example.com", "127.0.0.2", DNS::A, DNS::IN, 0x762)
+    );
     ASSERT_EQ(dns.answers_count(), 2);
     DNS::resources_type resources = dns.answers();
     for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
@@ -322,8 +340,12 @@ TEST_F(DNSTest, AnswersWithSameName) {
 
 TEST_F(DNSTest, AnswersV6) {
     DNS dns;
-    dns.add_answer("www.example.com", DNS::make_info(DNS::AAAA, DNS::IN, 0x762), IPv6Address("f9a8:239::1:1"));
-    dns.add_answer("www.example.com", DNS::make_info(DNS::AAAA, DNS::IN, 0x762), IPv6Address("f9a8:239::1:1"));
+    dns.add_answer(
+        DNS::Resource("www.example.com", "f9a8:239::1:1", DNS::AAAA, DNS::IN, 0x762)
+    );
+    dns.add_answer(
+        DNS::Resource("www.example.com", "f9a8:239::1:1", DNS::AAAA, DNS::IN, 0x762)
+    );
     ASSERT_EQ(dns.answers_count(), 2);
     
     DNS::resources_type resources = dns.answers();
@@ -341,9 +363,13 @@ TEST_F(DNSTest, ItAintGonnaCorrupt) {
     EXPECT_EQ(dns.questions_count(), 1);
     EXPECT_EQ(dns.answers_count(), 5);
 
-    std::string encoded = DNS::encode_domain_name("carlos.example.com");
-    dns.add_additional("www.example.com", DNS::make_info(DNS::CNAME, DNS::IN, 0x762), (const uint8_t*)encoded.c_str(), encoded.size());
-    dns.add_authority("www.example.com", DNS::make_info(DNS::CNAME, DNS::IN, 0x762), (const uint8_t*)encoded.c_str(), encoded.size());
+    const char *domain = "carlos.example.com";
+    dns.add_additional(
+        DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
+    );
+    dns.add_authority(
+        DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
+    );
     dns.add_query(DNS::Query("google.com", DNS::A, DNS::IN));
 
     DNS::queries_type queries(dns.queries());
@@ -376,7 +402,7 @@ TEST_F(DNSTest, ItAintGonnaCorrupt) {
         EXPECT_EQ("www.example.com", it->dname());
         EXPECT_EQ(it->type(), DNS::CNAME);
         EXPECT_EQ(it->ttl(), 0x762U);
-        EXPECT_EQ(it->data(), "carlos.example.com");
+        EXPECT_EQ(it->data(), domain);
         EXPECT_EQ(it->query_class(), DNS::IN);
     }
     
@@ -388,7 +414,7 @@ TEST_F(DNSTest, ItAintGonnaCorrupt) {
         EXPECT_EQ("www.example.com", it->dname());
         EXPECT_EQ(it->type(), DNS::CNAME);
         EXPECT_EQ(it->ttl(), 0x762U);
-        EXPECT_EQ(it->data(), "carlos.example.com");
+        EXPECT_EQ(it->data(), domain);
         EXPECT_EQ(it->query_class(), DNS::IN);
     }
 }

@@ -107,8 +107,8 @@
  ../include/dot11/../dot11/../endianness.h \
  ../include/dot11/../dot11/../internals.h \
  ../include/dot11/../dot11/../ip_address.h \
- ../include/dot11/../dot11/../hw_address.h \
  ../include/dot11/../dot11/../ipv6_address.h \
+ ../include/dot11/../dot11/../hw_address.h \
  ../include/dot11/../dot11/../small_uint.h \
  ../include/dot11/../dot11/../hw_address.h \
  ../include/dot11/../dot11/../endianness.h \
@@ -174,9 +174,9 @@
 
 ../include/dot11/../dot11/../ip_address.h:
 
-../include/dot11/../dot11/../hw_address.h:
-
 ../include/dot11/../dot11/../ipv6_address.h:
+
+../include/dot11/../dot11/../hw_address.h:
 
 ../include/dot11/../dot11/../small_uint.h:
 
@@ -270,7 +270,7 @@
 ../include/exceptions.h:
 ../src/dns.o: ../src/dns.cpp ../include/dns.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/endianness.h ../include/dns_record.h ../include/ip_address.h \
+ ../include/endianness.h ../include/ip_address.h \
  ../include/ipv6_address.h ../include/exceptions.h ../include/rawpdu.h
 
 ../include/dns.h:
@@ -285,8 +285,6 @@
 
 ../include/endianness.h:
 
-../include/dns_record.h:
-
 ../include/ip_address.h:
 
 ../include/ipv6_address.h:
@@ -294,19 +292,6 @@
 ../include/exceptions.h:
 
 ../include/rawpdu.h:
-../src/dns_record.o: ../src/dns_record.cpp ../include/dns_record.h \
- ../include/cxxstd.h ../include/macros.h ../include/endianness.h \
- ../include/exceptions.h
-
-../include/dns_record.h:
-
-../include/cxxstd.h:
-
-../include/macros.h:
-
-../include/endianness.h:
-
-../include/exceptions.h:
 ../src/dot11/dot11_assoc.o: ../src/dot11/dot11_assoc.cpp \
  ../include/dot11/dot11_assoc.h ../include/dot11/../config.h \
  ../include/dot11/../dot11/dot11_mgmt.h \
@@ -1976,7 +1961,16 @@
 ../include/exceptions.h:
 ../src/rsn_information.o: ../src/rsn_information.cpp \
  ../include/rsn_information.h ../include/endianness.h ../include/macros.h \
- ../include/exceptions.h
+ ../include/exceptions.h ../include/dot11/dot11_base.h \
+ ../include/dot11/../config.h ../include/dot11/../pdu.h \
+ ../include/dot11/../macros.h ../include/dot11/../cxxstd.h \
+ ../include/dot11/../exceptions.h ../include/dot11/../pdu_option.h \
+ ../include/dot11/../endianness.h ../include/dot11/../internals.h \
+ ../include/dot11/../constants.h ../include/dot11/../pdu.h \
+ ../include/dot11/../hw_address.h ../include/dot11/../ip_address.h \
+ ../include/dot11/../ipv6_address.h ../include/dot11/../small_uint.h \
+ ../include/dot11/../hw_address.h ../include/dot11/../endianness.h \
+ ../include/dot11/../cxxstd.h ../include/dot11/../macros.h
 
 ../include/rsn_information.h:
 
@@ -1985,6 +1979,44 @@
 ../include/macros.h:
 
 ../include/exceptions.h:
+
+../include/dot11/dot11_base.h:
+
+../include/dot11/../config.h:
+
+../include/dot11/../pdu.h:
+
+../include/dot11/../macros.h:
+
+../include/dot11/../cxxstd.h:
+
+../include/dot11/../exceptions.h:
+
+../include/dot11/../pdu_option.h:
+
+../include/dot11/../endianness.h:
+
+../include/dot11/../internals.h:
+
+../include/dot11/../constants.h:
+
+../include/dot11/../pdu.h:
+
+../include/dot11/../hw_address.h:
+
+../include/dot11/../ip_address.h:
+
+../include/dot11/../ipv6_address.h:
+
+../include/dot11/../small_uint.h:
+
+../include/dot11/../hw_address.h:
+
+../include/dot11/../endianness.h:
+
+../include/dot11/../cxxstd.h:
+
+../include/dot11/../macros.h:
 ../src/sll.o: ../src/sll.cpp ../include/sll.h ../include/pdu.h \
  ../include/macros.h ../include/cxxstd.h ../include/exceptions.h \
  ../include/endianness.h ../include/hw_address.h ../include/internals.h \
@@ -2063,7 +2095,7 @@
  ../include/dot11/../exceptions.h ../include/dot11/../endianness.h \
  ../include/dot11/../macros.h ../include/dot11/../internals.h \
  ../include/dot11/../ip_address.h ../include/dot11/../cxxstd.h \
- ../include/dot11/../hw_address.h ../include/dot11/../ipv6_address.h \
+ ../include/dot11/../ipv6_address.h ../include/dot11/../hw_address.h \
  ../include/dot11/../small_uint.h ../include/dot11/../hw_address.h \
  ../include/dot11/../endianness.h ../include/dot11/../cxxstd.h \
  ../include/dot11/../macros.h ../include/ethernetII.h \
@@ -2111,9 +2143,9 @@
 
 ../include/dot11/../cxxstd.h:
 
-../include/dot11/../hw_address.h:
-
 ../include/dot11/../ipv6_address.h:
+
+../include/dot11/../hw_address.h:
 
 ../include/dot11/../small_uint.h:
 
@@ -2524,10 +2556,9 @@ src/dhcpv6.o: src/dhcpv6.cpp ../include/dhcpv6.h ../include/pdu.h \
 ../include/ip_address.h:
 src/dns.o: src/dns.cpp ../include/dns.h ../include/macros.h \
  ../include/pdu.h ../include/cxxstd.h ../include/exceptions.h \
- ../include/endianness.h ../include/dns_record.h \
- ../include/ipv6_address.h ../include/utils.h ../include/ip_address.h \
- ../include/ipv6_address.h ../include/hw_address.h ../include/internals.h \
- ../include/constants.h
+ ../include/endianness.h ../include/ipv6_address.h ../include/utils.h \
+ ../include/ip_address.h ../include/ipv6_address.h \
+ ../include/hw_address.h ../include/internals.h ../include/constants.h
 
 ../include/dns.h:
 
@@ -2540,8 +2571,6 @@ src/dns.o: src/dns.cpp ../include/dns.h ../include/macros.h \
 ../include/exceptions.h:
 
 ../include/endianness.h:
-
-../include/dns_record.h:
 
 ../include/ipv6_address.h:
 
@@ -4889,8 +4918,8 @@ src/wep_decrypt.o: src/wep_decrypt.cpp ../include/config.h \
  ../include/dot11/../dot11/../endianness.h \
  ../include/dot11/../dot11/../internals.h \
  ../include/dot11/../dot11/../ip_address.h \
- ../include/dot11/../dot11/../hw_address.h \
  ../include/dot11/../dot11/../ipv6_address.h \
+ ../include/dot11/../dot11/../hw_address.h \
  ../include/dot11/../dot11/../small_uint.h \
  ../include/dot11/../dot11/../hw_address.h \
  ../include/dot11/../dot11/../endianness.h \
@@ -4957,9 +4986,9 @@ src/wep_decrypt.o: src/wep_decrypt.cpp ../include/config.h \
 
 ../include/dot11/../dot11/../ip_address.h:
 
-../include/dot11/../dot11/../hw_address.h:
-
 ../include/dot11/../dot11/../ipv6_address.h:
+
+../include/dot11/../dot11/../hw_address.h:
 
 ../include/dot11/../dot11/../small_uint.h:
 

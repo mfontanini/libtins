@@ -185,61 +185,40 @@ void DNS::add_query(const Query &query) {
     );
 }
 
-void DNS::add_answer(const string &name, const DNSResourceRecord::info &info, 
-  address_type ip) 
-{
-    uint32_t ip_int = ip;
-    add_answer(
-        name,
-        info,
-        (const uint8_t*)&ip_int,
-        sizeof(ip_int)
-    );
-}
-
-void DNS::add_answer(const string &name, const DNSResourceRecord::info &info, 
-  address_v6_type ip) 
-{
-    add_answer(
-        name,
-        info,
-        ip.begin(),
-        address_v6_type::address_size
-    );
-}
-
-void DNS::add_answer(const std::string &name, const DNSResourceRecord::info &info, 
-  const std::string &dname) 
-{
-    std::string parsed = encode_domain_name(dname);
-    add_answer(
-        name,
-        info,
-        (const uint8_t*)parsed.c_str(),
-        parsed.size()
-    );
-}
-
-void DNS::add_answer(const std::string &name, const DNSResourceRecord::info &info, 
-  const uint8_t *data, uint32_t sz) 
-{
+void DNS::add_answer(const Resource &resource) {
     sections_type sections;
     sections.push_back(std::make_pair(&authority_idx, authority_count()));
     sections.push_back(std::make_pair(&additional_idx, additional_count()));
-    add_record(name, info, data, sz, sections);
+    add_record(resource, sections);
     dns.answers = Endian::host_to_be<uint16_t>(
         answers_count() + 1
     );
 }
 
-void DNS::add_record(const std::string &name, const DNSResourceRecord::info &info, 
-    const uint8_t *data, uint32_t sz, const sections_type &sections)
-{
-    std::string buffer = encode_domain_name(name);
-    uint32_t offset = buffer.size() + sizeof(uint16_t) * 3 + sizeof(uint32_t) + sz, 
+void DNS::add_record(const Resource &resource, const sections_type &sections) {
+    // We need to check that the data provided is correct. Otherwise, the sections
+    // will end up being inconsistent.
+    IPv4Address v4_addr;
+    IPv6Address v6_addr;
+    std::string buffer = encode_domain_name(resource.dname()), encoded_data;
+    // By default the data size is the length of the data field.
+    uint32_t data_size = resource.data().size();
+    if(resource.type() == A) {
+        v4_addr = resource.data();
+        data_size = 4;
+    }
+    else if(resource.type() == AAAA) {
+        v6_addr = resource.data();
+        data_size = IPv6Address::address_size;
+    }
+    else if(contains_dname(resource.type())) { 
+        encoded_data = encode_domain_name(resource.data());
+        data_size = encoded_data.size();
+    }
+    uint32_t offset = buffer.size() + sizeof(uint16_t) * 3 + sizeof(uint32_t) + data_size, 
             threshold = sections.empty() ? records_data.size() : *sections.front().first;
     // Skip the preference field
-    if(info.type == MX) {
+    if(resource.type() == MX) {
         offset += sizeof(uint16_t);
     }
     for(size_t i = 0; i < sections.size(); ++i) {
@@ -256,39 +235,45 @@ void DNS::add_record(const std::string &name, const DNSResourceRecord::info &inf
         buffer.end(),
         &records_data[threshold]
     );
-    *(uint16_t*)ptr = Endian::host_to_be(info.type);
+    *(uint16_t*)ptr = Endian::host_to_be(resource.type());
     ptr += sizeof(uint16_t);
-    *(uint16_t*)ptr = Endian::host_to_be(info.qclass);
+    *(uint16_t*)ptr = Endian::host_to_be(resource.query_class());
     ptr += sizeof(uint16_t);
-    *(uint32_t*)ptr = Endian::host_to_be(info.ttl);
+    *(uint32_t*)ptr = Endian::host_to_be(resource.ttl());
     ptr += sizeof(uint32_t);
-    *(uint16_t*)ptr = Endian::host_to_be<uint16_t>(sz + (info.type == MX ? 2 : 0));
+    *(uint16_t*)ptr = Endian::host_to_be<uint16_t>(
+        data_size + (resource.type() == MX ? 2 : 0)
+    );
     ptr += sizeof(uint16_t);
-    if(info.type == MX) {
+    if(resource.type() == MX) {
         ptr += sizeof(uint16_t);
     }
-    std::copy(
-        data,
-        data + sz,
-        ptr
-    );
+    if(resource.type() == A) {
+        uint32_t ip_int = v4_addr;
+        std::memcpy(ptr, &ip_int, sizeof(ip_int));
+    }
+    else if(resource.type() == AAAA) {
+        std::copy(v6_addr.begin(), v6_addr.end(), ptr);
+    }
+    else if(!encoded_data.empty()) {
+        std::copy(encoded_data.begin(), encoded_data.end(), ptr);
+    }
+    else {
+        std::copy(resource.data().begin(), resource.data().end(), ptr);
+    }
 }
 
-void DNS::add_authority(const string &name, const DNSResourceRecord::info &info, 
-  const uint8_t *data, uint32_t sz) 
-{
+void DNS::add_authority(const Resource &resource) {
     sections_type sections;
     sections.push_back(std::make_pair(&additional_idx, additional_count()));
-    add_record(name, info, data, sz, sections);
+    add_record(resource, sections);
     dns.authority = Endian::host_to_be<uint16_t>(
         authority_count() + 1
     );
 }
 
-void DNS::add_additional(const string &name, const DNSResourceRecord::info &info, 
-  const uint8_t *data, uint32_t sz) 
-{
-    add_record(name, info, data, sz, sections_type());
+void DNS::add_additional(const Resource &resource){
+    add_record(resource, sections_type());
     dns.additional = Endian::host_to_be<uint16_t>(
         additional_count() + 1
     );
