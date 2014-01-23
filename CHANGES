@@ -1,3 +1,57 @@
+v2.0 - Thu Jan 23 11:09:38 ART 2014 
+
+- DNSResourceRecord was removed. Now DNS records are added using 
+DNS::Resource.
+
+- tins.h now includes ppi.h.
+
+- Done significant improvements in the speed of DNS parsing.
+
+- Added PDUOption<>::to<> which converts a PDUOption to a specific type.
+
+- Layer 3 packets sent using PacketSender::send_recv for which the 
+answer is a different PDU type.
+
+- ICMP::gateway now uses IPv4Address.
+
+- Added support for ICMP address mask request/reply.
+
+- Fixed bug in PacketSender when using send_recv and a layer 2 PDU. The 
+interface in which the packet was sent was not the default_interface 
+set when the sender was constructed.
+
+- IP packets sent using PacketSender::send_recv now match ICMP 
+responses.
+
+- Added support for ICMP timestamp request/reply packets. 
+ICMP::matches_response now works with these types of packets as well.
+
+- Added support for reassembling of fragmented IP packets via the
+IPv4Reassembler class.
+
+- Fragmented IP packet's inner_pdu PDUs are not decoded now.
+
+- Added 1000ms as the default read timeout used when calling 
+pcap_open_live. Added BaseSniffer::set_timeout to modify this parameter.
+
+- Added the --disable-dot11 configure switch.
+
+- Added support for IPSec.
+
+- Fixed bug triggered when ifaddrs::ifa_addr was null in 
+NetworkInterface::addresses.
+
+- Added another overload of Utils::route_entries which returns the
+result either than storing it in a parameter.
+
+- Added ARP monitor, WPS detector, DNS queries sniffer and DNS spoofer 
+examples.
+
+- Added another Sniffer constructor which doesn't expect the maximum
+capture size.
+
+- Added tins_cast as a replacement for dynamic_cast on PDUs.
+
 v1.2 - Mon oct  7 23:33:49 ART 2013
 
 - Added BaseSniffer::begin and BaseSniffer::end.

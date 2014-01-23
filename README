@@ -1,12 +1,12 @@
 ------------------------------------------------------------------------
-       libtins v1.3
+       libtins v2.0
 ------------------------------------------------------------------------
 
 
 -------------------------------- About ---------------------------------
 
 libtins is a high-level, multiplatform C++ network packet sniffing and 
-crafting library. 
+crafting library.
 
 Its main purpose is to provide the C++ developer an easy, efficient, 
 platform and endianess-independent way to create tools which need to 

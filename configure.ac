@@ -1,4 +1,4 @@
-AC_INIT([libtins], [1.3], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
+AC_INIT([libtins], [2.0], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_HEADER(include/config.h)
 AM_INIT_AUTOMAKE([-Wall -Werror -Wno-extra-portability foreign])
@@ -50,27 +50,28 @@ AC_ARG_ENABLE(
     [],
     [
         AC_DEFINE([HAVE_DOT11], 1, Have IEEE 802.11 support)
-    ]
-)
 
-AC_ARG_ENABLE(
-    wpa2, 
-    [  --disable-wpa2          disable WPA2 decryption features], 
-    [],
-    [
-        AC_CHECK_HEADERS(
-            [openssl/evp.h openssl/hmac.h openssl/aes.h], 
-            [], 
-            [AC_MSG_ERROR([openssl headers are missing! $wpa2_msg ])]
-            AC_DEFINE([HAVE_WPA2_DECRYPTION], 0, Have WPA2 decryption library)
+        # Only allow enabling WPA2 if Dot11 is enabled.
+        AC_ARG_ENABLE(
+            wpa2, 
+            [  --disable-wpa2          disable WPA2 decryption features], 
+            [],
+            [
+                AC_CHECK_HEADERS(
+                    [openssl/evp.h openssl/hmac.h openssl/aes.h], 
+                    [], 
+                    [AC_MSG_ERROR([openssl headers are missing! $wpa2_msg ])]
+                    AC_DEFINE([HAVE_WPA2_DECRYPTION], 0, Have WPA2 decryption library)
+                )
+                AC_CHECK_LIB(
+                    crypto, 
+                    PKCS5_PBKDF2_HMAC_SHA1, 
+                    [], 
+                    [AC_MSG_ERROR([openssl library is missing! $wpa2_msg ])]
+                )
+                AC_DEFINE([HAVE_WPA2_DECRYPTION], 1, Have WPA2 decryption library)
+            ]
         )
-        AC_CHECK_LIB(
-            crypto, 
-            PKCS5_PBKDF2_HMAC_SHA1, 
-            [], 
-            [AC_MSG_ERROR([openssl library is missing! $wpa2_msg ])]
-        )
-        AC_DEFINE([HAVE_WPA2_DECRYPTION], 1, Have WPA2 decryption library)
     ]
 )
 
@@ -79,6 +80,6 @@ AC_ARG_ENABLE(
 AC_SUBST(CXXFLAGS)
 AC_SUBST(LIBS)
 AC_SUBST(LIBTINS_INCLUDE_DIR)
-AC_SUBST([LIBTINS_VERSION], [1:3:0])
+AC_SUBST([LIBTINS_VERSION], [2:0:0])
 AC_CONFIG_FILES([Makefile libtins.pc])
 AC_OUTPUT
