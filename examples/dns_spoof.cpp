@@ -54,10 +54,14 @@ bool callback(const PDU &pdu)
             if(query.type() == DNS::A) {
                 // Here's one! Let's add an answer.
                 dns.add_answer(
-                    query.dname(), 
-                    // 777 is just a random TTL
-                    DNS::make_info(DNS::A, query.query_class(), 777),
-                    IPv4Address("127.0.0.1")
+                    DNS::Resource(
+                        query.dname(), 
+                        "127.0.0.1",
+                        DNS::A, 
+                        query.query_class(), 
+                        // 777 is just a random TTL
+                        777
+                    )
                 );
             }
         }
