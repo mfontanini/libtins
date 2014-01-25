@@ -32,7 +32,7 @@
 #endif // TINS_DEBUG
 #include <algorithm>
 #include <cstring>
-#include <pcap/bpf.h>
+#include <pcap.h>
 #include "dot11/dot11_base.h"
 #include "dot3.h"
 #include "ethernetII.h"
