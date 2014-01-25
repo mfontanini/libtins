@@ -30,6 +30,7 @@
 #ifndef TINS_EXCEPTIONS_H
 #define TINS_EXCEPTIONS_H
 
+#include <string>
 #include <stdexcept>
 
 namespace Tins {
