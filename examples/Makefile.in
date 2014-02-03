@@ -1,7 +1,7 @@
 CXX=@CXX@
 CXXFLAGS=-Wall @CXXFLAGS@
 LDFLAGS=-ltins
-EXECUTABLES=arpspoofing arpmonitor portscan traceroute beacon_display dns_queries dns_spoof wps_detect
+EXECUTABLES=arpspoofing arpmonitor portscan traceroute beacon_display dns_queries dns_spoof dns_stats wps_detect
 
 all: $(EXECUTABLES)
 
@@ -20,6 +20,9 @@ dns_queries:
 
 dns_spoof: 
 	$(CXX) dns_spoof.cpp -o dns_spoof -std=c++0x  $(CXXFLAGS) $(LDFLAGS)
+
+dns_stats: 
+	$(CXX) dns_stats.cpp -o dns_stats -std=c++0x $(CXXFLAGS) $(LDFLAGS) -lpthread 
 
 beacon_display: 
 	$(CXX) beacon_display.cpp -o beacon_display $(CXXFLAGS) $(LDFLAGS) 	
