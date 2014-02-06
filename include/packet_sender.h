@@ -325,6 +325,10 @@ namespace Tins {
         SocketTypeMap _types;
         uint32_t _timeout, _timeout_usec;
         NetworkInterface default_iface;
+        // In BSD we need to store the buffer size, retrieved using BIOCGBLEN
+        #if defined(BSD) || defined(__FreeBSD_kernel__)
+        int buffer_size;
+        #endif
     };
 }
 

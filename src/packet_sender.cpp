@@ -162,6 +162,12 @@ void PacketSender::open_l2_socket(const NetworkInterface& iface) {
             ::close(sock);
             throw socket_open_error(make_error_string());
         }
+        // Use immediate mode
+        if(ioctl(sock, BIOCIMMEDIATE, &buffer_size) < 0)
+            throw socket_open_error(make_error_string());
+        // Get the buffer size
+        if(ioctl(sock, BIOCGBLEN, &buffer_size) < 0)
+            throw socket_open_error(make_error_string());
         _ether_socket[iface.id()] = sock;
     #else
     if (_ether_socket == INVALID_RAW_SOCKET) {
@@ -320,7 +326,15 @@ PDU *PacketSender::recv_match_loop(const std::vector<int>& sockets, PDU &pdu, st
     fd_set readfds;
     struct timeval timeout,  end_time;
     int read;
-    uint8_t buffer[2048];
+    #if defined(BSD) || defined(__FreeBSD_kernel__)
+        // On *BSD, we need to allocate a buffer using the given size.
+        std::vector<uint8_t> actual_buffer(buffer_size);
+        uint8_t *buffer = &actual_buffer[0];
+    #else
+        uint8_t buffer[2048];
+        const int buffer_size = 2048;
+    #endif
+    
     timeout.tv_sec  = _timeout;
     end_time.tv_sec = time(0) + _timeout;    
     end_time.tv_usec = timeout.tv_usec = _timeout_usec;
@@ -333,13 +347,29 @@ PDU *PacketSender::recv_match_loop(const std::vector<int>& sockets, PDU &pdu, st
         }
         if((read = select(max_fd + 1, &readfds, 0, 0, &timeout)) == -1)
             return 0;
-        for(std::vector<int>::const_iterator it = sockets.begin(); it != sockets.end(); ++it) {
-            if(FD_ISSET(*it, &readfds)) {
-                socket_len_type length = addrlen;
-                recvfrom_ret_type size;
-                size = recvfrom(*it, (char*)buffer, 2048, 0, link_addr, &length);
-                if(pdu.matches_response(buffer, size)) {
-                    return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
+        if(read > 0) {
+            for(std::vector<int>::const_iterator it = sockets.begin(); it != sockets.end(); ++it) {
+                if(FD_ISSET(*it, &readfds)) {
+                    recvfrom_ret_type size;
+                    #if defined(BSD) || defined(__FreeBSD_kernel__)
+                        size = ::read(*it, buffer, buffer_size);
+                        const uint8_t* ptr = buffer;
+                        // We might see more than one packet
+                        while(ptr < (buffer + size)) {
+                            const bpf_hdr* bpf_header = reinterpret_cast<const bpf_hdr*>(ptr);
+                            const uint8_t *pkt_start = ptr + bpf_header->bh_hdrlen;
+                            if(pdu.matches_response(pkt_start, bpf_header->bh_caplen)) {
+                                return Internals::pdu_from_flag(pdu.pdu_type(), pkt_start, bpf_header->bh_caplen);
+                            }
+                            ptr += BPF_WORDALIGN(bpf_header->bh_hdrlen + bpf_header->bh_caplen);
+                        }
+                    #else
+                        socket_len_type length = addrlen;
+                        size = ::recvfrom(*it, (char*)buffer, buffer_size, 0, link_addr, &length);
+                        if(pdu.matches_response(buffer, size)) {
+                            return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
+                        }
+                    #endif
                 }
             }
         }
