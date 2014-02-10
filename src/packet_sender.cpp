@@ -163,7 +163,8 @@ void PacketSender::open_l2_socket(const NetworkInterface& iface) {
             throw socket_open_error(make_error_string());
         }
         // Use immediate mode
-        if(ioctl(sock, BIOCIMMEDIATE, &buffer_size) < 0)
+        u_int value = 1;
+        if(ioctl(sock, BIOCIMMEDIATE, &value) < 0)
             throw socket_open_error(make_error_string());
         // Get the buffer size
         if(ioctl(sock, BIOCGBLEN, &buffer_size) < 0)
