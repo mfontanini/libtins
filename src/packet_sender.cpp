@@ -238,25 +238,17 @@ void PacketSender::send(PDU &pdu) {
 }
 
 void PacketSender::send(PDU &pdu, const NetworkInterface &iface) {
-    PDU::PDUType type = pdu.pdu_type();
-    switch(type) {
-        case PDU::ETHERNET_II:
-            send<Tins::EthernetII>(pdu, iface);
-            break;
-        #ifdef HAVE_DOT11
-            case PDU::DOT11:
-                send<Tins::Dot11>(pdu, iface);
-                break;
-            case PDU::RADIOTAP:
-                send<Tins::RadioTap>(pdu, iface);
-                break;
-        #endif // HAVE_DOT11
-        case PDU::IEEE802_3:
-            send<Tins::IEEE802_3>(pdu, iface);
-            break;
-        default:
-            send(pdu);
-    };
+    if (pdu.matches_flag(PDU::ETHERNET_II))
+        send<Tins::EthernetII>(pdu, iface);
+    #ifdef HAVE_DOT11
+        else if (pdu.matches_flag(PDU::DOT11))
+            send<Tins::Dot11>(pdu, iface);
+        else if (pdu.matches_flag(PDU::RADIOTAP))
+            send<Tins::RadioTap>(pdu, iface);
+    #endif // HAVE_DOT11
+    else if (pdu.matches_flag(PDU::IEEE802_3))
+        send<Tins::IEEE802_3>(pdu, iface);
+    else send(pdu);
 }
 
 PDU *PacketSender::send_recv(PDU &pdu) {
