@@ -422,7 +422,7 @@ SNAP *SessionKeys::tkip_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) con
     return new SNAP(&pload[0], pload.size() - 20);
 }
 
-SNAP *SessionKeys::SessionKeys::decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const {
+SNAP *SessionKeys::decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const {
     return is_ccmp ? 
         ccmp_decrypt_unicast(dot11, raw) :
         tkip_decrypt_unicast(dot11, raw);
