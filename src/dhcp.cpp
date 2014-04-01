@@ -187,6 +187,14 @@ std::string DHCP::domain_name() const {
     return search_and_convert<std::string>(DOMAIN_NAME);
 }
 
+void DHCP::hostname(const std::string &name) {
+    add_option(option(HOST_NAME, name.size(), (const uint8_t*)name.c_str()));
+}
+
+std::string DHCP::hostname() const {
+    return search_and_convert<std::string>(HOST_NAME);
+}
+
 void DHCP::rebind_time(uint32_t time) {
     time = Endian::host_to_be(time);
     add_option(option(DHCP_REBINDING_TIME, sizeof(uint32_t), (uint8_t*)&time));

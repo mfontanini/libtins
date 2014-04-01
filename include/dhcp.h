@@ -309,6 +309,15 @@ namespace Tins {
          * \param name The domain name.
          */
         void domain_name(const std::string &name);
+
+        /** 
+         * \brief Adds a hostname option.
+         * 
+         * The new option is appended at the end of the list.
+         * 
+         * \param name The hostname.
+         */
+        void hostname(const std::string &name);
         
         // Option getters
         
@@ -423,6 +432,16 @@ namespace Tins {
          * \return std::string Containing the domain name.
          */
         std::string domain_name() const;
+
+        /**
+         * \brief Searchs for a hostname option.
+         * 
+         * If the option is not found, an option_not_found exception
+         * is thrown.
+         * 
+         * \return std::string Containing the hostname.
+         */
+        std::string hostname() const;
         
         /** 
          * \brief Getter for the options list.

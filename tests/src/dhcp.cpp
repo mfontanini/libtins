@@ -225,9 +225,16 @@ TEST_F(DHCPTest, DNSOption) {
 
 TEST_F(DHCPTest, DomainNameOption) {
     DHCP dhcp;
-    string domain = "libtins.test.domain", domain_found;
+    string domain = "libtins.test.domain";
     dhcp.domain_name(domain);
     EXPECT_EQ(domain, dhcp.domain_name());
+}
+
+TEST_F(DHCPTest, HostnameOption) {
+    DHCP dhcp;
+    string hostname = "libtins-hostname";
+    dhcp.hostname(hostname);
+    EXPECT_EQ(hostname, dhcp.hostname());
 }
 
 TEST_F(DHCPTest, BroadcastOption) {
