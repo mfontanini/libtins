@@ -185,7 +185,9 @@ private:
     static fragments_type clone_fragments(const fragments_type &frags);
     
     bool generic_process(uint32_t &my_seq, uint32_t &other_seq, 
-      payload_type &pload, fragments_type &frags, TCP *tcp, RawPDU *raw);
+      payload_type &pload, fragments_type &frags, TCP *tcp);
+
+    void safe_insert(fragments_type &frags, uint32_t seq, RawPDU *raw);
 
 
     uint32_t client_seq, server_seq;

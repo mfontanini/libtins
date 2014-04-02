@@ -27,10 +27,56 @@
  *
  */
 
+#include <limits>
 #include "rawpdu.h"
 #include "tcp_stream.h"
 
 namespace Tins {
+
+// As defined by RFC 1982 - 2 ^ (SERIAL_BITS - 1)
+static const uint32_t seq_number_diff = 2147483648;
+// As defined by RFC 1982 - 2 ^ (SERIAL_BITS)
+static const uint32_t addition_modulo = std::numeric_limits<uint32_t>::max();
+
+// Sequence number add as defined by RFC 1982
+uint32_t add_sequence_numbers(uint32_t seq1, uint32_t seq2) {
+    return (static_cast<uint64_t>(seq1) + seq2) % addition_modulo;
+}
+
+// Subtract sequence numbers
+uint32_t subtract_sequence_numbers(uint32_t seq1, uint32_t seq2) {
+    if(seq1 > seq2)
+        return seq1 - seq2;
+    else 
+        // the numbers between seq2 and the maximum sequence number(including seq1)
+        // + the numbers between 0 and seq1
+        return (std::numeric_limits<uint32_t>::max() - seq2) + seq1 + 1;
+}
+
+// Compares sequence numbers as defined by RFC 1982.
+int compare_seq_numbers(uint32_t seq1, uint32_t seq2) {
+    if(seq1 == seq2)
+        return 0;
+    if(seq1 < seq2) {
+        return (seq2 - seq1 < seq_number_diff) ? -1 : 1;
+    }
+    else {
+        return (seq1 - seq2 > seq_number_diff) ? -1 : 1;
+    }
+}
+
+template<typename Iterator, typename Container>
+Iterator erase_iterator(Iterator it, Container& cont) {
+    Iterator output = it;
+    ++output;
+    cont.erase(it);
+    if(output == cont.end())
+        output = cont.begin();
+    return output;
+}
+
+
+// TCPStreamFollower
 
 TCPStreamFollower::TCPStreamFollower() : last_identifier(0) {
     
@@ -92,33 +138,92 @@ TCPStream::fragments_type TCPStream::clone_fragments(const fragments_type &frags
     return new_frags;
 }
 
+void TCPStream::safe_insert(fragments_type &frags, uint32_t seq, RawPDU *raw)
+{
+    RawPDU*& stored_raw = frags[seq];
+    // New segment, insert it
+    if(stored_raw == 0)
+        stored_raw = raw;
+    else {
+        // There was a segment in this position. Keep the largest one.
+        if(stored_raw->payload_size() > raw->payload_size())
+            delete raw;
+        else {
+            delete stored_raw;
+            stored_raw = raw;
+        }
+    }
+}
+
 bool TCPStream::generic_process(uint32_t &my_seq, uint32_t &other_seq, 
-  payload_type &pload, fragments_type &frags, TCP *tcp, RawPDU *raw) 
+  payload_type &pload, fragments_type &frags, TCP *tcp) 
 {
     bool added_some(false);
     if(tcp->get_flag(TCP::FIN) || tcp->get_flag(TCP::RST))
         fin_sent = true;
-    if(raw && tcp->seq() >= my_seq) {
-        frags[tcp->seq()] = static_cast<RawPDU*>(tcp->release_inner_pdu()); 
-        fragments_type::iterator it = frags.begin();
-        while(it != frags.end() && it->first == my_seq) {
-            pload.insert(
-                pload.end(),
-                it->second->payload().begin(), 
-                it->second->payload().end()
-            );
-            my_seq += it->second->payload_size();
-            delete it->second;
-            frags.erase(it);
-            it = frags.begin();
-            added_some = true;
+    RawPDU *raw = static_cast<RawPDU*>(tcp->release_inner_pdu()); 
+    if(raw) {
+        const uint32_t chunk_end = add_sequence_numbers(tcp->seq(), raw->payload_size());
+        // If the end of the chunk ends after our current sequence number, process it.
+        if(compare_seq_numbers(chunk_end, my_seq) >= 0) {
+            uint32_t seq = tcp->seq();
+            // If it starts before our sequence number, slice it
+            if(compare_seq_numbers(seq, my_seq) < 0) {
+                const uint32_t diff = subtract_sequence_numbers(my_seq, seq);
+                raw->payload().erase(
+                    raw->payload().begin(),
+                    raw->payload().begin() + diff
+                );
+                seq = my_seq;
+            }
+            safe_insert(frags, seq, raw);
+            fragments_type::iterator it = frags.find(my_seq);
+            // Keep looping while the fragments seq is lower or equal to our seq
+            while(it != frags.end() && compare_seq_numbers(it->first, my_seq) <= 0) {
+                // Does this fragment start before our sequence number?
+                if(compare_seq_numbers(it->first, my_seq) < 0) {
+                    uint32_t fragment_end = add_sequence_numbers(it->first, it->second->payload_size());
+                    int comparison = compare_seq_numbers(fragment_end, my_seq);
+                    // Does it end after our sequence number? 
+                    if(comparison > 0) {
+                        // Then slice it
+                        RawPDU::payload_type& payload = it->second->payload();
+                        payload.erase(
+                            payload.begin(),
+                            payload.begin() + subtract_sequence_numbers(my_seq, it->first)
+                        );
+                        safe_insert(frags, my_seq, it->second);
+                        it = erase_iterator(it, frags);
+                    }
+                    else {
+                        // Otherwise, we've seen this part of the payload. Erase it.
+                        delete it->second;
+                        it = erase_iterator(it, frags);
+                    }
+                }
+                else {
+                    // They're equal. Add this payload.
+                    pload.insert(
+                        pload.end(),
+                        it->second->payload().begin(), 
+                        it->second->payload().end()
+                    );
+                    my_seq += it->second->payload_size();
+                    delete it->second;
+                    it = erase_iterator(it, frags);
+                    if(frags.empty())
+                        break;
+                }
+                added_some = true;
+            }
         }
+        else
+            delete raw;
     }
     return added_some;
 }
 
 bool TCPStream::update(IP *ip, TCP *tcp) {
-    RawPDU *raw = tcp->find_pdu<RawPDU>();
     if(!syn_ack_sent && tcp->get_flag(TCP::SYN) && tcp->get_flag(TCP::ACK)) {
         server_seq = tcp->seq() + 1;
         client_seq = tcp->ack_seq();
@@ -127,9 +232,9 @@ bool TCPStream::update(IP *ip, TCP *tcp) {
     }
     else {
         if(ip->src_addr() == info.client_addr)
-            return generic_process(client_seq, server_seq, client_payload_, client_frags, tcp, raw);
+            return generic_process(client_seq, server_seq, client_payload_, client_frags, tcp);
         else
-            return generic_process(server_seq, client_seq, server_payload_, server_frags, tcp, raw);
+            return generic_process(server_seq, client_seq, server_payload_, server_frags, tcp);
     }
 }
 
