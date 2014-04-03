@@ -36,7 +36,7 @@ void UDPTest::test_equals(const UDP& udp1, const UDP& udp2) {
     EXPECT_EQ(bool(udp1.inner_pdu()), bool(udp2.inner_pdu()));
 }
 
-TEST_F(UDPTest, DefaultContructor) {
+TEST_F(UDPTest, DefaultConstructor) {
     UDP udp;
     EXPECT_EQ(udp.dport(), 0);
     EXPECT_EQ(udp.sport(), 0);
@@ -55,7 +55,7 @@ TEST_F(UDPTest, ChecksumCheck) {
     EXPECT_EQ(udp1.checksum(), udp2.checksum());
 }
 
-TEST_F(UDPTest, CopyContructor) {
+TEST_F(UDPTest, CopyConstructor) {
     UDP udp1(expected_packet, sizeof(expected_packet));
     UDP udp2(udp1);
     test_equals(udp1, udp2);
