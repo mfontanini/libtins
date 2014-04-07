@@ -199,7 +199,7 @@ Sniffer::Sniffer(const std::string &device, promisc_type promisc,
 void Sniffer::init_sniffer(const std::string &device, unsigned max_packet_size,
   bool promisc, const std::string &filter)
 {
-        char error[PCAP_ERRBUF_SIZE];
+    char error[PCAP_ERRBUF_SIZE];
     bpf_u_int32 ip, if_mask;
     if (pcap_lookupnet(device.c_str(), &ip, &if_mask, error) == -1) {
         ip = 0;
