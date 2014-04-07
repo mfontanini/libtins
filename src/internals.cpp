@@ -205,6 +205,8 @@ Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag) {
     switch(flag) {
         case PDU::IP:
             return Constants::IP::PROTO_IPIP;
+        case PDU::IPv6:
+            return Constants::IP::PROTO_IPV6;
         case PDU::TCP:
             return Constants::IP::PROTO_TCP;
         case PDU::UDP:
