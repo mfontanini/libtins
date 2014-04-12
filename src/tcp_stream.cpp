@@ -211,10 +211,10 @@ bool TCPStream::generic_process(uint32_t &my_seq, uint32_t &other_seq,
                     my_seq += it->second->payload_size();
                     delete it->second;
                     it = erase_iterator(it, frags);
+                    added_some = true;
                     if(frags.empty())
                         break;
                 }
-                added_some = true;
             }
         }
         else
@@ -224,17 +224,20 @@ bool TCPStream::generic_process(uint32_t &my_seq, uint32_t &other_seq,
 }
 
 bool TCPStream::update(IP *ip, TCP *tcp) {
-    if(!syn_ack_sent && tcp->get_flag(TCP::SYN) && tcp->get_flag(TCP::ACK)) {
-        server_seq = tcp->seq() + 1;
-        client_seq = tcp->ack_seq();
-        syn_ack_sent = true;
+    if(!syn_ack_sent) {
+        if(tcp->flags() == (TCP::SYN | TCP::ACK)) {
+            server_seq = tcp->seq() + 1;
+            client_seq = tcp->ack_seq();
+            syn_ack_sent = true;
+        }
         return false;
     }
     else {
-        if(ip->src_addr() == info.client_addr)
+        if(ip->src_addr() == info.client_addr && tcp->sport() == info.client_port)
             return generic_process(client_seq, server_seq, client_payload_, client_frags, tcp);
-        else
+        else {
             return generic_process(server_seq, client_seq, server_payload_, server_frags, tcp);
+        }
     }
 }
 
