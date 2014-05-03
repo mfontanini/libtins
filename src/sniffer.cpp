@@ -184,20 +184,62 @@ void BaseSniffer::set_timeout(int ms) {
 
 // ****************************** Sniffer ******************************
 
-Sniffer::Sniffer(const string &device, unsigned max_packet_size, 
-  bool promisc, const string &filter)
+pcap_t *
+pcap_open_live_extended(const char *source, int snaplen, int promisc, int to_ms, int rfmon, char *errbuf)
 {
-    init_sniffer(device, max_packet_size, promisc, filter);
+    pcap_t *p;
+    int status;
+    
+    p = pcap_create(source, errbuf);
+    if (p == NULL)
+        return (NULL);
+    status = pcap_set_snaplen(p, snaplen);
+    if (status < 0)
+        goto fail;
+    status = pcap_set_promisc(p, promisc);
+    if (status < 0)
+        goto fail;
+    status = pcap_set_timeout(p, to_ms);
+    if (status < 0)
+        goto fail;
+    status = pcap_set_rfmon(p, rfmon);
+    if (status < 0)
+        goto fail;
+    status = pcap_activate(p);
+    if (status < 0)
+        goto fail;
+    return (p);
+    
+fail:
+    if (status == PCAP_ERROR)
+        snprintf(errbuf, PCAP_ERRBUF_SIZE, "%s: %s", source,
+                 pcap_geterr(p));
+    else if (status == PCAP_ERROR_NO_SUCH_DEVICE ||
+             status == PCAP_ERROR_PERM_DENIED ||
+             status == PCAP_ERROR_PROMISC_PERM_DENIED)
+        snprintf(errbuf, PCAP_ERRBUF_SIZE, "%s: %s (%s)", source,
+                 pcap_statustostr(status), pcap_geterr(p));
+    else
+        snprintf(errbuf, PCAP_ERRBUF_SIZE, "%s: %s", source,
+                pcap_statustostr(status));
+    pcap_close(p);
+    return (NULL);
+}
+
+Sniffer::Sniffer(const string &device, unsigned max_packet_size, 
+  bool promisc, const string &filter, bool rfmon)
+{
+    init_sniffer(device, max_packet_size, promisc, filter, rfmon);
 }
 
 Sniffer::Sniffer(const std::string &device, promisc_type promisc, 
-  const std::string &filter)
+  const std::string &filter, bool rfmon)
 {
-    init_sniffer(device, 65535, promisc == PROMISC, filter);
+    init_sniffer(device, 65535, promisc == PROMISC, filter, rfmon);
 }
 
 void Sniffer::init_sniffer(const std::string &device, unsigned max_packet_size,
-  bool promisc, const std::string &filter)
+  bool promisc, const std::string &filter, bool rfmon)
 {
     char error[PCAP_ERRBUF_SIZE];
     bpf_u_int32 ip, if_mask;
@@ -205,7 +247,7 @@ void Sniffer::init_sniffer(const std::string &device, unsigned max_packet_size,
         ip = 0;
         if_mask = 0;
     }
-    pcap_t *phandle = pcap_open_live(device.c_str(), max_packet_size, promisc, 1000, error);
+    pcap_t *phandle = pcap_open_live_extended(device.c_str(), max_packet_size, promisc, 1000, rfmon, error);
     if(!phandle)
         throw runtime_error(error);
     
