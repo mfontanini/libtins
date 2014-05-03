@@ -86,7 +86,7 @@ void ICMP::type(Flags new_type) {
     _icmp.type = new_type;
 }
 
-void ICMP::check(uint16_t new_check) {
+void ICMP::checksum(uint16_t new_check) {
     _icmp.check = Endian::host_to_be(new_check);
 }
 

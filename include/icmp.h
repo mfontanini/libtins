@@ -258,7 +258,7 @@ namespace Tins {
          *
          * \return Returns the checksum as an unit16_t.
          */
-        uint16_t check() const { return Endian::be_to_host(_icmp.check); }
+        uint16_t checksum() const { return Endian::be_to_host(_icmp.check); }
 
         /**
          * \brief Getter for the echo id.
@@ -377,7 +377,7 @@ namespace Tins {
             } un;
         } TINS_END_PACK;
 
-        void check(uint16_t new_check);
+        void checksum(uint16_t new_check);
         
         /** \brief Serialices this ICMP PDU.
          * \param buffer The buffer in which the PDU will be serialized.
