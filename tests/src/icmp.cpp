@@ -40,7 +40,7 @@ TEST_F(ICMPTest, DefaultConstructor) {
     EXPECT_EQ(icmp.code(), 0);
     EXPECT_EQ(icmp.type(), ICMP::ECHO_REQUEST);
     EXPECT_EQ(icmp.id(), 0);
-    EXPECT_EQ(icmp.check(), 0);
+    EXPECT_EQ(icmp.checksum(), 0);
 }
 
 TEST_F(ICMPTest, CopyConstructor) {
@@ -79,7 +79,7 @@ TEST_F(ICMPTest, ChecksumOnTimestamp) {
     EthernetII pkt(raw_pkt, sizeof(raw_pkt));
     pkt.serialize();
     EXPECT_EQ(0xb919, pkt.rfind_pdu<IP>().checksum());
-    EXPECT_EQ(0xed8d, pkt.rfind_pdu<ICMP>().check());
+    EXPECT_EQ(0xed8d, pkt.rfind_pdu<ICMP>().checksum());
 }
 
 TEST_F(ICMPTest, AddressMaskRequest) {
@@ -91,7 +91,7 @@ TEST_F(ICMPTest, AddressMaskRequest) {
     EthernetII pkt(raw_pkt, sizeof(raw_pkt));
     IP::serialization_type buffer = pkt.serialize();
     EXPECT_EQ(0xf926, pkt.rfind_pdu<IP>().checksum());
-    EXPECT_EQ(0xeaf9, pkt.rfind_pdu<ICMP>().check());
+    EXPECT_EQ(0xeaf9, pkt.rfind_pdu<ICMP>().checksum());
     EXPECT_EQ(IPv4Address("1.2.3.4"), pkt.rfind_pdu<ICMP>().address_mask());
 }
 
