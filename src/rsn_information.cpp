@@ -30,6 +30,7 @@
 #include <stdexcept>
 #include "rsn_information.h"
 #include "exceptions.h"
+#include "pdu_option.h"
 #include "dot11/dot11_base.h"
 
 namespace Tins {
