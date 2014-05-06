@@ -34,10 +34,12 @@
         #include <netinet/in.h>
         #include <net/ethernet.h>
     #endif
+#else
+    #include <ws2tcpip.h>
 #endif
 #include <stdexcept>
 #ifdef TINS_DEBUG
-#include <cassert>
+    #include <cassert>
 #endif
 #include <cstring>
 #include "loopback.h"
@@ -96,11 +98,13 @@ void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(_family));
     #endif
+    #ifndef WIN32
     if(tins_cast<const Tins::IP*>(inner_pdu()))
         _family = PF_INET;
     else if(tins_cast<const Tins::LLC*>(inner_pdu()))
         _family = PF_LLC;
     *reinterpret_cast<uint32_t*>(buffer) = _family;
+    #endif // WIN32
 }
 #ifdef BSD
 void Loopback::send(PacketSender &sender, const NetworkInterface &iface) {

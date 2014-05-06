@@ -31,7 +31,6 @@
 #define TINS_TIMESTAMP_H
 
 #ifdef WIN32
-    #define NOMINMAX
     #include <winsock2.h>
 #else
     #include <sys/time.h>

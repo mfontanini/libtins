@@ -33,7 +33,6 @@
 #include <cassert>
 #endif
 #ifndef WIN32
-    #define NOMINMAX
     #include <netinet/in.h>
 #endif
 #include "icmp.h"

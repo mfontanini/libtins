@@ -154,7 +154,11 @@ void BaseSniffer::stop_sniff() {
 }
 
 int BaseSniffer::get_fd() {
-    return pcap_get_selectable_fd(handle);
+    #ifndef WIN32
+        return pcap_get_selectable_fd(handle);
+    #else
+        throw std::runtime_error("Method not supported in Windows platform");
+    #endif // WIN32
 }
 
 int BaseSniffer::link_type() const {

@@ -43,6 +43,8 @@
     #endif
     #include <netdb.h>
     #include <net/if.h>
+#else
+    #include <ws2tcpip.h>
 #endif
 #include "pdu.h"
 #include "arp.h"

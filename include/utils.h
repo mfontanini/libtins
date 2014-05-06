@@ -33,7 +33,6 @@
 #ifndef WIN32
     #include <ifaddrs.h>
 #else
-    #define NOMINMAX
     #include <winsock2.h>
     #include <iphlpapi.h>
     #undef interface

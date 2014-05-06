@@ -38,7 +38,6 @@
     #include <sys/socket.h>
     #include <netinet/in.h>
 #else
-    #define NOMINMAX
     #include <winsock2.h>
 #endif
 #include "ip.h"

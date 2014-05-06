@@ -30,6 +30,10 @@
 #ifndef TINS_ICMP_H
 #define TINS_ICMP_H
 
+#ifdef TIMESTAMP_REQUEST
+	#undef TIMESTAMP_REQUEST
+#endif // TIMESTAMP_REQUEST
+
 #include "macros.h"
 #include "pdu.h"
 #include "endianness.h"

@@ -42,7 +42,6 @@
     #endif
     #include <net/if.h>
 #else
-    #define NOMINMAX
     #include <winsock2.h>
 #endif
 #include "network_interface.h"
