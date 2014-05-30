@@ -298,9 +298,10 @@ namespace Internals {
  */
 template<typename OptionType, class PDUType>
 class PDUOption {
+private:
+    static const int small_buffer_size = 8;
 public:
-    typedef std::vector<uint8_t> container_type;
-    typedef typename container_type::value_type data_type;
+    typedef uint8_t data_type;
     typedef OptionType option_type;
 
     /**
@@ -310,8 +311,79 @@ public:
      * \param data The option's data(if any).
      */
     PDUOption(option_type opt = option_type(), size_t length = 0, const data_type *data = 0) 
-    : option_(opt), size_(length), value_(data, data + (data ? length : 0)) {
-        
+    : option_(opt), size_(length) {
+        set_payload_contents(data, data + (data ? length : 0));
+    }
+    
+    /**
+     * \brief Copy constructor.
+     * \param rhs The PDUOption to be copied.
+     */
+    PDUOption(const PDUOption& rhs) {
+        real_size_ = 0;
+        *this = rhs;
+    }
+    
+    #if TINS_IS_CXX11
+    /**
+     * \brief Move constructor.
+     * \param rhs The PDUOption to be moved.
+     */
+    PDUOption(PDUOption&& rhs) {
+        real_size_ = 0;
+        *this = std::move(rhs);
+    }
+    
+    /**
+     * \brief Move assignment operator.
+     * \param rhs The PDUOption to be moved.
+     */
+    PDUOption& operator=(PDUOption&& rhs) {
+        option_ = rhs.option_;
+        size_ = rhs.size_;
+        if(real_size_ > small_buffer_size) {
+            delete[] payload_.big_buffer_ptr;
+        }
+        real_size_ = rhs.real_size_;
+        if(real_size_ > small_buffer_size) {
+            payload_.big_buffer_ptr = nullptr;
+            std::swap(payload_.big_buffer_ptr, rhs.payload_.big_buffer_ptr);
+            rhs.real_size_ = 0;
+        }
+        else {
+            std::copy(
+                rhs.data_ptr(),
+                rhs.data_ptr() + rhs.data_size(),
+                payload_.small_buffer
+            );
+        }
+        return *this;
+    }
+    
+    #endif // TINS_IS_CXX11
+    
+    /**
+     * \brief Copy assignment operator.
+     * \param rhs The PDUOption to be copied.
+     */
+    PDUOption& operator=(const PDUOption& rhs) {
+        option_ = rhs.option_;
+        size_ = rhs.size_;
+        if(real_size_ > small_buffer_size) {
+            delete[] payload_.big_buffer_ptr;
+        }
+        real_size_ = rhs.real_size_;
+        set_payload_contents(rhs.data_ptr(), rhs.data_ptr() + rhs.data_size());
+        return *this;
+    }
+    
+    /**
+     * \brief Destructor.
+     */
+    ~PDUOption() {
+        if(real_size_ > small_buffer_size) {
+            delete[] payload_.big_buffer_ptr;
+        }
     }
     
     /**
@@ -324,8 +396,8 @@ public:
      */
     template<typename ForwardIterator>
     PDUOption(option_type opt, ForwardIterator start, ForwardIterator end) 
-    : option_(opt), size_(std::distance(start, end)), value_(start, end) {
-        
+    : option_(opt), size_(std::distance(start, end)) {
+        set_payload_contents(start, end);
     }
     
     /**
@@ -345,8 +417,8 @@ public:
      */
     template<typename ForwardIterator>
     PDUOption(option_type opt, size_t length, ForwardIterator start, ForwardIterator end) 
-    : option_(opt), size_(length), value_(start, end) {
-        
+    : option_(opt), size_(length) {
+        set_payload_contents(start, end);
     }
     
     /**
@@ -375,7 +447,9 @@ public:
      * \return const data_type& containing this option's value.
      */
     const data_type *data_ptr() const {
-        return &*value_.begin();
+        return real_size_ <= small_buffer_size ?
+            payload_.small_buffer : 
+            payload_.big_buffer_ptr;
     }
     
     /**
@@ -384,7 +458,7 @@ public:
      * This is the actual size of the data.
      */
     size_t data_size() const {
-        return value_.size();
+        return real_size_;
     }
     
     /**
@@ -415,9 +489,32 @@ public:
         return Internals::converter<T>::convert(*this);
     }
 private:
+    template<typename ForwardIterator>
+    void set_payload_contents(ForwardIterator start, ForwardIterator end) {
+        real_size_ = std::distance(start, end);
+        if(real_size_ <= small_buffer_size) {
+            std::copy(
+                start,
+                end,
+                payload_.small_buffer
+            );
+        }
+        else {
+            payload_.big_buffer_ptr = new data_type[real_size_];
+            std::copy(
+                start, 
+                end,
+                payload_.big_buffer_ptr
+            );
+        }
+    }
+
     option_type option_;
-    uint16_t size_;
-    container_type value_;
+    uint16_t size_, real_size_;
+    union {
+        data_type small_buffer[small_buffer_size];
+        data_type* big_buffer_ptr;
+    } payload_;
 };
 } // namespace Tins
 #endif // TINS_PDU_OPTION_H

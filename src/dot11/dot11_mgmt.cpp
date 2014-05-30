@@ -120,7 +120,7 @@ void Dot11ManagementFrame::rsn_information(const RSNInformation& info) {
 uint8_t *Dot11ManagementFrame::serialize_rates(const rates_type &rates) {
     uint8_t *buffer = new uint8_t[rates.size()], *ptr = buffer;
     for(rates_type::const_iterator it = rates.begin(); it != rates.end(); ++it) {
-        uint8_t result = static_cast<uint8_t>(*it) * 2;
+        uint8_t result = static_cast<uint8_t>(*it * 2);
         if(result == 2 || result == 4 || result == 11 || result == 22)
             result |= 0x80;
         *(ptr++) = result;
