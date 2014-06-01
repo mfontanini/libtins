@@ -426,6 +426,20 @@ namespace Tins {
                 internal_add_option(opt);
                 _ip_options.push_back(std::move(opt));
             }
+
+            /**
+             * \brief Adds an IP option.
+             * 
+             * The option is constructed from the provided parameters.
+             * 
+             * \param args The arguments to be used in the option's 
+             * constructor.
+             */
+            template<typename... Args>
+            void add_option(Args&&... args) {
+                _ip_options.emplace_back(std::forward<Args>(args)...);
+                internal_add_option(_ip_options.back());
+            }
         #endif
 
         /**

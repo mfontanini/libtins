@@ -67,7 +67,11 @@ TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
 
     while(buffer < header_end) {
         if(*buffer <= NOP) {
+            #if TINS_IS_CXX11
+            add_option((OptionTypes)*buffer, 0);
+            #else
             add_option(option((OptionTypes)*buffer, 0));
+            #endif // TINS_IS_CXX11
             ++buffer;
         }
         else {
@@ -77,7 +81,11 @@ TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
             const uint8_t *data_start = buffer + 2;
             if(data_start + len > header_end)
                 throw malformed_packet(); 
+            #if TINS_IS_CXX11
+            add_option((OptionTypes)*buffer, data_start, data_start + len);
+            #else
             add_option(option((OptionTypes)*buffer, data_start, data_start + len));
+            #endif // TINS_IS_CXX11
             buffer = data_start + len;
         }
     }
