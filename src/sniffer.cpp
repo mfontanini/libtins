@@ -206,9 +206,11 @@ pcap_open_live_extended(const char *source, int snaplen, int promisc, int to_ms,
     status = pcap_set_timeout(p, to_ms);
     if (status < 0)
         goto fail;
-    status = pcap_set_rfmon(p, rfmon);
-    if (status < 0)
-        goto fail;
+    if(pcap_can_set_rfmon(p) == 1) {
+        status = pcap_set_rfmon(p, rfmon);
+        if (status < 0)
+            goto fail;
+    }
     status = pcap_activate(p);
     if (status < 0)
         goto fail;
