@@ -184,12 +184,16 @@ uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint3
 }
 
 uint32_t pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip, uint32_t len, uint32_t flag) {
-    uint32_t checksum = 0;
-    IPv6Address::const_iterator it;
-    for(it = source_ip.begin(); it != source_ip.end(); ++it)
-        checksum += *it;
-    for(it = dest_ip.begin(); it != dest_ip.end(); ++it)
-        checksum += *it;
+    uint32_t checksum(0);
+    uint16_t *ptr = (uint16_t*) source_ip.begin();
+    uint16_t *end = (uint16_t*) source_ip.end();
+    while(ptr < end)
+        checksum += (uint32_t) Endian::be_to_host(*ptr++);
+
+    ptr = (uint16_t*) dest_ip.begin();
+    end = (uint16_t*) dest_ip.end();
+    while(ptr < end)
+        checksum += (uint32_t) Endian::be_to_host(*ptr++);
     checksum += flag + len;
     return checksum;
 }

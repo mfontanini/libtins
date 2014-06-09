@@ -23,7 +23,7 @@ public:
 const uint8_t IPv6Test::expected_packet1[] = {
     105, 168, 39, 52, 0, 40, 6, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 198, 140, 
-    0, 80, 104, 72, 3, 12, 0, 0, 0, 0, 160, 2, 127, 240, 0, 48, 0, 0, 2, 
+    0, 80, 104, 72, 3, 12, 0, 0, 0, 0, 160, 2, 127, 240, 183, 120, 0, 0, 2, 
     4, 63, 248, 4, 2, 8, 10, 0, 132, 163, 156, 0, 0, 0, 0, 1, 3, 3, 7
 };
 
@@ -115,10 +115,13 @@ TEST_F(IPv6Test, ConstructorFromBuffer2) {
 }
 
 TEST_F(IPv6Test, Serialize) {
-    IPv6 ip1(expected_packet2, sizeof(expected_packet2));
+    IPv6 ip1(expected_packet1, sizeof(expected_packet1));
     IPv6::serialization_type buffer = ip1.serialize();
-    ASSERT_EQ(buffer.size(), sizeof(expected_packet2));
-    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet2));
+    ASSERT_EQ(buffer.size(), sizeof(expected_packet1));
+    EXPECT_EQ(
+        IPv6::serialization_type(expected_packet1, expected_packet1 + sizeof(expected_packet1)),
+        buffer
+    );
     IPv6 ip2(&buffer[0], buffer.size());
     test_equals(ip1, ip2);
 }

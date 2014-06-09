@@ -3,6 +3,7 @@
 #include <string>
 #include <stdint.h>
 #include "icmpv6.h"
+#include "ethernetII.h"
 #include "ip.h"
 #include "tcp.h"
 #include "utils.h"
@@ -14,6 +15,7 @@ class ICMPv6Test : public testing::Test {
 public:
     static const uint8_t expected_packet[];
     static const uint8_t expected_packet1[];
+    static const uint8_t expected_packet2[];
 
     void test_equals(const ICMPv6 &icmp1, const ICMPv6 &icmp2);
 };
@@ -29,6 +31,15 @@ const uint8_t ICMPv6Test::expected_packet1[] = {
     96, 151, 7, 105, 234, 5, 1, 0, 0, 0, 0, 5, 220, 3, 4, 64, 192, 0, 54, 
     238, 128, 0, 54, 238, 128, 0, 0, 0, 0, 63, 254, 5, 7, 0, 0, 0, 1, 0, 
     0, 0, 0, 0, 0, 0, 0
+};
+
+const uint8_t ICMPv6Test::expected_packet2[] = {
+    0, 96, 151, 7, 105, 234, 0, 0, 134, 5, 128, 218, 134, 221, 96, 0,
+    0, 0, 0, 32, 58, 255, 254, 128, 0, 0, 0, 0, 0, 0, 2, 0, 134, 255
+    , 254, 5, 128, 218, 254, 128, 0, 0, 0, 0, 0, 0, 2, 96, 151, 255, 
+    254, 7, 105, 234, 135, 0, 0, 0, 0, 0, 0, 0, 254, 128, 0, 0, 0
+    , 0, 0, 0, 2, 96, 151, 255, 254, 7, 105, 234, 1, 1, 0, 0, 134, 5,
+    128, 218
 };
 
 TEST_F(ICMPv6Test, Constructor) {
@@ -451,4 +462,11 @@ TEST_F(ICMPv6Test, SpoofedOptions) {
     // probably we'd expect it to crash if it's not working, valgrind plx
     EXPECT_EQ(3U, pdu.options().size());
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
+}
+
+TEST_F(ICMPv6Test, ChecksumCalculation) {
+    EthernetII eth(expected_packet2, sizeof(expected_packet2));
+    EthernetII::serialization_type serialized = eth.serialize();
+    const ICMPv6& icmp = eth.rfind_pdu<ICMPv6>();
+    EXPECT_EQ(0x68bd, icmp.checksum());
 }

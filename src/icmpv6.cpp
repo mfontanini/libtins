@@ -198,6 +198,7 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     assert(total_sz >= header_size());
     #endif
     icmp6hdr* ptr_header = (icmp6hdr*)buffer;
+    _header.cksum = 0;
     std::memcpy(buffer, &_header, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
@@ -224,19 +225,18 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
         #endif
         buffer = write_option(*it, buffer);
     }
-    if(!_header.cksum) {
-        const Tins::IPv6 *ipv6 = tins_cast<const Tins::IPv6*>(parent);
-        if(ipv6) {
-            uint32_t checksum = Utils::pseudoheader_checksum(
-                                    ipv6->src_addr(),  
-                                    ipv6->dst_addr(), 
-                                    size(), 
-                                    Constants::IP::PROTO_ICMPV6
-                                ) + Utils::do_checksum((uint8_t*)ptr_header, buffer);
-            while (checksum >> 16) 
-                checksum = (checksum & 0xffff) + (checksum >> 16);
-            ptr_header->cksum = Endian::host_to_be<uint16_t>(~checksum);
-        }
+    const Tins::IPv6 *ipv6 = tins_cast<const Tins::IPv6*>(parent);
+    if(ipv6) {
+        uint32_t checksum = Utils::pseudoheader_checksum(
+                                ipv6->src_addr(),  
+                                ipv6->dst_addr(), 
+                                size(), 
+                                Constants::IP::PROTO_ICMPV6
+                            ) + Utils::do_checksum((uint8_t*)ptr_header, buffer);
+        while (checksum >> 16) 
+            checksum = (checksum & 0xffff) + (checksum >> 16);
+        this->checksum(~checksum);
+        ptr_header->cksum = _header.cksum;
     }
 }
 
