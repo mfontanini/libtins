@@ -27,8 +27,10 @@
  *
  */
 
-#include <stdexcept>
 #include "rsn_information.h"
+#ifdef HAVE_DOT11
+
+#include <stdexcept>
 #include "exceptions.h"
 #include "pdu_option.h"
 #include "dot11/dot11_base.h"
@@ -152,3 +154,5 @@ RSNInformation RSNInformation::from_option(const PDUOption<uint8_t, Dot11> &opt)
     return RSNInformation(opt.data_ptr(), opt.data_size());
 }
 }
+
+#endif // HAVE_DOT11
