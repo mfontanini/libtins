@@ -35,10 +35,10 @@
 #ifndef WIN32
     #include <netinet/in.h>
 #endif
-#include "icmp.h"
 #include "rawpdu.h"
 #include "utils.h"
 #include "exceptions.h"
+#include "icmp.h"
 
 namespace Tins {
 ICMP::ICMP(Flags flag) 
