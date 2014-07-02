@@ -197,14 +197,14 @@ public:
     /**
      * Move constructor.
      */
-    Packet(Packet &&rhs) noexcept : pdu_(rhs.pdu()), ts(rhs.timestamp()) {
+    Packet(Packet &&rhs) NOEXCEPT : pdu_(rhs.pdu()), ts(rhs.timestamp()) {
         rhs.pdu_ = nullptr;
     }
     
     /**
      * Move assignment operator.
      */
-    Packet& operator=(Packet &&rhs) noexcept { 
+    Packet& operator=(Packet &&rhs) NOEXCEPT { 
         if(this != &rhs) {
             std::swap(pdu_, rhs.pdu_);
             ts = rhs.timestamp();
