@@ -89,10 +89,15 @@ int main(int argc, char *argv[])
         std::cout << "Usage: " << *argv << " <interface>" << std::endl;
         return 1;
     }
-    // Sniff on the provided interface, maximum packet size 2000
-    // in promiscuos mode and only udp packets sent to port 53
-    Sniffer sniffer(argv[1], 2000, true, "udp and dst port 53");
+    // Sniff on the provided interface in promiscuos mode
+    Sniffer sniffer(argv[1], Sniffer::PROMISC);
+    
+    // Only capture udp packets sent to port 53
+    sniffer.set_filter("udp and dst port 53");
+    
     // All packets will be sent through the provided interface
     sender.default_interface(argv[1]);
+    
+    // Start the capture
     sniffer.sniff_loop(callback);
 }

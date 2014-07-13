@@ -58,6 +58,10 @@ int main(int argc, char *argv[])
         return 1;
     }
     arp_monitor monitor;
-    Sniffer sniffer(argv[1], 2000, true, "arp");
+    // Sniff on the provided interface in promiscuous mode
+    Sniffer sniffer(argv[1], Sniffer::PROMISC);
+    
+    // Only capture arp packets
+    sniffer.set_filter("arp");
     monitor.run(sniffer);
 }

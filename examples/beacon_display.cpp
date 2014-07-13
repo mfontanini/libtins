@@ -47,7 +47,7 @@ private:
 };
  
 void BeaconSniffer::run(const std::string &iface) {
-    Sniffer sniffer(iface, 1500, true, "type mgt subtype beacon", true);
+    Sniffer sniffer(iface, Sniffer::PROMISC, "type mgt subtype beacon", true);
     sniffer.sniff_loop(make_sniffer_handler(this, &BeaconSniffer::callback));
 }
  
