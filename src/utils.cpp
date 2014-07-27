@@ -156,6 +156,65 @@ uint16_t channel_to_mhz(uint16_t channel) {
 uint16_t mhz_to_channel(uint16_t mhz) {
     return (mhz - 2407) / 5;
 }
+    
+std::string to_string(PDU::PDUType pduType) {
+#define ENUM_TEXT(p) case(PDU::p): return #p;
+    switch(pduType){
+        ENUM_TEXT(RAW);
+        ENUM_TEXT(ETHERNET_II);
+        ENUM_TEXT(IEEE802_3);
+        ENUM_TEXT(RADIOTAP);
+        ENUM_TEXT(DOT11);
+        ENUM_TEXT(DOT11_ACK);
+        ENUM_TEXT(DOT11_ASSOC_REQ);
+        ENUM_TEXT(DOT11_ASSOC_RESP);
+        ENUM_TEXT(DOT11_AUTH);
+        ENUM_TEXT(DOT11_BEACON);
+        ENUM_TEXT(DOT11_BLOCK_ACK);
+        ENUM_TEXT(DOT11_BLOCK_ACK_REQ);
+        ENUM_TEXT(DOT11_CF_END);
+        ENUM_TEXT(DOT11_DATA);
+        ENUM_TEXT(DOT11_CONTROL);
+        ENUM_TEXT(DOT11_DEAUTH);
+        ENUM_TEXT(DOT11_DIASSOC);
+        ENUM_TEXT(DOT11_END_CF_ACK);
+        ENUM_TEXT(DOT11_MANAGEMENT);
+        ENUM_TEXT(DOT11_PROBE_REQ);
+        ENUM_TEXT(DOT11_PROBE_RESP);
+        ENUM_TEXT(DOT11_PS_POLL);
+        ENUM_TEXT(DOT11_REASSOC_REQ);
+        ENUM_TEXT(DOT11_REASSOC_RESP);
+        ENUM_TEXT(DOT11_RTS);
+        ENUM_TEXT(DOT11_QOS_DATA);
+        ENUM_TEXT(LLC);
+        ENUM_TEXT(SNAP);
+        ENUM_TEXT(IP);
+        ENUM_TEXT(ARP);
+        ENUM_TEXT(TCP);
+        ENUM_TEXT(UDP);
+        ENUM_TEXT(ICMP);
+        ENUM_TEXT(BOOTP);
+        ENUM_TEXT(DHCP);
+        ENUM_TEXT(EAPOL);
+        ENUM_TEXT(RC4EAPOL);
+        ENUM_TEXT(RSNEAPOL);
+        ENUM_TEXT(DNS);
+        ENUM_TEXT(LOOPBACK);
+        ENUM_TEXT(IPv6);
+        ENUM_TEXT(ICMPv6);
+        ENUM_TEXT(SLL);
+        ENUM_TEXT(DHCPv6);
+        ENUM_TEXT(DOT1Q);
+        ENUM_TEXT(PPPOE);
+        ENUM_TEXT(STP);
+        ENUM_TEXT(PPI);
+        ENUM_TEXT(IPSEC_AH);
+        ENUM_TEXT(IPSEC_ESP);
+        ENUM_TEXT(USER_DEFINED_PDU);
+        default: return "";
+    }
+#undef ENUM_TEXT
+}
 
 uint32_t do_checksum(const uint8_t *start, const uint8_t *end) {
     uint32_t checksum(0);
