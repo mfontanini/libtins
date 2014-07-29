@@ -197,10 +197,17 @@ namespace Tins {
         
         /**
          * \brief Converts mhz units to the appropriate channel number.
-         * \param channel The mhz units to be converted.
+         * \param mhz The mhz units to be converted.
          * \return The channel number.
          */
         uint16_t mhz_to_channel(uint16_t mhz);
+        
+        /**
+         * \brief Converts a PDUType to a string.
+         * \param pduType The PDUType to be converted.
+         * \return A string representation, for example "DOT11_QOS_DATA".
+         */
+        std::string to_string(PDU::PDUType pduType);
 
         /** \brief Does the 16 bits sum of all 2 bytes elements between start and end.
          *
