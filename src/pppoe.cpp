@@ -56,8 +56,10 @@ PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz)
     while(buffer < end) {
         if(buffer + sizeof(uint32_t) * 2 > end)
             throw malformed_packet();
-        uint16_t opt_type = *(const uint16_t*)buffer;
-        uint16_t opt_len = *(const uint16_t*)(buffer + sizeof(uint16_t));
+        uint16_t opt_type;
+        std::memcpy(&opt_type, buffer, sizeof(uint16_t));
+        uint16_t opt_len;
+        std::memcpy(&opt_len, buffer + sizeof(uint16_t), sizeof(uint16_t));
         buffer += sizeof(uint16_t) * 2;
         total_sz -= sizeof(uint16_t) * 2;
         if(Endian::be_to_host(opt_len) > total_sz)
@@ -115,9 +117,12 @@ void PPPoE::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
     if(_tags_size > 0)
         ((pppoe_hdr*)buffer)->payload_length = Endian::host_to_be(_tags_size);
     buffer += sizeof(_header);
+    uint16_t uint16_t_buffer;
     for(tags_type::const_iterator it = _tags.begin(); it != _tags.end(); ++it) {
-        *(uint16_t*)buffer = it->option();
-        *(uint16_t*)(buffer + sizeof(uint16_t)) = Endian::host_to_be<uint16_t>(it->length_field());
+        uint16_t_buffer = it->option();
+        std::memcpy(buffer, &uint16_t_buffer, sizeof(uint16_t));
+        uint16_t_buffer = Endian::host_to_be<uint16_t>(it->length_field());
+        std::memcpy(buffer + sizeof(uint16_t), &uint16_t_buffer, sizeof(uint16_t));
         std::copy(
             it->data_ptr(), 
             it->data_ptr() + it->data_size(),
@@ -158,7 +163,8 @@ void PPPoE::ac_cookie(const byte_array &value) {
 
 void PPPoE::vendor_specific(const vendor_spec_type &value) {
     std::vector<uint8_t> buffer(sizeof(uint32_t) + value.data.size());
-    *(uint32_t*)&buffer[0] = Endian::host_to_be(value.vendor_id);
+    uint32_t tmp_vendor_id = Endian::host_to_be(value.vendor_id);
+    std::memcpy(&buffer[0], &tmp_vendor_id, sizeof(uint32_t));
     std::copy(
         value.data.begin(), 
         value.data.end(), 
@@ -234,7 +240,8 @@ PPPoE::vendor_spec_type PPPoE::vendor_spec_type::from_option(const tag &opt) {
     if(opt.data_size() < sizeof(uint32_t))
         throw malformed_option();
     vendor_spec_type output;
-    output.vendor_id = Endian::be_to_host(*(const uint32_t*)opt.data_ptr());
+    std::memcpy(&output.vendor_id, opt.data_ptr(), sizeof(uint32_t));
+    output.vendor_id = Endian::be_to_host(output.vendor_id);
     output.data.assign(
         opt.data_ptr() + sizeof(uint32_t), 
         opt.data_ptr() + opt.data_size()

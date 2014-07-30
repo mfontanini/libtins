@@ -218,13 +218,22 @@ std::string to_string(PDU::PDUType pduType) {
 
 uint32_t do_checksum(const uint8_t *start, const uint8_t *end) {
     uint32_t checksum(0);
-    uint16_t *ptr = (uint16_t*)start, *last = (uint16_t*)end, padding(0);
+    const uint8_t *last = end;
+    uint16_t buffer = 0;
+    uint16_t padding = 0;
+    const uint8_t *ptr = start;
+
     if(((end - start) & 1) == 1) {
-        last = (uint16_t*)end - 1;
+        last = end - 1;
         padding = *(end - 1) << 8;
     }
-    while(ptr < last)
-        checksum += Endian::host_to_be(*(ptr++));
+
+    while(ptr < last) {
+        memcpy(&buffer, ptr, sizeof(uint16_t));
+        checksum += Endian::host_to_be(buffer);
+        ptr += sizeof(uint16_t);
+    }
+
     return checksum + padding;
 }
 

@@ -445,10 +445,13 @@ IP::security_type IP::security_type::from_option(const option &opt)
     if(opt.data_size() != 9)
         throw malformed_option();
     security_type output;
-    const uint16_t *ptr = reinterpret_cast<const uint16_t*>(opt.data_ptr());
-    output.security = Endian::be_to_host(*ptr++);
-    output.compartments = Endian::be_to_host(*ptr++);
-    output.handling_restrictions = Endian::be_to_host(*ptr++);
+
+    memcpy(&output.security, opt.data_ptr(), sizeof(uint16_t));
+    output.security = Endian::be_to_host(output.security);
+    memcpy(&output.compartments, opt.data_ptr() + sizeof(uint16_t), sizeof(uint16_t));
+    output.compartments = Endian::be_to_host(output.compartments);
+    memcpy(&output.handling_restrictions, opt.data_ptr() + 2 * sizeof(uint16_t), sizeof(uint16_t));
+    output.handling_restrictions = Endian::be_to_host(output.handling_restrictions);
     uint32_t tcc = opt.data_ptr()[6];
     tcc = (tcc << 8) | opt.data_ptr()[7];
     tcc = (tcc << 8) | opt.data_ptr()[8];
@@ -463,10 +466,15 @@ IP::generic_route_option_type IP::generic_route_option_type::from_option(
         throw malformed_option();
     generic_route_option_type output;
     output.pointer = *opt.data_ptr();
-    const uint32_t *route = (const uint32_t*)(opt.data_ptr() + 1),
-                    *end = route + (opt.data_size() - 1) / sizeof(uint32_t);
-    while(route < end)
-        output.routes.push_back(address_type(*route++));
+    const uint8_t *route = opt.data_ptr() + 1;
+    const uint8_t *end = route + opt.data_size() - 1;
+
+    uint32_t uint32_t_buffer;
+    while(route < end) {
+        memcpy(&uint32_t_buffer, route, sizeof(uint32_t));
+        output.routes.push_back(address_type(uint32_t_buffer));
+        route += sizeof(uint32_t);
+    }
     return output;
 }
 }

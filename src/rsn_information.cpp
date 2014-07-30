@@ -30,6 +30,7 @@
 #include "rsn_information.h"
 #ifdef HAVE_DOT11
 
+#include <cstring>
 #include <stdexcept>
 #include "exceptions.h"
 #include "pdu_option.h"
@@ -57,40 +58,49 @@ RSNInformation::RSNInformation(const uint8_t *buffer, uint32_t total_sz) {
 void RSNInformation::init(const uint8_t *buffer, uint32_t total_sz) {
     if(total_sz <= sizeof(uint16_t) * 2 + sizeof(uint32_t))
         throw malformed_packet();
-    version(Endian::le_to_host(*(uint16_t*)buffer));
+
+    uint16_t uint16_t_buffer;
+    uint32_t uint32_t_buffer;
+
+    std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
+    version(Endian::le_to_host(uint16_t_buffer));
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
     
-    group_suite((RSNInformation::CypherSuites)*(uint32_t*)buffer);
+    std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
+    group_suite((RSNInformation::CypherSuites)uint32_t_buffer);
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);
 
-    uint16_t count = *(uint16_t*)buffer;
+    std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
     
-    if(count * sizeof(uint32_t) > total_sz)
+    if(uint16_t_buffer * sizeof(uint32_t) > total_sz)
         throw malformed_packet();
-    total_sz -= count * sizeof(uint32_t);
-    while(count--) {
-        add_pairwise_cypher((RSNInformation::CypherSuites)*(uint32_t*)buffer);
+    total_sz -= uint16_t_buffer * sizeof(uint32_t);
+    while(uint16_t_buffer--) {
+        std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
+        add_pairwise_cypher((RSNInformation::CypherSuites)uint32_t_buffer);
         buffer += sizeof(uint32_t);
     }
     check_size<uint16_t>(total_sz);
 
-    count = *(uint16_t*)buffer;
+    std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
-    if(count * sizeof(uint32_t) > total_sz)
+    if(uint16_t_buffer * sizeof(uint32_t) > total_sz)
         throw malformed_packet();
-    total_sz -= count * sizeof(uint32_t);
-    while(count--) {
-        add_akm_cypher((RSNInformation::AKMSuites)*(uint32_t*)buffer);
+    total_sz -= uint16_t_buffer * sizeof(uint32_t);
+    while(uint16_t_buffer--) {
+        std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
+        add_akm_cypher((RSNInformation::AKMSuites)uint32_t_buffer);
         buffer += sizeof(uint32_t);
     }
     check_size<uint16_t>(total_sz);
     
-    capabilities(Endian::le_to_host(*(uint16_t*)buffer));
+    std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
+    capabilities(Endian::le_to_host(uint16_t_buffer));
 }
 
 void RSNInformation::add_pairwise_cypher(CypherSuites cypher) {
@@ -117,26 +127,31 @@ RSNInformation::serialization_type RSNInformation::serialize() const {
     uint32_t size = sizeof(_version) + sizeof(_capabilities) + sizeof(uint32_t);
     size += (sizeof(uint16_t) << 1); // 2 lists count.
     size += sizeof(uint32_t) * (_akm_cyphers.size() + _pairwise_cyphers.size());
+
+    uint16_t pairwise_cyphers_size = _pairwise_cyphers.size();
+    uint16_t akm_cyphers_size = _akm_cyphers.size();
+    uint16_t capabilities = Endian::host_to_le(_capabilities);
     
     serialization_type buffer(size);
     serialization_type::value_type *ptr = &buffer[0];
-    *(uint16_t*)ptr = _version;
-    ptr += sizeof(_version);
-    *(uint32_t*)ptr = _group_suite;
+    std::memcpy(ptr, &_version, sizeof(_version));
+    ptr += sizeof(uint16_t);
+    std::memcpy(ptr, &_group_suite, sizeof(uint32_t));
     ptr += sizeof(uint32_t);
-    *(uint16_t*)ptr = _pairwise_cyphers.size();
+    std::memcpy(ptr, &pairwise_cyphers_size, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
     for(cyphers_type::const_iterator it = _pairwise_cyphers.begin(); it != _pairwise_cyphers.end(); ++it) {
-        *(uint32_t*)ptr = *it;
+        std::memcpy(ptr, &*it, sizeof(uint32_t));
         ptr += sizeof(uint32_t);
     }
-    *(uint16_t*)ptr = _akm_cyphers.size();
+    std::memcpy(ptr, &akm_cyphers_size, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
     for(akm_type::const_iterator it = _akm_cyphers.begin(); it != _akm_cyphers.end(); ++it) {
-        *(uint32_t*)ptr = *it;
+        std::memcpy(ptr, &*it, sizeof(uint32_t));
         ptr += sizeof(uint32_t);
     }
-    *(uint16_t*)ptr = _capabilities;
+    std::memcpy(ptr, &capabilities, sizeof(uint16_t));
+
     return buffer;
 }
 
