@@ -201,6 +201,22 @@ namespace Tins {
         void set_timeout(int ms);
 
         /**
+         * \brief Sets whether to extract RawPDUs or fully parsed packets.
+         *
+         * By default, packets will be parsed starting from link layer.
+         * However, if you're parsing a lot of traffic, then you might
+         * want to extract packets and push them into a queue, 
+         * so a consumer can parse them when they're popped.
+         *
+         * This method allows doing that. If the parameter is true,
+         * then packets taken from this BaseSniffer will only contain
+         * a RawPDU which will have to entire contents of the packet.
+         * 
+         * \param value Whether to extract RawPDUs or not.
+         */
+        void set_extract_raw_pdus(bool value);
+
+        /**
          * \brief Retrieves this sniffer's link type.
          *
          * This calls pcap_datalink on the stored pcap handle and
@@ -239,6 +255,7 @@ namespace Tins {
         
         pcap_t *handle;
         bpf_u_int32 mask;
+        bool extract_raw;
     };
     
     /** 

@@ -33,6 +33,7 @@
 #include "ethernetII.h"
 #include "radiotap.h"
 #include "loopback.h"
+#include "rawpdu.h"
 #include "dot3.h"
 #include "sll.h"
 #include "ppi.h"
@@ -42,7 +43,7 @@ using std::runtime_error;
 
 namespace Tins {
 BaseSniffer::BaseSniffer() 
-: handle(0), mask(0)
+: handle(0), mask(0), extract_raw(false)
 {
     
 }
@@ -116,7 +117,9 @@ PtrPacket BaseSniffer::next_packet() {
     sniff_data data;
     const int iface_type = pcap_datalink(handle);
     pcap_handler handler = 0;
-    if(iface_type == DLT_EN10MB)
+    if(extract_raw)
+        handler = &sniff_loop_handler<RawPDU>;
+    else if(iface_type == DLT_EN10MB)
         handler = sniff_loop_eth_handler;
     else if(iface_type == DLT_IEEE802_11_RADIO) {
         #ifdef HAVE_DOT11
@@ -147,6 +150,10 @@ PtrPacket BaseSniffer::next_packet() {
             return PtrPacket(0, Timestamp());
     }
     return PtrPacket(data.pdu, data.tv);
+}
+
+void BaseSniffer::set_extract_raw_pdus(bool value) {
+    extract_raw = value;
 }
 
 void BaseSniffer::stop_sniff() {
