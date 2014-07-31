@@ -29,6 +29,7 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <cstring>
 #include "endianness.h"
 #include "dhcp.h"
 #include "ethernetII.h"
@@ -52,7 +53,9 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
     buffer += BootP::header_size() - vend().size();
     total_sz -= BootP::header_size() - vend().size();
     uint8_t args[2] = {0};
-    if(total_sz < sizeof(uint32_t) || *(uint32_t*)buffer != Endian::host_to_be<uint32_t>(0x63825363))
+    uint32_t uint32_t_buffer;
+    std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
+    if(total_sz < sizeof(uint32_t) || uint32_t_buffer != Endian::host_to_be<uint32_t>(0x63825363))
         throw malformed_packet();
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);

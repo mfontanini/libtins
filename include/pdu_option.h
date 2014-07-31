@@ -32,6 +32,7 @@
 
 #include <vector>
 #include <iterator>
+#include <cstring>
 #include <algorithm>
 #include <string>
 #include <stdint.h>
@@ -266,8 +267,8 @@ namespace Internals {
             if(opt.data_size() != sizeof(T) + sizeof(U))
                 throw malformed_option();
             std::pair<T, U> output;
-            output.first = *(const T*)opt.data_ptr();
-            output.second = *(const U*)(opt.data_ptr() + sizeof(T));
+            std::memcpy(&output.first, opt.data_ptr(), sizeof(T));
+            std::memcpy(&output.second, opt.data_ptr() + sizeof(T), sizeof(U));
             if(PDUType::endianness == PDUType::BE) {
                 output.first = Endian::be_to_host(output.first);
                 output.second = Endian::be_to_host(output.second);

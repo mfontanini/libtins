@@ -153,7 +153,7 @@ Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz)
     total_sz -= sz;
     if(total_sz < sizeof(_qos_control))
         throw malformed_packet();
-    _qos_control = *(uint16_t*)buffer;
+    std::memcpy(&_qos_control, buffer, sizeof(uint16_t));
     total_sz -= sizeof(uint16_t);
     buffer += sizeof(uint16_t);
     if(total_sz) {
@@ -178,7 +178,7 @@ uint32_t Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz
     #ifdef TINS_DEBUG
     assert(sz <= total_sz);
     #endif
-    *(uint16_t*)buffer = this->_qos_control;
+    std::memcpy(buffer, &this->_qos_control, sizeof(uint16_t));
     return sz;
 }
 } // namespace Tins

@@ -72,9 +72,8 @@ ICMPv6::ICMPv6(const uint8_t *buffer, uint32_t total_sz)
     if(type() == ROUTER_ADVERT) {
         if(total_sz < sizeof(uint32_t) * 2)
             throw malformed_packet();
-        const uint32_t *ptr_32 = (const uint32_t*)buffer;
-        reach_time = *ptr_32++;
-        retrans_timer = *ptr_32++;
+        memcpy(&reach_time, buffer, sizeof(uint32_t));
+        memcpy(&retrans_timer, buffer + sizeof(uint32_t), sizeof(uint32_t));
         
         buffer += sizeof(uint32_t) * 2;
         total_sz -= sizeof(uint32_t) * 2;
@@ -197,7 +196,7 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     #ifdef TINS_DEBUG
     assert(total_sz >= header_size());
     #endif
-    icmp6hdr* ptr_header = (icmp6hdr*)buffer;
+    uint8_t *buffer_start = buffer;
     _header.cksum = 0;
     std::memcpy(buffer, &_header, sizeof(_header));
     buffer += sizeof(_header);
@@ -211,9 +210,9 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
         total_sz -= sizeof(ipaddress_type::address_size);
     }
     if(type() == ROUTER_ADVERT) {
-        *(uint32_t*)buffer = reach_time;
+        std::memcpy(buffer, &reach_time, sizeof(uint32_t));
         buffer += sizeof(uint32_t);
-        *(uint32_t*)buffer = retrans_timer;
+        std::memcpy(buffer, &retrans_timer, sizeof(uint32_t));
         buffer += sizeof(uint32_t);
         total_sz -= sizeof(uint32_t) * 2;
     }
@@ -232,11 +231,11 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
                                 ipv6->dst_addr(), 
                                 size(), 
                                 Constants::IP::PROTO_ICMPV6
-                            ) + Utils::do_checksum((uint8_t*)ptr_header, buffer);
+                            ) + Utils::do_checksum(buffer_start, buffer);
         while (checksum >> 16) 
             checksum = (checksum & 0xffff) + (checksum >> 16);
         this->checksum(~checksum);
-        ptr_header->cksum = _header.cksum;
+        memcpy(&buffer_start + 2, &_header.cksum, sizeof(uint16_t));
     }
 }
 
@@ -285,9 +284,12 @@ void ICMPv6::prefix_info(prefix_info_type info) {
     uint8_t buffer[2 + sizeof(uint32_t) * 3 + ipaddress_type::address_size];
     buffer[0] = info.prefix_len;
     buffer[1] = (info.L << 7) | (info.A << 6);
-    *(uint32_t*)(buffer + 2) = Endian::host_to_be(info.valid_lifetime);
-    *(uint32_t*)(buffer + 2 + sizeof(uint32_t)) = Endian::host_to_be(info.preferred_lifetime);
-    *(uint32_t*)(buffer + 2 + sizeof(uint32_t) * 2) = 0;
+    uint32_t uint32_t_buffer = Endian::host_to_be(info.valid_lifetime);
+    std::memcpy(buffer + 2, &uint32_t_buffer, sizeof(uint32_t));
+    uint32_t_buffer = Endian::host_to_be(info.preferred_lifetime);
+    std::memcpy(buffer + 2 + sizeof(uint32_t), &uint32_t_buffer, sizeof(uint32_t));
+    uint32_t_buffer = 0;
+    std::memcpy(buffer + 2 + sizeof(uint32_t) * 2, &uint32_t_buffer, sizeof(uint32_t));
     info.prefix.copy(buffer + 2 + sizeof(uint32_t) * 3);
     add_option(
         option(PREFIX_INFO, buffer, buffer + sizeof(buffer))
@@ -384,7 +386,8 @@ void ICMPv6::rsa_signature(const rsa_sign_type &value) {
 void ICMPv6::timestamp(const timestamp_type &value) {
     std::vector<uint8_t> buffer(6 + sizeof(uint64_t));
     std::copy(value.reserved, value.reserved + 6, buffer.begin());
-    *((uint64_t*)&buffer[6]) = Endian::host_to_be(value.timestamp);
+    uint64_t uint64_t_buffer = Endian::host_to_be(value.timestamp);
+    memcpy(&buffer[6], &uint64_t_buffer, sizeof(uint64_t));
     add_option(option(TIMESTAMP, buffer.begin(), buffer.end()));
 }
 
@@ -424,7 +427,8 @@ void ICMPv6::map(const map_type &value) {
     uint8_t buffer[sizeof(uint8_t) * 2 + sizeof(uint32_t) + ipaddress_type::address_size];
     buffer[0] = value.dist << 4 | value.pref;
     buffer[1] = value.r << 7;
-    *(uint32_t*)(buffer + 2) = Endian::host_to_be(value.valid_lifetime);
+    uint32_t uint32_t_buffer = Endian::host_to_be(value.valid_lifetime);
+    std::memcpy(buffer + 2, &uint32_t_buffer, sizeof(uint32_t));
     value.address.copy(buffer + 2 + sizeof(uint32_t));
     add_option(option(MAP, buffer, buffer + sizeof(buffer)));
 }
@@ -436,7 +440,8 @@ void ICMPv6::route_info(const route_info_type &value) {
     std::vector<uint8_t> buffer(2 + sizeof(uint32_t) + value.prefix.size() + padding);
     buffer[0] = value.prefix_len;
     buffer[1] = value.pref << 3;
-    *(uint32_t*)&buffer[2] = Endian::host_to_be(value.route_lifetime);
+    uint32_t uint32_t_buffer = Endian::host_to_be(value.route_lifetime);
+    std::memcpy(&buffer[2], &uint32_t_buffer, sizeof(uint32_t));
     // copy the prefix and then fill with padding
     buffer.insert(
         std::copy(value.prefix.begin(), value.prefix.end(), buffer.begin() + 2 + sizeof(uint32_t)),
@@ -452,7 +457,8 @@ void ICMPv6::recursive_dns_servers(const recursive_dns_type &value) {
     );
     
     buffer[0] = buffer[1] = 0;
-    *(uint32_t*)&buffer[2] = Endian::host_to_be(value.lifetime);
+    uint32_t tmp_lifetime = Endian::host_to_be(value.lifetime);
+    std::memcpy(&buffer[2], &tmp_lifetime, sizeof(uint32_t));
     std::vector<uint8_t>::iterator out = buffer.begin() + 2 + sizeof(uint32_t);
     typedef recursive_dns_type::servers_type::const_iterator iterator;
     for(iterator it = value.servers.begin(); it != value.servers.end(); ++it)
@@ -484,7 +490,8 @@ void ICMPv6::handover_key_reply(const handover_key_reply_type &value) {
     std::vector<uint8_t> buffer(data_size + padding);
     buffer[0] = padding;
     buffer[1] = value.AT << 4;
-    *(uint16_t*)&buffer[2] = Endian::host_to_be(value.lifetime);
+    uint32_t tmp_lifetime = Endian::host_to_be(value.lifetime);
+    std::memcpy(&buffer[2], &tmp_lifetime, sizeof(uint32_t));
     // copy the key, and fill with padding
     std::fill(
         std::copy(value.key.begin(), value.key.end(), buffer.begin() + 2 + sizeof(uint16_t)),
@@ -531,7 +538,8 @@ void ICMPv6::mobile_node_identifier(const mobile_node_id_type &value) {
 void ICMPv6::dns_search_list(const dns_search_list_type &value) {
     // at least it's got this size
     std::vector<uint8_t> buffer(2 + sizeof(uint32_t));
-    *(uint32_t*)&buffer[2] = Endian::host_to_be(value.lifetime);
+    uint32_t tmp_lifetime = Endian::host_to_be(value.lifetime);
+    std::memcpy(&buffer[2], &tmp_lifetime, sizeof(uint32_t));
     typedef dns_search_list_type::domains_type::const_iterator iterator;
     for(iterator it = value.domains.begin(); it != value.domains.end(); ++it) {
         size_t prev = 0, index;
@@ -699,9 +707,11 @@ ICMPv6::prefix_info_type ICMPv6::prefix_info_type::from_option(const option &opt
     output.prefix_len = *ptr++;
     output.L = (*ptr >> 7) & 0x1;
     output.A = (*ptr++ >> 6) & 0x1;
-    output.valid_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    std::memcpy(&output.valid_lifetime, ptr, sizeof(uint32_t));
+    output.valid_lifetime = Endian::be_to_host(output.valid_lifetime);
     ptr += sizeof(uint32_t);
-    output.preferred_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    std::memcpy(&output.preferred_lifetime, ptr, sizeof(uint32_t));
+    output.preferred_lifetime = Endian::be_to_host(output.preferred_lifetime);
     output.prefix = ptr + sizeof(uint32_t) * 2;
     return output;
 }
@@ -745,7 +755,7 @@ ICMPv6::map_type ICMPv6::map_type::from_option(const option &opt)
     output.dist = (*ptr >> 4) & 0x0f;
     output.pref = *ptr++ & 0x0f;
     output.r = (*ptr++ >> 7) & 0x01;
-    output.valid_lifetime = *(uint32_t*)ptr;
+    std::memcpy(&output.valid_lifetime, ptr, sizeof(uint32_t));
     ptr += sizeof(uint32_t);
     output.address = ptr;
     return output;
@@ -759,7 +769,8 @@ ICMPv6::route_info_type ICMPv6::route_info_type::from_option(const option &opt)
     route_info_type output;
     output.prefix_len = *ptr++;
     output.pref = (*ptr++ >> 3) & 0x3;
-    output.route_lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    std::memcpy(&output.route_lifetime, ptr, sizeof(uint32_t));
+    output.route_lifetime = Endian::be_to_host(output.route_lifetime);
     ptr += sizeof(uint32_t);
     output.prefix.assign(ptr, opt.data_ptr() + opt.data_size());
     return output;
@@ -771,7 +782,8 @@ ICMPv6::recursive_dns_type ICMPv6::recursive_dns_type::from_option(const option 
         throw malformed_option();
     const uint8_t *ptr = opt.data_ptr() + 2, *end = opt.data_ptr() + opt.data_size();
     recursive_dns_type output;
-    output.lifetime = Endian::be_to_host(*(uint32_t*)ptr);
+    std::memcpy(&output.lifetime, ptr, sizeof(uint32_t));
+    output.lifetime = Endian::be_to_host(output.lifetime);
     ptr += sizeof(uint32_t);
     while(ptr < end) {
         if(ptr + ICMPv6::ipaddress_type::address_size > end)
@@ -803,7 +815,8 @@ ICMPv6::handover_key_reply_type ICMPv6::handover_key_reply_type::from_option(con
     const uint8_t *ptr = opt.data_ptr() + 1, *end = opt.data_ptr() + opt.data_size();
     handover_key_reply_type output;
     output.AT = (*ptr++ >> 4) & 0x3;
-    output.lifetime = Endian::be_to_host(*(uint16_t*)ptr);
+    std::memcpy(&output.lifetime, ptr, sizeof(uint16_t));
+    output.lifetime = Endian::be_to_host(output.lifetime);
     ptr += sizeof(uint16_t);
     // is there enough size for the indicated padding?
     if(end - ptr < *opt.data_ptr())
@@ -844,7 +857,8 @@ ICMPv6::dns_search_list_type ICMPv6::dns_search_list_type::from_option(const opt
         throw malformed_option();
     const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
     dns_search_list_type output;
-    output.lifetime = Endian::be_to_host(*(uint32_t*)(ptr + 2));
+    std::memcpy(&output.lifetime, ptr + 2, sizeof(uint32_t));
+    output.lifetime = Endian::be_to_host(output.lifetime);
     ptr += 2 + sizeof(uint32_t);
     while(ptr < end && *ptr) {
         std::string domain;
@@ -867,7 +881,9 @@ ICMPv6::timestamp_type ICMPv6::timestamp_type::from_option(const option &opt)
 {
     if(opt.data_size() != 6 + sizeof(uint64_t))
         throw malformed_option();
-    timestamp_type output(Endian::be_to_host(*(uint64_t*)(opt.data_ptr() + 6)));
+    uint64_t uint64_t_buffer;
+    std::memcpy(&uint64_t_buffer, opt.data_ptr() + 6, sizeof(uint64_t));
+    timestamp_type output(Endian::be_to_host(uint64_t_buffer));
     std::copy(opt.data_ptr(), opt.data_ptr() + 6, output.reserved);
     return output;
 }
@@ -879,7 +895,8 @@ ICMPv6::shortcut_limit_type ICMPv6::shortcut_limit_type::from_option(const optio
     const uint8_t *ptr = opt.data_ptr();
     shortcut_limit_type output(*ptr++);
     output.reserved1 = *ptr++;
-    output.reserved2 = Endian::be_to_host(*(uint32_t*)ptr);
+    std::memcpy(&output.reserved2, ptr, sizeof(uint32_t));
+    output.reserved2 = Endian::be_to_host(output.reserved2);
     return output;
 }
 
@@ -888,8 +905,10 @@ ICMPv6::new_advert_interval_type ICMPv6::new_advert_interval_type::from_option(c
     if(opt.data_size() != 6)
         throw malformed_option();
     new_advert_interval_type output;
-    output.reserved = Endian::be_to_host(*(uint16_t*)opt.data_ptr());
-    output.interval = Endian::be_to_host(*(uint32_t*)(opt.data_ptr() + sizeof(uint16_t)));
+    std::memcpy(&output.reserved, opt.data_ptr(), sizeof(uint16_t));
+    output.reserved = Endian::be_to_host(output.reserved);
+    std::memcpy(&output.interval, opt.data_ptr() + sizeof(uint16_t), sizeof(uint32_t));
+    output.interval = Endian::be_to_host(output.interval);
     return output;
 }
 }

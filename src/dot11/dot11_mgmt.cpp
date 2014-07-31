@@ -496,7 +496,7 @@ Dot11ManagementFrame::fh_params_set Dot11ManagementFrame::fh_params_set::from_op
     if(opt.data_size() != 5)
         throw malformed_option();
     fh_params_set output;
-    output.dwell_time = Endian::le_to_host(*(uint16_t*)opt.data_ptr());
+    std::memcpy(&output.dwell_time, opt.data_ptr(), sizeof(uint16_t));
     output.hop_set = opt.data_ptr()[2];
     output.hop_pattern = opt.data_ptr()[3];
     output.hop_index = opt.data_ptr()[4];
@@ -510,8 +510,8 @@ Dot11ManagementFrame::cf_params_set Dot11ManagementFrame::cf_params_set::from_op
     cf_params_set output;
     output.cfp_count = *opt.data_ptr();
     output.cfp_period = opt.data_ptr()[1];
-    output.cfp_max_duration = Endian::le_to_host(*(uint16_t*)&opt.data_ptr()[2]);
-    output.cfp_dur_remaining = Endian::le_to_host(*(uint16_t*)&opt.data_ptr()[4]);
+    std::memcpy(&output.cfp_max_duration, &opt.data_ptr()[2], sizeof(uint16_t));
+    std::memcpy(&output.cfp_dur_remaining, &opt.data_ptr()[4], sizeof(uint16_t));
     return output;
 }
 
@@ -601,9 +601,10 @@ Dot11ManagementFrame::bss_load_type Dot11ManagementFrame::bss_load_type::from_op
     bss_load_type output;
     
     const uint8_t *ptr = opt.data_ptr();
-    output.station_count = Endian::le_to_host(*(uint16_t*)ptr);
+    std::memcpy(&output.station_count, ptr, sizeof(uint16_t));
     output.channel_utilization = ptr[2];
-    output.available_capacity = Endian::le_to_host(*(uint16_t*)(ptr + 3));
+    std::memcpy(&output.available_capacity, ptr + 3, sizeof(uint16_t));
+    output.available_capacity = Endian::le_to_host(output.available_capacity);
     return output;
 }
 

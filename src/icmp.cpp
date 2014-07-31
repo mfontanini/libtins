@@ -55,21 +55,24 @@ ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz)
     std::memcpy(&_icmp, buffer, sizeof(icmphdr));
     buffer += sizeof(icmphdr);
     total_sz -= sizeof(icmphdr);
+    uint32_t uint32_t_buffer = 0;
     if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
         if(total_sz < sizeof(uint32_t) * 3)
             throw malformed_packet();
-        const uint32_t *ptr = reinterpret_cast<const uint32_t*>(buffer);
-        original_timestamp(*ptr++);
-        receive_timestamp(*ptr++);
-        transmit_timestamp(*ptr++);
+        memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
+        original_timestamp(uint32_t_buffer);
+        memcpy(&uint32_t_buffer, buffer + sizeof(uint32_t), sizeof(uint32_t));
+        receive_timestamp(uint32_t_buffer);
+        memcpy(&uint32_t_buffer, buffer + 2 * sizeof(uint32_t), sizeof(uint32_t));
+        transmit_timestamp(uint32_t_buffer);
         total_sz -= sizeof(uint32_t) * 3;
         buffer += sizeof(uint32_t) * 3;
     }
     else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
         if(total_sz < sizeof(uint32_t))
             throw malformed_packet();
-        const uint32_t *ptr = reinterpret_cast<const uint32_t*>(buffer);
-        address_mask(address_type(*ptr++));
+        memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
+        address_mask(address_type(uint32_t_buffer));
         total_sz -= sizeof(uint32_t);
         buffer += sizeof(uint32_t);
     }
@@ -194,15 +197,18 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
     assert(total_sz >= sizeof(icmphdr));
     #endif
 
+    uint32_t uint32_t_buffer;
     if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
-        uint32_t *ptr = reinterpret_cast<uint32_t*>(buffer + sizeof(icmphdr));
-        *ptr++ = original_timestamp();
-        *ptr++ = receive_timestamp();
-        *ptr++ = transmit_timestamp();
+        uint32_t_buffer = original_timestamp();
+        memcpy(buffer + sizeof(icmphdr), &uint32_t_buffer, sizeof(uint32_t));
+        uint32_t_buffer = receive_timestamp();
+        memcpy(buffer + sizeof(icmphdr) + sizeof(uint32_t), &uint32_t_buffer, sizeof(uint32_t));
+        uint32_t_buffer = transmit_timestamp();
+        memcpy(buffer + sizeof(icmphdr) + 2 * sizeof(uint32_t), &uint32_t_buffer, sizeof(uint32_t));
     }
     else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
-        uint32_t *ptr = reinterpret_cast<uint32_t*>(buffer + sizeof(icmphdr));
-        *ptr++ = address_mask();
+        uint32_t_buffer = address_mask();
+        memcpy(buffer + sizeof(icmphdr), &uint32_t_buffer, sizeof(uint32_t));
     }
     // checksum calc
     _icmp.check = 0;
@@ -213,7 +219,7 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
         checksum = (checksum & 0xffff) + (checksum >> 16);
 
     _icmp.check = Endian::host_to_be<uint16_t>(~checksum);
-    ((icmphdr*)buffer)->check = _icmp.check;
+    memcpy(buffer + 2, &_icmp.check, sizeof(uint16_t));
 }
 
 bool ICMP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {

@@ -97,12 +97,14 @@ const uint8_t* DNS::find_dname_end(const uint8_t *ptr) const {
 
 const uint8_t *DNS::find_section_end(const uint8_t *ptr, const uint32_t num_records) const {
     const uint8_t *end = &records_data[0] + records_data.size();
+    uint16_t uint16_t_buffer;
     for(uint32_t i = 0; i < num_records; ++i) {
         ptr = find_dname_end(ptr);
         if(ptr + sizeof(uint16_t) * 3 + sizeof(uint32_t) > end)
             throw malformed_packet();
         ptr += sizeof(uint16_t) * 2 + sizeof(uint32_t);
-        uint16_t data_size = Endian::be_to_host(*(uint16_t*)ptr); // Data size
+        std::memcpy(&uint16_t_buffer, ptr, sizeof(uint16_t));
+        uint16_t data_size = Endian::be_to_host(uint16_t_buffer); // Data size
         ptr += sizeof(uint16_t);
         if(ptr + data_size > end)
             throw malformed_packet();
@@ -168,8 +170,11 @@ void DNS::add_query(const Query &query) {
     string new_str = encode_domain_name(query.dname());
     // Type (2 bytes) + Class (2 Bytes)
     new_str.insert(new_str.end(), sizeof(uint16_t) * 2, ' ');
-    *(uint16_t*)&new_str[new_str.size() - 4] = Endian::host_to_be<uint16_t>(query.type());
-    *(uint16_t*)&new_str[new_str.size() - 2] = Endian::host_to_be<uint16_t>(query.query_class());
+    uint16_t uint16_t_buffer;
+    uint16_t_buffer = Endian::host_to_be<uint16_t>(query.type());
+    std::memcpy(&new_str[new_str.size() - 4], &uint16_t_buffer, sizeof(uint16_t));
+    uint16_t_buffer = Endian::host_to_be<uint16_t>(query.query_class());
+    std::memcpy(&new_str[new_str.size() - 2], &uint16_t_buffer, sizeof(uint16_t));
 
     uint32_t offset = new_str.size(), threshold = answers_idx;
     update_records(answers_idx, answers_count(), threshold, offset);
@@ -235,15 +240,23 @@ void DNS::add_record(const Resource &resource, const sections_type &sections) {
         buffer.end(),
         &records_data[threshold]
     );
-    *(uint16_t*)ptr = Endian::host_to_be(resource.type());
+
+    uint16_t uint16_t_buffer;
+    uint32_t uint32_t_buffer;
+
+    uint16_t_buffer = Endian::host_to_be(resource.type());
+    std::memcpy(ptr, &uint16_t_buffer, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
-    *(uint16_t*)ptr = Endian::host_to_be(resource.query_class());
+    uint16_t_buffer = Endian::host_to_be(resource.query_class());
+    std::memcpy(ptr, &uint16_t_buffer, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
-    *(uint32_t*)ptr = Endian::host_to_be(resource.ttl());
+    uint32_t_buffer = Endian::host_to_be(resource.ttl());
+    std::memcpy(ptr, &uint32_t_buffer, sizeof(uint32_t));
     ptr += sizeof(uint32_t);
-    *(uint16_t*)ptr = Endian::host_to_be<uint16_t>(
+    uint16_t_buffer = Endian::host_to_be<uint16_t>(
         data_size + (resource.type() == MX ? 2 : 0)
     );
+    std::memcpy(ptr, &uint16_t_buffer, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
     if(resource.type() == MX) {
         ptr += sizeof(uint16_t);
@@ -305,7 +318,9 @@ const uint8_t* DNS::compose_name(const uint8_t *ptr, char *out_ptr) const {
         if((*ptr & 0xc0)) {
             if(ptr + sizeof(uint16_t) > end)
                 throw malformed_packet();
-            uint16_t index = Endian::be_to_host(*(uint16_t*)ptr) & 0x3fff;
+            uint16_t index;
+            std::memcpy(&index, ptr, sizeof(uint16_t));
+            index = Endian::be_to_host(index) & 0x3fff;
             // Check that the offset is neither too low or too high
             if(index < 0x0c || &records_data[index - 0x0c] >= ptr)
                 throw malformed_packet();
@@ -376,13 +391,17 @@ void DNS::convert_records(const uint8_t *ptr, const uint8_t *end, resources_type
         // Retrieve the following fields.
         uint16_t type, qclass, data_size;
         uint32_t ttl;
-        type = Endian::be_to_host(*(uint16_t*)ptr); // Type
+        std::memcpy(&type, ptr, sizeof(uint16_t)); // Type
+        type = Endian::be_to_host(type);
         ptr += sizeof(uint16_t);
-        qclass = Endian::be_to_host(*(uint16_t*)ptr); // Class
+        std::memcpy(&qclass, ptr, sizeof(uint16_t)); // Class
+        qclass = Endian::be_to_host(qclass);
         ptr += sizeof(uint16_t);
-        ttl = Endian::be_to_host(*(uint32_t*)ptr); // TTL
+        std::memcpy(&ttl, ptr, sizeof(uint32_t)); // TTL
+        ttl = Endian::be_to_host(ttl);
         ptr += sizeof(uint32_t);
-        data_size = Endian::be_to_host(*(uint16_t*)ptr); // Data size
+        std::memcpy(&data_size, ptr, sizeof(uint16_t)); // Data size
+        data_size = Endian::be_to_host(data_size);
         ptr += sizeof(uint16_t);
         // Skip the preference field if it's MX
         if(type ==  MX) {
@@ -393,6 +412,7 @@ void DNS::convert_records(const uint8_t *ptr, const uint8_t *end, resources_type
         }
         if(ptr + data_size > end)
             throw malformed_packet();
+
         switch(type) {
             case AAAA:
                 if(data_size != 16)
@@ -400,10 +420,14 @@ void DNS::convert_records(const uint8_t *ptr, const uint8_t *end, resources_type
                 addr = IPv6Address(ptr).to_string();
                 break;
             case A:
-                if(data_size != 4)
+                if(data_size == 4) {
+                    uint32_t uint32_t_buffer;
+                    std::memcpy(&uint32_t_buffer, ptr, sizeof(uint32_t));
+                    inline_convert_v4(uint32_t_buffer, small_addr_buf);
+                    used_small_buffer = true;
+                }
+                else
                     throw malformed_packet();
-                inline_convert_v4(*(uint32_t*)ptr, small_addr_buf);
-                used_small_buffer = true;
                 break;
             case NS:
             case CNAME:
@@ -443,9 +467,12 @@ void DNS::convert_records(const uint8_t *ptr, const uint8_t *end, resources_type
 uint8_t *DNS::update_dname(uint8_t *ptr, uint32_t threshold, uint32_t offset) {
     while(*ptr != 0) {
         if((*ptr & 0xc0)) {
-            uint16_t index = Endian::be_to_host(*(uint16_t*)ptr) & 0x3fff;
+            uint16_t index;
+            std::memcpy(&index, ptr, sizeof(uint16_t));
+            index = Endian::be_to_host(index) & 0x3fff;
             if(index > threshold) {
-                *(uint16_t*)ptr = Endian::host_to_be<uint16_t>((index + offset) | 0xc000);
+                index = Endian::host_to_be<uint16_t>((index + offset) | 0xc000);
+                std::memcpy(ptr, &index, sizeof(uint16_t));
             }
             ptr += sizeof(uint16_t);
             break;
@@ -463,9 +490,13 @@ void DNS::update_records(uint32_t &section_start, uint32_t num_records, uint32_t
     uint8_t *ptr = &records_data[section_start];
     for(uint32_t i = 0; i < num_records; ++i) {
         ptr = update_dname(ptr, threshold, offset);
-        uint16_t type = Endian::be_to_host(*(const uint16_t*)ptr);
+        uint16_t type;
+        std::memcpy(&type, ptr, sizeof(uint16_t));
+        type = Endian::be_to_host(type);
         ptr += sizeof(uint16_t) * 2 + sizeof(uint32_t);
-        uint16_t size = Endian::be_to_host(*(uint16_t*)ptr);
+        uint16_t size;
+        std::memcpy(&size, ptr, sizeof(uint16_t));
+        size = Endian::be_to_host(size);
         ptr += sizeof(uint16_t);
         if(type == MX) {
             ptr += sizeof(uint16_t);
@@ -483,15 +514,19 @@ DNS::queries_type DNS::queries() const {
     queries_type output;
     const uint8_t *ptr = &records_data[0], *end = &records_data[answers_idx];
     char buffer[256];
+    uint16_t tmp_query_type;
+    uint16_t tmp_query_class;
     while(ptr < end) {
         ptr = compose_name(ptr, buffer);
         if(ptr + sizeof(uint16_t) * 2 > end) 
             throw malformed_packet();
+        std::memcpy(&tmp_query_type, ptr, sizeof(uint16_t));
+        std::memcpy(&tmp_query_class, ptr + 2, sizeof(uint16_t));
         output.push_back(
             Query(
                 buffer, 
-                (QueryType)Endian::be_to_host(*(const uint16_t*)ptr), 
-                (QueryClass)Endian::be_to_host(*(const uint16_t*)(ptr + 2))
+                (QueryType)Endian::be_to_host(tmp_query_type), 
+                (QueryClass)Endian::be_to_host(tmp_query_class)
             )
         );
         ptr += sizeof(uint16_t) * 2;
