@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS=subdir-objects
+AUTOMAKE_OPTIONS=subdir-objects 1.11
 ACLOCAL_AMFLAGS=${ACLOCAL_FLAGS} -I m4
 
 # pkg-config stuff
