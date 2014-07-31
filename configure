@@ -2506,7 +2506,7 @@ test -n "$target_alias" &&
 
 ac_config_headers="$ac_config_headers include/config.h"
 
-am__api_version='1.13'
+am__api_version='1.11'
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
