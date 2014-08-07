@@ -1,4 +1,4 @@
-AC_INIT([libtins], [2.0], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
+AC_INIT([libtins], [3.0], [matias.fontanini@gmail.com], [libtins], [http://libtins.sourceforge.net])
 AC_CANONICAL_SYSTEM
 AC_CONFIG_HEADER(include/config.h)
 AM_INIT_AUTOMAKE([-Wall -Werror -Wno-extra-portability foreign])
@@ -80,6 +80,6 @@ AC_ARG_ENABLE(
 AC_SUBST(CXXFLAGS)
 AC_SUBST(LIBS)
 AC_SUBST(LIBTINS_INCLUDE_DIR)
-AC_SUBST([LIBTINS_VERSION], [2:0:0])
+AC_SUBST([LIBTINS_VERSION], [3:0:0])
 AC_CONFIG_FILES([Makefile libtins.pc])
 AC_OUTPUT
