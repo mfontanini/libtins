@@ -235,7 +235,7 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
         while (checksum >> 16) 
             checksum = (checksum & 0xffff) + (checksum >> 16);
         this->checksum(~checksum);
-        memcpy(&buffer_start + 2, &_header.cksum, sizeof(uint16_t));
+        memcpy(buffer_start + 2, &_header.cksum, sizeof(uint16_t));
     }
 }
 
