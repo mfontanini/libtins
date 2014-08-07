@@ -85,13 +85,13 @@ TEST_F(AllocatorsTest, LinkLayerPDUs) {
         EXPECT_EQ(pkt.serialize(), link_layer_data);
     }
     {
-        SLL pkt(&link_layer_data[0], link_layer_data.size());
-        EXPECT_TRUE(pkt.find_pdu<DummyPDU<3> >());
+        Dot1Q pkt(&link_layer_data[0], link_layer_data.size());
+        EXPECT_TRUE(pkt.find_pdu<DummyPDU<2> >());
         EXPECT_EQ(pkt.serialize(), link_layer_data);
     }
     {
-        Dot1Q pkt(&link_layer_data[0], link_layer_data.size());
-        EXPECT_TRUE(pkt.find_pdu<DummyPDU<2> >());
+        SLL pkt(&link_layer_data[0], link_layer_data.size());
+        EXPECT_TRUE(pkt.find_pdu<DummyPDU<3> >());
         EXPECT_EQ(pkt.serialize(), link_layer_data);
     }
 }

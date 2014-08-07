@@ -97,22 +97,13 @@ void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(_snap));
     #endif
-    if (!_snap.eth_type && inner_pdu()) {
-        uint16_t type = Tins::Constants::Ethernet::IP;
-        switch (inner_pdu()->pdu_type()) {
-            case PDU::IP:
-                type = Tins::Constants::Ethernet::IP;
-                break;
-            case PDU::ARP:
-                type = Tins::Constants::Ethernet::ARP;
-                break;
-            case PDU::EAPOL:
-                type = Tins::Constants::Ethernet::EAPOL;
-                break;
-            default:
-                type = 0;
-        }
-        _snap.eth_type = Endian::host_to_be(type);
+    if (inner_pdu()) {
+        Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
+            inner_pdu()->pdu_type()
+        );
+        _snap.eth_type = Endian::host_to_be(
+            static_cast<uint16_t>(flag)
+        );
     }
     std::memcpy(buffer, &_snap, sizeof(_snap));
 }
