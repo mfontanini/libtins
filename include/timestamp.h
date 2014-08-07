@@ -72,6 +72,22 @@ public:
      * Default constructs the timestamp.
      */
     Timestamp() : tv() {}
+
+    #if TINS_IS_CXX11
+        /**
+         * Constructs a Timestamp from a std::chrono::duration.
+         */
+        template<typename Rep, typename Period>
+        Timestamp(const std::chrono::duration<Rep, Period>& ts) {
+            using std::chrono::duration_cast;
+            using std::chrono::microseconds;
+            using std::chrono::seconds;
+
+            tv.tv_sec = duration_cast<seconds>(ts).count();
+            tv.tv_usec = duration_cast<microseconds>(
+                ts - seconds(tv.tv_sec)).count();
+        }
+    #endif
     
     /**
      * Constructs a timestamp from a timeval object.
