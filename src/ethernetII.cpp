@@ -154,7 +154,7 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     #endif
 
     /* Inner type defaults to IP */
-    if ((_eth.payload_type == 0) && inner_pdu()) {
+    if (inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
             inner_pdu()->pdu_type()
         );

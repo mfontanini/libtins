@@ -193,7 +193,7 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
         case PDU::PPPOE:
             return Constants::Ethernet::PPPOED;
         default:
-            if(Internals::pdu_type_registered<EthernetII>(flag))
+            if(Internals::pdu_type_registered<EthernetII>(flag)) 
                 return static_cast<Constants::Ethernet::e>(
                     Internals::pdu_type_to_id<EthernetII>(flag)
                 );
