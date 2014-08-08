@@ -438,12 +438,14 @@ void DNS::convert_records(const uint8_t *ptr, const uint8_t *end, resources_type
                 used_small_buffer = true;
                 break;
             default:
-                if(data_size <= 256) {
+                if(data_size < sizeof(small_addr_buf) - 1) {
                     std::copy(
                         ptr,
                         ptr + data_size,
                         small_addr_buf
                     );
+                    // null terminator
+                    small_addr_buf[data_size] = 0;
                     used_small_buffer = true;
                 }
                 else
