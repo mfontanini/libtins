@@ -1,3 +1,66 @@
+v3.0 - Thu Aug  7 21:39:09 ART 2014
+
+- Timestamps can now be constructed from std::chrono::duration.
+
+- Packets can now be constructed from a PDU pointer and take ownership
+of it.
+
+- All protocols now set the next layer protocol flag, regardless if 
+it was already set. This was not done in some protocols, 
+like EthernetII, and as a consequence if the network layer protocol
+was replaced by other, the packet would be serialized incorrectly.
+
+- Fixed invalid parsing of some unknown DNS records.
+
+- Fixed unaligned memory accesses that were not supported under
+ARMv4 and ARMv5.
+
+- Added BaseSniffer::set_extract_raw_pdus.
+
+- Reduced minimum automake version to 1.11.
+
+- Added Utils::to_string(PDU::PDUType).
+
+- Fixed error compilations on Windows.
+
+- Fixed ICMPv6 checksum calculation.
+
+- Added method in IP and TCP to emplace an option (C++11 only).
+
+- Added small option optimization to PDUOption.
+
+- Fixed error compilation on RSNInformation.
+
+- Renamed ICMP::check to ICMP::checksum.
+
+- Added Sniffer support to set interface to promiscuous mode.
+
+- TCPStreamFollower now handles overlapping fragments correctly.
+
+- Fixed bugs in TCPStreamFollower which didn't allow it to follow
+stream correctly.
+
+- TCPStreamFollower now doesn't clear its state after every call to
+TCPStreamFollower::follow_streams.
+
+- Added IPv6 flag check to pdu_flag_to_ip_type.
+
+- Added DHCP::hostname to extract the hostname options.
+
+- Removed extra qualifier on SessionKeys::decrypt_unicast which 
+produced compilation errors on some platforms.
+
+- PacketSender::send now uses PDU::matches_flag to match specific
+PDU types.
+
+- Removed 'no newline at end of file' warnings.
+
+- Fixed bug when calling BIOCIMMEDIATE on *BSD.
+
+- Fixed bug on PacketSender::send_recv which didn't work under *BSD.
+
+- Fixed bug triggered by not including the string header.
+
 v2.0 - Thu Jan 23 11:09:38 ART 2014 
 
 - DNSResourceRecord was removed. Now DNS records are added using 
