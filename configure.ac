@@ -4,7 +4,7 @@ AC_CONFIG_HEADER(include/config.h)
 AM_INIT_AUTOMAKE([-Wall -Werror -Wno-extra-portability foreign])
 LT_INIT([disable-static])
 AC_CONFIG_MACRO_DIR([m4])
-AM_MAINTAINER_MODE([enable])
+AM_MAINTAINER_MODE([disable])
 
 AC_PROG_CXX
 AC_LANG(C++)
