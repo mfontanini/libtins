@@ -196,6 +196,7 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     #ifdef TINS_DEBUG
     assert(total_sz >= header_size());
     #endif
+    uint32_t full_sz = total_sz;
     uint8_t *buffer_start = buffer;
     _header.cksum = 0;
     std::memcpy(buffer, &_header, sizeof(_header));
@@ -231,7 +232,7 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
                                 ipv6->dst_addr(), 
                                 size(), 
                                 Constants::IP::PROTO_ICMPV6
-                            ) + Utils::do_checksum(buffer_start, buffer);
+                            ) + Utils::do_checksum(buffer_start, buffer_start + full_sz);
         while (checksum >> 16) 
             checksum = (checksum & 0xffff) + (checksum >> 16);
         this->checksum(~checksum);
@@ -241,8 +242,16 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
 
 // can i haz more?
 bool ICMPv6::has_options() const {
-    return type() == NEIGHBOUR_SOLICIT ||
-            type() == ROUTER_ADVERT;
+    switch (type()) {
+        case NEIGHBOUR_SOLICIT:
+        case NEIGHBOUR_ADVERT:
+        case ROUTER_SOLICIT:
+        case ROUTER_ADVERT:
+        case REDIRECT:
+            return true;
+        default:
+            return false;
+    }
 }
 
 void ICMPv6::add_option(const option &option) {
