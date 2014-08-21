@@ -295,13 +295,15 @@ void DNS::add_additional(const Resource &resource){
 std::string DNS::encode_domain_name(const std::string &dn) {
     std::string output;
     size_t last_index(0), index;
-    while((index = dn.find('.', last_index+1)) != string::npos) {
-        output.push_back(index - last_index);
-        output.append(dn.begin() + last_index, dn.begin() + index);
-        last_index = index + 1; //skip dot
+    if(!dn.empty()) {
+        while((index = dn.find('.', last_index+1)) != string::npos) {
+            output.push_back(index - last_index);
+            output.append(dn.begin() + last_index, dn.begin() + index);
+            last_index = index + 1; //skip dot
+        }
+        output.push_back(dn.size() - last_index);
+        output.append(dn.begin() + last_index, dn.end());
     }
-    output.push_back(dn.size() - last_index);
-    output.append(dn.begin() + last_index, dn.end());
     output.push_back('\0');
     return output;
 }
