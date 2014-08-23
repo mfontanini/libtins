@@ -1,7 +1,6 @@
 FILE(GLOB INCLUDE_FILES "*.h")
 INSTALL(
     FILES ${INCLUDE_FILES} 
-    DESTINATION include/tins
+    DESTINATION include/tins/dot11
     COMPONENT Headers
 )
-ADD_SUBDIRECTORY(dot11)

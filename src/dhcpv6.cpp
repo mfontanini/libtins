@@ -368,8 +368,6 @@ void DHCPv6::rapid_commit() {
 }
 
 void DHCPv6::user_class(const user_class_type &value) {
-    typedef user_class_type::data_type::const_iterator iterator;
-    
     std::vector<uint8_t> buffer;
     Internals::class_option_data2option(value.data.begin(), value.data.end(), buffer);
     add_option(
