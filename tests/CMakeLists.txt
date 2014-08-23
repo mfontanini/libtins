@@ -1,0 +1,6 @@
+FIND_PACKAGE(GTest)
+IF(GTEST_FOUND)
+    ADD_SUBDIRECTORY(src)
+ELSE(GTEST_FOUND)
+    MESSAGE(STATUS "Google test not found. Disabling tests.")
+ENDIF(GTEST_FOUND)

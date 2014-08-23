@@ -49,12 +49,16 @@ ELSE(LIBTINS_ENABLE_CXX11)
 ENDIF(LIBTINS_ENABLE_CXX11)
 
 OPTION(LIBTINS_ENABLE_DOT11 "Compile libtins with IEEE 802.11 support" ON)
-OPTION(LIBTINS_ENABLE_WPA2 "Compile libtins with WPA2 decryption features (requires OpenSSL)" OFF)
+OPTION(LIBTINS_ENABLE_WPA2 "Compile libtins with WPA2 decryption features (requires OpenSSL)" ON)
 IF(LIBTINS_ENABLE_DOT11)
     SET(HAVE_DOT11 ON)
+    MESSAGE(STATUS "Enabling IEEE 802.11 support.")
     IF(LIBTINS_ENABLE_WPA2)
         FIND_PACKAGE(OpenSSL REQUIRED)
         SET(HAVE_WPA2_DECRYPTION ON)
+        MESSAGE(STATUS "Enabling WPA2 decryption support.")
+    ELSE(LIBTINS_ENABLE_WPA2)
+        MESSAGE(STATUS "Disabling WPA2 decryption support.")
     ENDIF(LIBTINS_ENABLE_WPA2)
 ENDIF(LIBTINS_ENABLE_DOT11)
 
@@ -67,9 +71,10 @@ CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/include/config.h"
 )
 
+ENABLE_TESTING()
 ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
-ENABLE_TESTING()
+ADD_SUBDIRECTORY(tests)
 
 # Add all targets to the build-tree export set
 EXPORT(TARGETS tins
