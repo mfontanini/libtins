@@ -15,12 +15,15 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 # Build output checks
 OPTION(LIBTINS_BUILD_SHARED "Build libtins as a shared library." ON)
 IF(LIBTINS_BUILD_SHARED)
-  MESSAGE(STATUS "Build will generate a shared library.")
-  MESSAGE(STATUS "Use LIBTINS_BUILD_SHARED=0 to perform a static build")
-  SET(LIBTINS_TYPE SHARED)
+    MESSAGE(
+        STATUS 
+        "Build will generate a shared library. "
+        "Use LIBTINS_BUILD_SHARED=0 to perform a static build"
+    )
+    SET(LIBTINS_TYPE SHARED)
 ELSE(LIBTINS_BUILD_SHARED)
-  MESSAGE(STATUS "Build will generate a static library.")
-  SET(LIBTINS_TYPE STATIC)
+    MESSAGE(STATUS "Build will generate a static library.")
+    SET(LIBTINS_TYPE STATIC)
 ENDIF(LIBTINS_BUILD_SHARED)
 
 # The version number.
@@ -45,7 +48,11 @@ IF(LIBTINS_ENABLE_CXX11)
         MESSAGE(FATAL_ERROR "C++11 features requested but the compiler does not support them.")
     ENDIF(CXX11_COMPILER_FLAGS AND HAS_CXX11_NULLPTR AND HAS_CXX11_RVALUE_REFERENCES)
 ELSE(LIBTINS_ENABLE_CXX11)
-    MESSAGE(STATUS "Disabling C++11 features. Use LIBTINS_ENABLE_CXX11=1 to enable them.")
+    MESSAGE(
+        WARNING 
+        "Disabling C++11 features. Use LIBTINS_ENABLE_CXX11=1 to enable them. "
+        "If your compiler is fairly new, you should enable this option, as it "
+        "increases the library performance")
 ENDIF(LIBTINS_ENABLE_CXX11)
 
 OPTION(LIBTINS_ENABLE_DOT11 "Compile libtins with IEEE 802.11 support" ON)
@@ -75,28 +82,41 @@ ENABLE_TESTING()
 ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(tests)
+ADD_SUBDIRECTORY(examples)
 
 # Add all targets to the build-tree export set
-EXPORT(TARGETS tins
-       FILE "${PROJECT_BINARY_DIR}/libtinsTargets.cmake")
+EXPORT(
+    TARGETS tins
+    FILE "${PROJECT_BINARY_DIR}/libtinsTargets.cmake"
+)
 
 # Export the package for use from the build-tree
 # (this registers the build-tree with a global CMake-registry)
 EXPORT(PACKAGE libtins)
+
 # Create the libtinsConfig.cmake and libtinsConfigVersion.cmake files
 # for the build tree
 SET(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
-CONFIGURE_FILE(libtinsConfig.cmake.in
-               "${PROJECT_BINARY_DIR}/libtinsConfig.cmake" @ONLY)
-CONFIGURE_FILE(libtinsConfigVersion.cmake.in
-               "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake" @ONLY)
+CONFIGURE_FILE(
+    libtinsConfig.cmake.in
+    "${PROJECT_BINARY_DIR}/libtinsConfig.cmake" @ONLY
+)
+CONFIGURE_FILE(
+    libtinsConfigVersion.cmake.in
+    "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake" @ONLY
+)
 # Install the libtinsConfig.cmake and libtinsConfigVersion.cmake
-INSTALL(FILES
-       "${PROJECT_BINARY_DIR}/libtinsConfig.cmake"
-       "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake"
-       DESTINATION CMake
-       COMPONENT dev)
+INSTALL(
+    FILES
+    "${PROJECT_BINARY_DIR}/libtinsConfig.cmake"
+   "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake"
+   DESTINATION CMake
+   COMPONENT dev
+)
+
 # Install the export set for use with the install-tree
-INSTALL(EXPORT libtinsTargets
-        DESTINATION CMake
-        COMPONENT dev)
+INSTALL(
+    EXPORT libtinsTargets
+    DESTINATION CMake
+    COMPONENT dev
+)
