@@ -40,7 +40,7 @@ FIND_PACKAGE(PCAP REQUIRED)
 # Set some Windows specific flags
 IF(WIN32)
     # We need to link against these libs
-    SET(LIBTINS_OS_LIBS Ws2_32.lib Iphlp/api.lib)
+    SET(LIBTINS_OS_LIBS Ws2_32.lib Iphlpapi.lib)
 
     # Add the NOMINMAX macro to avoid Windows' min and max macros.
     # While compiling on windows, for some reason, WIN32 is not defined,
