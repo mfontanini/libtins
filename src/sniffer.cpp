@@ -28,6 +28,7 @@
  */
 
 #include <algorithm>
+#include <sstream>
 #include "sniffer.h"
 #include "dot11/dot11_base.h"
 #include "ethernetII.h"
@@ -196,14 +197,17 @@ void BaseSniffer::set_timeout(int ms) {
 // ****************************** Sniffer ******************************
 
 pcap_t *
-pcap_open_live_extended(const char *source, int snaplen, int promisc, int to_ms, int rfmon, char *errbuf)
+pcap_open_live_extended(const char *source, int snaplen, int promisc, int to_ms, int rfmon, std::string& error)
 {
     pcap_t *p;
+    char errbuf[PCAP_ERRBUF_SIZE];
     int status;
     
     p = pcap_create(source, errbuf);
-    if (p == NULL)
+    if (p == NULL) {
+        error = errbuf;
         return (NULL);
+    }
     status = pcap_set_snaplen(p, snaplen);
     if (status < 0)
         goto fail;
@@ -213,18 +217,24 @@ pcap_open_live_extended(const char *source, int snaplen, int promisc, int to_ms,
     status = pcap_set_timeout(p, to_ms);
     if (status < 0)
         goto fail;
+
+    #ifndef WIN32
     if(pcap_can_set_rfmon(p) == 1) {
         status = pcap_set_rfmon(p, rfmon);
         if (status < 0)
             goto fail;
     }
+    #endif // WIN32
+    
     status = pcap_activate(p);
     if (status < 0)
         goto fail;
     return (p);
     
 fail:
-    snprintf(errbuf, PCAP_ERRBUF_SIZE, "%s: %s", source, pcap_geterr(p));
+    std::ostringstream oss;
+    oss << source << ": " << pcap_geterr(p);
+    error = oss.str();
     pcap_close(p);
     return (NULL);
 }
@@ -250,9 +260,17 @@ void Sniffer::init_sniffer(const std::string &device, unsigned max_packet_size,
         ip = 0;
         if_mask = 0;
     }
-    pcap_t *phandle = pcap_open_live_extended(device.c_str(), max_packet_size, promisc, 1000, rfmon, error);
+    std::string string_error;
+    pcap_t *phandle = pcap_open_live_extended(
+        device.c_str(), 
+        max_packet_size, 
+        promisc, 
+        1000, 
+        rfmon, 
+        string_error
+    );
     if(!phandle)
-        throw runtime_error(error);
+        throw runtime_error(string_error);
     
     init(phandle, filter, if_mask);
 }

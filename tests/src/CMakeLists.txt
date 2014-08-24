@@ -1,9 +1,17 @@
 # Use libtins' include directories + test include directories
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include/ ../include/)
 
+# Find pthread library
+FIND_PACKAGE(Threads REQUIRED)
+
 # Link against GoogleTest, libtins and pthread.
 # Pthread is required by GoogleTest
-LINK_LIBRARIES(${GTEST_LIBRARIES} ${GTEST_MAIN_LIBRARY} tins pthread)
+LINK_LIBRARIES(
+    ${GTEST_LIBRARIES} 
+    ${GTEST_MAIN_LIBRARY} 
+    tins 
+    ${CMAKE_THREAD_LIBS_INIT}
+)
 
 # Add tests target
 ADD_CUSTOM_TARGET(

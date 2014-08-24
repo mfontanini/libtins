@@ -286,7 +286,7 @@ public:
      * \return true if pdu() == nullptr, false otherwise.
      */
     operator bool() const {
-        return bool(pdu_);
+        return pdu_ ? true : false;
     }
     
     /**

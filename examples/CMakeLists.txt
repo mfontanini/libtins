@@ -1,4 +1,5 @@
 FIND_PACKAGE(libtins QUIET)
+FIND_PACKAGE(Threads QUIET)
 
 IF(libtins_FOUND)
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/examples)
@@ -39,7 +40,11 @@ IF(libtins_FOUND)
     ADD_EXECUTABLE(portscan EXCLUDE_FROM_ALL portscan.cpp)
     ADD_EXECUTABLE(traceroute EXCLUDE_FROM_ALL traceroute.cpp)
 
-    TARGET_LINK_LIBRARIES(portscan pthread)
+    if(THREADS_FOUND)
+        TARGET_LINK_LIBRARIES(portscan ${CMAKE_THREAD_LIBS_INIT})
+    ELSE(THREADS_FOUND)
+        MESSAGE(WARNING "Disabling portscan example since pthreads library was not found.")
+    ENDIF(THREADS_FOUND)
 ELSE(libtins_FOUND)
     MESSAGE(
         WARNING 

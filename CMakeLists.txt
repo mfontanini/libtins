@@ -37,12 +37,24 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # Look for libpcap
 FIND_PACKAGE(PCAP REQUIRED)
 
+# Set some Windows specific flags
+IF(WIN32)
+    # We need to link against these libs
+    SET(LIBTINS_OS_LIBS Ws2_32.lib Iphlp/api.lib)
+
+    # Add the NOMINMAX macro to avoid Windows' min and max macros.
+    # While compiling on windows, for some reason, WIN32 is not defined,
+    # maybe we could fix this later, but it's OK for now.
+    ADD_DEFINITIONS(-DNOMINMAX -DWIN32)
+ENDIF(WIN32)
+
 # Compilation options
 OPTION(LIBTINS_ENABLE_CXX11 "Compile libtins with c++11 features" OFF)
 IF(LIBTINS_ENABLE_CXX11)
     SET(HAVE_CXX11 ON)
     INCLUDE(CheckCXX11Features)
     IF(CXX11_COMPILER_FLAGS AND HAS_CXX11_NULLPTR AND HAS_CXX11_RVALUE_REFERENCES)
+        MESSAGE(STATUS "Enabling C++11 features")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS}")
     ELSE(CXX11_COMPILER_FLAGS AND HAS_CXX11_NULLPTR AND HAS_CXX11_RVALUE_REFERENCES)
         MESSAGE(FATAL_ERROR "C++11 features requested but the compiler does not support them.")
@@ -51,8 +63,8 @@ ELSE(LIBTINS_ENABLE_CXX11)
     MESSAGE(
         WARNING 
         "Disabling C++11 features. Use LIBTINS_ENABLE_CXX11=1 to enable them. "
-        "If your compiler is fairly new, you should enable this option, as it "
-        "increases the library performance")
+        "Unless you are using an old compiler, you should enable this option, "
+        "as it increases the library's performance")
 ENDIF(LIBTINS_ENABLE_CXX11)
 
 OPTION(LIBTINS_ENABLE_DOT11 "Compile libtins with IEEE 802.11 support" ON)
