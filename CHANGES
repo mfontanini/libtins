@@ -1,3 +1,11 @@
+v3.1 - Sun Aug 24 21:39:43 ART 2014
+
+- Fixed ICMPv6 checksum error on serialization.
+
+- Fixed empty domain name encoding on DNS.
+
+- Changed the build system to CMake.
+
 v3.0 - Thu Aug  7 21:39:09 ART 2014
 
 - Timestamps can now be constructed from std::chrono::duration.
