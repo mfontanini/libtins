@@ -45,6 +45,7 @@
 
 namespace Tins {
     class SnifferIterator;
+    class SnifferConfigurator;
 
     /**
      * \class BaseSniffer
@@ -238,17 +239,16 @@ namespace Tins {
          * Default constructor.
          */
         BaseSniffer();
-    
-        /**
-         * \brief Initialices this BaseSniffer.
-         * 
-         * \param phandle The pcap handle to be used for sniffing.
-         * \param filter The pcap filter which will be applied to the
-         * stream.
-         * \param if_mask The interface's subnet mask. If 0 is provided,
-         * then some IP broadcast tests won't work correctly.
-         */
-        void init(pcap_t *phandle, const std::string &filter, bpf_u_int32 if_mask);
+
+        void set_pcap_handle(pcap_t* const pcap_handle);
+
+        pcap_t* get_pcap_handle();
+
+        const pcap_t* get_pcap_handle() const;
+
+        void set_if_mask(bpf_u_int32 if_mask);
+
+        bpf_u_int32 get_if_mask() const;
     private:
         BaseSniffer(const BaseSniffer&);
         BaseSniffer &operator=(const BaseSniffer&);
@@ -264,10 +264,6 @@ namespace Tins {
      */
     class Sniffer : public BaseSniffer {
     public:
-        enum promisc_type {
-            NON_PROMISC,
-            PROMISC
-        };
 
         /**
          * Constructs an instance of Sniffer.
@@ -281,25 +277,18 @@ namespace Tins {
          * \param filter A capture filter to be used on the sniffing session.(optional);
          * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
          */
-        Sniffer(const std::string &device, unsigned max_packet_size,
-          bool promisc = false, const std::string &filter = "", bool rfmon = false);
+        Sniffer(const std::string &device, const SnifferConfigurator& sniffer_configurator);
 
-        /**
-         * \brief Constructs an instance of Sniffer.
-         *
-         * The maximum capture size is set to 65535. By default the interface won't
-         * be put into promiscuous mode, and won't be put into monitor mode.
-         * 
-         * \param device The device which will be sniffed.
-         * \param promisc Indicates if the interface should be put in promiscuous mode.
-         * \param filter A capture filter to be used on the sniffing session.(optional);
-         * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
-         */
-        Sniffer(const std::string &device, promisc_type promisc = NON_PROMISC, 
-          const std::string &filter = "", bool rfmon = false);
     private:
-        void init_sniffer(const std::string &device, unsigned max_packet_size,
-          bool promisc = false, const std::string &filter = "", bool rfmon = false);
+        friend class SnifferConfigurator;
+
+        void set_snap_len(unsigned snap_len);
+
+        void set_buffer_size(unsigned buffer_size);
+
+        void set_promisc_mode(bool promisc_enabled);
+
+        void set_rfmon(bool rfmon_enabled);
     };
     
     /**
@@ -316,7 +305,7 @@ namespace Tins {
          * \param file_name The pcap file which will be parsed.
          * \param filter A capture filter to be used on the file.(optional);
          */
-        FileSniffer(const std::string &file_name, const std::string &filter = "");
+        FileSniffer(const std::string &file_name, const SnifferConfigurator& sniffer_configurator);
     };
     
     template<class T>
@@ -415,6 +404,45 @@ namespace Tins {
 
         BaseSniffer *sniffer;
         Packet pkt;
+    };
+
+    class SnifferConfigurator {
+    public:
+
+        SnifferConfigurator();
+
+        void set_snap_len(unsigned snap_len);
+
+        void set_buffer_size(unsigned buffer_size);
+
+        void set_promisc_mode(bool enabled);
+
+        void set_filter(const std::string& filter);
+
+        void set_rfmon(bool enabled);
+
+        void set_timeout(unsigned timeout);
+
+    protected:
+        friend class Sniffer;
+        friend class FileSniffer;
+
+        void configure_sniffer(Sniffer& sniffer) const;
+
+        void configure_sniffer(FileSniffer& sniffer) const;
+
+        bool _has_snap_len;
+        unsigned _snap_len;
+        bool _has_buffer_size;
+        unsigned _buffer_size;
+        bool _has_promisc;
+        bool _promisc;
+        bool _has_rfmon;
+        bool _rfmon;
+        bool _has_filter;
+        std::string _filter;
+        bool _has_timeout;
+        unsigned _timeout;
     };
 
     template<class Functor>
