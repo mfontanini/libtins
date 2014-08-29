@@ -45,7 +45,7 @@
 
 namespace Tins {
     class SnifferIterator;
-    class SnifferConfigurator;
+    class SnifferConfiguration;
 
     /**
      * \class BaseSniffer
@@ -277,10 +277,10 @@ namespace Tins {
          * \param filter A capture filter to be used on the sniffing session.(optional);
          * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
          */
-        Sniffer(const std::string &device, const SnifferConfigurator& sniffer_configurator);
+        Sniffer(const std::string &device, const SnifferConfiguration& configuration);
 
     private:
-        friend class SnifferConfigurator;
+        friend class SnifferConfiguration;
 
         void set_snap_len(unsigned snap_len);
 
@@ -305,7 +305,7 @@ namespace Tins {
          * \param file_name The pcap file which will be parsed.
          * \param filter A capture filter to be used on the file.(optional);
          */
-        FileSniffer(const std::string &file_name, const SnifferConfigurator& sniffer_configurator);
+        FileSniffer(const std::string &file_name, const SnifferConfiguration& configuration);
     };
     
     template<class T>
@@ -406,10 +406,10 @@ namespace Tins {
         Packet pkt;
     };
 
-    class SnifferConfigurator {
+    class SnifferConfiguration {
     public:
 
-        SnifferConfigurator();
+        SnifferConfiguration();
 
         void set_snap_len(unsigned snap_len);
 

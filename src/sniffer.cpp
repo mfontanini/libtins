@@ -214,7 +214,7 @@ void BaseSniffer::set_timeout(int ms) {
 
 // ****************************** Sniffer ******************************
 
-Sniffer::Sniffer(const string &device, const SnifferConfigurator& sniffer_configurator)
+Sniffer::Sniffer(const string &device, const SnifferConfiguration& configuration)
 {
     char error[PCAP_ERRBUF_SIZE];
     pcap_t* phandle = pcap_create(device.c_str(), error);
@@ -230,7 +230,7 @@ Sniffer::Sniffer(const string &device, const SnifferConfigurator& sniffer_config
     }
 
     // Configure the sniffer
-    sniffer_configurator.configure_sniffer(*this);
+    configuration.configure_sniffer(*this);
 
     // Finally, activate the pcap. In case of error throw runtime_error
     if (pcap_activate(get_pcap_handle()) < 0) {
@@ -275,7 +275,7 @@ void Sniffer::set_rfmon(bool rfmon_enabled)
 
 // **************************** FileSniffer ****************************
 
-FileSniffer::FileSniffer(const string &file_name, const SnifferConfigurator& sniffer_configurator) {
+FileSniffer::FileSniffer(const string &file_name, const SnifferConfiguration& configuration) {
     char error[PCAP_ERRBUF_SIZE];
     pcap_t *phandle = pcap_open_offline(file_name.c_str(), error);
     if(!phandle) {
@@ -284,13 +284,13 @@ FileSniffer::FileSniffer(const string &file_name, const SnifferConfigurator& sni
     set_pcap_handle(phandle);
 
     // Configure the sniffer
-    sniffer_configurator.configure_sniffer(*this);
+    configuration.configure_sniffer(*this);
     
 }
 
-// ************************ SnifferConfigurator ************************
+// ************************ SnifferConfiguration ************************
 
-SnifferConfigurator::SnifferConfigurator() :
+SnifferConfiguration::SnifferConfiguration() :
     _has_snap_len(false), _snap_len(0),
     _has_buffer_size(false), _buffer_size(0),
     _has_promisc(false), _promisc(false),
@@ -301,7 +301,7 @@ SnifferConfigurator::SnifferConfigurator() :
 
 }
 
-void SnifferConfigurator::configure_sniffer(Sniffer& sniffer) const
+void SnifferConfiguration::configure_sniffer(Sniffer& sniffer) const
 {
     if (_has_snap_len) {
         sniffer.set_snap_len(_snap_len);
@@ -325,7 +325,7 @@ void SnifferConfigurator::configure_sniffer(Sniffer& sniffer) const
     }
 }
 
-void SnifferConfigurator::configure_sniffer(FileSniffer& sniffer) const
+void SnifferConfiguration::configure_sniffer(FileSniffer& sniffer) const
 {
     if (_has_filter) {
         if (!sniffer.set_filter(_filter)) {
@@ -334,37 +334,37 @@ void SnifferConfigurator::configure_sniffer(FileSniffer& sniffer) const
     }
 }
 
-void SnifferConfigurator::set_snap_len(unsigned snap_len)
+void SnifferConfiguration::set_snap_len(unsigned snap_len)
 {
     _has_snap_len = true;
     _snap_len = snap_len;
 }
 
-void SnifferConfigurator::set_buffer_size(unsigned buffer_size)
+void SnifferConfiguration::set_buffer_size(unsigned buffer_size)
 {
     _has_buffer_size = true;
     _buffer_size = buffer_size;
 }
 
-void SnifferConfigurator::set_promisc_mode(bool enabled)
+void SnifferConfiguration::set_promisc_mode(bool enabled)
 {
     _has_promisc = true;
     _promisc = enabled;
 }
 
-void SnifferConfigurator::set_filter(const std::string& filter)
+void SnifferConfiguration::set_filter(const std::string& filter)
 {
     _has_filter = true;
     _filter = filter;
 }
 
-void SnifferConfigurator::set_rfmon(bool enabled)
+void SnifferConfiguration::set_rfmon(bool enabled)
 {
     _has_rfmon = true;
     _rfmon = enabled;
 }
 
-void SnifferConfigurator::set_timeout(unsigned timeout)
+void SnifferConfiguration::set_timeout(unsigned timeout)
 {
     _has_timeout = true;
     _timeout = timeout;
