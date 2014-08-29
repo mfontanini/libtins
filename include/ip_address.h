@@ -177,7 +177,7 @@ public:
      */
     friend std::ostream &operator<<(std::ostream &output, const IPv4Address &addr);
 private:
-    uint32_t ip_to_int(const std::string &ip);
+    uint32_t ip_to_int(const char* ip);
 
     uint32_t ip_addr;
 };

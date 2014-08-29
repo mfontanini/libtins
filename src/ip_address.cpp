@@ -27,6 +27,11 @@
  *
  */
 
+#ifdef WIN32
+    #include <ws2tcpip.h>
+#else // WIN32
+    #include <arpa/inet.h>
+#endif // WIN32
 #include <stdexcept>
 #include <sstream>
 #include "ip_address.h"
@@ -57,7 +62,7 @@ IPv4Address::IPv4Address(const char *ip) {
 }
 
 IPv4Address::IPv4Address(const std::string &ip) 
-: ip_addr(ip_to_int(ip)) {
+: ip_addr(ip_to_int(ip.c_str())) {
       
 } 
 
@@ -71,28 +76,24 @@ std::string IPv4Address::to_string() const {
     return oss.str();
 }
 
-uint32_t IPv4Address::ip_to_int(const string &ip) {
-    uint32_t result(0), i(0), end, bytes_found(0);
-    while(i < ip.size() && bytes_found < 4) {
-        uint16_t this_byte(0);
-        end = i + 3;
-        while(i < ip.size() && i < end && ip[i] != '.') {
-            if(ip[i] < '0' || ip[i] > '9')
-                throw std::runtime_error("Non-digit character found in ip");
-            this_byte = (this_byte * 10)  + (ip[i] - '0');
-            i++;
+uint32_t IPv4Address::ip_to_int(const char* ip) {
+    #ifdef WIN32
+        in_addr addr;
+        if(InetPtonA(AF_INET, ip, &addr)) {
+            return addr.s_addr;
         }
-        if (this_byte > 0xFF) {
-            throw std::runtime_error("Byte greater than 255");
+        else {
+            throw std::runtime_error("Invalid ip address");
         }
-        result = (result << 8) | (this_byte & 0xFF);
-        bytes_found++;
-        if(bytes_found < 4 && i < ip.size() && ip[i] == '.')
-            i++;
-    }
-    if(bytes_found < 4 || (i < ip.size() && bytes_found == 4))
-        throw std::runtime_error("Invalid ip address");
-    return result;
+    #else // WIN32
+        in_addr addr;
+        if(inet_pton(AF_INET, ip, &addr) == 1) {
+            return Endian::be_to_host(addr.s_addr);
+        }
+        else {
+            throw std::runtime_error("Invalid ip address");
+        }
+    #endif // WIN32
 }
 
 std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {
