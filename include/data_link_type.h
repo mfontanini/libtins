@@ -26,53 +26,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
-#ifndef WIN32
-    #include <sys/time.h>
-#endif
-#include <stdexcept>
-#include "packet_writer.h"
-#include "pdu.h"
+
+#ifndef TINS_DATA_LINK_TYPE_H
+#define TINS_DATA_LINK_TYPE_H
+
+#include <pcap.h>
 
 namespace Tins {
-PacketWriter::PacketWriter(const std::string &file_name, LinkType lt) {
-    init(file_name, lt);
-}
 
-PacketWriter::~PacketWriter() {
-    if(dumper && handle) {
-        pcap_dump_close(dumper);
-        pcap_close(handle);
-    }
-}
+class EthernetII;
+class RadioTap;
+class Dot11;
+class Dot3;
+class SLL;
+class Loopback;
+class PPI;
 
-void PacketWriter::write(PDU &pdu) {
-    PDU::serialization_type buffer = pdu.serialize();
-    timeval tm;
-    #ifndef WIN32
-        gettimeofday(&tm, 0);
-    #else
-        // fixme
-        tm = timeval();
-    #endif
-    struct pcap_pkthdr header = { 
-        tm,
-        static_cast<bpf_u_int32>(buffer.size()),
-        static_cast<bpf_u_int32>(buffer.size())
-    };
-    pcap_dump((u_char*)dumper, &header, &buffer[0]);
-}
+/**
+ * \brief Maps a libtins link layer PDU to a libpcap data link identifier.
+ */
+template<typename T>
+struct DataLinkType;
 
-void PacketWriter::init(const std::string& file_name, int link_type) {
-    handle = pcap_open_dead(link_type, 65535);
-    if(!handle)
-        throw std::runtime_error("Error creating pcap handle");
-    dumper = pcap_dump_open(handle, file_name.c_str());
-    if(!dumper) {
-        // RAII plx
-        pcap_close(handle);
-        throw std::runtime_error(pcap_geterr(handle));
-    }
-}
+#define TINS_MAKE_DATA_LINK_TYPE(tins_type, pcap_type) \
+template<> \
+struct DataLinkType<tins_type> { \
+    static const int type = pcap_type; \
+    int get_type() const { \
+        return type; \
+    } \
+}; 
 
-}
+TINS_MAKE_DATA_LINK_TYPE(EthernetII, DLT_EN10MB)
+TINS_MAKE_DATA_LINK_TYPE(Dot3, DLT_EN10MB)
+TINS_MAKE_DATA_LINK_TYPE(SLL, DLT_LINUX_SLL)
+TINS_MAKE_DATA_LINK_TYPE(Loopback, DLT_LOOP)
+TINS_MAKE_DATA_LINK_TYPE(PPI, DLT_PPI)
+TINS_MAKE_DATA_LINK_TYPE(Dot11, DLT_IEEE802_11)
+TINS_MAKE_DATA_LINK_TYPE(RadioTap, DLT_IEEE802_11_RADIO)
+
+#undef TINS_MAKE_DATA_LINK_TYPE
+
+} // Tins
+
+#endif // TINS_DATA_LINK_TYPE_H

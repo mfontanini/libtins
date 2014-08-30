@@ -33,6 +33,7 @@
 #include <string>
 #include <iterator>
 #include <pcap.h>
+#include "data_link_type.h"
 #include "utils.h"
 #include "cxxstd.h"
 
@@ -66,6 +67,33 @@ public:
      * \sa LinkType.
      */
     PacketWriter(const std::string &file_name, LinkType lt);
+
+    /**
+     * \brief Constructs a PacketWriter.
+     *
+     * This method takes a DataLinkType, which indicates the link
+     * layer protocol that will be used on the packets to write.
+     *
+     * For example, you can write packets that contain an 
+     * EthernetII link layer type by doing:
+     * 
+     * \code
+     * // Construct a PacketWriter
+     * PacketWriter writer("/tmp/test.pcap", DataLinkType<EthernetII>());
+     * // Write some packet
+     * writer.write(packet);
+     * \endcode
+     * 
+     * \param file_name The file in which to store the written PDUs.
+     * \param lt A DataLinkType that represents the link layer
+     * protocol to use.
+     * \sa PcapIdentifier.
+     */
+    template<typename T>
+    PacketWriter(const std::string &file_name, const DataLinkType<T>& lt)
+    {
+        init(file_name, lt.get_type());
+    }
     
     #if TINS_IS_CXX11
         /**
@@ -135,6 +163,8 @@ private:
     // You shall not copy
     PacketWriter(const PacketWriter&);
     PacketWriter& operator=(const PacketWriter&);
+
+    void init(const std::string& file_name, int link_type);
 
     pcap_t *handle;
     pcap_dumper_t *dumper; 
