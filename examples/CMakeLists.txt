@@ -13,6 +13,7 @@ IF(libtins_FOUND)
             dns_spoof
             dns_stats
             wps_detect
+            traceroute
         )
     ELSE(HAVE_CXX11)
         MESSAGE(WARNING "Disabling some examples since C++11 support is disabled.")
@@ -24,7 +25,6 @@ IF(libtins_FOUND)
         ${LIBTINS_CXX11_EXAMPLES}
         beacon_display
         portscan
-        traceroute
     )
 
     ADD_EXECUTABLE(arpspoofing EXCLUDE_FROM_ALL arpspoofing.cpp)
@@ -39,11 +39,13 @@ IF(libtins_FOUND)
     ADD_EXECUTABLE(beacon_display EXCLUDE_FROM_ALL beacon_display.cpp)
 
     if(THREADS_FOUND)
+        IF(HAVE_CXX11)
+            ADD_EXECUTABLE(traceroute EXCLUDE_FROM_ALL traceroute.cpp)
+            TARGET_LINK_LIBRARIES(traceroute ${CMAKE_THREAD_LIBS_INIT})
+        ENDIF(HAVE_CXX11)
+
         ADD_EXECUTABLE(portscan EXCLUDE_FROM_ALL portscan.cpp)
-        ADD_EXECUTABLE(traceroute EXCLUDE_FROM_ALL traceroute.cpp)
-        
         TARGET_LINK_LIBRARIES(portscan ${CMAKE_THREAD_LIBS_INIT})
-        TARGET_LINK_LIBRARIES(traceroute ${CMAKE_THREAD_LIBS_INIT})
     ELSE(THREADS_FOUND)
         MESSAGE(WARNING "Disabling portscan and traceroute examples since pthreads library was not found.")
     ENDIF(THREADS_FOUND)
