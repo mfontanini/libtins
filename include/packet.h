@@ -215,14 +215,14 @@ public:
     /**
      * Move constructor.
      */
-    Packet(Packet &&rhs) NOEXCEPT : pdu_(rhs.pdu()), ts(rhs.timestamp()) {
+    Packet(Packet &&rhs) TINS_NOEXCEPT : pdu_(rhs.pdu()), ts(rhs.timestamp()) {
         rhs.pdu_ = nullptr;
     }
     
     /**
      * Move assignment operator.
      */
-    Packet& operator=(Packet &&rhs) NOEXCEPT { 
+    Packet& operator=(Packet &&rhs) TINS_NOEXCEPT { 
         if(this != &rhs) {
             std::swap(pdu_, rhs.pdu_);
             ts = rhs.timestamp();

@@ -40,13 +40,13 @@
     #define TINS_END_PACK __pragma( pack(pop) )
     #define TINS_PACKED(DECLARATION) __pragma( pack(push, 1) ) DECLARATION __pragma( pack(pop) )
     #define TINS_DEPRECATED(func) __declspec(deprecated) func
-    #define NOEXCEPT
+    #define TINS_NOEXCEPT
 #else
     #define TINS_BEGIN_PACK 
     #define TINS_END_PACK __attribute__((packed))
     #define TINS_PACKED(DECLARATION) DECLARATION __attribute__((packed))
     #define TINS_DEPRECATED(func) func __attribute__ ((deprecated))
-    #define NOEXCEPT noexcept
+    #define TINS_NOEXCEPT noexcept
 #endif
 
 #endif

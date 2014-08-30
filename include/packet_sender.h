@@ -87,7 +87,7 @@ namespace Tins {
              * \brief Move constructor.
              * \param rhs The sender to be moved.
              */
-            PacketSender(PacketSender &&rhs) NOEXCEPT {
+            PacketSender(PacketSender &&rhs) TINS_NOEXCEPT {
                 *this = std::move(rhs);
             }
             
@@ -95,7 +95,7 @@ namespace Tins {
              * \brief Move assignment operator.
              * \param rhs The sender to be moved.
              */
-            PacketSender& operator=(PacketSender &&rhs) NOEXCEPT {
+            PacketSender& operator=(PacketSender &&rhs) TINS_NOEXCEPT {
                 _sockets = std::move(rhs._sockets);
                 rhs._sockets = std::vector<int>(SOCKETS_END, INVALID_RAW_SOCKET);
                 #ifndef WIN32

@@ -68,7 +68,7 @@ namespace Tins {
              * \brief Move constructor.
              * This constructor is available only in C++11.
              */
-            BaseSniffer(BaseSniffer &&rhs) NOEXCEPT 
+            BaseSniffer(BaseSniffer &&rhs) TINS_NOEXCEPT 
             : handle(nullptr), mask()
             {
                 *this = std::move(rhs);
@@ -78,7 +78,7 @@ namespace Tins {
              * \brief Move assignment operator.
              * This operator is available only in C++11.
              */
-            BaseSniffer& operator=(BaseSniffer &&rhs) NOEXCEPT 
+            BaseSniffer& operator=(BaseSniffer &&rhs) TINS_NOEXCEPT 
             {
                 using std::swap;
                 swap(handle, rhs.handle);

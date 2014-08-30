@@ -149,7 +149,7 @@ namespace Tins {
              * 
              * \param rhs The PDU to be moved.
              */
-            PDU(PDU &&rhs) NOEXCEPT 
+            PDU(PDU &&rhs) TINS_NOEXCEPT 
             : _inner_pdu(0)
             {
                 std::swap(_inner_pdu, rhs._inner_pdu);
@@ -160,7 +160,7 @@ namespace Tins {
              * 
              * \param rhs The PDU to be moved.
              */
-            PDU& operator=(PDU &&rhs) NOEXCEPT {
+            PDU& operator=(PDU &&rhs) TINS_NOEXCEPT {
                 std::swap(_inner_pdu, rhs._inner_pdu);
                 return *this;
             }
