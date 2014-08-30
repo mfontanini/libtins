@@ -166,8 +166,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     try {
-        Sniffer sniffer(argv[1], Sniffer::PROMISC);
-        sniffer.set_filter("udp and port 53");
+        SnifferConfiguration config;
+        config.set_promisc_mode(true);
+        config.set_filter("udp and dst port 53");
+        Sniffer sniffer(argv[1], config);
         dns_monitor monitor;
         std::thread thread(
             [&]() {

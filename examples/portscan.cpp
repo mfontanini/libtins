@@ -117,7 +117,9 @@ void scan(int argc, char *argv[]) {
     cout << "Sniffing on interface: " << iface.name() << endl;
 
     // 300 bytes are enough to receive SYNs and RSTs.
-    Sniffer sniffer(iface.name(), 300);
+    SnifferConfiguration config;
+    config.set_snap_len(300);
+    Sniffer sniffer(iface.name(), config);
     sniffer_data data(&sniffer, argv[1]);
     pthread_t thread;
     // Launch our sniff thread.

@@ -87,10 +87,14 @@ int main(int argc, char *argv[])
         return 1;
     }
     arp_monitor monitor;
+    // Sniffer configuration
+    SnifferConfiguration config;
+    config.set_promisc_mode(true);
+    config.set_filter("arp");
+
     // Sniff on the provided interface in promiscuous mode
-    Sniffer sniffer(argv[1], Sniffer::PROMISC);
+    Sniffer sniffer(argv[1], config);
     
     // Only capture arp packets
-    sniffer.set_filter("arp");
     monitor.run(sniffer);
 }
