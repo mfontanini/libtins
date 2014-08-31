@@ -376,6 +376,7 @@ FileSniffer::FileSniffer(const std::string &file_name, const std::string &filter
 // ************************ SnifferConfiguration ************************
 
 const unsigned SnifferConfiguration::DEFAULT_SNAP_LEN = 65535;
+const unsigned SnifferConfiguration::DEFAULT_TIMEOUT = 1000;
 
 SnifferConfiguration::SnifferConfiguration() :
     _snap_len(DEFAULT_SNAP_LEN),
@@ -383,7 +384,7 @@ SnifferConfiguration::SnifferConfiguration() :
     _has_promisc(false), _promisc(false),
     _has_rfmon(false), _rfmon(false),
     _has_filter(false),
-    _has_timeout(false), _timeout(0)
+    _timeout(DEFAULT_TIMEOUT)
 {
 
 }
@@ -391,6 +392,7 @@ SnifferConfiguration::SnifferConfiguration() :
 void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) const
 {
     sniffer.set_snap_len(_snap_len);
+    sniffer.set_timeout(_timeout);
     if (_has_buffer_size) {
         sniffer.set_buffer_size(_buffer_size);
     }
@@ -399,9 +401,6 @@ void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) co
     }
     if (_has_rfmon) {
         sniffer.set_rfmon(_rfmon);
-    }
-    if (_has_timeout) {
-        sniffer.set_timeout(_timeout);
     }
 }
 
@@ -454,7 +453,6 @@ void SnifferConfiguration::set_rfmon(bool enabled)
 
 void SnifferConfiguration::set_timeout(unsigned timeout)
 {
-    _has_timeout = true;
     _timeout = timeout;
 }
 

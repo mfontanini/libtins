@@ -480,6 +480,13 @@ namespace Tins {
         static const unsigned DEFAULT_SNAP_LEN;
 
         /**
+         * \brief The default timeout.
+         *
+         * This is 1000 by default.
+         */
+        static const unsigned DEFAULT_TIMEOUT;
+
+        /**
          * Default constructs a SnifferConfiguration.
          */
         SnifferConfiguration();
@@ -537,7 +544,6 @@ namespace Tins {
         bool _rfmon;
         bool _has_filter;
         std::string _filter;
-        bool _has_timeout;
         unsigned _timeout;
     };
 
