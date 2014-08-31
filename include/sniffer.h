@@ -447,25 +447,78 @@ namespace Tins {
         Packet pkt;
     };
 
+    /** 
+     * \class SnifferConfiguration
+     * \brief Represents the configuration of a BaseSniffer object.
+     *
+     * This class can be used as an easy way to configure a Sniffer 
+     * or FileSniffer object.
+     *
+     * It can be used by constructing an object of this type, 
+     * setting the desired values and then passing it to the 
+     * Sniffer or FileSniffer object's constructor. 
+     * 
+     * For example:
+     *
+     * \code
+     * // Initialize the configuration.
+     * SnifferConfiguration config;
+     * config.set_filter("ip and port 80");
+     * config.set_promisc_mode(true);
+     * 
+     * // Use it on a Sniffer object.
+     * Sniffer sniffer("eth0", config);
+     * \endcode
+     */
     class SnifferConfiguration {
     public:
-
+        /**
+         * \brief The default snapshot length.
+         *
+         * This is 65535 by default.
+         */
         static const unsigned DEFAULT_SNAP_LEN;
 
+        /**
+         * Default constructs a SnifferConfiguration.
+         */
         SnifferConfiguration();
 
+        /**
+         * Sets the snapshot length option.
+         * \param snap_len The snapshot length to be set.
+         */
         void set_snap_len(unsigned snap_len);
 
+        /**
+         * Sets the buffer size option.
+         * \param buffer_size The buffer size to be set.
+         */
         void set_buffer_size(unsigned buffer_size);
 
+        /**
+         * Sets the promiscuous mode option.
+         * \param enabled The promiscuous mode value.
+         */
         void set_promisc_mode(bool enabled);
 
+        /**
+         * Sets a pcap filter to use on the sniffer.
+         * \param filter The pcap filter to be used.
+         */
         void set_filter(const std::string& filter);
 
+        /**
+         * Sets the rfmon option.
+         * \param enabled The rfmon option value.
+         */
         void set_rfmon(bool enabled);
 
+        /**
+         * Sets the timeout option.
+         * \param timeout The timeout to be set.
+         */
         void set_timeout(unsigned timeout);
-
     protected:
         friend class Sniffer;
         friend class FileSniffer;
