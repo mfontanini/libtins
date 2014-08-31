@@ -127,18 +127,12 @@ bool Dot3::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    bool set_length = _eth.length == 0;
     #ifdef TINS_DEBUG
     assert(total_sz >= header_size());
     #endif
-
-    if (set_length)
-    	_eth.length = Endian::host_to_be(size() - sizeof(_eth));
+    _eth.length = Endian::host_to_be<uint16_t>(size() - sizeof(_eth));
 
     memcpy(buffer, &_eth, sizeof(ethhdr));
-
-    if (set_length)
-    	_eth.length = 0;
 }
 
 #ifndef WIN32
