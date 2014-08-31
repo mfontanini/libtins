@@ -69,6 +69,10 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     // Only sniff beacons
-    Sniffer sniffer(argv[1], 2000, true, "wlan type mgt subtype beacon");
+    SnifferConfiguration config;
+    config.set_snap_len(2000);
+    config.set_promisc_mode(true);
+    config.set_filter("wlan type mgt subtype beacon");
+    Sniffer sniffer(argv[1], config);
     sniffer.sniff_loop(handler);
 }

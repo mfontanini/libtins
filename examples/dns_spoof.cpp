@@ -90,10 +90,11 @@ int main(int argc, char *argv[])
         return 1;
     }
     // Sniff on the provided interface in promiscuos mode
-    Sniffer sniffer(argv[1], Sniffer::PROMISC);
-    
+    SnifferConfiguration config;
+    config.set_promisc_mode(true);
     // Only capture udp packets sent to port 53
-    sniffer.set_filter("udp and dst port 53");
+    config.set_filter("udp and dst port 53");
+    Sniffer sniffer(argv[1], config);
     
     // All packets will be sent through the provided interface
     sender.default_interface(argv[1]);
