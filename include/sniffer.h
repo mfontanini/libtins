@@ -264,8 +264,24 @@ namespace Tins {
      */
     class Sniffer : public BaseSniffer {
     public:
+        /**
+         * \deprecated
+         */
+        enum promisc_type {
+            NON_PROMISC,
+            PROMISC
+        };
 
         /**
+         * Constructs an instance of Sniffer.
+         *
+         * \param device The device which will be sniffed.
+         * \param configuration The configuration object to use to setup the sniffer.
+         */
+        Sniffer(const std::string &device, const SnifferConfiguration& configuration);
+
+        /**
+         * \deprecated
          * Constructs an instance of Sniffer.
          *
          * By default the interface won't be put into promiscuous mode, and won't
@@ -277,7 +293,23 @@ namespace Tins {
          * \param filter A capture filter to be used on the sniffing session.(optional);
          * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
          */
-        Sniffer(const std::string &device, const SnifferConfiguration& configuration);
+        Sniffer(const std::string &device, unsigned max_packet_size,
+          bool promisc = false, const std::string &filter = "", bool rfmon = false);
+
+        /**
+         * \deprecaetd
+         * \brief Constructs an instance of Sniffer.
+         *
+         * The maximum capture size is set to 65535. By default the interface won't
+         * be put into promiscuous mode, and won't be put into monitor mode.
+         * 
+         * \param device The device which will be sniffed.
+         * \param promisc Indicates if the interface should be put in promiscuous mode.
+         * \param filter A capture filter to be used on the sniffing session.(optional);
+         * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
+         */
+        Sniffer(const std::string &device, promisc_type promisc = NON_PROMISC, 
+          const std::string &filter = "", bool rfmon = false);
 
     private:
         friend class SnifferConfiguration;
@@ -306,6 +338,15 @@ namespace Tins {
          * \param filter A capture filter to be used on the file.(optional);
          */
         FileSniffer(const std::string &file_name, const SnifferConfiguration& configuration);
+
+        /**
+         * \deprecated
+         *
+         * \brief Constructs an instance of FileSniffer.
+         * \param file_name The pcap file which will be parsed.
+         * \param filter A capture filter to be used on the file.(optional);
+         */
+        FileSniffer(const std::string &file_name, const std::string &filter = "");
     };
     
     template<class T>
@@ -409,6 +450,8 @@ namespace Tins {
     class SnifferConfiguration {
     public:
 
+        static const unsigned DEFAULT_SNAP_LEN;
+
         SnifferConfiguration();
 
         void set_snap_len(unsigned snap_len);
@@ -431,7 +474,6 @@ namespace Tins {
 
         void configure_sniffer(FileSniffer& sniffer) const;
 
-        bool _has_snap_len;
         unsigned _snap_len;
         bool _has_buffer_size;
         unsigned _buffer_size;

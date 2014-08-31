@@ -44,7 +44,7 @@ using std::runtime_error;
 
 namespace Tins {
 BaseSniffer::BaseSniffer() 
-: handle(0), mask(PCAP_NETMASK_UNKNOWN), extract_raw(false)
+: handle(0), mask(0), extract_raw(false)
 {
     
 }
@@ -238,6 +238,67 @@ Sniffer::Sniffer(const string &device, const SnifferConfiguration& configuration
     }
 }
 
+Sniffer::Sniffer(const std::string &device, unsigned max_packet_size, bool promisc, 
+                 const std::string &filter, bool rfmon)
+{
+    SnifferConfiguration config;
+    config.set_snap_len(max_packet_size);
+    config.set_promisc_mode(promisc);
+    config.set_filter(filter);
+    config.set_rfmon(rfmon);
+
+    char error[PCAP_ERRBUF_SIZE];
+    pcap_t* phandle = pcap_create(device.c_str(), error);
+    if (!phandle) {
+        throw runtime_error(error);
+    }
+    set_pcap_handle(phandle);
+
+    // Set the netmask if we are able to find it.
+    bpf_u_int32 ip, if_mask;
+    if (pcap_lookupnet(device.c_str(), &ip, &if_mask, error) == 0) {
+        set_if_mask(if_mask);
+    }
+
+    // Configure the sniffer
+    config.configure_sniffer(*this);
+
+    // Finally, activate the pcap. In case of error throw runtime_error
+    if (pcap_activate(get_pcap_handle()) < 0) {
+        throw std::runtime_error(pcap_geterr(get_pcap_handle()));
+    }
+}
+
+Sniffer::Sniffer(const std::string &device, promisc_type promisc, const std::string &filter,
+                 bool rfmon)
+{
+    SnifferConfiguration config;
+    config.set_promisc_mode(promisc == PROMISC);
+    config.set_filter(filter);
+    config.set_rfmon(rfmon);
+
+    char error[PCAP_ERRBUF_SIZE];
+    pcap_t* phandle = pcap_create(device.c_str(), error);
+    if (!phandle) {
+        throw runtime_error(error);
+    }
+    set_pcap_handle(phandle);
+
+    // Set the netmask if we are able to find it.
+    bpf_u_int32 ip, if_mask;
+    if (pcap_lookupnet(device.c_str(), &ip, &if_mask, error) == 0) {
+        set_if_mask(if_mask);
+    }
+
+    // Configure the sniffer
+    config.configure_sniffer(*this);
+
+    // Finally, activate the pcap. In case of error throw runtime_error
+    if (pcap_activate(get_pcap_handle()) < 0) {
+        throw std::runtime_error(pcap_geterr(get_pcap_handle()));
+    }
+}
+
 void Sniffer::set_snap_len(unsigned snap_len)
 {
     if (pcap_set_snaplen(get_pcap_handle(), snap_len)) {
@@ -288,10 +349,28 @@ FileSniffer::FileSniffer(const string &file_name, const SnifferConfiguration& co
     
 }
 
+FileSniffer::FileSniffer(const std::string &file_name, const std::string &filter)
+{
+    SnifferConfiguration config;
+    config.set_filter(filter);
+
+    char error[PCAP_ERRBUF_SIZE];
+    pcap_t *phandle = pcap_open_offline(file_name.c_str(), error);
+    if(!phandle) {
+        throw std::runtime_error(error);
+    }
+    set_pcap_handle(phandle);
+
+    // Configure the sniffer
+    config.configure_sniffer(*this);
+}
+
 // ************************ SnifferConfiguration ************************
 
+const unsigned SnifferConfiguration::DEFAULT_SNAP_LEN = 65535;
+
 SnifferConfiguration::SnifferConfiguration() :
-    _has_snap_len(false), _snap_len(0),
+    _snap_len(DEFAULT_SNAP_LEN),
     _has_buffer_size(false), _buffer_size(0),
     _has_promisc(false), _promisc(false),
     _has_rfmon(false), _rfmon(false),
@@ -303,9 +382,7 @@ SnifferConfiguration::SnifferConfiguration() :
 
 void SnifferConfiguration::configure_sniffer(Sniffer& sniffer) const
 {
-    if (_has_snap_len) {
-        sniffer.set_snap_len(_snap_len);
-    }
+    sniffer.set_snap_len(_snap_len);
     if (_has_buffer_size) {
         sniffer.set_buffer_size(_buffer_size);
     }
@@ -336,7 +413,6 @@ void SnifferConfiguration::configure_sniffer(FileSniffer& sniffer) const
 
 void SnifferConfiguration::set_snap_len(unsigned snap_len)
 {
-    _has_snap_len = true;
     _snap_len = snap_len;
 }
 
