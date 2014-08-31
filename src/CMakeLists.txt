@@ -33,6 +33,7 @@ ADD_LIBRARY(
     llc.cpp
     loopback.cpp
     network_interface.cpp
+    offline_packet_filter.cpp
     packet_sender.cpp
     packet_writer.cpp
     ppi.cpp

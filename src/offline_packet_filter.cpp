@@ -27,49 +27,60 @@
  *
  */
 
-#ifndef TINS_DATA_LINK_TYPE_H
-#define TINS_DATA_LINK_TYPE_H
-
-#include <pcap.h>
+#include <stdexcept>
+#include "offline_packet_filter.h"
+#include "pdu.h"
 
 namespace Tins {
 
-class EthernetII;
-class RadioTap;
-class Dot11;
-class Dot3;
-class SLL;
-class Loopback;
-class PPI;
+OfflinePacketFilter::OfflinePacketFilter(const OfflinePacketFilter& other)
+{
+    *this = other;
+}
 
-/**
- * \brief Maps a libtins link layer PDU to a libpcap data link identifier.
- *
- * This should be instantiated with any object that represents a
- * link layer PDU (EthernetII, Dot11, RadioTap, etc)
- */
-template<typename T>
-struct DataLinkType;
+OfflinePacketFilter& OfflinePacketFilter::operator=(const OfflinePacketFilter& other)
+{
+    string_filter = other.string_filter;
+    init(string_filter, pcap_datalink(other.handle), pcap_snapshot(other.handle));
+    return *this;
+}
 
-#define TINS_MAKE_DATA_LINK_TYPE(tins_type, pcap_type) \
-template<> \
-struct DataLinkType<tins_type> { \
-    static const int type = pcap_type; \
-    int get_type() const { \
-        return type; \
-    } \
-}; 
+OfflinePacketFilter::~OfflinePacketFilter()
+{
+    pcap_freecode(&filter);
+    pcap_close(handle);
+}
 
-TINS_MAKE_DATA_LINK_TYPE(EthernetII, DLT_EN10MB)
-TINS_MAKE_DATA_LINK_TYPE(Dot3, DLT_EN10MB)
-TINS_MAKE_DATA_LINK_TYPE(SLL, DLT_LINUX_SLL)
-TINS_MAKE_DATA_LINK_TYPE(Loopback, DLT_LOOP)
-TINS_MAKE_DATA_LINK_TYPE(PPI, DLT_PPI)
-TINS_MAKE_DATA_LINK_TYPE(Dot11, DLT_IEEE802_11)
-TINS_MAKE_DATA_LINK_TYPE(RadioTap, DLT_IEEE802_11_RADIO)
+void OfflinePacketFilter::init(const std::string& pcap_filter, int link_type, 
+    unsigned int snap_len) 
+{
+    handle = pcap_open_dead(
+        link_type,
+        snap_len
+    );
+    if(pcap_compile(handle, &filter, pcap_filter.c_str(), 1, 0xffffffff) == -1)
+    {
+        throw std::runtime_error(pcap_geterr(handle));
+    }
+}
 
-#undef TINS_MAKE_DATA_LINK_TYPE
+bool OfflinePacketFilter::matches_filter(const uint8_t* buffer, 
+    uint32_t total_sz) const
+{
+    pcap_pkthdr header = {};
+    header.len = total_sz;
+    header.caplen = total_sz;
+    return pcap_offline_filter(
+        &filter,
+        &header,
+        buffer
+    );
+}
+
+bool OfflinePacketFilter::matches_filter(PDU& pdu) const
+{
+    PDU::serialization_type buffer = pdu.serialize();
+    return matches_filter(&buffer[0], buffer.size());
+}
 
 } // Tins
-
-#endif // TINS_DATA_LINK_TYPE_H
