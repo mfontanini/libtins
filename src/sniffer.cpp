@@ -201,7 +201,6 @@ BaseSniffer::iterator BaseSniffer::end() {
 bool BaseSniffer::set_filter(const std::string &filter) {
     bpf_program prog;
     if(pcap_compile(handle, &prog, filter.c_str(), 0, mask) == -1) {
-        std::cout << pcap_geterr(handle) << std::endl;
         return false;
     }
     bool result = pcap_setfilter(handle, &prog) != -1;
