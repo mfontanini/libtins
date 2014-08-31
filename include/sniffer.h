@@ -523,9 +523,10 @@ namespace Tins {
         friend class Sniffer;
         friend class FileSniffer;
 
-        void configure_sniffer(Sniffer& sniffer) const;
+        void configure_sniffer_pre_activation(Sniffer& sniffer) const;
+        void configure_sniffer_pre_activation(FileSniffer& sniffer) const;
 
-        void configure_sniffer(FileSniffer& sniffer) const;
+        void configure_sniffer_post_activation(Sniffer& sniffer) const;
 
         unsigned _snap_len;
         bool _has_buffer_size;
