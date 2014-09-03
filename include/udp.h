@@ -36,7 +36,9 @@
 
 namespace Tins {
 
-    /** \brief Class that represents an UDP PDU.
+    /** 
+     * \class UDP
+     * \brief Class that represents an UDP PDU.
      *
      * UDP is the representation of the UDP PDU. Instances of this class
      * must be sent over a level 3 PDU, this will otherwise fail.

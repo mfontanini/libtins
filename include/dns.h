@@ -47,6 +47,27 @@ namespace Tins {
     /**
      * \class DNS
      * \brief Represents a DNS PDU.
+     *
+     * This class represents the DNS PDU, and allows easy access
+     * to queries and answer records. 
+     *
+     * The DNS PDU is not parsed automatically while sniffing, so you will
+     * have to parse it manually from an UDP packet's payload, for example:
+     *
+     * \code
+     * // Assume we get an udp packet from somewhere.
+     * UDP udp = get_udp_packet();
+     *
+     * // Now:
+     * // 1 - Get the RawPDU layer (contains the payload).
+     * // 2 - Construct a DNS object over its contents.
+     * DNS dns = udp.rfind_pdu<RawPDU>().to<DNS>();
+     *
+     * // Now use the DNS object!
+     * for(const auto& query : dns.queries()) {
+     *     // Process a query
+     * }
+     * \endcode
      */
     class DNS : public PDU {
     public:

@@ -49,14 +49,16 @@ namespace Tins {
      */
     typedef std::vector<uint8_t> byte_array;
 
-    /** \brief Base class for protocol data units.
+    /** 
+     * \class PDU
+     * \brief Base class for protocol data units.
      *
-     * Every PDU implementation must inherit this one. PDUs can be serialized,
+     * Every PDU implementation must inherit this class. PDUs can be serialized,
      * therefore allowing a PacketSender to send them through the corresponding
-     * sockets. PDUs are created upwards: upper layers will be children of the
-     * lower ones. Each PDU must provide its flag identifier. This will be most
-     * likely added to its parent's data, hence it should be a valid identifier.
-     * For example, IP should provide IPPROTO_IP.
+     * sockets. 
+     * 
+     * PDUs are created upwards: upper layers will be children of the
+     * lower ones. 
      */
     class PDU {
     public:

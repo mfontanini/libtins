@@ -40,7 +40,8 @@
 
 namespace Tins {    
 /**
- * Represents a DHCPv6 PDU.
+ * \class DHCPv6
+ * \brief Represents a DHCPv6 PDU.
  */
 class DHCPv6 : public PDU {
 public:

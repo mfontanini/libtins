@@ -36,10 +36,28 @@
 
 namespace Tins {
 
-    /** \brief Represents a PDU which holds raw data.
+    /** 
+     * \class PDU
+     * \brief Represents a PDU which holds raw data.
      *
-     * In order to send payloads over TCP, UDP, or other transport layer or
-     * higher level protocols, RawPDU can be used as a wrapper for raw byte arrays.
+     * This class is a wrapper over a byte array. It can be used to hold
+     * the payload sent over transport layer protocols (such as TCP or UDP).
+     *
+     * While sniffing, this class is the one that will hold transport layer
+     * protocols' payload. You can simply convert a RawPDU into a specific
+     * application layer protocol using the RawPDU::to method:
+     *
+     * \code
+     * // Get a RawPDU from somewhere
+     * RawPDU raw = get_raw_pdu();
+     *
+     * // Parse it as a DHCP PDU.
+     * DHCP dhcp = raw.to<DHCP>();
+     *
+     * // Or parse it as DNS. Of course this will fail if the contents
+     * // don't look like DNS
+     * DNS dns = raw.to<DNS>();
+     * \endcode
      */
     class RawPDU : public PDU {
     public:

@@ -42,6 +42,7 @@
 namespace Tins {
 
     /**
+     * \class IP
      * \brief Class that represents an IP PDU.
      * 
      * By default, IP PDUs are initialized, setting TTL to IP::DEFAULT_TTL,

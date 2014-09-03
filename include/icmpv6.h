@@ -44,7 +44,8 @@
 
 namespace Tins {
 /**
- * Represents an ICMPv6 PDU.
+ * \class ICMPv6
+ * \brief Represents an ICMPv6 PDU.
  */
 class ICMPv6 : public PDU {
 public:

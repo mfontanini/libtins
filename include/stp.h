@@ -36,6 +36,10 @@
 #include "small_uint.h"
 
 namespace Tins {
+/**
+ * \class STP
+ * \brief Represents a Spanning Tree Protocol PDU.
+ */
 class STP : public PDU {
 public:
     /**

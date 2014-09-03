@@ -36,6 +36,10 @@
 #include "hw_address.h"
 
 namespace Tins {
+/**
+ * \class SLL
+ * \brief Represents a Linux cooked-mode capture (SLL) PDU.
+ */
 class SLL : public PDU {
 public:
     /**

@@ -43,11 +43,40 @@ class PDU;
 /**
  * \class PacketWriter
  * \brief Writes PDUs to a pcap format file.
+ *
+ * This class can be used to write packets into a <i>pcap</i> format
+ * file. It supports both writing packets one by one, or writing all
+ * packets in a range (provided by iterators), so you can use it
+ * to dump all packets in a vector.
+ *
+ * Since you might use both PDU objects and pointers to them,
+ * both the PacketWriter::write overload that takes a single object
+ * or the one that takes an iterator range accept a PDU reference type
+ * as well as any type that can be dereferenced until a PDU type is found.
+ * This means you can use both raw and smart pointers. 
+ *
+ * For example:
+ *
+ * \code
+ * // Differents types holding PDUs
+ * EthernetII object;
+ * std::shared_ptr<PDU> smart_ptr = ...;
+ * std::vector<std::shared_ptr<PDU>> vt = ....;
+ *
+ * // The writer we'll use
+ * PacketWriter writer("/tmp/file.pcap", DataLinkType<EthernetII>());
+ *
+ * // Now write all of them
+ * writer.write(object);
+ * writer.write(smart_ptr);
+ * writer.write(vt.begin(), vt.end());
+ * \endcode
  */
 class PacketWriter {
 public:
     /**
-     * \brief The type of PDUs that will be written to this file.
+     * \brief The type of PDUs that will be written to this file (deprecated).
+     * \deprecated Use DataLinkType instead of this enum.
      * 
      * This flag should match the type of the lowest layer PDU to be
      * written.
@@ -59,14 +88,6 @@ public:
         DOT3 = DLT_EN10MB,
         SLL = DLT_LINUX_SLL
     };
-    
-    /**
-     * \brief Constructs a PacketWriter.
-     * \param file_name The file in which to store the written PDUs.
-     * \param lt The link type which will be written to this file.
-     * \sa LinkType.
-     */
-    PacketWriter(const std::string &file_name, LinkType lt);
 
     /**
      * \brief Constructs a PacketWriter.
@@ -94,6 +115,17 @@ public:
     {
         init(file_name, lt.get_type());
     }
+
+    /**
+     * \brief Constructs a PacketWriter.
+     * 
+     * \deprecated Use the other constructor, which takes a DataLinkType.
+     * 
+     * \param file_name The file in which to store the written PDUs.
+     * \param lt The link type which will be written to this file.
+     * \sa LinkType.
+     */
+    PacketWriter(const std::string &file_name, LinkType lt);
     
     #if TINS_IS_CXX11
         /**

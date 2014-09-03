@@ -48,7 +48,31 @@ class PDU;
  * A potential use case would be if you are capturing packets that are
  * sent from another host over UDP. You would recieve UDP packets, then
  * parse their content, and apply the OfflinePacketFilter over the
- * wrapped packet.
+ * wrapped packet. For example:
+ *
+ * \code
+ * // Assume we get an UDP packet from somewhere.
+ * // Inside the payload, there will be a complete packet
+ * // including its link layer protocol.
+ * UDP udp = get_packet();
+ *
+ * // Create the filter. We'll be expecting Ethernet packets.
+ * OfflinePacketFilter filter("ip and port 80", DataLinkLayer<EthernetII>());
+ * 
+ * // We can use this directly over the inner PDU (assuming it has one)
+ * // See the notes on the efficiency of doing it this way.
+ * if(filter.matches_filter(*udp.inner_pdu())) {
+ *     // Matches!
+ * }
+ *
+ * // We can also use the payload. This version it faster and should
+ * // be preferred over the one above
+ * const RawPDU& raw = udp.rfind_pdu<RawPDU>();
+ * const auto& payload = raw.payload();
+ * if(filter.matches_filter(payload.data(), payload.size())) {
+ *     // Matches!
+ * }
+ * \endcode
  */
 class OfflinePacketFilter {
 public:

@@ -43,10 +43,16 @@ class Loopback;
 class PPI;
 
 /**
+ * \struct DataLinkType
  * \brief Maps a libtins link layer PDU to a libpcap data link identifier.
  *
- * This should be instantiated with any object that represents a
- * link layer PDU (EthernetII, Dot11, RadioTap, etc)
+ * This is an empty class that should be instantiated with any object that 
+ * represents a link layer PDU (EthernetII, Dot11, RadioTap, etc):
+ *
+ * \code
+ * // Instantiate it and pass it to PacketWriter's constructor.
+ * PacketWriter writer("file.pcap", DataLinkType<RadioTap>());
+ * \endcode
  */
 template<typename T>
 struct DataLinkType;

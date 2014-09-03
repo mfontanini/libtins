@@ -40,11 +40,29 @@
 
 namespace Tins {
     /** 
-     * \brief Class that represents the DHCP PDU.
+     * \class DHCP
+     * \brief Represents the DHCP PDU.
      *
-     * When adding options, the "End" option is not added automatically. 
+     * This class represents a DHCP PDU. It contains helpers methods
+     * which make it easy to set/get specific option values.
+     * 
+     * Note that when adding options, the "End" option is not added 
+     * automatically, so you will have to add it yourself.
      *
-     * \sa DHCP::end
+     * Options can be retrieved easily from DHCP PDUs:
+     *
+     * \code
+     * // Sniff a packet from somewhere
+     * DHCP dhcp = get_dhcp_from_somewhere();
+     * 
+     * // This retrieves the Domain Name Servers option and converts
+     * // it to a std::vector<IPv4Address>. Note that if this option
+     * // is not present, an option_not_found exception is thrown.
+     * for(const auto& address : dhcp.domain_name_servers()) {
+     *     // address is an ip
+     * }
+     * 
+     * \endcode
      */
     class DHCP : public BootP {
     public:

@@ -43,6 +43,7 @@ namespace Tins {
 class PacketSender;
     
 /**
+ * \class IPv6
  * Represents an IPv6 PDU.
  */
 class IPv6 : public PDU {

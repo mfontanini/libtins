@@ -43,6 +43,7 @@
 namespace Tins {
 
     /**
+     * \class BootP
      * \brief Class representing a BootP packet.
      */
     class BootP : public PDU {

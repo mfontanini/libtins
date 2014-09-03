@@ -36,6 +36,7 @@
 
 namespace Tins {
 /**
+ * \class PDUCacher
  * \brief PDU wrapper that caches the result of the wrapped PDU's 
  * serialization.
  * 

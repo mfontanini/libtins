@@ -40,7 +40,8 @@
 namespace Tins {
 
     /**
-     * \brief Class representing a LLC frame.
+     * \class LLC
+     * \brief Representing a LLC frame.
      *
      * This PDU follows the standard LLC frame described in the IEEE 802.2 specs.
      */

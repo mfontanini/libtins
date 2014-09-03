@@ -46,7 +46,8 @@ namespace Tins {
     /** \endcond */
     
     /**
-     * \brief Class that represents the EAP encapsulation over LAN.
+     * \class EAPOL
+     * \brief Represents the EAP encapsulation over LAN.
      */
     class EAPOL : public PDU {
     public:

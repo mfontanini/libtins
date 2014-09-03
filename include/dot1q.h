@@ -36,6 +36,7 @@
 
 namespace Tins {
 /**
+ * \class Dot1Q
  * Represents an IEEE 802.1q PDU.
  */
 class Dot1Q : public PDU {

@@ -42,7 +42,8 @@ namespace Tins {
     class EthernetII;
 
     /**
-     * \brief Class that represents an ARP PDU.
+     * \class ARP
+     * \brief Represents an ARP PDU.
      *
      */
     class ARP : public PDU {

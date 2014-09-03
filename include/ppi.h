@@ -36,6 +36,7 @@
 
 namespace Tins {
 /**
+ * \class PPI
  * \brief Represents a Per-Packet Information PDU.
  *
  * This PDU can only be constructed from a buffer, and

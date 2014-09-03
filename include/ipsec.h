@@ -36,6 +36,7 @@
 
 namespace Tins {
 /**
+ * \class IPSecAH
  * \brief Represents an IPSec Authentication Header.
  */
 class IPSecAH : public PDU {

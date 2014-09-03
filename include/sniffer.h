@@ -273,20 +273,27 @@ namespace Tins {
         };
 
         /**
-         * Constructs an instance of Sniffer.
+         * \brief Constructs an instance of Sniffer using the provided configuration.
          *
+         * This constructor was added as a way to improve the parameter bloat
+         * introduced by the other ones available. You should create an instance
+         * of SnifferConfiguration, set the desired parameters, and then use it
+         * when constructing a Sniffer object.
+         *
+         * \sa SnifferConfiguration
+         * 
          * \param device The device which will be sniffed.
          * \param configuration The configuration object to use to setup the sniffer.
          */
         Sniffer(const std::string &device, const SnifferConfiguration& configuration);
 
         /**
-         * \deprecated
-         * Constructs an instance of Sniffer.
+         * \brief Constructs an instance of Sniffer.
          *
          * By default the interface won't be put into promiscuous mode, and won't
          * be put into monitor mode.
          *
+         * \deprecated Use the constructor that takes a SnifferConfiguration.
          * \param device The device which will be sniffed.
          * \param max_packet_size The maximum packet size to be read.
          * \param promisc bool indicating wether to put the interface in promiscuous mode.(optional)
@@ -297,12 +304,12 @@ namespace Tins {
           bool promisc = false, const std::string &filter = "", bool rfmon = false);
 
         /**
-         * \deprecaetd
          * \brief Constructs an instance of Sniffer.
          *
          * The maximum capture size is set to 65535. By default the interface won't
          * be put into promiscuous mode, and won't be put into monitor mode.
-         * 
+         *
+         * \deprecated Use the constructor that takes a SnifferConfiguration.
          * \param device The device which will be sniffed.
          * \param promisc Indicates if the interface should be put in promiscuous mode.
          * \param filter A capture filter to be used on the sniffing session.(optional);
@@ -340,7 +347,7 @@ namespace Tins {
         FileSniffer(const std::string &file_name, const SnifferConfiguration& configuration);
 
         /**
-         * \deprecated
+         * \deprecated Use the constructor that takes a SnifferConfiguration instead.
          *
          * \brief Constructs an instance of FileSniffer.
          * \param file_name The pcap file which will be parsed.
@@ -456,9 +463,19 @@ namespace Tins {
      *
      * It can be used by constructing an object of this type, 
      * setting the desired values and then passing it to the 
-     * Sniffer or FileSniffer object's constructor. 
+     * Sniffer or FileSniffer object's constructor. This sets
+     * default values for some attributes:
+     *
+     * - Snapshot length: 65535 bytes (64 KB).
+     * - Timeout: 1000 milliseconds.
+     * - Promiscuous mode: false.
+     *
+     * For any of the attributes not listed above, the associated
+     * pcap function which is used to set them on a pcap handle
+     * won't be called at all. 
      * 
-     * For example:
+     * This class can be used to configure a Sniffer object,
+     * like this:
      *
      * \code
      * // Initialize the configuration.

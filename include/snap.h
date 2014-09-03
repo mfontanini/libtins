@@ -40,7 +40,8 @@
 namespace Tins {
 
     /**
-     * \brief Class representing a SNAP frame.
+     * \class SNAP
+     * \brief Represents a SNAP frame.
      * 
      * Note that this PDU contains the 802.3 LLC structure + SNAP frame.
      * So far only unnumbered information structure is supported.

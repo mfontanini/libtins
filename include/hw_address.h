@@ -43,6 +43,22 @@ namespace Tins {
 /**
  * \class HWAddress
  * \brief Represents a hardware address.
+ *
+ * This class represents a hardware (MAC) address. It can 
+ * be constructed from it's string representation and you can
+ * iterate over the bytes that compose it.
+ *
+ * For example:
+ *
+ * \code
+ * // Construct it from a string.
+ * HWAddress<6> address("00:01:fa:9e:1a:cd");
+ *
+ * // Iterate over its bytes.
+ * for(auto element : address) {
+ *     // element will be each of the bytes(\x00, \x01, \xfa, etc)
+ * }
+ * \endcode
  */
 template<size_t n, typename Storage = uint8_t>
 class HWAddress {
@@ -79,7 +95,8 @@ public:
      * \brief Constructor from a const storage_type*.
      * 
      * If no pointer or a null pointer is provided, the address is 
-     * initialized to 00:00:..... 
+     * initialized to 00:00:00:00:00:00.
+     * 
      * This constructor is very usefull when passing zero initialized
      * addresses as arguments to other functions. You can use a 
      * literal 0, which will be implicitly converted to the empty address.

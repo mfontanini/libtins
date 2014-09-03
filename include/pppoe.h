@@ -40,6 +40,10 @@
 #include "cxxstd.h"
 
 namespace Tins {
+/**
+ * \class PPPoE
+ * \brief Represents a Point-to-point protocol over Ethernet PDU.
+ */
 class PPPoE : public PDU {
 public:
     /**

@@ -45,6 +45,7 @@
 
 namespace Tins {
     /**
+     * \class TCP
      * \brief Class that represents an TCP PDU.
      *
      * TCP is the representation of the TCP PDU. Instances of this class

@@ -39,7 +39,8 @@
 namespace Tins {
 
     /**
-     * \brief Class representing an Ethernet II PDU.
+     * \class EthernetII
+     * \brief Represents an Ethernet II PDU.
      */
     class EthernetII : public PDU {
     public:
