@@ -1,0 +1,29 @@
+/** 
+ * \mainpage Documentation
+ *
+ * \section intro_sec Introduction
+ *
+ * <i>libtins</i> is a high-level, multiplatform <i>C++</i> network packet 
+ * sniffing and crafting library.
+ * 
+ * Its main purpose is to provide the <i>C++</i> developer an easy, efficient, 
+ * platform and endianess-independent way to create tools which need to 
+ * send, receive and manipulate network packets.
+ *
+ * \section install_sec Installation
+ * 
+ * Please visit the <a href="http://libtins.github.io/download/">downloads
+ * section</a> in order to see the installation instructions.
+ *
+ * \section tutorials_sec Tutorials
+ *
+ * If you want to learn about how the library works, please visit the
+ * <a href="http://libtins.github.io/tutorial/">tutorials</a> section.
+ *
+ * \section examples_sec Examples
+ *
+ * Make sure to visit the <a href="http://libtins.github.io/examples/">
+ * examples</a> section to see some short but illustrative examples on how 
+ * to send and sniff packets using <i>libtins</i>.
+ *
+ */
