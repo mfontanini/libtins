@@ -43,6 +43,7 @@
     #include <net/if.h>
 #else
     #include <winsock2.h>
+    #include <Iphlpapi.h>
 #endif
 #include "network_interface.h"
 #include "utils.h"
@@ -169,7 +170,19 @@ std::string NetworkInterface::name() const {
         throw std::runtime_error("Error fetching this interface's name");
     return iface_name;
     #else // WIN32
-    return "Not implemented";
+    ULONG size;
+    ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
+    std::vector<uint8_t> buffer(size);
+    if (::GetAdaptersAddresses(AF_INET, 0, 0, (IP_ADAPTER_ADDRESSES *)&buffer[0], &size) == ERROR_SUCCESS) {
+        PIP_ADAPTER_ADDRESSES iface = (IP_ADAPTER_ADDRESSES *)&buffer[0];
+        while (iface) {
+            if (iface->IfIndex == iface_id) {
+                return std::string("\\Device\\NPF_") + iface->AdapterName;
+            }
+            iface = iface->Next;
+        }
+    }
+    throw std::runtime_error("Failed to find interface name");
     #endif // WIN32
 }
 

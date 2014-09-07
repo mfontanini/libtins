@@ -106,7 +106,11 @@ public:
     
     /**
      * \brief Retrieves this interface's name.
-     * 
+     *
+     * This name can be used as the interface name provided to the
+     * Sniffer class when starting a sniffing session.
+     *
+     * \sa Sniffer
      * \return std::string containing this interface's name.
      */
     std::string name() const;
