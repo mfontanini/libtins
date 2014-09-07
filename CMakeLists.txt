@@ -81,11 +81,11 @@ IF(LIBTINS_ENABLE_DOT11)
     ENDIF(LIBTINS_ENABLE_WPA2)
 ENDIF(LIBTINS_ENABLE_DOT11)
 
-# add a target to generate API documentation with Doxygen
+# Add a target to generate API documentation using Doxygen
 FIND_PACKAGE(Doxygen QUIET)
 IF(DOXYGEN_FOUND)
     CONFIGURE_FILE(
-        ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in 
+        ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in 
         ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile 
         @ONLY
     )
@@ -126,20 +126,20 @@ EXPORT(PACKAGE libtins)
 # for the build tree
 SET(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
 CONFIGURE_FILE(
-    libtinsConfig.cmake.in
+    cmake/libtinsConfig.cmake.in
     "${PROJECT_BINARY_DIR}/libtinsConfig.cmake" @ONLY
 )
 CONFIGURE_FILE(
-    libtinsConfigVersion.cmake.in
+    cmake/libtinsConfigVersion.cmake.in
     "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake" @ONLY
 )
 # Install the libtinsConfig.cmake and libtinsConfigVersion.cmake
 INSTALL(
     FILES
     "${PROJECT_BINARY_DIR}/libtinsConfig.cmake"
-   "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake"
-   DESTINATION CMake
-   COMPONENT dev
+    "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake"
+    DESTINATION CMake
+    COMPONENT dev
 )
 
 # Install the export set for use with the install-tree
