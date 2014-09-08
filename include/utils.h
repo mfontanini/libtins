@@ -36,6 +36,7 @@
     #include <winsock2.h>
     #include <iphlpapi.h>
     #undef interface
+    #include "network_interface.h"
 #endif
 #include "macros.h"
 #if defined(BSD) || defined(__FreeBSD_kernel__)
@@ -389,9 +390,8 @@ void Tins::Utils::route_entries(ForwardIterator output) {
     for (DWORD i = 0; i < table->dwNumEntries; i++) {
         MIB_IPFORWARDROW *row = &table->table[i];
         if(row->dwForwardType == MIB_IPROUTE_TYPE_INDIRECT) {
-            if_indextoname(row->dwForwardIfIndex, iface_name);
             RouteEntry entry;
-            entry.interface = iface_name;
+            entry.interface = NetworkInterface::from_index(row->dwForwardIfIndex).name();
             entry.destination = IPv4Address(row->dwForwardDest);
             entry.mask = IPv4Address(row->dwForwardMask);
             entry.gateway = IPv4Address(row->dwForwardNextHop);

@@ -49,6 +49,10 @@
 #include "utils.h"
 #include "endianness.h"
 
+using std::string;
+using std::vector;
+using std::set;
+
 /** \cond */
 struct InterfaceInfoCollector {
     typedef Tins::NetworkInterface::Info info_type;
@@ -123,9 +127,24 @@ namespace Tins {
 NetworkInterface NetworkInterface::default_interface() {
     return NetworkInterface(IPv4Address(uint32_t(0)));
 }
+
+vector<NetworkInterface> NetworkInterface::all() {
+    const set<string> interfaces = Utils::network_interfaces();
+    vector<NetworkInterface> output;
+    for(set<string>::const_iterator it = interfaces.begin(); it != interfaces.end(); ++it) {
+        output.push_back(*it);
+    }
+    return output;
+}
     
 NetworkInterface::NetworkInterface() : iface_id(0) {
 
+}
+
+NetworkInterface NetworkInterface::from_index(id_type identifier) {
+    NetworkInterface iface;
+    iface.iface_id = identifier;
+    return iface;
 }
 
 NetworkInterface::NetworkInterface(const char *name) {
@@ -177,7 +196,7 @@ std::string NetworkInterface::name() const {
         PIP_ADAPTER_ADDRESSES iface = (IP_ADAPTER_ADDRESSES *)&buffer[0];
         while (iface) {
             if (iface->IfIndex == iface_id) {
-                return std::string("\\Device\\NPF_") + iface->AdapterName;
+                return iface->AdapterName;
             }
             iface = iface->Next;
         }
@@ -197,10 +216,26 @@ NetworkInterface::Info NetworkInterface::addresses() const {
 }
 
 NetworkInterface::id_type NetworkInterface::resolve_index(const char *name) {
+    #ifndef WIN32
     id_type id = if_nametoindex(name);
     if(!id)
         throw std::runtime_error("Invalid interface");
     return id;
+    #else // Win32
+    ULONG size;
+    ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
+    std::vector<uint8_t> buffer(size);
+    if (::GetAdaptersAddresses(AF_INET, 0, 0, (IP_ADAPTER_ADDRESSES *)&buffer[0], &size) == ERROR_SUCCESS) {
+        PIP_ADAPTER_ADDRESSES iface = (IP_ADAPTER_ADDRESSES *)&buffer[0];
+        while (iface) {
+            if (strcmp(iface->AdapterName, name) == 0) {
+                return iface->IfIndex;
+            }
+            iface = iface->Next;
+        }
+    }
+    throw std::runtime_error("Invalid interface");
+    #endif // Win32
 }
 }
 

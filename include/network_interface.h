@@ -31,6 +31,7 @@
 #define TINS_NETWORK_INTERFACE_H
 
 #include <string>
+#include <vector>
 #include <stdint.h>
 #include "hw_address.h"
 #include "ip_address.h"
@@ -65,6 +66,16 @@ public:
      * interface.
      */
     static NetworkInterface default_interface();
+
+    /**
+     * Returns all available network interfaces.
+     */
+    static std::vector<NetworkInterface> all();
+
+    /**
+     * Returns a network interface for the given index.
+     */
+    static NetworkInterface from_index(id_type identifier);
 
     /**
      * Default constructor.

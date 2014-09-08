@@ -63,7 +63,7 @@ struct InterfaceCollector {
     
     #ifdef WIN32
     bool operator() (PIP_ADAPTER_ADDRESSES addr) {
-        ifaces.insert(string("\\Device\\NPF_") + addr->AdapterName);
+        ifaces.insert(addr->AdapterName);
         return false;
     }
     #else

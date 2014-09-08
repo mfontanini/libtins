@@ -27,6 +27,12 @@
  *
  */
 
+#ifdef WIN32
+    #define TINS_PREFIX_INTERFACE(x) ("\\Device\\NPF_" + x)
+#else // WIN32
+    #define TINS_PREFIX_INTERFACE(x) (x)
+#endif // WIN32
+
 #include <algorithm>
 #include <sstream>
 #include "sniffer.h"
@@ -217,7 +223,7 @@ void BaseSniffer::set_timeout(int ms) {
 Sniffer::Sniffer(const string &device, const SnifferConfiguration& configuration)
 {
     char error[PCAP_ERRBUF_SIZE];
-    pcap_t* phandle = pcap_create(device.c_str(), error);
+    pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
     if (!phandle) {
         throw runtime_error(error);
     }
@@ -225,7 +231,7 @@ Sniffer::Sniffer(const string &device, const SnifferConfiguration& configuration
 
     // Set the netmask if we are able to find it.
     bpf_u_int32 ip, if_mask;
-    if (pcap_lookupnet(device.c_str(), &ip, &if_mask, error) == 0) {
+    if (pcap_lookupnet(TINS_PREFIX_INTERFACE(device).c_str(), &ip, &if_mask, error) == 0) {
         set_if_mask(if_mask);
     }
 
@@ -251,7 +257,7 @@ Sniffer::Sniffer(const std::string &device, unsigned max_packet_size, bool promi
     configuration.set_rfmon(rfmon);
 
     char error[PCAP_ERRBUF_SIZE];
-    pcap_t* phandle = pcap_create(device.c_str(), error);
+    pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
     if (!phandle) {
         throw runtime_error(error);
     }
@@ -259,7 +265,7 @@ Sniffer::Sniffer(const std::string &device, unsigned max_packet_size, bool promi
 
     // Set the netmask if we are able to find it.
     bpf_u_int32 ip, if_mask;
-    if (pcap_lookupnet(device.c_str(), &ip, &if_mask, error) == 0) {
+    if (pcap_lookupnet(TINS_PREFIX_INTERFACE(device).c_str(), &ip, &if_mask, error) == 0) {
         set_if_mask(if_mask);
     }
 
@@ -284,7 +290,7 @@ Sniffer::Sniffer(const std::string &device, promisc_type promisc, const std::str
     configuration.set_rfmon(rfmon);
 
     char error[PCAP_ERRBUF_SIZE];
-    pcap_t* phandle = pcap_create(device.c_str(), error);
+    pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
     if (!phandle) {
         throw runtime_error(error);
     }
@@ -292,7 +298,7 @@ Sniffer::Sniffer(const std::string &device, promisc_type promisc, const std::str
 
     // Set the netmask if we are able to find it.
     bpf_u_int32 ip, if_mask;
-    if (pcap_lookupnet(device.c_str(), &ip, &if_mask, error) == 0) {
+    if (pcap_lookupnet(TINS_PREFIX_INTERFACE(device).c_str(), &ip, &if_mask, error) == 0) {
         set_if_mask(if_mask);
     }
 
