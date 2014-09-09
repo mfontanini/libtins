@@ -110,7 +110,7 @@ Tins::PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer,
 {
     switch(flag) {
         case Constants::IP::PROTO_IPIP:
-            return new Tins::TCP(buffer, size);
+            return new Tins::IP(buffer, size);
         case Constants::IP::PROTO_TCP:
             return new Tins::TCP(buffer, size);
         case Constants::IP::PROTO_UDP:
