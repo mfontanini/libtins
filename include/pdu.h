@@ -53,12 +53,56 @@ namespace Tins {
      * \class PDU
      * \brief Base class for protocol data units.
      *
-     * Every PDU implementation must inherit this class. PDUs can be serialized,
-     * therefore allowing a PacketSender to send them through the corresponding
-     * sockets. 
+     * Every PDU implementation inherits from this class. 
+     *
+     * PDUs can contain 0 or 1 inner PDU. By stacking several PDUs together,
+     * you can construct packets. These are created upwards: upper layers 
+     * will be children of the lower ones. 
+     *
+     * If you want to find a specific protocol within a PDU chain, you can use
+     * PDU::find_pdu and PDU::rfind_pdu. Both of them take a template parameter
+     * that indicates the PDU type you are looking for. The first one returns a 
+     * pointer to the first object of that type, and the second one returns a 
+     * reference (and throws if it is not found). 
      * 
-     * PDUs are created upwards: upper layers will be children of the
-     * lower ones. 
+     * For example:
+     *
+     * \code
+     * // Take a whole packet from somewhere.
+     * EthernetII packet = ...;
+     *
+     * // Find the IP layer
+     * const IP* ip = packet.find_pdu<IP>();
+     * if(ip) {
+     *     // If the pointer is not null, then it will point to the IP layer
+     * }
+     *
+     * // Find the TCP layer. This will throw a pdu_not_found exception
+     * // if there is no TCP layer in this packet.
+     * const TCP& tcp = packet.rfind_pdu<TCP>();
+     * \endcode
+     *
+     * PDU objects can be serialized. Serialization converts the entire PDU
+     * stack into a vector of bytes. This process might modify some parameters
+     * on packets depending on which protocols are used in it. For example:
+     *
+     * - If the lowest protocol layer is IP (this means that there is no 
+     * link layer protocol in the packet), then it calculates the source address
+     * that should be used in that IP PDU. \sa IP
+     * - If a protocol contains a checksum field, its value will be calculated
+     * and included in its serialized contents.
+     * - If a protocol contains a "next protocol" field, it is also set based
+     * on the type of the next PDU in the packet.
+     *
+     * If you want to serialize a packet, just use PDU::serialize:
+     *
+     * \code
+     * // Construct a packet
+     * EthernetII packet = EthernetII() / IP() / TCP() / RawPDU("hello");
+     *
+     * // Now serialize it. This is a std::vector<uint8_t>.
+     * PDU::serialization_type buffer = packet.serialize();
+     * \endcode
      */
     class PDU {
     public:

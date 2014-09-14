@@ -38,10 +38,27 @@ namespace Tins {
 
     /** 
      * \class UDP
-     * \brief Class that represents an UDP PDU.
+     * \brief Represents an UDP PDU.
      *
-     * UDP is the representation of the UDP PDU. Instances of this class
-     * must be sent over a level 3 PDU, this will otherwise fail.
+     * This class represents an UDP PDU. 
+     * 
+     * While sniffing, the payload sent in each packet will be wrapped
+     * in a RawPDU, which is set as the UDP object's inner_pdu. Therefore,
+     * if you are sniffing and want to see the UDP packet's payload,
+     * you need to do the following:
+     *
+     * \code
+     * // Get a packet from somewhere.
+     * UDP udp = ...;
+     *
+     * // Extract the RawPDU object.
+     * const RawPDU& raw = udp.rfind_pdu<RawPDU>();
+     *
+     * // Finally, take the payload (this is a vector<uint8_t>)
+     * const RawPDU::payload_type& payload = raw.payload();
+     * \endcode
+     *
+     * \sa RawPDU
      */
     class UDP : public PDU {
     public:

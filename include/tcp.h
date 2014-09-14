@@ -46,10 +46,30 @@
 namespace Tins {
     /**
      * \class TCP
-     * \brief Class that represents an TCP PDU.
+     * \brief Represents a TCP PDU.
      *
-     * TCP is the representation of the TCP PDU. Instances of this class
-     * must be sent over a level 3 PDU, this will otherwise fail.
+     * This class represents a TCP PDU. 
+     *
+     * When sending TCP PDUs, the checksum is calculated automatically
+     * every time you send the packet.
+     * 
+     * While sniffing, the payload sent in each packet will be wrapped
+     * in a RawPDU, which is set as the TCP object's inner_pdu. Therefore,
+     * if you are sniffing and want to see the TCP packet's payload,
+     * you need to do the following:
+     *
+     * \code
+     * // Get a packet from somewhere.
+     * TCP tcp = ...;
+     *
+     * // Extract the RawPDU object.
+     * const RawPDU& raw = tcp.rfind_pdu<RawPDU>();
+     *
+     * // Finally, take the payload (this is a vector<uint8_t>)
+     * const RawPDU::payload_type& payload = raw.payload();
+     * \endcode
+     *
+     * \sa RawPDU
      */
 
     class TCP : public PDU {
@@ -78,7 +98,7 @@ namespace Tins {
         /**
          * \brief TCP options enum.
          *
-         * This enum identifies valid options supported by TCP PDU.
+         * This enum defines option types supported by TCP PDU.
          */
         enum OptionTypes {
             EOL     = 0,
@@ -120,6 +140,7 @@ namespace Tins {
          *
          * Creates an instance of TCP. Destination and source port can
          * be provided, otherwise both will be 0.
+         * 
          * \param dport Destination port.
          * \param sport Source port.
          * */
@@ -129,7 +150,7 @@ namespace Tins {
          * \brief Constructs TCP object from a buffer.
          * 
          * If there is not enough size for a TCP header, or any of the
-         * TLV options are malformed a malformed_packet exception is 
+         * TLV options are malformed, a malformed_packet exception is 
          * thrown.
          * 
          * Any extra data will be stored in a RawPDU.
@@ -142,56 +163,56 @@ namespace Tins {
         /**
          * \brief Getter for the destination port field.
          *
-         * \return The destination port in an uint16_t.
+         * \return The destination port field value.
          */
         uint16_t dport() const { return Endian::be_to_host(_tcp.dport); }
 
         /**
          * \brief Getter for the source port field.
          *
-         * \return The source port in an uint16_t.
+         * \return The source port field value.
          */
         uint16_t sport() const { return Endian::be_to_host(_tcp.sport); }
 
         /**
          * \brief Getter for the sequence number field.
          *
-         * \return The sequence number in an uint32_t.
+         * \return The sequence number field value.
          */
         uint32_t seq() const { return Endian::be_to_host(_tcp.seq); }
 
         /**
          * \brief Getter for the acknowledge number field.
          *
-         * \return The acknowledge number in an uint32_t.
+         * \return The acknowledge number field value.
          */
         uint32_t ack_seq() const { return Endian::be_to_host(_tcp.ack_seq); }
 
         /**
          * \brief Getter for the window size field.
          *
-         * \return The window size in an uint32_t.
+         * \return The window size field value.
          */
         uint16_t window() const { return Endian::be_to_host(_tcp.window); }
 
         /**
          * \brief Getter for the checksum field.
          *
-         * \return The checksum field in an uint16_t.
+         * \return The checksum field value.
          */
         uint16_t checksum() const { return Endian::be_to_host(_tcp.check); }
 
         /**
          * \brief Getter for the urgent pointer field.
          *
-         * \return The urgent pointer in an uint16_t.
+         * \return The urgent pointer field value.
          */
         uint16_t urg_ptr() const { return Endian::be_to_host(_tcp.urg_ptr); }
 
         /**
          * \brief Getter for the data offset field.
          *
-         * \return Data offset in an uint8_t.
+         * \return The data offset field value.
          */
         small_uint<4> data_offset() const { return this->_tcp.doff; }
 
@@ -204,7 +225,24 @@ namespace Tins {
 
         /**
          * \brief Gets the value of a flag.
+         *
+         * This method gets the value of a specific flag. If you 
+         * want to check for multiple flags at the same time,
+         * use TCP::flags.
+         *
+         * If you want to check if this PDU has the SYN flag on,
+         * you can do it like this:
+         *
+         * \code
+         * // Get a TCP packet from somewhere.
+         * TCP tcp = ...;
+         *
+         * if(tcp.get_flag(TCP::SYN)) {
+         *     // The SYN flag is on!
+         * }
+         * \endcode
          * 
+         * \sa TCP::flags
          * \param tcp_flag The polled flag.
          * \return The value of the flag.
          */
@@ -220,8 +258,9 @@ namespace Tins {
          * 
          * \code
          * TCP tcp = ...;
-         * if(tcp.flags() == (TCP::SYN | TCP::ACK))
+         * if(tcp.flags() == (TCP::SYN | TCP::ACK)) {
          *     // It's a SYN+ACK!
+         * }
          * \endcode
          * 
          * \return The value of the flags field.
@@ -379,11 +418,13 @@ namespace Tins {
          * same time.
          * 
          * \code
+         * // Get a TCP packet from somewhere and set the flags to SYN && ACK
          * TCP tcp = ...;
          * tcp.flags(TCP::SYN | TCP::ACK);
-         * // ...
-         * // only set the ACK, keeping the rest of the old flags.
-         * tcp.flags(tcp.flags() | TCP::ACK);
+         * 
+         * // Now also set the PSH flag, without modifying 
+         * // the rest of the flags.
+         * tcp.flags(tcp.flags() | TCP::PSH);
          * \endcode
          * 
          * \param value The new value of the flags.

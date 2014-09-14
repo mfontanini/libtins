@@ -265,7 +265,8 @@ namespace Tins {
     class Sniffer : public BaseSniffer {
     public:
         /**
-         * \deprecated
+         * \deprecated This enum is no longer necessary. You should use the
+         * Sniffer(const std::string&, const SnifferConfiguration&) constructor.
          */
         enum promisc_type {
             NON_PROMISC,
@@ -293,7 +294,8 @@ namespace Tins {
          * By default the interface won't be put into promiscuous mode, and won't
          * be put into monitor mode.
          *
-         * \deprecated Use the constructor that takes a SnifferConfiguration.
+         * \deprecated Use the Sniffer(const std::string&, const SnifferConfiguration&) 
+         * constructor.
          * \param device The device which will be sniffed.
          * \param max_packet_size The maximum packet size to be read.
          * \param promisc bool indicating wether to put the interface in promiscuous mode.(optional)
@@ -309,7 +311,8 @@ namespace Tins {
          * The maximum capture size is set to 65535. By default the interface won't
          * be put into promiscuous mode, and won't be put into monitor mode.
          *
-         * \deprecated Use the constructor that takes a SnifferConfiguration.
+         * \deprecated Use the Sniffer(const std::string&, const SnifferConfiguration&) 
+         * constructor.
          * \param device The device which will be sniffed.
          * \param promisc Indicates if the interface should be put in promiscuous mode.
          * \param filter A capture filter to be used on the sniffing session.(optional);

@@ -78,7 +78,9 @@ public:
       cached_size()  {}
     
     /**
-     * Forwards the call to the cached PDU. \sa PDU::header_size.
+     * Forwards the call to the cached PDU. 
+     * 
+     * \sa PDU::header_size.
      */
     uint32_t header_size() const {
         if(cached_serialization.empty())
@@ -87,42 +89,54 @@ public:
     }
     
     /**
-     * Forwards the call to the cached PDU. \sa PDU::clone.
+     * Forwards the call to the cached PDU. 
+     * 
+     * \sa PDU::clone.
      */
     PDUCacher *clone() const {
         return new PDUCacher<T>(*this);
     }
     
     /**
-     * Forwards the call to the cached PDU. \sa PDU::send.
+     * Forwards the call to the cached PDU. 
+     * 
+     * \sa PDU::send.
      */
     void send(PacketSender &sender, const NetworkInterface &iface) {
         cached.send(sender, iface);
     }
     
     /**
-     * Forwards the call to the cached PDU. \sa PDU::recv_responde.
+     * Forwards the call to the cached PDU. 
+     * 
+     * \sa PDU::recv_responde.
      */
     PDU *recv_response(PacketSender &sender, const NetworkInterface &iface) {
         return cached.recv_response(sender, iface);
     }
     
     /**
-     * Forwards the call to the cached PDU. \sa PDU::matches_response.
+     * Forwards the call to the cached PDU. 
+     * 
+     * \sa PDU::matches_response.
      */
     bool matches_response(const uint8_t *ptr, uint32_t total_sz) const {
         return cached.matches_response(ptr, total_sz);
     }
     
     /**
-     * Forwards the call to the cached PDU. \sa PDU::matches_flag.
+     * Forwards the call to the cached PDU. 
+     * 
+     * \sa PDU::matches_flag.
      */
     bool matches_flag(PDUType flag) const {
         return cached.matches_flag(flag);
     }
     
     /**
-     * Forwards the call to the cached PDU. \sa PDU::pdu_type.
+     * Forwards the call to the cached PDU. 
+     * 
+     * \sa PDU::pdu_type.
      */
     PDUType pdu_type() const {
         return cached.pdu_type();

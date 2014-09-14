@@ -47,10 +47,61 @@ namespace Tins {
     class PDU;
     
     /**
-     * \brief Class that enables sending the created PDUs
+     * \class PacketSender
+     * \brief Sends packets through a network interface.
      *
-     * PacketSender class is responsible for sending the packets using the
-     * correct PDU layer. It is responsible for opening the raw sockets.
+     * This class allows sending packets through a network interface.
+     * It can send basically two types of packets:
+     *
+     * - Those that contain a link layer PDU (EthernetII, SLL, etc). These
+     * will be serialized and sent through an interface that has to be 
+     * specified. This can be done by providing it when you call 
+     * PacketSender::send, or set a default one using 
+     * PacketSender::default_interface.
+     * - Those that don't contain a link layer PDU. In this case, the 
+     * kernel will be responsible for picking the appropriate network interface
+     * based on the destination address.
+     *
+     * Sending packets can be done via PacketSender::send:
+     *
+     * \code
+     * // Construct a packet which uses an EthernetII link layer.
+     * EthernetII pkt1 = ...;
+     *
+     * // Construct a packet sender, which we'll use to send packets.
+     * PacketSender sender;
+     * 
+     * // Send it through interface eth0
+     * sender.send(pkt1, "eth0");
+     *
+     * // Set the default interface to eth0
+     * sender.default_interface("eth0");
+     * 
+     * // This is now equivalent to the previous send.
+     * sender.send(pkt1);
+     *
+     * // Construct a packet which has no link layer protocol.
+     * IP ip = IP("192.168.0.1") / TCP(22, 928);
+     *
+     * // Here the kernel will figure out which interface to use and it will
+     * // append the appropriate link layer protocol PDU. It will also perform
+     * // the necessary ARP lookups in order to use the destination host's
+     * // hardware address.
+     * //
+     * // libtins will find which is the appropriate source IP address to use.
+     * // This will be done by the kernel as well, but it's required when 
+     * // calculating checksums.
+     * sender.send(ip);
+     * \endcode
+     *
+     * PacketSender also supports sending a packet and waiting for a response.
+     * This can be done by using PacketSender::send_recv.
+     *
+     * This class opens sockets as it needs to, and closes them when the object
+     * is destructed.
+     *
+     * \sa PacketSender::send
+     * \sa PacketSender::send_recv
      */
     class PacketSender {
     public:
@@ -209,9 +260,19 @@ namespace Tins {
          * \brief Sends a PDU and waits for its response. 
          * 
          * This method is used to send PDUs and receive their response. 
-         * It opens the required socket(if it's not open yet). This can be used
-         * to expect responses for ICMP, ARP, and such packets that are normally
-         * answered by the host that receives the packet.
+         * The packet is sent, and then a response is awaited. 
+         * PDU::matches_pdu is called on the packet sent in order to
+         * check whether a packet received is a response. 
+         *
+         * This will match every response to a packet. For example,
+         * if you send a TCP packet, any response matching the same
+         * IP addresses and ports will be taken as a response to it.
+         * This also happens for other protocols, such as ARP, ICMP, 
+         * DHCP, DNS, IP, etc.
+         *
+         * If you send a packet and get an ICMP response indicating
+         * an error (such as host unreachable, ttl exceeded, etc),
+         * that packet will be considered a response.
          * 
          * \param pdu The PDU to send.
          * \return Returns the response PDU, 0 if not response was received.
@@ -220,12 +281,11 @@ namespace Tins {
         
         /** 
          * \brief Sends a PDU and waits for its response. 
+         *
+         * Sends a packet and receives a response. This overload takes 
+         * a NetworkInterface. 
          * 
-         * This method is used to send PDUs and receive their response. 
-         * It opens the required socket(if it's not open yet). This can be used
-         * to expect responses for ICMP, ARP, and such packets that are normally
-         * answered by the host that receives the packet.
-         * 
+         * \sa PacketSender::send_recv(PDU&);
          * \param pdu The PDU to send.
          * \param iface The network interface in which to send and receive.
          * \return Returns the response PDU, 0 if not response was received.
@@ -235,9 +295,12 @@ namespace Tins {
         #ifndef WIN32
         /** 
          * \brief Receives a layer 2 PDU response to a previously sent PDU.
+         *
+         * This method is used internally. You should just use PacketSender::send_recv.
          * 
-         * This PacketSender will receive data from a raw socket, open using the corresponding flag,
-         * according to the given type of protocol, until a match for the given PDU is received. 
+         * This PacketSender will receive data from a raw socket, open using 
+         * the corresponding flag, according to the given type of protocol, until 
+         * a match for the given PDU is received. 
          * 
          * \param pdu The PDU which will try to match the responses.
          * \param link_addr The sockaddr struct which will be used to receive the PDU.
@@ -249,6 +312,8 @@ namespace Tins {
 
         /** 
          * \brief Sends a level 2 PDU.
+         *
+         * This method is used internally. You should just use PacketSender::send.
          * 
          * This method sends a layer 2 PDU, using a raw socket, open 
          * using the corresponding flag, according to the given type of 
@@ -266,6 +331,8 @@ namespace Tins {
 
         /** 
          * \brief Receives a layer 3 PDU response to a previously sent PDU.
+         *
+         * This method is used internally. You should just use PacketSender::send_recv.
          * 
          * This PacketSender will receive data from a raw socket, open using the corresponding flag,
          * according to the given type of protocol, until a match for the given PDU is received. 
@@ -280,6 +347,8 @@ namespace Tins {
 
         /** 
          * \brief Sends a level 3 PDU.
+         *
+         * This method is used internally. You should just use PacketSender::send.
          * 
          * This method sends a layer 3 PDU, using a raw socket, open using the corresponding flag,
          * according to the given type of protocol.

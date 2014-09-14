@@ -119,7 +119,8 @@ public:
     /**
      * \brief Constructs a PacketWriter.
      * 
-     * \deprecated Use the other constructor, which takes a DataLinkType.
+     * \deprecated Use the PacketWriter(const std::string&, const DataLinkType<T>&)
+     * constructor.
      * 
      * \param file_name The file in which to store the written PDUs.
      * \param lt The link type which will be written to this file.
@@ -158,7 +159,9 @@ public:
     #endif
     
     /**
-     * Destructor.
+     * \brief Destructor.
+     *
+     * Gracefully closes the output file.
      */
     ~PacketWriter();
     
