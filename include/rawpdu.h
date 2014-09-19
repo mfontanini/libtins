@@ -33,6 +33,7 @@
 #include <vector>
 #include <string>
 #include "pdu.h"
+#include "cxxstd.h"
 
 namespace Tins {
 
@@ -81,6 +82,31 @@ namespace Tins {
          */
         RawPDU(const uint8_t *pload, uint32_t size);
         
+        /**
+         * \brief Constructs a RawPDU from an iterator range.
+         *
+         * The data in the iterator range is copied into the RawPDU
+         * internal buffer.
+         *
+         * \param start The beginning of the iterator range.
+         * \param end The end of the iterator range.
+         */
+        template<typename ForwardIterator>
+        RawPDU(ForwardIterator start, ForwardIterator end) 
+        : _payload(start, end) { }
+
+        #if TINS_IS_CXX11
+            /** 
+             * \brief Creates an instance of RawPDU from a payload_type.
+             *
+             * The payload is moved into the RawPDU's internal buffer.
+             * 
+             * \param data The payload to use.
+             */
+            RawPDU(payload_type&& data)
+            : _payload(move(data)) { }
+        #endif // TINS_IS_CXX11
+
         /** 
          * \brief Creates an instance of RawPDU from an input string.
          * 
