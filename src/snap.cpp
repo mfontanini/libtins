@@ -33,6 +33,7 @@
 #endif
 #include <stdexcept>
 #ifndef WIN32
+    #include <sys/types.h>
     #include <net/ethernet.h>
 #endif
 #include "snap.h"

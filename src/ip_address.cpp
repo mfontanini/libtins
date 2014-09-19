@@ -30,6 +30,7 @@
 #ifdef WIN32
     #include <ws2tcpip.h>
 #else // WIN32
+    #include <sys/socket.h>
     #include <arpa/inet.h>
 #endif // WIN32
 #include <stdexcept>
