@@ -159,7 +159,7 @@ PtrPacket BaseSniffer::next_packet() {
             throw protocol_disabled();
         #endif
     }
-    else if(iface_type == DLT_LOOP)
+    else if(iface_type == DLT_NULL)
         handler = &sniff_loop_handler<Tins::Loopback>;
     else if(iface_type == DLT_LINUX_SLL)
         handler = &sniff_loop_handler<SLL>;
