@@ -106,6 +106,7 @@ public:
     }
 private:
     friend class BaseSniffer;
+    friend class SnifferIterator;
     
     PacketWrapper(pdu_type pdu, const Timestamp &ts) 
     : pdu_(pdu), ts_(ts) {}
