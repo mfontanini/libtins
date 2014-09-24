@@ -32,6 +32,7 @@
 #endif
 #include <cstring>
 #include "pppoe.h"
+#include "rawpdu.h"
 #include "exceptions.h"
 
 namespace Tins {
@@ -52,27 +53,37 @@ PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz)
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
     total_sz = std::min(total_sz, (uint32_t)payload_length());
-    const uint8_t *end = buffer + total_sz;
-    while(buffer < end) {
-        if(buffer + sizeof(uint32_t) * 2 > end)
-            throw malformed_packet();
-        uint16_t opt_type;
-        std::memcpy(&opt_type, buffer, sizeof(uint16_t));
-        uint16_t opt_len;
-        std::memcpy(&opt_len, buffer + sizeof(uint16_t), sizeof(uint16_t));
-        buffer += sizeof(uint16_t) * 2;
-        total_sz -= sizeof(uint16_t) * 2;
-        if(Endian::be_to_host(opt_len) > total_sz)
-            throw malformed_packet();
-        add_tag(
-            tag(
-                static_cast<TagTypes>(opt_type), 
-                Endian::be_to_host(opt_len), 
-                buffer
-            )
-        );
-        buffer += Endian::be_to_host(opt_len);
-        total_sz -= Endian::be_to_host(opt_len);
+    // If this is a session data packet
+    if(code() == 0) {
+        if(total_sz > 0) {
+            inner_pdu(
+                new RawPDU(buffer, total_sz)
+            );
+        }
+    }
+    else {
+        const uint8_t *end = buffer + total_sz;
+        while(buffer < end) {
+            if(buffer + sizeof(uint32_t) * 2 > end)
+                throw malformed_packet();
+            uint16_t opt_type;
+            std::memcpy(&opt_type, buffer, sizeof(uint16_t));
+            uint16_t opt_len;
+            std::memcpy(&opt_len, buffer + sizeof(uint16_t), sizeof(uint16_t));
+            buffer += sizeof(uint16_t) * 2;
+            total_sz -= sizeof(uint16_t) * 2;
+            if(Endian::be_to_host(opt_len) > total_sz)
+                throw malformed_packet();
+            add_tag(
+                tag(
+                    static_cast<TagTypes>(opt_type), 
+                    Endian::be_to_host(opt_len), 
+                    buffer
+                )
+            );
+            buffer += Endian::be_to_host(opt_len);
+            total_sz -= Endian::be_to_host(opt_len);
+        }
     }
 }
 

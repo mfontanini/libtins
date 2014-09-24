@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "pppoe.h"
 #include "ethernetII.h"
+#include "rawpdu.h"
 
 using namespace std;
 using namespace Tins;
@@ -11,10 +12,25 @@ using namespace Tins;
 class PPPoETest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
+    static const uint8_t session_packet[];
+    static const uint8_t full_session_packet[];
 };
 
 const uint8_t PPPoETest::expected_packet[] = {
     17, 9, 0, 0, 0, 16, 1, 1, 0, 0, 1, 2, 0, 0, 1, 3, 0, 4, 97, 98, 99, 100
+};
+
+const uint8_t PPPoETest::session_packet[] = {
+    17, 0, 0, 98, 0, 21, 192, 33, 1, 11, 0, 19, 1, 4, 5, 212, 3, 5, 
+    194, 35, 5, 5, 6, 22, 173, 224, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+const uint8_t PPPoETest::full_session_packet[] = {
+    0, 5, 133, 192, 164, 17, 0, 144, 26, 65, 118, 126, 136, 100, 17, 
+    0, 0, 98, 0, 21, 192, 33, 1, 11, 0, 19, 1, 4, 5, 212, 3, 5, 194, 
+    35, 5, 5, 6, 22, 173, 224, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    , 0, 0, 0, 0, 0, 0, 0
 };
 
 TEST_F(PPPoETest, DefaultConstructor) {
@@ -24,6 +40,35 @@ TEST_F(PPPoETest, DefaultConstructor) {
     EXPECT_EQ(0, pdu.code());
     EXPECT_EQ(0, pdu.session_id());
     EXPECT_EQ(0, pdu.payload_length());
+}
+
+TEST_F(PPPoETest, ConstructorFromSessionBuffer) {
+    PPPoE pdu(session_packet, sizeof(session_packet));
+    EXPECT_EQ(1, pdu.version());
+    EXPECT_EQ(1, pdu.type());
+    EXPECT_EQ(0x00, pdu.code());
+    EXPECT_EQ(0x62, pdu.session_id());
+    EXPECT_EQ(21, pdu.payload_length());
+    EXPECT_EQ(0U, pdu.tags().size());
+    
+    const RawPDU* raw = pdu.find_pdu<RawPDU>();
+    ASSERT_TRUE(raw);
+    EXPECT_EQ(21, raw->payload_size());
+}
+
+TEST_F(PPPoETest, ConstructorFromFullSessionBuffer) {
+    EthernetII eth(full_session_packet, sizeof(full_session_packet));
+    const PPPoE& pdu = eth.rfind_pdu<PPPoE>();
+    EXPECT_EQ(1, pdu.version());
+    EXPECT_EQ(1, pdu.type());
+    EXPECT_EQ(0x00, pdu.code());
+    EXPECT_EQ(0x62, pdu.session_id());
+    EXPECT_EQ(21, pdu.payload_length());
+    EXPECT_EQ(0U, pdu.tags().size());
+    
+    const RawPDU* raw = pdu.find_pdu<RawPDU>();
+    ASSERT_TRUE(raw);
+    EXPECT_EQ(21, raw->payload_size());
 }
 
 TEST_F(PPPoETest, ConstructorFromBuffer) {

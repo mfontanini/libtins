@@ -86,6 +86,7 @@ Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
         case Tins::Constants::Ethernet::ARP:
             return new ARP(buffer, size);
         case Tins::Constants::Ethernet::PPPOED:
+        case Tins::Constants::Ethernet::PPPOES:
             return new PPPoE(buffer, size);
         case Tins::Constants::Ethernet::EAPOL:
             return EAPOL::from_bytes(buffer, size);
