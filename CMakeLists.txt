@@ -102,8 +102,8 @@ SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 # Congiguration file
 CONFIGURE_FILE(
-  "${PROJECT_SOURCE_DIR}/include/config.h.in"
-  "${PROJECT_SOURCE_DIR}/include/config.h"
+  "${PROJECT_SOURCE_DIR}/include/tins/config.h.in"
+  "${PROJECT_SOURCE_DIR}/include/tins/config.h"
 )
 
 ENABLE_TESTING()
