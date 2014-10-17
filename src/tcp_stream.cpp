@@ -34,7 +34,7 @@
 namespace Tins {
 
 // As defined by RFC 1982 - 2 ^ (SERIAL_BITS - 1)
-static const uint32_t seq_number_diff = 2147483648;
+static const uint32_t seq_number_diff = 2147483648U;
 // As defined by RFC 1982 - 2 ^ (SERIAL_BITS)
 static const uint32_t addition_modulo = std::numeric_limits<uint32_t>::max();
 
