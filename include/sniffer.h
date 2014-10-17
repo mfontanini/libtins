@@ -234,6 +234,16 @@ namespace Tins {
          * Retrieves an end iterator.
          */
         iterator end();
+
+        /**
+         * Retrieves the pcap handle used by this sniffer.
+         */
+        pcap_t* get_pcap_handle();
+
+        /**
+         * Retrieves the pcap handle used by this sniffer.
+         */
+        const pcap_t* get_pcap_handle() const;
     protected:
         /**
          * Default constructor.
@@ -241,10 +251,6 @@ namespace Tins {
         BaseSniffer();
 
         void set_pcap_handle(pcap_t* const pcap_handle);
-
-        pcap_t* get_pcap_handle();
-
-        const pcap_t* get_pcap_handle() const;
 
         void set_if_mask(bpf_u_int32 if_mask);
 
