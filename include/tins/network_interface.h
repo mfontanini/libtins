@@ -144,6 +144,12 @@ public:
     operator bool() const {
         return iface_id != 0;
     }
+
+    /**
+     * \brief Indicates whether this is a loopback device.
+     * @return true iff this is a loopback device.
+     */
+    bool is_loopback() const;
     
     /**
      * \brief Compares this interface for equality.

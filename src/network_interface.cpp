@@ -215,6 +215,10 @@ NetworkInterface::Info NetworkInterface::addresses() const {
     return info;
 }
 
+bool NetworkInterface::is_loopback() const {
+    return addresses().ip_addr.is_loopback();
+}
+
 NetworkInterface::id_type NetworkInterface::resolve_index(const char *name) {
     #ifndef WIN32
     id_type id = if_nametoindex(name);
