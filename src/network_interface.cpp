@@ -59,10 +59,11 @@ struct InterfaceInfoCollector {
     info_type *info;
     int iface_id;
     const char* iface_name;
-    bool found;
+    bool found_hw;
+    bool found_ip;
 
     InterfaceInfoCollector(info_type *res, int id, const char* if_name) 
-    : info(res), iface_id(id), iface_name(if_name), found(false) { }
+    : info(res), iface_id(id), iface_name(if_name), found_hw(false), found_ip(false) { }
     
     #ifndef WIN32
     bool operator() (const struct ifaddrs *addr) {
@@ -71,8 +72,10 @@ struct InterfaceInfoCollector {
         #if defined(BSD) || defined(__FreeBSD_kernel__)
             const struct sockaddr_dl* addr_ptr = ((struct sockaddr_dl*)addr->ifa_addr);
             
-            if(addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id)
+            if(addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id) {
                 info->hw_addr = (const uint8_t*)LLADDR(addr_ptr); // mmmm
+                found_hw = true;
+            }
             else if(addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
                 info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
                 info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
@@ -80,15 +83,16 @@ struct InterfaceInfoCollector {
                     info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_dstaddr)->sin_addr.s_addr);
                 else
                     info->bcast_addr = 0;
-                found = true;
+                found_ip = true;
             }
-            return found;
         #else
             const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
             
             if(addr->ifa_addr) {
-                if(addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id)
+                if(addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id) {
                     info->hw_addr = addr_ptr->sll_addr;
+                    found_hw = true;
+                }
                 else if(addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
                     info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
                     info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
@@ -96,11 +100,12 @@ struct InterfaceInfoCollector {
                         info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
                     else
                         info->bcast_addr = 0;
-                    found = true;
+                    found_ip = true;
                 }
             }
-            return found;
         #endif
+        
+        return found_ip && found_hw;
     }
     #else // WIN32
     bool operator() (const IP_ADAPTER_ADDRESSES *iface) {
@@ -113,10 +118,11 @@ struct InterfaceInfoCollector {
                 info->ip_addr = IPv4Address(((const struct sockaddr_in *)unicast->Address.lpSockaddr)->sin_addr.s_addr);
                 info->netmask = IPv4Address(host_to_be<uint32_t>(0xffffffff << (32 - unicast->OnLinkPrefixLength)));
                 info->bcast_addr = IPv4Address((info->ip_addr & info->netmask) | ~info->netmask);
-                found = true;
+                found_ip = true;
+                found_hw = true;
             }
         }
-        return found;
+        return found_ip && found_hw;
     }
     #endif // WIN32
 };
@@ -210,8 +216,10 @@ NetworkInterface::Info NetworkInterface::addresses() const {
     Info info;
     InterfaceInfoCollector collector(&info, iface_id, iface_name.c_str());
     Utils::generic_iface_loop(collector);
-    if(!collector.found)
+    // If we didn't event get the hw address, this went wrong
+    if(!collector.found_hw) {
         throw std::runtime_error("Error looking up interface address");
+    }
     return info;
 }
 
