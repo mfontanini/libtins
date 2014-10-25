@@ -293,6 +293,9 @@ PDU *PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_ad
     open_l3_socket(type);
     std::vector<int> sockets(1, _sockets[type]);
     if(type == IP_TCP_SOCKET || type == IP_UDP_SOCKET) {
+        #ifdef BSD
+            throw std::runtime_error("Receiving L3 packets not supported on this platform");
+        #endif
         open_l3_socket(ICMP_SOCKET);
         sockets.push_back(_sockets[ICMP_SOCKET]);
     }
