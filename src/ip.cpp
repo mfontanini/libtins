@@ -432,7 +432,7 @@ bool IP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     // checks for broadcast addr
     if((_ip.saddr == ip_ptr->daddr && (_ip.daddr == ip_ptr->saddr || dst_addr().is_broadcast())) ||
         (dst_addr().is_broadcast() && _ip.saddr == 0)) {
-        uint32_t sz = std::min<uint32_t>(_ip.ihl * sizeof(uint32_t), total_sz);
+        uint32_t sz = std::min<uint32_t>(header_size(), total_sz);
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
     return false;

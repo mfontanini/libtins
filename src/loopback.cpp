@@ -93,8 +93,7 @@ uint32_t Loopback::header_size() const {
     return sizeof(_family);
 }
 
-void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
-{
+void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(_family));
     #endif
@@ -106,6 +105,19 @@ void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     *reinterpret_cast<uint32_t*>(buffer) = _family;
     #endif // WIN32
 }
+
+bool Loopback::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
+    if(total_sz < sizeof(_family)) {
+        return false;
+    }
+    // If there's an inner_pdu, check if the inner pdu matches.
+    // Otherwise, just check this loopback family.
+    
+    return inner_pdu() ? 
+        inner_pdu()->matches_response(ptr + sizeof(_family), total_sz - sizeof(_family)) :
+        (_family == *reinterpret_cast<const uint32_t*>(ptr));
+}
+
 #ifdef BSD
 void Loopback::send(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)

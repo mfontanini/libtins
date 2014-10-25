@@ -1,5 +1,5 @@
 # Use libtins' include directories + test include directories
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include/ ../include/)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include/tins/ ../include/)
 
 # Find pthread library
 FIND_PACKAGE(Threads REQUIRED)
@@ -52,6 +52,7 @@ ADD_CUSTOM_TARGET(
     IPv6Test
     IPv6AddressTest
     LLCTest
+    LoopbackTest
     MatchesResponseTest
     NetworkInterfaceTest
     OfflinePacketFilterTest
@@ -92,6 +93,7 @@ ADD_EXECUTABLE(IPSecTest EXCLUDE_FROM_ALL ipsec.cpp)
 ADD_EXECUTABLE(IPv6Test EXCLUDE_FROM_ALL ipv6.cpp)
 ADD_EXECUTABLE(IPv6AddressTest EXCLUDE_FROM_ALL ipv6address.cpp)
 ADD_EXECUTABLE(LLCTest EXCLUDE_FROM_ALL llc.cpp)
+ADD_EXECUTABLE(LoopbackTest EXCLUDE_FROM_ALL loopback.cpp)
 ADD_EXECUTABLE(MatchesResponseTest EXCLUDE_FROM_ALL matches_response.cpp)
 ADD_EXECUTABLE(NetworkInterfaceTest EXCLUDE_FROM_ALL network_interface.cpp)
 ADD_EXECUTABLE(OfflinePacketFilterTest EXCLUDE_FROM_ALL offline_packet_filter.cpp)
@@ -170,6 +172,7 @@ ADD_TEST(IPSec IPSecTest)
 ADD_TEST(IPv6 IPv6Test)
 ADD_TEST(IPv6Address IPv6AddressTest)
 ADD_TEST(LLC LLCTest)
+ADD_TEST(Loopback LoopbackTest)
 ADD_TEST(MatchesResponse MatchesResponseTest)
 ADD_TEST(NetworkInterface NetworkInterfaceTest)
 ADD_TEST(OfflinePacketFilter OfflinePacketFilterTest)
