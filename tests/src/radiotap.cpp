@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
+#include "arp.h"
 #include "utils.h"
 
 using namespace std;
@@ -16,7 +17,7 @@ using namespace Tins;
 class RadioTapTest : public testing::Test {
 public:
     static const uint8_t expected_packet[], expected_packet1[],
-                        expected_packet2[];
+                        expected_packet2[], expected_packet3[];
 };
 
 const uint8_t RadioTapTest::expected_packet[] = {
@@ -63,6 +64,15 @@ const uint8_t RadioTapTest::expected_packet2[] = {
     112, 100, 218, 16, 165, 71, 12, 251, 231, 214, 69, 86, 10, 41, 95, 
     147, 149, 126, 177, 131, 158, 124, 227, 49, 222, 97, 79, 200, 223, 
     132, 241, 42, 135, 151, 94, 223, 190, 109, 180, 255, 115, 238, 211
+};
+
+const uint8_t RadioTapTest::expected_packet3[] = {
+    0, 0, 36, 0, 47, 64, 0, 160, 32, 8, 0, 0, 0, 0, 0, 0, 75, 136, 126,
+     238, 50, 0, 0, 0, 18, 22, 133, 9, 192, 0, 181, 0, 0, 0, 181, 0, 8, 
+     2, 0, 0, 255, 255, 255, 255, 255, 255, 116, 37, 138, 78, 207, 112, 
+     0, 102, 75, 134, 135, 47, 32, 84, 170, 170, 3, 0, 0, 0, 8, 6, 0, 1, 
+     8, 0, 6, 4, 0, 1, 0, 102, 75, 134, 135, 47, 172, 31, 30, 115, 0, 0, 
+     0, 0, 0, 0, 172, 31, 31, 105, 106, 113, 120, 145
 };
 
 TEST_F(RadioTapTest, DefaultConstructor) {
@@ -127,6 +137,20 @@ TEST_F(RadioTapTest, ConstructorFromBuffer2) {
     EXPECT_EQ(radio.channel_freq(), 2447);
     EXPECT_EQ(radio.antenna(), 0);
     EXPECT_TRUE(radio.find_pdu<Dot11QoSData>());
+}
+
+TEST_F(RadioTapTest, ConstructorFromBuffer3) {
+    RadioTap radio(expected_packet3, sizeof(expected_packet3));
+    EXPECT_TRUE(radio.present() & RadioTap::RATE);
+    EXPECT_TRUE(radio.present() & RadioTap::CHANNEL);
+    EXPECT_TRUE(radio.present() & RadioTap::DBM_SIGNAL);
+    EXPECT_TRUE(radio.present() & RadioTap::ANTENNA);
+    EXPECT_TRUE(radio.present() & RadioTap::RX_FLAGS);
+
+    EXPECT_EQ(0, radio.antenna());
+    EXPECT_EQ(0xb5, radio.dbm_signal());
+
+    EXPECT_TRUE(radio.find_pdu<ARP>());
 }
 
 TEST_F(RadioTapTest, Serialize) {

@@ -77,63 +77,81 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
     std::memcpy(&_radio, buffer, sizeof(_radio));
     uint32_t radiotap_hdr_size = length();
     check_size(total_sz, radiotap_hdr_size);
+    // We start on the first flags field, skipping version, pad and length.
+    const flags_type* current_flags = (const flags_type*)(buffer + sizeof(uint32_t));
+    const uint32_t extra_flags_size = find_extra_flag_fields_size(
+        buffer + sizeof(uint32_t), total_sz);
+    // Find and skip the extra flag fields.
+    buffer += extra_flags_size;
+    radiotap_hdr_size -= extra_flags_size;
+    // Also skip the header
     buffer += sizeof(_radio);
     radiotap_hdr_size -= sizeof(_radio);
 
-    if(_radio.flags.tsft) 
-        read_field(buffer, radiotap_hdr_size, _tsft);
+    while(true) {
+        _radio.flags_32 |= *(const uint32_t*)current_flags;
+        if(current_flags->tsft) 
+            read_field(buffer, radiotap_hdr_size, _tsft);
+            
+        if(current_flags->flags) 
+            read_field(buffer, radiotap_hdr_size, _flags);
+
+        if(current_flags->rate) 
+            read_field(buffer, radiotap_hdr_size, _rate);
         
-    if(_radio.flags.flags) 
-        read_field(buffer, radiotap_hdr_size, _flags);
-
-    if(_radio.flags.rate) 
-        read_field(buffer, radiotap_hdr_size, _rate);
-    
-    if(_radio.flags.channel) {
-        if(((buffer - buffer_start) & 1) == 1) {
-            buffer++;
-            radiotap_hdr_size--;
+        if(current_flags->channel) {
+            if(((buffer - buffer_start) & 1) == 1) {
+                buffer++;
+                radiotap_hdr_size--;
+            }
+            read_field(buffer, radiotap_hdr_size, _channel_freq);
+            read_field(buffer, radiotap_hdr_size, _channel_type);
         }
-        read_field(buffer, radiotap_hdr_size, _channel_freq);
-        read_field(buffer, radiotap_hdr_size, _channel_type);
-    }
-    
-    if(_radio.flags.dbm_signal)
-        read_field(buffer, radiotap_hdr_size, _dbm_signal);
-    
-    if(_radio.flags.dbm_noise) 
-        read_field(buffer, radiotap_hdr_size, _dbm_noise);
-    
-    if(_radio.flags.lock_quality) 
-        read_field(buffer, radiotap_hdr_size, _signal_quality);
+        
+        if(current_flags->dbm_signal)
+            read_field(buffer, radiotap_hdr_size, _dbm_signal);
+        
+        if(current_flags->dbm_noise) 
+            read_field(buffer, radiotap_hdr_size, _dbm_noise);
+        
+        if(current_flags->lock_quality) 
+            read_field(buffer, radiotap_hdr_size, _signal_quality);
 
-    if(_radio.flags.antenna) 
-        read_field(buffer, radiotap_hdr_size, _antenna);
-    
-    if(_radio.flags.db_signal) 
-        read_field(buffer, radiotap_hdr_size, _db_signal);
+        if(current_flags->antenna) 
+            read_field(buffer, radiotap_hdr_size, _antenna);
+        
+        if(current_flags->db_signal) 
+            read_field(buffer, radiotap_hdr_size, _db_signal);
 
-    if(_radio.flags.rx_flags) {
-        if(((buffer - buffer_start) & 1) == 1) {
-            buffer++;
-            radiotap_hdr_size--;
+        if(current_flags->rx_flags) {
+            if(((buffer - buffer_start) & 1) == 1) {
+                buffer++;
+                radiotap_hdr_size--;
+            }
+            read_field(buffer, radiotap_hdr_size, _rx_flags);
         }
-        read_field(buffer, radiotap_hdr_size, _rx_flags);
-    }
-    if(_radio.flags.channel_plus) {
-        uint32_t offset = ((buffer - buffer_start) % 4);
-        if(offset) {
-            offset = 4 - offset;
-            buffer += offset;
-            radiotap_hdr_size -= offset;
+        if(current_flags->channel_plus) {
+            uint32_t offset = ((buffer - buffer_start) % 4);
+            if(offset) {
+                offset = 4 - offset;
+                buffer += offset;
+                radiotap_hdr_size -= offset;
+            }
+            uint32_t dummy;
+            read_field(buffer, radiotap_hdr_size, dummy);
+            // nasty Big Endian fix
+            _channel_type = Endian::le_to_host<uint16_t>(Endian::host_to_le<uint32_t>(dummy));
+            read_field(buffer, radiotap_hdr_size, _channel_freq);
+            read_field(buffer, radiotap_hdr_size, _channel);
+            read_field(buffer, radiotap_hdr_size, _max_power);
         }
-        uint32_t dummy;
-        read_field(buffer, radiotap_hdr_size, dummy);
-        // nasty Big Endian fix
-        _channel_type = Endian::le_to_host<uint16_t>(Endian::host_to_le<uint32_t>(dummy));
-        read_field(buffer, radiotap_hdr_size, _channel_freq);
-        read_field(buffer, radiotap_hdr_size, _channel);
-        read_field(buffer, radiotap_hdr_size, _max_power);
+        // We can do this safely because we checked the size on find_extra_flags...
+        if(current_flags->ext == 1) {
+            current_flags++;
+        }
+        else {
+            break;
+        }
     }
 
     total_sz -= length();
@@ -157,6 +175,20 @@ void RadioTap::init() {
     dbm_signal(0xce);
     rx_flags(0);
     antenna(0);
+}
+
+// This method finds the extra flags field size, taking into account other 
+// set of flags that may appear if the "ext" bit is on/.
+uint32_t RadioTap::find_extra_flag_fields_size(const uint8_t* buffer, uint32_t total_sz) {
+    const flags_type* ptr = (const flags_type*)buffer;
+    while (ptr->ext == 1) {
+        if (total_sz < sizeof(flags_type)) {
+            throw malformed_packet();
+        }
+        ++ptr;
+    }
+
+    return (const uint8_t*)ptr - buffer;
 }
 
 void RadioTap::version(uint8_t new_version) {

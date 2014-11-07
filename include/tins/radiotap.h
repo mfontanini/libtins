@@ -356,70 +356,73 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::RADIOTAP; }
     private:
         TINS_BEGIN_PACK
+        #if TINS_IS_LITTLE_ENDIAN
+            struct flags_type {
+                uint32_t tsft:1,
+                    flags:1,
+                    rate:1,
+                    channel:1,
+                    fhss:1,
+                    dbm_signal:1,
+                    dbm_noise:1,
+                    lock_quality:1,
+                    tx_attenuation:1,
+                    db_tx_attenuation:1,
+                    dbm_tx_attenuation:1,
+                    antenna:1,
+                    db_signal:1,
+                    db_noise:1,
+                    rx_flags:1,
+                    reserved1:3,
+                    channel_plus:1,
+                    reserved2:12,
+                    ext:1;
+            } TINS_END_PACK;
+        #else
+            struct flags_type {
+                uint32_t lock_quality:1,
+                    dbm_noise:1,
+                    dbm_signal:1,
+                    fhss:1,
+                    channel:1,
+                    rate:1,
+                    flags:1,
+                    tsft:1,
+                    reserved3:1,
+                    rx_flags:1,
+                    db_tx_attenuation:1,
+                    dbm_tx_attenuation:1,
+                    antenna:1,
+                    db_signal:1,
+                    db_noise:1,
+                    tx_attenuation:1,
+                    reserved2:5,
+                    channel_plus:1,
+                    reserved1:2,
+                    reserved4:7,
+                    ext:1;
+            } TINS_END_PACK;
+        #endif
+
+        TINS_BEGIN_PACK
         struct radiotap_hdr {
         #if TINS_IS_LITTLE_ENDIAN
             uint8_t it_version;	
             uint8_t it_pad;
-            uint16_t it_len;
-            union {
-                struct {
-                    uint32_t tsft:1,
-                        flags:1,
-                        rate:1,
-                        channel:1,
-                        fhss:1,
-                        dbm_signal:1,
-                        dbm_noise:1,
-                        lock_quality:1,
-                        tx_attenuation:1,
-                        db_tx_attenuation:1,
-                        dbm_tx_attenuation:1,
-                        antenna:1,
-                        db_signal:1,
-                        db_noise:1,
-                        rx_flags:1,
-                        reserved1:3,
-                        channel_plus:1,
-                        reserved2:12,
-                        ext:1;
-                } flags;
-                uint32_t flags_32;
-            };
         #else
             uint8_t it_pad;
-            uint8_t it_version;	
+            uint8_t it_version;
+        #endif // TINS_IS_LITTLE_ENDIAN 
             uint16_t it_len;
             union {
-                struct {
-                    uint32_t lock_quality:1,
-                        dbm_noise:1,
-                        dbm_signal:1,
-                        fhss:1,
-                        channel:1,
-                        rate:1,
-                        flags:1,
-                        tsft:1,
-                        reserved3:1,
-                        rx_flags:1,
-                        db_tx_attenuation:1,
-                        dbm_tx_attenuation:1,
-                        antenna:1,
-                        db_signal:1,
-                        db_noise:1,
-                        tx_attenuation:1,
-                        reserved2:5,
-                        channel_plus:1,
-                        reserved1:2,
-                        reserved4:7,
-                        ext:1;
-                } flags;
+                flags_type flags;
                 uint32_t flags_32;
             };
-        #endif
         } TINS_END_PACK;
         
         void init();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+        uint32_t find_extra_flag_fields_size(const uint8_t* buffer, uint32_t total_sz);
         
         
         radiotap_hdr _radio;
