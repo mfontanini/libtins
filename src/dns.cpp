@@ -60,18 +60,21 @@ DNS::DNS(const uint8_t *buffer, uint32_t total_sz)
         buffer + sizeof(dnshdr),
         buffer + total_sz
     );
-    buffer = &records_data[0];
-    const uint8_t *end = &records_data[0] + records_data.size(), *prev_start = buffer;
-    uint16_t nquestions = questions_count();
-    for(uint16_t i(0); i < nquestions; ++i) {
-        buffer = find_dname_end(buffer);
-        if((buffer + (sizeof(uint16_t) * 2)) > end)
-            throw malformed_packet();
-        buffer += sizeof(uint16_t) * 2;
+    // Avoid doing this if there's no data. Otherwise VS's asserts fail.
+    if(!records_data.empty()) {
+        buffer = &records_data[0];
+        const uint8_t *end = &records_data[0] + records_data.size(), *prev_start = buffer;
+        uint16_t nquestions = questions_count();
+        for(uint16_t i(0); i < nquestions; ++i) {
+            buffer = find_dname_end(buffer);
+            if((buffer + (sizeof(uint16_t) * 2)) > end)
+                throw malformed_packet();
+            buffer += sizeof(uint16_t) * 2;
+        }
+        answers_idx = buffer - prev_start;
+        authority_idx = find_section_end(&records_data[0] + answers_idx, answers_count()) - &records_data[0];
+        additional_idx = find_section_end(&records_data[0] + authority_idx, authority_count()) - &records_data[0];
     }
-    answers_idx = buffer - prev_start;
-    authority_idx = find_section_end(&records_data[answers_idx], answers_count()) - &records_data[0];
-    additional_idx = find_section_end(&records_data[authority_idx], authority_count()) - &records_data[0];
 }
 
 const uint8_t* DNS::find_dname_end(const uint8_t *ptr) const {
