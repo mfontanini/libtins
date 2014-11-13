@@ -327,7 +327,7 @@ const uint8_t* DNS::compose_name(const uint8_t *ptr, char *out_ptr) const {
             std::memcpy(&index, ptr, sizeof(uint16_t));
             index = Endian::be_to_host(index) & 0x3fff;
             // Check that the offset is neither too low or too high
-            if(index < 0x0c || &records_data[index - 0x0c] >= ptr)
+            if(index < 0x0c || (&records_data[0] + (index - 0x0c)) >= ptr)
                 throw malformed_packet();
             // We've probably found the end of the original domain name. Save it.
             if(end_ptr == 0)
@@ -494,80 +494,91 @@ uint8_t *DNS::update_dname(uint8_t *ptr, uint32_t threshold, uint32_t offset) {
 // Updates offsets in domain names inside records.
 // No length checks, records are already valid.
 void DNS::update_records(uint32_t &section_start, uint32_t num_records, uint32_t threshold, uint32_t offset) {
-    uint8_t *ptr = &records_data[section_start];
-    for(uint32_t i = 0; i < num_records; ++i) {
-        ptr = update_dname(ptr, threshold, offset);
-        uint16_t type;
-        std::memcpy(&type, ptr, sizeof(uint16_t));
-        type = Endian::be_to_host(type);
-        ptr += sizeof(uint16_t) * 2 + sizeof(uint32_t);
-        uint16_t size;
-        std::memcpy(&size, ptr, sizeof(uint16_t));
-        size = Endian::be_to_host(size);
-        ptr += sizeof(uint16_t);
-        if(type == MX) {
+    if(records_data.size() >= section_start) {
+        uint8_t *ptr = &records_data[section_start];
+        for(uint32_t i = 0; i < num_records; ++i) {
+            ptr = update_dname(ptr, threshold, offset);
+            uint16_t type;
+            std::memcpy(&type, ptr, sizeof(uint16_t));
+            type = Endian::be_to_host(type);
+            ptr += sizeof(uint16_t) * 2 + sizeof(uint32_t);
+            uint16_t size;
+            std::memcpy(&size, ptr, sizeof(uint16_t));
+            size = Endian::be_to_host(size);
             ptr += sizeof(uint16_t);
-            size -= sizeof(uint16_t);
+            if(type == MX) {
+                ptr += sizeof(uint16_t);
+                size -= sizeof(uint16_t);
+            }
+            if(contains_dname(type)) {
+                update_dname(ptr, threshold, offset);
+            }
+            ptr += size;
         }
-        if(contains_dname(type)) {
-            update_dname(ptr, threshold, offset);
-        }
-        ptr += size;
     }
     section_start += offset;
 }
 
 DNS::queries_type DNS::queries() const { 
     queries_type output;
-    const uint8_t *ptr = &records_data[0], *end = &records_data[answers_idx];
-    char buffer[256];
-    uint16_t tmp_query_type;
-    uint16_t tmp_query_class;
-    while(ptr < end) {
-        ptr = compose_name(ptr, buffer);
-        if(ptr + sizeof(uint16_t) * 2 > end) 
-            throw malformed_packet();
-        std::memcpy(&tmp_query_type, ptr, sizeof(uint16_t));
-        std::memcpy(&tmp_query_class, ptr + 2, sizeof(uint16_t));
-        output.push_back(
-            Query(
-                buffer, 
-                (QueryType)Endian::be_to_host(tmp_query_type), 
-                (QueryClass)Endian::be_to_host(tmp_query_class)
-            )
-        );
-        ptr += sizeof(uint16_t) * 2;
+    if(!records_data.empty()) {
+        const uint8_t *ptr = &records_data[0], 
+                    *end = &records_data[0] + answers_idx;
+        char buffer[256];
+        uint16_t tmp_query_type;
+        uint16_t tmp_query_class;
+        while(ptr < end) {
+            ptr = compose_name(ptr, buffer);
+            if(ptr + sizeof(uint16_t) * 2 > end) 
+                throw malformed_packet();
+            std::memcpy(&tmp_query_type, ptr, sizeof(uint16_t));
+            std::memcpy(&tmp_query_class, ptr + 2, sizeof(uint16_t));
+            output.push_back(
+                Query(
+                    buffer, 
+                    (QueryType)Endian::be_to_host(tmp_query_type), 
+                    (QueryClass)Endian::be_to_host(tmp_query_class)
+                )
+            );
+            ptr += sizeof(uint16_t) * 2;
+        }
     }
     return output;
 }
 
 DNS::resources_type DNS::answers() const {
     resources_type res;
-    convert_records(
-        &records_data[answers_idx], 
-        &records_data[authority_idx], 
-        res
-    );
+    if(records_data.size() >= authority_idx) {
+        convert_records(
+            &records_data[answers_idx], 
+            &records_data[authority_idx], 
+            res
+        );
+    }
     return res;
 }
 
 DNS::resources_type DNS::authority() const {
     resources_type res;
-    convert_records(
-        &records_data[authority_idx], 
-        &records_data[additional_idx], 
-        res
-    );
+    if(records_data.size() >= additional_idx) {
+        convert_records(
+            &records_data[authority_idx], 
+            &records_data[additional_idx], 
+            res
+        );
+    }
     return res;
 }
 
 DNS::resources_type DNS::additional() const {
     resources_type res;
-    convert_records(
-        &records_data[additional_idx], 
-        &records_data[records_data.size()], 
-        res
-    );
+    if(records_data.size() >= additional_idx) {
+        convert_records(
+            &records_data[additional_idx], 
+            &records_data[records_data.size()], 
+            res
+        );
+    }
     return res;
 }
 
