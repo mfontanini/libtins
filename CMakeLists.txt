@@ -100,10 +100,25 @@ ENDIF(DOXYGEN_FOUND)
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
-# Congiguration file
+# Configuration file
 CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/include/tins/config.h.in"
   "${PROJECT_SOURCE_DIR}/include/tins/config.h"
+)
+
+# Support for pkg-config
+set(CMAKE_INSTALL_LIBDIR lib)
+set(pkgconfig_prefix      ${CMAKE_INSTALL_PREFIX})
+set(pkgconfig_exec_prefix ${CMAKE_INSTALL_PREFIX})
+set(pkgconfig_libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+set(pkgconfig_version     ${LIBTINS_VERSION})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libtins.pc.in
+               ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc @ONLY)
+
+install(
+    FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 
 ENABLE_TESTING()
