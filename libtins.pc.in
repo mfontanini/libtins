@@ -1,0 +1,10 @@
+prefix=@pkgconfig_prefix@
+exec_prefix=@pkgconfig_exec_prefix@
+libdir=@pkgconfig_libdir@
+includedir=${prefix}/include
+
+Name: libtins
+Description: C++ packet crafting, sniffing and interpretation library.
+Version: @pkgconfig_version@
+Libs: -L${libdir} -ltins
+Cflags: -I${includedir}/tins
