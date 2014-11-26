@@ -110,8 +110,10 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
     }
     uint8_t padding = _options_size % 4;
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
-    // check this line PLX
-    total_sz = std::min(total_sz, (uint32_t)tot_len());
+    // Don't avoid consuming more than we should if tot_len is 0,
+    // since this is the case when using TCP segmentation offload
+    if (tot_len() != 0) 
+        total_sz = std::min(total_sz, (uint32_t)tot_len());
     if (total_sz < head_len() * sizeof(uint32_t))
         throw malformed_packet();
     total_sz -= head_len() * sizeof(uint32_t);
