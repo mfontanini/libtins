@@ -7,5 +7,3 @@
 
 /* Have WPA2 decryption library */
 #define HAVE_WPA2_DECRYPTION
-
-
