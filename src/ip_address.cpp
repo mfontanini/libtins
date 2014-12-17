@@ -81,7 +81,7 @@ uint32_t IPv4Address::ip_to_int(const char* ip) {
     #ifdef WIN32
         in_addr addr;
         if(InetPtonA(AF_INET, ip, &addr)) {
-            return addr.s_addr;
+            return Endian::be_to_host(addr.s_addr);
         }
         else {
             throw std::runtime_error("Invalid ip address");
