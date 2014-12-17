@@ -6,6 +6,6 @@
 #define HAVE_DOT11
 
 /* Have WPA2 decryption library */
-//#define HAVE_WPA2_DECRYPTION
+#define HAVE_WPA2_DECRYPTION
 
 
