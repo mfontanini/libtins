@@ -162,7 +162,7 @@ PtrPacket BaseSniffer::next_packet() {
     }
     #ifdef DLT_PKTAP
     else if (iface_type == DLT_PKTAP) {
-        handler = &sniff_loop_handler<PKTAP>();
+        handler = &sniff_loop_handler<PKTAP>;
     }
     #endif // DLT_PKTAP
     else if(iface_type == DLT_NULL)

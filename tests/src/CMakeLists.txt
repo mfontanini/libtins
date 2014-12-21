@@ -57,6 +57,7 @@ ADD_CUSTOM_TARGET(
     NetworkInterfaceTest
     OfflinePacketFilterTest
     PDUTest
+    PKTAPTest
     PPITest
     PPPoETest
     RadioTapTest
@@ -98,6 +99,7 @@ ADD_EXECUTABLE(MatchesResponseTest EXCLUDE_FROM_ALL matches_response.cpp)
 ADD_EXECUTABLE(NetworkInterfaceTest EXCLUDE_FROM_ALL network_interface.cpp)
 ADD_EXECUTABLE(OfflinePacketFilterTest EXCLUDE_FROM_ALL offline_packet_filter.cpp)
 ADD_EXECUTABLE(PDUTest EXCLUDE_FROM_ALL pdu.cpp)
+ADD_EXECUTABLE(PKTAPTest EXCLUDE_FROM_ALL pktap.cpp)
 ADD_EXECUTABLE(PPITest EXCLUDE_FROM_ALL ppi.cpp)
 ADD_EXECUTABLE(PPPoETest EXCLUDE_FROM_ALL pppoe.cpp)
 ADD_EXECUTABLE(RadioTapTest EXCLUDE_FROM_ALL radiotap.cpp)

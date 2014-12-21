@@ -49,8 +49,8 @@ PKTAP::PKTAP(const uint8_t* buffer, uint32_t total_sz)
     total_sz -= header_length;
     if (header_.next && total_sz > 0) {
         inner_pdu(
-            Internals::pdu_from_flag(
-                (Constants::Ethernet::e)header_.dlt, 
+            Internals::pdu_from_dlt_flag(
+                header_.dlt, 
                 buffer, 
                 total_sz
             )
