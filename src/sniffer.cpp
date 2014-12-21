@@ -42,6 +42,7 @@
 #include "loopback.h"
 #include "rawpdu.h"
 #include "dot3.h"
+#include "pktap.h"
 #include "sll.h"
 #include "ppi.h"
 
@@ -159,6 +160,11 @@ PtrPacket BaseSniffer::next_packet() {
             throw protocol_disabled();
         #endif
     }
+    #ifdef DLT_PKTAP
+    else if (iface_type == DLT_PKTAP) {
+        handler = &sniff_loop_handler<PKTAP>();
+    }
+    #endif // DLT_PKTAP
     else if(iface_type == DLT_NULL)
         handler = &sniff_loop_handler<Tins::Loopback>;
     else if(iface_type == DLT_LINUX_SLL)

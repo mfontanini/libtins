@@ -38,6 +38,7 @@ ADD_LIBRARY(
     packet_writer.cpp
     ppi.cpp
     pdu.cpp
+    pktap.cpp
     radiotap.cpp
     address_range.cpp
     rawpdu.cpp

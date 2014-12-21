@@ -175,6 +175,7 @@ namespace Tins {
             PPI,
             IPSEC_AH,
             IPSEC_ESP,
+            PKTAP,
             USER_DEFINED_PDU = 1000
         };
         
