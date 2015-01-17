@@ -3,6 +3,7 @@
 #include <string>
 #include <stdint.h>
 #include "eapol.h"
+#include "snap.h"
 #include "utils.h"
 #include "rsn_information.h"
 
@@ -12,6 +13,7 @@ using namespace Tins;
 class RSNEAPOLTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
+    static const uint8_t eapol_over_snap[];
     
     void test_equals(const RSNEAPOL &eapol1, const RSNEAPOL &eapol2);
 };
@@ -53,6 +55,16 @@ const uint8_t RSNEAPOLTest::expected_packet[] = {
     255, 139, 147, 211, 46
 };
 
+const uint8_t RSNEAPOLTest::eapol_over_snap[] = {
+    170, 170, 3, 0, 0, 0, 136, 142, 2, 3, 0, 95, 2, 0, 138, 0, 16, 0,
+    0, 0, 0, 0, 0, 0, 1, 82, 43, 37, 89, 147, 67, 237, 161, 188, 102
+    , 113, 206, 250, 93, 102, 154, 119, 17, 84, 225, 191, 146, 83, 
+    238, 40, 0, 226, 176, 19, 64, 109, 146, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 216, 
+    123, 212, 159
+};
+
 void RSNEAPOLTest::test_equals(const RSNEAPOL &eapol1, const RSNEAPOL &eapol2) {
     EXPECT_EQ(eapol1.version(), eapol2.version());
     EXPECT_EQ(eapol1.packet_type(), eapol2.packet_type());
@@ -87,6 +99,11 @@ TEST_F(RSNEAPOLTest, DefaultConstructor) {
     EXPECT_TRUE(std::equal(empty_nonce, empty_nonce + sizeof(empty_nonce), eapol.nonce()));
     EXPECT_TRUE(std::equal(empty_iv, empty_iv + sizeof(empty_iv), eapol.mic()));
     EXPECT_EQ(RSNEAPOL::key_type(), eapol.key());
+}
+
+TEST_F(RSNEAPOLTest, EAPOLOverSnap) {
+    SNAP snap(eapol_over_snap, sizeof(eapol_over_snap));
+    EXPECT_TRUE(snap.find_pdu<RSNEAPOL>());
 }
 
 TEST_F(RSNEAPOLTest, ConstructorFromBuffer) {

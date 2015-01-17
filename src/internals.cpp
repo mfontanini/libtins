@@ -227,6 +227,9 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
             return Constants::Ethernet::VLAN;
         case PDU::PPPOE:
             return Constants::Ethernet::PPPOED;
+        case PDU::RSNEAPOL:
+        case PDU::RC4EAPOL:
+            return Constants::Ethernet::EAPOL;
         default:
             if(Internals::pdu_type_registered<EthernetII>(flag)) 
                 return static_cast<Constants::Ethernet::e>(
