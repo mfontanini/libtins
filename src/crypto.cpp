@@ -345,7 +345,7 @@ RC4Key SessionKeys::generate_rc4_key(const Dot11Data &dot11, const RawPDU &raw) 
     const uint8_t *tk = ptk.begin() + 32;
     Internals::byte_array<16> rc4_key;
     uint16_t ppk[6];
-    const Dot11::address_type addr = get_bssid(dot11);
+    const Dot11::address_type addr = dot11.addr2();
     // Phase 1
     ppk[0] = join_bytes(pload[4], pload[5]);
     ppk[1] = join_bytes(pload[6], pload[7]);
