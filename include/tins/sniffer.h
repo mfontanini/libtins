@@ -43,6 +43,10 @@
 #include "exceptions.h"
 #include "internals.h"
 
+#if TINS_IS_CXX11
+#include <type_traits>
+#endif
+
 namespace Tins {
     class SnifferIterator;
     class SnifferConfiguration;
@@ -425,15 +429,15 @@ namespace Tins {
          * Dereferences the iterator.
          * \return reference to the current packet.
          */
-        PDU &operator*() {
-            return *pkt.pdu();
+        Packet &operator*() {
+            return pkt;
         }
 
         /**
          * Dereferences the iterator.
          * \return pointer to the current packet.
          */
-        PDU *operator->() {
+        Packet *operator->() {
             return &(**this);
         }
 
@@ -573,13 +577,44 @@ namespace Tins {
         unsigned _timeout;
     };
 
+    #if TINS_IS_CXX11
+
+    template<bool B, class T = void>
+    using enable_if_t = typename std::enable_if<B,T>::type;
+
+    /* Template metaprogramming trait to determine if a functor can accept a Packet& as an argument */
+    template <class T, class=void>
+    struct takes_packet : std::false_type { };
+
+    template <class T>
+    struct takes_packet<T, enable_if_t<
+      std::is_same<  decltype(  std::declval<T>()(std::declval<Packet>())  ), bool>::value
+    >> : std::true_type { };
+
+    /* use enable_if to invoke the Packet& version of the sniff_loop handler if possible - otherwise fail to old behavior */
+    template <class Functor>
+    bool _invoke_functor(Functor& f, Packet& p, typename std::enable_if<takes_packet<Functor>::value, bool>::type* = 0) {
+      return f(p);
+    }
+
+    template <class Functor>
+    bool _invoke_functor(Functor& f, Packet& p, typename std::enable_if<!takes_packet<Functor>::value, bool>::type* = 0) {
+      return f(*p.pdu());
+    }
+    #endif
+
     template<class Functor>
     void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
         for(iterator it = begin(); it != end(); ++it) {
             try {
                 // If the functor returns false, we're done
+                #if TINS_IS_CXX11
+                if (!_invoke_functor(function, *it))
+                    return;
+                #else
                 if(!function(*it))
                     return;
+                #endif
             }
             catch(malformed_packet&) { }
             catch(pdu_not_found&) { }
