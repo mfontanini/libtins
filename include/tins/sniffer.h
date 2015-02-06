@@ -139,6 +139,9 @@ namespace Tins {
          * \code
          * bool(PDU&);
          * bool(const PDU&);
+         * bool(const Packet&);
+         * bool(Packet&&);
+         * bool(Packet);
          * \endcode
          *
          * This functor will be called using the each of the sniffed packets
@@ -391,7 +394,7 @@ namespace Tins {
     /**
      * \brief Iterates over packets sniffed by a BaseSniffer.
      */
-    class SnifferIterator : public std::iterator<std::forward_iterator_tag, PDU> {
+    class SnifferIterator : public std::iterator<std::forward_iterator_tag, Packet> {
     public:
         /**
          * Constructs a SnifferIterator.
