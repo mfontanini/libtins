@@ -220,91 +220,91 @@ namespace Tins {
          * \brief Getter for the version field.
          * \return The version field.
          */
-        uint8_t version() const { return _radio.it_version; }
+        uint8_t version() const;
     
         /**
          * \brief Getter for the padding field.
          * \return The padding field.
          */
-        uint8_t padding() const { return _radio.it_pad; }
+        uint8_t padding() const;
         
         /**
          * \brief Getter for the length field.
          * \return The length field.
          */
-        uint16_t length() const { return Endian::le_to_host(_radio.it_len); }
+        uint16_t length() const;
         
         /**
          * \brief Getter for the tsft field.
          * \return The tsft field.
          */
-        uint64_t tsft() const { return Endian::le_to_host(_tsft); }
+        uint64_t tsft() const;
         
         /**
          * \brief Getter for the flags field.
          * \return The flags field.
          */
-        FrameFlags flags() const { return (FrameFlags)_flags; }
+        FrameFlags flags() const;
         
         /**
          * \brief Getter for the rate field.
          * \return The rate field.
          */
-        uint8_t rate() const { return _rate; }
+        uint8_t rate() const;
         
         /**
          * \brief Getter for the channel frequency field.
          * \return The channel frequency field.
          */
-        uint16_t channel_freq() const { return Endian::le_to_host(_channel_freq); }
+        uint16_t channel_freq() const;
         
         /**
          * \brief Getter for the channel type field.
          * \return The channel type field.
          */
-        uint16_t channel_type() const { return Endian::le_to_host(_channel_type); }
+        uint16_t channel_type() const;
         
         /**
          * \brief Getter for the dbm signal field.
          * \return The dbm signal field.
          */
-        uint8_t dbm_signal() const { return _dbm_signal; }
+        uint8_t dbm_signal() const;
         
         /**
          * \brief Getter for the dbm noise field.
          * \return The dbm noise field.
          */
-        uint8_t dbm_noise() const { return _dbm_noise; }
+        uint8_t dbm_noise() const;
         
         /**
          * \brief Getter for the signal quality field.
          * \return The signal quality field.
          */
-        uint16_t signal_quality() const { return _signal_quality; }
+        uint16_t signal_quality() const;
 
         /**
          * \brief Getter for the antenna field.
          * \return The antenna field.
          */
-        uint8_t antenna() const { return _antenna; }
+        uint8_t antenna() const;
 
         /**
          * \brief Getter for the db signal field.
          * \return The db signal field.
          */
-        uint8_t db_signal() const { return _db_signal; }
+        uint8_t db_signal() const;
         
         /**
          * \brief Getter for the channel+ field.
          * \return The channel+ field.
          */
-        uint32_t channel_plus() const { return Endian::le_to_host<uint32_t>(_channel_type); }
+        uint32_t channel_plus() const;
         
         /**
          * \brief Getter for the rx flags field.
          * \return The rx flags field.
          */
-        uint16_t rx_flags() const { return Endian::le_to_host(_rx_flags); }
+        uint16_t rx_flags() const;
         
         /**
          * \brief Getter for the present bit fields.
