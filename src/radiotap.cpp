@@ -224,12 +224,12 @@ void RadioTap::channel(uint16_t new_freq, uint16_t new_type) {
     _channel_type = Endian::host_to_le(new_type);
     _radio.flags.channel = 1;
 }
-void RadioTap::dbm_signal(uint8_t new_dbm_signal) {
+void RadioTap::dbm_signal(int8_t new_dbm_signal) {
     _dbm_signal = new_dbm_signal;
     _radio.flags.dbm_signal = 1;
 }
 
-void RadioTap::dbm_noise(uint8_t new_dbm_noise) {
+void RadioTap::dbm_noise(int8_t new_dbm_noise) {
     _dbm_noise = new_dbm_noise;
     _radio.flags.dbm_noise = 1;
 }
@@ -340,13 +340,13 @@ uint16_t RadioTap::channel_type() const {
     return Endian::le_to_host(_channel_type);
 }
 
-uint8_t RadioTap::dbm_signal() const {
+int8_t RadioTap::dbm_signal() const {
     if(!_radio.flags.dbm_signal)
         throw field_not_present();
     return _dbm_signal;
 }
 
-uint8_t RadioTap::dbm_noise() const {
+int8_t RadioTap::dbm_noise() const {
     if(!_radio.flags.dbm_noise)
         throw field_not_present();
     return _dbm_noise;

@@ -182,13 +182,13 @@ namespace Tins {
          * \brief Setter for the dbm signal field.
          * \param new_dbm_signal The new dbm signal.
          */
-        void dbm_signal(uint8_t new_dbm_signal);
+        void dbm_signal(int8_t new_dbm_signal);
         
         /**
          * \brief Setter for the dbm noise field.
          * \param new_dbm_noise The new dbm noise.
          */
-        void dbm_noise(uint8_t new_dbm_noise);
+        void dbm_noise(int8_t new_dbm_noise);
         
         /**
          * \brief Setter for the signal quality field.
@@ -268,13 +268,13 @@ namespace Tins {
          * \brief Getter for the dbm signal field.
          * \return The dbm signal field.
          */
-        uint8_t dbm_signal() const;
+        int8_t dbm_signal() const;
         
         /**
          * \brief Getter for the dbm noise field.
          * \return The dbm noise field.
          */
-        uint8_t dbm_noise() const;
+        int8_t dbm_noise() const;
         
         /**
          * \brief Getter for the signal quality field.
@@ -429,7 +429,8 @@ namespace Tins {
         // present fields...
         uint64_t _tsft;
         uint16_t _channel_type, _channel_freq, _rx_flags, _signal_quality;
-        uint8_t _antenna, _flags, _rate, _dbm_signal, _dbm_noise, _channel, _max_power, _db_signal;
+        uint8_t _antenna, _flags, _rate, _channel, _max_power, _db_signal;
+        int8_t _dbm_signal, _dbm_noise;
     };
 }
 
