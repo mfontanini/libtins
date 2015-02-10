@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -55,7 +55,7 @@ class malformed_packet : public std::runtime_error {
 public:
     malformed_packet()
     : std::runtime_error(std::string()) { }
-    
+
     const char* what() const throw() {
         return "Malformed packet";
     }
@@ -68,7 +68,7 @@ class pdu_not_found : public std::runtime_error {
 public:
     pdu_not_found()
     : std::runtime_error(std::string()) { }
-    
+
     const char* what() const throw() {
         return "PDU not found";
     }
@@ -82,9 +82,21 @@ class invalid_interface : public std::runtime_error {
 public:
     invalid_interface()
     : std::runtime_error(std::string()) { }
-    
+
     const char* what() const throw() {
         return "Invalid interface";
+    }
+};
+
+/**
+ * \brief Exception thrown when a field is not present in frame.
+ */
+class field_not_present : public std::runtime_error {
+public:
+    field_not_present()
+    : std::runtime_error(std::string()) { }
+    const char* what() const throw() {
+        return "Field not present";
     }
 };
 
@@ -93,7 +105,7 @@ public:
  */
 class socket_open_error : public std::runtime_error {
 public:
-    socket_open_error(const std::string &msg) 
+    socket_open_error(const std::string &msg)
     : std::runtime_error(msg) { }
 };
 
@@ -102,7 +114,7 @@ public:
  */
 class socket_close_error : public std::runtime_error {
 public:
-    socket_close_error(const std::string &msg) 
+    socket_close_error(const std::string &msg)
     : std::runtime_error(msg) { }
 };
 
@@ -111,7 +123,7 @@ public:
  */
 class socket_write_error : public std::runtime_error {
 public:
-    socket_write_error(const std::string &msg) 
+    socket_write_error(const std::string &msg)
     : std::runtime_error(msg) { }
 };
 
@@ -127,7 +139,7 @@ public:
 };
 
 /**
- * \brief Exception thrown when an unkown link layer PDU type is 
+ * \brief Exception thrown when an unkown link layer PDU type is
  * found while sniffing.
  */
 class unknown_link_type : public std::exception {
