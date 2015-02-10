@@ -81,7 +81,7 @@ TEST_F(RadioTapTest, DefaultConstructor) {
     EXPECT_EQ(Utils::mhz_to_channel(radio.channel_freq()), 1);
     EXPECT_EQ(radio.channel_type(), 0xa0U);
     EXPECT_EQ(radio.tsft(), 0U);
-    EXPECT_EQ(radio.dbm_signal(), 0xce);
+    EXPECT_EQ(radio.dbm_signal(), -50);
     EXPECT_EQ(radio.antenna(), 0);
     EXPECT_EQ(radio.rx_flags(), 0);
 }
@@ -100,11 +100,11 @@ TEST_F(RadioTapTest, ConstructorFromBuffer) {
     EXPECT_TRUE(radio.present() & RadioTap::CHANNEL_PLUS);
     
     EXPECT_TRUE(radio.flags() & RadioTap::FCS);
-    EXPECT_EQ(radio.channel_type(), 0x140);
-    EXPECT_EQ(radio.channel_freq(), 5180);
+    EXPECT_THROW(radio.channel_type(), field_not_present);
+    EXPECT_THROW(radio.channel_freq(), field_not_present);
     EXPECT_EQ(radio.tsft(), 616089172U);
-    EXPECT_EQ(radio.dbm_signal(), 0xda);
-    EXPECT_EQ(radio.dbm_noise(), 0xa0);
+    EXPECT_EQ(radio.dbm_signal(), -38);
+    EXPECT_EQ(radio.dbm_noise(), -96);
     EXPECT_EQ(radio.antenna(), 2);
 }
 
@@ -132,7 +132,7 @@ TEST_F(RadioTapTest, ConstructorFromBuffer2) {
     EXPECT_EQ(radio.length(), 34);
     EXPECT_EQ(radio.rate(), 0x12);
     EXPECT_EQ(radio.flags(), 0x02);
-    EXPECT_EQ(radio.dbm_signal(), 0xb9);
+    EXPECT_EQ(radio.dbm_signal(), -71);
     EXPECT_EQ(radio.channel_type(), 192);
     EXPECT_EQ(radio.channel_freq(), 2447);
     EXPECT_EQ(radio.antenna(), 0);
@@ -148,7 +148,7 @@ TEST_F(RadioTapTest, ConstructorFromBuffer3) {
     EXPECT_TRUE(radio.present() & RadioTap::RX_FLAGS);
 
     EXPECT_EQ(0, radio.antenna());
-    EXPECT_EQ(0xb5, radio.dbm_signal());
+    EXPECT_EQ(-75, radio.dbm_signal());
 
     EXPECT_TRUE(radio.find_pdu<ARP>());
 }
