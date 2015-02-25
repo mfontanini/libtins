@@ -582,7 +582,7 @@ namespace Tins {
             try {
                 // If the functor returns false, we're done
                 #if TINS_IS_CXX11
-                if (!Tins::Internals::invoke_loop_cb<Functor, Packet>(function, *it))
+                if (!Tins::Internals::invoke_loop_cb(function, *it))
                     return;
                 #else
                 if(!function(*it))
