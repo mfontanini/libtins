@@ -220,14 +220,19 @@ struct accepts_type<T, P, enable_if_t<
   std::is_same<  decltype(  std::declval<T>()(std::declval<P>())  ), bool>::value
 >> : std::true_type { };
 
-// use enable_if to invoke the Packet& version of the sniff_loop handler if possible - otherwise fail to old behavior
+// use enable_if to invoke the Packet&& version of the sniff_loop handler if possible - otherwise fail to old behavior
 template <class Functor, class Packet>
 bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<accepts_type<Functor, Packet>::value, bool>::type* = 0) {
   return f(std::move(p));
 }
 
 template <class Functor, class Packet>
-bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<!accepts_type<Functor, Packet>::value, bool>::type* = 0) {
+bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<!accepts_type<Functor, Packet>::value && accepts_type<Functor, Packet&>::value, bool>::type* = 0) {
+  return f(p);
+}
+
+template <class Functor, class Packet>
+bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<!accepts_type<Functor, Packet>::value && !accepts_type<Functor, Packet&>::value, bool>::type* = 0) {
   return f(*p.pdu());
 }
 #endif
