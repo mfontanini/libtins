@@ -94,9 +94,12 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
     // Also skip the header
     buffer += sizeof(_radio);
     radiotap_hdr_size -= sizeof(_radio);
-    // Align start of contents to 8 bytes boundary
-    buffer += (buffer - buffer_start) % 8;
-    radiotap_hdr_size -= (buffer - buffer_start) % 8;
+    // Add padding until next 8 bytes boundary
+    int padding = 8 - (buffer - buffer_start) % 8;
+    if (padding != 8) {
+        buffer += padding;
+        radiotap_hdr_size -= padding;
+    }
 
     while(true) {
         _radio.flags_32 |= *(const uint32_t*)current_flags;
