@@ -390,17 +390,17 @@ namespace Tins {
                     tsft:1,
                     reserved3:1,
                     rx_flags:1,
-                    db_tx_attenuation:1,
-                    dbm_tx_power:1,
-                    antenna:1,
-                    db_signal:1,
                     db_noise:1,
+                    db_signal:1,
+                    antenna:1,
+                    dbm_tx_power:1,
+                    db_tx_attenuation:1,
                     tx_attenuation:1,
                     reserved2:5,
                     channel_plus:1,
                     reserved1:2,
-                    reserved4:7,
-                    ext:1;
+                    ext:1,
+                    reserved4:7;
             } TINS_END_PACK;
         #endif
 
