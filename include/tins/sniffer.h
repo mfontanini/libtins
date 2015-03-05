@@ -585,7 +585,7 @@ namespace Tins {
                 if (!Tins::Internals::invoke_loop_cb(function, *it))
                     return;
                 #else
-                if(!function(*it))
+                if(!function(*it->pdu()))
                     return;
                 #endif
             }
