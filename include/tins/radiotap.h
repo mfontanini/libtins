@@ -77,22 +77,25 @@ namespace Tins {
          * \sa RadioTap::present()
          */
         enum PresentFlags {
-            TSTF                = 1,
-            FLAGS               = 2,
-            RATE                = 4,
-            CHANNEL             = 8,
-            FHSS                = 16,
-            DBM_SIGNAL          = 32,
-            DBM_NOISE           = 64,
-            LOCK_QUALITY        = 128,
-            TX_ATTENUATION      = 256,
-            DB_TX_ATTENUATION   = 512,
-            DBM_TX_ATTENUATION  = 1024,
-            ANTENNA             = 2048,
-            DB_SIGNAL           = 4096,
-            DB_NOISE            = 8192,
-            RX_FLAGS            = 16382,
-            CHANNEL_PLUS        = 262144
+            TSTF                = 1 << 0,
+            FLAGS               = 1 << 1,
+            RATE                = 1 << 2,
+            CHANNEL             = 1 << 3,
+            FHSS                = 1 << 4,
+            DBM_SIGNAL          = 1 << 5,
+            DBM_NOISE           = 1 << 6,
+            LOCK_QUALITY        = 1 << 7,
+            TX_ATTENUATION      = 1 << 8,
+            DB_TX_ATTENUATION   = 1 << 9,
+            DBM_TX_ATTENUATION  = 1 << 10,
+            ANTENNA             = 1 << 11,
+            DB_SIGNAL           = 1 << 12,
+            DB_NOISE            = 1 << 13,
+            RX_FLAGS            = 1 << 14,
+            TX_FLAGS            = 1 << 15,
+            DATA_RETRIES        = 1 << 17,
+            CHANNEL_PLUS        = 1 << 18,
+            MCS                 = 1 << 19
         };
         
         /**
@@ -108,6 +111,16 @@ namespace Tins {
             FAILED_FCS    = 64,
             SHORT_GI      = 128
         };
+
+        /**
+         * \brief The type used to represent the MCS flags field
+         */
+        TINS_BEGIN_PACK
+        struct mcs_type {
+            uint8_t known;
+            uint8_t flags;
+            uint8_t mcs;
+        } TINS_END_PACK;
         
         /**
          * \brief Default constructor.
@@ -210,9 +223,27 @@ namespace Tins {
 
         /**
          * \brief Setter for the rx flag field.
-         * \param new_rx_flag The antenna signal.
+         * \param new_rx_flag The rx flags.
          */
         void rx_flags(uint16_t new_rx_flag);
+
+        /**
+         * \brief Setter for the tx flag field.
+         * \param new_tx_flag The tx flags.
+         */
+        void tx_flags(uint16_t new_tx_flag);
+
+        /**
+         * \brief Setter for the data retries field.
+         * \param new_rx_flag The data retries.
+         */
+        void data_retries(uint8_t new_data_retries);
+
+        /**
+         * \brief Setter for the MCS field.
+         * \param new_rx_flag The MCS retries.
+         */
+        void mcs(const mcs_type& new_mcs);
         
         /* Getters */
         
@@ -301,11 +332,29 @@ namespace Tins {
         uint32_t channel_plus() const;
         
         /**
+         * \brief Getter for the data retries field
+         * \return The data retries field.
+         */
+        uint8_t data_retries() const;
+
+        /**
          * \brief Getter for the rx flags field.
          * \return The rx flags field.
          */
         uint16_t rx_flags() const;
+
+        /**
+         * \brief Getter for the tx flags field.
+         * \return The tx flags field.
+         */
+        uint16_t tx_flags() const;
         
+        /**
+         * \brief Getter for the MCS field.
+         * \return The MCS field.
+         */
+        mcs_type mcs() const;
+
         /**
          * \brief Getter for the present bit fields.
          * 
@@ -373,9 +422,12 @@ namespace Tins {
                     db_signal:1,
                     db_noise:1,
                     rx_flags:1,
-                    reserved1:3,
+                    tx_flags:1,
+                    reserved1:1,
+                    data_retries:1,
                     channel_plus:1,
-                    reserved2:12,
+                    mcs:1,
+                    reserved2:11,
                     ext:1;
             } TINS_END_PACK;
         #else
@@ -423,13 +475,27 @@ namespace Tins {
         void init();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         uint32_t find_extra_flag_fields_size(const uint8_t* buffer, uint32_t total_sz);
+
+        template <size_t n>
+        void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t& size) {
+            uint32_t offset = ((buffer - buffer_start) % n);
+            if(offset) {
+                offset = n - offset;
+                if (offset > size) {
+                    throw malformed_packet();
+                }
+                buffer += offset;
+                size -= offset;
+            }
+        }
         
         
         radiotap_hdr _radio;
         // present fields...
         uint64_t _tsft;
-        uint16_t _channel_type, _channel_freq, _rx_flags, _signal_quality;
-        uint8_t _antenna, _flags, _rate, _channel, _max_power, _db_signal;
+        uint16_t _channel_type, _channel_freq, _rx_flags, _signal_quality, _tx_flags;
+        mcs_type _mcs;
+        uint8_t _antenna, _flags, _rate, _channel, _max_power, _db_signal, _data_retries;
         int8_t _dbm_signal, _dbm_noise;
     };
 }
