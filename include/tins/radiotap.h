@@ -366,6 +366,7 @@ namespace Tins {
                     dbm_signal:1,
                     dbm_noise:1,
                     lock_quality:1,
+
                     tx_attenuation:1,
                     db_tx_attenuation:1,
                     dbm_tx_power:1,
@@ -373,9 +374,13 @@ namespace Tins {
                     db_signal:1,
                     db_noise:1,
                     rx_flags:1,
-                    reserved1:3,
+                    reserved3:1,
+
+                    reserved1:2,
                     channel_plus:1,
-                    reserved2:12,
+                    reserved2:5,
+
+                    reserved4:7,
                     ext:1;
             } TINS_END_PACK;
         #else
@@ -388,6 +393,7 @@ namespace Tins {
                     rate:1,
                     flags:1,
                     tsft:1,
+
                     reserved3:1,
                     rx_flags:1,
                     db_tx_attenuation:1,
@@ -396,11 +402,13 @@ namespace Tins {
                     db_signal:1,
                     db_noise:1,
                     tx_attenuation:1,
+
                     reserved2:5,
                     channel_plus:1,
                     reserved1:2,
-                    reserved4:7,
-                    ext:1;
+
+                    ext:1,
+                    reserved4:7;
             } TINS_END_PACK;
         #endif
 

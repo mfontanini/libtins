@@ -76,17 +76,30 @@ RadioTap::RadioTap(const uint8_t *buffer, uint32_t total_sz)
     const uint8_t *buffer_start = buffer;
     std::memcpy(&_radio, buffer, sizeof(_radio));
     uint32_t radiotap_hdr_size = length();
+
+//    for (unsigned char i = 0; i < radiotap_hdr_size; i++) {
+//        printf("%02x|", *(buffer + i));
+//    }
+//    printf("\n");
+
     check_size(total_sz, radiotap_hdr_size);
     // We start on the first flags field, skipping version, pad and length.
     const flags_type* current_flags = (const flags_type*)(buffer + sizeof(uint32_t));
     const uint32_t extra_flags_size = find_extra_flag_fields_size(
         buffer + sizeof(uint32_t), total_sz);
     // Find and skip the extra flag fields.
+//    printf("Extra flaggs size %d\n", extra_flags_size);
     buffer += extra_flags_size;
     radiotap_hdr_size -= extra_flags_size;
     // Also skip the header
     buffer += sizeof(_radio);
     radiotap_hdr_size -= sizeof(_radio);
+    // Add padding until next 8 bytes boundary
+    int padding = 8 - (buffer - buffer_start) % 8;
+    if (padding != 8) {
+        buffer += padding;
+        radiotap_hdr_size -= padding;
+    }
 
     while(true) {
         _radio.flags_32 |= *(const uint32_t*)current_flags;
