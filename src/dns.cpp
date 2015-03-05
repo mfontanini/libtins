@@ -494,7 +494,7 @@ uint8_t *DNS::update_dname(uint8_t *ptr, uint32_t threshold, uint32_t offset) {
 // Updates offsets in domain names inside records.
 // No length checks, records are already valid.
 void DNS::update_records(uint32_t &section_start, uint32_t num_records, uint32_t threshold, uint32_t offset) {
-    if(records_data.size() >= section_start) {
+    if(records_data.size() > section_start) {
         uint8_t *ptr = &records_data[section_start];
         for(uint32_t i = 0; i < num_records; ++i) {
             ptr = update_dname(ptr, threshold, offset);
