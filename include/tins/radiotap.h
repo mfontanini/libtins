@@ -407,7 +407,8 @@ namespace Tins {
         TINS_BEGIN_PACK
         #if TINS_IS_LITTLE_ENDIAN
             struct flags_type {
-                uint32_t tsft:1,
+                uint32_t
+                    tsft:1,
                     flags:1,
                     rate:1,
                     channel:1,
@@ -415,6 +416,7 @@ namespace Tins {
                     dbm_signal:1,
                     dbm_noise:1,
                     lock_quality:1,
+
                     tx_attenuation:1,
                     db_tx_attenuation:1,
                     dbm_tx_power:1,
@@ -423,16 +425,20 @@ namespace Tins {
                     db_noise:1,
                     rx_flags:1,
                     tx_flags:1,
+
                     reserved1:1,
                     data_retries:1,
                     channel_plus:1,
                     mcs:1,
-                    reserved2:11,
+                    reserved2:4,
+
+                    reserved3:7,
                     ext:1;
             } TINS_END_PACK;
         #else
             struct flags_type {
-                uint32_t lock_quality:1,
+                uint32_t
+                    lock_quality:1,
                     dbm_noise:1,
                     dbm_signal:1,
                     fhss:1,
@@ -440,19 +446,24 @@ namespace Tins {
                     rate:1,
                     flags:1,
                     tsft:1,
-                    reserved3:1,
+
+                    tx_flags:1,
                     rx_flags:1,
-                    db_tx_attenuation:1,
-                    dbm_tx_power:1,
-                    antenna:1,
-                    db_signal:1,
                     db_noise:1,
+                    db_signal:1,
+                    antenna:1,
+                    dbm_tx_power:1,
+                    db_tx_attenuation:1,
                     tx_attenuation:1,
-                    reserved2:5,
+
+                    reserved2:4,
+                    mcs:1,
                     channel_plus:1,
-                    reserved1:2,
-                    reserved4:7,
-                    ext:1;
+                    data_retries:1,
+                    reserved1:1,
+
+                    ext:1,
+                    reserved3:7;
             } TINS_END_PACK;
         #endif
 
