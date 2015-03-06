@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -26,9 +26,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
+
 #ifndef TINS_INTERNALS_H
 #define TINS_INTERNALS_H
+
+#if TINS_IS_CXX11
+#include <type_traits>
+#endif
 
 #include <sstream>
 #include <string>
@@ -50,16 +54,16 @@ class byte_array {
 public:
     typedef uint8_t* iterator;
     typedef const uint8_t* const_iterator;
-    
+
     byte_array() {
         std::fill(begin(), end(), 0);
     }
-    
+
     template<typename InputIterator>
     byte_array(InputIterator start, InputIterator last) {
         std::copy(start, last, data);
     }
-    
+
     template<typename InputIterator>
     byte_array(InputIterator start) {
         std::copy(start, n, data);
@@ -72,23 +76,23 @@ public:
     uint8_t operator[](size_t i) const{
         return data[i];
     }
-    
+
     iterator begin() {
         return data;
     }
-    
+
     iterator end() {
         return data + n;
     }
-    
+
     const_iterator begin() const {
         return data;
     }
-    
+
     const_iterator end() const {
         return data + n;
     }
-    
+
     size_t size() const {
         return n;
     }
@@ -106,14 +110,14 @@ struct enable_if {
 
 template<typename T>
 struct enable_if<false, T> {
-    
+
 };
 
-PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer, 
+PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
-PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer, 
+PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
-PDU *pdu_from_dlt_flag(int flag, const uint8_t *buffer, 
+PDU *pdu_from_dlt_flag(int flag, const uint8_t *buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
 PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size);
 
@@ -200,6 +204,39 @@ template<>
 struct is_unsigned_integral<uint64_t> {
     static const bool value = true;
 };
+
+#if TINS_IS_CXX11
+
+// Part of C++14 standard library
+template<bool B, class T = void>
+using enable_if_t = typename std::enable_if<B,T>::type;
+
+// Template metaprogramming trait to determine if a functor can accept another parameter as an argument
+template <class T, class P, class=void>
+struct accepts_type : std::false_type { };
+
+template <class T, class P>
+struct accepts_type<T, P, enable_if_t<
+  std::is_same<  decltype(  std::declval<T>()(std::declval<P>())  ), bool>::value
+>> : std::true_type { };
+
+// use enable_if to invoke the Packet&& version of the sniff_loop handler if possible - otherwise fail to old behavior
+template <class Functor, class Packet>
+bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<accepts_type<Functor, Packet>::value, bool>::type* = 0) {
+  return f(std::move(p));
+}
+
+template <class Functor, class Packet>
+bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<!accepts_type<Functor, Packet>::value && accepts_type<Functor, Packet&>::value, bool>::type* = 0) {
+  return f(p);
+}
+
+template <class Functor, class Packet>
+bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<!accepts_type<Functor, Packet>::value && !accepts_type<Functor, Packet&>::value, bool>::type* = 0) {
+  return f(*p.pdu());
+}
+#endif
+
 } // namespace Internals
 } // namespace Tins
 /**
