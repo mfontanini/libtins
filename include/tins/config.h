@@ -1,3 +1,5 @@
+#ifndef TINS_CONFIG_H
+#define TINS_CONFIG_H
 
 /* Define if the compiler supports basic C++11 syntax */
 #define HAVE_CXX11
@@ -7,3 +9,5 @@
 
 /* Have WPA2 decryption library */
 #define HAVE_WPA2_DECRYPTION
+
+#endif // TINS_CONFIG_H
