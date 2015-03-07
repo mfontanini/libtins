@@ -1,2 +1,2 @@
 build/**
-include/config.h
+include/tins/config.h
