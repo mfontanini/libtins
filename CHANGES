@@ -1,3 +1,84 @@
+v3.2
+
+- Added include guard for config.h.
+
+- The functor used on BaseSniffer::sniff_loop can now take a Packet.
+
+- Added mcs, tx_flags, ext and data_retries options to RadioTap.
+
+- Fixed big endian representation of RadioTap header.
+
+- RadioTap's dbm_signal and dbm_noise are now signed.
+
+- RadioTap now throws if an option is not present when getting
+its value.
+
+- TKIP decryption now works correctly on packets from AP to STA.
+
+- Added support for PKTAP header.
+
+- Fixed endian issue on IPv4Address::ip_to_int on Windows.
+
+- Fixed IP parsing when total length is 0 due to TCP segmentation offload.
+
+- Re-added support for pkg-config.
+
+- TCPStreamFollower now calls PDU::find_pdu instead of PDU::rfind_pdu.
+
+- Fixed assertion throw caused by DNS parsing on Windows on debug mode.
+
+- Added throw on BSD when trying to send_recv L3 packets.
+
+- Added Loopback::matches_response.
+
+- Removed obsolete autotools files.
+
+- Fixed exception thrown when an interface didn't have an IP address 
+on NetworkInterface.
+
+- Added NetworkInterface::is_loopback.
+
+- Moved all headers to the directory include/tins.
+
+- Fixed compilation warning on TCPStramFollower due to signed to unsigned
+conversion on integral constant.
+
+- BaseSniffer::get_pcap_handle is now public.
+
+- PPPoE session packets are now parsed correctly.
+
+- Fixed invalid Loopback protocol detection on FreeBSD/OSX.
+
+- Fixed OSX IP packet sending issue.
+
+- Added useful constructors to RawPDU.
+
+- Fixed compilation errors on FreeBSD.
+
+- Improved documentation on several classes.
+
+- Fixed parsing bug when allocating IP over IP packets.
+
+- Fixed Windows network interface naming.
+
+- Utils::network_interface returns pcap compatible names on Windows.
+
+- NetworkInterface::name now works on Windows.
+
+- Added documentation generation through the build system.
+
+- Added SnifferConfiguration class.
+
+- Fixed bug on Dot3 serialization.
+
+- Added OfflinePacketFilter class.
+
+- Renamed NOEXCEPT macro to TINS_NOEXCEPT.
+
+- Added DataLinkType class.
+
+- IPv4Address now uses inet_pton when constructing from string. 
+
 v3.1 - Sun Aug 24 21:39:43 ART 2014
 
 - Fixed ICMPv6 checksum error on serialization.
