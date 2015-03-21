@@ -139,9 +139,10 @@ namespace Tins {
          * \code
          * bool(PDU&);
          * bool(const PDU&);
+         *
+         * // These two are only allowed when compiling in C++11 mode
+         * bool(Packet&);
          * bool(const Packet&);
-         * bool(Packet&&);
-         * bool(Packet);
          * \endcode
          *
          * This functor will be called using the each of the sniffed packets
