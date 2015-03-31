@@ -45,7 +45,7 @@ void test_equals_expected(const Dot11Beacon &dot11) {
     EXPECT_EQ(info.qos(), 0);
     EXPECT_EQ(info.sst(), 0);
     EXPECT_EQ(info.apsd(), 0);
-    EXPECT_EQ(info.reserved(), 0);
+    EXPECT_EQ(info.radio_measurement(), 0);
     EXPECT_EQ(info.dsss_ofdm(), 1);
     EXPECT_EQ(info.delayed_block_ack(), 0);
     EXPECT_EQ(info.immediate_block_ack(), 0);

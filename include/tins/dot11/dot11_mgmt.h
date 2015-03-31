@@ -117,7 +117,7 @@ public:
                      _qos:1,
                      _sst:1,
                      _apsd:1,
-                     _reserved:1,
+                     _radio_measurement:1,
                      _dsss_ofdm:1,
                      _delayed_block_ack:1,
                      _immediate_block_ack:1;
@@ -129,11 +129,11 @@ public:
                      _cf_poll_req:1,
                      _cf_poll:1,
                      _ibss:1,
-                    _ess:1,
-                    _immediate_block_ack:1,
+                     _ess:1,
+                     _immediate_block_ack:1,
                      _delayed_block_ack:1,
                      _dsss_ofdm:1,
-                     _reserved:1,
+                     _radio_measurement:1,
                      _apsd:1,
                      _sst:1,
                      _qos:1,
@@ -225,11 +225,11 @@ public:
         bool apsd() const { return _apsd; }
 
         /**
-         * \brief Getter for the reserved flag.
+         * \brief Getter for the radio measurement flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool reserved() const { return _reserved; }
+        bool radio_measurement() const { return _radio_measurement; }
 
         /**
          * \brief Getter for the dsss_ofdm flag.
@@ -337,11 +337,11 @@ public:
         void apsd(bool new_value) { _apsd = new_value; }
 
         /**
-         * \brief Setter for the reserved flag.
+         * \brief Setter for the radio measurement flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void reserved(bool new_value) { _reserved = new_value; }
+        void radio_measurement(bool new_value) { _radio_measurement = new_value; }
 
         /**
          * \brief Setter for the dsss_ofdm flag.
