@@ -61,7 +61,7 @@ inline void test_equals(const capability_information &info1, const capability_in
      EXPECT_EQ(info1.qos(), info2.qos());
      EXPECT_EQ(info1.sst(), info2.sst());
      EXPECT_EQ(info1.apsd(), info2.apsd());
-     EXPECT_EQ(info1.reserved(), info2.reserved());
+     EXPECT_EQ(info1.radio_measurement(), info2.radio_measurement());
      EXPECT_EQ(info1.dsss_ofdm(), info2.dsss_ofdm());
      EXPECT_EQ(info1.delayed_block_ack(), info2.delayed_block_ack());
      EXPECT_EQ(info1.immediate_block_ack(), info2.immediate_block_ack());
@@ -80,7 +80,7 @@ inline void test_equals_empty(const capability_information &info) {
     EXPECT_EQ(info.qos(), 0);
     EXPECT_EQ(info.sst(), 0);
     EXPECT_EQ(info.apsd(), 0);
-    EXPECT_EQ(info.reserved(), 0);
+    EXPECT_EQ(info.radio_measurement(), 0);
     EXPECT_EQ(info.dsss_ofdm(), 0);
     EXPECT_EQ(info.delayed_block_ack(), 0);
     EXPECT_EQ(info.immediate_block_ack(), 0);
