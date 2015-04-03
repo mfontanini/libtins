@@ -499,8 +499,8 @@ void ICMPv6::handover_key_reply(const handover_key_reply_type &value) {
     std::vector<uint8_t> buffer(data_size + padding);
     buffer[0] = padding;
     buffer[1] = value.AT << 4;
-    uint32_t tmp_lifetime = Endian::host_to_be(value.lifetime);
-    std::memcpy(&buffer[2], &tmp_lifetime, sizeof(uint32_t));
+    uint16_t tmp_lifetime = Endian::host_to_be(value.lifetime);
+    std::memcpy(&buffer[2], &tmp_lifetime, sizeof(uint16_t));
     // copy the key, and fill with padding
     std::fill(
         std::copy(value.key.begin(), value.key.end(), buffer.begin() + 2 + sizeof(uint16_t)),
