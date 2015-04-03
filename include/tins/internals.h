@@ -207,10 +207,6 @@ struct is_unsigned_integral<uint64_t> {
 
 #if TINS_IS_CXX11
 
-// Part of C++14 standard library
-template<bool B, class T = void>
-using enable_if_t = typename std::enable_if<B,T>::type;
-
 // Template metaprogramming trait to determine if a functor can accept another parameter as an argument
 template <class T, class P, class=void>
 struct accepts_type : std::false_type { };
