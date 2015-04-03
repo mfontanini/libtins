@@ -153,13 +153,13 @@ public:
      * \brief Getter for the version field.
      * \return The version field.
      */
-    uint16_t version() const { return Endian::le_to_host(_version); }
+    uint16_t version() const { return _version; }
     
     /**
      * \brief Getter for the capabilities field.
      * \return The version field.
      */
-    uint16_t capabilities() const { return Endian::le_to_host(_capabilities); }
+    uint16_t capabilities() const { return _capabilities; }
 
     /**
      * \brief Getter for the pairwise cypher suite list.

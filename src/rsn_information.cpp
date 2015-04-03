@@ -116,11 +116,11 @@ void RSNInformation::group_suite(CypherSuites group) {
 }
 
 void RSNInformation::version(uint16_t ver) {
-    _version = Endian::host_to_le(ver);
+    _version = ver;
 }
 
 void RSNInformation::capabilities(uint16_t cap) {
-    _capabilities = Endian::host_to_le(cap);
+    _capabilities = cap;
 }
 
 RSNInformation::serialization_type RSNInformation::serialize() const {
@@ -131,10 +131,11 @@ RSNInformation::serialization_type RSNInformation::serialize() const {
     uint16_t pairwise_cyphers_size = _pairwise_cyphers.size();
     uint16_t akm_cyphers_size = _akm_cyphers.size();
     uint16_t capabilities = Endian::host_to_le(_capabilities);
+    uint16_t version = Endian::host_to_le(_version);
     
     serialization_type buffer(size);
     serialization_type::value_type *ptr = &buffer[0];
-    std::memcpy(ptr, &_version, sizeof(_version));
+    std::memcpy(ptr, &version, sizeof(version));
     ptr += sizeof(uint16_t);
     std::memcpy(ptr, &_group_suite, sizeof(uint32_t));
     ptr += sizeof(uint32_t);
