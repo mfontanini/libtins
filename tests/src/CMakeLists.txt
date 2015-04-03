@@ -13,6 +13,12 @@ LINK_LIBRARIES(
     ${CMAKE_THREAD_LIBS_INIT}
 )
 
+IF(LIBTINS_ENABLE_WPA2)
+    SET(OPTIONAL_TEST_TARGETS WPA2DecryptTest)
+    ADD_EXECUTABLE(WPA2DecryptTest EXCLUDE_FROM_ALL wpa2_decrypt.cpp)
+    ADD_TEST(WPA2Decrypt WPA2DecryptTest)
+ENDIF()
+
 # Add tests target
 ADD_CUSTOM_TARGET(
     tests DEPENDS
@@ -71,7 +77,7 @@ ADD_CUSTOM_TARGET(
     UDPTest
     UtilsTest
     WEPDecryptTest
-    WPA2DecryptTest
+    ${OPTIONAL_TEST_TARGETS}
 )
 
 # Test executables
@@ -113,7 +119,6 @@ ADD_EXECUTABLE(TCPStreamTest EXCLUDE_FROM_ALL tcp_stream.cpp)
 ADD_EXECUTABLE(UDPTest EXCLUDE_FROM_ALL udp.cpp)
 ADD_EXECUTABLE(UtilsTest EXCLUDE_FROM_ALL utils.cpp)
 ADD_EXECUTABLE(WEPDecryptTest EXCLUDE_FROM_ALL wep_decrypt.cpp)
-ADD_EXECUTABLE(WPA2DecryptTest EXCLUDE_FROM_ALL wpa2_decrypt.cpp)
 
 # Dot11 tests executables
 
@@ -192,5 +197,4 @@ ADD_TEST(TCPStream TCPStreamTest)
 ADD_TEST(UDP UDPTest)
 ADD_TEST(Utils UtilsTest)
 ADD_TEST(WEPDecrypt WEPDecryptTest)
-ADD_TEST(WPA2Decrypt WPA2DecryptTest)
 

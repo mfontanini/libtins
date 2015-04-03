@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_DOT11
+#if defined(HAVE_DOT11) && defined(HAVE_WPA2_DECRYPTION)
 
 #include <gtest/gtest.h>
 #include <cstring>
@@ -221,4 +221,4 @@ TEST_F(WPA2DecryptTest, DecryptCCMPAndTKIPWithoutUsingBeacon) {
     }
 }
 
-#endif // HAVE_DOT11
+#endif // defined(HAVE_DOT11) && defined(HAVE_WPA2_DECRYPTION)
