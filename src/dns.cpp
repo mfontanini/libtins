@@ -38,6 +38,7 @@
 #include "ipv6_address.h"
 #include "exceptions.h"
 #include "rawpdu.h"
+#include "endianness.h"
 
 using std::string;
 using std::list;
@@ -373,10 +374,17 @@ void DNS::inline_convert_v4(uint32_t value, char *output) {
     output += sprintf(
         output, 
         "%d.%d.%d.%d", 
+        #if TINS_IS_LITTLE_ENDIAN
         value & 0xff, 
         (value >> 8) & 0xff,
         (value >> 16) & 0xff,
         (value >> 24) & 0xff
+        #else
+        (value >> 24) & 0xff,
+        (value >> 16) & 0xff,
+        (value >> 8) & 0xff,
+        value & 0xff
+        #endif // TINS_IS_LITTLE_ENDIAN
     );
     *output = 0;
 }
