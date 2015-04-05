@@ -12,7 +12,8 @@ using namespace Tins;
 
 class TCPTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[], checksum_packet[];
+    static const uint8_t expected_packet[], checksum_packet[],
+                            partial_packet[];
     
     void test_equals(const TCP &tcp1, const TCP &tcp2);
 };
@@ -28,6 +29,10 @@ const uint8_t TCPTest::checksum_packet[] = {
     69, 0, 0, 40, 0, 0, 64, 0, 64, 6, 60, 206, 0, 0, 0, 0, 127, 0, 0, 1, 
     5, 57, 199, 49, 0, 0, 0, 0, 255, 216, 70, 222, 80, 20, 0, 0, 158, 172, 
     0, 0
+};
+
+const uint8_t TCPTest::partial_packet[] = {
+    142, 210, 0, 80, 60, 158, 102, 111, 10, 2, 46, 161, 80, 24, 0, 229, 247, 192, 0, 0
 };
 
 
@@ -197,7 +202,6 @@ void TCPTest::test_equals(const TCP &tcp1, const TCP &tcp2) {
     EXPECT_EQ((bool)tcp1.inner_pdu(), (bool)tcp2.inner_pdu());
 }
 
-// This is not working, but i don't want to fix it right now.
 TEST_F(TCPTest, ConstructorFromBuffer) {
     TCP tcp1(expected_packet, sizeof(expected_packet));
     
@@ -227,6 +231,11 @@ TEST_F(TCPTest, ConstructorFromBuffer) {
     
     TCP tcp2(&buffer[0], buffer.size());
     test_equals(tcp1, tcp2);
+}
+
+TEST_F(TCPTest, ConstructorFromPartialBuffer) {
+    TCP tcp(partial_packet, sizeof(partial_packet));
+    EXPECT_FALSE(tcp.inner_pdu());
 }
 
 TEST_F(TCPTest, Serialize) {
