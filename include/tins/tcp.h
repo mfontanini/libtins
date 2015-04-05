@@ -507,6 +507,32 @@ namespace Tins {
             return new TCP(*this);
         }
     private:
+        #if TINS_IS_LITTLE_ENDIAN
+            TINS_BEGIN_PACK
+            struct flags_type {
+                uint8_t fin:1,
+                    syn:1,
+                    rst:1,
+                    psh:1,
+                    ack:1,
+                    urg:1,
+                    ece:1,
+                    cwr:1;
+            } TINS_END_PACK;
+        #else
+            TINS_BEGIN_PACK
+            struct flags_type {
+                uint8_t cwr:1,
+                    ece:1,
+                    urg:1,
+                    ack:1,
+                    psh:1,
+                    rst:1,
+                    syn:1,
+                    fin:1;
+            } TINS_END_PACK;
+        #endif
+
         TINS_BEGIN_PACK
         struct tcphdr {
             uint16_t sport;
@@ -514,30 +540,16 @@ namespace Tins {
             uint32_t seq;
             uint32_t ack_seq;
         #if TINS_IS_LITTLE_ENDIAN
-            uint16_t res1:4,
-                doff:4,
-                fin:1,
-                syn:1,
-                rst:1,
-                psh:1,
-                ack:1,
-                urg:1,
-                ece:1,
-                cwr:1;
-        #elif TINS_IS_BIG_ENDIAN
-            uint16_t doff:4,
-                res1:4,
-                cwr:1,
-                ece:1,
-                urg:1,
-                ack:1,
-                psh:1,
-                rst:1,
-                syn:1,
-                fin:1;
+            uint8_t res1:4,
+                doff:4;
         #else
-        #error	"Endian is not LE nor BE..."
+            uint8_t doff:4,
+                res1:4;
         #endif
+            union {
+                flags_type flags;
+                uint8_t flags_8;
+            };
             uint16_t	window;
             uint16_t	check;
             uint16_t	urg_ptr;

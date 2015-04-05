@@ -200,28 +200,28 @@ TCP::AltChecksums TCP::altchecksum() const {
 small_uint<1> TCP::get_flag(Flags tcp_flag) const {
     switch(tcp_flag) {
         case FIN:
-            return _tcp.fin;
+            return _tcp.flags.fin;
             break;
         case SYN:
-            return _tcp.syn;
+            return _tcp.flags.syn;
             break;
         case RST:
-            return _tcp.rst;
+            return _tcp.flags.rst;
             break;
         case PSH:
-            return _tcp.psh;
+            return _tcp.flags.psh;
             break;
         case ACK:
-            return _tcp.ack;
+            return _tcp.flags.ack;
             break;
         case URG:
-            return _tcp.urg;
+            return _tcp.flags.urg;
             break;
         case ECE:
-            return _tcp.ece;
+            return _tcp.flags.ece;
             break;
         case CWR:
-            return _tcp.cwr;
+            return _tcp.flags.cwr;
             break;
         default:
             return 0;
@@ -230,55 +230,41 @@ small_uint<1> TCP::get_flag(Flags tcp_flag) const {
 }
 
 small_uint<12> TCP::flags() const {
-    return (_tcp.res1 << 8) |
-            (_tcp.cwr << 7) |
-            (_tcp.ece << 6) |
-            (_tcp.urg << 5) |
-            (_tcp.ack << 4) |
-            (_tcp.psh << 3) |
-            (_tcp.rst << 2) |
-            (_tcp.syn << 1) |
-            _tcp.fin;
+    return (_tcp.res1 << 8) | _tcp.flags_8;
 }
 
 void TCP::set_flag(Flags tcp_flag, small_uint<1> value) {
     switch(tcp_flag) {
         case FIN:
-            _tcp.fin = value;
+            _tcp.flags.fin = value;
             break;
         case SYN:
-            _tcp.syn = value;
+            _tcp.flags.syn = value;
             break;
         case RST:
-            _tcp.rst = value;
+            _tcp.flags.rst = value;
             break;
         case PSH:
-            _tcp.psh = value;
+            _tcp.flags.psh = value;
             break;
         case ACK:
-            _tcp.ack = value;
+            _tcp.flags.ack = value;
             break;
         case URG:
-            _tcp.urg = value;
+            _tcp.flags.urg = value;
             break;
         case ECE:
-            _tcp.ece = value;
+            _tcp.flags.ece = value;
             break;
         case CWR:
-            _tcp.cwr = value;
+            _tcp.flags.cwr = value;
             break;
     };
 }
 
 void TCP::flags(small_uint<12> value) {
-    _tcp.fin = (value & FIN) ? 1 : 0;
-    _tcp.syn = (value & SYN) ? 1 : 0;
-    _tcp.rst = (value & RST) ? 1 : 0;
-    _tcp.psh = (value & PSH) ? 1 : 0;
-    _tcp.ack = (value & ACK) ? 1 : 0;
-    _tcp.urg = (value & URG) ? 1 : 0;
-    _tcp.ece = (value & ECE) ? 1 : 0;
-    _tcp.cwr = (value & CWR) ? 1 : 0;
+    _tcp.res1 = (value >> 8) & 0x0f;
+    _tcp.flags_8 = value & 0xff;
 }
 
 void TCP::add_option(const option &opt) {
