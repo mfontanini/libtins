@@ -205,7 +205,7 @@ struct is_unsigned_integral<uint64_t> {
     static const bool value = true;
 };
 
-#if TINS_IS_CXX11
+#if TINS_IS_CXX11 && !defined(_MSC_VER)
 
 // Template metaprogramming trait to determine if a functor can accept another parameter as an argument
 template <class T, class P, class=void>

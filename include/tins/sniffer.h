@@ -582,7 +582,7 @@ namespace Tins {
         for(iterator it = begin(); it != end(); ++it) {
             try {
                 // If the functor returns false, we're done
-                #if TINS_IS_CXX11
+                #if TINS_IS_CXX11 && !defined(_MSC_VER)
                 if (!Tins::Internals::invoke_loop_cb(function, *it))
                     return;
                 #else
