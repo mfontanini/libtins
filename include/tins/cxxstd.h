@@ -30,6 +30,8 @@
 #ifndef TINS_CXXSTD_H
 #define TINS_CXXSTD_H
 
+#include "config.h"
+
 #include <memory>
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
@@ -38,8 +40,10 @@
     #define TINS_CXXSTD_GCC_FIX 0
 #endif // __GXX_EXPERIMENTAL_CXX0X__
 
-#ifndef TINS_IS_CXX11
+#if !defined(TINS_IS_CXX11) && defined(HAVE_CXX11)
 #define TINS_IS_CXX11 (__cplusplus > 199711L || TINS_CXXSTD_GCC_FIX == 1 || _MSC_VER >= 1800)
+#elif !defined(TINS_IS_CXX11)
+#define TINS_IS_CXX11 0
 #endif  // TINS_IS_CXX11
 
 namespace Tins{
