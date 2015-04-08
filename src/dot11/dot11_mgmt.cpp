@@ -369,7 +369,7 @@ void Dot11ManagementFrame::vendor_specific(const vendor_specific_type &data) {
 
 // Getters
 
-RSNInformation Dot11ManagementFrame::rsn_information() {
+RSNInformation Dot11ManagementFrame::rsn_information() const {
     return search_and_convert<RSNInformation>(RSN);
 }
 
