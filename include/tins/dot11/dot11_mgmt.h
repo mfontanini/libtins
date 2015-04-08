@@ -834,7 +834,7 @@ public:
      * 
      * \return std::string containing the ssid.
      */
-    RSNInformation rsn_information();
+    RSNInformation rsn_information() const;
     
     /**
      * \brief Helper method to search for this PDU's SSID.
