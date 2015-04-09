@@ -44,6 +44,21 @@ namespace Tins {
 class Dot11ManagementFrame : public Dot11 {
 public:
     /**
+     * \brief Enum that represents the map field within a channels map field.
+     *
+     * These bitmasks can be used to get or set the second value of
+     * ibss_dfs_params().channel_map
+     */
+    enum MapMask {
+        BSS                 = 0x1,
+        OFDM_PREAMBLE       = 0x2,
+        UNIDENTIFIED_SIGNAL = 0x4,
+        RADARE              = 0x8,
+        UNMEASURED          = 0x10,
+        RESERVED            = 0xE0
+    };
+
+    /**
      * The supported rates container type.
      */
     typedef std::vector<float> rates_type;
@@ -52,6 +67,11 @@ public:
      * The supported channels container type.
      */
     typedef std::vector<std::pair<uint8_t, uint8_t> > channels_type;
+
+    /**
+     * The channel map container type.
+     */
+    typedef std::vector<std::pair<uint8_t, uint8_t> > channel_map_type;
 
     /**
      * The requested information container type.
@@ -409,14 +429,14 @@ public:
         
         address_type dfs_owner;
         uint8_t recovery_interval; 
-        channels_type channel_map;
+        channel_map_type channel_map;
        
         ibss_dfs_params() {}
        
         ibss_dfs_params(const address_type &addr, 
-          uint8_t recovery_interval, const channels_type &channels)
+          uint8_t recovery_interval, const channel_map_type &channel_map)
         : dfs_owner(addr), recovery_interval(recovery_interval),
-          channel_map(channels) {}
+          channel_map(channel_map) {}
 
         static ibss_dfs_params from_option(const option &opt);
     };
