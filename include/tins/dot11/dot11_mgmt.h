@@ -44,21 +44,6 @@ namespace Tins {
 class Dot11ManagementFrame : public Dot11 {
 public:
     /**
-     * \brief Enum that represents the map field within a channels map field.
-     *
-     * These bitmasks can be used to get or set the second value of
-     * ibss_dfs_params().channel_map
-     */
-    enum MapMask {
-        BSS                 = 0x1,
-        OFDM_PREAMBLE       = 0x2,
-        UNIDENTIFIED_SIGNAL = 0x4,
-        RADARE              = 0x8,
-        UNMEASURED          = 0x10,
-        RESERVED            = 0xE0
-    };
-
-    /**
      * The supported rates container type.
      */
     typedef std::vector<float> rates_type;
@@ -83,6 +68,12 @@ public:
      */
     static const PDU::PDUType pdu_flag = PDU::DOT11_MANAGEMENT;
 
+    /**
+     * \brief Enum used in the reason code field.
+     *
+     * These  can be used to get or set the second value of
+     * ibss_dfs_params().channel_map
+     */
     enum ReasonCodes {
         UNSPECIFIED = 1,
         PREV_AUTH_NOT_VALID = 2,
@@ -116,6 +107,21 @@ public:
         REQUESTED_BY_STA_REJECT_SETUP = 38,
         REQUESTED_BY_STA_TIMEOUT = 39,
         PEER_STA_NOT_SUPPORT_CIPHER = 45
+    };
+
+    /**
+     * \brief Enum that represents the map field within a channels map field.
+     *
+     * These bitmasks can be used to get or set the second value of
+     * ibss_dfs_params().channel_map
+     */
+    enum MapMask {
+        BSS                 = 0x1,
+        OFDM_PREAMBLE       = 0x2,
+        UNIDENTIFIED_SIGNAL = 0x4,
+        RADARE              = 0x8,
+        UNMEASURED          = 0x10,
+        RESERVED            = 0xE0
     };
     
     /**
