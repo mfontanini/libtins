@@ -71,8 +71,8 @@ public:
     /**
      * \brief Enum used in the reason code field.
      *
-     * These  can be used to get or set the second value of
-     * ibss_dfs_params().channel_map
+     * This enumeration can be used to get or set the reason code field in a
+     * Deauthentication or Disassociation
      */
     enum ReasonCodes {
         UNSPECIFIED = 1,
@@ -119,7 +119,7 @@ public:
         BSS                 = 0x1,
         OFDM_PREAMBLE       = 0x2,
         UNIDENTIFIED_SIGNAL = 0x4,
-        RADARE              = 0x8,
+        RADAR               = 0x8,
         UNMEASURED          = 0x10,
         RESERVED            = 0xE0
     };
