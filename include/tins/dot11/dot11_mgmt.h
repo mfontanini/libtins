@@ -54,6 +54,11 @@ public:
     typedef std::vector<std::pair<uint8_t, uint8_t> > channels_type;
 
     /**
+     * The channel map container type.
+     */
+    typedef std::vector<std::pair<uint8_t, uint8_t> > channel_map_type;
+
+    /**
      * The requested information container type.
      */
     typedef std::vector<uint8_t> request_info_type;
@@ -63,6 +68,12 @@ public:
      */
     static const PDU::PDUType pdu_flag = PDU::DOT11_MANAGEMENT;
 
+    /**
+     * \brief Enum used in the reason code field.
+     *
+     * This enumeration can be used to get or set the reason code field in a
+     * Deauthentication or Disassociation
+     */
     enum ReasonCodes {
         UNSPECIFIED = 1,
         PREV_AUTH_NOT_VALID = 2,
@@ -96,6 +107,21 @@ public:
         REQUESTED_BY_STA_REJECT_SETUP = 38,
         REQUESTED_BY_STA_TIMEOUT = 39,
         PEER_STA_NOT_SUPPORT_CIPHER = 45
+    };
+
+    /**
+     * \brief Enum that represents the map field within a channels map field.
+     *
+     * These bitmasks can be used to get or set the second value of
+     * ibss_dfs_params().channel_map
+     */
+    enum MapMask {
+        BSS                 = 0x1,
+        OFDM_PREAMBLE       = 0x2,
+        UNIDENTIFIED_SIGNAL = 0x4,
+        RADAR               = 0x8,
+        UNMEASURED          = 0x10,
+        RESERVED            = 0xE0
     };
     
     /**
@@ -409,14 +435,14 @@ public:
         
         address_type dfs_owner;
         uint8_t recovery_interval; 
-        channels_type channel_map;
+        channel_map_type channel_map;
        
         ibss_dfs_params() {}
        
         ibss_dfs_params(const address_type &addr, 
-          uint8_t recovery_interval, const channels_type &channels)
+          uint8_t recovery_interval, const channel_map_type &channel_map)
         : dfs_owner(addr), recovery_interval(recovery_interval),
-          channel_map(channels) {}
+          channel_map(channel_map) {}
 
         static ibss_dfs_params from_option(const option &opt);
     };
