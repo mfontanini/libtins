@@ -134,7 +134,7 @@ const NetworkInterface& PacketSender::default_interface() const {
 
 #if !defined(WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 
-#ifdef WIN32
+#ifndef WIN32
 bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const {
     #if defined(BSD) || defined(__FreeBSD_kernel__)
     return _ether_socket.count(iface.id());

@@ -176,14 +176,14 @@ namespace Tins {
          */
         ~PacketSender();
 
-        #ifndef WIN32
+        #if !defined(WIN32) || HAVE_PACKET_SENDER_PCAP_SENDPACKET
         /** 
          * \brief Opens a layer 2 socket.
          * 
          * If this operation fails, then a socket_open_error will be thrown.
          */
         void open_l2_socket(const NetworkInterface& iface = NetworkInterface());
-        #endif // WIN32
+        #endif // !WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
         /** 
          * \brief Opens a layer 3 socket, using the corresponding protocol
