@@ -305,7 +305,7 @@ PDU *PacketSender::send_recv(PDU &pdu, const NetworkInterface &iface) {
     return pdu.recv_response(*this, iface);
 }
 
-#ifndef WIN32
+#if !defined(WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, 
   uint32_t len_addr, const NetworkInterface &iface) 
 {
@@ -337,7 +337,7 @@ PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr,
     std::vector<int> sockets(1, sock);
     return recv_match_loop(sockets, pdu, link_addr, len_addr);
 }
-#endif // WIN32
+#endif // !WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 PDU *PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
     open_l3_socket(type);
