@@ -175,7 +175,7 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
 }
 
 PDU *EthernetII::recv_response(PacketSender &sender, const NetworkInterface &iface) {
-    #if !defined(BSD) && !defined(__FreeBSD_kernel__) && !HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #if !defined(BSD) && !defined(__FreeBSD_kernel__) && !defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
         struct sockaddr_ll addr;
         memset(&addr, 0, sizeof(struct sockaddr_ll));
 
