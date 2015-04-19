@@ -66,6 +66,8 @@
 #include "ieee802_3.h"
 #include "internals.h"
 
+using std::string;
+using std::runtime_error;
 
 namespace Tins {
 const int PacketSender::INVALID_RAW_SOCKET = -1;
@@ -107,12 +109,19 @@ PacketSender::~PacketSender() {
         #endif
     }
     #if defined(BSD) || defined(__FreeBSD_kernel__)
-    for(BSDEtherSockets::iterator it = _ether_socket.begin(); it != _ether_socket.end(); ++it)
-        ::close(it->second);
+        for(BSDEtherSockets::iterator it = _ether_socket.begin(); it != _ether_socket.end(); ++it)
+            ::close(it->second);
     #elif !defined(WIN32)
-    if(_ether_socket != INVALID_RAW_SOCKET)
-        ::close(_ether_socket);
+        if(_ether_socket != INVALID_RAW_SOCKET)
+            ::close(_ether_socket);
     #endif
+
+    #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+        for (PcapHandleMap::iterator it = pcap_handles.begin(); it != pcap_handles.end(); ++it) {
+            pcap_close(it->second);
+        }
+        pcap_handles.clear();
+    #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
 }
 
 void PacketSender::default_interface(const NetworkInterface &iface) {
@@ -142,8 +151,37 @@ int PacketSender::get_ether_socket(const NetworkInterface& iface) {
     #endif
 }
 
+#ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+
+pcap_t* PacketSender::make_pcap_handle(const NetworkInterface& iface) const {
+    #ifdef WIN32
+        #define TINS_PREFIX_INTERFACE(x) ("\\Device\\NPF_" + x)
+    #else // WIN32
+        #define TINS_PREFIX_INTERFACE(x) (x)
+    #endif // WIN32
+
+    char error[PCAP_ERRBUF_SIZE];
+    pcap_t* handle = pcap_create(TINS_PREFIX_INTERFACE(iface.name()).c_str(), error);
+    if (!handle) {
+        throw runtime_error("Error opening pcap handle: " + string(error));
+    }
+    if (pcap_set_promisc(handle, 1) < 0) {
+        throw runtime_error("Failed to set pcap handle promisc mode: " + string(pcap_geterr(handle)));
+    }
+    if (pcap_activate(handle) < 0) {
+        throw runtime_error("Failed to activate pcap handle: " + string(pcap_geterr(handle)));
+    }
+    return handle;
+}
+
+#endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+
 void PacketSender::open_l2_socket(const NetworkInterface& iface) {
-    #if defined(BSD) || defined(__FreeBSD_kernel__)
+    #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+        if (pcap_handles.count(iface) == 0) {
+            pcap_handles.insert(std::make_pair(iface, make_pcap_handle(iface)));
+        }
+    #elif defined(BSD) || defined(__FreeBSD_kernel__)
         int sock = -1;
         // At some point, there should be an available device
         for (int i = 0; sock == -1;i++) {
@@ -258,7 +296,7 @@ PDU *PacketSender::send_recv(PDU &pdu, const NetworkInterface &iface) {
     try {
         pdu.send(*this, iface);
     }
-    catch(std::runtime_error&) {
+    catch(runtime_error&) {
         return 0;
     }
     return pdu.recv_response(*this, iface);
@@ -268,16 +306,25 @@ PDU *PacketSender::send_recv(PDU &pdu, const NetworkInterface &iface) {
 void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, 
   uint32_t len_addr, const NetworkInterface &iface) 
 {
-    int sock = get_ether_socket(iface);
     PDU::serialization_type buffer = pdu.serialize();
-    if(!buffer.empty()) {
-        #if defined(BSD) || defined(__FreeBSD_kernel__)
-        if(::write(sock, &buffer[0], buffer.size()) == -1)
-        #else
-        if(::sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
-        #endif
-            throw socket_write_error(make_error_string());
-    }
+
+    #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+        open_l2_socket(iface);
+        pcap_t* handle = pcap_handles[iface];
+        if (pcap_sendpacket(handle, (u_char*)&buffer[0], buffer.size()) != 0) {
+            throw runtime_error("Failed to send packet: " + string(pcap_geterr(handle)));
+        }
+    #else // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+        int sock = get_ether_socket(iface);
+        if(!buffer.empty()) {
+            #if defined(BSD) || defined(__FreeBSD_kernel__)
+            if(::write(sock, &buffer[0], buffer.size()) == -1)
+            #else
+            if(::sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
+            #endif
+                throw socket_write_error(make_error_string());
+        }
+    #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
 }
 
 PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, 
@@ -294,7 +341,7 @@ PDU *PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_ad
     std::vector<int> sockets(1, _sockets[type]);
     if(type == IP_TCP_SOCKET || type == IP_UDP_SOCKET) {
         #ifdef BSD
-            throw std::runtime_error("Receiving L3 packets not supported on this platform");
+            throw runtime_error("Receiving L3 packets not supported on this platform");
         #endif
         open_l3_socket(ICMP_SOCKET);
         sockets.push_back(_sockets[ICMP_SOCKET]);

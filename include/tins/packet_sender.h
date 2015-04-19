@@ -36,6 +36,10 @@
 #include <vector>
 #include <stdint.h>
 #include <map>
+#include "config.h"
+#ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #include <pcap.h>
+#endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
 #include "network_interface.h"
 #include "macros.h"
 #include "cxxstd.h"
@@ -378,6 +382,9 @@ namespace Tins {
         void send(PDU &pdu, const NetworkInterface &iface) {
             static_cast<T&>(pdu).send(*this, iface);
         }
+        #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+            pcap_t* make_pcap_handle(const NetworkInterface& iface) const;
+        #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
         
         PDU *recv_match_loop(const std::vector<int>& sockets, PDU &pdu, struct sockaddr* link_addr, 
             uint32_t addrlen);
@@ -397,7 +404,11 @@ namespace Tins {
         // In BSD we need to store the buffer size, retrieved using BIOCGBLEN
         #if defined(BSD) || defined(__FreeBSD_kernel__)
         int buffer_size;
-        #endif
+        #endif // BSD
+        #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+            typedef std::map<NetworkInterface, pcap_t*> PcapHandleMap; 
+            PcapHandleMap pcap_handles;
+        #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
     };
 }
 

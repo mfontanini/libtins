@@ -145,13 +145,10 @@ namespace Tins {
          */
         uint32_t trailer_size() const;
 
-        // Windows does not support sending L2 PDUs.
-        #ifndef WIN32
         /**
          * \sa PDU::send()
          */
         void send(PacketSender &sender, const NetworkInterface &iface);
-        #endif // WIN32
 
         /** 
          * \brief Check wether ptr points to a valid response for this PDU.

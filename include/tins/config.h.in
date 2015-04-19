@@ -10,4 +10,7 @@
 /* Have WPA2 decryption library */
 #cmakedefine HAVE_WPA2_DECRYPTION
 
+/* Use pcap_sendpacket to send l2 packets */
+#cmakedefine HAVE_PACKET_SENDER_PCAP_SENDPACKET
+
 #endif // TINS_CONFIG_H
