@@ -159,12 +159,14 @@ namespace Tins {
          */
         bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
 
+        #ifndef WIN32
         /** 
          * \brief Receives a matching response for this packet.
          *
          * \sa PDU::recv_response
          */
         PDU *recv_response(PacketSender &sender, const NetworkInterface &iface);
+        #endif // WIN32
 
         /**
          * \brief Getter for the PDU's type.
