@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include "macros.h"
 #include "pdu.h"
+#include "config.h"
 #include "endianness.h"
 #include "hw_address.h"
 
@@ -137,12 +138,12 @@ namespace Tins {
          */
         uint32_t header_size() const;
         
-        #ifndef WIN32
+        #if !defined(WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
         /**
          * \sa PDU::send()
          */
         void send(PacketSender &sender, const NetworkInterface &iface);
-        #endif // WIN32
+        #endif // !WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
         /** 
          * \brief Check wether ptr points to a valid response for this PDU.

@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include "macros.h"
 #include "pdu.h"
+#include "config.h"
 #include "endianness.h"
 #include "hw_address.h"
 
