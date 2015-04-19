@@ -132,7 +132,9 @@ const NetworkInterface& PacketSender::default_interface() const {
     return default_iface;
 }
 
-#ifndef WIN32
+#if !defined(WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+
+#ifdef WIN32
 bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const {
     #if defined(BSD) || defined(__FreeBSD_kernel__)
     return _ether_socket.count(iface.id());
@@ -150,6 +152,7 @@ int PacketSender::get_ether_socket(const NetworkInterface& iface) {
     return _ether_socket;
     #endif
 }
+#endif // WIN32
 
 #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
@@ -216,7 +219,7 @@ void PacketSender::open_l2_socket(const NetworkInterface& iface) {
     }
     #endif
 }
-#endif // WIN32
+#endif // !WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 void PacketSender::open_l3_socket(SocketType type) {
     int socktype = find_type(type);
