@@ -66,6 +66,12 @@ namespace Tins {
      * kernel will be responsible for picking the appropriate network interface
      * based on the destination address.
      *
+     * \par Note for Windows users:
+     * Sending layer 3 PDUs (without a link layer protocol) is very restricted
+     * on Windows (<a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms740548(v=vs.85).aspx">link</a>).
+     * Therefore it's recommended you always send packets which contain link layer PDUs.
+     * This will use Winpcap's pcap_sendpacket to inject the packets.
+     *
      * Sending packets can be done via PacketSender::send:
      *
      * \code
