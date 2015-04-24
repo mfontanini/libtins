@@ -140,7 +140,7 @@ ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
 
 # Only include googletest if the git submodule has been fetched
-IF(EXISTS "googletest/CMakeLists.txt")
+IF(EXISTS "${CMAKE_SOURCE_DIR}/googletest/CMakeLists.txt")
     ADD_SUBDIRECTORY(googletest)
 ENDIF()
 ADD_SUBDIRECTORY(tests)
