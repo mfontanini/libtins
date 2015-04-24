@@ -137,8 +137,10 @@ install(
 ENABLE_TESTING()
 ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(tests)
 ADD_SUBDIRECTORY(examples)
+
+ADD_SUBDIRECTORY(googletest)
+ADD_SUBDIRECTORY(tests)
 
 # Add all targets to the build-tree export set
 EXPORT(
