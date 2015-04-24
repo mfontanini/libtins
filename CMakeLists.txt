@@ -139,7 +139,10 @@ ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
 
-ADD_SUBDIRECTORY(googletest)
+# Only include googletest if the git submodule has been fetched
+IF(EXISTS "googletest/CMakeLists.txt")
+    ADD_SUBDIRECTORY(googletest)
+ENDIF()
 ADD_SUBDIRECTORY(tests)
 
 # Add all targets to the build-tree export set

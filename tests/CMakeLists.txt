@@ -1,5 +1,5 @@
 IF(gtest_BINARY_DIR)
-    MESSAGE(STATUS "Using googletest submodule")
+    MESSAGE(STATUS "Using googletest git submodule.")
     SET(GTEST_FOUND true)
 ELSE()
     FIND_PACKAGE(GTest)
