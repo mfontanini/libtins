@@ -242,7 +242,7 @@ void DNS::add_record(const Resource &resource, const sections_type &sections) {
     uint8_t *ptr = std::copy(
         buffer.begin(),
         buffer.end(),
-        &records_data[threshold]
+        &records_data[0] + threshold
     );
 
     uint16_t uint16_t_buffer;
@@ -502,7 +502,7 @@ uint8_t *DNS::update_dname(uint8_t *ptr, uint32_t threshold, uint32_t offset) {
 // Updates offsets in domain names inside records.
 // No length checks, records are already valid.
 void DNS::update_records(uint32_t &section_start, uint32_t num_records, uint32_t threshold, uint32_t offset) {
-    if(records_data.size() > section_start) {
+    if(section_start < records_data.size()) {
         uint8_t *ptr = &records_data[section_start];
         for(uint32_t i = 0; i < num_records; ++i) {
             ptr = update_dname(ptr, threshold, offset);
@@ -556,10 +556,10 @@ DNS::queries_type DNS::queries() const {
 
 DNS::resources_type DNS::answers() const {
     resources_type res;
-    if(records_data.size() >= authority_idx) {
+    if(answers_idx < records_data.size()) {
         convert_records(
-            &records_data[answers_idx], 
-            &records_data[authority_idx], 
+            &records_data[0] + answers_idx, 
+            &records_data[0] + authority_idx, 
             res
         );
     }
@@ -568,10 +568,10 @@ DNS::resources_type DNS::answers() const {
 
 DNS::resources_type DNS::authority() const {
     resources_type res;
-    if(records_data.size() >= additional_idx) {
+    if(authority_idx < records_data.size()) {
         convert_records(
-            &records_data[authority_idx], 
-            &records_data[additional_idx], 
+            &records_data[0] + authority_idx, 
+            &records_data[0] + additional_idx, 
             res
         );
     }
@@ -580,10 +580,10 @@ DNS::resources_type DNS::authority() const {
 
 DNS::resources_type DNS::additional() const {
     resources_type res;
-    if(records_data.size() >= additional_idx) {
+    if(additional_idx < records_data.size()) {
         convert_records(
-            &records_data[additional_idx], 
-            &records_data[records_data.size()], 
+            &records_data[0] + additional_idx, 
+            &records_data[0] + records_data.size(), 
             res
         );
     }

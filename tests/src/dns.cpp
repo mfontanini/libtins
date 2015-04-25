@@ -126,6 +126,14 @@ TEST_F(DNSTest, ConstructorFromBuffer2) {
     }
 }
 
+TEST_F(DNSTest, NoRecords) {
+    DNS dns;
+    EXPECT_TRUE(dns.queries().empty());
+    EXPECT_TRUE(dns.answers().empty());
+    EXPECT_TRUE(dns.authority().empty());
+    EXPECT_TRUE(dns.additional().empty());
+}
+
 TEST_F(DNSTest, Serialization) {
     DNS dns(expected_packet, sizeof(expected_packet));
     DNS::serialization_type buffer = dns.serialize();
