@@ -45,7 +45,7 @@ namespace Tins {
      * By default, RadioTap PDUs set the necesary fields to send an 802.11
      * PDU as its inner pdu, avoiding packet drops. As a consequence, 
      * the FCS-at-end flag is on, the channel is set to 1, TSFT is set to 0,
-     * dbm_signal is set to 0xce, and the rx_flag and antenna fields to 0.
+     * dbm_signal is set to -50, and the rx_flag and antenna fields to 0.
      */
     class RadioTap : public PDU {
     public:

@@ -178,7 +178,7 @@ void RadioTap::init() {
     channel(Utils::channel_to_mhz(1), 0xa0);
     flags(FCS);
     tsft(0);
-    dbm_signal(static_cast<int8_t>(0xce));
+    dbm_signal(-50);
     rx_flags(0);
     antenna(0);
 }

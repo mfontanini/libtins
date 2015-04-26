@@ -147,7 +147,7 @@ void TCP::sack_permitted() {
 }
 
 bool TCP::has_sack_permitted() const {
-    return static_cast<bool>(search_option(SACK_OK));
+    return search_option(SACK_OK) != NULL;
 }
 
 void TCP::sack(const sack_type &edges) {
