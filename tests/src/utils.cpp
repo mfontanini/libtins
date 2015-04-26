@@ -67,36 +67,7 @@ const uint32_t UtilsTest::data_len = 500;
 
 
 TEST_F(UtilsTest, Crc32) {
-
     uint32_t crc = Utils::crc32(data, data_len);
 
     EXPECT_EQ(crc, 0x78840f54U);
-
-}
-
-TEST_F(UtilsTest, ResolveDomain) {
-    IPv4Address localhost_ip("127.0.0.1");
-
-    EXPECT_EQ(Utils::resolve_domain("localhost"), localhost_ip);
-}
-
-/*
-TEST_F(UtilsTest, ResolveDomain6) {
-    IPv6Address localhost_ip("2606:2800:220:6d:26bf:1447:1097:aa7");
-
-    EXPECT_EQ(Utils::resolve_domain6("example.com"), localhost_ip);
-}
-*/
-
-// FIXME
-TEST_F(UtilsTest, Checksum) {
-
-    /*uint16_t checksum = Utils::do_checksum(data, data + data_len);
-
-    //EXPECT_EQ(checksum, 0x231a);
-
-    uint8_t my_data[] = {0, 0, 0, 0};
-    checksum = Utils::do_checksum(my_data, my_data + 4);
-    //EXPECT_EQ(checksum, 0xFFFF);
-*/
 }

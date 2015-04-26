@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "tcp.h"
 #include "ip.h"
+#include "ethernetII.h"
 #include "utils.h"
 
 using namespace std;
@@ -24,11 +25,12 @@ const uint8_t TCPTest::expected_packet[] = {
     18, 52, 3, 3, 122, 4, 2, 5, 10, 0, 1, 2, 3, 4, 5, 6, 7, 0, 0, 0
 };
 
-// IP + TCP
+// Ethernet + IP + TCP
 const uint8_t TCPTest::checksum_packet[] = {
-    69, 0, 0, 40, 0, 0, 64, 0, 64, 6, 60, 206, 0, 0, 0, 0, 127, 0, 0, 1, 
-    5, 57, 199, 49, 0, 0, 0, 0, 255, 216, 70, 222, 80, 20, 0, 0, 158, 172, 
-    0, 0
+    10, 128, 57, 251, 101, 187, 76, 128, 147, 141, 144, 65, 8, 0, 69, 0, 0, 
+    60, 152, 189, 64, 0, 64, 6, 0, 19, 10, 0, 0, 54, 198, 41, 209, 140, 180, 
+    207, 1, 187, 114, 130, 185, 186, 0, 0, 0, 0, 160, 2, 114, 16, 44, 228, 0, 
+    0, 2, 4, 5, 180, 4, 2, 8, 10, 3, 81, 33, 7, 0, 0, 0, 0, 1, 3, 3, 7
 };
 
 const uint8_t TCPTest::partial_packet[] = {
@@ -44,12 +46,12 @@ TEST_F(TCPTest, DefaultConstructor) {
 }
 
 TEST_F(TCPTest, ChecksumCheck) {
-    IP pkt1(checksum_packet, sizeof(checksum_packet)); 
+    EthernetII pkt1(checksum_packet, sizeof(checksum_packet)); 
     const TCP &tcp1 = pkt1.rfind_pdu<TCP>();
     uint16_t checksum = tcp1.checksum();
     
-    IP::serialization_type buffer = pkt1.serialize();
-    IP pkt2(&buffer[0], buffer.size());
+    PDU::serialization_type buffer = pkt1.serialize();
+    EthernetII pkt2(&buffer[0], buffer.size());
     const TCP &tcp2 = pkt2.rfind_pdu<TCP>();
     EXPECT_EQ(checksum, tcp2.checksum());
     EXPECT_EQ(tcp1.checksum(), tcp2.checksum());

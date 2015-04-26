@@ -9,8 +9,16 @@ ELSE(NOT CMAKE_BUILD_TYPE)
     MESSAGE(STATUS "Using specified '${CMAKE_BUILD_TYPE}' build type.")
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
-# Default compilation settings
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+# Compilation flags.
+IF(MSVC)
+    # Don't always use Wall, since VC's /Wall is ridiculously verbose.
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+    # Disable VC secure checks, since these are not really issues.
+    ADD_DEFINITIONS("-D_CRT_SECURE_NO_WARNINGS=1")
+    ADD_DEFINITIONS("-D_SCL_SECURE_NO_WARNINGS=1")
+ELSE()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+ENDIF()
 
 # Build output checks
 OPTION(LIBTINS_BUILD_SHARED "Build libtins as a shared library." ON)
@@ -28,7 +36,7 @@ ENDIF(LIBTINS_BUILD_SHARED)
 
 # The version number.
 SET(LIBTINS_VERSION_MAJOR 3)
-SET(LIBTINS_VERSION_MINOR 2)
+SET(LIBTINS_VERSION_MINOR 3)
 SET(LIBTINS_VERSION "${LIBTINS_VERSION_MAJOR}.${LIBTINS_VERSION_MINOR}")
 
 # Required Packages
@@ -48,7 +56,11 @@ IF(WIN32)
     ADD_DEFINITIONS(-DNOMINMAX -DWIN32)
 ENDIF(WIN32)
 
+# *******************
 # Compilation options
+# *******************
+
+# C++11 support
 OPTION(LIBTINS_ENABLE_CXX11 "Compile libtins with c++11 features" OFF)
 IF(LIBTINS_ENABLE_CXX11)
     SET(HAVE_CXX11 ON)
@@ -67,6 +79,7 @@ ELSE(LIBTINS_ENABLE_CXX11)
         "as it increases the library's performance")
 ENDIF(LIBTINS_ENABLE_CXX11)
 
+# IEEE 802.11 and WPA2 decryption support
 OPTION(LIBTINS_ENABLE_DOT11 "Compile libtins with IEEE 802.11 support" ON)
 OPTION(LIBTINS_ENABLE_WPA2 "Compile libtins with WPA2 decryption features (requires OpenSSL)" ON)
 IF(LIBTINS_ENABLE_DOT11)
@@ -81,6 +94,7 @@ IF(LIBTINS_ENABLE_DOT11)
     ENDIF(LIBTINS_ENABLE_WPA2)
 ENDIF(LIBTINS_ENABLE_DOT11)
 
+# Use pcap_sendpacket to send l2 packets rather than raw sockets
 IF(WIN32)
     SET(USE_PCAP_SENDPACKET_DEFAULT ON)
 ELSE(WIN32)
@@ -110,6 +124,7 @@ IF(DOXYGEN_FOUND)
     )
 ENDIF(DOXYGEN_FOUND)
 
+# The library output directory
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
@@ -120,25 +135,42 @@ CONFIGURE_FILE(
 )
 
 # Support for pkg-config
-set(CMAKE_INSTALL_LIBDIR lib)
-set(pkgconfig_prefix      ${CMAKE_INSTALL_PREFIX})
-set(pkgconfig_exec_prefix ${CMAKE_INSTALL_PREFIX})
-set(pkgconfig_libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
-set(pkgconfig_version     ${LIBTINS_VERSION})
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libtins.pc.in
-               ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc @ONLY)
+SET(CMAKE_INSTALL_LIBDIR lib)
+SET(pkgconfig_prefix      ${CMAKE_INSTALL_PREFIX})
+SET(pkgconfig_exec_prefix ${CMAKE_INSTALL_PREFIX})
+SET(pkgconfig_libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+SET(pkgconfig_version     ${LIBTINS_VERSION})
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libtins.pc.in
+                ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc @ONLY)
 
-install(
+INSTALL(
     FILES
     ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 
-ENABLE_TESTING()
+# ******************
+# Add subdirectories
+# ******************
 ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(tests)
 ADD_SUBDIRECTORY(examples)
+
+# Only include googletest if the git submodule has been fetched
+IF(EXISTS "${CMAKE_SOURCE_DIR}/googletest/CMakeLists.txt")
+    # Enable tests and add the test directory
+    MESSAGE(STATUS "Tests have been enabled")
+    SET(gtest_force_shared_crt ON CACHE BOOL "Always use /MD")
+    ENABLE_TESTING()
+    ADD_SUBDIRECTORY(googletest)
+    ADD_SUBDIRECTORY(tests)
+ELSE()
+    MESSAGE(STATUS "googletest git submodule is absent. Run `git submodule init && git submodule update` to get it")
+ENDIF()
+
+# **********************************
+# CMake project configuration export
+# **********************************
 
 # Add all targets to the build-tree export set
 EXPORT(

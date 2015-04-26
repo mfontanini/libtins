@@ -147,7 +147,7 @@ void TCP::sack_permitted() {
 }
 
 bool TCP::has_sack_permitted() const {
-    return bool(search_option(SACK_OK));
+    return search_option(SACK_OK) != NULL;
 }
 
 void TCP::sack(const sack_type &edges) {
@@ -286,7 +286,7 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
         buffer = write_option(*it, buffer);
 
     if(_options_size < _total_options_size) {
-        uint8_t padding = _options_size;
+        uint16_t padding = _options_size;
         while(padding < _total_options_size) {
             *(buffer++) = 1;
             padding++;

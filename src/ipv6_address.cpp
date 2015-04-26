@@ -87,7 +87,7 @@ std::string IPv6Address::to_string() const {
     #ifdef WIN32
         // mingw on linux somehow doesn't have InetNtop
         #ifdef _MSC_VER
-            if(InetNtopA(AF_INET6, (PVOID)address, buffer, sizeof(buffer)) != 0)
+            if(InetNtopA(AF_INET6, (PVOID)address, buffer, sizeof(buffer)) == 0)
                 throw malformed_address();
         #else
             ULONG sz = sizeof(buffer);

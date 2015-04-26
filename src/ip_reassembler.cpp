@@ -87,7 +87,7 @@ uint16_t IPv4Stream::extract_offset(const IP *ip) {
 }
 
 bool IPv4Stream::extract_more_frag(const IP *ip) {
-    return ip->frag_off() & 0x2000;
+    return (ip->frag_off() & 0x2000) != 0;
 }
 } // namespace Internals
 

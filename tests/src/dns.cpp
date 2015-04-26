@@ -4,6 +4,9 @@
 #include "ipv6_address.h"
 #include "utils.h"
 
+// Really nice and unique macro names, Windows :D
+#undef IN
+
 using namespace Tins;
 
 
