@@ -3,6 +3,7 @@ INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}/include/tins/ 
     ../include/
     ${gtest_SOURCE_DIR}/include
+    ${PCAP_INCLUDE_DIR}
 )
 
 # Find pthread library
@@ -10,7 +11,6 @@ FIND_PACKAGE(Threads REQUIRED)
 
 LINK_DIRECTORIES(
     ${gtest_BINARY_DIR}
-
 )
 # Link against GoogleTest, libtins and pthread.
 # Pthread is required by GoogleTest
@@ -19,6 +19,7 @@ LINK_LIBRARIES(
     gtest_main
     tins 
     ${CMAKE_THREAD_LIBS_INIT}
+    ${PCAP_LIBRARY}
 )
 
 IF(LIBTINS_ENABLE_WPA2)

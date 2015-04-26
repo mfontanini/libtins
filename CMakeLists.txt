@@ -120,30 +120,33 @@ CONFIGURE_FILE(
 )
 
 # Support for pkg-config
-set(CMAKE_INSTALL_LIBDIR lib)
-set(pkgconfig_prefix      ${CMAKE_INSTALL_PREFIX})
-set(pkgconfig_exec_prefix ${CMAKE_INSTALL_PREFIX})
-set(pkgconfig_libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
-set(pkgconfig_version     ${LIBTINS_VERSION})
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libtins.pc.in
-               ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc @ONLY)
+SET(CMAKE_INSTALL_LIBDIR lib)
+SET(pkgconfig_prefix      ${CMAKE_INSTALL_PREFIX})
+SET(pkgconfig_exec_prefix ${CMAKE_INSTALL_PREFIX})
+SET(pkgconfig_libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+SET(pkgconfig_version     ${LIBTINS_VERSION})
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libtins.pc.in
+                ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc @ONLY)
 
-install(
+INSTALL(
     FILES
     ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 
-ENABLE_TESTING()
 ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
 
 # Only include googletest if the git submodule has been fetched
 IF(EXISTS "${CMAKE_SOURCE_DIR}/googletest/CMakeLists.txt")
+    MESSAGE(STATUS "Tests have been enabled")
+    ENABLE_TESTING()
     ADD_SUBDIRECTORY(googletest)
+    ADD_SUBDIRECTORY(tests)
+ELSE()
+    MESSAGE(STATUS "googletest git submodule is absent. Run `git submodule init && git submodule update` to get it")
 ENDIF()
-ADD_SUBDIRECTORY(tests)
 
 # Add all targets to the build-tree export set
 EXPORT(
