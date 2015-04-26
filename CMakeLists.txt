@@ -18,6 +18,8 @@ IF(MSVC)
     ADD_DEFINITIONS("-D_SCL_SECURE_NO_WARNINGS=1")
 ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+    # Fix for Clang on OSX
+    ADD_DEFINITIONS("-DGTEST_HAS_TR1_TUPLE=0")
 ENDIF()
 
 # Build output checks

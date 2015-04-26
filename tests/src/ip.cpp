@@ -659,13 +659,6 @@ TEST_F(IPTest, ConstructorFromBuffer) {
     EXPECT_EQ(sec.transmission_control, 0x68656cU);
 }
 
-TEST_F(IPTest, Serialize) {
-    IP ip1(expected_packet, sizeof(expected_packet));
-    PDU::serialization_type buffer = ip1.serialize();
-    ASSERT_EQ(buffer.size(), sizeof(expected_packet));
-    EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
-}
-
 TEST_F(IPTest, StackedProtocols) {
     IP ip = IP() / TCP();
     IP::serialization_type buffer = ip.serialize();
