@@ -85,6 +85,32 @@ in order to invalidate it, you should run(as root):
 ldconfig
 ```
 
+## Running tests ##
+
+You may want to run the unit tests on your system so you make sure
+everything works. In order to do so, you need to follow these steps:
+
+```Shell
+# This will fetch the googletest submodule, needed for tests
+git submodule init
+git submodule update
+
+mkdir build
+cd build
+
+# Use any options you want
+cmake .. 
+
+# Compile tests
+make tests
+
+# Run them
+make test
+```
+
+If you find that any tests fail, please create an ticket in the
+issue tracker indicating the platform and architecture you're using.
+
 ## Examples ##
 
 You might want to have a look at the examples located  in the "examples"
