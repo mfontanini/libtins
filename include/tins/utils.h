@@ -381,7 +381,6 @@ template<class ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
     MIB_IPFORWARDTABLE *table;
     ULONG size = 0;
-    char iface_name[256];
     GetIpForwardTable(0, &size, 0);
     std::vector<uint8_t> buffer(size);
     table = (MIB_IPFORWARDTABLE*)&buffer[0];

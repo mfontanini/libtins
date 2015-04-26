@@ -201,7 +201,7 @@ DHCPv6::status_code_type DHCPv6::status_code() const {
 }
 
 bool DHCPv6::has_rapid_commit() const {
-    return search_option(RAPID_COMMIT);
+    return static_cast<bool>(search_option(RAPID_COMMIT));
 }
 
 DHCPv6::user_class_type DHCPv6::user_class() const {
@@ -225,7 +225,7 @@ uint8_t DHCPv6::reconfigure_msg() const {
 }
 
 bool DHCPv6::has_reconfigure_accept() const {
-    return search_option(RECONF_ACCEPT);
+    return static_cast<bool>(search_option(RECONF_ACCEPT));
 }
 
 DHCPv6::duid_type DHCPv6::client_id() const {

@@ -70,11 +70,7 @@ bool OfflinePacketFilter::matches_filter(const uint8_t* buffer,
     pcap_pkthdr header = {};
     header.len = total_sz;
     header.caplen = total_sz;
-    return pcap_offline_filter(
-        &filter,
-        &header,
-        buffer
-    );
+    return pcap_offline_filter(&filter, &header, buffer) != 0;
 }
 
 bool OfflinePacketFilter::matches_filter(PDU& pdu) const

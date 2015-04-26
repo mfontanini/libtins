@@ -9,8 +9,16 @@ ELSE(NOT CMAKE_BUILD_TYPE)
     MESSAGE(STATUS "Using specified '${CMAKE_BUILD_TYPE}' build type.")
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
-# Default compilation settings
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+# Compilation flags.
+IF(MSVC)
+    # Don't always use Wall, since VC's /Wall is ridiculously verbose.
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+    # Disable VC secure checks, since these are not really issues.
+    ADD_DEFINITIONS("-D_CRT_SECURE_NO_WARNINGS=1")
+    ADD_DEFINITIONS("-D_SCL_SECURE_NO_WARNINGS=1")
+ELSE()
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+ENDIF()
 
 # Build output checks
 OPTION(LIBTINS_BUILD_SHARED "Build libtins as a shared library." ON)
@@ -152,7 +160,7 @@ ADD_SUBDIRECTORY(examples)
 IF(EXISTS "${CMAKE_SOURCE_DIR}/googletest/CMakeLists.txt")
     # Enable tests and add the test directory
     MESSAGE(STATUS "Tests have been enabled")
-    SET(gtest_force_shared_crt true)
+    SET(gtest_force_shared_crt ON CACHE BOOL "Always use /MD")
     ENABLE_TESTING()
     ADD_SUBDIRECTORY(googletest)
     ADD_SUBDIRECTORY(tests)

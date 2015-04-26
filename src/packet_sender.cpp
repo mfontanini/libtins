@@ -384,7 +384,7 @@ PDU *PacketSender::recv_match_loop(const std::vector<int>& sockets, PDU &pdu, st
     #endif
     
     timeout.tv_sec  = _timeout;
-    end_time.tv_sec = time(0) + _timeout;    
+    end_time.tv_sec = static_cast<long>(time(0) + _timeout);
     end_time.tv_usec = timeout.tv_usec = _timeout_usec;
     while(true) {
         FD_ZERO(&readfds);
