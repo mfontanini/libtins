@@ -48,7 +48,11 @@ IF(WIN32)
     ADD_DEFINITIONS(-DNOMINMAX -DWIN32)
 ENDIF(WIN32)
 
+# *******************
 # Compilation options
+# *******************
+
+# C++11 support
 OPTION(LIBTINS_ENABLE_CXX11 "Compile libtins with c++11 features" OFF)
 IF(LIBTINS_ENABLE_CXX11)
     SET(HAVE_CXX11 ON)
@@ -67,6 +71,7 @@ ELSE(LIBTINS_ENABLE_CXX11)
         "as it increases the library's performance")
 ENDIF(LIBTINS_ENABLE_CXX11)
 
+# IEEE 802.11 and WPA2 decryption support
 OPTION(LIBTINS_ENABLE_DOT11 "Compile libtins with IEEE 802.11 support" ON)
 OPTION(LIBTINS_ENABLE_WPA2 "Compile libtins with WPA2 decryption features (requires OpenSSL)" ON)
 IF(LIBTINS_ENABLE_DOT11)
@@ -81,6 +86,7 @@ IF(LIBTINS_ENABLE_DOT11)
     ENDIF(LIBTINS_ENABLE_WPA2)
 ENDIF(LIBTINS_ENABLE_DOT11)
 
+# Use pcap_sendpacket to send l2 packets rather than raw sockets
 IF(WIN32)
     SET(USE_PCAP_SENDPACKET_DEFAULT ON)
 ELSE(WIN32)
@@ -110,6 +116,7 @@ IF(DOXYGEN_FOUND)
     )
 ENDIF(DOXYGEN_FOUND)
 
+# The library output directory
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
@@ -134,19 +141,28 @@ INSTALL(
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 
+# ******************
+# Add subdirectories
+# ******************
 ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
 
 # Only include googletest if the git submodule has been fetched
 IF(EXISTS "${CMAKE_SOURCE_DIR}/googletest/CMakeLists.txt")
+    # Enable tests and add the test directory
     MESSAGE(STATUS "Tests have been enabled")
+    SET(gtest_force_shared_crt true)
     ENABLE_TESTING()
     ADD_SUBDIRECTORY(googletest)
     ADD_SUBDIRECTORY(tests)
 ELSE()
     MESSAGE(STATUS "googletest git submodule is absent. Run `git submodule init && git submodule update` to get it")
 ENDIF()
+
+# **********************************
+# CMake project configuration export
+# **********************************
 
 # Add all targets to the build-tree export set
 EXPORT(
