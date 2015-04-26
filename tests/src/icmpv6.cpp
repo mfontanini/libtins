@@ -218,9 +218,8 @@ TEST_F(ICMPv6Test, PrefixInformation) {
 
 TEST_F(ICMPv6Test, RedirectHeader) {
     ICMPv6 icmp;
-    IP ip = IP("127.0.0.1") / TCP(22);
-    PDU::serialization_type buffer = ip.serialize();
-    buffer.insert(buffer.begin(), 6, 0);
+    EthernetII eth = EthernetII() / IP("8.8.8.8", "192.168.0.100") / TCP(22, 26);
+    PDU::serialization_type buffer = eth.serialize();
     icmp.redirect_header(buffer);
     EXPECT_EQ(buffer, icmp.redirect_header());
 }
