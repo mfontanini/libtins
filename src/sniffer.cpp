@@ -27,11 +27,11 @@
  *
  */
 
-#ifdef WIN32
+#ifdef _WIN32
     #define TINS_PREFIX_INTERFACE(x) ("\\Device\\NPF_" + x)
-#else // WIN32
+#else // _WIN32
     #define TINS_PREFIX_INTERFACE(x) (x)
-#endif // WIN32
+#endif // _WIN32
 
 #include <algorithm>
 #include <sstream>
@@ -191,11 +191,11 @@ void BaseSniffer::stop_sniff() {
 }
 
 int BaseSniffer::get_fd() {
-    #ifndef WIN32
+    #ifndef _WIN32
         return pcap_get_selectable_fd(handle);
     #else
         throw std::runtime_error("Method not supported in Windows platform");
-    #endif // WIN32
+    #endif // _WIN32
 }
 
 int BaseSniffer::link_type() const {
@@ -343,7 +343,7 @@ void Sniffer::set_promisc_mode(bool promisc_enabled)
 
 void Sniffer::set_rfmon(bool rfmon_enabled)
 {
-    #ifndef WIN32
+    #ifndef _WIN32
     if (pcap_can_set_rfmon(get_pcap_handle()) == 1) {
         if (pcap_set_rfmon(get_pcap_handle(), rfmon_enabled)) {
             throw runtime_error(pcap_geterr(get_pcap_handle()));

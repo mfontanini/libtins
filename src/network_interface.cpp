@@ -31,7 +31,7 @@
 #include <vector>
 #include <cstring>
 #include "macros.h"
-#ifndef WIN32
+#ifndef _WIN32
     #include <netinet/in.h>
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <ifaddrs.h>
@@ -65,7 +65,7 @@ struct InterfaceInfoCollector {
     InterfaceInfoCollector(info_type *res, int id, const char* if_name) 
     : info(res), iface_id(id), iface_name(if_name), found_hw(false), found_ip(false) { }
     
-    #ifndef WIN32
+    #ifndef _WIN32
     bool operator() (const struct ifaddrs *addr) {
         using Tins::Endian::host_to_be;
             using Tins::IPv4Address;
@@ -107,7 +107,7 @@ struct InterfaceInfoCollector {
         
         return found_ip && found_hw;
     }
-    #else // WIN32
+    #else // _WIN32
     bool operator() (const IP_ADAPTER_ADDRESSES *iface) {
         using Tins::IPv4Address;
         using Tins::Endian::host_to_be;
@@ -124,7 +124,7 @@ struct InterfaceInfoCollector {
         }
         return found_ip && found_hw;
     }
-    #endif // WIN32
+    #endif // _WIN32
 };
 /** \endcond */
 
@@ -189,12 +189,12 @@ NetworkInterface::NetworkInterface(IPv4Address ip) : iface_id(0) {
 }
 
 std::string NetworkInterface::name() const {
-    #ifndef WIN32
+    #ifndef _WIN32
     char iface_name[IF_NAMESIZE];
     if(!if_indextoname(iface_id, iface_name))
         throw std::runtime_error("Error fetching this interface's name");
     return iface_name;
-    #else // WIN32
+    #else // _WIN32
     ULONG size;
     ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
     std::vector<uint8_t> buffer(size);
@@ -208,7 +208,7 @@ std::string NetworkInterface::name() const {
         }
     }
     throw std::runtime_error("Failed to find interface name");
-    #endif // WIN32
+    #endif // _WIN32
 }
 
 NetworkInterface::Info NetworkInterface::addresses() const {
@@ -228,7 +228,7 @@ bool NetworkInterface::is_loopback() const {
 }
 
 NetworkInterface::id_type NetworkInterface::resolve_index(const char *name) {
-    #ifndef WIN32
+    #ifndef _WIN32
     id_type id = if_nametoindex(name);
     if(!id)
         throw std::runtime_error("Invalid interface");

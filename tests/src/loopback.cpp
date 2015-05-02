@@ -3,7 +3,7 @@
 #include <string>
 #include <stdint.h>
 #include "macros.h"
-#ifndef WIN32
+#ifndef _WIN32
     #include <sys/socket.h>
     #ifdef BSD
         #include <net/if_dl.h>
@@ -23,7 +23,7 @@ public:
     
 };
 
-#ifndef WIN32
+#ifndef _WIN32
 TEST_F(LoopbackTest, MatchesResponse) {
     Loopback loop1 = Loopback() / IP("192.168.0.1", "192.168.0.2") / TCP(22, 21);
     loop1.family(PF_INET);
@@ -32,4 +32,4 @@ TEST_F(LoopbackTest, MatchesResponse) {
     PDU::serialization_type buffer = loop2.serialize();
     EXPECT_TRUE(loop1.matches_response(&buffer[0], buffer.size()));
 }
-#endif // WIN32
+#endif // _WIN32

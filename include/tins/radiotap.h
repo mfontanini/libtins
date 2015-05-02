@@ -141,7 +141,7 @@ namespace Tins {
         
         /* Setters */
         
-        #ifndef WIN32
+        #ifndef _WIN32
         /**
          * \sa PDU::send()
          */

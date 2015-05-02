@@ -34,7 +34,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include "macros.h"
-#ifndef WIN32
+#ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <net/if_dl.h>
     #else
@@ -87,7 +87,7 @@ uint32_t Dot3::header_size() const {
     return sizeof(ethhdr);
 }
 
-#if !defined(WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+#if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 void Dot3::send(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)
         throw invalid_interface();
@@ -108,7 +108,7 @@ void Dot3::send(PacketSender &sender, const NetworkInterface &iface) {
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #endif
 }
-#endif // !WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 bool Dot3::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(ethhdr))
@@ -135,7 +135,7 @@ void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
     memcpy(buffer, &_eth, sizeof(ethhdr));
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 PDU *Dot3::recv_response(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)
         throw invalid_interface();
@@ -154,5 +154,5 @@ PDU *Dot3::recv_response(PacketSender &sender, const NetworkInterface &iface) {
         return sender.recv_l2(*this, 0, 0, iface);
     #endif
 }
-#endif // WIN32
+#endif // _WIN32
 }

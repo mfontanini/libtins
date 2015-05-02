@@ -39,7 +39,7 @@
 #include "macros.h"
 #include "exceptions.h"
 
-#ifndef WIN32
+#ifndef _WIN32
     #if defined(__FreeBSD_kernel__) || defined(BSD) || defined(__APPLE__)
         #include <sys/types.h>
         #include <net/if_dl.h>
@@ -171,7 +171,7 @@ uint32_t Dot11::header_size() const {
     return sz;
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 void Dot11::send(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)
         throw invalid_interface();
@@ -191,7 +191,7 @@ void Dot11::send(PacketSender &sender, const NetworkInterface &iface) {
         sender.send_l2(*this, 0, 0, iface);
     #endif
 }
-#endif // WIN32
+#endif // _WIN32
 
 void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     #ifdef TINS_DEBUG

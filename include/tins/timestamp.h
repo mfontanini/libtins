@@ -30,7 +30,7 @@
 #ifndef TINS_TIMESTAMP_H
 #define TINS_TIMESTAMP_H
 
-#ifdef WIN32
+#ifdef _WIN32
     #include <winsock2.h>
 #else
     #include <sys/time.h>
@@ -46,7 +46,7 @@ namespace Tins {
  */
 class Timestamp {
 public:
-    #ifdef WIN32
+    #ifdef _WIN32
         typedef long seconds_type;
         typedef long microseconds_type;
     #else
@@ -58,7 +58,7 @@ public:
      * \brief Constructs a Timestamp which will hold the current time.
      */
     static Timestamp current_time() {
-        #ifdef WIN32
+        #ifdef _WIN32
             //fixme
             return Timestamp();
         #else

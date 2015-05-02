@@ -53,9 +53,7 @@ IF(WIN32)
     SET(LIBTINS_OS_LIBS Ws2_32.lib Iphlpapi.lib)
 
     # Add the NOMINMAX macro to avoid Windows' min and max macros.
-    # While compiling on windows, for some reason, WIN32 is not defined,
-    # maybe we could fix this later, but it's OK for now.
-    ADD_DEFINITIONS(-DNOMINMAX -DWIN32)
+    ADD_DEFINITIONS(-DNOMINMAX)
 ENDIF(WIN32)
 
 # *******************

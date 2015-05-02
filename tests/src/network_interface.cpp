@@ -21,7 +21,7 @@ const string NetworkInterfaceTest::iface_name("lo"),
                   NetworkInterfaceTest::iface_addr("");
 #endif
 
-#ifndef WIN32
+#ifndef _WIN32
 TEST_F(NetworkInterfaceTest, ConstructorFromString) {
     // just test this doesn't throw
     NetworkInterface iface(iface_name);
@@ -62,7 +62,7 @@ TEST_F(NetworkInterfaceTest, DistinctOperator) {
     NetworkInterface iface1(iface_name), iface2;
     EXPECT_NE(iface1, iface2);
 }
-#endif // WIN32
+#endif // _WIN32
 
 // This is a more generic test that can be run on all platforms.
 // The above ones won't run on windows since there's no name for the loopback interface.

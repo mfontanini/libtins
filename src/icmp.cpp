@@ -32,7 +32,7 @@
 #ifdef TINS_DEBUG
 #include <cassert>
 #endif
-#ifndef WIN32
+#ifndef _WIN32
     #include <netinet/in.h>
 #endif
 #include "rawpdu.h"

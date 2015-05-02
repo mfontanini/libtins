@@ -34,7 +34,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include "macros.h"
-#ifndef WIN32
+#ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <net/if_dl.h>
     #else
@@ -118,7 +118,7 @@ void EthernetII::send(PacketSender &sender, const NetworkInterface &iface) {
     #if defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET) || defined(BSD) || defined(__FreeBSD_kernel__)
         // Sending using pcap_sendpacket/BSD bpf packet mode is the same here
         sender.send_l2(*this, 0, 0, iface);
-    #elif defined(WIN32)
+    #elif defined(_WIN32)
         // On Windows we can only send l2 PDUs using pcap_sendpacket
         throw std::runtime_error("LIBTINS_USE_PCAP_SENDPACKET is not enabled");
     #else
@@ -174,7 +174,7 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
 
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 PDU *EthernetII::recv_response(PacketSender &sender, const NetworkInterface &iface) {
     #if !defined(BSD) && !defined(__FreeBSD_kernel__)
         struct sockaddr_ll addr;
@@ -191,5 +191,5 @@ PDU *EthernetII::recv_response(PacketSender &sender, const NetworkInterface &ifa
         return sender.recv_l2(*this, 0, 0, iface);
     #endif
 }
-#endif // WIN32
+#endif // _WIN32
 }

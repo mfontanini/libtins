@@ -32,7 +32,7 @@
 
 // Windows likes to define macros with not-so-common-names, which break
 // this code
-#ifdef WIN32
+#ifdef _WIN32
     #ifdef TIMESTAMP_REQUEST
         #undef TIMESTAMP_REQUEST
     #endif // TIMESTAMP_REQUEST
@@ -40,7 +40,7 @@
     #ifdef TIMESTAMP_REPLY
         #undef TIMESTAMP_REPLY
     #endif // TIMESTAMP_REPLY
-#endif // WIN32
+#endif // _WIN32
 
 #include "macros.h"
 #include "pdu.h"

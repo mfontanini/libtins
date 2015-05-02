@@ -27,12 +27,12 @@
  *
  */
 
-#ifdef WIN32
+#ifdef _WIN32
     #include <ws2tcpip.h>
-#else // WIN32
+#else // _WIN32
     #include <sys/socket.h>
     #include <arpa/inet.h>
-#endif // WIN32
+#endif // _WIN32
 #include <stdexcept>
 #include <sstream>
 #include "ip_address.h"
@@ -78,7 +78,7 @@ std::string IPv4Address::to_string() const {
 }
 
 uint32_t IPv4Address::ip_to_int(const char* ip) {
-    #ifdef WIN32
+    #ifdef _WIN32
         in_addr addr;
         if(InetPtonA(AF_INET, ip, &addr)) {
             return Endian::be_to_host(addr.s_addr);
@@ -86,7 +86,7 @@ uint32_t IPv4Address::ip_to_int(const char* ip) {
         else {
             throw std::runtime_error("Invalid ip address");
         }
-    #else // WIN32
+    #else // _WIN32
         in_addr addr;
         if(inet_pton(AF_INET, ip, &addr) == 1) {
             return Endian::be_to_host(addr.s_addr);
@@ -94,7 +94,7 @@ uint32_t IPv4Address::ip_to_int(const char* ip) {
         else {
             throw std::runtime_error("Invalid ip address");
         }
-    #endif // WIN32
+    #endif // _WIN32
 }
 
 std::ostream &operator<<(std::ostream &output, const IPv4Address &addr) {

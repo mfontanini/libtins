@@ -28,7 +28,7 @@
  */
 
 #include "packet_sender.h"
-#ifndef WIN32
+#ifndef _WIN32
     #include <sys/socket.h>
     #include <sys/select.h>
     #include <sys/time.h>
@@ -73,7 +73,7 @@ namespace Tins {
 const int PacketSender::INVALID_RAW_SOCKET = -1;
 const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
 
-#ifndef WIN32
+#ifndef _WIN32
     const char *make_error_string() {
         return strerror(errno);
     }
@@ -87,7 +87,7 @@ const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
 PacketSender::PacketSender(const NetworkInterface &iface, uint32_t recv_timeout, 
   uint32_t usec) 
 : _sockets(SOCKETS_END, INVALID_RAW_SOCKET), 
-#if !defined(BSD) && !defined(WIN32) && !defined(__FreeBSD_kernel__)
+#if !defined(BSD) && !defined(_WIN32) && !defined(__FreeBSD_kernel__)
   _ether_socket(INVALID_RAW_SOCKET),
 #endif
   _timeout(recv_timeout), _timeout_usec(usec), default_iface(iface)
@@ -102,7 +102,7 @@ PacketSender::PacketSender(const NetworkInterface &iface, uint32_t recv_timeout,
 PacketSender::~PacketSender() {
     for(unsigned i(0); i < _sockets.size(); ++i) {
         if(_sockets[i] != INVALID_RAW_SOCKET) 
-        #ifndef WIN32
+        #ifndef _WIN32
             ::close(_sockets[i]);
         #else
             ::closesocket(_sockets[i]);
@@ -111,7 +111,7 @@ PacketSender::~PacketSender() {
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         for(BSDEtherSockets::iterator it = _ether_socket.begin(); it != _ether_socket.end(); ++it)
             ::close(it->second);
-    #elif !defined(WIN32)
+    #elif !defined(_WIN32)
         if(_ether_socket != INVALID_RAW_SOCKET)
             ::close(_ether_socket);
     #endif
@@ -132,9 +132,9 @@ const NetworkInterface& PacketSender::default_interface() const {
     return default_iface;
 }
 
-#if !defined(WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+#if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 
-#ifndef WIN32
+#ifndef _WIN32
 bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const {
     #if defined(BSD) || defined(__FreeBSD_kernel__)
     return _ether_socket.count(iface.id());
@@ -152,16 +152,16 @@ int PacketSender::get_ether_socket(const NetworkInterface& iface) {
     return _ether_socket;
     #endif
 }
-#endif // WIN32
+#endif // _WIN32
 
 #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 pcap_t* PacketSender::make_pcap_handle(const NetworkInterface& iface) const {
-    #ifdef WIN32
+    #ifdef _WIN32
         #define TINS_PREFIX_INTERFACE(x) ("\\Device\\NPF_" + x)
-    #else // WIN32
+    #else // _WIN32
         #define TINS_PREFIX_INTERFACE(x) (x)
-    #endif // WIN32
+    #endif // _WIN32
 
     char error[PCAP_ERRBUF_SIZE];
     pcap_t* handle = pcap_create(TINS_PREFIX_INTERFACE(iface.name()).c_str(), error);
@@ -219,7 +219,7 @@ void PacketSender::open_l2_socket(const NetworkInterface& iface) {
     }
     #endif
 }
-#endif // !WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 void PacketSender::open_l3_socket(SocketType type) {
     int socktype = find_type(type);
@@ -232,7 +232,7 @@ void PacketSender::open_l3_socket(SocketType type) {
             throw socket_open_error(make_error_string());
 
         const int on = 1;
-        #ifndef WIN32
+        #ifndef _WIN32
         typedef const void* option_ptr;
         #else
         typedef const char* option_ptr;
@@ -252,7 +252,7 @@ void PacketSender::close_socket(SocketType type, const NetworkInterface &iface) 
         if(::close(it->second) == -1)
             throw socket_close_error(make_error_string());
         _ether_socket.erase(it);
-        #elif !defined(WIN32)
+        #elif !defined(_WIN32)
         if(_ether_socket == INVALID_RAW_SOCKET)
             throw invalid_socket_type();
         if(::close(_ether_socket) == -1)
@@ -263,7 +263,7 @@ void PacketSender::close_socket(SocketType type, const NetworkInterface &iface) 
     else {
         if(type >= SOCKETS_END || _sockets[type] == INVALID_RAW_SOCKET)
             throw invalid_socket_type();
-        #ifndef WIN32
+        #ifndef _WIN32
         if(close(_sockets[type]) == -1)
             throw socket_close_error(make_error_string());
         #else
@@ -305,7 +305,7 @@ PDU *PacketSender::send_recv(PDU &pdu, const NetworkInterface &iface) {
     return pdu.recv_response(*this, iface);
 }
 
-#if !defined(WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+#if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr, 
   uint32_t len_addr, const NetworkInterface &iface) 
 {
@@ -330,9 +330,9 @@ void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr,
     #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
 }
 
-#endif // !WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
-#ifndef WIN32
+#ifndef _WIN32
 PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr, 
   uint32_t len_addr, const NetworkInterface &iface) 
 {
@@ -340,7 +340,7 @@ PDU *PacketSender::recv_l2(PDU &pdu, struct sockaddr *link_addr,
     std::vector<int> sockets(1, sock);
     return recv_match_loop(sockets, pdu, link_addr, len_addr);
 }
-#endif // WIN32
+#endif // _WIN32
 
 PDU *PacketSender::recv_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type) {
     open_l3_socket(type);
@@ -364,7 +364,7 @@ void PacketSender::send_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_ad
 }
 
 PDU *PacketSender::recv_match_loop(const std::vector<int>& sockets, PDU &pdu, struct sockaddr* link_addr, uint32_t addrlen) {
-    #ifdef WIN32
+    #ifdef _WIN32
         typedef int socket_len_type;
         typedef int recvfrom_ret_type;
     #else
@@ -422,11 +422,11 @@ PDU *PacketSender::recv_match_loop(const std::vector<int>& sockets, PDU &pdu, st
             }
         }
         struct timeval this_time, diff;
-        #ifdef WIN32
+        #ifdef _WIN32
             // fixme
         #else
             gettimeofday(&this_time, 0);
-        #endif // WIN32
+        #endif // _WIN32
         if(timeval_subtract(&diff, &end_time, &this_time))
             return 0;
         timeout.tv_sec = diff.tv_sec;

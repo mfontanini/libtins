@@ -33,7 +33,7 @@
 #include <cassert>
 #endif
 #include <algorithm>
-#ifndef WIN32
+#ifndef _WIN32
     #include <netdb.h>
     #include <sys/socket.h>
     #include <netinet/in.h>

@@ -29,7 +29,7 @@
 
 #include <algorithm>
 #include "macros.h"
-#ifndef WIN32
+#ifndef _WIN32
     #include <arpa/inet.h>
     #ifdef BSD
         #include <sys/socket.h>
@@ -64,7 +64,7 @@ IPv6Address::IPv6Address(const std::string &addr) {
 }
 
 void IPv6Address::init(const char *addr) {
-    #ifdef WIN32
+    #ifdef _WIN32
         // mingw on linux somehow doesn't have InetPton
         #ifdef _MSC_VER
             if(InetPtonA(AF_INET6, addr, address) != 1)
@@ -84,7 +84,7 @@ void IPv6Address::init(const char *addr) {
 
 std::string IPv6Address::to_string() const {
     char buffer[INET6_ADDRSTRLEN];
-    #ifdef WIN32
+    #ifdef _WIN32
         // mingw on linux somehow doesn't have InetNtop
         #ifdef _MSC_VER
             if(InetNtopA(AF_INET6, (PVOID)address, buffer, sizeof(buffer)) == 0)

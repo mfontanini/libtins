@@ -31,7 +31,7 @@
 #ifdef TINS_DEBUG
 #include <cassert>
 #endif
-#ifndef WIN32
+#ifndef _WIN32
     #include <netinet/in.h>
     #include <sys/socket.h>
 #else

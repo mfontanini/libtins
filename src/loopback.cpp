@@ -27,7 +27,7 @@
  *
  */
 
-#ifndef WIN32
+#ifndef _WIN32
     #include <sys/socket.h>
     #ifdef BSD
         #include <net/if_dl.h>
@@ -68,7 +68,7 @@ Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz)
     _family = *reinterpret_cast<const uint32_t*>(buffer);
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);
-    #ifndef WIN32
+    #ifndef _WIN32
     if(total_sz) {
         switch(_family) {
             case PF_INET:
@@ -82,7 +82,7 @@ Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz)
                 break;
         };
     }
-    #endif // WIN32
+    #endif // _WIN32
 }
     
 void Loopback::family(uint32_t family_id) {
@@ -97,13 +97,13 @@ void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU
     #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(_family));
     #endif
-    #ifndef WIN32
+    #ifndef _WIN32
     if(tins_cast<const Tins::IP*>(inner_pdu()))
         _family = PF_INET;
     else if(tins_cast<const Tins::LLC*>(inner_pdu()))
         _family = PF_LLC;
     *reinterpret_cast<uint32_t*>(buffer) = _family;
-    #endif // WIN32
+    #endif // _WIN32
 }
 
 bool Loopback::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
@@ -125,5 +125,5 @@ void Loopback::send(PacketSender &sender, const NetworkInterface &iface) {
     
     sender.send_l2(*this, 0, 0, iface);
 }
-#endif // WIN32
+#endif // _WIN32
 }

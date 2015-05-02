@@ -382,12 +382,12 @@ public:
      */
     uint32_t header_size() const;
     
-    #ifndef WIN32
+    #ifndef _WIN32
     /**
      * \sa PDU::send()
      */
     void send(PacketSender &sender, const NetworkInterface &iface);
-    #endif // WIN32
+    #endif // _WIN32
     
     /**
      * \brief Adds a new option to this Dot11 PDU.

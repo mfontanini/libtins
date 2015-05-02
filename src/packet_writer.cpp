@@ -27,7 +27,7 @@
  *
  */
  
-#ifndef WIN32
+#ifndef _WIN32
     #include <sys/time.h>
 #endif
 #include <stdexcept>
@@ -49,7 +49,7 @@ PacketWriter::~PacketWriter() {
 void PacketWriter::write(PDU &pdu) {
     PDU::serialization_type buffer = pdu.serialize();
     timeval tm;
-    #ifndef WIN32
+    #ifndef _WIN32
         gettimeofday(&tm, 0);
     #else
         // fixme

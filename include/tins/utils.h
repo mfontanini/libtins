@@ -30,7 +30,7 @@
 #ifndef TINS_UTILS_H
 #define TINS_UTILS_H
 
-#ifndef WIN32
+#ifndef _WIN32
     #include <ifaddrs.h>
 #else
     #include <winsock2.h>
@@ -248,7 +248,7 @@ namespace Tins {
          * the object to collect data from them.
          * \param functor An instance of an class which implements operator(struct ifaddrs*).
          */
-        #ifndef WIN32
+        #ifndef _WIN32
         template<class Functor> 
         void generic_iface_loop(Functor &functor) {
             struct ifaddrs *ifaddrs = 0;
@@ -261,7 +261,7 @@ namespace Tins {
             if(ifaddrs)
                 freeifaddrs(ifaddrs);
         }
-        #else // WIN32
+        #else // _WIN32
         template<class Functor> 
         void generic_iface_loop(Functor &functor) {
             ULONG size;
@@ -276,7 +276,7 @@ namespace Tins {
                 }
             }
         }
-        #endif // WIN32
+        #endif // _WIN32
         
         template <typename T>
         struct is_pdu {  
@@ -376,7 +376,7 @@ void Tins::Utils::route_entries(ForwardIterator output) {
         next += rtm->rtm_msglen;
     }
 }
-#elif defined(WIN32)
+#elif defined(_WIN32)
 template<class ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
     MIB_IPFORWARDTABLE *table;

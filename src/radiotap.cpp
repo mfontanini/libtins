@@ -37,7 +37,7 @@
 #endif
 #include <stdexcept>
 #include "macros.h"
-#ifndef WIN32
+#ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <net/if_dl.h>
     #else
@@ -430,7 +430,7 @@ uint8_t RadioTap::data_retries() const {
     return _data_retries;
 }
 
-#ifndef WIN32
+#ifndef _WIN32
 void RadioTap::send(PacketSender &sender, const NetworkInterface &iface) {
     if(!iface)
         throw invalid_interface();
