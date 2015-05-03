@@ -222,7 +222,7 @@ public:
      * \return bool indicating whether addresses are equal.
      */
     bool operator==(const HWAddress &rhs) const {
-        return std::equal(begin(), end(), rhs.begin());
+        return std::equal(begin(), end(), rhs.buffer);
     }
     
     /**
@@ -325,13 +325,16 @@ public:
      * But since some PDUs return a HWAddress<> by value, this function
      * can be used to avoid temporaries. 
      * 
-     * \param iter The output iterator in which to store this address.
+     * \param output The output iterator in which to store this address.
      * \return OutputIterator pointing to one-past the last position
      * written.
      */
     template<typename OutputIterator>
-    OutputIterator copy(OutputIterator iter) const {
-        return std::copy(begin(), end(), iter);
+    OutputIterator copy(OutputIterator output) const {
+        for (const_iterator iter = begin(); iter != end(); ++iter) {
+            *output++ = *iter;
+        }
+        return output;
     }
 private:
     template<typename OutputIterator>

@@ -502,11 +502,12 @@ private:
         }
         else {
             payload_.big_buffer_ptr = new data_type[real_size_];
-            std::copy(
-                start, 
-                end,
-                payload_.big_buffer_ptr
-            );
+            uint8_t* ptr = payload_.big_buffer_ptr;
+            while (start < end) {
+                *ptr = *start;
+                ++ptr;
+                ++start;
+            }
         }
     }
 

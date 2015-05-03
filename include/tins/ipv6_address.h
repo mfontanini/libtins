@@ -137,7 +137,7 @@ public:
      * \return bool indicating whether addresses are equal.
      */
     bool operator==(const IPv6Address &rhs) const {
-        return std::equal(begin(), end(), rhs.begin());
+        return std::equal(begin(), end(), rhs.address);
     }
     
     /**
