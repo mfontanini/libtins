@@ -328,7 +328,7 @@ const uint8_t* DNS::compose_name(const uint8_t *ptr, char *out_ptr) const {
             std::memcpy(&index, ptr, sizeof(uint16_t));
             index = Endian::be_to_host(index) & 0x3fff;
             // Check that the offset is neither too low or too high
-            if(index < 0x0c || (&records_data[0] + (index - 0x0c)) >= ptr)
+            if(index < 0x0c || (&records_data[0] + (index - 0x0c)) >= end)
                 throw malformed_packet();
             // We've probably found the end of the original domain name. Save it.
             if(end_ptr == 0)

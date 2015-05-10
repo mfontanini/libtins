@@ -12,7 +12,8 @@ using namespace Tins;
 
 class DNSTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[], dns_response1[];
+    static const uint8_t expected_packet[], dns_response1[],
+                        dns_packet1[];
     
     void test_equals(const DNS &dns1, const DNS &dns2);
     void test_equals(const DNS::Query &q1, const DNS::Query &q2);
@@ -27,7 +28,19 @@ const uint8_t DNSTest::expected_packet[] = {
 };
 
 const uint8_t DNSTest::dns_response1[] = {
-174, 73, 129, 128, 0, 1, 0, 5, 0, 0, 0, 0, 6, 103, 111, 111, 103, 108, 101, 3, 99, 111, 109, 0, 0, 15, 0, 1, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 17, 0, 50, 4, 97, 108, 116, 52, 5, 97, 115, 112, 109, 120, 1, 108, 192, 12, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 9, 0, 40, 4, 97, 108, 116, 51, 192, 47, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 9, 0, 20, 4, 97, 108, 116, 49, 192, 47, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 4, 0, 10, 192, 47, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 9, 0, 30, 4, 97, 108, 116, 50, 192, 47
+    174, 73, 129, 128, 0, 1, 0, 5, 0, 0, 0, 0, 6, 103, 111, 111, 103, 108, 
+    101, 3, 99, 111, 109, 0, 0, 15, 0, 1, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 
+    0, 17, 0, 50, 4, 97, 108, 116, 52, 5, 97, 115, 112, 109, 120, 1, 108, 
+    192, 12, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 9, 0, 40, 4, 97, 108, 
+    116, 51, 192, 47, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 9, 0, 20, 4, 
+    97, 108, 116, 49, 192, 47, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 4, 
+    0, 10, 192, 47, 192, 12, 0, 15, 0, 1, 0, 0, 2, 88, 0, 9, 0, 30, 4, 97, 
+    108, 116, 50, 192, 47
+};
+
+const uint8_t DNSTest::dns_packet1[] = {
+    2, 225, 1, 32, 0, 1, 0, 0, 0, 0, 0, 0, 7, 118, 101, 114, 115, 105, 
+    111, 110, 4, 98, 105, 110, 100, 192, 27, 0, 16, 0, 3
 };
 
 
@@ -127,6 +140,14 @@ TEST_F(DNSTest, ConstructorFromBuffer2) {
             );
         }
     }
+}
+
+TEST_F(DNSTest, ConstructorFromBuffer3) {
+    DNS dns(dns_packet1, sizeof(dns_packet1));
+    EXPECT_EQ(dns.questions_count(), 1);
+    DNS::queries_type queries = dns.queries();
+    ASSERT_EQ(1, queries.size());
+    EXPECT_EQ("version.bind", queries.front().dname());
 }
 
 TEST_F(DNSTest, NoRecords) {
