@@ -146,7 +146,7 @@ TEST_F(DNSTest, ConstructorFromBuffer3) {
     DNS dns(dns_packet1, sizeof(dns_packet1));
     EXPECT_EQ(dns.questions_count(), 1);
     DNS::queries_type queries = dns.queries();
-    ASSERT_EQ(1, queries.size());
+    ASSERT_EQ(1UL, queries.size());
     EXPECT_EQ("version.bind", queries.front().dname());
 }
 
