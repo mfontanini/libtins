@@ -27,8 +27,8 @@
  *
  */
 
-#include <pcap.h>
 #include "internals.h"
+#include <pcap.h>
 #include "ip.h"
 #include "ethernetII.h"
 #include "ieee802_3.h"
