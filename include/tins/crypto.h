@@ -232,7 +232,7 @@ namespace Crypto {
          * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
-    private:
+    protected:
         typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
         typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
         typedef std::pair<address_type, address_type> addr_pair;
