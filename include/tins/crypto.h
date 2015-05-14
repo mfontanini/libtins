@@ -157,7 +157,7 @@ namespace Crypto {
          * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
-    private:
+    protected:
         typedef std::map<address_type, std::string> passwords_type;
     
         PDU *decrypt(RawPDU &raw, const std::string &password);
