@@ -66,7 +66,15 @@ namespace Crypto {
             
             SessionKeys();
             SessionKeys(const RSNHandshake &hs, const pmk_type &pmk);
+            SessionKeys(const ptk_type &rptk, const bool &ccmp){
+                std::copy( rptk.begin(), rptk.end(), ptk.begin());
+                is_ccmp = ccmp; 
+            }
+
             SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
+            ptk_type getptk() const{return ptk;}
+            bool getccmp() const {return is_ccmp;}
+
         private:
             SNAP *ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
             SNAP *tkip_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
