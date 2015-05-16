@@ -33,23 +33,23 @@ void test_equals_expected(const Dot11Beacon &dot11) {
     EXPECT_EQ(dot11.interval(), 0x14fa);
     
     const Dot11Beacon::capability_information &info = dot11.capabilities();
-    EXPECT_EQ(info.ess(), 1);
-    EXPECT_EQ(info.ibss(), 0);
-    EXPECT_EQ(info.cf_poll(), 1);
-    EXPECT_EQ(info.cf_poll_req(), 0);
-    EXPECT_EQ(info.privacy(), 1);
-    EXPECT_EQ(info.short_preamble(), 0);
-    EXPECT_EQ(info.pbcc(), 0);
-    EXPECT_EQ(info.channel_agility(), 1);
-    EXPECT_EQ(info.spectrum_mgmt(), 0);
-    EXPECT_EQ(info.qos(), 0);
-    EXPECT_EQ(info.sst(), 0);
-    EXPECT_EQ(info.apsd(), 0);
-    EXPECT_EQ(info.radio_measurement(), 0);
-    EXPECT_EQ(info.dsss_ofdm(), 1);
-    EXPECT_EQ(info.delayed_block_ack(), 0);
-    EXPECT_EQ(info.immediate_block_ack(), 0);
-    
+    EXPECT_EQ(info.ess(), true);
+    EXPECT_EQ(info.ibss(), false);
+    EXPECT_EQ(info.cf_poll(), true);
+    EXPECT_EQ(info.cf_poll_req(), false);
+    EXPECT_EQ(info.privacy(), true);
+    EXPECT_EQ(info.short_preamble(), false);
+    EXPECT_EQ(info.pbcc(), false);
+    EXPECT_EQ(info.channel_agility(), true);
+    EXPECT_EQ(info.spectrum_mgmt(), false);
+    EXPECT_EQ(info.qos(), false);
+    EXPECT_EQ(info.sst(), false);
+    EXPECT_EQ(info.apsd(), false);
+    EXPECT_EQ(info.radio_measurement(), false);
+    EXPECT_EQ(info.dsss_ofdm(), true);
+    EXPECT_EQ(info.delayed_block_ack(), false);
+    EXPECT_EQ(info.immediate_block_ack(), false);
+
     ::test_equals_expected(static_cast<const Dot11ManagementFrame&>(dot11));
 }
 
@@ -110,9 +110,9 @@ TEST_F(Dot11BeaconTest, SeqNum) {
 
 TEST_F(Dot11BeaconTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
-    ASSERT_TRUE(dot11.get());
+    ASSERT_TRUE(dot11.get() != NULL);
     const Dot11Beacon *beacon = dot11->find_pdu<Dot11Beacon>();
-    ASSERT_TRUE(beacon);
+    ASSERT_TRUE(beacon != NULL);
     test_equals_expected(*beacon);
 }
 

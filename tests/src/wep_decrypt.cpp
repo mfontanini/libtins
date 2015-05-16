@@ -36,7 +36,7 @@ TEST_F(WEPDecryptTest, Decrypt1) {
     ASSERT_TRUE(decrypter.decrypt(dot11));
     
     ARP *arp = dot11.find_pdu<ARP>();
-    ASSERT_TRUE(arp);
+    ASSERT_TRUE(arp != NULL);
     EXPECT_EQ(arp->sender_hw_addr(), "00:0e:a6:6b:fb:69");
     EXPECT_EQ(arp->target_hw_addr(), "00:00:00:00:00:00");
     EXPECT_EQ(arp->sender_ip_addr(), "172.16.0.1");

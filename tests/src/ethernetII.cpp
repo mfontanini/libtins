@@ -154,7 +154,7 @@ TEST_F(EthernetIITest, ConstructorFromIPv6Buffer) {
 TEST_F(EthernetIITest, EliminateEthernetPadding) {
     EthernetII eth(smallip_packet, sizeof(smallip_packet));
     ASSERT_TRUE(eth.inner_pdu() != NULL);
-    ASSERT_TRUE(eth.find_pdu<IP>());
-    ASSERT_TRUE(eth.find_pdu<TCP>());
-    ASSERT_FALSE(eth.find_pdu<RawPDU>());
+    ASSERT_TRUE(eth.find_pdu<IP>() != NULL);
+    ASSERT_TRUE(eth.find_pdu<TCP>() != NULL);
+    ASSERT_FALSE(eth.find_pdu<RawPDU>() != NULL);
 }
