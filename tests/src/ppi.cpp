@@ -36,8 +36,8 @@ TEST_F(PPITest, ConstructorFromBuffer) {
     EXPECT_EQ(0, pdu.flags());
     EXPECT_EQ(84, pdu.length());
     EXPECT_EQ(105U, pdu.dlt());
-    EXPECT_TRUE(pdu.find_pdu<Dot11Data>());
-    EXPECT_TRUE(pdu.find_pdu<UDP>());
+    EXPECT_TRUE(pdu.find_pdu<Dot11Data>() != NULL);
+    EXPECT_TRUE(pdu.find_pdu<UDP>() != NULL);
 }
 
 #endif // HAVE_DOT11

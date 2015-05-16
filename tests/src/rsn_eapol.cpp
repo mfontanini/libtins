@@ -103,7 +103,7 @@ TEST_F(RSNEAPOLTest, DefaultConstructor) {
 
 TEST_F(RSNEAPOLTest, EAPOLOverSnap) {
     SNAP snap(eapol_over_snap, sizeof(eapol_over_snap));
-    EXPECT_TRUE(snap.find_pdu<RSNEAPOL>());
+    EXPECT_TRUE(snap.find_pdu<RSNEAPOL>() != NULL);
 }
 
 TEST_F(RSNEAPOLTest, ConstructorFromBuffer) {

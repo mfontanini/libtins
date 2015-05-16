@@ -106,8 +106,8 @@ TEST_F(MatchesResponseTest, DHCP) {
     EthernetII discover(dhcp_discover, sizeof(dhcp_discover));
     UDP *udp = discover.find_pdu<UDP>();
     const RawPDU *raw = discover.find_pdu<RawPDU>();
-    ASSERT_TRUE(udp);
-    ASSERT_TRUE(raw);
+    ASSERT_TRUE(udp != NULL);
+    ASSERT_TRUE(raw != NULL);
     
     udp->inner_pdu(raw->to<DHCP>());
     EXPECT_TRUE(discover.matches_response(dhcp_offer, sizeof(dhcp_offer)));
@@ -223,8 +223,8 @@ TEST_F(MatchesResponseTest, DHCPv6) {
     EthernetII pkt(request, sizeof(request));
     UDP *udp = pkt.find_pdu<UDP>();
     const RawPDU *raw = pkt.find_pdu<RawPDU>();
-    ASSERT_TRUE(udp);
-    ASSERT_TRUE(raw);
+    ASSERT_TRUE(udp != NULL);
+    ASSERT_TRUE(raw != NULL);
     
     udp->inner_pdu(raw->to<DHCPv6>());
     EXPECT_TRUE(pkt.matches_response(reply, sizeof(reply)));

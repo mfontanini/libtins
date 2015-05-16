@@ -214,13 +214,13 @@ TEST_F(RadioTapTest, ConstructorFromBuffer) {
     EXPECT_EQ(radio.rate(), 0xc);
     EXPECT_EQ(radio.flags(), 0x10);
     
-    EXPECT_TRUE(radio.present() & RadioTap::TSTF);
-    EXPECT_TRUE(radio.present() & RadioTap::RATE);
-    EXPECT_TRUE(radio.present() & RadioTap::DBM_SIGNAL);
-    EXPECT_TRUE(radio.present() & RadioTap::ANTENNA);
-    EXPECT_TRUE(radio.present() & RadioTap::CHANNEL_PLUS);
+    EXPECT_TRUE((radio.present() & RadioTap::TSTF) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::RATE) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::DBM_SIGNAL) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::ANTENNA) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::CHANNEL_PLUS) != 0);
     
-    EXPECT_TRUE(radio.flags() & RadioTap::FCS);
+    EXPECT_TRUE((radio.flags() & RadioTap::FCS) != 0);
     EXPECT_THROW(radio.channel_type(), field_not_present);
     EXPECT_THROW(radio.channel_freq(), field_not_present);
     EXPECT_EQ(radio.tsft(), 616089172U);
@@ -237,17 +237,17 @@ TEST_F(RadioTapTest, ConstructorFromBuffer1) {
     EXPECT_EQ(radio.flags(), 0x10);
     EXPECT_TRUE(radio.flags() & RadioTap::FCS);
     EXPECT_EQ(radio.antenna(), 1);
-    EXPECT_TRUE(radio.find_pdu<Dot11Beacon>());
+    EXPECT_TRUE(radio.find_pdu<Dot11Beacon>() != NULL);
 }
 
 TEST_F(RadioTapTest, ConstructorFromBuffer2) {
     RadioTap radio(expected_packet2, sizeof(expected_packet2));
     
-    EXPECT_TRUE(radio.present() & RadioTap::RATE);
-    EXPECT_TRUE(radio.present() & RadioTap::CHANNEL);
-    EXPECT_TRUE(radio.present() & RadioTap::DBM_SIGNAL);
-    EXPECT_TRUE(radio.present() & RadioTap::ANTENNA);
-    EXPECT_TRUE(radio.present() & RadioTap::RX_FLAGS);
+    EXPECT_TRUE((radio.present() & RadioTap::RATE) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::CHANNEL) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::DBM_SIGNAL) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::ANTENNA) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::RX_FLAGS) != 0);
     
     EXPECT_EQ(radio.version(), 0);
     EXPECT_EQ(radio.length(), 34);
@@ -257,31 +257,31 @@ TEST_F(RadioTapTest, ConstructorFromBuffer2) {
     EXPECT_EQ(radio.channel_type(), 192);
     EXPECT_EQ(radio.channel_freq(), 2447);
     EXPECT_EQ(radio.antenna(), 0);
-    EXPECT_TRUE(radio.find_pdu<Dot11QoSData>());
+    EXPECT_TRUE(radio.find_pdu<Dot11QoSData>() != NULL);
 }
 
 TEST_F(RadioTapTest, ConstructorFromBuffer3) {
     RadioTap radio(expected_packet3, sizeof(expected_packet3));
-    EXPECT_TRUE(radio.present() & RadioTap::RATE);
-    EXPECT_TRUE(radio.present() & RadioTap::CHANNEL);
-    EXPECT_TRUE(radio.present() & RadioTap::DBM_SIGNAL);
-    EXPECT_TRUE(radio.present() & RadioTap::ANTENNA);
-    EXPECT_TRUE(radio.present() & RadioTap::RX_FLAGS);
+    EXPECT_TRUE((radio.present() & RadioTap::RATE) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::CHANNEL) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::DBM_SIGNAL) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::ANTENNA) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::RX_FLAGS) != 0);
 
     EXPECT_EQ(0, radio.antenna());
     EXPECT_EQ(-75, radio.dbm_signal());
 
-    EXPECT_TRUE(radio.find_pdu<ARP>());
+    EXPECT_TRUE(radio.find_pdu<ARP>() != NULL);
 }
 
 TEST_F(RadioTapTest, ConstructorFromBuffer4) {
     RadioTap radio(expected_packet4, sizeof(expected_packet4));
-    EXPECT_TRUE(radio.present() & RadioTap::TSTF);
-    EXPECT_TRUE(radio.present() & RadioTap::DBM_SIGNAL);
-    EXPECT_TRUE(radio.present() & RadioTap::CHANNEL);
-    EXPECT_TRUE(radio.present() & RadioTap::ANTENNA);
-    EXPECT_TRUE(radio.present() & RadioTap::RX_FLAGS);
-    EXPECT_TRUE(radio.present() & RadioTap::MCS);
+    EXPECT_TRUE((radio.present() & RadioTap::TSTF) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::DBM_SIGNAL) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::CHANNEL) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::ANTENNA) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::RX_FLAGS) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::MCS) != 0);
 
     EXPECT_EQ(2076020709598, radio.tsft());
     EXPECT_EQ(0, radio.rx_flags());
@@ -293,14 +293,14 @@ TEST_F(RadioTapTest, ConstructorFromBuffer4) {
     EXPECT_EQ(0x00, radio.mcs().flags);
     EXPECT_EQ(0x01, radio.mcs().mcs);
 
-    EXPECT_TRUE(radio.find_pdu<Dot11Data>());
+    EXPECT_TRUE(radio.find_pdu<Dot11Data>() != NULL);
 }
 
 TEST_F(RadioTapTest, ConstructorFromBuffer5) {
     RadioTap radio(expected_packet5, sizeof(expected_packet5));
-    EXPECT_TRUE(radio.present() & RadioTap::DATA_RETRIES);
-    EXPECT_TRUE(radio.present() & RadioTap::TX_FLAGS);
-    EXPECT_TRUE(radio.present() & RadioTap::MCS);
+    EXPECT_TRUE((radio.present() & RadioTap::DATA_RETRIES) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::TX_FLAGS) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::MCS) != 0);
 
     EXPECT_EQ(0, radio.data_retries());
     EXPECT_EQ(0, radio.tx_flags());

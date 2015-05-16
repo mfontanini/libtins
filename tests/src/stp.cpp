@@ -80,8 +80,8 @@ TEST_F(STPTest, ChainedPDUs) {
     Dot3 pkt(input, sizeof(input));
     STP *stp = pkt.find_pdu<STP>();
     LLC *llc = pkt.find_pdu<LLC>();
-    ASSERT_TRUE(stp);
-    ASSERT_TRUE(llc);
+    ASSERT_TRUE(stp != NULL);
+    ASSERT_TRUE(llc != NULL);
     EXPECT_EQ(0x8001, stp->port_id());
     EXPECT_EQ(0, stp->msg_age());
     EXPECT_EQ(20, stp->max_age());

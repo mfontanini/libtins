@@ -35,7 +35,7 @@ void UDPTest::test_equals(const UDP& udp1, const UDP& udp2) {
     EXPECT_EQ(udp1.length(), udp2.length());
     EXPECT_EQ(udp1.size(), udp2.size());
     EXPECT_EQ(udp1.header_size(), udp2.header_size());
-    EXPECT_EQ(bool(udp1.inner_pdu()), bool(udp2.inner_pdu()));
+    EXPECT_EQ(udp1.inner_pdu() != NULL, udp2.inner_pdu() != NULL);
 }
 
 TEST_F(UDPTest, DefaultConstructor) {
@@ -110,7 +110,7 @@ TEST_F(UDPTest, ClonePDU) {
     udp1.length(length);
     
     UDP *udp2 = udp1.clone();
-    ASSERT_TRUE(udp2);
+    ASSERT_TRUE(udp2 != NULL);
     EXPECT_EQ(udp2->sport(), sport);
     EXPECT_EQ(udp2->dport(), dport);
     EXPECT_EQ(udp2->length(), length);

@@ -35,14 +35,14 @@ TEST_F(Dot1QTest, DefaultConstructor) {
 TEST_F(Dot1QTest, ConstructorFromBuffer) {
     EthernetII eth(expected_packet, sizeof(expected_packet));
     const Dot1Q *dot1 = eth.find_pdu<Dot1Q>();
-    ASSERT_TRUE(dot1);
+    ASSERT_TRUE(dot1 != NULL);
     EXPECT_EQ(0x806, dot1->payload_type());
     EXPECT_EQ(5, dot1->priority());
     EXPECT_EQ(1, dot1->cfi());
     EXPECT_EQ(123, dot1->id());
     
     const ARP *arp = dot1->find_pdu<ARP>();
-    ASSERT_TRUE(arp);
+    ASSERT_TRUE(arp != NULL);
     // just to check it the offset's OK
     EXPECT_EQ(ARP::hwaddress_type("00:19:06:ea:b8:c1"), arp->sender_hw_addr());
 }

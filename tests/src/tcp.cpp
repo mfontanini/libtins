@@ -201,7 +201,7 @@ void TCPTest::test_equals(const TCP &tcp1, const TCP &tcp2) {
     EXPECT_EQ(tcp1.checksum(), tcp2.checksum());
     EXPECT_EQ(tcp1.urg_ptr(), tcp2.urg_ptr());
     EXPECT_EQ(tcp1.data_offset(), tcp2.data_offset());
-    EXPECT_EQ((bool)tcp1.inner_pdu(), (bool)tcp2.inner_pdu());
+    EXPECT_EQ(tcp1.inner_pdu() != NULL, tcp2.inner_pdu() != NULL);
 }
 
 TEST_F(TCPTest, ConstructorFromBuffer) {

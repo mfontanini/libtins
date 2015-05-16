@@ -72,9 +72,9 @@ TEST_F(IPSecAHTest, DefaultConstructor) {
 
 TEST_F(IPSecAHTest, EthPacket) {
     EthernetII eth(whole_packet, sizeof(whole_packet));
-    EXPECT_TRUE(eth.find_pdu<IPSecAH>());
-    EXPECT_TRUE(eth.find_pdu<IPSecESP>());
-    EXPECT_TRUE(eth.find_pdu<RawPDU>());
+    EXPECT_TRUE(eth.find_pdu<IPSecAH>() != NULL);
+    EXPECT_TRUE(eth.find_pdu<IPSecESP>() != NULL);
+    EXPECT_TRUE(eth.find_pdu<RawPDU>() != NULL);
 }
 
 TEST_F(IPSecAHTest, ConstructorFromBuffer) {
@@ -86,8 +86,8 @@ TEST_F(IPSecAHTest, ConstructorFromBuffer) {
     EXPECT_EQ(1, ipsec.seq_number());
     ASSERT_EQ(12, ipsec.icv().size());
     EXPECT_EQ(ipsec.icv(), byte_array(icv_ptr, icv_ptr + 12));
-    EXPECT_TRUE(ipsec.find_pdu<IPSecESP>());
-    EXPECT_TRUE(ipsec.find_pdu<RawPDU>());
+    EXPECT_TRUE(ipsec.find_pdu<IPSecESP>() != NULL);
+    EXPECT_TRUE(ipsec.find_pdu<RawPDU>() != NULL);
 }
 
 TEST_F(IPSecAHTest, Serialize) {
@@ -147,7 +147,7 @@ TEST_F(IPSecESPTest, ConstructorFromBuffer) {
     IPSecESP ipsec(expected_packet, sizeof(expected_packet));
     EXPECT_EQ(0x48dac2e4, ipsec.spi());
     EXPECT_EQ(1, ipsec.seq_number());
-    EXPECT_TRUE(ipsec.find_pdu<RawPDU>());
+    EXPECT_TRUE(ipsec.find_pdu<RawPDU>() != NULL);
 }
 
 TEST_F(IPSecESPTest, SPI) {

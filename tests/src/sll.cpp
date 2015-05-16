@@ -48,7 +48,7 @@ TEST_F(SLLTest, ConstructorFromBuffer) {
     EXPECT_EQ(Constants::Ethernet::IP, sll.protocol());
     EXPECT_EQ(addr, sll.address());
     
-    ASSERT_TRUE(sll.inner_pdu());
+    ASSERT_TRUE(sll.inner_pdu() != NULL);
     EXPECT_EQ(sll.find_pdu<IP>(), sll.inner_pdu());
 }
 

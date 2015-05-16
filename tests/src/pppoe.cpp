@@ -52,7 +52,7 @@ TEST_F(PPPoETest, ConstructorFromSessionBuffer) {
     EXPECT_EQ(0U, pdu.tags().size());
     
     const RawPDU* raw = pdu.find_pdu<RawPDU>();
-    ASSERT_TRUE(raw);
+    ASSERT_TRUE(raw != NULL);
     EXPECT_EQ(21, raw->payload_size());
 }
 
@@ -67,7 +67,7 @@ TEST_F(PPPoETest, ConstructorFromFullSessionBuffer) {
     EXPECT_EQ(0U, pdu.tags().size());
     
     const RawPDU* raw = pdu.find_pdu<RawPDU>();
-    ASSERT_TRUE(raw);
+    ASSERT_TRUE(raw != NULL);
     EXPECT_EQ(21, raw->payload_size());
 }
 
@@ -81,14 +81,14 @@ TEST_F(PPPoETest, ConstructorFromBuffer) {
     EXPECT_EQ(3U, pdu.tags().size());
     
     EXPECT_EQ("", pdu.service_name());
-    ASSERT_TRUE(pdu.search_tag(PPPoE::SERVICE_NAME));
+    ASSERT_TRUE(pdu.search_tag(PPPoE::SERVICE_NAME) != NULL);
 }
 
 TEST_F(PPPoETest, StackedOnEthernet) {
     EthernetII eth = EthernetII() / PPPoE();
     PDU::serialization_type buffer = eth.serialize();
     EthernetII eth2(&buffer[0], buffer.size());
-    ASSERT_TRUE(eth2.find_pdu<PPPoE>());
+    ASSERT_TRUE(eth2.find_pdu<PPPoE>() != NULL);
 }
 
 TEST_F(PPPoETest, StackedOnEthernetSerializationWithTags) {
@@ -97,7 +97,7 @@ TEST_F(PPPoETest, StackedOnEthernetSerializationWithTags) {
     PDU::serialization_type buffer = eth.serialize();
     EthernetII eth2(&buffer[0], buffer.size());
     PPPoE* unserialized = eth2.find_pdu<PPPoE>();
-    ASSERT_TRUE(unserialized);
+    ASSERT_TRUE(unserialized != NULL);
     EXPECT_EQ(
         PPPoE::serialization_type(expected_packet, expected_packet + sizeof(expected_packet)),
         unserialized->serialize()

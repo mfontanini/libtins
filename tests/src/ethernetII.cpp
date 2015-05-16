@@ -57,7 +57,7 @@ void EthernetIITest::test_equals(const EthernetII &eth1, const EthernetII &eth2)
     EXPECT_EQ(eth1.dst_addr(), eth2.dst_addr());
     EXPECT_EQ(eth1.src_addr(), eth2.src_addr());
     EXPECT_EQ(eth1.payload_type(), eth2.payload_type());
-    EXPECT_EQ((bool)eth1.inner_pdu(), (bool)eth2.inner_pdu());
+    EXPECT_EQ(eth1.inner_pdu() != NULL, eth2.inner_pdu() != NULL);
 }
 
 TEST_F(EthernetIITest, DefaultConstructor) {
@@ -126,7 +126,7 @@ TEST_F(EthernetIITest, Serialize) {
 
 TEST_F(EthernetIITest, SerializeSmallEthernetWithPadding) {
     EthernetII eth(smallip_packet, sizeof(smallip_packet));
-    ASSERT_TRUE(eth.inner_pdu());
+    ASSERT_TRUE(eth.inner_pdu() != NULL);
     PDU::serialization_type serialized = eth.serialize();
     EXPECT_EQ(serialized.size(), sizeof(smallip_packet));
     EXPECT_TRUE(std::equal(serialized.begin(), serialized.end(), smallip_packet));
@@ -141,19 +141,19 @@ TEST_F(EthernetIITest, ConstructorFromBuffer) {
 
 TEST_F(EthernetIITest, ConstructorFromIPBuffer) {
     EthernetII eth(ip_packet, sizeof(ip_packet));
-    ASSERT_TRUE(eth.inner_pdu());
+    ASSERT_TRUE(eth.inner_pdu() != NULL);
     EXPECT_EQ(eth.find_pdu<IP>(), eth.inner_pdu());
 }
 
 TEST_F(EthernetIITest, ConstructorFromIPv6Buffer) {
     EthernetII eth(ipv6_packet, sizeof(ipv6_packet));
-    ASSERT_TRUE(eth.inner_pdu());
+    ASSERT_TRUE(eth.inner_pdu() != NULL);
     EXPECT_EQ(eth.find_pdu<IPv6>(), eth.inner_pdu());
 }
 
 TEST_F(EthernetIITest, EliminateEthernetPadding) {
     EthernetII eth(smallip_packet, sizeof(smallip_packet));
-    ASSERT_TRUE(eth.inner_pdu());
+    ASSERT_TRUE(eth.inner_pdu() != NULL);
     ASSERT_TRUE(eth.find_pdu<IP>());
     ASSERT_TRUE(eth.find_pdu<TCP>());
     ASSERT_FALSE(eth.find_pdu<RawPDU>());

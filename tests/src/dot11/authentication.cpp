@@ -93,9 +93,9 @@ TEST_F(Dot11AuthenticationTest, ClonePDU) {
 
 TEST_F(Dot11AuthenticationTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
-    ASSERT_TRUE(dot11.get());
+    ASSERT_TRUE(dot11.get() != NULL);
     const Dot11Authentication *inner = dot11->find_pdu<Dot11Authentication>();
-    ASSERT_TRUE(inner);
+    ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }
 

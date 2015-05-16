@@ -22,6 +22,6 @@ const uint8_t PKTAPTest::packet1[] = {
 TEST_F(PKTAPTest, ConstructorFromBuffer) {
     PKTAP pkt(packet1, sizeof(packet1));
     PDU* inner = pkt.inner_pdu();
-    ASSERT_TRUE(inner);
+    ASSERT_TRUE(inner != NULL);
     EXPECT_EQ(PDU::ETHERNET_II, inner->pdu_type());
 }

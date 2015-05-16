@@ -484,7 +484,7 @@ TEST_F(IPTest, Constructor) {
 
 TEST_F(IPTest, ConstructorFromFragmentedPacket) {
     IP ip(fragmented_packet, sizeof(fragmented_packet));
-    ASSERT_TRUE(ip.inner_pdu());
+    ASSERT_TRUE(ip.inner_pdu() != NULL);
     EXPECT_EQ(PDU::RAW, ip.inner_pdu()->pdu_type());
 }
 
@@ -502,8 +502,8 @@ TEST_F(IPTest, SerializeFragmentedPacket) {
 
 TEST_F(IPTest, TotalLengthZeroPacket) {
     EthernetII pkt(tot_len_zero_packet, sizeof(tot_len_zero_packet));
-    ASSERT_TRUE(pkt.find_pdu<TCP>());
-    ASSERT_TRUE(pkt.find_pdu<RawPDU>());
+    ASSERT_TRUE(pkt.find_pdu<TCP>() != NULL);
+    ASSERT_TRUE(pkt.find_pdu<RawPDU>() != NULL);
     EXPECT_EQ(8192, pkt.rfind_pdu<RawPDU>().payload_size());
 }
 
@@ -623,8 +623,8 @@ TEST_F(IPTest, AddOption) {
     const uint8_t data[] = { 0x15, 0x17, 0x94, 0x66, 0xff };
     IP::option_identifier id(IP::SEC, IP::CONTROL, 1);
     ip.add_option(IP::option(id, data, data + sizeof(data)));
-    const IP::option *opt;
-    ASSERT_TRUE((opt = ip.search_option(id)));
+    const IP::option *opt = ip.search_option(id);
+    ASSERT_TRUE(opt != NULL);
     ASSERT_EQ(opt->data_size(), sizeof(data));
     EXPECT_TRUE(memcmp(opt->data_ptr(), data, sizeof(data)) == 0);
 }
@@ -637,7 +637,7 @@ void IPTest::test_equals(const IP &ip1, const IP &ip2) {
     EXPECT_EQ(ip1.tos(), ip2.tos());
     EXPECT_EQ(ip1.ttl(), ip2.ttl());
     EXPECT_EQ(ip1.version(), ip2.version());
-    EXPECT_EQ((bool)ip1.inner_pdu(), (bool)ip2.inner_pdu());
+    EXPECT_EQ(ip1.inner_pdu() != NULL, ip2.inner_pdu() != NULL);
 }
 
 TEST_F(IPTest, ConstructorFromBuffer) {
@@ -662,15 +662,15 @@ TEST_F(IPTest, ConstructorFromBuffer) {
 TEST_F(IPTest, StackedProtocols) {
     IP ip = IP() / TCP();
     IP::serialization_type buffer = ip.serialize();
-    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<TCP>());
+    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<TCP>() != NULL);
     
     ip = IP() / UDP();
     buffer = ip.serialize();
-    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<UDP>());
+    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<UDP>() != NULL);
     
     ip = IP() / ICMP();
     buffer = ip.serialize();
-    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<ICMP>());
+    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<ICMP>() != NULL);
 }
 
 TEST_F(IPTest, SpoofedOptions) {

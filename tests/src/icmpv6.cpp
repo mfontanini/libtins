@@ -84,16 +84,16 @@ TEST_F(ICMPv6Test, ConstructorFromBuffer2) {
     EXPECT_EQ(icmp.reachable_time(), 30000U);
     EXPECT_EQ(icmp.retransmit_timer(), 1000U);
     const ICMPv6::option *opt = icmp.search_option(ICMPv6::SOURCE_ADDRESS);
-    ASSERT_TRUE(opt);
+    ASSERT_TRUE(opt != NULL);
     EXPECT_EQ(opt->data_size(), 6U);
     EXPECT_EQ(HWAddress<6>(opt->data_ptr()), "00:60:97:07:69:ea");
     
     opt = icmp.search_option(ICMPv6::MTU);
-    ASSERT_TRUE(opt);
+    ASSERT_TRUE(opt != NULL);
     EXPECT_EQ(opt->data_size(), 6U);
     
     opt = icmp.search_option(ICMPv6::PREFIX_INFO);
-    ASSERT_TRUE(opt);
+    ASSERT_TRUE(opt != NULL);
     EXPECT_EQ(opt->data_size(), 30U);
 }
 

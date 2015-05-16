@@ -96,14 +96,14 @@ TEST_F(Dot11Test, Subtype) {
 
 TEST_F(Dot11Test, ToDS) {
     Dot11 dot11;
-    dot11.to_ds(true);
-    EXPECT_EQ(dot11.to_ds(), true);
+    dot11.to_ds(1);
+    EXPECT_EQ(1, dot11.to_ds());
 }
 
 TEST_F(Dot11Test, FromDS) {
     Dot11 dot11;
-    dot11.from_ds(true);
-    EXPECT_EQ(dot11.from_ds(), true);
+    dot11.from_ds(1);
+    EXPECT_EQ(1, dot11.from_ds());
 }
 
 TEST_F(Dot11Test, MoreFrag) {
@@ -151,8 +151,8 @@ TEST_F(Dot11Test, Addr1) {
 TEST_F(Dot11Test, AddTaggedOption) {
     Dot11 dot11;
     dot11.add_option(Dot11::option(Dot11::SSID, hwaddr.begin(), hwaddr.end()));
-    const Dot11::option *option;
-    ASSERT_TRUE((option = dot11.search_option(Dot11::SSID)));
+    const Dot11::option *option = dot11.search_option(Dot11::SSID);
+    ASSERT_TRUE(option != NULL);
     EXPECT_EQ(option->data_size(), hwaddr.size());
     EXPECT_EQ(option->option(), Dot11::SSID);
     EXPECT_TRUE(std::equal(hwaddr.begin(), hwaddr.end(), option->data_ptr()));

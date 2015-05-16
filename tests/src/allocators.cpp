@@ -76,22 +76,22 @@ TEST_F(AllocatorsTest, LinkLayerPDUs) {
     );
     {
         EthernetII pkt(&link_layer_data[0], link_layer_data.size());
-        EXPECT_TRUE(pkt.find_pdu<DummyPDU<0> >());
+        EXPECT_TRUE(pkt.find_pdu<DummyPDU<0> >() != NULL);
         EXPECT_EQ(pkt.serialize(), link_layer_data);
     }
     {
         SNAP pkt(&link_layer_data[0], link_layer_data.size());
-        EXPECT_TRUE(pkt.find_pdu<DummyPDU<1> >());
+        EXPECT_TRUE(pkt.find_pdu<DummyPDU<1> >() != NULL);
         EXPECT_EQ(pkt.serialize(), link_layer_data);
     }
     {
         Dot1Q pkt(&link_layer_data[0], link_layer_data.size());
-        EXPECT_TRUE(pkt.find_pdu<DummyPDU<2> >());
+        EXPECT_TRUE(pkt.find_pdu<DummyPDU<2> >() != NULL);
         EXPECT_EQ(pkt.serialize(), link_layer_data);
     }
     {
         SLL pkt(&link_layer_data[0], link_layer_data.size());
-        EXPECT_TRUE(pkt.find_pdu<DummyPDU<3> >());
+        EXPECT_TRUE(pkt.find_pdu<DummyPDU<3> >() != NULL);
         EXPECT_EQ(pkt.serialize(), link_layer_data);
     }
 }
@@ -103,8 +103,8 @@ TEST_F(AllocatorsTest, IP) {
     );
     Allocators::register_allocator<IP, DummyPDU<0> >(255);
     EthernetII pkt(&ipv4_data[0], ipv4_data.size());
-    EXPECT_TRUE(pkt.find_pdu<IP>());
-    EXPECT_TRUE(pkt.find_pdu<DummyPDU<0> >());
+    EXPECT_TRUE(pkt.find_pdu<IP>() != NULL);
+    EXPECT_TRUE(pkt.find_pdu<DummyPDU<0> >() != NULL);
     EXPECT_EQ(pkt.serialize(), ipv4_data);
 }
 
@@ -116,8 +116,8 @@ TEST_F(AllocatorsTest, IPv6) {
     Allocators::register_allocator<IPv6, DummyPDU<0> >(250);
     {
         EthernetII pkt(&ipv6_data[0], ipv6_data.size());
-        EXPECT_TRUE(pkt.find_pdu<IPv6>());
-        EXPECT_TRUE(pkt.find_pdu<DummyPDU<0> >());
+        EXPECT_TRUE(pkt.find_pdu<IPv6>() != NULL);
+        EXPECT_TRUE(pkt.find_pdu<DummyPDU<0> >() != NULL);
         EXPECT_EQ(pkt.serialize(), ipv6_data);
     }
 }

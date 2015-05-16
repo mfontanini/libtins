@@ -66,9 +66,9 @@ TEST_F(Dot11ProbeRequestTest, ClonePDU) {
 
 TEST_F(Dot11ProbeRequestTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
-    ASSERT_TRUE(dot11.get());
+    ASSERT_TRUE(dot11.get() != NULL);
     const Dot11ProbeRequest *inner = dot11->find_pdu<Dot11ProbeRequest>();
-    ASSERT_TRUE(inner);
+    ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }
 

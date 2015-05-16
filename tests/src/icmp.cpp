@@ -243,7 +243,7 @@ void ICMPTest::test_equals(const ICMP &icmp1, const ICMP &icmp2) {
     EXPECT_EQ(icmp1.sequence(), icmp2.sequence());
     EXPECT_EQ(icmp1.pointer(), icmp2.pointer());
     EXPECT_EQ(icmp1.mtu(), icmp2.mtu());
-    EXPECT_EQ((bool)icmp1.inner_pdu(), (bool)icmp2.inner_pdu());
+    EXPECT_EQ(icmp1.inner_pdu() != NULL, icmp2.inner_pdu() != NULL);
 }
 
 TEST_F(ICMPTest, Serialize) {

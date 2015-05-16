@@ -30,11 +30,11 @@ TEST_F(DHCPv6Test, ConstructorFromBuffer) {
     DHCPv6 dhcp(expected_packet, sizeof(expected_packet));
     EXPECT_EQ(DHCPv6::SOLICIT, dhcp.msg_type());
     EXPECT_EQ(0xe828b9U, dhcp.transaction_id());
-    EXPECT_TRUE(dhcp.search_option(DHCPv6::CLIENTID));
-    EXPECT_TRUE(dhcp.search_option(DHCPv6::IA_NA));
-    EXPECT_TRUE(dhcp.search_option(DHCPv6::ELAPSED_TIME));
-    EXPECT_TRUE(dhcp.search_option(DHCPv6::OPTION_REQUEST));
-    EXPECT_FALSE(dhcp.search_option(DHCPv6::SERVERID));
+    EXPECT_TRUE(dhcp.search_option(DHCPv6::CLIENTID) != NULL);
+    EXPECT_TRUE(dhcp.search_option(DHCPv6::IA_NA) != NULL);
+    EXPECT_TRUE(dhcp.search_option(DHCPv6::ELAPSED_TIME) != NULL);
+    EXPECT_TRUE(dhcp.search_option(DHCPv6::OPTION_REQUEST) != NULL);
+    EXPECT_FALSE(dhcp.search_option(DHCPv6::SERVERID) != NULL);
 }
 
 TEST_F(DHCPv6Test, Serialize) {

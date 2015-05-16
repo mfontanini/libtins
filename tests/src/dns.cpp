@@ -63,7 +63,7 @@ void DNSTest::test_equals(const DNS &dns1, const DNS &dns2) {
     EXPECT_EQ(dns1.additional_count(), dns2.additional_count());
     EXPECT_EQ(dns1.pdu_type(), dns2.pdu_type());
     EXPECT_EQ(dns1.header_size(), dns2.header_size());
-    EXPECT_EQ(bool(dns1.inner_pdu()), bool(dns2.inner_pdu()));
+    EXPECT_EQ(dns1.inner_pdu() != NULL, dns2.inner_pdu() != NULL);
 }
 
 void DNSTest::test_equals(const DNS::Query &q1, const DNS::Query &q2) {
