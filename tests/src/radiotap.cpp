@@ -198,7 +198,7 @@ const uint8_t RadioTapTest::expected_packet5[] = {
 
 TEST_F(RadioTapTest, DefaultConstructor) {
     RadioTap radio;
-    EXPECT_TRUE(radio.flags() & RadioTap::FCS);
+    EXPECT_TRUE((radio.flags() & RadioTap::FCS) != 0);
     EXPECT_EQ(Utils::mhz_to_channel(radio.channel_freq()), 1);
     EXPECT_EQ(radio.channel_type(), 0xa0U);
     EXPECT_EQ(radio.tsft(), 0U);
@@ -235,7 +235,7 @@ TEST_F(RadioTapTest, ConstructorFromBuffer1) {
     EXPECT_EQ(radio.length(), 26);
     EXPECT_EQ(radio.rate(), 2);
     EXPECT_EQ(radio.flags(), 0x10);
-    EXPECT_TRUE(radio.flags() & RadioTap::FCS);
+    EXPECT_TRUE((radio.flags() & RadioTap::FCS) != 0);
     EXPECT_EQ(radio.antenna(), 1);
     EXPECT_TRUE(radio.find_pdu<Dot11Beacon>() != NULL);
 }
