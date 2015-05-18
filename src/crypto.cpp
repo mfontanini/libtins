@@ -266,6 +266,19 @@ SessionKeys::SessionKeys(const RSNHandshake &hs, const pmk_type &pmk) {
     is_ccmp = (hs.handshake()[3].key_descriptor() == 2);
 }
 
+SessionKeys::SessionKeys(const ptk_type &rptk, const bool &ccmp) {
+    std::copy( rptk.begin(), rptk.end(), ptk.begin());
+    is_ccmp = ccmp; 
+}
+
+const ptk_type &SessionKeys::get_ptk() const {
+    return ptk;
+}
+
+bool SessionKeys::get_ccmp() const {
+    return is_ccmp;
+}
+
 SNAP *SessionKeys::ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const {
     RawPDU::payload_type &pload = raw.payload();
     uint8_t MIC[16] = {0};
