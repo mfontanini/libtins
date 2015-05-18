@@ -69,8 +69,12 @@ namespace Crypto {
             SessionKeys(const ptk_type &rptk, const bool &ccmp); 
 
             SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
-            const ptk_type &get_ptk() const;
-            bool get_ccmp() const;
+            const ptk_type &get_ptk() const {
+                return ptk;
+            }
+            bool get_ccmp() const {
+                return is_ccmp;
+            }
 
         private:
             SNAP *ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
