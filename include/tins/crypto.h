@@ -72,8 +72,8 @@ namespace Crypto {
             }
 
             SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
-            ptk_type getptk() const{return ptk;}
-            bool getccmp() const {return is_ccmp;}
+            ptk_type& get_ptk() const{return ptk;}
+            bool get_ccmp() const {return is_ccmp;}
 
         private:
             SNAP *ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
@@ -165,6 +165,8 @@ namespace Crypto {
          * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
+        
+        /*Changed from private to protected to allow in derived class to use other member functions*/
     protected:
         typedef std::map<address_type, std::string> passwords_type;
     
@@ -240,6 +242,7 @@ namespace Crypto {
          * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
+        /*Changed from private to protected to allow in derived class to use other member functions*/
     protected:
         typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
         typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
