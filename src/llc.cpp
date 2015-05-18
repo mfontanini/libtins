@@ -190,7 +190,7 @@ void LLC::add_xid_information(uint8_t xid_id, uint8_t llc_type_class, uint8_t re
     xid[0] = xid_id;
     xid[1] = llc_type_class;
     xid[2] = receive_window;
-	information_field_length += xid.size();
+	information_field_length += static_cast<uint8_t>(xid.size());
     information_fields.push_back(xid);
 }
 

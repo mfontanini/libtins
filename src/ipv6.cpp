@@ -203,7 +203,7 @@ void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
         }
         set_last_next_header(new_flag);
     }
-    payload_length(total_sz - sizeof(_header));
+    payload_length(static_cast<uint16_t>(total_sz - sizeof(_header)));
     std::memcpy(buffer, &_header, sizeof(_header));
     buffer += sizeof(_header);
     for(headers_type::const_iterator it = ext_headers.begin(); it != ext_headers.end(); ++it) {
@@ -227,7 +227,7 @@ void IPv6::send(PacketSender &sender, const NetworkInterface &) {
 
 void IPv6::add_ext_header(const ext_header &header) {
     ext_headers.push_back(header);
-    headers_size += header.data_size() + sizeof(uint8_t) * 2;
+    headers_size += static_cast<uint32_t>(header.data_size() + sizeof(uint8_t) * 2);
 }
 
 const IPv6::ext_header *IPv6::search_header(ExtensionHeader id) const {
@@ -251,7 +251,7 @@ void IPv6::set_last_next_header(uint8_t value) {
 
 uint8_t *IPv6::write_header(const ext_header &header, uint8_t *buffer) {
     *buffer++ = header.option();
-    *buffer++ = (header.length_field() > 8) ? (header.length_field() - 8) : 0;
+    *buffer++ = static_cast<uint8_t>((header.length_field() > 8) ? (header.length_field() - 8) : 0);
     return std::copy(header.data_ptr(), header.data_ptr() + header.data_size(), buffer);
 }
 

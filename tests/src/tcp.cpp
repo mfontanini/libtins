@@ -51,7 +51,7 @@ TEST_F(TCPTest, ChecksumCheck) {
     uint16_t checksum = tcp1.checksum();
     
     PDU::serialization_type buffer = pkt1.serialize();
-    EthernetII pkt2(&buffer[0], buffer.size());
+    EthernetII pkt2(&buffer[0], (uint32_t)buffer.size());
     const TCP &tcp2 = pkt2.rfind_pdu<TCP>();
     EXPECT_EQ(checksum, tcp2.checksum());
     EXPECT_EQ(tcp1.checksum(), tcp2.checksum());
@@ -231,7 +231,7 @@ TEST_F(TCPTest, ConstructorFromBuffer) {
     
     PDU::serialization_type buffer = tcp1.serialize();
     
-    TCP tcp2(&buffer[0], buffer.size());
+    TCP tcp2(&buffer[0], (uint32_t)buffer.size());
     test_equals(tcp1, tcp2);
 }
 

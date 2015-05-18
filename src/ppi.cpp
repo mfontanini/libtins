@@ -57,7 +57,7 @@ PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
     if(options_length > 0) {
         _data.assign(buffer, buffer + options_length);
         buffer += options_length;
-        total_sz -= options_length;
+        total_sz -= static_cast<uint32_t>(options_length);
     }
     if(total_sz > 0) {
         switch(dlt()) {
@@ -92,7 +92,7 @@ PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 uint32_t PPI::header_size() const {
-    return sizeof(_header) + _data.size();
+    return static_cast<uint32_t>(sizeof(_header) + _data.size());
 }
 
 void PPI::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {

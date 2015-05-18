@@ -95,7 +95,7 @@ const DHCPv6::option *DHCPv6::search_option(OptionTypes id) const {
 uint8_t* DHCPv6::write_option(const option &opt, uint8_t* buffer) const {
     uint16_t uint16_t_buffer = Endian::host_to_be(opt.option());
     std::memcpy(buffer, &uint16_t_buffer, sizeof(uint16_t));
-    uint16_t_buffer = Endian::host_to_be<uint16_t>(opt.length_field());
+    uint16_t_buffer = Endian::host_to_be(static_cast<uint16_t>(opt.length_field()));
     std::memcpy(&buffer[sizeof(uint16_t)], &uint16_t_buffer, sizeof(uint16_t));
     return std::copy(
         opt.data_ptr(), 
@@ -632,7 +632,7 @@ DHCPv6::vendor_class_type DHCPv6::vendor_class_type::from_option(const option &o
     output.enterprise_number = Endian::be_to_host(output.enterprise_number);
     output.vendor_class_data = Internals::option2class_option_data<data_type>(
         opt.data_ptr() + sizeof(uint32_t),
-        opt.data_size() - sizeof(uint32_t)
+        static_cast<uint32_t>(opt.data_size() - sizeof(uint32_t))
     );
     
     return output;
@@ -660,7 +660,7 @@ DHCPv6::user_class_type DHCPv6::user_class_type::from_option(const option &opt)
         throw malformed_option();
     user_class_type output;
     output.data = Internals::option2class_option_data<data_type>(
-        opt.data_ptr(), opt.data_size()
+        opt.data_ptr(), static_cast<uint32_t>(opt.data_size())
     );
     return output;
 }

@@ -301,7 +301,7 @@ TEST_F(DHCPTest, Serialize) {
     ASSERT_EQ(buffer.size(), sizeof(expected_packet));
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 
-    DHCP dhcp2(&buffer[0], buffer.size());
+    DHCP dhcp2(&buffer[0], (uint32_t)buffer.size());
     test_equals(dhcp1, dhcp2);
 }
 

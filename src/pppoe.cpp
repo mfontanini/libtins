@@ -132,7 +132,7 @@ void PPPoE::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
     for(tags_type::const_iterator it = _tags.begin(); it != _tags.end(); ++it) {
         uint16_t_buffer = it->option();
         std::memcpy(buffer, &uint16_t_buffer, sizeof(uint16_t));
-        uint16_t_buffer = Endian::host_to_be<uint16_t>(it->length_field());
+        uint16_t_buffer = Endian::host_to_be(static_cast<uint16_t>(it->length_field()));
         std::memcpy(buffer + sizeof(uint16_t), &uint16_t_buffer, sizeof(uint16_t));
         std::copy(
             it->data_ptr(), 
@@ -144,7 +144,7 @@ void PPPoE::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
 }
 
 void PPPoE::add_tag(const tag &option) {
-    _tags_size += option.data_size() + sizeof(uint16_t) * 2;
+    _tags_size += static_cast<uint16_t>(option.data_size() + sizeof(uint16_t) * 2);
     _tags.push_back(option);
 }
 

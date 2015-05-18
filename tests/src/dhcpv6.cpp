@@ -283,7 +283,7 @@ TEST_F(DHCPv6Test, Client_Server_ID_DUIDLL) {
     data.lladdress.push_back(209);
     dhcp.client_id(data);
     tmp = dhcp.client_id();
-    output = DHCPv6::duid_ll::from_bytes(&tmp.data[0], tmp.data.size());
+    output = DHCPv6::duid_ll::from_bytes(&tmp.data[0], (uint32_t)tmp.data.size());
     EXPECT_EQ(data.hw_type, output.hw_type);
     EXPECT_EQ(data.lladdress, output.lladdress);
     
@@ -304,7 +304,7 @@ TEST_F(DHCPv6Test, Client_Server_ID_DUIDLLT) {
     data.lladdress.push_back(209);
     dhcp.client_id(data);
     tmp = dhcp.client_id();
-    output = DHCPv6::duid_llt::from_bytes(&tmp.data[0], tmp.data.size());
+    output = DHCPv6::duid_llt::from_bytes(&tmp.data[0], (uint32_t)tmp.data.size());
     EXPECT_EQ(data.hw_type, output.hw_type);
     EXPECT_EQ(data.time, output.time);
     EXPECT_EQ(data.lladdress, output.lladdress);
@@ -325,7 +325,7 @@ TEST_F(DHCPv6Test, Client_Server_ID_DUIDEN) {
     data.identifier.push_back(209);
     dhcp.client_id(data);
     tmp = dhcp.client_id();
-    output = DHCPv6::duid_en::from_bytes(&tmp.data[0], tmp.data.size());
+    output = DHCPv6::duid_en::from_bytes(&tmp.data[0], (uint32_t)tmp.data.size());
     EXPECT_EQ(data.enterprise_number, output.enterprise_number);
     EXPECT_EQ(data.identifier, output.identifier);
     

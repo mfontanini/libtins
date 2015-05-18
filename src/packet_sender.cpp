@@ -74,10 +74,14 @@ const int PacketSender::INVALID_RAW_SOCKET = -1;
 const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
 
 #ifndef _WIN32
+    typedef int socket_type;
+    
     const char *make_error_string() {
         return strerror(errno);
     }
 #else
+    typedef SOCKET socket_type;
+
     // fixme
     const char *make_error_string() {
         return "error";
@@ -226,7 +230,7 @@ void PacketSender::open_l3_socket(SocketType type) {
     if(socktype == -1)
         throw invalid_socket_type();
     if(_sockets[type] == INVALID_RAW_SOCKET) {
-        int sockfd;
+        socket_type sockfd;
         sockfd = socket((type == IPV6_SOCKET) ? AF_INET6 : AF_INET, SOCK_RAW, socktype);
         if (sockfd < 0)
             throw socket_open_error(make_error_string());
@@ -239,7 +243,7 @@ void PacketSender::open_l3_socket(SocketType type) {
         #endif
         setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL,(option_ptr)&on,sizeof(on));
 
-        _sockets[type] = sockfd;
+        _sockets[type] = static_cast<int>(sockfd);
     }
 }
 
@@ -314,7 +318,7 @@ void PacketSender::send_l2(PDU &pdu, struct sockaddr* link_addr,
     #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
         open_l2_socket(iface);
         pcap_t* handle = pcap_handles[iface];
-        if (pcap_sendpacket(handle, (u_char*)&buffer[0], buffer.size()) != 0) {
+        if (pcap_sendpacket(handle, (u_char*)&buffer[0], static_cast<int>(buffer.size())) != 0) {
             throw runtime_error("Failed to send packet: " + string(pcap_geterr(handle)));
         }
     #else // HAVE_PACKET_SENDER_PCAP_SENDPACKET
@@ -359,7 +363,7 @@ void PacketSender::send_l3(PDU &pdu, struct sockaddr* link_addr, uint32_t len_ad
     open_l3_socket(type);
     int sock = _sockets[type];
     PDU::serialization_type buffer = pdu.serialize();
-    if(sendto(sock, (const char*)&buffer[0], buffer.size(), 0, link_addr, len_addr) == -1)
+    if(sendto(sock, (const char*)&buffer[0], static_cast<int>(buffer.size()), 0, link_addr, len_addr) == -1)
         throw socket_write_error(make_error_string());
 }
 

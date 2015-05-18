@@ -240,7 +240,7 @@ public:
          * \param option The option to be added.
          */
         void add_tag(tag &&option) {
-            _tags_size += option.data_size() + sizeof(uint16_t) * 2;
+            _tags_size += static_cast<uint16_t>(option.data_size() + sizeof(uint16_t) * 2);
             _tags.push_back(std::move(option));
         }
     #endif

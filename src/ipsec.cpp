@@ -83,7 +83,7 @@ void IPSecAH::icv(const byte_array &new_icv) {
 }
 
 uint32_t IPSecAH::header_size() const {
-    return sizeof(_header) + _icv.size();
+    return static_cast<uint32_t>(sizeof(_header) + _icv.size());
 }
 
 void IPSecAH::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {

@@ -130,7 +130,7 @@ void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
     #ifdef TINS_DEBUG
     assert(total_sz >= header_size());
     #endif
-    _eth.length = Endian::host_to_be<uint16_t>(size() - sizeof(_eth));
+    _eth.length = Endian::host_to_be(static_cast<uint16_t>(size() - sizeof(_eth)));
 
     memcpy(buffer, &_eth, sizeof(ethhdr));
 }

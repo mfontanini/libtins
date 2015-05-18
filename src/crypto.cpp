@@ -96,7 +96,8 @@ PDU *WEPDecrypter::decrypt(RawPDU &raw, const std::string &password) {
     // Generate the key
     RC4Key key(key_buffer.begin(), key_buffer.begin() + password.size() + 3);
     rc4(pload.begin() + 4, pload.end(), key, pload.begin());
-    uint32_t crc = Utils::crc32(&pload[0], pload.size() - 8);
+    uint32_t payload_size = static_cast<uint32_t>(pload.size() - 8);
+    uint32_t crc = Utils::crc32(&pload[0], payload_size);
     if(pload[pload.size() - 8] != (crc & 0xff) ||
         pload[pload.size() - 7] != ((crc >> 8) & 0xff) ||
         pload[pload.size() - 6] != ((crc >> 16) & 0xff) ||
@@ -104,7 +105,7 @@ PDU *WEPDecrypter::decrypt(RawPDU &raw, const std::string &password) {
         return 0;
     
     try {
-        return new SNAP(&pload[0], pload.size() - 8);
+        return new SNAP(&pload[0], payload_size);
     }
     catch(std::runtime_error&) {
         return 0;

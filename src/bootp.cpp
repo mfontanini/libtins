@@ -52,7 +52,7 @@ BootP::BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size)
 }
 
 uint32_t BootP::header_size() const {
-    return sizeof(bootphdr) + _vend.size();
+    return static_cast<uint32_t>(sizeof(bootphdr) + _vend.size());
 }
 
 void BootP::opcode(uint8_t new_opcode) {

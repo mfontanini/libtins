@@ -168,7 +168,7 @@ TEST_F(RSNEAPOLTest, ConstructionTest) {
     RSNEAPOL::serialization_type buffer = eapol.serialize();
     ASSERT_EQ(sizeof(expected_packet), buffer.size());
     
-    RSNEAPOL eapol2(&buffer[0], buffer.size());
+    RSNEAPOL eapol2(&buffer[0], (uint32_t)buffer.size());
     test_equals(eapol, eapol2);
     
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));

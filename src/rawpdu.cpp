@@ -47,7 +47,7 @@ RawPDU::RawPDU(const std::string &data)
 }
 
 uint32_t RawPDU::header_size() const {
-    return _payload.size();
+    return static_cast<uint32_t>(_payload.size());
 }
 
 void RawPDU::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {

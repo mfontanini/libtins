@@ -104,7 +104,7 @@ TEST_F(SNAPTest, ConstructorFromBuffer) {
     EXPECT_EQ(0x0800, snap1.eth_type()); 
     EXPECT_EQ(1U, snap1.org_code()); 
     
-    SNAP snap2(&buffer[0], buffer.size());
+    SNAP snap2(&buffer[0], (uint32_t)buffer.size());
     test_equals(snap1, snap2);
 }
 

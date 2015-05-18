@@ -387,8 +387,9 @@ namespace Crypto {
     
     template<typename ForwardIterator>
     RC4Key::RC4Key(ForwardIterator start, ForwardIterator end) {
-        for(size_t i = 0; i < data_size; ++i)
-            data[i] = i;
+        for(size_t i = 0; i < data_size; ++i) {
+            data[i] = static_cast<uint8_t>(i);
+        }
         size_t j = 0;
         ForwardIterator iter = start;
         for(size_t i = 0; i < data_size; ++i) {

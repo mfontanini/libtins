@@ -80,10 +80,12 @@ void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     assert(total_sz >= sizeof(udphdr));
     #endif
     _udp.check = 0;
-    if(inner_pdu())
-        length(sizeof(udphdr) + inner_pdu()->size());
-    else
-        length(sizeof(udphdr));
+    if(inner_pdu()) {
+        length(static_cast<uint16_t>(sizeof(udphdr) + inner_pdu()->size()));
+    }
+    else {
+        length(static_cast<uint16_t>(sizeof(udphdr)));
+    }
     std::memcpy(buffer, &_udp, sizeof(udphdr));
     const Tins::IP *ip_packet = tins_cast<const Tins::IP*>(parent);
     if(ip_packet) {

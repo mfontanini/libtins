@@ -180,6 +180,17 @@ public:
     }
 };
 
+/**
+ * \brief Exception thrown when a payload is too large to fit
+ * into a PDUOption.
+ */
+class option_payload_too_large : public std::exception {
+public:
+    const char *what() const throw() {
+        return "Option payload too large";
+    }
+};
+
 } // Tins
 
 #endif // TINS_EXCEPTIONS_H

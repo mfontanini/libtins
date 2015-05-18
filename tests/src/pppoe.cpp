@@ -87,7 +87,7 @@ TEST_F(PPPoETest, ConstructorFromBuffer) {
 TEST_F(PPPoETest, StackedOnEthernet) {
     EthernetII eth = EthernetII() / PPPoE();
     PDU::serialization_type buffer = eth.serialize();
-    EthernetII eth2(&buffer[0], buffer.size());
+    EthernetII eth2(&buffer[0], (uint32_t)buffer.size());
     ASSERT_TRUE(eth2.find_pdu<PPPoE>() != NULL);
 }
 
@@ -95,7 +95,7 @@ TEST_F(PPPoETest, StackedOnEthernetSerializationWithTags) {
     PPPoE pdu(expected_packet, sizeof(expected_packet));
     EthernetII eth = EthernetII() / pdu;
     PDU::serialization_type buffer = eth.serialize();
-    EthernetII eth2(&buffer[0], buffer.size());
+    EthernetII eth2(&buffer[0], (uint32_t)buffer.size());
     PPPoE* unserialized = eth2.find_pdu<PPPoE>();
     ASSERT_TRUE(unserialized != NULL);
     EXPECT_EQ(

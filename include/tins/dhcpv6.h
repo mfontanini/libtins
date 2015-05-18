@@ -891,7 +891,7 @@ void class_option_data2option(InputIterator start, InputIterator end,
     uint16_t uint16_t_buffer;
     while(start != end) {
         buffer.resize(buffer.size() + sizeof(uint16_t) + start->size());
-        uint16_t_buffer = Endian::host_to_be<uint16_t>(start->size());
+        uint16_t_buffer = Endian::host_to_be(static_cast<uint16_t>(start->size()));
         std::memcpy(&buffer[index], &uint16_t_buffer, sizeof(uint16_t));
         index += sizeof(uint16_t);
         std::copy(start->begin(), start->end(), buffer.begin() + index);

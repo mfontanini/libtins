@@ -312,7 +312,7 @@ public:
      * \param data The option's data(if any).
      */
     PDUOption(option_type opt = option_type(), size_t length = 0, const data_type *data = 0) 
-    : option_(opt), size_(length) {
+    : option_(opt), size_(static_cast<uint16_t>(length)) {
         set_payload_contents(data, data + (data ? length : 0));
     }
     
@@ -397,7 +397,7 @@ public:
      */
     template<typename ForwardIterator>
     PDUOption(option_type opt, ForwardIterator start, ForwardIterator end) 
-    : option_(opt), size_(std::distance(start, end)) {
+    : option_(opt), size_(static_cast<uint16_t>(std::distance(start, end))) {
         set_payload_contents(start, end);
     }
     
@@ -417,7 +417,7 @@ public:
      * \param end The end of the option data.
      */
     template<typename ForwardIterator>
-    PDUOption(option_type opt, size_t length, ForwardIterator start, ForwardIterator end) 
+    PDUOption(option_type opt, uint16_t length, ForwardIterator start, ForwardIterator end) 
     : option_(opt), size_(length) {
         set_payload_contents(start, end);
     }
@@ -492,7 +492,11 @@ public:
 private:
     template<typename ForwardIterator>
     void set_payload_contents(ForwardIterator start, ForwardIterator end) {
-        real_size_ = std::distance(start, end);
+        size_t total_size = std::distance(start, end);
+        if (total_size > std::numeric_limits<uint16_t>::max()) {
+            throw option_payload_too_large();
+        }
+        real_size_ = static_cast<uint16_t>(total_size);
         if(real_size_ <= small_buffer_size) {
             std::copy(
                 start,

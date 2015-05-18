@@ -152,7 +152,7 @@ TEST_F(ARPTest, ConstructorFromBuffer) {
     ARP arp1(expected_packet, sizeof(expected_packet));
     PDU::serialization_type buffer = arp1.serialize();
     
-    ARP arp2(&buffer[0], buffer.size());
+    ARP arp2(&buffer[0], (uint32_t)buffer.size());
     EXPECT_EQ(arp1.opcode(), arp2.opcode());
     ASSERT_EQ(arp1.hw_addr_length(), arp2.hw_addr_length());
     EXPECT_EQ(arp1.hw_addr_format(), arp2.hw_addr_format());

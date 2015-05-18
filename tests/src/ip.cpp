@@ -662,15 +662,15 @@ TEST_F(IPTest, ConstructorFromBuffer) {
 TEST_F(IPTest, StackedProtocols) {
     IP ip = IP() / TCP();
     IP::serialization_type buffer = ip.serialize();
-    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<TCP>() != NULL);
+    EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<TCP>() != NULL);
     
     ip = IP() / UDP();
     buffer = ip.serialize();
-    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<UDP>() != NULL);
+    EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<UDP>() != NULL);
     
     ip = IP() / ICMP();
     buffer = ip.serialize();
-    EXPECT_TRUE(IP(&buffer[0], buffer.size()).find_pdu<ICMP>() != NULL);
+    EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<ICMP>() != NULL);
 }
 
 TEST_F(IPTest, SpoofedOptions) {

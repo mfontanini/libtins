@@ -74,9 +74,9 @@ uint32_t Dot11Data::init(const uint8_t *buffer, uint32_t total_sz) {
             throw malformed_packet();
         _addr4 = buffer;
         buffer += _addr4.size();
-        total_sz -= _addr4.size();
+        total_sz -= static_cast<uint32_t>(_addr4.size());
     }
-    return buffer - start_ptr;
+    return static_cast<uint32_t>(buffer - start_ptr);
 }
 
 Dot11Data::Dot11Data(const address_type &dst_hw_addr, 
@@ -128,7 +128,7 @@ uint32_t Dot11Data::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
     memcpy(buffer, &_ext_header, sizeof(_ext_header));
     buffer += sizeof(_ext_header);
     if (from_ds() && to_ds()) {
-        written += _addr4.size();
+        written += static_cast<uint32_t>(_addr4.size());
         _addr4.copy(buffer);
     }
     return written;

@@ -72,9 +72,13 @@ DNS::DNS(const uint8_t *buffer, uint32_t total_sz)
                 throw malformed_packet();
             buffer += sizeof(uint16_t) * 2;
         }
-        answers_idx = buffer - prev_start;
-        authority_idx = find_section_end(&records_data[0] + answers_idx, answers_count()) - &records_data[0];
-        additional_idx = find_section_end(&records_data[0] + authority_idx, authority_count()) - &records_data[0];
+        answers_idx = static_cast<uint32_t>(buffer - prev_start);
+        authority_idx = static_cast<uint32_t>(
+            find_section_end(&records_data[0] + answers_idx, answers_count()) - &records_data[0]
+        );
+        additional_idx = static_cast<uint32_t>(
+            find_section_end(&records_data[0] + authority_idx, authority_count()) - &records_data[0]
+        );
     }
 }
 
@@ -118,7 +122,7 @@ const uint8_t *DNS::find_section_end(const uint8_t *ptr, const uint32_t num_reco
 }
 
 uint32_t DNS::header_size() const {
-    return sizeof(dns) + records_data.size();
+    return static_cast<uint32_t>(sizeof(dns) + records_data.size());
 }
 
 void DNS::id(uint16_t new_id) {
@@ -180,7 +184,7 @@ void DNS::add_query(const Query &query) {
     uint16_t_buffer = Endian::host_to_be<uint16_t>(query.query_class());
     std::memcpy(&new_str[new_str.size() - 2], &uint16_t_buffer, sizeof(uint16_t));
 
-    uint32_t offset = new_str.size(), threshold = answers_idx;
+    uint32_t offset = static_cast<uint32_t>(new_str.size()), threshold = answers_idx;
     update_records(answers_idx, answers_count(), threshold, offset);
     update_records(authority_idx, authority_count(), threshold, offset);
     update_records(additional_idx, additional_count(), threshold, offset);
@@ -189,9 +193,7 @@ void DNS::add_query(const Query &query) {
         new_str.begin(),
         new_str.end()
     );
-    dns.questions = Endian::host_to_be<uint16_t>(
-        questions_count() + 1
-    );
+    dns.questions = Endian::host_to_be(static_cast<uint16_t>(questions_count() + 1));
 }
 
 void DNS::add_answer(const Resource &resource) {
@@ -211,7 +213,7 @@ void DNS::add_record(const Resource &resource, const sections_type &sections) {
     IPv6Address v6_addr;
     std::string buffer = encode_domain_name(resource.dname()), encoded_data;
     // By default the data size is the length of the data field.
-    uint32_t data_size = resource.data().size();
+    size_t data_size = resource.data().size();
     if(resource.type() == A) {
         v4_addr = resource.data();
         data_size = 4;
@@ -224,14 +226,15 @@ void DNS::add_record(const Resource &resource, const sections_type &sections) {
         encoded_data = encode_domain_name(resource.data());
         data_size = encoded_data.size();
     }
-    uint32_t offset = buffer.size() + sizeof(uint16_t) * 3 + sizeof(uint32_t) + data_size, 
+    size_t offset = buffer.size() + sizeof(uint16_t) * 3 + sizeof(uint32_t) + data_size, 
             threshold = sections.empty() ? records_data.size() : *sections.front().first;
     // Skip the preference field
     if(resource.type() == MX) {
         offset += sizeof(uint16_t);
     }
     for(size_t i = 0; i < sections.size(); ++i) {
-        update_records(*sections[i].first, sections[i].second, threshold, offset);
+        update_records(*sections[i].first, sections[i].second, 
+            static_cast<uint32_t>(threshold), static_cast<uint32_t>(offset));
     }
     
     records_data.insert(
@@ -257,8 +260,8 @@ void DNS::add_record(const Resource &resource, const sections_type &sections) {
     uint32_t_buffer = Endian::host_to_be(resource.ttl());
     std::memcpy(ptr, &uint32_t_buffer, sizeof(uint32_t));
     ptr += sizeof(uint32_t);
-    uint16_t_buffer = Endian::host_to_be<uint16_t>(
-        data_size + (resource.type() == MX ? 2 : 0)
+    uint16_t_buffer = Endian::host_to_be(
+        static_cast<uint16_t>(data_size + (resource.type() == MX ? 2 : 0))
     );
     std::memcpy(ptr, &uint16_t_buffer, sizeof(uint16_t));
     ptr += sizeof(uint16_t);
@@ -301,11 +304,11 @@ std::string DNS::encode_domain_name(const std::string &dn) {
     size_t last_index(0), index;
     if(!dn.empty()) {
         while((index = dn.find('.', last_index+1)) != string::npos) {
-            output.push_back(index - last_index);
+            output.push_back(static_cast<char>(index - last_index));
             output.append(dn.begin() + last_index, dn.begin() + index);
             last_index = index + 1; //skip dot
         }
-        output.push_back(dn.size() - last_index);
+        output.push_back(static_cast<char>(dn.size() - last_index));
         output.append(dn.begin() + last_index, dn.end());
     }
     output.push_back('\0');

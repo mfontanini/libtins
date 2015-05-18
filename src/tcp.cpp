@@ -59,7 +59,7 @@ TCP::TCP(const uint8_t *buffer, uint32_t total_sz)
     if(data_offset() * sizeof(uint32_t) > total_sz || data_offset() * sizeof(uint32_t) < sizeof(tcphdr)) 
         throw malformed_packet();
     const uint8_t *header_end = buffer + (data_offset() * sizeof(uint32_t));
-    total_sz = total_sz - (header_end - buffer);
+    total_sz = static_cast<uint32_t>(total_sz - (header_end - buffer));
     buffer += sizeof(tcphdr);
     
     _total_options_size = 0;
@@ -338,7 +338,7 @@ uint8_t *TCP::write_option(const option &opt, uint8_t *buffer) {
     }
     else {
         buffer[0] = opt.option();
-        buffer[1] = opt.length_field();
+        buffer[1] = static_cast<uint8_t>(opt.length_field());
         // only add the identifier and size field sizes if the length
         // field hasn't been spoofed.
         if(opt.length_field() == opt.data_size())
@@ -355,7 +355,7 @@ void TCP::internal_add_option(const option &opt) {
     if(opt.data_size() || opt.option() == SACK_OK)
         _options_size += sizeof(uint8_t);
         
-    _options_size += opt.data_size();
+    _options_size += static_cast<uint16_t>(opt.data_size());
     
     padding = _options_size & 3;
     _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;

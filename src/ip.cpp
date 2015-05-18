@@ -101,7 +101,7 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
                 _ip_options.push_back(option(opt_type));
             
             ptr_buffer += _ip_options.back().data_size() + 1;
-            _options_size += _ip_options.back().data_size() + 2;
+            _options_size += static_cast<uint16_t>(_ip_options.back().data_size() + 2);
         }
         else {
             _ip_options.push_back(option(opt_type));
@@ -298,7 +298,7 @@ void IP::add_option(const option &opt) {
 }
 
 void IP::internal_add_option(const option &opt) {
-    _options_size += 1 + opt.data_size();
+    _options_size += static_cast<uint16_t>(1 + opt.data_size());
     uint8_t padding = _options_size % 4;
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
 }
@@ -317,7 +317,7 @@ uint8_t* IP::write_option(const option &opt, uint8_t* buffer) {
     if(*buffer <= 1)
         return ++buffer;
     buffer++;
-    *buffer = opt.length_field();
+    *buffer = static_cast<uint8_t>(opt.length_field());
     if(opt.data_size() == opt.length_field())
         *buffer += 2;
     buffer++;
@@ -394,7 +394,7 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
             total_sz = Endian::host_to_be<uint16_t>(total_sz);
     #endif
     tot_len(total_sz);
-    head_len(my_sz / sizeof(uint32_t));
+    head_len(static_cast<uint8_t>(my_sz / sizeof(uint32_t)));
 
     memcpy(buffer, &_ip, sizeof(_ip));
 

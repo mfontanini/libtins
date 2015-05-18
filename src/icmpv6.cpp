@@ -260,12 +260,12 @@ void ICMPv6::add_option(const option &option) {
 }
 
 void ICMPv6::internal_add_option(const option &option) {
-    _options_size += option.data_size() + sizeof(uint8_t) * 2;
+    _options_size += static_cast<uint32_t>(option.data_size() + sizeof(uint8_t) * 2);
 }
 
 uint8_t *ICMPv6::write_option(const option &opt, uint8_t *buffer) {
     *buffer++ = opt.option();
-    *buffer++ = (opt.length_field() + sizeof(uint8_t) * 2) / 8;
+    *buffer++ = static_cast<uint8_t>((opt.length_field() + sizeof(uint8_t) * 2) / 8);
     return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
 }
 
@@ -379,7 +379,7 @@ void ICMPv6::add_addr_list(uint8_t type, const addr_list_type &value) {
 }
 
 void ICMPv6::rsa_signature(const rsa_sign_type &value) {
-    uint32_t total_sz =  4 + sizeof(value.key_hash) + value.signature.size();
+    uint32_t total_sz = static_cast<uint32_t>(4 + sizeof(value.key_hash) + value.signature.size());
     uint8_t padding = 8 - total_sz % 8;
     if(padding == 8)
         padding = 0;
@@ -492,7 +492,7 @@ void ICMPv6::handover_key_request(const handover_key_req_type &value) {
 }
 
 void ICMPv6::handover_key_reply(const handover_key_reply_type &value) {
-    const uint32_t data_size = value.key.size() + 2 + sizeof(uint16_t);
+    const uint32_t data_size = static_cast<uint32_t>(value.key.size() + 2 + sizeof(uint16_t));
     uint8_t padding = 8 - (data_size+2) % 8;
     if(padding == 8)
         padding = 0;
@@ -511,7 +511,7 @@ void ICMPv6::handover_key_reply(const handover_key_reply_type &value) {
 }
 
 void ICMPv6::handover_assist_info(const handover_assist_info_type &value) {
-    const uint32_t data_size = value.hai.size() + 2;
+    const uint32_t data_size = static_cast<uint32_t>(value.hai.size() + 2);
     uint8_t padding = 8 - (data_size+2) % 8;
     if(padding == 8)
         padding = 0;
@@ -528,7 +528,7 @@ void ICMPv6::handover_assist_info(const handover_assist_info_type &value) {
 }
 
 void ICMPv6::mobile_node_identifier(const mobile_node_id_type &value) {
-    const uint32_t data_size = value.mn.size() + 2;
+    const uint32_t data_size = static_cast<uint32_t>(value.mn.size() + 2);
     uint8_t padding = 8 - (data_size+2) % 8;
     if(padding == 8)
         padding = 0;
@@ -555,7 +555,7 @@ void ICMPv6::dns_search_list(const dns_search_list_type &value) {
         do {
             index = it->find('.', prev);
             std::string::const_iterator end = (index == std::string::npos) ? it->end() : (it->begin() + index);
-            buffer.push_back(end - (it->begin() + prev));
+            buffer.push_back(static_cast<uint8_t>(end - (it->begin() + prev)));
             buffer.insert(buffer.end(), it->begin() + prev, end);
             prev = index + 1;
         } while(index != std::string::npos);

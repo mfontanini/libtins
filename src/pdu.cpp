@@ -95,7 +95,7 @@ PDU *PDU::release_inner_pdu() {
 
 PDU::serialization_type PDU::serialize() {
     std::vector<uint8_t> buffer(size());
-    serialize(&buffer[0], buffer.size(), 0);
+    serialize(&buffer[0], static_cast<uint32_t>(buffer.size()), 0);
     
     // Copy elision, do your magic
     return buffer;

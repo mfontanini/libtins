@@ -51,7 +51,7 @@ TEST_F(UDPTest, ChecksumCheck) {
     uint16_t checksum = udp1.checksum();
     
     PDU::serialization_type buffer = pkt1.serialize();
-    EthernetII pkt2(&buffer[0], buffer.size());
+    EthernetII pkt2(&buffer[0], (uint32_t)buffer.size());
     const UDP &udp2 = pkt2.rfind_pdu<UDP>();
     EXPECT_EQ(checksum, udp2.checksum());
     EXPECT_EQ(udp1.checksum(), udp2.checksum());
@@ -141,7 +141,7 @@ TEST_F(UDPTest, ConstructorFromBuffer) {
     EXPECT_EQ(udp1.sport(), 0xf51a);
     EXPECT_EQ(udp1.length(), 8);
     
-    UDP udp2(&buffer[0], buffer.size());
+    UDP udp2(&buffer[0], (uint32_t)buffer.size());
     EXPECT_EQ(udp1.dport(), udp2.dport());
     EXPECT_EQ(udp1.sport(), udp2.sport());
     EXPECT_EQ(udp1.length(), udp2.length());

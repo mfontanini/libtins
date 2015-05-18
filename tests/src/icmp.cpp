@@ -282,7 +282,7 @@ TEST_F(ICMPTest, ConstructorFromBuffer) {
                 break;
         }
         
-        ICMP icmp2(&buffer[0], buffer.size());
+        ICMP icmp2(&buffer[0], (uint32_t)buffer.size());
         test_equals(icmp1, icmp2);
     }
 }

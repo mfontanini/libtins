@@ -157,7 +157,7 @@ namespace Tins {
          * \return uint32_t containing the payload size.
          */
         uint32_t payload_size() const {
-            return _payload.size();
+            return static_cast<uint32_t>(_payload.size());
         }
 
         /**
@@ -184,7 +184,7 @@ namespace Tins {
          */
         template<typename T>
         T to() const {
-            return T(&_payload[0], _payload.size());
+            return T(&_payload[0], static_cast<uint32_t>(_payload.size()));
         }
         
         /**

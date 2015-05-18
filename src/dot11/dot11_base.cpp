@@ -103,7 +103,7 @@ void Dot11::add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t *val) 
 }
 
 void Dot11::internal_add_option(const option &opt) {
-    _options_size += opt.data_size() + sizeof(uint8_t) * 2;
+    _options_size += static_cast<uint32_t>(opt.data_size() + sizeof(uint8_t) * 2);
 }
 
 void Dot11::add_option(const option &opt) {
@@ -212,7 +212,7 @@ void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *p
     #endif
     for(std::list<option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         *(buffer++) = it->option();
-        *(buffer++) = it->length_field();
+        *(buffer++) = static_cast<uint8_t>(it->length_field());
         std::copy(it->data_ptr(), it->data_ptr() + it->data_size(), buffer);
         buffer += it->data_size();
     }

@@ -48,7 +48,7 @@ RSNInformation::RSNInformation() : _version(1), _capabilities(0) {
 }
 
 RSNInformation::RSNInformation(const serialization_type &buffer) {
-    init(&buffer[0], buffer.size());
+    init(&buffer[0], static_cast<uint32_t>(buffer.size()));
 }
 
 RSNInformation::RSNInformation(const uint8_t *buffer, uint32_t total_sz) {
@@ -124,12 +124,12 @@ void RSNInformation::capabilities(uint16_t cap) {
 }
 
 RSNInformation::serialization_type RSNInformation::serialize() const {
-    uint32_t size = sizeof(_version) + sizeof(_capabilities) + sizeof(uint32_t);
+    size_t size = sizeof(_version) + sizeof(_capabilities) + sizeof(uint32_t);
     size += (sizeof(uint16_t) << 1); // 2 lists count.
     size += sizeof(uint32_t) * (_akm_cyphers.size() + _pairwise_cyphers.size());
 
-    uint16_t pairwise_cyphers_size = _pairwise_cyphers.size();
-    uint16_t akm_cyphers_size = _akm_cyphers.size();
+    const size_t pairwise_cyphers_size = _pairwise_cyphers.size();
+    const size_t akm_cyphers_size = _akm_cyphers.size();
     uint16_t capabilities = Endian::host_to_le(_capabilities);
     uint16_t version = Endian::host_to_le(_version);
     
@@ -167,7 +167,7 @@ RSNInformation RSNInformation::wpa2_psk() {
 RSNInformation RSNInformation::from_option(const PDUOption<uint8_t, Dot11> &opt) {
     if(opt.data_size() < sizeof(uint16_t) * 2 + sizeof(uint32_t))
         throw malformed_option();
-    return RSNInformation(opt.data_ptr(), opt.data_size());
+    return RSNInformation(opt.data_ptr(), static_cast<uint32_t>(opt.data_size()));
 }
 }
 

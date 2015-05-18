@@ -72,13 +72,13 @@ PDU *IPv4Stream::allocate_pdu() const {
     for(fragments_type::const_iterator it = fragments.begin(); it != fragments.end(); ++it) {
         if(expected != it->offset())
             return 0;
-        expected = it->offset() + it->payload().size();
+        expected = static_cast<uint16_t>(it->offset() + it->payload().size());
         buffer.insert(buffer.end(), it->payload().begin(), it->payload().end());
     }
     return Internals::pdu_from_flag(
         static_cast<Constants::IP::e>(transport_proto),
         buffer.empty() ? 0 : &buffer[0],
-        buffer.size()
+        static_cast<uint32_t>(buffer.size())
     );
 }
 

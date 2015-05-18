@@ -123,7 +123,7 @@ TEST_F(IPv6Test, Serialize) {
         IPv6::serialization_type(expected_packet1, expected_packet1 + sizeof(expected_packet1)),
         buffer
     );
-    IPv6 ip2(&buffer[0], buffer.size());
+    IPv6 ip2(&buffer[0], (uint32_t)buffer.size());
     test_equals(ip1, ip2);
 }
 

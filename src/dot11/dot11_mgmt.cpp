@@ -109,12 +109,12 @@ uint32_t Dot11ManagementFrame::write_ext_header(uint8_t *buffer, uint32_t total_
 }
 
 void Dot11ManagementFrame::ssid(const std::string &new_ssid) {
-    add_tagged_option(Dot11::SSID, new_ssid.size(), (const uint8_t*)new_ssid.c_str());
+    add_tagged_option(Dot11::SSID, static_cast<uint8_t>(new_ssid.size()), (const uint8_t*)new_ssid.c_str());
 }
 
 void Dot11ManagementFrame::rsn_information(const RSNInformation& info) {
     RSNInformation::serialization_type buffer = info.serialize();
-    add_tagged_option(RSN, buffer.size(), &buffer[0]);
+    add_tagged_option(RSN, static_cast<uint8_t>(buffer.size()), &buffer[0]);
 }
 
 uint8_t *Dot11ManagementFrame::serialize_rates(const rates_type &rates) {
@@ -139,13 +139,13 @@ Dot11ManagementFrame::rates_type Dot11ManagementFrame::deserialize_rates(const o
 
 void Dot11ManagementFrame::supported_rates(const rates_type &new_rates) {
     uint8_t *buffer = serialize_rates(new_rates);
-    add_tagged_option(SUPPORTED_RATES, new_rates.size(), buffer);
+    add_tagged_option(SUPPORTED_RATES, static_cast<uint8_t>(new_rates.size()), buffer);
     delete[] buffer;
 }
 
 void Dot11ManagementFrame::extended_supported_rates(const rates_type &new_rates) {
     uint8_t *buffer = serialize_rates(new_rates);
-    add_tagged_option(EXT_SUPPORTED_RATES, new_rates.size(), buffer);
+    add_tagged_option(EXT_SUPPORTED_RATES, static_cast<uint8_t>(new_rates.size()), buffer);
     delete[] buffer;
 }
 
@@ -167,7 +167,7 @@ void Dot11ManagementFrame::supported_channels(const channels_type &new_channels)
         *(ptr++) = it->first;
         *(ptr++) = it->second;
     }
-    add_tagged_option(SUPPORTED_CHANNELS, buffer.size(), &buffer[0]);
+    add_tagged_option(SUPPORTED_CHANNELS, static_cast<uint8_t>(buffer.size()), &buffer[0]);
 }
 
 void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
@@ -183,7 +183,7 @@ void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, ui
 }
 
 void Dot11ManagementFrame::request_information(const request_info_type elements) {
-    add_tagged_option(REQUEST_INFORMATION, elements.size(), &elements[0]);
+    add_tagged_option(REQUEST_INFORMATION, static_cast<uint8_t>(elements.size()), &elements[0]);
 }
 
 void Dot11ManagementFrame::fh_parameter_set(const fh_params_set &fh_params) {
@@ -218,9 +218,10 @@ void Dot11ManagementFrame::ibss_parameter_set(uint16_t atim_window) {
 }
 
 void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params &params) {
-    uint8_t sz = address_type::address_size + sizeof(uint8_t) + sizeof(uint8_t) * 2 * params.channel_map.size();
-    uint8_t* buffer = new uint8_t[sz];
-    uint8_t* ptr_buffer = buffer;
+    const size_t sz = address_type::address_size + sizeof(uint8_t) + 
+                        sizeof(uint8_t) * 2 * params.channel_map.size();
+    std::vector<uint8_t> buffer(sz);
+    uint8_t* ptr_buffer = &buffer[0];
 
     ptr_buffer = params.dfs_owner.copy(ptr_buffer);
     *(ptr_buffer++) = params.recovery_interval;
@@ -229,9 +230,7 @@ void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params &params) {
         *(ptr_buffer++) = it->second;
     }
 
-    add_tagged_option(IBSS_DFS, sz, buffer);
-
-    delete[] buffer;
+    add_tagged_option(IBSS_DFS, static_cast<uint8_t>(buffer.size()), &buffer[0]);
 }
 
 void Dot11ManagementFrame::country(const country_params &params) {
@@ -251,7 +250,7 @@ void Dot11ManagementFrame::country(const country_params &params) {
         *(ptr++) = params.number_channels[i];
         *(ptr++) = params.max_transmit_power[i];
     }
-    add_tagged_option(COUNTRY, sz, &buffer[0]);
+    add_tagged_option(COUNTRY, static_cast<uint8_t>(sz), &buffer[0]);
 }
 
 void Dot11ManagementFrame::fh_parameters(uint8_t prime_radix, uint8_t number_channels) {
@@ -271,7 +270,7 @@ void Dot11ManagementFrame::fh_pattern_table(const fh_pattern_type &params) {
     byte_array::const_iterator it(params.random_table.begin());
     for(; it != params.random_table.end(); ++it)
         *(ptr++) = *it;
-    add_tagged_option(HOPPING_PATTERN_TABLE, data.size(), &data[0]);
+    add_tagged_option(HOPPING_PATTERN_TABLE, static_cast<uint8_t>(data.size()), &data[0]);
 }
 
 void Dot11ManagementFrame::power_constraint(uint8_t local_power_constraint) {
@@ -296,7 +295,6 @@ void Dot11ManagementFrame::quiet(const quiet_type &data) {
     ptr_buffer[0] = Endian::host_to_le(data.quiet_duration);
     ptr_buffer[1] = Endian::host_to_le(data.quiet_offset);
     add_tagged_option(QUIET, sizeof(buffer), buffer);
-
 }
 
 void Dot11ManagementFrame::tpc_report(uint8_t transmit_power, uint8_t link_margin) {
@@ -346,13 +344,13 @@ void Dot11ManagementFrame::tim(const tim_type &data) {
         data.partial_virtual_bitmap.end(),
         &buffer[3]
     );
-    add_tagged_option(TIM, buffer.size(), &buffer[0]);
+    add_tagged_option(TIM, static_cast<uint8_t>(buffer.size()), &buffer[0]);
 }
 
 void Dot11ManagementFrame::challenge_text(const std::string &text) {
     add_tagged_option(
         CHALLENGE_TEXT, 
-        text.size(),
+        static_cast<uint8_t>(text.size()),
         (const uint8_t*)text.c_str()
     );
 }
@@ -364,7 +362,7 @@ void Dot11ManagementFrame::vendor_specific(const vendor_specific_type &data) {
         data.data.end(),
         data.oui.copy(buffer.begin())
     );
-    add_tagged_option(VENDOR_SPECIFIC, buffer.size(), &buffer[0]);
+    add_tagged_option(VENDOR_SPECIFIC, static_cast<uint8_t>(buffer.size()), &buffer[0]);
 }
 
 // Getters
@@ -475,7 +473,8 @@ Dot11ManagementFrame::vendor_specific_type Dot11ManagementFrame::vendor_specific
     const Dot11::option *option = search_option(VENDOR_SPECIFIC);
     if(!option || option->data_size() < 3)
         throw option_not_found();
-    return vendor_specific_type::from_bytes(option->data_ptr(), option->data_size());
+    return vendor_specific_type::from_bytes(option->data_ptr(), 
+        static_cast<uint32_t>(option->data_size()));
 }
 
 Dot11ManagementFrame::vendor_specific_type 

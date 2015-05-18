@@ -194,7 +194,7 @@ uint32_t RadioTap::find_extra_flag_fields_size(const uint8_t* buffer, uint32_t t
         ++ptr;
     }
 
-    return (const uint8_t*)ptr - buffer;
+    return static_cast<uint32_t>((const uint8_t*)ptr - buffer);
 }
 
 // Setter for RadioTap fields
