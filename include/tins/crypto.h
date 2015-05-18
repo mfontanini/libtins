@@ -170,7 +170,11 @@ namespace Crypto {
          */
         bool decrypt(PDU &pdu);
         
-        /*Changed from private to protected to allow in derived class to use other member functions*/
+        /**
+         * Changed access modifier from private to protected to overload decrypt member function.
+         * In overloaded decrypt member function, we can use other members also to 
+         * process packets 
+         */
     protected:
         typedef std::map<address_type, std::string> passwords_type;
     
@@ -246,7 +250,12 @@ namespace Crypto {
          * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
-        /*Changed from private to protected to allow in derived class to use other member functions*/
+        
+         /**
+         * Changed access modifier from private to protected to overload decrypt member function.
+         * In overloaded decrypt member function, we can use other members also to 
+         * process packets 
+         */
     protected:
         typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
         typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
