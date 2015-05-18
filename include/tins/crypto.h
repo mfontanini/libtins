@@ -72,10 +72,10 @@ namespace Crypto {
             }
 
             SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
-            ptk_type& get_ptk() const {
+            ptk_type &get_ptk() const {
                 return ptk;
             }
-            bool get_ccmp() const {
+            bool &get_ccmp() const {
                 return is_ccmp;
             }
 
