@@ -258,7 +258,7 @@ namespace Crypto {
          * \return false if no decryption was performed, or the decryption 
          * failed, true otherwise.
          */
-        virtual bool decrypt(PDU &pdu);
+        bool decrypt(PDU &pdu);
         
          /**
          * \brief add handshakes(keys).
