@@ -260,7 +260,7 @@ namespace Crypto {
          */
         bool decrypt(PDU &pdu);
         
-         /**
+        /**
          * \brief add handshakes(keys).
          * 
          * A Dot11Data PDU is looked up inside the provided PDU chain.
@@ -272,7 +272,7 @@ namespace Crypto {
          */
         void try_add_keys(const Dot11Data &dot11, const RSNHandshake &hs);
         
-         /**
+        /**
          * \brief add access point ssid and address.
          * 
          * Add ssid to access point to bssids map if ssid exits in pmks map.
@@ -288,7 +288,7 @@ namespace Crypto {
          * return pmks.
          */
         pmks_map &get_pmks() {
-          return pmks;
+            return pmks;
         }
         
         /**
@@ -296,8 +296,8 @@ namespace Crypto {
          * 
          * return keys to save captured keys or to set provious stored keys.
          */
-         keys_map &get_keys(){
-          return keys;
+        keys_map &get_keys(){
+            return keys;
         }
         
         /**
@@ -305,8 +305,8 @@ namespace Crypto {
          * 
          * return capturer.
          */
-         RSNHandshakeCapturer &get_capturer() {
-          return capturer;
+        RSNHandshakeCapturer &get_capturer() {
+            return capturer;
         }
         
         /**
@@ -317,6 +317,7 @@ namespace Crypto {
         bssids_map &get_aps() {
             return aps;
         }
+        
     private:
         
         addr_pair make_addr_pair(const address_type &addr1, const address_type &addr2) {
