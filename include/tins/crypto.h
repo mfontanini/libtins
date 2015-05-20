@@ -202,7 +202,7 @@ namespace Crypto {
          */
         typedef std::pair<address_type, address_type> addr_pair;
         
-         /*
+        /*
          * \brief The type used to store Session Keys against address pair.
          */
         typedef std::map<addr_pair, WPA2::SessionKeys> keys_map;
