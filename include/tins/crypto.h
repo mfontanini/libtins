@@ -66,7 +66,16 @@ namespace Crypto {
             
             SessionKeys();
             SessionKeys(const RSNHandshake &hs, const pmk_type &pmk);
+            SessionKeys(const ptk_type &rptk, const bool &ccmp); 
+
             SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
+            const ptk_type &get_ptk() const {
+                return ptk;
+            }
+            bool get_ccmp() const {
+                return is_ccmp;
+            }
+
         private:
             SNAP *ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
             SNAP *tkip_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
@@ -157,7 +166,13 @@ namespace Crypto {
          * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
-    private:
+        
+        /**
+         * Changed access modifier from private to protected to overload decrypt member function.
+         * In overloaded decrypt member function, we can use other members also to 
+         * process packets 
+         */
+    protected:
         typedef std::map<address_type, std::string> passwords_type;
     
         PDU *decrypt(RawPDU &raw, const std::string &password);
@@ -232,7 +247,13 @@ namespace Crypto {
          * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
-    private:
+        
+         /**
+         * Changed access modifier from private to protected to overload decrypt member function.
+         * In overloaded decrypt member function, we can use other members also to 
+         * process packets 
+         */
+    protected:
         typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
         typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
         typedef std::pair<address_type, address_type> addr_pair;
