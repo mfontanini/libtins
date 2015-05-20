@@ -130,11 +130,20 @@ public:
     /**
      * \brief Retrieve this interface's addresses.
      * 
+     * This method is deprecated. You should use NetworkInterface::info (this
+     * is just a naming deprecation, NetworkInterface::info is equivalent).
+     * \deprecated
+     */
+    Info addresses() const;
+
+    /**
+     * \brief Retrieve this interface's information.
+     * 
      * This method iterates through all the interface's until the 
      * correct one is found. Therefore it's O(N), being N the amount
      * of interfaces in the system.
      */
-    Info addresses() const;
+    Info info() const;
     
     /**
      * \brief Tests whether this is a valid interface;
@@ -151,7 +160,15 @@ public:
      * @return true iff this is a loopback device.
      */
     bool is_loopback() const;
-    
+
+    /**
+     * \brief Indicates whether this interface is up.
+     *
+     * This is equivalent to getting the interface info and checking for the is_up 
+     * attribute.
+     */
+    bool is_up() const;
+
     /**
      * \brief Compares this interface for equality.
      * 

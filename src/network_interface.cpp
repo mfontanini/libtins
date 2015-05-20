@@ -120,7 +120,7 @@ struct InterfaceInfoCollector {
                 info->ip_addr = IPv4Address(((const struct sockaddr_in *)unicast->Address.lpSockaddr)->sin_addr.s_addr);
                 info->netmask = IPv4Address(host_to_be<uint32_t>(0xffffffff << (32 - unicast->OnLinkPrefixLength)));
                 info->bcast_addr = IPv4Address((info->ip_addr & info->netmask) | ~info->netmask);
-                info->is_up = (iface->Flags & IP_ADAPTER_IPV4_ENABLED);
+                info->is_up = (iface->Flags & IP_ADAPTER_IPV4_ENABLED) != 0;
                 found_ip = true;
                 found_hw = true;
             }
@@ -215,6 +215,10 @@ std::string NetworkInterface::name() const {
 }
 
 NetworkInterface::Info NetworkInterface::addresses() const {
+    return info();
+}
+
+NetworkInterface::Info NetworkInterface::info() const {
     const std::string &iface_name = name();
     Info info;
     InterfaceInfoCollector collector(&info, iface_id, iface_name.c_str());
@@ -229,6 +233,10 @@ NetworkInterface::Info NetworkInterface::addresses() const {
 
 bool NetworkInterface::is_loopback() const {
     return addresses().ip_addr.is_loopback();
+}
+
+bool NetworkInterface::is_up() const {
+    return addresses().is_up;
 }
 
 NetworkInterface::id_type NetworkInterface::resolve_index(const char *name) {
