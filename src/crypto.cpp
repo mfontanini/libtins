@@ -267,7 +267,7 @@ SessionKeys::SessionKeys(const RSNHandshake &hs, const pmk_type &pmk) {
     is_ccmp = (hs.handshake()[3].key_descriptor() == 2);
 }
 
-SessionKeys::SessionKeys(const ptk_type &rptk, const bool &ccmp) {
+SessionKeys::SessionKeys(const ptk_type &rptk, const bool ccmp) {
     std::copy( rptk.begin(), rptk.end(), ptk.begin());
     is_ccmp = ccmp;
 }
