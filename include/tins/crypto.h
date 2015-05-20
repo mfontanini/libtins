@@ -66,7 +66,14 @@ namespace Crypto {
             
             SessionKeys();
             SessionKeys(const RSNHandshake &hs, const pmk_type &pmk);
+            SessionKeys(const ptk_type &rptk, const bool &ccmp);
             SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
+            const ptk_type get_ptk() const {
+                return ptk;
+            }
+            const bool get_ccmp() const {
+                return is_ccmp;
+            }
         private:
             SNAP *ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
             SNAP *tkip_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
@@ -180,6 +187,26 @@ namespace Crypto {
          */
         typedef HWAddress<6> address_type;
         
+        /*
+         * \brief The type used to store pmks against ssids.
+         */
+        typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
+        
+        /*
+         * \brief The type used to store bssids against ssids.
+         */
+        typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
+        
+        /*
+         * \brief The type used to store address pair.
+         */
+        typedef std::pair<address_type, address_type> addr_pair;
+        
+         /*
+         * \brief The type used to store Session Keys against address pair.
+         */
+        typedef std::map<addr_pair, WPA2::SessionKeys> keys_map;
+        
         /**
          * \brief Adds an access points's information.
          *
@@ -231,14 +258,67 @@ namespace Crypto {
          * \return false if no decryption was performed, or the decryption 
          * failed, true otherwise.
          */
-        bool decrypt(PDU &pdu);
-    private:
-        typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
-        typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
-        typedef std::pair<address_type, address_type> addr_pair;
-        typedef std::map<addr_pair, WPA2::SessionKeys> keys_map;
+        virtual bool decrypt(PDU &pdu);
         
+         /**
+         * \brief add handshakes(keys).
+         * 
+         * A Dot11Data PDU is looked up inside the provided PDU chain.
+         * If found ap then add session to keys map. if ap not found then 
+         * packet left intact.
+         * 
+         * \param dot11 associated packet to add keys.
+         * \param hs captured handshakes to apply.
+         */
         void try_add_keys(const Dot11Data &dot11, const RSNHandshake &hs);
+        
+         /**
+         * \brief add access point ssid and address.
+         * 
+         * Add ssid to access point to bssids map if ssid exits in pmks map.
+         * 
+         * \param ssid .
+         * \param addr associated to access point(ssid).
+         */
+        void add_access_point(const std::string &ssid, const address_type &addr);
+        
+        /**
+         * \brief get pmks.
+         * 
+         * return pmks.
+         */
+        pmks_map &get_pmks() {
+          return pmks;
+        }
+        
+        /**
+         * \brief get keys map.
+         * 
+         * return keys to save captured keys or to set provious stored keys.
+         */
+         keys_map &get_keys(){
+          return keys;
+        }
+        
+        /**
+         * \brief get capturer.
+         * 
+         * return capturer.
+         */
+         RSNHandshakeCapturer &get_capturer() {
+          return capturer;
+        }
+        
+        /**
+         * \brief get aps.
+         * 
+         * return access point bssids map.
+         */
+        bssids_map &get_aps() {
+            return aps;
+        }
+    private:
+        
         addr_pair make_addr_pair(const address_type &addr1, const address_type &addr2) {
             return (addr1 < addr2) ? 
                 std::make_pair(addr1, addr2) :
@@ -247,7 +327,6 @@ namespace Crypto {
         addr_pair extract_addr_pair(const Dot11Data &dot11);
         addr_pair extract_addr_pair_dst(const Dot11Data &dot11);
         bssids_map::const_iterator find_ap(const Dot11Data &dot11);
-        void add_access_point(const std::string &ssid, const address_type &addr);
 
         RSNHandshakeCapturer capturer;
         pmks_map pmks;
