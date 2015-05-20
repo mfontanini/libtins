@@ -31,7 +31,7 @@
 #include <vector>
 #include <cstring>
 #include "macros.h"
-#ifndef _WIN32
+#ifndef WIN32
     #include <netinet/in.h>
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <ifaddrs.h>
@@ -65,7 +65,7 @@ struct InterfaceInfoCollector {
     InterfaceInfoCollector(info_type *res, int id, const char* if_name) 
     : info(res), iface_id(id), iface_name(if_name), found_hw(false), found_ip(false) { }
     
-    #ifndef _WIN32
+    #ifndef WIN32
     bool operator() (const struct ifaddrs *addr) {
         using Tins::Endian::host_to_be;
             using Tins::IPv4Address;
@@ -83,6 +83,7 @@ struct InterfaceInfoCollector {
                     info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_dstaddr)->sin_addr.s_addr);
                 else
                     info->bcast_addr = 0;
+                info->is_up = (addr->ifa_flags & IFF_UP);
                 found_ip = true;
             }
         #else
@@ -100,6 +101,7 @@ struct InterfaceInfoCollector {
                         info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
                     else
                         info->bcast_addr = 0;
+                    info->is_up = (addr->ifa_flags & IFF_UP);
                     found_ip = true;
                 }
             }
@@ -107,7 +109,7 @@ struct InterfaceInfoCollector {
         
         return found_ip && found_hw;
     }
-    #else // _WIN32
+    #else // WIN32
     bool operator() (const IP_ADAPTER_ADDRESSES *iface) {
         using Tins::IPv4Address;
         using Tins::Endian::host_to_be;
@@ -118,13 +120,14 @@ struct InterfaceInfoCollector {
                 info->ip_addr = IPv4Address(((const struct sockaddr_in *)unicast->Address.lpSockaddr)->sin_addr.s_addr);
                 info->netmask = IPv4Address(host_to_be<uint32_t>(0xffffffff << (32 - unicast->OnLinkPrefixLength)));
                 info->bcast_addr = IPv4Address((info->ip_addr & info->netmask) | ~info->netmask);
+                info->is_up = (iface->Flags & IP_ADAPTER_IPV4_ENABLED);
                 found_ip = true;
                 found_hw = true;
             }
         }
         return found_ip && found_hw;
     }
-    #endif // _WIN32
+    #endif // WIN32
 };
 /** \endcond */
 
@@ -189,12 +192,12 @@ NetworkInterface::NetworkInterface(IPv4Address ip) : iface_id(0) {
 }
 
 std::string NetworkInterface::name() const {
-    #ifndef _WIN32
+    #ifndef WIN32
     char iface_name[IF_NAMESIZE];
     if(!if_indextoname(iface_id, iface_name))
         throw std::runtime_error("Error fetching this interface's name");
     return iface_name;
-    #else // _WIN32
+    #else // WIN32
     ULONG size;
     ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
     std::vector<uint8_t> buffer(size);
@@ -208,13 +211,14 @@ std::string NetworkInterface::name() const {
         }
     }
     throw std::runtime_error("Failed to find interface name");
-    #endif // _WIN32
+    #endif // WIN32
 }
 
 NetworkInterface::Info NetworkInterface::addresses() const {
     const std::string &iface_name = name();
     Info info;
     InterfaceInfoCollector collector(&info, iface_id, iface_name.c_str());
+    info.is_up = false;
     Utils::generic_iface_loop(collector);
     // If we didn't event get the hw address, this went wrong
     if(!collector.found_hw) {
@@ -228,7 +232,7 @@ bool NetworkInterface::is_loopback() const {
 }
 
 NetworkInterface::id_type NetworkInterface::resolve_index(const char *name) {
-    #ifndef _WIN32
+    #ifndef WIN32
     id_type id = if_nametoindex(name);
     if(!id)
         throw std::runtime_error("Invalid interface");

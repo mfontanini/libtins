@@ -59,6 +59,7 @@ public:
     struct Info {
         IPv4Address ip_addr, netmask, bcast_addr;
         address_type hw_addr;
+        bool is_up;
     };
 
     /**
