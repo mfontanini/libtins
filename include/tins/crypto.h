@@ -71,7 +71,7 @@ namespace Crypto {
             const ptk_type &get_ptk() const {
                 return ptk;
             }
-            const bool &get_ccmp() const {
+            bool get_ccmp() const {
                 return is_ccmp;
             }
         private:
