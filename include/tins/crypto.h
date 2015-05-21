@@ -283,6 +283,26 @@ namespace Crypto {
         void add_access_point(const std::string &ssid, const address_type &addr);
         
         /**
+         * \brief extract address pair of access point and device bssid pair 
+         * by extracting data from dot11 packet.
+         * 
+         * \param dot11.
+         * 
+         * \returns pair of access point and device bssid.
+         */
+        addr_pair extract_addr_pair(const Dot11Data &dot11);
+        
+        /**
+         * \brief extract address pair of access point and device bssid pair 
+         * by extracting data from dot11 packet.
+         * 
+         * \param dot11.
+         * 
+         * \returns pair of access point and device bssid.
+         */
+        addr_pair extract_addr_pair_dst(const Dot11Data &dot11);
+        
+        /**
          * \brief get pmks.
          * 
          * return pmks.
@@ -325,8 +345,6 @@ namespace Crypto {
                 std::make_pair(addr1, addr2) :
                 std::make_pair(addr2, addr1);
         }
-        addr_pair extract_addr_pair(const Dot11Data &dot11);
-        addr_pair extract_addr_pair_dst(const Dot11Data &dot11);
         bssids_map::const_iterator find_ap(const Dot11Data &dot11);
 
         RSNHandshakeCapturer capturer;
