@@ -47,26 +47,79 @@ class Dot11;
 class Dot11Data;
 
 namespace Crypto {
-    /**
-     * \cond
-     */
     struct RC4Key;
     #ifdef HAVE_WPA2_DECRYPTION
     namespace WPA2 {
-        class invalid_handshake : public std::exception {
-        public:
-            const char *what() const throw() {
-                return "invalid handshake";
-            }
-        };
+        /**
+         * \brief Class that represents the keys used to decrypt a session.
+         */
         class SessionKeys {
         public:
-            typedef Internals::byte_array<80> ptk_type;
-            typedef Internals::byte_array<32> pmk_type;
+            /**
+             * The size of the Pairwise Master Key.
+             */
+            static const size_t PMK_SIZE;
+
+            /**
+             * The size of the Pairwise Transient Key.
+             */
+            static const size_t PTK_SIZE;
+
+            /**
+             * The type used to hold the PTK (this has to be PTK_SIZE bytes long).
+             */
+            typedef std::vector<uint8_t> ptk_type;
+
+            /**
+             * The type used to hold the PMK (this has to be PMK_SIZE bytes long).
+             */
+            typedef std::vector<uint8_t> pmk_type;
             
+            /**
+             * Default constructs a SessionKeys object.
+             */
             SessionKeys();
+
+            /**
+             * \brief Constructs an instance using the provided PTK and a flag 
+             * indicating whether it should use ccmp.
+             *
+             * \param ptk The PTK to use.
+             * \param is_ccmp Indicates whether to use CCMP to decrypt this traffic.
+             */
+            SessionKeys(const ptk_type& ptk, bool is_ccmp);
+
+            /**
+             * \brief Constructs an instance using a handshake and a PMK.
+             *
+             * This will internally construct the PTK from the input parameters.
+             *
+             * \param hs The handshake to use.
+             * \param pmk The PMK to use.
+             */
             SessionKeys(const RSNHandshake &hs, const pmk_type &pmk);
+
+            /**
+             * \brief Decrypts a unicast packet.
+             *
+             * \param dot11 The encrypted packet to decrypt.
+             * \param raw The raw layer on the packet to decrypt.
+             * \return A SNAP layer containing the decrypted traffic or a null pointer
+             * if decryption failed.
+             */
             SNAP *decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
+
+            /**
+             * \brief Gets the PTK for this session keys.
+             * \return The Pairwise Transcient Key.
+             */
+            const ptk_type& get_ptk() const;
+
+            /**
+             * \brief Indicates whether CCMP is used to decrypt packets
+             * /return true iff CCMP is used.
+             */
+            bool uses_ccmp() const;
         private:
             SNAP *ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
             SNAP *tkip_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const;
@@ -75,7 +128,10 @@ namespace Crypto {
             ptk_type ptk;
             bool is_ccmp;
         };
-            
+
+        /**
+         * \cond
+         */   
         class SupplicantData {
         public:
             typedef HWAddress<6> address_type;
@@ -87,7 +143,7 @@ namespace Crypto {
         private:
             pmk_type pmk_;
         };
-    }
+    } // WPA2
     #endif // HAVE_WPA2_DECRYPTION
     /**
      * \endcond
@@ -181,6 +237,27 @@ namespace Crypto {
         typedef HWAddress<6> address_type;
         
         /**
+         * \brief Represents a pair of mac addresses.
+         * 
+         * This is used to identify a host and the access point to which 
+         * it is connected. The first element in the pair will always de
+         * lower or equal than the second one, so that given any host and
+         * the access point it's connected to, we can uniquely identify
+         * it with an address pair.
+         */
+        typedef std::pair<address_type, address_type> addr_pair;
+
+        /**
+         * \brief Maps an address pair to the session keys.
+         *
+         * This type associates an address pair (host, access point) with the
+         * session keys, as generated using the packets seen on a handshake.
+         *
+         * \sa addr_pair
+         */
+        typedef std::map<addr_pair, WPA2::SessionKeys> keys_map;
+
+        /**
          * \brief Adds an access points's information.
          *
          * This associates an SSID with a PSK, and allows the decryption of
@@ -217,6 +294,28 @@ namespace Crypto {
         void add_ap_data(const std::string &psk, const std::string &ssid, const address_type &addr);
         
         /**
+         * \brief Explicitly add decryption keys.
+         * 
+         * This method associates a pair (host, access point) with the given decryption keys.
+         * All encrypted packets sent between the given addresses will be decrypted using the
+         * provided keys.
+         * 
+         * This method shouldn't normally be required. The WPA2Decrypter will be waiting for
+         * handshakes and will automatically extract the session keys, decrypting all 
+         * encrypted packets with them. You should only use this method if for some reason
+         * you know the actual keys being used (because you checked and stored the keys_map 
+         * somewhere).
+         *
+         * The actual order of the addresses doesn't matter, this method will make sure
+         * they're sorted.
+         *
+         * \param addresses The address pair (host, access point) to associate.
+         * \param session_keys The keys to use when decrypting messages sent between the 
+         * given addresses.
+         */
+        void add_decryption_keys(const addr_pair& addresses, const WPA2::SessionKeys& session_keys);
+
+        /**
          * \brief Decrypts the provided PDU.
          * 
          * A Dot11Data PDU is looked up inside the provided PDU chain.
@@ -232,11 +331,19 @@ namespace Crypto {
          * failed, true otherwise.
          */
         bool decrypt(PDU &pdu);
+
+        /**
+         * \brief Getter for the keys on this decrypter
+         *
+         * The returned map will be populated every time a new, complete, handshake
+         * is captured. 
+         *
+         * \return The WPA2Decrypter keys map.
+         */
+        const keys_map& get_keys() const;
     private:
         typedef std::map<std::string, WPA2::SupplicantData> pmks_map;
         typedef std::map<address_type, WPA2::SupplicantData> bssids_map;
-        typedef std::pair<address_type, address_type> addr_pair;
-        typedef std::map<addr_pair, WPA2::SessionKeys> keys_map;
         
         void try_add_keys(const Dot11Data &dot11, const RSNHandshake &hs);
         addr_pair make_addr_pair(const address_type &addr1, const address_type &addr2) {

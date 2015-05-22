@@ -38,6 +38,7 @@
 #endif // HAVE_WPA2_DECRYPTION
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
+#include "exceptions.h"
 
 namespace Tins {
 namespace Crypto {
@@ -114,6 +115,8 @@ PDU *WEPDecrypter::decrypt(RawPDU &raw, const std::string &password) {
 
 #ifdef HAVE_WPA2_DECRYPTION
 // WPA2Decrypter
+
+using WPA2::SessionKeys;
 
 const HWAddress<6> &min(const HWAddress<6>& lhs, const HWAddress<6>& rhs) {
     return lhs < rhs ? lhs : rhs;
@@ -232,11 +235,26 @@ HWAddress<6> get_bssid(const Dot11Data &dot11) {
 
 namespace WPA2 {
 
+const size_t SessionKeys::PTK_SIZE = 80;
+const size_t SessionKeys::PMK_SIZE = 32;
+
 SessionKeys::SessionKeys() {
 
 }
 
-SessionKeys::SessionKeys(const RSNHandshake &hs, const pmk_type &pmk) {
+SessionKeys::SessionKeys(const ptk_type& ptk, bool is_ccmp) 
+: ptk(ptk), is_ccmp(is_ccmp) {
+    if (ptk.size() != PTK_SIZE) {
+        throw invalid_handshake();
+    }
+}
+
+SessionKeys::SessionKeys(const RSNHandshake &hs, const pmk_type &pmk) 
+: ptk(PTK_SIZE) {
+    if (pmk.size() != PMK_SIZE) {
+        throw invalid_handshake();
+    }
+
     uint8_t PKE[100] = "Pairwise key expansion";
     uint8_t MIC[16];
     min(hs.client_address(), hs.supplicant_address()).copy(PKE + 23);
@@ -253,14 +271,14 @@ SessionKeys::SessionKeys(const RSNHandshake &hs, const pmk_type &pmk) {
     }
     for(int i(0); i < 4; ++i) {
         PKE[99] = i;
-        HMAC(EVP_sha1(), pmk.begin(), pmk.size(), PKE, 100, ptk.begin() + i * 20, 0);
+        HMAC(EVP_sha1(), &pmk[0], pmk.size(), PKE, 100, &ptk[0] + i * 20, 0);
     }
     PDU::serialization_type buffer = const_cast<RSNEAPOL&>(hs.handshake()[3]).serialize();
     std::fill(buffer.begin() + 81, buffer.begin() + 81 + 16, 0);
     if(hs.handshake()[3].key_descriptor() == 2)
-        HMAC(EVP_sha1(), ptk.begin(), 16, &buffer[0], buffer.size(), MIC, 0);
+        HMAC(EVP_sha1(), &ptk[0], 16, &buffer[0], buffer.size(), MIC, 0);
     else
-        HMAC(EVP_md5(), ptk.begin(), 16, &buffer[0], buffer.size(), MIC, 0);
+        HMAC(EVP_md5(), &ptk[0], 16, &buffer[0], buffer.size(), MIC, 0);
     
     if(!std::equal(MIC, MIC + sizeof(MIC), hs.handshake()[3].mic()))
         throw invalid_handshake();
@@ -298,7 +316,7 @@ SNAP *SessionKeys::ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) con
         dot11.addr4().copy(AAD + 24);
     
     AES_KEY ctx;
-    AES_set_encrypt_key(ptk.begin() + 32, 128, &ctx);
+    AES_set_encrypt_key(&ptk[0] + 32, 128, &ctx);
     uint8_t crypted_block[16];
     size_t total_sz = raw.payload_size() - 16, offset = 8, blocks = (total_sz + 15) / 16;
     
@@ -343,7 +361,7 @@ SNAP *SessionKeys::ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) con
 
 RC4Key SessionKeys::generate_rc4_key(const Dot11Data &dot11, const RawPDU &raw) const {
     const RawPDU::payload_type &pload = raw.payload();
-    const uint8_t *tk = ptk.begin() + 32;
+    const uint8_t *tk = &ptk[0] + 32;
     Internals::byte_array<16> rc4_key;
     uint16_t ppk[6];
     const Dot11::address_type addr = dot11.addr2();
@@ -429,9 +447,18 @@ SNAP *SessionKeys::decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const {
         tkip_decrypt_unicast(dot11, raw);
 }
 
+const SessionKeys::ptk_type& SessionKeys::get_ptk() const {
+    return ptk;
+}
+
+bool SessionKeys::uses_ccmp() const {
+    return is_ccmp;
+}
+
 // supplicant_data
 
-SupplicantData::SupplicantData(const std::string &psk, const std::string &ssid) {
+SupplicantData::SupplicantData(const std::string &psk, const std::string &ssid)
+: pmk_(SessionKeys::PMK_SIZE) {
     PKCS5_PBKDF2_HMAC_SHA1(
         psk.c_str(), 
         psk.size(), 
@@ -439,7 +466,7 @@ SupplicantData::SupplicantData(const std::string &psk, const std::string &ssid) 
         ssid.size(), 
         4096, 
         pmk_.size(), 
-        pmk_.begin()
+        &pmk_[0]
     );
 }
 
@@ -466,16 +493,25 @@ void WPA2Decrypter::add_access_point(const std::string &ssid, const address_type
     aps.insert(std::make_pair(addr, it->second));
 }
 
+void WPA2Decrypter::add_decryption_keys(const addr_pair& addresses, const SessionKeys& session_keys) {
+    addr_pair sorted_pair = make_addr_pair(addresses.first, addresses.second);
+    keys[sorted_pair] = session_keys;
+}
+
 void WPA2Decrypter::try_add_keys(const Dot11Data &dot11, const RSNHandshake &hs) {
     bssids_map::const_iterator it = find_ap(dot11);
     if(it != aps.end()) {
         addr_pair addr_p = extract_addr_pair(dot11);
         try {
-            WPA2::SessionKeys session(hs, it->second.pmk());
+            SessionKeys session(hs, it->second.pmk());
             keys[addr_p] = session;
         }
         catch(WPA2::invalid_handshake&) { }
     }
+}
+
+const WPA2Decrypter::keys_map& WPA2Decrypter::get_keys() const {
+    return keys;
 }
 
 WPA2Decrypter::addr_pair WPA2Decrypter::extract_addr_pair(const Dot11Data &dot11) {

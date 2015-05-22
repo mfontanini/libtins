@@ -191,6 +191,20 @@ public:
     }
 };
 
+namespace Crypto {
+namespace WPA2 {
+    /**
+     * \brief Exception thrown when an invalid WPA2 handshake is found.
+     */
+    class invalid_handshake : public std::exception {
+    public:
+        const char *what() const throw() {
+            return "Invalid WPA2 handshake";
+        }
+    };
+} // WPA2
+} // Crypto
+
 } // Tins
 
 #endif // TINS_EXCEPTIONS_H
