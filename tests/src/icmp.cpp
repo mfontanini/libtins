@@ -140,19 +140,19 @@ TEST_F(ICMPTest, Pointer) {
 TEST_F(ICMPTest, OriginalTimestamp) {
     ICMP icmp;
     icmp.original_timestamp(0x1f8172da);
-    EXPECT_EQ(0x1f8172da, icmp.original_timestamp());
+    EXPECT_EQ(0x1f8172daU, icmp.original_timestamp());
 }
 
 TEST_F(ICMPTest, ReceiveTimestamp) {
     ICMP icmp;
     icmp.receive_timestamp(0x1f8172da);
-    EXPECT_EQ(0x1f8172da, icmp.receive_timestamp());
+    EXPECT_EQ(0x1f8172daU, icmp.receive_timestamp());
 }
 
 TEST_F(ICMPTest, TransmitTimestamp) {
     ICMP icmp;
     icmp.transmit_timestamp(0x1f8172da);
-    EXPECT_EQ(0x1f8172da, icmp.transmit_timestamp());
+    EXPECT_EQ(0x1f8172daU, icmp.transmit_timestamp());
 }
 
 TEST_F(ICMPTest, AddressMask) {

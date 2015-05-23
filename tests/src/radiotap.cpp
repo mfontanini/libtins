@@ -283,7 +283,7 @@ TEST_F(RadioTapTest, ConstructorFromBuffer4) {
     EXPECT_TRUE((radio.present() & RadioTap::RX_FLAGS) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::MCS) != 0);
 
-    EXPECT_EQ(2076020709598, radio.tsft());
+    EXPECT_EQ(2076020709598ULL, radio.tsft());
     EXPECT_EQ(0, radio.rx_flags());
     EXPECT_EQ(0, radio.antenna());
     EXPECT_EQ(-70, radio.dbm_signal());

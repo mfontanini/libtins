@@ -139,7 +139,7 @@ TEST_F(WPA2DecryptTest, DecryptCCMPUsingKey) {
             ASSERT_FALSE(decrypter.decrypt(radio));
         }
         const Crypto::WPA2Decrypter::keys_map& keys = decrypter.get_keys();
-        ASSERT_EQ(1, keys.size());
+        ASSERT_EQ(1ULL, keys.size());
         addresses = keys.begin()->first;
         session_keys = keys.begin()->second;
     }
@@ -204,7 +204,7 @@ TEST_F(WPA2DecryptTest, DecryptTKIPUsingKey) {
             ASSERT_FALSE(decrypter.decrypt(radio));
         }
         const Crypto::WPA2Decrypter::keys_map& keys = decrypter.get_keys();
-        ASSERT_EQ(1, keys.size());
+        ASSERT_EQ(1ULL, keys.size());
         addresses = keys.begin()->first;
         session_keys = keys.begin()->second;
     }

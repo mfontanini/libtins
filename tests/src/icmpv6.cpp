@@ -240,7 +240,7 @@ TEST_F(ICMPv6Test, ShortcutLimit) {
     ICMPv6::shortcut_limit_type sl = icmp.shortcut_limit();
     EXPECT_EQ(123, sl.limit);
     EXPECT_EQ(0x7f, sl.reserved1);
-    EXPECT_EQ(0x12345678, sl.reserved2);
+    EXPECT_EQ(0x12345678U, sl.reserved2);
 }
 
 TEST_F(ICMPv6Test, NewAdvertisementInterval) {

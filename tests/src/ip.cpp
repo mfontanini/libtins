@@ -504,7 +504,7 @@ TEST_F(IPTest, TotalLengthZeroPacket) {
     EthernetII pkt(tot_len_zero_packet, sizeof(tot_len_zero_packet));
     ASSERT_TRUE(pkt.find_pdu<TCP>() != NULL);
     ASSERT_TRUE(pkt.find_pdu<RawPDU>() != NULL);
-    EXPECT_EQ(8192, pkt.rfind_pdu<RawPDU>().payload_size());
+    EXPECT_EQ(8192U, pkt.rfind_pdu<RawPDU>().payload_size());
 }
 
 TEST_F(IPTest, TOS) {

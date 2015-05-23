@@ -53,7 +53,7 @@ TEST_F(PPPoETest, ConstructorFromSessionBuffer) {
     
     const RawPDU* raw = pdu.find_pdu<RawPDU>();
     ASSERT_TRUE(raw != NULL);
-    EXPECT_EQ(21, raw->payload_size());
+    EXPECT_EQ(21U, raw->payload_size());
 }
 
 TEST_F(PPPoETest, ConstructorFromFullSessionBuffer) {
@@ -68,7 +68,7 @@ TEST_F(PPPoETest, ConstructorFromFullSessionBuffer) {
     
     const RawPDU* raw = pdu.find_pdu<RawPDU>();
     ASSERT_TRUE(raw != NULL);
-    EXPECT_EQ(21, raw->payload_size());
+    EXPECT_EQ(21U, raw->payload_size());
 }
 
 TEST_F(PPPoETest, ConstructorFromBuffer) {

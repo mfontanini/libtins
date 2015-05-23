@@ -53,7 +53,7 @@ void IPv4ReassemblerTest::test_packets(const std::vector<std::pair<const uint8_t
             ASSERT_TRUE(eth.find_pdu<UDP>() != NULL);
             RawPDU *raw = eth.find_pdu<RawPDU>();
             ASSERT_TRUE(raw != NULL);
-            ASSERT_EQ(15000, raw->payload().size());
+            ASSERT_EQ(15000ULL, raw->payload().size());
         }
         else if(status == IPv4Reassembler::FRAGMENTED)
             EXPECT_NE(vt.size() - 1, i);

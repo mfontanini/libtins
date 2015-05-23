@@ -318,7 +318,7 @@ TEST_F(DNSTest, Authority) {
     ASSERT_EQ(dns.authority_count(), 2);
     
     DNS::resources_type resources = dns.authority();
-    EXPECT_EQ(2, resources.size());
+    EXPECT_EQ(2ULL, resources.size());
     for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
         EXPECT_EQ("www.example.com", it->dname());
         EXPECT_EQ(it->type(), DNS::CNAME);
@@ -429,7 +429,7 @@ TEST_F(DNSTest, ItAintGonnaCorrupt) {
     
     // Check authority records
     resources = dns.authority();
-    EXPECT_EQ(1, resources.size());
+    EXPECT_EQ(1ULL, resources.size());
     for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
         EXPECT_EQ("www.example.com", it->dname());
         EXPECT_EQ(it->type(), DNS::CNAME);
@@ -441,7 +441,7 @@ TEST_F(DNSTest, ItAintGonnaCorrupt) {
         
     // Check additional records
     resources = dns.additional();
-    EXPECT_EQ(1, resources.size());
+    EXPECT_EQ(1ULL, resources.size());
     for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
         EXPECT_EQ("www.example.com", it->dname());
         EXPECT_EQ(it->type(), DNS::CNAME);
