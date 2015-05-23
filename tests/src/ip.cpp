@@ -14,6 +14,12 @@
 using namespace std;
 using namespace Tins;
 
+#ifdef _WIN32
+    #define TINS_DEFAULT_TEST_IP "0.0.0.0"
+#else 
+    #define TINS_DEFAULT_TEST_IP "127.0.0.1"
+#endif
+
 class IPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[], fragmented_packet[], 
@@ -660,21 +666,21 @@ TEST_F(IPTest, ConstructorFromBuffer) {
 }
 
 TEST_F(IPTest, StackedProtocols) {
-    IP ip = IP("127.0.0.1") / TCP();
+    IP ip = IP(TINS_DEFAULT_TEST_IP) / TCP();
     IP::serialization_type buffer = ip.serialize();
     EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<TCP>() != NULL);
     
-    ip = IP("127.0.0.1") / UDP();
+    ip = IP(TINS_DEFAULT_TEST_IP) / UDP();
     buffer = ip.serialize();
     EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<UDP>() != NULL);
     
-    ip = IP("127.0.0.1") / ICMP();
+    ip = IP(TINS_DEFAULT_TEST_IP) / ICMP();
     buffer = ip.serialize();
     EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<ICMP>() != NULL);
 }
 
 TEST_F(IPTest, SpoofedOptions) {
-    IP pdu("127.0.0.1");
+    IP pdu(TINS_DEFAULT_TEST_IP);
     uint8_t a[] = { 1,2,3,4,5,6 };
     pdu.add_option(
         IP::option(IP::NOOP, 250, a, a + sizeof(a))
