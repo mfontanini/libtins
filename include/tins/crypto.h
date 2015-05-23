@@ -130,24 +130,36 @@ namespace Crypto {
         };
 
         /**
-         * \cond
-         */   
+         * \brief Represents a WPA2 supplicant's data.
+         *
+         * Objects of this class can be given the pre-shared key and the SSID
+         * of some access point, and this will generate the Pairwise Master Key
+         * from those parameters.
+         */
         class SupplicantData {
         public:
-            typedef HWAddress<6> address_type;
+            /**
+             * The type used to store the PMK.
+             */
             typedef SessionKeys::pmk_type pmk_type;
             
+            /**
+             * \brief Constructs a SupplicantData.
+             * \param psk The pre-shared key.
+             * \param ssid The access point's SSID.
+             */
             SupplicantData(const std::string &psk, const std::string &ssid);
             
+            /**
+             * \brief Getter for the PMK.
+             * \return The generated PMK.
+             */
             const pmk_type &pmk() const;
         private:
             pmk_type pmk_;
         };
     } // WPA2
     #endif // HAVE_WPA2_DECRYPTION
-    /**
-     * \endcond
-     */
 
     /**
      * \brief RC4 Key abstraction.

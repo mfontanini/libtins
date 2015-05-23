@@ -40,3 +40,5 @@ test_script:
 - ctest -C %Configuration%
 deploy_script:
 - ps: Push-AppveyorArtifact "install\libtins-$env:Platform-$env:Configuration.zip"
+skip_commits:
+  message: /Update documentation.*/
