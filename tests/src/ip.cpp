@@ -660,21 +660,21 @@ TEST_F(IPTest, ConstructorFromBuffer) {
 }
 
 TEST_F(IPTest, StackedProtocols) {
-    IP ip = IP() / TCP();
+    IP ip = IP("127.0.0.1") / TCP();
     IP::serialization_type buffer = ip.serialize();
     EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<TCP>() != NULL);
     
-    ip = IP() / UDP();
+    ip = IP("127.0.0.1") / UDP();
     buffer = ip.serialize();
     EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<UDP>() != NULL);
     
-    ip = IP() / ICMP();
+    ip = IP("127.0.0.1") / ICMP();
     buffer = ip.serialize();
     EXPECT_TRUE(IP(&buffer[0], (uint32_t)buffer.size()).find_pdu<ICMP>() != NULL);
 }
 
 TEST_F(IPTest, SpoofedOptions) {
-    IP pdu;
+    IP pdu("127.0.0.1");
     uint8_t a[] = { 1,2,3,4,5,6 };
     pdu.add_option(
         IP::option(IP::NOOP, 250, a, a + sizeof(a))

@@ -64,29 +64,14 @@ TEST_F(NetworkInterfaceTest, DistinctOperator) {
 }
 #endif // _WIN32
 
-// This is a more generic test that can be run on all platforms.
-// The above ones won't run on windows since there's no name for the loopback interface.
-// So this does more or less the same as all of the above, but iterating over the
-// actual interfaces available in the system.
 TEST_F(NetworkInterfaceTest, IterateOverInterfaces) {
     vector<NetworkInterface> interfaces = NetworkInterface::all();
-    set<string> names;
-    set<int> ids;
     for (size_t i = 0; i < interfaces.size(); ++i) {
-        // Expect unique names an all interfaces
-        EXPECT_TRUE(names.insert(interfaces[i].name()).second);
-        // Expect unique ids an all interfaces
-        EXPECT_TRUE(ids.insert(interfaces[i].id()).second);
         // Expect this interface to be equal to itself
         EXPECT_EQ(interfaces[i], interfaces[i]);
         // We expect to be able to construct the interface from a name 
         // and they should still be equal
         NetworkInterface iface(interfaces[i].name());
         EXPECT_EQ(interfaces[i], iface);
-
-        // We expect this interface to be different from the others
-        for (size_t u = i + 1; u < interfaces.size(); ++u) {
-            EXPECT_NE(interfaces[i], interfaces[u]);
-        }
     }
 }
