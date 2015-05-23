@@ -1,5 +1,6 @@
 # libtins
 
+[![Build status](https://travis-ci.org/mfontanini/libtins.svg?branch=master)](https://travis-ci.org/mfontanini/libtins) 
 [![Build status](https://ci.appveyor.com/api/projects/status/33n8ib68nx3tptib/branch/master?svg=true)](https://ci.appveyor.com/project/mfontanini/libtins/branch/master)
 
 libtins is a high-level, multiplatform C++ network packet sniffing and 
