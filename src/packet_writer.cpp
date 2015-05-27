@@ -32,6 +32,7 @@
 #endif
 #include <stdexcept>
 #include "packet_writer.h"
+#include "packet.h"
 #include "pdu.h"
 
 namespace Tins {
@@ -47,16 +48,27 @@ PacketWriter::~PacketWriter() {
 }
 
 void PacketWriter::write(PDU &pdu) {
-    PDU::serialization_type buffer = pdu.serialize();
-    timeval tm;
+    timeval tv;
     #ifndef _WIN32
-        gettimeofday(&tm, 0);
+        gettimeofday(&tv, 0);
     #else
         // fixme
-        tm = timeval();
+        tv = timeval();
     #endif
+    write(pdu, tv);
+}
+
+void PacketWriter::write(Packet &packet) {
+    timeval tv;
+    tv.tv_sec = packet.timestamp().seconds();
+    tv.tv_usec = packet.timestamp().microseconds();
+    write(*packet.pdu(), tv);
+}
+
+void PacketWriter::write(PDU& pdu, const struct timeval& tv) {
+    PDU::serialization_type buffer = pdu.serialize();
     struct pcap_pkthdr header = { 
-        tm,
+        tv,
         static_cast<bpf_u_int32>(buffer.size()),
         static_cast<bpf_u_int32>(buffer.size())
     };

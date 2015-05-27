@@ -37,8 +37,11 @@
 #include "utils.h"
 #include "cxxstd.h"
 
+struct timeval;
+
 namespace Tins {
 class PDU;
+class Packet;
 
 /**
  * \class PacketWriter
@@ -167,8 +170,19 @@ public:
     
     /**
      * \brief Writes a PDU to this file. 
+     * \param pdu The PDU to be written.
      */
     void write(PDU &pdu);
+
+    /**
+     * \brief Writes a Packet to this file. 
+     *
+     * The timestamp used on the entry for this packet will be the Timestamp
+     * object associated with this packet.
+     *
+     * \param packet The packet to be written.
+     */
+    void write(Packet &packet);
     
     /**
      * \brief Writes a PDU to this file. 
@@ -200,6 +214,7 @@ private:
     PacketWriter& operator=(const PacketWriter&);
 
     void init(const std::string& file_name, int link_type);
+    void write(PDU& pdu, const struct timeval& tv);
 
     pcap_t *handle;
     pcap_dumper_t *dumper; 

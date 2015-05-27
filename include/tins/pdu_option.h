@@ -35,6 +35,7 @@
 #include <cstring>
 #include <algorithm>
 #include <string>
+#include <limits>
 #include <stdint.h>
 #include "exceptions.h"
 #include "endianness.h"
