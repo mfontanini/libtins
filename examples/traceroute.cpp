@@ -46,10 +46,9 @@ public:
       : iface(interface), addr(address) { }
     
     result_type trace() {
-        // ICMPs that aren't sent from us.
         SnifferConfiguration config;
-        config.set_snap_len(500);
         config.set_promisc_mode(false);
+        // ICMPs that aren't sent from us.
         config.set_filter(
             "ip proto \\icmp and not src host " + iface.addresses().ip_addr.to_string());
         Sniffer sniffer(iface.name(), config);
@@ -65,10 +64,9 @@ public:
         running = true;
         // Start the sniff thread
         std::thread sniff_thread(
-            &Sniffer::sniff_loop<decltype(handler)>, 
-            &sniffer, 
-            handler,
-            0
+            [&]() {
+                sniffer.sniff_loop(handler);
+            }
         );
         send_packets(sender);
         sniff_thread.join();

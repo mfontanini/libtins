@@ -3,7 +3,10 @@ FIND_PACKAGE(Threads QUIET)
 
 IF(libtins_FOUND)
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/examples)
-    INCLUDE_DIRECTORIES(${LIBTINS_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(
+        ${LIBTINS_INCLUDE_DIRS}
+        ${PCAP_INCLUDE_DIR}
+    )
     LINK_LIBRARIES(${LIBTINS_LIBRARIES})
 
     IF(HAVE_CXX11)
@@ -32,7 +35,6 @@ IF(libtins_FOUND)
         ADD_EXECUTABLE(arpmonitor EXCLUDE_FROM_ALL arpmonitor.cpp)
         ADD_EXECUTABLE(dns_queries EXCLUDE_FROM_ALL dns_queries.cpp)
         ADD_EXECUTABLE(dns_spoof EXCLUDE_FROM_ALL dns_spoof.cpp)
-        ADD_EXECUTABLE(dns_stats EXCLUDE_FROM_ALL dns_stats.cpp)
         ADD_EXECUTABLE(wps_detect EXCLUDE_FROM_ALL wps_detect.cpp)
     ENDIF(HAVE_CXX11)
 
@@ -41,14 +43,19 @@ IF(libtins_FOUND)
     if(THREADS_FOUND)
         IF(HAVE_CXX11)
             ADD_EXECUTABLE(traceroute EXCLUDE_FROM_ALL traceroute.cpp)
+            ADD_EXECUTABLE(dns_stats EXCLUDE_FROM_ALL dns_stats.cpp)
             TARGET_LINK_LIBRARIES(traceroute ${CMAKE_THREAD_LIBS_INIT})
+            TARGET_LINK_LIBRARIES(dns_stats ${CMAKE_THREAD_LIBS_INIT})
         ENDIF(HAVE_CXX11)
-
-        ADD_EXECUTABLE(portscan EXCLUDE_FROM_ALL portscan.cpp)
-        TARGET_LINK_LIBRARIES(portscan ${CMAKE_THREAD_LIBS_INIT})
-    ELSE(THREADS_FOUND)
+        IF(WIN32)
+            MESSAGE(WARNING "Disabling portscan example since it doesn't compile on Windows.")
+        ELSE()
+            ADD_EXECUTABLE(portscan EXCLUDE_FROM_ALL portscan.cpp)
+            TARGET_LINK_LIBRARIES(portscan ${CMAKE_THREAD_LIBS_INIT})
+        ENDIF()
+    ELSE()
         MESSAGE(WARNING "Disabling portscan and traceroute examples since pthreads library was not found.")
-    ENDIF(THREADS_FOUND)
+    ENDIF()
 ELSE(libtins_FOUND)
     MESSAGE(
         WARNING 

@@ -96,8 +96,8 @@ public:
     }
 private:
     using packet_info = std::tuple<IPv4Address, IPv4Address, uint16_t>;
-    using clock_type = std::chrono::steady_clock;
-    using time_point_type = std::chrono::time_point<clock_type>;
+    using clock_type = std::chrono::system_clock;
+    using time_point_type = clock_type::time_point;
 
     bool callback(const PDU& pdu);
     static packet_info make_packet_info(const PDU& pdu, const DNS& dns);
@@ -161,15 +161,20 @@ auto dns_monitor::make_packet_info(const PDU& pdu, const DNS& dns) -> packet_inf
 }
 
 int main(int argc, char *argv[]) {
-    if(argc != 2) {
-        std::cout << "Usage: " << *argv << " <interface>\n";
-        return 1;
+    std::string iface;
+    if (argc == 2) {
+        // Use the provided interface
+        iface = argv[1];
+    }
+    else {
+        // Use the default interface
+        iface = NetworkInterface::default_interface().name();
     }
     try {
         SnifferConfiguration config;
         config.set_promisc_mode(true);
-        config.set_filter("udp and dst port 53");
-        Sniffer sniffer(argv[1], config);
+        config.set_filter("udp and port 53");
+        Sniffer sniffer(iface, config);
         dns_monitor monitor;
         std::thread thread(
             [&]() {
