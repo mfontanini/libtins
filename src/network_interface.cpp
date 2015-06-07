@@ -98,7 +98,7 @@ struct InterfaceInfoCollector {
                     info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
                     info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
                     if((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT)))
-                        info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_ifu.ifu_broadaddr)->sin_addr.s_addr);
+                        info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_broadaddr)->sin_addr.s_addr);
                     else
                         info->bcast_addr = 0;
                     info->is_up = (addr->ifa_flags & IFF_UP);

@@ -42,6 +42,7 @@
         #include <net/if_dl.h>
     #else
         #include <netpacket/packet.h>
+        #include <sys/socket.h>
     #endif
     #include <net/ethernet.h>
 #endif

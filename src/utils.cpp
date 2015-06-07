@@ -43,6 +43,10 @@
     #endif
     #include <netdb.h>
     #include <net/if.h>
+    #ifdef __ANDROID_API__
+        #include <linux/in.h>
+        #include <linux/in6.h>
+    #endif
 #else
     #include <ws2tcpip.h>
 #endif
