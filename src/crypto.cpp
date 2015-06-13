@@ -256,7 +256,9 @@ SessionKeys::SessionKeys(const RSNHandshake &hs, const pmk_type &pmk)
     }
 
     uint8_t PKE[100] = "Pairwise key expansion";
-    uint8_t MIC[16];
+    uint8_t MIC[20];
+    is_ccmp = (hs.handshake()[3].key_descriptor() == 2);
+    
     min(hs.client_address(), hs.supplicant_address()).copy(PKE + 23);
     max(hs.client_address(), hs.supplicant_address()).copy(PKE + 29);
     const uint8_t *nonce1 = hs.handshake()[1].nonce(), 
@@ -275,14 +277,13 @@ SessionKeys::SessionKeys(const RSNHandshake &hs, const pmk_type &pmk)
     }
     PDU::serialization_type buffer = const_cast<RSNEAPOL&>(hs.handshake()[3]).serialize();
     std::fill(buffer.begin() + 81, buffer.begin() + 81 + 16, 0);
-    if(hs.handshake()[3].key_descriptor() == 2)
+    if(is_ccmp)
         HMAC(EVP_sha1(), &ptk[0], 16, &buffer[0], buffer.size(), MIC, 0);
     else
         HMAC(EVP_md5(), &ptk[0], 16, &buffer[0], buffer.size(), MIC, 0);
     
-    if(!std::equal(MIC, MIC + sizeof(MIC), hs.handshake()[3].mic()))
+    if(!std::equal(MIC, MIC + RSNEAPOL::mic_size, hs.handshake()[3].mic()))
         throw invalid_handshake();
-    is_ccmp = (hs.handshake()[3].key_descriptor() == 2);
 }
 
 SNAP *SessionKeys::ccmp_decrypt_unicast(const Dot11Data &dot11, RawPDU &raw) const {
