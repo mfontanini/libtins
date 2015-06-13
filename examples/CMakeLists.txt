@@ -18,6 +18,7 @@ IF(libtins_FOUND)
             wps_detect
             traceroute
             interfaces_info
+            icmp_responses
         )
     ELSE(HAVE_CXX11)
         MESSAGE(WARNING "Disabling some examples since C++11 support is disabled.")
@@ -38,6 +39,7 @@ IF(libtins_FOUND)
         ADD_EXECUTABLE(dns_spoof EXCLUDE_FROM_ALL dns_spoof.cpp)
         ADD_EXECUTABLE(wps_detect EXCLUDE_FROM_ALL wps_detect.cpp)
         ADD_EXECUTABLE(interfaces_info EXCLUDE_FROM_ALL interfaces_info.cpp)
+        ADD_EXECUTABLE(icmp_responses EXCLUDE_FROM_ALL icmp_responses.cpp)
     ENDIF(HAVE_CXX11)
 
     ADD_EXECUTABLE(beacon_display EXCLUDE_FROM_ALL beacon_display.cpp)
