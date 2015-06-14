@@ -341,6 +341,8 @@ namespace Tins {
         void set_promisc_mode(bool promisc_enabled);
 
         void set_rfmon(bool rfmon_enabled);
+
+        void set_immediate_mode(bool enabled);
     };
 
     /**
@@ -556,6 +558,12 @@ namespace Tins {
          * \param timeout The timeout to be set.
          */
         void set_timeout(unsigned timeout);
+
+        /**
+         * Sets the immediate mode option.
+         * \param enabled The immediate mode option value.
+         */
+        void set_immediate_mode(bool enabled);
     protected:
         friend class Sniffer;
         friend class FileSniffer;
@@ -564,7 +572,8 @@ namespace Tins {
             BUFFER_SIZE = 1,
             PROMISCUOUS = 2,
             RFMON = 4,
-            PACKET_FILTER = 8
+            PACKET_FILTER = 8,
+            IMMEDIATE_MODE = 16
         };
 
         void configure_sniffer_pre_activation(Sniffer& sniffer) const;
@@ -575,10 +584,11 @@ namespace Tins {
         uint32_t _flags;
         unsigned _snap_len;
         unsigned _buffer_size;
-        bool _promisc;
-        bool _rfmon;
         std::string _filter;
         unsigned _timeout;
+        bool _promisc;
+        bool _rfmon;
+        bool _immediate_mode;
     };
 
     template<class Functor>

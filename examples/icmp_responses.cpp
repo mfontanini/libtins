@@ -40,10 +40,6 @@ using namespace Tins;
 // and will respond with ICMP error packets whenever a packet is captured.
 // The response mechanism is pretty naive as it generates a packet which
 // has swapped HW and IP addresses (dst as src, src as dst).
-// 
-// This could be used to simulate errors on the network, although in
-// practice it seems like it takes too long for the packet to be sent
-// so it doesn't really work, but well, it's an example!
 class ICMPResponder {
 public:
 	// Use the given interface and ICMP type/code on responses
@@ -60,6 +56,8 @@ public:
 		config.set_promisc_mode(true);
 		// Use this packet filter
 		config.set_filter(filter);
+		// Use immediate mode (we don't want to buffer packets, we want the mright away).
+		config.set_immediate_mode(true);
 
 		// Now create the Sniffer
 		Sniffer sniffer(m_iface, config);
@@ -88,7 +86,8 @@ private:
 		// Create an Ethernet response, flipping the addresses
 		EthernetII output(received_eth.src_addr(), received_eth.dst_addr());
 		// Append an IP PDU, again flipping addresses.
-		output /= IP(received_ip.src_addr(), received_ip.dst_addr());
+		//output /= IP(received_ip.src_addr(), received_ip.dst_addr());
+		output /= IP(received_ip.src_addr(), "8.8.8.8");
 
 		// Now generate the ICMP layer using the type and code provided.
 		ICMP icmp;

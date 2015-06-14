@@ -341,6 +341,13 @@ void Sniffer::set_promisc_mode(bool promisc_enabled)
     }
 }
 
+void Sniffer::set_immediate_mode(bool enabled) 
+{
+    if (pcap_set_immediate_mode(get_pcap_handle(), enabled)) {
+        throw runtime_error(pcap_geterr(get_pcap_handle()));
+    }
+}
+
 void Sniffer::set_rfmon(bool rfmon_enabled)
 {
     #ifndef _WIN32
@@ -393,9 +400,10 @@ SnifferConfiguration::SnifferConfiguration() :
     _flags(0),
     _snap_len(DEFAULT_SNAP_LEN),
     _buffer_size(0),
+    _timeout(DEFAULT_TIMEOUT),
     _promisc(false),
     _rfmon(false),
-    _timeout(DEFAULT_TIMEOUT)
+    _immediate_mode(false)
 {
 
 }
@@ -412,6 +420,9 @@ void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) co
     }
     if ((_flags & RFMON) != 0) {
         sniffer.set_rfmon(_rfmon);
+    }
+    if ((_flags & IMMEDIATE_MODE) != 0) {
+        sniffer.set_immediate_mode(_immediate_mode);
     }
 }
 
@@ -465,6 +476,12 @@ void SnifferConfiguration::set_rfmon(bool enabled)
 void SnifferConfiguration::set_timeout(unsigned timeout)
 {
     _timeout = timeout;
+}
+
+void SnifferConfiguration::set_immediate_mode(bool enabled) 
+{
+    _flags |= IMMEDIATE_MODE;
+    _immediate_mode = enabled;
 }
 
 }
