@@ -390,11 +390,11 @@ const unsigned SnifferConfiguration::DEFAULT_SNAP_LEN = 65535;
 const unsigned SnifferConfiguration::DEFAULT_TIMEOUT = 1000;
 
 SnifferConfiguration::SnifferConfiguration() :
+    _flags(0),
     _snap_len(DEFAULT_SNAP_LEN),
-    _has_buffer_size(false), _buffer_size(0),
-    _has_promisc(false), _promisc(false),
-    _has_rfmon(false), _rfmon(false),
-    _has_filter(false),
+    _buffer_size(0),
+    _promisc(false),
+    _rfmon(false),
     _timeout(DEFAULT_TIMEOUT)
 {
 
@@ -404,20 +404,20 @@ void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) co
 {
     sniffer.set_snap_len(_snap_len);
     sniffer.set_timeout(_timeout);
-    if (_has_buffer_size) {
+    if ((_flags & BUFFER_SIZE) != 0) {
         sniffer.set_buffer_size(_buffer_size);
     }
-    if (_has_promisc) {
+    if ((_flags & PROMISCUOUS) != 0) {
         sniffer.set_promisc_mode(_promisc);
     }
-    if (_has_rfmon) {
+    if ((_flags & RFMON) != 0) {
         sniffer.set_rfmon(_rfmon);
     }
 }
 
 void SnifferConfiguration::configure_sniffer_pre_activation(FileSniffer& sniffer) const
 {
-    if (_has_filter) {
+    if ((_flags & PACKET_FILTER) != 0) {
         if (!sniffer.set_filter(_filter)) {
             throw std::runtime_error("Could not set the filter!");
         }
@@ -426,7 +426,7 @@ void SnifferConfiguration::configure_sniffer_pre_activation(FileSniffer& sniffer
 
 void SnifferConfiguration::configure_sniffer_post_activation(Sniffer& sniffer) const
 {
-    if (_has_filter) {
+    if ((_flags & PACKET_FILTER) != 0) {
         if (!sniffer.set_filter(_filter)) {
             throw std::runtime_error("Could not set the filter! ");
         }
@@ -440,25 +440,25 @@ void SnifferConfiguration::set_snap_len(unsigned snap_len)
 
 void SnifferConfiguration::set_buffer_size(unsigned buffer_size)
 {
-    _has_buffer_size = true;
+    _flags |= BUFFER_SIZE;
     _buffer_size = buffer_size;
 }
 
 void SnifferConfiguration::set_promisc_mode(bool enabled)
 {
-    _has_promisc = true;
+    _flags |= PROMISCUOUS;
     _promisc = enabled;
 }
 
 void SnifferConfiguration::set_filter(const std::string& filter)
 {
-    _has_filter = true;
+    _flags |= PACKET_FILTER;
     _filter = filter;
 }
 
 void SnifferConfiguration::set_rfmon(bool enabled)
 {
-    _has_rfmon = true;
+    _flags |= RFMON;
     _rfmon = enabled;
 }
 

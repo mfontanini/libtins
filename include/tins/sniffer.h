@@ -560,19 +560,23 @@ namespace Tins {
         friend class Sniffer;
         friend class FileSniffer;
 
+        enum Flags {
+            BUFFER_SIZE = 1,
+            PROMISCUOUS = 2,
+            RFMON = 4,
+            PACKET_FILTER = 8
+        };
+
         void configure_sniffer_pre_activation(Sniffer& sniffer) const;
         void configure_sniffer_pre_activation(FileSniffer& sniffer) const;
 
         void configure_sniffer_post_activation(Sniffer& sniffer) const;
 
+        uint32_t _flags;
         unsigned _snap_len;
-        bool _has_buffer_size;
         unsigned _buffer_size;
-        bool _has_promisc;
         bool _promisc;
-        bool _has_rfmon;
         bool _rfmon;
-        bool _has_filter;
         std::string _filter;
         unsigned _timeout;
     };
