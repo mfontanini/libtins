@@ -343,9 +343,14 @@ void Sniffer::set_promisc_mode(bool promisc_enabled)
 
 void Sniffer::set_immediate_mode(bool enabled) 
 {
+    // As of libpcap version 1.5.0 this function exists. Before, it was
+    // technically always immediate mode since capture used TPACKET_V1/2
+    // which doesn't do packet buffering.
+    #ifdef HAVE_PCAP_IMMEDIATE_MODE
     if (pcap_set_immediate_mode(get_pcap_handle(), enabled)) {
         throw runtime_error(pcap_geterr(get_pcap_handle()));
     }
+    #endif // HAVE_PCAP_IMMEDIATE_MODE
 }
 
 void Sniffer::set_rfmon(bool rfmon_enabled)
