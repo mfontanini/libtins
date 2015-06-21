@@ -180,7 +180,7 @@ NetworkInterface::NetworkInterface(IPv4Address ip) : iface_id(0) {
         Utils::route_entries(std::back_inserter(entries));
         for(entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
             if((ip_int & it->mask) == it->destination) {
-                if(!best_match || it->mask > best_match->mask) {
+                if(!best_match || it->mask > best_match->mask || it->metric < best_match->metric) {
                     best_match = &*it;
                 }
             }

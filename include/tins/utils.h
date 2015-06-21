@@ -94,6 +94,11 @@ namespace Tins {
              * This route entry's subnet mask.
              */
             IPv4Address mask;
+
+            /**
+             * This route entry's metric.
+             */
+            int metric;
         };
         
         /** 
@@ -371,6 +376,7 @@ void Tins::Utils::route_entries(ForwardIterator output) {
             else
                 entry.mask = IPv4Address(uint32_t());
             entry.interface = iface_name;
+            entry.metric = 0;
             *output++ = entry;
         }
         next += rtm->rtm_msglen;
@@ -388,12 +394,14 @@ void Tins::Utils::route_entries(ForwardIterator output) {
     
     for (DWORD i = 0; i < table->dwNumEntries; i++) {
         MIB_IPFORWARDROW *row = &table->table[i];
-        if(row->dwForwardType == MIB_IPROUTE_TYPE_INDIRECT) {
+        if(row->dwForwardType == MIB_IPROUTE_TYPE_INDIRECT || 
+                row->dwForwardType == MIB_IPROUTE_TYPE_DIRECT) {
             RouteEntry entry;
             entry.interface = NetworkInterface::from_index(row->dwForwardIfIndex).name();
             entry.destination = IPv4Address(row->dwForwardDest);
             entry.mask = IPv4Address(row->dwForwardMask);
             entry.gateway = IPv4Address(row->dwForwardNextHop);
+            entry.metric = row->dwForwardMetric1;
             *output++ = entry;
         }
     }
@@ -403,19 +411,22 @@ template<class ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
     using namespace Tins::Internals;
     std::ifstream input("/proc/net/route");
-    std::string destination, mask, gw;
+    std::string destination, mask, metric, gw;
     uint32_t dummy;
     skip_line(input);
     RouteEntry entry;
     while(input >> entry.interface >> destination >> gw) {
-        for(unsigned i(0); i < 5; ++i)
-            input >> mask;
+        for(unsigned i(0); i < 4; ++i)
+            input >> metric;
+        input >> mask;
         from_hex(destination, dummy);
         entry.destination = IPv4Address(dummy);
         from_hex(mask, dummy);
         entry.mask = IPv4Address(dummy);
         from_hex(gw, dummy);
         entry.gateway = IPv4Address(dummy);
+        from_hex(metric, dummy);
+        entry.metric = dummy;
         skip_line(input);
         *output = entry;
         ++output;

@@ -30,9 +30,11 @@ IF(libtins_FOUND)
         ${LIBTINS_CXX11_EXAMPLES}
         beacon_display
         portscan
+        route_table
     )
 
     ADD_EXECUTABLE(arpspoofing EXCLUDE_FROM_ALL arpspoofing.cpp)
+    ADD_EXECUTABLE(route_table EXCLUDE_FROM_ALL route_table.cpp)
     IF(HAVE_CXX11)
         ADD_EXECUTABLE(arpmonitor EXCLUDE_FROM_ALL arpmonitor.cpp)
         ADD_EXECUTABLE(dns_queries EXCLUDE_FROM_ALL dns_queries.cpp)
