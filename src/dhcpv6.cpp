@@ -58,7 +58,7 @@ DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz)
         buffer += ipaddress_type::address_size * 2;
         total_sz -= ipaddress_type::address_size * 2;
     }
-    options_size = total_sz;
+    //options_size = total_sz;
     while(total_sz) {
         if(total_sz < sizeof(uint16_t) * 2) 
             throw malformed_packet();
