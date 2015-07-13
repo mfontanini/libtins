@@ -82,6 +82,7 @@ DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz)
     
 void DHCPv6::add_option(const option &opt) {
     options_.push_back(opt);
+    options_size += opt.data_size() + sizeof(uint16_t) * 2;
 }
 
 const DHCPv6::option *DHCPv6::search_option(OptionTypes id) const {
