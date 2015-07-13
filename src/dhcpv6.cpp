@@ -58,7 +58,6 @@ DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz)
         buffer += ipaddress_type::address_size * 2;
         total_sz -= ipaddress_type::address_size * 2;
     }
-    options_size = total_sz;
     while(total_sz) {
         if(total_sz < sizeof(uint16_t) * 2) 
             throw malformed_packet();
@@ -82,6 +81,7 @@ DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz)
     
 void DHCPv6::add_option(const option &opt) {
     options_.push_back(opt);
+    options_size += opt.data_size() + sizeof(uint16_t) * 2;
 }
 
 const DHCPv6::option *DHCPv6::search_option(OptionTypes id) const {
