@@ -224,10 +224,7 @@ NetworkInterface::Info NetworkInterface::info() const {
     InterfaceInfoCollector collector(&info, iface_id, iface_name.c_str());
     info.is_up = false;
     Utils::generic_iface_loop(collector);
-    // If we didn't event get the hw address, this went wrong
-    if(!collector.found_hw) {
-        throw std::runtime_error("Error looking up interface address");
-    }
+
     return info;
 }
 
