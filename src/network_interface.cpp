@@ -225,6 +225,10 @@ NetworkInterface::Info NetworkInterface::info() const {
     info.is_up = false;
     Utils::generic_iface_loop(collector);
 
+    if(!collector.found_hw && !collector.found_ip) {
+        throw std::runtime_error("Error looking up interface address");
+    }
+
     return info;
 }
 
