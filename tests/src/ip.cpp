@@ -695,3 +695,26 @@ TEST_F(IPTest, SpoofedOptions) {
     EXPECT_EQ(3U, pdu.options().size());
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
 }
+
+TEST_F(IPTest, RemoveOption) {
+    IP ip(TINS_DEFAULT_TEST_IP);
+    PDU::serialization_type old_buffer = ip.serialize();
+
+    // Add a record route option
+    IP::record_route_type record_route(0x2d);
+    record_route.routes.push_back("192.168.2.3");
+    record_route.routes.push_back("192.168.5.1");
+    ip.record_route(record_route);
+
+    // Add a lsrr option
+    IP::lsrr_type lsrr(0x2d);
+    lsrr.routes.push_back("192.168.2.3");
+    lsrr.routes.push_back("192.168.5.1");
+    ip.lsrr(lsrr);
+    
+    EXPECT_TRUE(ip.remove_option(IP::option_identifier(IP::LSRR, IP::CONTROL, 1)));
+    EXPECT_TRUE(ip.remove_option(IP::option_identifier(IP::RR, IP::CONTROL, 0)));
+
+    PDU::serialization_type new_buffer = ip.serialize();
+    EXPECT_EQ(old_buffer, new_buffer);
+}

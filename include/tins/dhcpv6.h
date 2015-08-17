@@ -816,15 +816,26 @@ public:
     void add_option(const option &opt);
     
     /**
-     * \brief Searchs for an option that matchs the given flag.
+     * \brief Removes a DHCPv6 option.
+     * 
+     * If there are multiple options of the given type, only the first one
+     * will be removed.
+     *
+     * \param type The type of the option to be removed.
+     * \return true if the option was removed, false otherwise.
+     */
+    bool remove_option(OptionTypes type);
+
+    /**
+     * \brief Searchs for an option that matchs the given type.
      * 
      * If the option is not found, a null pointer is returned. 
      * Deleting the returned pointer will result in <b>undefined 
      * behaviour</b>.
      * 
-     * \param id The option identifier to be searched.
+     * \param type The option identifier to be searched.
      */
-    const option *search_option(OptionTypes id) const;
+    const option *search_option(OptionTypes type) const;
 
     // PDU stuff
     
@@ -859,6 +870,8 @@ public:
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *);
     uint8_t* write_option(const option &option, uint8_t* buffer) const;
+    options_type::const_iterator search_option_iterator(OptionTypes type) const;
+    options_type::iterator search_option_iterator(OptionTypes type);
     
     template<template <typename> class Functor>
     const option *safe_search_option(OptionTypes opt, uint32_t size) const {

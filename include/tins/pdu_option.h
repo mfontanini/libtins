@@ -523,5 +523,25 @@ private:
         data_type* big_buffer_ptr;
     } payload_;
 };
+
+namespace Internals {
+    /*
+     * \cond
+     */
+    template <typename Option>
+    struct option_type_equality_comparator {
+        option_type_equality_comparator(typename Option::option_type type) : type(type) { }
+
+        bool operator()(const Option& opt) const {
+            return opt.option() == type;
+        }
+
+        typename Option::option_type type; 
+    };
+    /*
+     * \endcond
+     */
+} // Internals
+
 } // namespace Tins
 #endif // TINS_PDU_OPTION_H

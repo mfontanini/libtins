@@ -334,3 +334,17 @@ TEST_F(DHCPv6Test, Client_Server_ID_DUIDEN) {
     EXPECT_EQ(tmp.id, tmp2.id);
     EXPECT_EQ(tmp.data, tmp2.data);
 }
+
+TEST_F(DHCPv6Test, RemoveOption) {
+    DHCPv6 dhcp;
+    PDU::serialization_type old_buffer = dhcp.serialize();
+
+    dhcp.server_unicast("fe00:0a9d:dd23::1");
+    dhcp.preference(12);
+
+    EXPECT_TRUE(dhcp.remove_option(DHCPv6::UNICAST));
+    EXPECT_TRUE(dhcp.remove_option(DHCPv6::PREFERENCE));
+
+    PDU::serialization_type new_buffer = dhcp.serialize();
+    EXPECT_EQ(old_buffer, new_buffer);
+}

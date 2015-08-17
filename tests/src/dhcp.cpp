@@ -276,7 +276,7 @@ TEST_F(DHCPTest, ConstructorFromBuffer) {
     DHCP dhcp1(expected_packet, sizeof(expected_packet));
     std::vector<IPv4Address> routers, expected_routers;
     expected_routers.push_back("192.168.0.1");
-     expected_routers.push_back("127.0.0.1");
+    expected_routers.push_back("127.0.0.1");
 
     EXPECT_EQ(dhcp1.opcode(), DHCP::DISCOVER);
     EXPECT_EQ(dhcp1.htype(), 1);
@@ -305,4 +305,15 @@ TEST_F(DHCPTest, Serialize) {
     test_equals(dhcp1, dhcp2);
 }
 
+TEST_F(DHCPTest, RemoveOption) {
+    DHCP dhcp;
+    PDU::serialization_type old_buffer = dhcp.serialize();
+    dhcp.domain_name("libtins.github.io");
+    dhcp.server_identifier("192.168.0.1");
 
+    EXPECT_TRUE(dhcp.remove_option(DHCP::DOMAIN_NAME));
+    EXPECT_TRUE(dhcp.remove_option(DHCP::DHCP_SERVER_IDENTIFIER));
+
+    PDU::serialization_type new_buffer = dhcp.serialize();
+    EXPECT_EQ(old_buffer, new_buffer);
+}

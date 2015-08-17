@@ -854,6 +854,17 @@ public:
     #endif
 
     /**
+     * \brief Removes an ICMPv6 option.
+     * 
+     * If there are multiple options of the given type, only the first one
+     * will be removed.
+     *
+     * \param type The type of the option to be removed.
+     * \return true if the option was removed, false otherwise.
+     */
+    bool remove_option(OptionTypes type);
+
+    /**
      * \brief Returns the header size.
      *
      * This metod overrides PDU::header_size. This size includes the
@@ -877,9 +888,9 @@ public:
      * Deleting the returned pointer will result in <b>undefined 
      * behaviour</b>.
      * 
-     * \param id The option identifier to be searched.
+     * \param type The option identifier to be searched.
      */
-    const option *search_option(OptionTypes id) const;
+    const option *search_option(OptionTypes type) const;
 
     /**
      * \sa PDU::clone
@@ -1309,6 +1320,8 @@ private:
     void parse_options(const uint8_t *&buffer, uint32_t &total_sz);
     void add_addr_list(uint8_t type, const addr_list_type &value);
     addr_list_type search_addr_list(OptionTypes type) const;
+    options_type::const_iterator search_option_iterator(OptionTypes type) const;
+    options_type::iterator search_option_iterator(OptionTypes type);
     
     template<template <typename> class Functor>
     const option *safe_search_option(OptionTypes opt, uint32_t size) const {

@@ -297,18 +297,40 @@ void IP::add_option(const option &opt) {
     _ip_options.push_back(opt);
 }
 
-void IP::internal_add_option(const option &opt) {
-    _options_size += static_cast<uint16_t>(1 + opt.data_size());
+void IP::update_padded_options_size() {
     uint8_t padding = _options_size % 4;
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
 }
 
-const IP::option *IP::search_option(option_identifier id) const {
-    for(options_type::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
-        if(it->option() == id)
-            return &(*it);
+void IP::internal_add_option(const option &opt) {
+    _options_size += static_cast<uint16_t>(1 + opt.data_size());
+    update_padded_options_size();
+}
+
+bool IP::remove_option(option_identifier id) {
+    options_type::iterator iter = search_option_iterator(id);
+    if (iter == _ip_options.end()) {
+        return false;
     }
-    return 0;
+    _options_size -= static_cast<uint16_t>(1 + iter->data_size());
+    _ip_options.erase(iter);
+    update_padded_options_size();
+    return true;
+}
+
+const IP::option *IP::search_option(option_identifier id) const {
+    options_type::const_iterator iter = search_option_iterator(id);
+    return (iter != _ip_options.end()) ? &*iter : 0;
+}
+
+IP::options_type::const_iterator IP::search_option_iterator(option_identifier id) const {
+    Internals::option_type_equality_comparator<option> comparator(id);
+    return find_if(_ip_options.begin(), _ip_options.end(), comparator);
+}
+
+IP::options_type::iterator IP::search_option_iterator(option_identifier id) {
+    Internals::option_type_equality_comparator<option> comparator(id);
+    return find_if(_ip_options.begin(), _ip_options.end(), comparator);
 }
 
 uint8_t* IP::write_option(const option &opt, uint8_t* buffer) {

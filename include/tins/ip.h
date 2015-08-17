@@ -81,7 +81,7 @@ namespace Tins {
             END = 0,
             NOOP = 1,
             SEC = 2,
-            LSSR = 3,
+            LSRR = 3,
             TIMESTAMP = 4,
             EXTSEC = 5,
             RR = 7,
@@ -444,6 +444,17 @@ namespace Tins {
         #endif
 
         /**
+         * \brief Removes an IP option.
+         * 
+         * If there are multiple options of the given type, only the first one
+         * will be removed.
+         *
+         * \param type The type of the option to be removed.
+         * \return true if the option was removed, false otherwise.
+         */
+        bool remove_option(option_identifier id);
+
+        /**
          * \brief Searchs for an option that matchs the given flag.
          * 
          * If the option is not found, a null pointer is returned. 
@@ -653,11 +664,15 @@ namespace Tins {
         void add_route_option(option_identifier id, const generic_route_option_type &data);
         generic_route_option_type search_route_option(option_identifier id) const;
         void checksum(uint16_t new_check);
+        options_type::const_iterator search_option_iterator(option_identifier id) const;
+        options_type::iterator search_option_iterator(option_identifier id);
+        void update_padded_options_size();
 
         iphdr _ip;
         uint16_t _options_size, _padded_options_size;
         options_type _ip_options;
     };
-}
+
+} // Tins
 
 #endif // TINS_IP_H

@@ -407,7 +407,6 @@ TEST_F(Dot11BeaconTest, RSNInformationTest) {
     EXPECT_EQ(rsn_info.akm_cyphers(), found.akm_cyphers());
 }
 
-
 TEST_F(Dot11BeaconTest, PCAPLoad1) {
     const uint8_t buffer[] = {
         128, 0, 0, 0, 255, 255, 255, 255, 255, 255, 244, 236, 56, 254, 77, 
@@ -458,6 +457,20 @@ TEST_F(Dot11BeaconTest, Serialize) {
     PDU::serialization_type buffer = pdu.serialize();
     ASSERT_EQ(sizeof(expected_packet), buffer.size());
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
+}
+
+TEST_F(Dot11BeaconTest, RemoveOption) {
+    Dot11Beacon dot11;
+    PDU::serialization_type old_buffer = dot11.serialize();
+
+    dot11.challenge_text("libtins ftw");
+    dot11.power_constraint(0x1e);
+
+    EXPECT_TRUE(dot11.remove_option(Dot11::CHALLENGE_TEXT));
+    EXPECT_TRUE(dot11.remove_option(Dot11::POWER_CONSTRAINT));
+
+    PDU::serialization_type new_buffer = dot11.serialize();
+    EXPECT_EQ(old_buffer, new_buffer);
 }
 
 #endif // HAVE_DOT11

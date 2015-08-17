@@ -410,14 +410,25 @@ public:
     #endif
 
     /**
+     * \brief Removes a Dot11 option.
+     * 
+     * If there are multiple options of the given type, only the first one
+     * will be removed.
+     *
+     * \param type The type of the option to be removed.
+     * \return true if the option was removed, false otherwise.
+     */
+    bool remove_option(OptionTypes type);
+
+    /**
      * \brief Looks up a tagged option in the option list.
      * 
      * The returned pointer <b>must not</b> be free'd.
      * 
-     * \param opt The option identifier.
+     * \param type The option identifier.
      * \return The option found, or 0 if no such option has been set.
      */
-    const option *search_option(OptionTypes opt) const;
+    const option *search_option(OptionTypes type) const;
 
     /**
      * \brief Getter for the PDU's type.
@@ -511,6 +522,8 @@ private:
     
     void internal_add_option(const option &opt);
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    options_type::const_iterator search_option_iterator(OptionTypes type) const;
+    options_type::iterator search_option_iterator(OptionTypes type);
 
 
     ieee80211_header _header;

@@ -469,3 +469,20 @@ TEST_F(ICMPv6Test, ChecksumCalculation) {
     const ICMPv6& icmp = eth.rfind_pdu<ICMPv6>();
     EXPECT_EQ(0x68bd, icmp.checksum());
 }
+
+TEST_F(ICMPv6Test, RemoveOption) {
+    ICMPv6 icmp;
+    PDU::serialization_type old_buffer = icmp.serialize();
+
+    ICMPv6::recursive_dns_type data(0x9283712);
+    data.servers.push_back("827d:adae::1");
+    data.servers.push_back("2929:1234:fefe::2");
+    icmp.recursive_dns_servers(data);
+    icmp.timestamp(0x2837d6aaa231ULL);
+
+    EXPECT_TRUE(icmp.remove_option(ICMPv6::TIMESTAMP));
+    EXPECT_TRUE(icmp.remove_option(ICMPv6::RECURSIVE_DNS_SERV));
+
+    PDU::serialization_type new_buffer = icmp.serialize();
+    EXPECT_EQ(old_buffer, new_buffer);
+}

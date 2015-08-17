@@ -263,3 +263,22 @@ TEST_F(TCPTest, SpoofedOptions) {
     EXPECT_EQ(3U, pdu.options().size());
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
 }
+
+TEST_F(TCPTest, RemoveOption) {
+    TCP tcp(22, 987);
+    uint8_t a[] = { 1,2,3,4,5,6 };
+    // Add an option
+    tcp.mss(1400);
+    PDU::serialization_type old_buffer = tcp.serialize();
+    
+    // Add options and remove them. The serializations before and after should be equal.
+    tcp.add_option(TCP::option(TCP::SACK, 250, a, a + sizeof(a)));
+    tcp.add_option(TCP::option(TCP::SACK_OK));
+    tcp.add_option(TCP::option(TCP::NOP));
+    EXPECT_TRUE(tcp.remove_option(TCP::SACK));
+    EXPECT_TRUE(tcp.remove_option(TCP::SACK_OK));
+    EXPECT_TRUE(tcp.remove_option(TCP::NOP));
+
+    PDU::serialization_type new_buffer = tcp.serialize();
+    EXPECT_EQ(old_buffer, new_buffer);
+}

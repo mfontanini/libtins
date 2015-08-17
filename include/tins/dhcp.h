@@ -210,6 +210,17 @@ namespace Tins {
                 _options.push_back(std::move(opt));
             }
         #endif 
+
+        /**
+         * \brief Removes a DHCP option.
+         * 
+         * If there are multiple options of the given type, only the first one
+         * will be removed.
+         *
+         * \param type The type of the option to be removed.
+         * \return true if the option was removed, false otherwise.
+         */
+        bool remove_option(OptionTypes type);
     
         /**
          * \brief Searchs for an option that matchs the given flag.
@@ -501,6 +512,8 @@ namespace Tins {
         
         void internal_add_option(const option &opt);
         serialization_type serialize_list(const std::vector<ipaddress_type> &ip_list);
+        options_type::const_iterator search_option_iterator(OptionTypes opt) const;
+        options_type::iterator search_option_iterator(OptionTypes opt);
         
         options_type _options;
         uint32_t _size;
