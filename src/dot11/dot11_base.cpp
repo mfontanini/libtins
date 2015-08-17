@@ -106,16 +106,35 @@ void Dot11::internal_add_option(const option &opt) {
     _options_size += static_cast<uint32_t>(opt.data_size() + sizeof(uint8_t) * 2);
 }
 
+bool Dot11::remove_option(OptionTypes type) {
+    options_type::iterator iter = search_option_iterator(type);
+    if (iter == _options.end()) {
+        return false;
+    }
+    _options_size -= static_cast<uint32_t>(iter->data_size() + sizeof(uint8_t) * 2);
+    _options.erase(iter);
+    return true;
+}
+
 void Dot11::add_option(const option &opt) {
     internal_add_option(opt);
     _options.push_back(opt);
 }
 
-const Dot11::option *Dot11::search_option(OptionTypes opt) const {
-    for(std::list<option>::const_iterator it = _options.begin(); it != _options.end(); ++it)
-        if(it->option() == (uint8_t)opt)
-            return &(*it);
-    return 0;
+const Dot11::option *Dot11::search_option(OptionTypes type) const {
+    // Search for the iterator. If we found something, return it, otherwise return nullptr.
+    options_type::const_iterator iter = search_option_iterator(type);
+    return (iter != _options.end()) ? &*iter : 0;
+}
+
+Dot11::options_type::const_iterator Dot11::search_option_iterator(OptionTypes type) const {
+    Internals::option_type_equality_comparator<option> comparator(static_cast<uint8_t>(type));
+    return find_if(_options.begin(), _options.end(), comparator);
+}
+
+Dot11::options_type::iterator Dot11::search_option_iterator(OptionTypes type) {
+    Internals::option_type_equality_comparator<option> comparator(static_cast<uint8_t>(type));
+    return find_if(_options.begin(), _options.end(), comparator);
 }
 
 void Dot11::protocol(small_uint<2> new_proto) {

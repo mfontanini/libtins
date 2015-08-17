@@ -468,6 +468,17 @@ namespace Tins {
         #endif
 
         /**
+         * \brief Removes a TCP option.
+         * 
+         * If there are multiple options of the given type, only the first one
+         * will be removed.
+         *
+         * \param type The type of the option to be removed.
+         * \return true if the option was removed, false otherwise.
+         */
+        bool remove_option(OptionTypes type);
+
+        /**
          * \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. This size includes the
@@ -494,11 +505,11 @@ namespace Tins {
         PDUType pdu_type() const { return PDU::TCP; }
 
         /**
-         * \brief Searchs for an option that matchs the given flag.
-         * \param opt_flag The flag to be searched.
+         * \brief Searchs for an option that matchs the given type.
+         * \param type The option type to be searched.
          * \return A pointer to the option, or 0 if it was not found.
          */
-        const option *search_option(OptionTypes opt) const;
+        const option *search_option(OptionTypes type) const;
         
         /**
          * \sa PDU::clone
@@ -568,6 +579,9 @@ namespace Tins {
         void internal_add_option(const option &option);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         void checksum(uint16_t new_check);
+        void update_options_size();
+        options_type::const_iterator search_option_iterator(OptionTypes type) const;
+        options_type::iterator search_option_iterator(OptionTypes type);
         
         uint8_t *write_option(const option &opt, uint8_t *buffer);
 
@@ -575,6 +589,6 @@ namespace Tins {
         uint16_t _options_size, _total_options_size;
         options_type _options;
     };
-}
+} // Tins
 
 #endif // TINS_TCP_H

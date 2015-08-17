@@ -28,6 +28,7 @@
  */
 
 #include <cstring>
+#include <algorithm>
 #include <cassert>
 #include "tcp.h"
 #include "ip.h"
@@ -36,6 +37,9 @@
 #include "rawpdu.h"
 #include "utils.h"
 #include "exceptions.h"
+#include "internals.h"
+
+using std::find_if;
 
 namespace Tins {
 
@@ -321,12 +325,20 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
     }
 }
 
-const TCP::option *TCP::search_option(OptionTypes opt) const {
-    for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-        if(it->option() == opt)
-            return &(*it);
-    }
-    return 0;
+const TCP::option *TCP::search_option(OptionTypes type) const {
+    // Search for the iterator. If we found something, return it, otherwise return nullptr.
+    options_type::const_iterator iter = search_option_iterator(type);
+    return (iter != _options.end()) ? &*iter : 0;
+}
+
+TCP::options_type::const_iterator TCP::search_option_iterator(OptionTypes type) const {
+    Internals::option_type_equality_comparator<option> comparator(type);
+    return find_if(_options.begin(), _options.end(), comparator);
+}
+
+TCP::options_type::iterator TCP::search_option_iterator(OptionTypes type) {
+    Internals::option_type_equality_comparator<option> comparator(type);
+    return find_if(_options.begin(), _options.end(), comparator);
 }
 
 /* options */
@@ -347,18 +359,35 @@ uint8_t *TCP::write_option(const option &opt, uint8_t *buffer) {
     }
 }
 
+void TCP::update_options_size() {
+    uint8_t padding = _options_size & 3;
+    _total_options_size = (padding) ? (_options_size - padding + 4) : _options_size;
+}
+
 void TCP::internal_add_option(const option &opt) {
-    uint8_t padding;
-    
     _options_size += sizeof(uint8_t);
     // SACK_OK contains length but not data....
-    if(opt.data_size() || opt.option() == SACK_OK)
-        _options_size += sizeof(uint8_t);
-        
-    _options_size += static_cast<uint16_t>(opt.data_size());
-    
-    padding = _options_size & 3;
-    _total_options_size = (padding) ? _options_size - padding + 4 : _options_size;
+    if(opt.data_size() || opt.option() == SACK_OK) {
+        _options_size += sizeof(uint8_t);    
+        _options_size += static_cast<uint16_t>(opt.data_size());
+    }
+    update_options_size();
+}
+
+bool TCP::remove_option(OptionTypes type) {
+    options_type::iterator iter = search_option_iterator(type);
+    if (iter == _options.end()) {
+        return false;
+    }
+    _options_size -= sizeof(uint8_t);
+    // SACK_OK contains length but not data....
+    if(iter->data_size() || iter->option() == SACK_OK) {
+        _options_size -= sizeof(uint8_t);
+        _options_size -= static_cast<uint16_t>(iter->data_size());
+    }
+    _options.erase(iter);
+    update_options_size();
+    return true;
 }
 
 bool TCP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {

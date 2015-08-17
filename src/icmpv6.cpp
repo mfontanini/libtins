@@ -263,18 +263,36 @@ void ICMPv6::internal_add_option(const option &option) {
     _options_size += static_cast<uint32_t>(option.data_size() + sizeof(uint8_t) * 2);
 }
 
+bool ICMPv6::remove_option(OptionTypes type) {
+    options_type::iterator iter = search_option_iterator(type);
+    if (iter == _options.end()) {
+        return false;
+    }
+    _options_size -= static_cast<uint32_t>(iter->data_size() + sizeof(uint8_t) * 2);
+    _options.erase(iter);
+    return true;
+}
+
 uint8_t *ICMPv6::write_option(const option &opt, uint8_t *buffer) {
     *buffer++ = opt.option();
     *buffer++ = static_cast<uint8_t>((opt.length_field() + sizeof(uint8_t) * 2) / 8);
     return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
 }
 
-const ICMPv6::option *ICMPv6::search_option(OptionTypes id) const {
-    for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-        if(it->option() == id)
-            return &*it;
-    }
-    return 0;
+const ICMPv6::option *ICMPv6::search_option(OptionTypes type) const {
+    // Search for the iterator. If we found something, return it, otherwise return nullptr.
+    options_type::const_iterator iter = search_option_iterator(type);
+    return (iter != _options.end()) ? &*iter : 0;
+}
+
+ICMPv6::options_type::const_iterator ICMPv6::search_option_iterator(OptionTypes type) const {
+    Internals::option_type_equality_comparator<option> comparator(type);
+    return find_if(_options.begin(), _options.end(), comparator);
+}
+
+ICMPv6::options_type::iterator ICMPv6::search_option_iterator(OptionTypes type) {
+    Internals::option_type_equality_comparator<option> comparator(type);
+    return find_if(_options.begin(), _options.end(), comparator);
 }
 
 // ********************************************************************

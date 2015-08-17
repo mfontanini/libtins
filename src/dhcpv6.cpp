@@ -32,6 +32,8 @@
 #include "dhcpv6.h"
 #include "exceptions.h"
 
+using std::find_if;
+
 namespace Tins {
 DHCPv6::DHCPv6() : options_size() {
     std::fill(header_data, header_data + sizeof(header_data), 0);
@@ -84,12 +86,30 @@ void DHCPv6::add_option(const option &opt) {
     options_size += opt.data_size() + sizeof(uint16_t) * 2;
 }
 
-const DHCPv6::option *DHCPv6::search_option(OptionTypes id) const {
-    for(options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
-        if(it->option() == static_cast<uint16_t>(id))
-            return &*it;
+bool DHCPv6::remove_option(OptionTypes type) {
+    options_type::iterator iter = search_option_iterator(type);
+    if (iter == options_.end()) {
+        return false;
     }
-    return 0;
+    options_size -= iter->data_size() + sizeof(uint16_t) * 2;
+    options_.erase(iter);
+    return true;
+}
+
+const DHCPv6::option *DHCPv6::search_option(OptionTypes type) const {
+    // Search for the iterator. If we found something, return it, otherwise return nullptr.
+    options_type::const_iterator iter = search_option_iterator(type);
+    return (iter != options_.end()) ? &*iter : 0;
+}
+
+DHCPv6::options_type::const_iterator DHCPv6::search_option_iterator(OptionTypes type) const {
+    Internals::option_type_equality_comparator<option> comparator(type);
+    return find_if(options_.begin(), options_.end(), comparator);
+}
+
+DHCPv6::options_type::iterator DHCPv6::search_option_iterator(OptionTypes type) {
+    Internals::option_type_equality_comparator<option> comparator(type);
+    return find_if(options_.begin(), options_.end(), comparator);
 }
 
 uint8_t* DHCPv6::write_option(const option &opt, uint8_t* buffer) const {
@@ -151,8 +171,9 @@ void DHCPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
         buffer = link_addr.copy(buffer);
         buffer = peer_addr.copy(buffer);
     }
-    for(options_type::const_iterator it = options_.begin(); it != options_.end(); ++it)
+    for(options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
         buffer = write_option(*it, buffer);
+    }
 }
 
 

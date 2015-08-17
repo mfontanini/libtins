@@ -33,11 +33,13 @@
 #include "endianness.h"
 #include "dhcp.h"
 #include "ethernetII.h"
+#include "internals.h"
 #include "exceptions.h"
 
 using std::string;
 using std::list;
 using std::runtime_error;
+using std::find_if;
 
 namespace Tins {
 // Magic cookie: uint32_t. 
@@ -89,12 +91,30 @@ void DHCP::internal_add_option(const option &opt) {
     _size += static_cast<uint32_t>(opt.data_size() + (sizeof(uint8_t) << 1));
 }
 
-const DHCP::option *DHCP::search_option(OptionTypes opt) const {
-    for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-        if(it->option() == opt)
-            return &(*it);
+bool DHCP::remove_option(OptionTypes type) {
+    options_type::iterator iter = search_option_iterator(type);
+    if (iter == _options.end()) {
+        return false;
     }
-    return 0;
+    _size -= static_cast<uint32_t>(iter->data_size() + (sizeof(uint8_t) << 1));
+    _options.erase(iter);
+    return true;
+}
+
+const DHCP::option *DHCP::search_option(OptionTypes opt) const {
+    // Search for the iterator. If we found something, return it, otherwise return nullptr.
+    options_type::const_iterator iter = search_option_iterator(opt);
+    return (iter != _options.end()) ? &*iter : 0;
+}
+
+DHCP::options_type::const_iterator DHCP::search_option_iterator(OptionTypes opt) const {
+    Internals::option_type_equality_comparator<option> comparator(opt);
+    return find_if(_options.begin(), _options.end(), comparator);
+}
+
+DHCP::options_type::iterator DHCP::search_option_iterator(OptionTypes opt) {
+    Internals::option_type_equality_comparator<option> comparator(opt);
+    return find_if(_options.begin(), _options.end(), comparator);
 }
 
 void DHCP::type(Flags type) {
