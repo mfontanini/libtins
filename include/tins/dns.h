@@ -304,7 +304,7 @@ namespace Tins {
             /**
              * Setter for the time-to-live field.
              */
-            void ttl(uint16_t data) {
+            void ttl(uint32_t data) {
                 ttl_ = data;
             }
         private:
