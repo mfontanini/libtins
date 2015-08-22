@@ -102,14 +102,16 @@ IPv4Reassembler::packet_status IPv4Reassembler::process(PDU &pdu) {
     if(ip && ip->inner_pdu()) {
         // There's fragmentation
         if(ip->is_fragmented()) {
+            key_type key = make_key(ip);
             // Create it or look it up, it's the same
-            Internals::IPv4Stream &stream = streams[make_key(ip)];
+            Internals::IPv4Stream &stream = streams[key];
             stream.add_fragment(ip);
             if(stream.is_complete()) {
                 PDU *pdu = stream.allocate_pdu();
+                // Erase this stream, since it's already assembled
+                streams.erase(key);
                 // The packet is corrupt
                 if(!pdu)  {
-                    streams.erase(make_key(ip));
                     return FRAGMENTED;
                 }
                 ip->inner_pdu(pdu);
