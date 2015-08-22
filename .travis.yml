@@ -1,5 +1,7 @@
 language: cpp
 
+sudo: false
+
 compiler:
   - gcc
   - clang
@@ -8,8 +10,11 @@ os:
   - linux
   - osx
 
-install:
-  - if [ $TRAVIS_OS_NAME == linux ]; then sudo apt-get update && sudo apt-get install libpcap-dev libssl-dev; fi
+addons:
+  apt:
+    packages:
+    - libpcap-dev
+    - libssl-dev
 
 before_script:
   - mkdir build
