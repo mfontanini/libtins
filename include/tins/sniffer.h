@@ -156,6 +156,13 @@ namespace Tins {
          * Sniffing will stop when either max_packets are sniffed(if it is != 0),
          * or when the functor returns false.
          *
+         * Note that the pcap handle stored in a BaseSniffer will always be the
+         * same. This means that if you start sniffing using sniff_loop, then stop
+         * and at some point in the future you call sniff_loop again, you will keep 
+         * iterating over the same handle. If the handle points to a pcap file, then
+         * you will continue processing packets from it. If the handle points to 
+         * a network device, you will keep sniffing from it.
+         *
          * This method catches both malformed_packet and pdu_not_found exceptions,
          * which allows writing much cleaner code, since you can call PDU::rfind_pdu
          * without worrying about catching the exception that can be thrown. This
