@@ -57,7 +57,7 @@ class PDU;
  * UDP udp = get_packet();
  *
  * // Create the filter. We'll be expecting Ethernet packets.
- * OfflinePacketFilter filter("ip and port 80", DataLinkLayer<EthernetII>());
+ * OfflinePacketFilter filter("ip and port 80", DataLinkType<EthernetII>());
  * 
  * // We can use this directly over the inner PDU (assuming it has one)
  * // See the notes on the efficiency of doing it this way.
