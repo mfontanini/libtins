@@ -100,6 +100,7 @@ void PPI::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
 }
 
 void PPI::parse_80211(const uint8_t* buffer, uint32_t total_sz) {
+    #ifdef HAVE_DOT11
     if (_data.size() >= 13) {
         // Is FCS-at-end on?
         if ((_data[12] & 1) == 1) {
@@ -111,6 +112,7 @@ void PPI::parse_80211(const uint8_t* buffer, uint32_t total_sz) {
         }
     }
     inner_pdu(Dot11::from_bytes(buffer, total_sz));
+    #endif // HAVE_DOT11
 }
 
 } // Tins
