@@ -120,6 +120,7 @@ public:
     }
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *);
+    void parse_80211(const uint8_t* buffer, uint32_t total_sz);
 
     struct header {
         uint8_t version, flags;

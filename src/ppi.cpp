@@ -63,7 +63,7 @@ PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
         switch(dlt()) {
             case DLT_IEEE802_11:
                 #ifdef HAVE_DOT11
-                    inner_pdu(Dot11::from_bytes(buffer, total_sz));
+                    parse_80211(buffer, total_sz);
                 #else
                     throw protocol_disabled();
                 #endif
@@ -99,4 +99,18 @@ void PPI::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     throw std::runtime_error("PPI serialization not supported");
 }
 
+void PPI::parse_80211(const uint8_t* buffer, uint32_t total_sz) {
+    if (_data.size() >= 13) {
+        // Is FCS-at-end on?
+        if ((_data[12] & 1) == 1) {
+            // We need to reduce the total size since we're skipping the FCS
+            if (total_sz < sizeof(uint32_t)) {
+                throw malformed_packet();
+            }
+            total_sz -= sizeof(uint32_t);
+        }
+    }
+    inner_pdu(Dot11::from_bytes(buffer, total_sz));
 }
+
+} // Tins
