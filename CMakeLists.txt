@@ -172,6 +172,8 @@ ENDIF()
 # CMake project configuration export
 # **********************************
 
+INCLUDE(CMakePackageConfigHelpers)
+
 # Add all targets to the build-tree export set
 EXPORT(
     TARGETS tins
@@ -184,10 +186,12 @@ EXPORT(PACKAGE libtins)
 
 # Create the libtinsConfig.cmake and libtinsConfigVersion.cmake files
 # for the build tree
-SET(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
-CONFIGURE_FILE(
+SET(CONF_INCLUDE_DIRS "include")
+CONFIGURE_PACKAGE_CONFIG_FILE(
     cmake/libtinsConfig.cmake.in
     "${PROJECT_BINARY_DIR}/libtinsConfig.cmake" @ONLY
+    INSTALL_DESTINATION CMake
+    PATH_VARS CONF_INCLUDE_DIRS
 )
 CONFIGURE_FILE(
     cmake/libtinsConfigVersion.cmake.in
