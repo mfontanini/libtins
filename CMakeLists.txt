@@ -189,7 +189,7 @@ EXPORT(PACKAGE libtins)
 SET(CONF_INCLUDE_DIRS "include")
 CONFIGURE_PACKAGE_CONFIG_FILE(
     cmake/libtinsConfig.cmake.in
-    "${PROJECT_BINARY_DIR}/libtinsConfig.cmake" @ONLY
+    "${PROJECT_BINARY_DIR}/libtinsConfig.cmake"
     INSTALL_DESTINATION CMake
     PATH_VARS CONF_INCLUDE_DIRS
 )
