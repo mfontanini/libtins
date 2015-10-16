@@ -35,8 +35,11 @@
 
 namespace Tins {
 
-PKTAP::PKTAP(const uint8_t* buffer, uint32_t total_sz)
-{
+PKTAP::PKTAP() {
+    memset(&header_, 0, sizeof(header_));
+}
+
+PKTAP::PKTAP(const uint8_t* buffer, uint32_t total_sz) {
     if (total_sz < sizeof(pktap_header)) {
         throw malformed_packet();
     }
@@ -58,13 +61,11 @@ PKTAP::PKTAP(const uint8_t* buffer, uint32_t total_sz)
     }
 }
 
-uint32_t PKTAP::header_size() const
-{
+uint32_t PKTAP::header_size() const {
     return sizeof(header_);
 }
 
-void PKTAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent)
-{
+void PKTAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     throw std::runtime_error("PKTAP cannot be serialized");
 }
 
