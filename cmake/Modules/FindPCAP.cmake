@@ -82,3 +82,10 @@ mark_as_advanced(
     PCAP_INCLUDE_DIR
     PCAP_LIBRARY
 )
+
+# create imported target for libpcap dependency
+if (PCAP_FOUND AND NOT TARGET PCAP)
+   add_library(PCAP IMPORTED SHARED)
+   set_target_properties(PCAP PROPERTIES IMPORTED_LOCATION ${PCAP_LIBRARY})
+   set(PCAP_LIBRARIES PCAP)
+endif()

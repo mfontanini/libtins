@@ -16,3 +16,6 @@ endif()
 
 # These are IMPORTED targets created by libtinsTargets.cmake
 set(LIBTINS_LIBRARIES tins)
+
+include(CMakeFindDependencyMacro)
+find_dependency(PCAP)
