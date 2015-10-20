@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.1)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 PROJECT(libtins)
 
 # Compile in release mode by default
