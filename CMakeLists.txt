@@ -135,10 +135,11 @@ CONFIGURE_FILE(
 )
 
 # Support for pkg-config
+# use 'pcfiledir' pkg-config variable to avoid absolute paths
 SET(CMAKE_INSTALL_LIBDIR lib)
-SET(pkgconfig_prefix      ${CMAKE_INSTALL_PREFIX})
-SET(pkgconfig_exec_prefix ${CMAKE_INSTALL_PREFIX})
-SET(pkgconfig_libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+SET(pkgconfig_prefix      "\${pcfiledir}/../..")
+SET(pkgconfig_libdir      "\${prefix}/lib")
+SET(pkgconfig_includedir  "\${prefix}/include")
 SET(pkgconfig_version     ${LIBTINS_VERSION})
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libtins.pc.in
                 ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc @ONLY)
