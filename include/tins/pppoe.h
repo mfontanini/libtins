@@ -58,7 +58,7 @@ public:
             AC_COOKIE = 0x401,
             VENDOR_SPECIFIC = 0x501,
             RELAY_SESSION_ID = 0x101,
-            SERVICE_NAME_ERROR = 0x201,
+            SERVICE_NAME_ERROR = 0x102,
             AC_SYSTEM_ERROR = 0x202,
             GENERIC_ERROR = 0x302
         #else
