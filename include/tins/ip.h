@@ -48,6 +48,13 @@ namespace Tins {
      * By default, IP PDUs are initialized, setting TTL to IP::DEFAULT_TTL,
      * id field to 1 and version to 4. Taking this into account, users
      * should set destination and source port and would be enough to send one.
+     *
+     * When IP is the lowest layer on a packet, and the packet is serialized
+     * this willc heck if the source address is different than 0.0.0.0. If it is,
+     * the address of the interface in which the packet is going to be sent
+     * is retrieved (by using the routing table and the destination address)
+     * and set as the source address. If you don't want this behaviour, simply
+     * set the source address to 0.0.0.0.
      */
     class IP : public PDU {
     public:

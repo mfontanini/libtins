@@ -426,13 +426,11 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     }
     memset(buffer + sizeof(_ip) + _options_size, 0, _padded_options_size - _options_size);
 
-    if(parent) {
-        uint32_t check = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
-        while (check >> 16)
-            check = (check & 0xffff) + (check >> 16);
-        checksum(~check);
-        ((iphdr*)buffer)->check = _ip.check;
-    }
+    uint32_t check = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
+    while (check >> 16)
+        check = (check & 0xffff) + (check >> 16);
+    checksum(~check);
+    ((iphdr*)buffer)->check = _ip.check;
 }
 
 bool IP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {

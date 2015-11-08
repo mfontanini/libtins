@@ -26,6 +26,7 @@ public:
         fragmented_ether_ip_packet[], tot_len_zero_packet[];
     
     void test_equals(const IP &ip1, const IP &ip2);
+    void test_overwrite_source_address(IP& ip);
 };
 
 const uint8_t IPTest::expected_packet[] = { 
@@ -718,3 +719,42 @@ TEST_F(IPTest, RemoveOption) {
     PDU::serialization_type new_buffer = ip.serialize();
     EXPECT_EQ(old_buffer, new_buffer);
 }
+
+void IPTest::test_overwrite_source_address(IP& ip) {
+    const uint8_t expected_output[] = {
+        69,0,0,40,0,1,0,0,128,6,38,186,1,2,3,4,8,8,8,8,0,32,0,12,0,
+        0,0,0,0,0,0,0,80,0,127,166,27,253,0,0
+    };
+    // Add TCP so we can check if the timestamp is correctly calculated
+    ip /= TCP(12, 32);
+
+    PDU::serialization_type buffer = ip.serialize();
+    EXPECT_EQ(IPv4Address("1.2.3.4"), ip.src_addr());
+    EXPECT_EQ(0x26ba, ip.checksum());
+
+    vector<uint8_t> output_buffer(expected_output, 
+                                  expected_output + sizeof(expected_output));
+    EXPECT_EQ(output_buffer, buffer);
+}
+
+TEST_F(IPTest, OverwriteSourceAddress) {
+    IP ip("8.8.8.8");
+    ip.src_addr("1.2.3.4");
+    test_overwrite_source_address(ip);
+}
+
+TEST_F(IPTest, OverwriteSourceAddressUsingConstructor) {
+    IP ip("8.8.8.8", "1.2.3.4");
+    test_overwrite_source_address(ip);
+}
+
+TEST_F(IPTest, OverwriteSourceAddressConstructingFromBuffer) {
+    // Only the expected packet's IP layer
+    const uint8_t expected_output[] = {
+        69,0,0,20,0,1,0,0,128,0,0,0,1,2,3,4,8,8,8,8
+    };
+    IP ip(expected_output, sizeof(expected_output));
+    test_overwrite_source_address(ip);
+}
+
+
