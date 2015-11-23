@@ -47,6 +47,8 @@ namespace Tins {
     class SnifferIterator;
     class SnifferConfiguration;
 
+    typedef pcap_direction_t tins_direction_t;
+
     /**
      * \class BaseSniffer
      * \brief Base class for sniffers.
@@ -211,6 +213,14 @@ namespace Tins {
          * \param ms The amount of milliseconds.
          */
         void set_timeout(int ms);
+
+        /**
+         * \brief Sets direction for the sniffer.
+         *
+         * This calls pcap_setdirection using the provided parameter.
+         * \param d The direction for the sniffer.
+         */
+        int set_direction(tins_direction_t d);
 
         /**
          * \brief Sets whether to extract RawPDUs or fully parsed packets.
@@ -567,6 +577,12 @@ namespace Tins {
         void set_timeout(unsigned timeout);
 
         /**
+         * Sets the direction option.
+         * \param direction The direction to be set.
+         */
+        void set_direction(tins_direction_t direction);
+
+        /**
          * Sets the immediate mode option.
          * \param enabled The immediate mode option value.
          */
@@ -596,6 +612,7 @@ namespace Tins {
         bool _promisc;
         bool _rfmon;
         bool _immediate_mode;
+        tins_direction_t _direction;
     };
 
     template<class Functor>

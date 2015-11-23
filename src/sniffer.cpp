@@ -224,6 +224,10 @@ void BaseSniffer::set_timeout(int ms) {
     pcap_set_timeout(handle, ms);
 }
 
+int BaseSniffer::set_direction(tins_direction_t d) {
+	return pcap_setdirection(handle, d);
+}
+
 // ****************************** Sniffer ******************************
 
 Sniffer::Sniffer(const string &device, const SnifferConfiguration& configuration)
@@ -408,7 +412,8 @@ SnifferConfiguration::SnifferConfiguration() :
     _timeout(DEFAULT_TIMEOUT),
     _promisc(false),
     _rfmon(false),
-    _immediate_mode(false)
+    _immediate_mode(false),
+    _direction(PCAP_D_INOUT)
 {
 
 }
@@ -417,6 +422,7 @@ void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) co
 {
     sniffer.set_snap_len(_snap_len);
     sniffer.set_timeout(_timeout);
+
     if ((_flags & BUFFER_SIZE) != 0) {
         sniffer.set_buffer_size(_buffer_size);
     }
@@ -446,6 +452,9 @@ void SnifferConfiguration::configure_sniffer_post_activation(Sniffer& sniffer) c
         if (!sniffer.set_filter(_filter)) {
             throw std::runtime_error("Could not set the filter! ");
         }
+    }
+    if (sniffer.set_direction(_direction) < 0) {
+        throw std::runtime_error("Could not set the direction! ");
     }
 }
 
@@ -481,6 +490,11 @@ void SnifferConfiguration::set_rfmon(bool enabled)
 void SnifferConfiguration::set_timeout(unsigned timeout)
 {
     _timeout = timeout;
+}
+
+void SnifferConfiguration::set_direction(tins_direction_t direction)
+{
+    _direction = direction;
 }
 
 void SnifferConfiguration::set_immediate_mode(bool enabled) 
