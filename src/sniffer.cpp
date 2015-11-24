@@ -224,7 +224,7 @@ void BaseSniffer::set_timeout(int ms) {
     pcap_set_timeout(handle, ms);
 }
 
-int BaseSniffer::set_direction(tins_direction_t d) {
+int BaseSniffer::set_direction(pcap_direction_t d) {
 	return pcap_setdirection(handle, d);
 }
 
@@ -492,7 +492,7 @@ void SnifferConfiguration::set_timeout(unsigned timeout)
     _timeout = timeout;
 }
 
-void SnifferConfiguration::set_direction(tins_direction_t direction)
+void SnifferConfiguration::set_direction(pcap_direction_t direction)
 {
     _direction = direction;
 }
