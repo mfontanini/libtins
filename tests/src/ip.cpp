@@ -737,6 +737,8 @@ void IPTest::test_overwrite_source_address(IP& ip) {
     EXPECT_EQ(output_buffer, buffer);
 }
 
+// Only run these tests on non-osx nor freebsd
+#if !(__FreeBSD__ || defined(__FreeBSD_kernel__) || __APPLE__)
 TEST_F(IPTest, OverwriteSourceAddress) {
     IP ip("8.8.8.8");
     ip.src_addr("1.2.3.4");
@@ -756,5 +758,4 @@ TEST_F(IPTest, OverwriteSourceAddressConstructingFromBuffer) {
     IP ip(expected_output, sizeof(expected_output));
     test_overwrite_source_address(ip);
 }
-
-
+#endif 
