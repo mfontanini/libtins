@@ -161,7 +161,9 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
             inner_pdu()->pdu_type()
         );
-        payload_type(static_cast<uint16_t>(flag));
+        if (flag != Constants::Ethernet::UNKNOWN) {
+            payload_type(static_cast<uint16_t>(flag));
+        }
     }
     memcpy(buffer, &_eth, sizeof(ethhdr));
     uint32_t trailer = trailer_size();

@@ -158,3 +158,13 @@ TEST_F(EthernetIITest, EliminateEthernetPadding) {
     ASSERT_TRUE(eth.find_pdu<TCP>() != NULL);
     ASSERT_FALSE(eth.find_pdu<RawPDU>() != NULL);
 }
+
+TEST_F(EthernetIITest, SerializePreservesGivenPayloadType) {
+    EthernetII eth;
+    uint32_t payload_size = 100;
+    uint8_t payload[100] = {0};
+    eth /= RawPDU(payload, payload_size);
+    eth.payload_type(p_type);
+    eth.serialize();
+    EXPECT_EQ(p_type, eth.payload_type());
+}
