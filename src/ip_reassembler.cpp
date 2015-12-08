@@ -52,7 +52,7 @@ void IPv4Stream::add_fragment(IP *ip) {
         return;
     fragments.insert(it, IPv4Fragment(ip->inner_pdu(), offset));
     received_size += ip->inner_pdu()->size();
-    if(!extract_more_frag(ip)) {
+    if(ip->flags() != IP::MORE_FRAGMENTS) {
         total_size = offset + ip->inner_pdu()->size();
         received_end = true;
     }
@@ -83,12 +83,9 @@ PDU *IPv4Stream::allocate_pdu() const {
 }
 
 uint16_t IPv4Stream::extract_offset(const IP *ip) {
-    return (ip->frag_off() & 0x1fff) * 8;
+    return ip->fragment_offset() * 8;
 }
 
-bool IPv4Stream::extract_more_frag(const IP *ip) {
-    return (ip->frag_off() & 0x2000) != 0;
-}
 } // namespace Internals
 
 IPv4Reassembler::IPv4Reassembler(overlapping_technique technique)

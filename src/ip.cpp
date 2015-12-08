@@ -157,9 +157,7 @@ void IP::init_ip_fields() {
 }
 
 bool IP::is_fragmented() const {
-    // It's 0 if offset == 0 && more_frag == 0
-    // It's 0x4000 if dont_fragment = 1
-    return frag_off() != 0 && frag_off() != 0x4000;
+    return flags() == IP::MORE_FRAGMENTS || fragment_offset() != 0;
 }
 
 /* Setters */
@@ -178,6 +176,14 @@ void IP::id(uint16_t new_id) {
 
 void IP::frag_off(uint16_t new_frag_off) {
     _ip.frag_off = Endian::host_to_be(new_frag_off);
+}
+
+void IP::fragment_offset(small_uint<13> new_frag_off) {
+    _ip.frag_off = (_ip.frag_off & 0xe0) | Endian::host_to_be<uint16_t>(new_frag_off);
+}
+
+void IP::flags(Flags new_flags) {
+    _ip.frag_off = (_ip.frag_off & 0xff1f) | (new_flags << 5);
 }
 
 void IP::ttl(uint8_t new_ttl) {
