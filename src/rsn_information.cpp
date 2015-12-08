@@ -68,19 +68,21 @@ void RSNInformation::init(const uint8_t *buffer, uint32_t total_sz) {
     total_sz -= sizeof(uint16_t);
     
     std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
-    group_suite((RSNInformation::CypherSuites)uint32_t_buffer);
+    group_suite((RSNInformation::CypherSuites)Endian::le_to_host(uint32_t_buffer));
     buffer += sizeof(uint32_t);
     total_sz -= sizeof(uint32_t);
 
     std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
+    uint16_t_buffer = Endian::le_to_host(uint16_t_buffer);
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
     
-    if(uint16_t_buffer * sizeof(uint32_t) > total_sz)
+    if(uint16_t_buffer * sizeof(uint32_t) > total_sz) 
         throw malformed_packet();
     total_sz -= uint16_t_buffer * sizeof(uint32_t);
     while(uint16_t_buffer--) {
         std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
+        uint32_t_buffer = Endian::le_to_host(uint32_t_buffer);
         add_pairwise_cypher((RSNInformation::CypherSuites)uint32_t_buffer);
         buffer += sizeof(uint32_t);
     }
@@ -89,12 +91,14 @@ void RSNInformation::init(const uint8_t *buffer, uint32_t total_sz) {
     std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
     buffer += sizeof(uint16_t);
     total_sz -= sizeof(uint16_t);
+    uint16_t_buffer = Endian::le_to_host(uint16_t_buffer);
+
     if(uint16_t_buffer * sizeof(uint32_t) > total_sz)
         throw malformed_packet();
     total_sz -= uint16_t_buffer * sizeof(uint32_t);
     while(uint16_t_buffer--) {
         std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
-        add_akm_cypher((RSNInformation::AKMSuites)uint32_t_buffer);
+        add_akm_cypher((RSNInformation::AKMSuites)Endian::le_to_host(uint32_t_buffer));
         buffer += sizeof(uint32_t);
     }
     check_size<uint16_t>(total_sz);
@@ -112,15 +116,15 @@ void RSNInformation::add_akm_cypher(AKMSuites akm) {
 }
 
 void RSNInformation::group_suite(CypherSuites group) {
-    _group_suite = group;
+    _group_suite = static_cast<CypherSuites>(Endian::host_to_le<uint32_t>(group));
 }
 
 void RSNInformation::version(uint16_t ver) {
-    _version = ver;
+    _version = Endian::host_to_le(ver);
 }
 
 void RSNInformation::capabilities(uint16_t cap) {
-    _capabilities = cap;
+    _capabilities = Endian::host_to_le(cap);
 }
 
 RSNInformation::serialization_type RSNInformation::serialize() const {
@@ -128,30 +132,30 @@ RSNInformation::serialization_type RSNInformation::serialize() const {
     size += (sizeof(uint16_t) << 1); // 2 lists count.
     size += sizeof(uint32_t) * (_akm_cyphers.size() + _pairwise_cyphers.size());
 
-    const size_t pairwise_cyphers_size = _pairwise_cyphers.size();
-    const size_t akm_cyphers_size = _akm_cyphers.size();
-    uint16_t capabilities = Endian::host_to_le(_capabilities);
-    uint16_t version = Endian::host_to_le(_version);
+    const uint16_t pairwise_cyphers_size = Endian::host_to_le<uint16_t>(_pairwise_cyphers.size());
+    const uint16_t akm_cyphers_size = Endian::host_to_le<uint16_t>(_akm_cyphers.size());
     
     serialization_type buffer(size);
     serialization_type::value_type *ptr = &buffer[0];
-    std::memcpy(ptr, &version, sizeof(version));
+    std::memcpy(ptr, &_version, sizeof(_version));
     ptr += sizeof(uint16_t);
     std::memcpy(ptr, &_group_suite, sizeof(uint32_t));
     ptr += sizeof(uint32_t);
-    std::memcpy(ptr, &pairwise_cyphers_size, sizeof(uint16_t));
+    std::memcpy(ptr, &pairwise_cyphers_size, sizeof(pairwise_cyphers_size));
     ptr += sizeof(uint16_t);
     for(cyphers_type::const_iterator it = _pairwise_cyphers.begin(); it != _pairwise_cyphers.end(); ++it) {
-        std::memcpy(ptr, &*it, sizeof(uint32_t));
+        const uint32_t value = Endian::host_to_le<uint32_t>(*it);
+        std::memcpy(ptr, &value, sizeof(uint32_t));
         ptr += sizeof(uint32_t);
     }
-    std::memcpy(ptr, &akm_cyphers_size, sizeof(uint16_t));
+    std::memcpy(ptr, &akm_cyphers_size, sizeof(akm_cyphers_size));
     ptr += sizeof(uint16_t);
     for(akm_type::const_iterator it = _akm_cyphers.begin(); it != _akm_cyphers.end(); ++it) {
-        std::memcpy(ptr, &*it, sizeof(uint32_t));
+        const uint32_t value = Endian::host_to_le<uint32_t>(*it);
+        std::memcpy(ptr, &value, sizeof(uint32_t));
         ptr += sizeof(uint32_t);
     }
-    std::memcpy(ptr, &capabilities, sizeof(uint16_t));
+    std::memcpy(ptr, &_capabilities, sizeof(uint16_t));
 
     return buffer;
 }

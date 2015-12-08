@@ -147,19 +147,21 @@ public:
      * \brief Getter for the group suite field.
      * \return The group suite field.
      */
-    CypherSuites group_suite() const { return _group_suite; }
+    CypherSuites group_suite() const { 
+        return static_cast<CypherSuites>(Endian::le_to_host<uint32_t>(_group_suite)); 
+    }
 
     /**
      * \brief Getter for the version field.
      * \return The version field.
      */
-    uint16_t version() const { return _version; }
+    uint16_t version() const { return Endian::le_to_host(_version); }
     
     /**
      * \brief Getter for the capabilities field.
      * \return The version field.
      */
-    uint16_t capabilities() const { return _capabilities; }
+    uint16_t capabilities() const { return Endian::le_to_host(_capabilities); }
 
     /**
      * \brief Getter for the pairwise cypher suite list.
