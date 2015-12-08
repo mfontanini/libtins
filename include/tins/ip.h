@@ -329,7 +329,7 @@ namespace Tins {
          * \return The IP flags field
          */
         Flags flags() const {
-            return static_cast<Flags>((_ip.frag_off & 0xe0) >> 5); 
+            return static_cast<Flags>(Endian::be_to_host(_ip.frag_off) >> 13); 
         }
 
         /**

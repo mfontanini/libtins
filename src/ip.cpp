@@ -179,11 +179,13 @@ void IP::frag_off(uint16_t new_frag_off) {
 }
 
 void IP::fragment_offset(small_uint<13> new_frag_off) {
-    _ip.frag_off = (_ip.frag_off & 0xe0) | Endian::host_to_be<uint16_t>(new_frag_off);
+    uint16_t value = (Endian::be_to_host(_ip.frag_off) & 0xe000) | new_frag_off;
+    _ip.frag_off = Endian::host_to_be(value);
 }
 
 void IP::flags(Flags new_flags) {
-    _ip.frag_off = (_ip.frag_off & 0xff1f) | (new_flags << 5);
+    uint16_t value = (Endian::be_to_host(_ip.frag_off) & 0x1fff) | (new_flags << 13);
+    _ip.frag_off = Endian::host_to_be(value);
 }
 
 void IP::ttl(uint8_t new_ttl) {

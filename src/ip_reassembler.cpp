@@ -112,7 +112,8 @@ IPv4Reassembler::packet_status IPv4Reassembler::process(PDU &pdu) {
                     return FRAGMENTED;
                 }
                 ip->inner_pdu(pdu);
-                ip->frag_off(0);
+                ip->fragment_offset(0);
+                ip->flags(static_cast<IP::Flags>(0));
                 return REASSEMBLED;
             }
             else
