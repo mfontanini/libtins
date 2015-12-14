@@ -215,16 +215,29 @@ namespace Tins {
          */
         std::string to_string(PDU::PDUType pduType);
 
-        /** \brief Does the 16 bits sum of all 2 bytes elements between start and end.
+        /** 
+         * \brief Does the 16 bits sum of all 2 bytes elements between start and end.
          *
          * This is the checksum used by IP, UDP and TCP. If there's and odd number of
-         * bytes, the last one is padded and added to the checksum. The checksum is performed
-         * using network endiannes.
+         * bytes, the last one is padded and added to the checksum. 
          * \param start The pointer to the start of the buffer.
          * \param end The pointer to the end of the buffer(excluding the last element).
-         * \return Returns the checksum between start and end(non inclusive).
+         * \return Returns the checksum between start and end (non inclusive) 
+         * in network endian
          */
         uint32_t do_checksum(const uint8_t *start, const uint8_t *end);
+
+        /** 
+         * \brief Computes the 16 bit sum of the input buffer.
+         *
+         * If there's and odd number of bytes in the buffer, the last one is padded and 
+         * added to the checksum. 
+         * \param start The pointer to the start of the buffer.
+         * \param end The pointer to the end of the buffer(excluding the last element).
+         * \return Returns the checksum between start and end (non inclusive) 
+         * in network endian
+         */
+        uint16_t sum_range(const uint8_t *start, const uint8_t *end);
 
         /** \brief Performs the pseudo header checksum used in TCP and UDP PDUs.
          *

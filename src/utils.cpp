@@ -221,6 +221,10 @@ std::string to_string(PDU::PDUType pduType) {
 }
 
 uint32_t do_checksum(const uint8_t *start, const uint8_t *end) {
+    return Endian::host_to_be<uint32_t>(sum_range(start, end));
+}
+
+uint16_t sum_range(const uint8_t *start, const uint8_t *end) {
     uint32_t checksum(0);
     const uint8_t *last = end;
     uint16_t buffer = 0;
@@ -229,16 +233,20 @@ uint32_t do_checksum(const uint8_t *start, const uint8_t *end) {
 
     if(((end - start) & 1) == 1) {
         last = end - 1;
-        padding = *(end - 1) << 8;
+        padding = *(end - 1);
     }
 
     while(ptr < last) {
         memcpy(&buffer, ptr, sizeof(uint16_t));
-        checksum += Endian::host_to_be(buffer);
+        checksum += buffer;
         ptr += sizeof(uint16_t);
     }
 
-    return checksum + padding;
+    checksum += padding;
+    while (checksum >> 16) {
+        checksum = (checksum & 0xffff) + (checksum >> 16);
+    }
+    return checksum;  
 }
 
 uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
