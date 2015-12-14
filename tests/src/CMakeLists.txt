@@ -58,6 +58,7 @@ ADD_CUSTOM_TARGET(
     Dot1QTest
     EthernetTest
     HWAddressTest
+    ICMPExtensionTest
     ICMPTest
     ICMPv6Test
     IPTest
@@ -100,6 +101,7 @@ ADD_EXECUTABLE(DNSTest EXCLUDE_FROM_ALL dns.cpp)
 ADD_EXECUTABLE(Dot1QTest EXCLUDE_FROM_ALL dot1q.cpp)
 ADD_EXECUTABLE(EthernetTest EXCLUDE_FROM_ALL ethernetII.cpp)
 ADD_EXECUTABLE(HWAddressTest EXCLUDE_FROM_ALL hwaddress.cpp)
+ADD_EXECUTABLE(ICMPExtensionTest EXCLUDE_FROM_ALL icmp_extension.cpp)
 ADD_EXECUTABLE(ICMPTest EXCLUDE_FROM_ALL icmp.cpp)
 ADD_EXECUTABLE(ICMPv6Test EXCLUDE_FROM_ALL icmpv6.cpp)
 ADD_EXECUTABLE(IPTest EXCLUDE_FROM_ALL ip.cpp)
@@ -179,6 +181,7 @@ ADD_TEST(Dot11RTS Dot11RTSTest)
 ADD_TEST(Dot1Q Dot1QTest)
 ADD_TEST(Ethernet EthernetTest)
 ADD_TEST(HWAddress HWAddressTest)
+ADD_TEST(ICMPExtension ICMPExtensionTest)
 ADD_TEST(ICMP ICMPTest)
 ADD_TEST(ICMPv6 ICMPv6Test)
 ADD_TEST(IP IPTest)

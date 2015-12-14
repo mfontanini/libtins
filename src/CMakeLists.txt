@@ -25,6 +25,7 @@ ADD_LIBRARY(
     dot1q.cpp
     eapol.cpp
     ethernetII.cpp
+    icmp_extension.cpp
     icmp.cpp
     icmpv6.cpp
     internals.cpp
