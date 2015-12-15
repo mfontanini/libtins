@@ -26,12 +26,38 @@ public:
     typedef std::vector<uint8_t> serialization_type;
 
     /**
+     * \brief Default constructor
+     */
+    ICMPExtension();
+
+    /**
      * \brief Constructs an ICMP extension from a buffer
      *
      * \param buffer The input buffer
      * \param total_sz The input buffer size
      */
     ICMPExtension(const uint8_t* buffer, uint32_t total_sz);
+
+    /**
+     * \brief Setter for the extension class field
+     *
+     * \param value The new extension class field value
+     */
+    void extension_class(uint8_t value);
+
+    /**
+     * \brief Setter for the extension sub-type field
+     *
+     * \param value The new extension sub-type field value
+     */
+    void extension_type(uint8_t value);
+
+    /**
+     * \brief Setter for the payload field
+     *
+     * \param value The new payload field value
+     */
+    void payload(const payload_type& value);
 
     /**
      * \brief Getter for the extension class field
@@ -116,7 +142,14 @@ public:
     ICMPExtensionsStructure(const uint8_t* buffer, uint32_t total_sz);
 
     /**
-     * \brief Setter for the checksum field
+     * \brief Setter for the version field
+     *
+     * \param value The new version field value
+     */
+    void version(small_uint<4> value);
+
+    /**
+     * \brief Setter for the reserved field
      *
      * \param value The new reserved field value
      */

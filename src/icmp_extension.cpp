@@ -12,6 +12,11 @@ const uint32_t ICMPExtension::BASE_HEADER_SIZE = sizeof(uint16_t) + sizeof(uint8
 
 // ICMPExtension class
 
+ICMPExtension::ICMPExtension() 
+: extension_class_(0), extension_type_(0) {
+
+} 
+
 ICMPExtension::ICMPExtension(const uint8_t* buffer, uint32_t total_sz) {
     // Check for the base header (u16 length + u8 clss + u8 type)
     if (total_sz < BASE_HEADER_SIZE) {
@@ -29,6 +34,18 @@ ICMPExtension::ICMPExtension(const uint8_t* buffer, uint32_t total_sz) {
     }
     length -= BASE_HEADER_SIZE;
     payload_.assign(buffer, buffer + length);
+}
+
+void ICMPExtension::extension_class(uint8_t value) {
+    extension_class_ = value;
+}
+
+void ICMPExtension::extension_type(uint8_t value) {
+    extension_type_ = value;
+}
+
+void ICMPExtension::payload(const payload_type& value) {
+    payload_ = value;
 }
 
 uint32_t ICMPExtension::size() const {
@@ -85,6 +102,13 @@ void ICMPExtensionsStructure::reserved(small_uint<12> value) {
     current_value &= 0xf000;
     current_value |= value;
     version_and_reserved_ = Endian::host_to_be(current_value);
+}
+
+void ICMPExtensionsStructure::version(small_uint<4> value) {
+    uint16_t current_value = Endian::be_to_host(version_and_reserved_);
+    current_value &= 0xfff;
+    current_value |= value << 12;
+    version_and_reserved_ = Endian::host_to_be(current_value);   
 }
 
 bool ICMPExtensionsStructure::validate_extensions(const uint8_t* buffer, uint32_t total_sz) {

@@ -27,6 +27,28 @@ TEST_F(ICMPExtensionTest, ConstructorFromBuffer) {
     );
 }
 
+TEST_F(ICMPExtensionTest, ExtensionClass) {
+    ICMPExtension extension;
+    extension.extension_class(126);
+    EXPECT_EQ(126, extension.extension_class());
+}
+
+TEST_F(ICMPExtensionTest, ExtensionType) {
+    ICMPExtension extension;
+    extension.extension_type(126);
+    EXPECT_EQ(126, extension.extension_type());
+}
+
+TEST_F(ICMPExtensionTest, Payload) {
+    ICMPExtension::payload_type payload;
+    payload.push_back(0x92);
+    payload.push_back(0x1a);
+    payload.push_back(0xde);
+    ICMPExtension extension;
+    extension.payload(payload);
+    EXPECT_EQ(payload, extension.payload());
+}
+
 TEST_F(ICMPExtensionTest, ExtensionStructureValidation) {
     const uint8_t input[] = { 32, 0, 197, 95, 0, 8, 1, 1, 24, 150, 1, 1 };
     EXPECT_TRUE(ICMPExtensionsStructure::validate_extensions(input, sizeof(input)));
@@ -62,4 +84,12 @@ TEST_F(ICMPExtensionTest, Reserved) {
     structure.reserved(0xdea);
     EXPECT_EQ(0xdea, structure.reserved());
     EXPECT_EQ(2, structure.version());
+}
+
+TEST_F(ICMPExtensionTest, Version) {
+    ICMPExtensionsStructure structure;
+    structure.reserved(0xdea);
+    structure.version(0xf);
+    EXPECT_EQ(0xdea, structure.reserved());
+    EXPECT_EQ(0xf, structure.version());
 }
