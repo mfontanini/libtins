@@ -6,6 +6,7 @@
 #include "ip.h"
 #include "ethernetII.h"
 #include "utils.h"
+#include "rawpdu.h"
 
 using namespace std;
 using namespace Tins;
@@ -285,4 +286,23 @@ TEST_F(ICMPTest, ConstructorFromBuffer) {
         ICMP icmp2(&buffer[0], (uint32_t)buffer.size());
         test_equals(icmp1, icmp2);
     }
+}
+
+TEST_F(ICMPTest, ExtensionsParsingWithoutALengthField) {
+    const uint8_t packet[] = { 11, 0, 205, 4, 0, 0, 0, 0, 69, 0, 0, 40, 165, 76, 0, 0, 1, 17, 247, 111, 12, 4, 4, 4, 12, 1, 1, 1, 165, 75, 130, 155, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 197, 95, 0, 8, 1, 1, 24, 150, 1, 1 };
+    const uint8_t encapsulated[] = { 69, 0, 0, 40, 165, 76, 0, 0, 1, 17, 247, 111, 12, 4, 4, 4, 12, 1, 1, 1, 165, 75, 130, 155, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    const uint8_t ext[] = { 0, 8, 1, 1, 24, 150, 1, 1 };
+    ICMP icmp(packet, sizeof(packet));
+    ICMPExtensionsStructure extensions = icmp.extensions();
+    ASSERT_EQ(1, extensions.extensions().size());
+    EXPECT_EQ(
+        ICMPExtension::payload_type(ext, ext + sizeof(ext)), 
+        extensions.extensions().begin()->serialize()
+    );
+    const RawPDU* raw = icmp.find_pdu<RawPDU>();
+    ASSERT_TRUE(raw != 0);
+    EXPECT_EQ(
+        RawPDU::payload_type(encapsulated, encapsulated + sizeof(encapsulated)),
+        raw->payload()
+    );
 }

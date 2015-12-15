@@ -46,6 +46,7 @@
 #include "pdu.h"
 #include "endianness.h"
 #include "ip_address.h"
+#include "icmp_extension.h"
 
 namespace Tins {
 
@@ -297,12 +298,19 @@ namespace Tins {
             return address_type(Endian::be_to_host(_icmp.un.gateway)); 
         }
 
-         /**
-          * \brief Getter for the pointer field.
-          *
-          * \return Returns the pointer field value.
-          */
-        uint8_t pointer() const { return this->_icmp.un.pointer; }
+        /**
+         * \brief Getter for the pointer field.
+         *
+         * \return Returns the pointer field value.
+         */
+        uint8_t pointer() const { return this->_icmp.un.rfc4884.pointer; }
+
+        /**
+         * \brief Getter for the length field.
+         *
+         * \return Returns the length field value.
+         */
+        uint8_t length() const { return this->_icmp.un.rfc4884.length; }
         
         /**
           * \brief Getter for the mtu field.
@@ -358,6 +366,8 @@ namespace Tins {
          */
         bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
 
+        const ICMPExtensionsStructure& extensions() { return extensions_; }
+
         /**
          * \brief Getter for the PDU's type.
          *
@@ -372,6 +382,8 @@ namespace Tins {
             return new ICMP(*this);
         }
     private:
+        static const uint32_t EXTENSION_PAYLOAD_LIMIT;
+
         TINS_BEGIN_PACK
         struct icmphdr {
             uint8_t	type;
@@ -387,7 +399,11 @@ namespace Tins {
                     uint16_t unused;
                     uint16_t mtu;
                 } frag;
-                uint8_t pointer;
+                struct {
+                    uint8_t pointer;
+                    uint8_t length;
+                    uint16_t unused;
+                } rfc4884;
             } un;
         } TINS_END_PACK;
 
@@ -400,8 +416,11 @@ namespace Tins {
          */
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
+        void try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz);
+
         icmphdr _icmp;
         uint32_t _orig_timestamp_or_address_mask, _recv_timestamp, _trans_timestamp;
+        ICMPExtensionsStructure extensions_;
     };
 }
 

@@ -41,6 +41,9 @@
 #include "icmp.h"
 
 namespace Tins {
+
+const uint32_t ICMP::EXTENSION_PAYLOAD_LIMIT = 128;
+
 ICMP::ICMP(Flags flag) 
 : _orig_timestamp_or_address_mask(), _recv_timestamp(), _trans_timestamp()
 {
@@ -76,8 +79,11 @@ ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz)
         total_sz -= sizeof(uint32_t);
         buffer += sizeof(uint32_t);
     }
-    if(total_sz)
+    // Attempt to parse ICMP extensions
+    try_parse_extensions(buffer, total_sz);
+    if (total_sz) {
         inner_pdu(new RawPDU(buffer, total_sz));
+    }
 }
 
 void ICMP::code(uint8_t new_code) {
@@ -109,7 +115,7 @@ void ICMP::mtu(uint16_t new_mtu) {
 }
 
 void ICMP::pointer(uint8_t new_pointer) {
-    _icmp.un.pointer = new_pointer;
+    _icmp.un.rfc4884.pointer = new_pointer;
 }
 
 void ICMP::original_timestamp(uint32_t new_timestamp) {
@@ -220,6 +226,38 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
 
     _icmp.check = Endian::host_to_be<uint16_t>(~checksum);
     memcpy(buffer + 2, &_icmp.check, sizeof(uint16_t));
+}
+
+void ICMP::try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz) {
+    if (total_sz == 0) {
+        return;
+    }
+    // Check if this is one of the types defined in RFC 4884
+    if (type() == DEST_UNREACHABLE || type() == TIME_EXCEEDED || type() == PARAM_PROBLEM) {
+        uint32_t actual_length = length() * sizeof(uint32_t);
+        // Check if we actually have this amount of data and whether it's more than
+        // the minimum encapsulated packet size
+        const uint8_t* extensions_ptr;
+        uint32_t extensions_size;
+        if (actual_length < total_sz && actual_length >= EXTENSION_PAYLOAD_LIMIT) {
+            extensions_ptr = buffer + actual_length;
+            extensions_size = total_sz - actual_length;
+        }
+        else if (total_sz > EXTENSION_PAYLOAD_LIMIT) {
+            // This packet might be non-rfc compliant. In that case the length 
+            // field can contain garbage.
+            extensions_ptr = buffer + EXTENSION_PAYLOAD_LIMIT;
+            extensions_size = total_sz - EXTENSION_PAYLOAD_LIMIT;
+        }
+        else {
+            // No more special cases, this doesn't have extensions
+            return;
+        }
+        if (ICMPExtensionsStructure::validate_extensions(extensions_ptr, extensions_size)) {
+            extensions_ = ICMPExtensionsStructure(extensions_ptr, extensions_size);
+            total_sz -= extensions_size;
+        }
+    }
 }
 
 bool ICMP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
