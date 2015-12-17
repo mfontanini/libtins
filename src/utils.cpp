@@ -233,7 +233,7 @@ uint16_t sum_range(const uint8_t *start, const uint8_t *end) {
 
     if(((end - start) & 1) == 1) {
         last = end - 1;
-        padding = *(end - 1);
+        padding = Endian::host_to_le<uint16_t>(*(end - 1));
     }
 
     while(ptr < last) {
