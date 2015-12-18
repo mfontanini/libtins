@@ -190,6 +190,13 @@ public:
     const extensions_type& extensions() const { return extensions_; }
 
     /**
+     * \brief Adds an extension to this structure
+     *
+     * \param extension The extension to be added;
+     */
+    void add_extension(const ICMPExtension& extension);
+
+    /**
      * \brief Gets the size of this ICMP extensions structure
      *
      * \return The size of this structure

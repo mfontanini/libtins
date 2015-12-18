@@ -76,8 +76,8 @@ ICMPExtension::serialization_type ICMPExtension::serialize() const {
 const uint32_t ICMPExtensionsStructure::BASE_HEADER_SIZE = sizeof(uint16_t) * 2;
 
 ICMPExtensionsStructure::ICMPExtensionsStructure() 
-: version_and_reserved_(0x2000), checksum_(0) {
-
+: version_and_reserved_(), checksum_(0) {
+    version(2);
 }
 
 ICMPExtensionsStructure::ICMPExtensionsStructure(const uint8_t* buffer, uint32_t total_sz) {
@@ -133,6 +133,10 @@ uint32_t ICMPExtensionsStructure::size() const {
         output += iter->size();
     }
     return output;
+}
+
+void ICMPExtensionsStructure::add_extension(const ICMPExtension& extension) {
+    extensions_.push_back(extension);
 }
 
 void ICMPExtensionsStructure::serialize(uint8_t* buffer, uint32_t buffer_size) {

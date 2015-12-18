@@ -353,9 +353,20 @@ namespace Tins {
          * \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. This size includes the
-         * payload and options size. \sa PDU::header_size
+         * payload and options size. 
+         *
+         * \sa PDU::header_size
          */
         uint32_t header_size() const;
+
+        /**
+         * \brief Returns the trailer size.
+         *
+         * This metod overrides PDU::trailer_size. This size will hold the extensions size
+         *
+         * \sa PDU::header_size
+         */
+        uint32_t trailer_size() const;
 
         /**
          * \brief Check wether ptr points to a valid response for this PDU.
@@ -366,7 +377,24 @@ namespace Tins {
          */
         bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
 
-        const ICMPExtensionsStructure& extensions() { return extensions_; }
+        /** 
+         * \brief Getter for the extensions field.
+         *
+         * \return The extensions field
+         */
+        const ICMPExtensionsStructure& extensions() const { return extensions_; }
+
+        /** 
+         * \brief Getter for the extensions field.
+         *
+         * \return The extensions field
+         */
+        ICMPExtensionsStructure& extensions() { return extensions_; }
+
+        /**
+         * \brief Indicates whether this object contains ICMP extensions
+         */
+        bool has_extensions() const { return !extensions_.extensions().empty(); }
 
         /**
          * \brief Getter for the PDU's type.

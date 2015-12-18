@@ -140,7 +140,19 @@ uint32_t ICMP::header_size() const {
         extra = sizeof(uint32_t) * 3;
     else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) 
         extra = sizeof(uint32_t);
+
     return sizeof(icmphdr) + extra;
+}
+
+uint32_t ICMP::trailer_size() const {
+    uint32_t output = 0;
+    if (has_extensions()) {
+        output += extensions_.size();
+        if (inner_pdu()) {
+            output += 128 - std::min(inner_pdu()->size(), 128U);
+        }
+    }
+    return output;
 }
 
 void ICMP::set_echo_request(uint16_t id, uint16_t seq) {
@@ -216,6 +228,20 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
         uint32_t_buffer = address_mask();
         memcpy(buffer + sizeof(icmphdr), &uint32_t_buffer, sizeof(uint32_t));
     }
+
+    if (has_extensions()) {
+        uint8_t* extensions_ptr = buffer + sizeof(icmphdr);
+        if (inner_pdu()) {
+            uint32_t inner_pdu_size = inner_pdu()->size();
+            if (inner_pdu_size < 128) {
+                memset(buffer + sizeof(icmphdr) + inner_pdu_size, 0, 128 - inner_pdu_size);
+                inner_pdu_size = 128;
+            }
+            extensions_ptr += inner_pdu_size;
+        }
+        extensions_.serialize(extensions_ptr, total_sz - (extensions_ptr - buffer));
+    }
+
     // checksum calc
     _icmp.check = 0;
     memcpy(buffer, &_icmp, sizeof(icmphdr));
