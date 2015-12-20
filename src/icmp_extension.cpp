@@ -17,6 +17,12 @@ ICMPExtension::ICMPExtension()
 
 } 
 
+ICMPExtension::ICMPExtension(uint8_t ext_class, uint8_t ext_type)
+: extension_class_(ext_class), extension_type_(ext_type) {
+
+}
+
+
 ICMPExtension::ICMPExtension(const uint8_t* buffer, uint32_t total_sz) {
     // Check for the base header (u16 length + u8 clss + u8 type)
     if (total_sz < BASE_HEADER_SIZE) {
@@ -76,7 +82,7 @@ ICMPExtension::serialization_type ICMPExtension::serialize() const {
 const uint32_t ICMPExtensionsStructure::BASE_HEADER_SIZE = sizeof(uint16_t) * 2;
 
 ICMPExtensionsStructure::ICMPExtensionsStructure() 
-: version_and_reserved_(), checksum_(0) {
+: version_and_reserved_(0), checksum_(0) {
     version(2);
 }
 
@@ -98,7 +104,7 @@ ICMPExtensionsStructure::ICMPExtensionsStructure(const uint8_t* buffer, uint32_t
 }
 
 void ICMPExtensionsStructure::reserved(small_uint<12> value) {
-    uint16_t current_value = version_and_reserved_;
+    uint16_t current_value = Endian::be_to_host(version_and_reserved_);
     current_value &= 0xf000;
     current_value |= value;
     version_and_reserved_ = Endian::host_to_be(current_value);
@@ -142,6 +148,7 @@ void ICMPExtensionsStructure::add_extension(const ICMPExtension& extension) {
 void ICMPExtensionsStructure::serialize(uint8_t* buffer, uint32_t buffer_size) {
     const uint32_t structure_size = size();
     if (buffer_size < structure_size) {
+        std::cout << buffer_size << " vs " << structure_size << std::endl;
         throw malformed_packet();
     }
     uint8_t* original_ptr = buffer;

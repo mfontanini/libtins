@@ -14,7 +14,8 @@ using namespace Tins;
 class ICMPTest : public testing::Test {
 public:
     static const uint8_t expected_packets[][8];
-    static const uint8_t ts_request[], ts_reply[], packet_with_extensions[];
+    static const uint8_t ts_request[], ts_reply[], packet_with_extensions[], 
+                         packet_with_extensions_and_length[];
     static const uint32_t expected_packet_count;
     
     void test_equals(const ICMP &icmp1, const ICMP &icmp2);
@@ -44,6 +45,14 @@ const uint8_t ICMPTest::packet_with_extensions[] = {
     8, 1, 1, 24, 150, 1, 1
 };
 
+const uint8_t ICMPTest::packet_with_extensions_and_length[] = { 
+    11, 0, 204, 228, 0, 32, 0, 0, 69, 0, 0, 40, 165, 76, 0, 0, 1, 17, 247, 111, 12, 4, 4, 4, 12, 
+    1, 1, 1, 165, 75, 130, 155, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 0, 197, 95, 0, 
+    8, 1, 1, 24, 150, 1, 1
+};
 
 
 TEST_F(ICMPTest, DefaultConstructor) {
@@ -320,5 +329,44 @@ TEST_F(ICMPTest, ExtensionsParsingWithoutALengthField) {
     EXPECT_EQ(
         buffer, 
         PDU::serialization_type(packet_with_extensions, packet_with_extensions + sizeof(packet_with_extensions))
+    );
+}
+
+TEST_F(ICMPTest, ExtensionsParsingWithALengthField) {
+    const uint8_t encapsulated[] = { 69, 0, 0, 40, 165, 76, 0, 0, 1, 17, 247, 111, 12, 4, 4, 4, 12, 1, 1, 1, 165, 75, 130, 155, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    const uint8_t ext[] = { 0, 8, 1, 1, 24, 150, 1, 1 };
+    ICMP icmp(packet_with_extensions_and_length, sizeof(packet_with_extensions_and_length));
+    ICMPExtensionsStructure extensions = icmp.extensions();
+    ASSERT_EQ(1, extensions.extensions().size());
+    EXPECT_EQ(
+        ICMPExtension::payload_type(ext, ext + sizeof(ext)), 
+        extensions.extensions().begin()->serialize()
+    );
+    const RawPDU* raw = icmp.find_pdu<RawPDU>();
+    ASSERT_TRUE(raw != 0);
+    EXPECT_EQ(
+        RawPDU::payload_type(encapsulated, encapsulated + sizeof(encapsulated)),
+        raw->payload()
+    );
+
+    // Dump this packet without a length field
+    icmp.use_length_field(false);
+    PDU::serialization_type buffer = icmp.serialize();
+    
+    EXPECT_EQ(sizeof(packet_with_extensions), buffer.size());
+    EXPECT_EQ(
+        buffer, 
+        PDU::serialization_type(packet_with_extensions, packet_with_extensions + sizeof(packet_with_extensions))
+    );
+
+    // Dump this packet using a length field
+    icmp.use_length_field(true);
+    buffer = icmp.serialize();
+
+    EXPECT_EQ(sizeof(packet_with_extensions_and_length), buffer.size());
+    EXPECT_EQ(
+        buffer, 
+        PDU::serialization_type(packet_with_extensions_and_length, 
+                                packet_with_extensions_and_length + sizeof(packet_with_extensions_and_length))
     );
 }

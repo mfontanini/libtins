@@ -397,12 +397,29 @@ namespace Tins {
         bool has_extensions() const { return !extensions_.extensions().empty(); }
 
         /**
+         * \brief Sets whether the length field will be set for packets that use it
+         *
+         * As defined in RFC 4884, some ICMP packet types can have a length field. This
+         * method controlers whether the length field is set or not.
+         *
+         * Note that this only indicates that the packet should use this field. The 
+         * actual value will be set during the packet's serialization.
+         *
+         * Note that, in order to br RFC compliant, if the size of the encapsulated
+         * PDU is greater than 128, the length field will always be set, regardless
+         * of whether this method was called or not.
+         *
+         * /param value true iff the length field should be set appropriately
+         */
+        void use_length_field(bool value);
+
+        /**
          * \brief Getter for the PDU's type.
          *
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::ICMP; }
-        
+
         /**
          * \sa PDU::clone
          */
@@ -445,6 +462,8 @@ namespace Tins {
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         void try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz);
+        bool are_extensions_allowed() const;
+        uint32_t get_adjusted_inner_pdu_size() const;
 
         icmphdr _icmp;
         uint32_t _orig_timestamp_or_address_mask, _recv_timestamp, _trans_timestamp;

@@ -149,7 +149,12 @@ uint32_t ICMP::trailer_size() const {
     if (has_extensions()) {
         output += extensions_.size();
         if (inner_pdu()) {
-            output += 128 - std::min(inner_pdu()->size(), 128U);
+            // This gets how much padding we'll use. 
+            // If the next pdu size is lower than 128 bytes, then padding = 128 - pdu size
+            // If the next pdu size is greater than 128 bytes, 
+            // then padding = pdu size padded to next 32 bit boundary - pdu size
+            const uint32_t upper_bound = std::max(get_adjusted_inner_pdu_size(), 128U);
+            output += upper_bound - inner_pdu()->size();
         }
     }
     return output;
@@ -210,6 +215,12 @@ void ICMP::set_redirect(uint8_t icode, address_type address) {
     gateway(address);
 }
 
+void ICMP::use_length_field(bool value) {
+    // We just need a non 0 value here, we'll use the right value on 
+    // write_serialization
+    _icmp.un.rfc4884.length = value ? 1 : 0;
+}
+
 void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(icmphdr));
@@ -229,16 +240,36 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
         memcpy(buffer + sizeof(icmphdr), &uint32_t_buffer, sizeof(uint32_t));
     }
 
+    // If extensions are allowed and we have to set the length field
+    if (are_extensions_allowed()) {
+        uint32_t length_value = get_adjusted_inner_pdu_size();
+        // If the next pdu size is greater than 128, we are forced to set the length field
+        if (length() != 0 || length_value > 128) {
+            length_value = length_value ? std::max(length_value, 128U) : 0;
+            // This field uses 32 bit words as the unit
+            _icmp.un.rfc4884.length = length_value / sizeof(uint32_t);
+        }
+    }
+
     if (has_extensions()) {
         uint8_t* extensions_ptr = buffer + sizeof(icmphdr);
         if (inner_pdu()) {
-            uint32_t inner_pdu_size = inner_pdu()->size();
+            // Get the size of the next pdu, padded to the next 32 bit boundary
+            uint32_t inner_pdu_size = get_adjusted_inner_pdu_size();
+            // If it's lower than 128, we need to padd enough zeroes to make it 128 bytes long
             if (inner_pdu_size < 128) {
                 memset(buffer + sizeof(icmphdr) + inner_pdu_size, 0, 128 - inner_pdu_size);
                 inner_pdu_size = 128;
             }
+            else {
+                // If the packet has to be padded to 32 bits, append the amount 
+                // of zeroes we need
+                uint32_t diff = inner_pdu_size - inner_pdu()->size();
+                memset(buffer + sizeof(icmphdr) + inner_pdu_size, 0, diff);
+            }
             extensions_ptr += inner_pdu_size;
         }
+        // Now serialize the exensions where they should be
         extensions_.serialize(extensions_ptr, total_sz - (extensions_ptr - buffer));
     }
 
@@ -254,12 +285,25 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
     memcpy(buffer + 2, &_icmp.check, sizeof(uint16_t));
 }
 
+uint32_t ICMP::get_adjusted_inner_pdu_size() const {
+    // This gets the size of the next pdu, padded to the next 32 bit word boundary
+    if (inner_pdu()) {
+        uint32_t inner_pdu_size = inner_pdu()->size();
+        uint32_t padding = inner_pdu_size % 4;
+        inner_pdu_size = padding ? (inner_pdu_size - padding + 4) : inner_pdu_size;
+        return inner_pdu_size;
+    }
+    else {
+        return 0;
+    }
+}
+
 void ICMP::try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz) {
     if (total_sz == 0) {
         return;
     }
     // Check if this is one of the types defined in RFC 4884
-    if (type() == DEST_UNREACHABLE || type() == TIME_EXCEEDED || type() == PARAM_PROBLEM) {
+    if (are_extensions_allowed()) {
         uint32_t actual_length = length() * sizeof(uint32_t);
         // Check if we actually have this amount of data and whether it's more than
         // the minimum encapsulated packet size
@@ -284,6 +328,10 @@ void ICMP::try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz) {
             total_sz -= extensions_size;
         }
     }
+}
+
+bool ICMP::are_extensions_allowed() const {
+    return type() == DEST_UNREACHABLE || type() == TIME_EXCEEDED || type() == PARAM_PROBLEM;
 }
 
 bool ICMP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {

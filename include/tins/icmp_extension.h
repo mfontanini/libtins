@@ -31,6 +31,14 @@ public:
     ICMPExtension();
 
     /**
+     * \brief Constructor taking class and type
+     *
+     * \param ext_class The extension class
+     * \param ext_type The extension sub-type
+     */
+    ICMPExtension(uint8_t ext_class, uint8_t ext_type);
+
+    /**
      * \brief Constructs an ICMP extension from a buffer
      *
      * \param buffer The input buffer

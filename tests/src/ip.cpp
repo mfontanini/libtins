@@ -6,6 +6,7 @@
 #include "tcp.h"
 #include "udp.h"
 #include "icmp.h"
+#include "icmp_extension.h"
 #include "rawpdu.h"
 #include "ip_address.h"
 #include "utils.h"
@@ -782,4 +783,54 @@ TEST_F(IPTest, FragmentOffset) {
     EXPECT_FALSE(ip.is_fragmented());
     ip.flags(IP::DONT_FRAGMENT);
     EXPECT_FALSE(ip.is_fragmented());
+}
+
+// Use a large buffer. This wil set the length field
+TEST_F(IPTest, SerializePacketHavingICMPExtensionsWithLengthAndLotsOfPayload) {
+    IP encapsulated = IP(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(250, 'A'));
+    EthernetII pkt = EthernetII() / IP() / ICMP(ICMP::TIME_EXCEEDED) / encapsulated;
+    const uint8_t payload[] = { 24, 150, 1, 1 }; 
+    ICMPExtension extension(1, 1);
+    ICMPExtension::payload_type ext_payload(payload, payload + sizeof(payload));
+    extension.payload(ext_payload);
+    pkt.rfind_pdu<ICMP>().extensions().add_extension(extension);
+
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII serialized(&buffer[0], buffer.size());
+    ASSERT_EQ(1, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
+    EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMP>().extensions().extensions().begin()->payload());
+}
+
+// Use a short buffer and set the length field
+TEST_F(IPTest, SerializePacketHavingICMPExtensionsWithLengthAndShortPayload) {
+    IP encapsulated = IP(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(40, 'A'));
+    EthernetII pkt = EthernetII() / IP() / ICMP(ICMP::TIME_EXCEEDED) / encapsulated;
+    const uint8_t payload[] = { 24, 150, 1, 1 }; 
+    ICMPExtension extension(1, 1);
+    ICMPExtension::payload_type ext_payload(payload, payload + sizeof(payload));
+    extension.payload(ext_payload);
+    pkt.rfind_pdu<ICMP>().extensions().add_extension(extension);
+    pkt.rfind_pdu<ICMP>().use_length_field(true);
+
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII serialized(&buffer[0], buffer.size());
+    ASSERT_EQ(1, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
+    EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMP>().extensions().extensions().begin()->payload());
+}
+
+// Use a short buffer and don't set the length field
+TEST_F(IPTest, SerializePacketHavingICMPExtensionsWithoutLengthAndShortPayload) {
+    IP encapsulated = IP(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(40, 'A'));
+    EthernetII pkt = EthernetII() / IP() / ICMP(ICMP::TIME_EXCEEDED) / encapsulated;
+    const uint8_t payload[] = { 24, 150, 1, 1 }; 
+    ICMPExtension extension(1, 1);
+    ICMPExtension::payload_type ext_payload(payload, payload + sizeof(payload));
+    extension.payload(ext_payload);
+    pkt.rfind_pdu<ICMP>().extensions().add_extension(extension);
+    pkt.rfind_pdu<ICMP>().use_length_field(false);
+
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII serialized(&buffer[0], buffer.size());
+    ASSERT_EQ(1, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
+    EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMP>().extensions().extensions().begin()->payload());
 }
