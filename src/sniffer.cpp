@@ -224,8 +224,9 @@ void BaseSniffer::set_timeout(int ms) {
     pcap_set_timeout(handle, ms);
 }
 
-int BaseSniffer::set_direction(pcap_direction_t d) {
-	return pcap_setdirection(handle, d);
+bool BaseSniffer::set_direction(pcap_direction_t d) {
+	bool result = pcap_setdirection(handle, d) != -1;
+	return result;
 }
 
 // ****************************** Sniffer ******************************
@@ -453,7 +454,7 @@ void SnifferConfiguration::configure_sniffer_post_activation(Sniffer& sniffer) c
             throw std::runtime_error("Could not set the filter! ");
         }
     }
-    if (sniffer.set_direction(_direction) < 0) {
+    if (!sniffer.set_direction(_direction)) {
         throw std::runtime_error("Could not set the direction! ");
     }
 }

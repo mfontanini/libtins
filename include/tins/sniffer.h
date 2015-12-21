@@ -218,7 +218,7 @@ namespace Tins {
          * This calls pcap_setdirection using the provided parameter.
          * \param d The direction for the sniffer.
          */
-        int set_direction(pcap_direction_t d);
+        bool set_direction(pcap_direction_t d);
 
         /**
          * \brief Sets whether to extract RawPDUs or fully parsed packets.
