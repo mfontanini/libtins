@@ -50,38 +50,47 @@ ICMPv6::ICMPv6(Types tp)
 ICMPv6::ICMPv6(const uint8_t *buffer, uint32_t total_sz) 
 : _options_size(), reach_time(0), retrans_timer(0)
 {
-    if(total_sz < sizeof(_header))
+    if (total_sz < sizeof(_header)) {
         throw malformed_packet();
+    }
     std::memcpy(&_header, buffer, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
-    if(has_target_addr()) {
-        if(total_sz < ipaddress_type::address_size)
+    if (has_target_addr()) {
+        if(total_sz < ipaddress_type::address_size) {
             throw malformed_packet();
+        }
         target_addr(buffer);
         buffer += ipaddress_type::address_size;
         total_sz -= ipaddress_type::address_size;
     }
-    if(has_dest_addr()) {
-        if(total_sz < ipaddress_type::address_size)
+    if (has_dest_addr()) {
+        if(total_sz < ipaddress_type::address_size) {
             throw malformed_packet();
+        }
         dest_addr(buffer);
         buffer += ipaddress_type::address_size;
         total_sz -= ipaddress_type::address_size;
     }
-    if(type() == ROUTER_ADVERT) {
-        if(total_sz < sizeof(uint32_t) * 2)
+    if (type() == ROUTER_ADVERT) {
+        if(total_sz < sizeof(uint32_t) * 2) {
             throw malformed_packet();
+        }
         memcpy(&reach_time, buffer, sizeof(uint32_t));
         memcpy(&retrans_timer, buffer + sizeof(uint32_t), sizeof(uint32_t));
         
         buffer += sizeof(uint32_t) * 2;
         total_sz -= sizeof(uint32_t) * 2;
     }
-    if(has_options())
+    // Retrieve options
+    if (has_options()) {
         parse_options(buffer, total_sz);
-    if(total_sz > 0)
+    }
+    // Attempt to parse ICMP extensions
+    try_parse_extensions(buffer, total_sz);
+    if (total_sz) {
         inner_pdu(new RawPDU(buffer, total_sz));
+    }
 }
 
 void ICMPv6::parse_options(const uint8_t *&buffer, uint32_t &total_sz) {
@@ -182,6 +191,28 @@ uint32_t ICMPv6::header_size() const {
         (has_dest_addr() ? ipaddress_type::address_size : 0);
 }
 
+uint32_t ICMPv6::trailer_size() const {
+    uint32_t output = 0;
+    if (has_extensions()) {
+        output += extensions_.size();
+        if (inner_pdu()) {
+            // This gets how much padding we'll use. 
+            // If the next pdu size is lower than 128 bytes, then padding = 128 - pdu size
+            // If the next pdu size is greater than 128 bytes, 
+            // then padding = pdu size padded to next 32 bit boundary - pdu size
+            const uint32_t upper_bound = std::max(get_adjusted_inner_pdu_size(), 128U);
+            output += upper_bound - inner_pdu()->size();
+        }
+    }
+    return output;
+}
+
+void ICMPv6::use_length_field(bool value) {
+    // We just need a non 0 value here, we'll use the right value on 
+    // write_serialization
+    _header.rfc4884.length = value ? 1 : 0;
+}
+
 bool ICMPv6::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
     if(total_sz < sizeof(icmp6hdr))
         return false;
@@ -199,6 +230,18 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     uint32_t full_sz = total_sz;
     uint8_t *buffer_start = buffer;
     _header.cksum = 0;
+
+    // If extensions are allowed and we have to set the length field
+    if (are_extensions_allowed()) {
+        uint32_t length_value = get_adjusted_inner_pdu_size();
+        // If the next pdu size is greater than 128, we are forced to set the length field
+        if (length() != 0 || length_value > 128) {
+            length_value = length_value ? std::max(length_value, 128U) : 0;
+            // This field uses 64 bit words as the unit
+            _header.rfc4884.length = length_value / sizeof(uint64_t);
+        }
+    }
+
     std::memcpy(buffer, &_header, sizeof(_header));
     buffer += sizeof(_header);
     total_sz -= sizeof(_header);
@@ -225,6 +268,30 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
         #endif
         buffer = write_option(*it, buffer);
     }
+
+    if (has_extensions()) {
+        uint8_t* extensions_ptr = buffer;
+        if (inner_pdu()) {
+            // Get the size of the next pdu, padded to the next 32 bit boundary
+            uint32_t inner_pdu_size = get_adjusted_inner_pdu_size();
+            // If it's lower than 128, we need to padd enough zeroes to make it 128 bytes long
+            if (inner_pdu_size < 128) {
+                memset(extensions_ptr + inner_pdu_size, 0, 
+                    128 - inner_pdu_size);
+                inner_pdu_size = 128;
+            }
+            else {
+                // If the packet has to be padded to 64 bits, append the amount 
+                // of zeroes we need
+                uint32_t diff = inner_pdu_size - inner_pdu()->size();
+                memset(extensions_ptr + inner_pdu_size, 0, diff);
+            }
+            extensions_ptr += inner_pdu_size;
+        }
+        // Now serialize the exensions where they should be
+        extensions_.serialize(extensions_ptr, total_sz - (extensions_ptr - buffer));
+    }
+
     const Tins::IPv6 *ipv6 = tins_cast<const Tins::IPv6*>(parent);
     if(ipv6) {
         uint32_t checksum = Utils::pseudoheader_checksum(
@@ -581,10 +648,28 @@ void ICMPv6::dns_search_list(const dns_search_list_type &value) {
         buffer.push_back(0);
     }
     uint8_t padding = 8 - (buffer.size() + 2) % 8;
-    if(padding == 8)
+    if (padding == 8) {
         padding = 0;
+    }
     buffer.insert(buffer.end(), padding, 0);
     add_option(option(DNS_SEARCH_LIST, buffer.begin(), buffer.end()));
+}
+
+uint32_t ICMPv6::get_adjusted_inner_pdu_size() const {
+    // This gets the size of the next pdu, padded to the next 64 bit word boundary
+    return Internals::get_padded_icmp_inner_pdu_size(inner_pdu(), sizeof(uint64_t));
+}
+
+void ICMPv6::try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz) {
+    // Check if this is one of the types defined in RFC 4884
+    if (are_extensions_allowed()) {
+        Internals::try_parse_icmp_extensions(buffer, total_sz, length() * sizeof(uint64_t), 
+            extensions_);
+    }
+}
+
+bool ICMPv6::are_extensions_allowed() const {
+    return type() == TIME_EXCEEDED;
 }
 
 // ********************************************************************

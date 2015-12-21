@@ -42,8 +42,6 @@
 
 namespace Tins {
 
-const uint32_t ICMP::EXTENSION_PAYLOAD_LIMIT = 128;
-
 ICMP::ICMP(Flags flag) 
 : _orig_timestamp_or_address_mask(), _recv_timestamp(), _trans_timestamp()
 {
@@ -258,14 +256,14 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
             uint32_t inner_pdu_size = get_adjusted_inner_pdu_size();
             // If it's lower than 128, we need to padd enough zeroes to make it 128 bytes long
             if (inner_pdu_size < 128) {
-                memset(buffer + sizeof(icmphdr) + inner_pdu_size, 0, 128 - inner_pdu_size);
+                memset(extensions_ptr + inner_pdu_size, 0, 128 - inner_pdu_size);
                 inner_pdu_size = 128;
             }
             else {
                 // If the packet has to be padded to 32 bits, append the amount 
                 // of zeroes we need
                 uint32_t diff = inner_pdu_size - inner_pdu()->size();
-                memset(buffer + sizeof(icmphdr) + inner_pdu_size, 0, diff);
+                memset(extensions_ptr + inner_pdu_size, 0, diff);
             }
             extensions_ptr += inner_pdu_size;
         }
@@ -287,46 +285,14 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
 
 uint32_t ICMP::get_adjusted_inner_pdu_size() const {
     // This gets the size of the next pdu, padded to the next 32 bit word boundary
-    if (inner_pdu()) {
-        uint32_t inner_pdu_size = inner_pdu()->size();
-        uint32_t padding = inner_pdu_size % 4;
-        inner_pdu_size = padding ? (inner_pdu_size - padding + 4) : inner_pdu_size;
-        return inner_pdu_size;
-    }
-    else {
-        return 0;
-    }
+    return Internals::get_padded_icmp_inner_pdu_size(inner_pdu(), sizeof(uint32_t));
 }
 
 void ICMP::try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz) {
-    if (total_sz == 0) {
-        return;
-    }
     // Check if this is one of the types defined in RFC 4884
     if (are_extensions_allowed()) {
-        uint32_t actual_length = length() * sizeof(uint32_t);
-        // Check if we actually have this amount of data and whether it's more than
-        // the minimum encapsulated packet size
-        const uint8_t* extensions_ptr;
-        uint32_t extensions_size;
-        if (actual_length < total_sz && actual_length >= EXTENSION_PAYLOAD_LIMIT) {
-            extensions_ptr = buffer + actual_length;
-            extensions_size = total_sz - actual_length;
-        }
-        else if (total_sz > EXTENSION_PAYLOAD_LIMIT) {
-            // This packet might be non-rfc compliant. In that case the length 
-            // field can contain garbage.
-            extensions_ptr = buffer + EXTENSION_PAYLOAD_LIMIT;
-            extensions_size = total_sz - EXTENSION_PAYLOAD_LIMIT;
-        }
-        else {
-            // No more special cases, this doesn't have extensions
-            return;
-        }
-        if (ICMPExtensionsStructure::validate_extensions(extensions_ptr, extensions_size)) {
-            extensions_ = ICMPExtensionsStructure(extensions_ptr, extensions_size);
-            total_sz -= extensions_size;
-        }
+        Internals::try_parse_icmp_extensions(buffer, total_sz, length() * sizeof(uint32_t), 
+            extensions_);
     }
 }
 

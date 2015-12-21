@@ -40,6 +40,7 @@
 #include "small_uint.h"
 #include "hw_address.h"
 #include "small_uint.h"
+#include "icmp_extension.h"
 #include "cxxstd.h"
 
 namespace Tins {
@@ -692,6 +693,15 @@ public:
         return _options;
     }
 
+    /**
+     * \brief Getter for the length field.
+     *
+     * \return Returns the length field value.
+     */
+    uint8_t length() const { 
+        return _header.rfc4884.length;
+    }
+
     // Setters
 
     /**
@@ -871,7 +881,52 @@ public:
      * payload and options size. \sa PDU::header_size
      */
     uint32_t header_size() const;
+
+    /**
+     * \brief Returns the trailer size.
+     *
+     * This metod overrides PDU::trailer_size. This size will hold the extensions size
+     *
+     * \sa PDU::header_size
+     */
+    uint32_t trailer_size() const;
     
+    /** 
+     * \brief Getter for the extensions field.
+     *
+     * \return The extensions field
+     */
+    const ICMPExtensionsStructure& extensions() const { return extensions_; }
+
+    /** 
+     * \brief Getter for the extensions field.
+     *
+     * \return The extensions field
+     */
+    ICMPExtensionsStructure& extensions() { return extensions_; }
+
+    /**
+     * \brief Indicates whether this object contains ICMP extensions
+     */
+    bool has_extensions() const { return !extensions_.extensions().empty(); }
+
+    /**
+     * \brief Sets whether the length field will be set for packets that use it
+     *
+     * As defined in RFC 4884, some ICMP packet types can have a length field. This
+     * method controlers whether the length field is set or not.
+     *
+     * Note that this only indicates that the packet should use this field. The 
+     * actual value will be set during the packet's serialization.
+     *
+     * Note that, in order to br RFC compliant, if the size of the encapsulated
+     * PDU is greater than 128, the length field will always be set, regardless
+     * of whether this method was called or not.
+     *
+     * /param value true iff the length field should be set appropriately
+     */
+    void use_length_field(bool value);
+
     /** 
      * \brief Check wether ptr points to a valid response for this PDU.
      *
@@ -1282,15 +1337,15 @@ private:
             struct {
         #if TINS_IS_LITTLE_ENDIAN
             uint32_t reserved:5,
-                        override:1,
-                        solicited:1,
-                        router:1,
-                        reserved2:24;
+                     override:1,
+                     solicited:1,
+                     router:1,
+                     reserved2:24;
         #else
             uint32_t router:1,
-                        solicited:1,
-                        override:1,
-                        reserved:29;
+                     solicited:1,
+                     override:1,
+                     reserved:29;
         #endif						
             } u_nd_advt;
             struct {
@@ -1310,6 +1365,10 @@ private:
         #endif
                 uint16_t router_lifetime;
             } u_nd_ra;
+            struct {
+                uint8_t length;
+                uint8_t unused[3];
+            } rfc4884;
         };
     } TINS_END_PACK;
     
@@ -1322,7 +1381,10 @@ private:
     addr_list_type search_addr_list(OptionTypes type) const;
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);
-    
+    void try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz);
+    bool are_extensions_allowed() const;
+    uint32_t get_adjusted_inner_pdu_size() const;
+
     template<template <typename> class Functor>
     const option *safe_search_option(OptionTypes opt, uint32_t size) const {
         const option *option = search_option(opt);
@@ -1344,6 +1406,7 @@ private:
     options_type _options;
     uint32_t _options_size;
     uint32_t reach_time, retrans_timer;
+    ICMPExtensionsStructure extensions_;
 };
 }
 

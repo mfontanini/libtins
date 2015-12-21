@@ -7,11 +7,19 @@
 #include "udp.h"
 #include "icmp.h"
 #include "icmpv6.h"
+#include "rawpdu.h"
+#include "ethernetII.h"
 #include "ipv6_address.h"
 #include "utils.h"
 
 using namespace std;
 using namespace Tins;
+
+#ifdef _WIN32
+    #define TINS_DEFAULT_TEST_IP "::"
+#else 
+    #define TINS_DEFAULT_TEST_IP "::1"
+#endif
 
 class IPv6Test : public testing::Test {
 public:
@@ -175,3 +183,63 @@ TEST_F(IPv6Test, DestinationAddress) {
     EXPECT_EQ(ipv6.dst_addr(), "99af:1293::1");
 }
 
+// Make sure that a big payload is not considered ICMP extensions
+TEST_F(IPv6Test, BigEncapsulatedPacketIsNotConsideredToHaveExtensions) {
+    IPv6 encapsulated = IPv6(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(250, 'A'));
+    EthernetII pkt = EthernetII() / IPv6() / ICMPv6(ICMPv6::TIME_EXCEEDED) / encapsulated;
+
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII serialized(&buffer[0], buffer.size());
+    ASSERT_EQ(encapsulated.size(), serialized.rfind_pdu<RawPDU>().payload().size());
+    ASSERT_TRUE(serialized.rfind_pdu<ICMPv6>().extensions().extensions().empty());
+}
+
+// Use a large buffer. This wil set the length field
+TEST_F(IPv6Test, SerializePacketHavingICMPExtensionsWithLengthAndLotsOfPayload) {
+    IPv6 encapsulated = IPv6(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(250, 'A'));
+    EthernetII pkt = EthernetII() / IPv6() / ICMPv6(ICMPv6::TIME_EXCEEDED) / encapsulated;
+    const uint8_t payload[] = { 24, 150, 1, 1 }; 
+    ICMPExtension extension(1, 1);
+    ICMPExtension::payload_type ext_payload(payload, payload + sizeof(payload));
+    extension.payload(ext_payload);
+    pkt.rfind_pdu<ICMPv6>().extensions().add_extension(extension);
+
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII serialized(&buffer[0], buffer.size());
+    ASSERT_EQ(1, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
+    EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMPv6>().extensions().extensions().begin()->payload());
+}
+
+// Use a short buffer and set the length field
+TEST_F(IPv6Test, SerializePacketHavingICMPExtensionsWithLengthAndShortPayload) {
+    IPv6 encapsulated = IPv6(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(40, 'A'));
+    EthernetII pkt = EthernetII() / IPv6() / ICMPv6(ICMPv6::TIME_EXCEEDED) / encapsulated;
+    const uint8_t payload[] = { 24, 150, 1, 1 }; 
+    ICMPExtension extension(1, 1);
+    ICMPExtension::payload_type ext_payload(payload, payload + sizeof(payload));
+    extension.payload(ext_payload);
+    pkt.rfind_pdu<ICMPv6>().extensions().add_extension(extension);
+    pkt.rfind_pdu<ICMPv6>().use_length_field(true);
+
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII serialized(&buffer[0], buffer.size());
+    ASSERT_EQ(1, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
+    EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMPv6>().extensions().extensions().begin()->payload());
+}
+
+// Use a short buffer and don't set the length field
+TEST_F(IPv6Test, SerializePacketHavingICMPExtensionsWithoutLengthAndShortPayload) {
+    IPv6 encapsulated = IPv6(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(40, 'A'));
+    EthernetII pkt = EthernetII() / IPv6() / ICMPv6(ICMPv6::TIME_EXCEEDED) / encapsulated;
+    const uint8_t payload[] = { 24, 150, 1, 1 }; 
+    ICMPExtension extension(1, 1);
+    ICMPExtension::payload_type ext_payload(payload, payload + sizeof(payload));
+    extension.payload(ext_payload);
+    pkt.rfind_pdu<ICMPv6>().extensions().add_extension(extension);
+    pkt.rfind_pdu<ICMPv6>().use_length_field(false);
+
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII serialized(&buffer[0], buffer.size());
+    ASSERT_EQ(1, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
+    EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMPv6>().extensions().extensions().begin()->payload());
+}

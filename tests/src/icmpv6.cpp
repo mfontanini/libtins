@@ -7,6 +7,7 @@
 #include "ip.h"
 #include "tcp.h"
 #include "utils.h"
+#include "rawpdu.h"
 #include "hw_address.h"
 
 using namespace Tins;
@@ -16,6 +17,8 @@ public:
     static const uint8_t expected_packet[];
     static const uint8_t expected_packet1[];
     static const uint8_t expected_packet2[];
+    static const uint8_t packet_with_extensions[];
+    static const uint8_t packet_with_extensions_and_length[];
 
     void test_equals(const ICMPv6 &icmp1, const ICMPv6 &icmp2);
 };
@@ -40,6 +43,24 @@ const uint8_t ICMPv6Test::expected_packet2[] = {
     254, 7, 105, 234, 135, 0, 0, 0, 0, 0, 0, 0, 254, 128, 0, 0, 0
     , 0, 0, 0, 2, 96, 151, 255, 254, 7, 105, 234, 1, 1, 0, 0, 134, 5,
     128, 218
+};
+
+const uint8_t ICMPv6Test::packet_with_extensions[] = { 
+    3, 0, 139, 66, 0, 0, 0, 0, 96, 0, 0, 0, 0, 38, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 12, 0, 99, 0, 38, 45, 93, 
+    65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 
+    65, 65, 65, 65, 65, 65, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 
+    0, 197, 95, 0, 8, 1, 1, 24, 150, 1, 1
+};
+
+const uint8_t ICMPv6Test::packet_with_extensions_and_length[] = { 
+    3, 0, 139, 66, 16, 0, 0, 0, 96, 0, 0, 0, 0, 38, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 12, 0, 99, 0, 38, 45, 93, 
+    65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 
+    65, 65, 65, 65, 65, 65, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 
+    0, 197, 95, 0, 8, 1, 1, 24, 150, 1, 1
 };
 
 TEST_F(ICMPv6Test, Constructor) {
@@ -485,4 +506,41 @@ TEST_F(ICMPv6Test, RemoveOption) {
 
     PDU::serialization_type new_buffer = icmp.serialize();
     EXPECT_EQ(old_buffer, new_buffer);
+}
+
+TEST_F(ICMPv6Test, ExtensionsParsingWithoutALengthField) {
+    const uint8_t encapsulated[] = { 96, 0, 0, 0, 0, 38, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 12, 0, 99, 0, 38, 45, 93, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    const uint8_t ext[] = { 0, 8, 1, 1, 24, 150, 1, 1 };
+    ICMPv6 icmp(packet_with_extensions, sizeof(packet_with_extensions));
+    ICMPExtensionsStructure extensions = icmp.extensions();
+    ASSERT_EQ(1, extensions.extensions().size());
+    EXPECT_EQ(
+        ICMPExtension::payload_type(ext, ext + sizeof(ext)), 
+        extensions.extensions().begin()->serialize()
+    );
+    const RawPDU* raw = icmp.find_pdu<RawPDU>();
+    ASSERT_TRUE(raw != 0);
+    EXPECT_EQ(sizeof(encapsulated), raw->payload().size());
+    EXPECT_EQ(
+        RawPDU::payload_type(encapsulated, encapsulated + sizeof(encapsulated)),
+        raw->payload()
+    );
+}
+
+TEST_F(ICMPv6Test, ExtensionsParsingWithALengthField) {
+    const uint8_t encapsulated[] = { 96, 0, 0, 0, 0, 38, 17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 12, 0, 99, 0, 38, 45, 93, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    const uint8_t ext[] = { 0, 8, 1, 1, 24, 150, 1, 1 };
+    ICMPv6 icmp(packet_with_extensions_and_length, sizeof(packet_with_extensions_and_length));
+    ICMPExtensionsStructure extensions = icmp.extensions();
+    ASSERT_EQ(1, extensions.extensions().size());
+    EXPECT_EQ(
+        ICMPExtension::payload_type(ext, ext + sizeof(ext)), 
+        extensions.extensions().begin()->serialize()
+    );
+    const RawPDU* raw = icmp.find_pdu<RawPDU>();
+    ASSERT_TRUE(raw != 0);
+    EXPECT_EQ(
+        RawPDU::payload_type(encapsulated, encapsulated + sizeof(encapsulated)),
+        raw->payload()
+    );
 }

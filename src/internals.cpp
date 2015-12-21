@@ -262,6 +262,50 @@ Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag) {
     };
 }
 
+uint32_t get_padded_icmp_inner_pdu_size(const PDU* inner_pdu, uint32_t pad_alignment) {
+        // This gets the size of the next pdu, padded to the next 32 bit word boundary
+    if (inner_pdu) {
+        uint32_t inner_pdu_size = inner_pdu->size();
+        uint32_t padding = inner_pdu_size % pad_alignment;
+        inner_pdu_size = padding ? (inner_pdu_size - padding + pad_alignment) : inner_pdu_size;
+        return inner_pdu_size;
+    }
+    else {
+        return 0;
+    }
+}
+
+void try_parse_icmp_extensions(const uint8_t* buffer, uint32_t& total_sz, 
+    uint32_t payload_length, ICMPExtensionsStructure& extensions) {
+    if (total_sz == 0) {
+        return;
+    }
+    // Check if this is one of the types defined in RFC 4884
+    const uint32_t minimum_payload = ICMPExtensionsStructure::MINIMUM_ICMP_PAYLOAD;
+    // Check if we actually have this amount of data and whether it's more than
+    // the minimum encapsulated packet size
+    const uint8_t* extensions_ptr;
+    uint32_t extensions_size;
+    if (payload_length < total_sz && payload_length >= minimum_payload) {
+        extensions_ptr = buffer + payload_length;
+        extensions_size = total_sz - payload_length;
+    }
+    else if (total_sz > minimum_payload) {
+        // This packet might be non-rfc compliant. In that case the length 
+        // field can contain garbage.
+        extensions_ptr = buffer + minimum_payload;
+        extensions_size = total_sz - minimum_payload;
+    }
+    else {
+        // No more special cases, this doesn't have extensions
+        return;
+    }
+    if (ICMPExtensionsStructure::validate_extensions(extensions_ptr, extensions_size)) {
+        extensions = ICMPExtensionsStructure(extensions_ptr, extensions_size);
+        total_sz -= extensions_size;
+    }
+}
+
 bool increment(IPv4Address &addr) {
     uint32_t addr_int = Endian::be_to_host<uint32_t>(addr);
     bool reached_end = ++addr_int == 0xffffffff;

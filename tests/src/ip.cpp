@@ -785,6 +785,17 @@ TEST_F(IPTest, FragmentOffset) {
     EXPECT_FALSE(ip.is_fragmented());
 }
 
+// Make sure that a big payload is not considered ICMP extensions
+TEST_F(IPTest, BigEncapsulatedPacketIsNotConsideredToHaveExtensions) {
+    IP encapsulated = IP(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(250, 'A'));
+    EthernetII pkt = EthernetII() / IP() / ICMP(ICMP::TIME_EXCEEDED) / encapsulated;
+
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII serialized(&buffer[0], buffer.size());
+    ASSERT_EQ(encapsulated.size(), serialized.rfind_pdu<RawPDU>().payload().size());
+    ASSERT_TRUE(serialized.rfind_pdu<ICMP>().extensions().extensions().empty());
+}
+
 // Use a large buffer. This wil set the length field
 TEST_F(IPTest, SerializePacketHavingICMPExtensionsWithLengthAndLotsOfPayload) {
     IP encapsulated = IP(TINS_DEFAULT_TEST_IP) / UDP(99, 12) / RawPDU(std::string(250, 'A'));

@@ -79,6 +79,7 @@ ICMPExtension::serialization_type ICMPExtension::serialize() const {
 
 // ICMPExtensionsStructure class
 
+const uint32_t ICMPExtensionsStructure::MINIMUM_ICMP_PAYLOAD = 128;
 const uint32_t ICMPExtensionsStructure::BASE_HEADER_SIZE = sizeof(uint16_t) * 2;
 
 ICMPExtensionsStructure::ICMPExtensionsStructure() 
@@ -148,7 +149,6 @@ void ICMPExtensionsStructure::add_extension(const ICMPExtension& extension) {
 void ICMPExtensionsStructure::serialize(uint8_t* buffer, uint32_t buffer_size) {
     const uint32_t structure_size = size();
     if (buffer_size < structure_size) {
-        std::cout << buffer_size << " vs " << structure_size << std::endl;
         throw malformed_packet();
     }
     uint8_t* original_ptr = buffer;

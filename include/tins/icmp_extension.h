@@ -124,6 +124,12 @@ private:
 class ICMPExtensionsStructure {
 public:
     /**
+     * The minimum ICMP payload size that has to be present when the PDU
+     * contains extensions.
+     */
+    static const uint32_t MINIMUM_ICMP_PAYLOAD;
+
+    /**
      * The type that will be returned when serializing an extensions 
      * structure object
      */
