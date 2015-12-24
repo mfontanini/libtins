@@ -47,8 +47,12 @@
 #include "packet_sender.h"
 #include "llc.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
+
 const Dot3::address_type Dot3::BROADCAST("ff:ff:ff:ff:ff:ff");
 
 Dot3::Dot3(const address_type &dst_hw_addr, const address_type &src_hw_addr)
@@ -62,13 +66,11 @@ Dot3::Dot3(const address_type &dst_hw_addr, const address_type &src_hw_addr)
 
 Dot3::Dot3(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(ethhdr))
-        throw malformed_packet();
-    memcpy(&_eth, buffer, sizeof(ethhdr));
-    buffer += sizeof(ethhdr);
-    total_sz -= sizeof(ethhdr);
-    if(total_sz)
-        inner_pdu(new Tins::LLC(buffer, total_sz));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_eth);
+    if (stream) {
+        inner_pdu(new Tins::LLC(stream.pointer(), stream.size()));
+    }
 }
 
 void Dot3::dst_addr(const address_type &new_dst_mac) {

@@ -49,6 +49,9 @@
 #include "icmp_extension.h"
 
 namespace Tins {
+namespace Memory {
+class InputMemoryStream;
+} // memory
 
 /** 
  * \class ICMP
@@ -460,7 +463,7 @@ private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     
     uint32_t get_adjusted_inner_pdu_size() const;
-    void try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz);
+    void try_parse_extensions(Memory::InputMemoryStream& stream);
     bool are_extensions_allowed() const;
 
     icmphdr _icmp;

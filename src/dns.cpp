@@ -39,30 +39,28 @@
 #include "exceptions.h"
 #include "rawpdu.h"
 #include "endianness.h"
+#include "memory_helpers.h"
 
 using std::string;
 using std::list;
 
+using Tins::Memory::InputMemoryStream;
+
 namespace Tins {
 
 DNS::DNS() 
-: answers_idx(), authority_idx(), additional_idx()
+: dns(), answers_idx(), authority_idx(), additional_idx()
 { 
-    std::memset(&dns, 0, sizeof(dns));
 }
 
 DNS::DNS(const uint8_t *buffer, uint32_t total_sz) 
 : answers_idx(), authority_idx(), additional_idx()
 { 
-    if(total_sz < sizeof(dnshdr))
-        throw malformed_packet();
-    std::memcpy(&dns, buffer, sizeof(dnshdr));
-    records_data.assign(
-        buffer + sizeof(dnshdr),
-        buffer + total_sz
-    );
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(dns);
+    records_data.assign(stream.pointer(), stream.pointer() + stream.size());
     // Avoid doing this if there's no data. Otherwise VS's asserts fail.
-    if(!records_data.empty()) {
+    if (!records_data.empty()) {
         buffer = &records_data[0];
         const uint8_t *end = &records_data[0] + records_data.size(), *prev_start = buffer;
         uint16_t nquestions = questions_count();

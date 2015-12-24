@@ -34,19 +34,25 @@
     #include <sys/param.h>
 #endif
 
-// Packing directives....
+// Check if this is Visual Studio
 #ifdef _MSC_VER
+    // This is Visual Studio
     #define TINS_BEGIN_PACK __pragma( pack(push, 1) )
     #define TINS_END_PACK __pragma( pack(pop) )
     #define TINS_PACKED(DECLARATION) __pragma( pack(push, 1) ) DECLARATION __pragma( pack(pop) )
     #define TINS_DEPRECATED(func) __declspec(deprecated) func
     #define TINS_NOEXCEPT
+    #define TINS_LIKELY(x) (x)
+    #define TINS_UNLIKELY(x) (x)
 #else
+    // Not Vistual Studio. Assume this is gcc compatible
     #define TINS_BEGIN_PACK 
     #define TINS_END_PACK __attribute__((packed))
     #define TINS_PACKED(DECLARATION) DECLARATION __attribute__((packed))
     #define TINS_DEPRECATED(func) func __attribute__ ((deprecated))
     #define TINS_NOEXCEPT noexcept
-#endif
+    #define TINS_LIKELY(x) __builtin_expect((x),1)
+    #define TINS_UNLIKELY(x) __builtin_expect((x),0)
+#endif // 
 
-#endif
+#endif // TINS_MACROS_H

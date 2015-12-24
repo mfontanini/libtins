@@ -31,53 +31,50 @@
 #include <algorithm>
 #include "dhcpv6.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
 
 using std::find_if;
 
+using Tins::Memory::InputMemoryStream;
+
 namespace Tins {
-DHCPv6::DHCPv6() : options_size() {
-    std::fill(header_data, header_data + sizeof(header_data), 0);
+
+DHCPv6::DHCPv6() 
+: header_data(), options_size() {
+
 }
 
 DHCPv6::DHCPv6(const uint8_t *buffer, uint32_t total_sz) 
 : options_size() 
 {
-    if(total_sz == 0) 
+    InputMemoryStream stream(buffer, total_sz);
+    if (!stream) {
         throw malformed_packet();
-    // Relay Agent/Server Messages
-    bool is_relay_msg = (buffer[0] == 12 || buffer[0] == 13);
-    uint32_t required_size = is_relay_msg ? 2 : 4;
-    if(total_sz < required_size)
-        throw malformed_packet();
-    std::copy(buffer, buffer + required_size, header_data);
-    buffer += required_size;
-    total_sz -= required_size;
-    if(is_relay_message()) {
-        if(total_sz < ipaddress_type::address_size * 2)
-            throw malformed_packet();
-        link_addr = buffer;
-        peer_addr = buffer + ipaddress_type::address_size;
-        buffer += ipaddress_type::address_size * 2;
-        total_sz -= ipaddress_type::address_size * 2;
     }
-    while(total_sz) {
-        if(total_sz < sizeof(uint16_t) * 2) 
+    // Relay Agent/Server Messages
+    const MessageType message_type = (MessageType)*stream.pointer();
+    bool is_relay_msg = (message_type == RELAY_FORWARD || message_type == RELAY_REPLY);
+    uint32_t required_size = is_relay_msg ? 2 : 4;
+    stream.read(&header_data, required_size);
+    if (is_relay_message()) {
+        if (!stream.can_read(ipaddress_type::address_size * 2)) {
             throw malformed_packet();
-        
-        uint16_t opt;
-        std::memcpy(&opt, buffer, sizeof(uint16_t));
-        opt = Endian::be_to_host(opt);
-        uint16_t data_size;
-        std::memcpy(&data_size, buffer + sizeof(uint16_t), sizeof(uint16_t));
-        data_size = Endian::be_to_host(data_size);
-        if(total_sz - sizeof(uint16_t) * 2 < data_size)
+        }
+        // Read both addresses
+        link_addr = stream.pointer();
+        peer_addr = stream.pointer() + ipaddress_type::address_size;
+        stream.skip(ipaddress_type::address_size * 2);
+    }
+    while (stream) {
+        uint16_t opt = Endian::be_to_host(stream.read<uint16_t>());
+        uint16_t data_size = Endian::be_to_host(stream.read<uint16_t>());
+        if(!stream.can_read(data_size)) {
             throw malformed_packet();
-        buffer += sizeof(uint16_t) * 2;
+        }
         add_option(
-            option(opt, buffer, buffer + data_size)
+            option(opt, stream.pointer(), stream.pointer() + data_size)
         );
-        buffer += data_size;
-        total_sz -= sizeof(uint16_t) * 2 + data_size;
+        stream.skip(data_size);
     }
 }
     

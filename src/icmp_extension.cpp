@@ -3,8 +3,11 @@
 #include "icmp_extension.h"
 #include "exceptions.h"
 #include "utils.h"
+#include "memory_helpers.h"
 
 using std::runtime_error;
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
@@ -24,22 +27,17 @@ ICMPExtension::ICMPExtension(uint8_t ext_class, uint8_t ext_type)
 
 
 ICMPExtension::ICMPExtension(const uint8_t* buffer, uint32_t total_sz) {
-    // Check for the base header (u16 length + u8 clss + u8 type)
-    if (total_sz < BASE_HEADER_SIZE) {
-        throw malformed_packet();
-    }
+    InputMemoryStream stream(buffer, total_sz);
 
-    uint16_t length = Endian::be_to_host(*(const uint16_t*)buffer);
-    buffer += sizeof(uint16_t);
-    extension_class_ = *buffer++;
-    extension_type_ = *buffer++;
-    total_sz -= BASE_HEADER_SIZE;
+    uint16_t length = Endian::be_to_host(stream.read<uint16_t>());
+    extension_class_ = stream.read<uint8_t>();
+    extension_type_ = stream.read<uint8_t>();
     // Length is BASE_HEADER_SIZE + payload size, make sure it's valid
-    if (length < BASE_HEADER_SIZE || length - BASE_HEADER_SIZE > total_sz) {
+    if (length < BASE_HEADER_SIZE || length - BASE_HEADER_SIZE > stream.size()) {
         throw malformed_packet();
     }
     length -= BASE_HEADER_SIZE;
-    payload_.assign(buffer, buffer + length);
+    payload_.assign(stream.pointer(), stream.pointer() + length);
 }
 
 void ICMPExtension::extension_class(uint8_t value) {
@@ -88,19 +86,14 @@ ICMPExtensionsStructure::ICMPExtensionsStructure()
 }
 
 ICMPExtensionsStructure::ICMPExtensionsStructure(const uint8_t* buffer, uint32_t total_sz) {
-    if (total_sz < BASE_HEADER_SIZE) {
-        throw malformed_packet();
-    }
+    InputMemoryStream stream(buffer, total_sz);
 
-    version_and_reserved_ = *(const uint16_t*)buffer;
-    buffer += sizeof(uint16_t);
-    checksum_ = *(const uint16_t*)buffer;
-    buffer += sizeof(uint16_t);
-    total_sz -= BASE_HEADER_SIZE;
-    while (total_sz > 0) {
-        extensions_.push_back(ICMPExtension(buffer, total_sz));
-        uint16_t size = Endian::be_to_host(*(const uint16_t*)buffer);
-        total_sz -= size;
+    version_and_reserved_ = stream.read<uint16_t>();
+    checksum_ = stream.read<uint16_t>();
+    while (stream) {
+        extensions_.push_back(ICMPExtension(stream.pointer(), stream.size()));
+        uint16_t size = Endian::be_to_host(stream.read<uint16_t>());
+        stream.skip(size - sizeof(uint16_t));
     }
 }
 

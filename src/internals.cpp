@@ -52,11 +52,15 @@
 #include "ip_address.h"
 #include "ipv6_address.h"
 #include "pdu_allocator.h"
+#include "memory_helpers.h"
 
 using std::string;
 
+using Tins::Memory::InputMemoryStream;
+
 namespace Tins {
 namespace Internals {
+
 bool from_hex(const string &str, uint32_t &result) {
     unsigned i(0);
     result = 0;
@@ -275,9 +279,9 @@ uint32_t get_padded_icmp_inner_pdu_size(const PDU* inner_pdu, uint32_t pad_align
     }
 }
 
-void try_parse_icmp_extensions(const uint8_t* buffer, uint32_t& total_sz, 
-    uint32_t payload_length, ICMPExtensionsStructure& extensions) {
-    if (total_sz == 0) {
+void try_parse_icmp_extensions(InputMemoryStream& stream, uint32_t payload_length, 
+    ICMPExtensionsStructure& extensions) {
+    if (!stream) {
         return;
     }
     // Check if this is one of the types defined in RFC 4884
@@ -286,15 +290,15 @@ void try_parse_icmp_extensions(const uint8_t* buffer, uint32_t& total_sz,
     // the minimum encapsulated packet size
     const uint8_t* extensions_ptr;
     uint32_t extensions_size;
-    if (payload_length < total_sz && payload_length >= minimum_payload) {
-        extensions_ptr = buffer + payload_length;
-        extensions_size = total_sz - payload_length;
+    if (stream.can_read(payload_length) && payload_length >= minimum_payload) {
+        extensions_ptr = stream.pointer() + payload_length;
+        extensions_size = stream.size() - payload_length;
     }
-    else if (total_sz > minimum_payload) {
+    else if (stream.can_read(minimum_payload)) {
         // This packet might be non-rfc compliant. In that case the length 
         // field can contain garbage.
-        extensions_ptr = buffer + minimum_payload;
-        extensions_size = total_sz - minimum_payload;
+        extensions_ptr = stream.pointer() + minimum_payload;
+        extensions_size = stream.size() - minimum_payload;
     }
     else {
         // No more special cases, this doesn't have extensions
@@ -302,7 +306,7 @@ void try_parse_icmp_extensions(const uint8_t* buffer, uint32_t& total_sz,
     }
     if (ICMPExtensionsStructure::validate_extensions(extensions_ptr, extensions_size)) {
         extensions = ICMPExtensionsStructure(extensions_ptr, extensions_size);
-        total_sz -= extensions_size;
+        stream.size(stream.size() - extensions_size);
     }
 }
 

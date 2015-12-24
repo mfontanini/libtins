@@ -37,6 +37,9 @@
 #include "utils.h"
 #include "constants.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
@@ -50,63 +53,49 @@ ICMPv6::ICMPv6(Types tp)
 ICMPv6::ICMPv6(const uint8_t *buffer, uint32_t total_sz) 
 : _options_size(), reach_time(0), retrans_timer(0)
 {
-    if (total_sz < sizeof(_header)) {
-        throw malformed_packet();
-    }
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header);
     if (has_target_addr()) {
-        if(total_sz < ipaddress_type::address_size) {
-            throw malformed_packet();
-        }
-        target_addr(buffer);
-        buffer += ipaddress_type::address_size;
-        total_sz -= ipaddress_type::address_size;
+        _target_address = stream.read<ipaddress_type>();
     }
     if (has_dest_addr()) {
-        if(total_sz < ipaddress_type::address_size) {
-            throw malformed_packet();
-        }
-        dest_addr(buffer);
-        buffer += ipaddress_type::address_size;
-        total_sz -= ipaddress_type::address_size;
+        _dest_address = stream.read<ipaddress_type>();
     }
     if (type() == ROUTER_ADVERT) {
-        if(total_sz < sizeof(uint32_t) * 2) {
-            throw malformed_packet();
-        }
-        memcpy(&reach_time, buffer, sizeof(uint32_t));
-        memcpy(&retrans_timer, buffer + sizeof(uint32_t), sizeof(uint32_t));
-        
-        buffer += sizeof(uint32_t) * 2;
-        total_sz -= sizeof(uint32_t) * 2;
+        reach_time = stream.read<uint32_t>();
+        retrans_timer = stream.read<uint32_t>();
     }
     // Retrieve options
     if (has_options()) {
-        parse_options(buffer, total_sz);
+        parse_options(stream);
     }
     // Attempt to parse ICMP extensions
-    try_parse_extensions(buffer, total_sz);
-    if (total_sz) {
-        inner_pdu(new RawPDU(buffer, total_sz));
+    try_parse_extensions(stream);
+    if (stream) {
+        inner_pdu(new RawPDU(stream.pointer(), stream.size()));
     }
 }
 
-void ICMPv6::parse_options(const uint8_t *&buffer, uint32_t &total_sz) {
-    while(total_sz > 0) {
-        if(total_sz < 8 || (static_cast<uint32_t>(buffer[1]) * 8) > total_sz || buffer[1] < 1) 
+void ICMPv6::parse_options(InputMemoryStream& stream) {
+    while (stream) {
+        const uint8_t opt_type = stream.read<uint8_t>();
+        const uint32_t opt_size = static_cast<uint32_t>(stream.read<uint8_t>()) * 8;
+        if (opt_size < sizeof(uint8_t) << 1) {
             throw malformed_packet();
+        }
         // size(option) = option_size - identifier_size - length_identifier_size
+        const uint32_t payload_size = opt_size - (sizeof(uint8_t) << 1);
+        if (!stream.can_read(payload_size)) { 
+            throw malformed_packet();
+        }
         add_option(
             option(
-                buffer[0], 
-                static_cast<uint32_t>(buffer[1]) * 8 - sizeof(uint8_t) * 2, 
-                buffer + 2
+                opt_type, 
+                payload_size, 
+                stream.pointer()
             )
         );
-        total_sz -= buffer[1] * 8;
-        buffer += buffer[1] * 8;
+        stream.skip(payload_size);
     }
 }
 
@@ -660,10 +649,10 @@ uint32_t ICMPv6::get_adjusted_inner_pdu_size() const {
     return Internals::get_padded_icmp_inner_pdu_size(inner_pdu(), sizeof(uint64_t));
 }
 
-void ICMPv6::try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz) {
+void ICMPv6::try_parse_extensions(InputMemoryStream& stream) {
     // Check if this is one of the types defined in RFC 4884
     if (are_extensions_allowed()) {
-        Internals::try_parse_icmp_extensions(buffer, total_sz, length() * sizeof(uint64_t), 
+        Internals::try_parse_icmp_extensions(stream, length() * sizeof(uint64_t), 
             extensions_);
     }
 }

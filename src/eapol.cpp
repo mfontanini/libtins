@@ -36,11 +36,15 @@
 #include "eapol.h"
 #include "rsn_information.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
+
 EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) 
+: _header()
 {
-    std::memset(&_header, 0, sizeof(_header));
     _header.version = 1;
     _header.packet_type = packet_type;
     _header.type = (uint8_t)type;
@@ -48,14 +52,14 @@ EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type)
 
 EAPOL::EAPOL(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header);
 }
 
 EAPOL *EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
-    if(total_sz < sizeof(eapolhdr))
+    if (total_sz < sizeof(eapolhdr)) {
         throw malformed_packet();
+    }
     const eapolhdr *ptr = (const eapolhdr*)buffer;
     uint32_t data_len = Endian::be_to_host<uint16_t>(ptr->length);
     // at least 4 for fields always present

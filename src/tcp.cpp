@@ -38,17 +38,18 @@
 #include "utils.h"
 #include "exceptions.h"
 #include "internals.h"
+#include "memory_helpers.h"
 
 using std::find_if;
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
 const uint16_t TCP::DEFAULT_WINDOW = 32678;
 
 TCP::TCP(uint16_t dport, uint16_t sport) 
-: _options_size(0), _total_options_size(0) 
+: _tcp(), _options_size(0), _total_options_size(0) 
 {
-    std::memset(&_tcp, 0, sizeof(tcphdr));
     this->dport(dport);
     this->sport(sport);
     data_offset(sizeof(tcphdr) / sizeof(uint32_t));
@@ -56,45 +57,54 @@ TCP::TCP(uint16_t dport, uint16_t sport)
 }
 
 TCP::TCP(const uint8_t *buffer, uint32_t total_sz) 
+: _options_size(0), _total_options_size(0) 
 {
-    if(total_sz < sizeof(tcphdr))
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_tcp);
+    // Check that we have at least the amount of bytes we need and not less
+    if (TINS_UNLIKELY(data_offset() * sizeof(uint32_t) > total_sz || 
+                      data_offset() * sizeof(uint32_t) < sizeof(tcphdr))) {
         throw malformed_packet();
-    std::memcpy(&_tcp, buffer, sizeof(tcphdr));
-    if(data_offset() * sizeof(uint32_t) > total_sz || data_offset() * sizeof(uint32_t) < sizeof(tcphdr)) 
-        throw malformed_packet();
+    }
     const uint8_t *header_end = buffer + (data_offset() * sizeof(uint32_t));
-    total_sz = static_cast<uint32_t>(total_sz - (header_end - buffer));
-    buffer += sizeof(tcphdr);
-    
-    _total_options_size = 0;
-    _options_size = 0;
 
-    while(buffer < header_end) {
-        if(*buffer <= NOP) {
+    while (stream.pointer() < header_end) {
+        const OptionTypes option_type = (OptionTypes)stream.read<uint8_t>();
+        if (option_type <= NOP) {
             #if TINS_IS_CXX11
-            add_option((OptionTypes)*buffer, 0);
+            add_option(option_type, 0);
             #else
-            add_option(option((OptionTypes)*buffer, 0));
+            add_option(option(option_type, 0));
             #endif // TINS_IS_CXX11
-            ++buffer;
         }
         else {
-            if(buffer + 1 == header_end)
+            // Extract the length
+            uint32_t len = stream.read<uint8_t>();
+            const uint8_t *data_start = stream.pointer();
+
+            // We need to subtract the option type and length from the size
+            if (TINS_UNLIKELY(len < sizeof(uint8_t) << 1)) {
                 throw malformed_packet();
-            const uint8_t len = buffer[1] - (sizeof(uint8_t) << 1);
-            const uint8_t *data_start = buffer + 2;
-            if(data_start + len > header_end)
+            }
+            len -= (sizeof(uint8_t) << 1);
+            // Make sure we have enough bytes for the advertised option payload length
+            if (TINS_UNLIKELY(data_start + len > header_end)) {
                 throw malformed_packet(); 
+            }
+            // If we're using C++11, use the variadic template overload
             #if TINS_IS_CXX11
-            add_option((OptionTypes)*buffer, data_start, data_start + len);
+            add_option(option_type, data_start, data_start + len);
             #else
-            add_option(option((OptionTypes)*buffer, data_start, data_start + len));
+            add_option(option(option_type, data_start, data_start + len));
             #endif // TINS_IS_CXX11
-            buffer = data_start + len;
+            // Skip the option's payload
+            stream.skip(len);
         }
     }
-    if(total_sz)
-        inner_pdu(new RawPDU(buffer, total_sz));
+    // If we still have any bytes left
+    if (stream) {
+        inner_pdu(new RawPDU(stream.pointer(), stream.size()));
+    }
 }
 
 void TCP::dport(uint16_t new_dport) {

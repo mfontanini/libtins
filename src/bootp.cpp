@@ -32,23 +32,25 @@
 #include <cassert>
 #include "bootp.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins{
+
 BootP::BootP() 
-: _vend(64) {
-    std::memset(&_bootp, 0, sizeof(bootphdr));
+: _bootp(), _vend(64) {
+
 }
 
 BootP::BootP(const uint8_t *buffer, uint32_t total_sz, uint32_t vend_field_size) 
 : _vend(vend_field_size) 
 {
-    if(total_sz < sizeof(bootphdr) + vend_field_size)
-        throw malformed_packet();
-    std::memcpy(&_bootp, buffer, sizeof(bootphdr));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_bootp);
     buffer += sizeof(bootphdr);
     total_sz -= sizeof(bootphdr);
-    _vend.assign(buffer, buffer + vend_field_size);
-    // Maybe RawPDU on what is left on the buffer?...
+    _vend.assign(stream.pointer(), stream.pointer() + vend_field_size);
 }
 
 uint32_t BootP::header_size() const {

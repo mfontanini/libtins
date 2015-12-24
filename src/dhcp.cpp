@@ -35,15 +35,20 @@
 #include "ethernetII.h"
 #include "internals.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
 
 using std::string;
 using std::list;
 using std::runtime_error;
 using std::find_if;
 
+using Tins::Memory::InputMemoryStream;
+
 namespace Tins {
+
 // Magic cookie: uint32_t. 
-DHCP::DHCP() : _size(sizeof(uint32_t)) {
+DHCP::DHCP() 
+: _size(sizeof(uint32_t)) {
     opcode(BOOTREQUEST);
     htype(1); //ethernet
     hlen(EthernetII::address_type::address_size);
@@ -52,33 +57,26 @@ DHCP::DHCP() : _size(sizeof(uint32_t)) {
 DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) 
 : BootP(buffer, total_sz, 0), _size(sizeof(uint32_t))
 {
-    buffer += BootP::header_size() - vend().size();
-    total_sz -= static_cast<uint32_t>(BootP::header_size() - vend().size());
-    uint8_t args[2] = {0};
-    uint32_t uint32_t_buffer;
-    std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
-    if(total_sz < sizeof(uint32_t) || uint32_t_buffer != Endian::host_to_be<uint32_t>(0x63825363))
+    const uint32_t bootp_size = BootP::header_size() - vend().size();
+    InputMemoryStream stream(buffer + bootp_size, total_sz - bootp_size);
+    const uint32_t magic_number = stream.read<uint32_t>();
+    if (magic_number != Endian::host_to_be<uint32_t>(0x63825363))
         throw malformed_packet();
-    buffer += sizeof(uint32_t);
-    total_sz -= sizeof(uint32_t);
-    while(total_sz) {
-        for(unsigned i(0); i < 2; ++i) {
-            args[i] = *(buffer++);
-            total_sz--;
-            if(args[0] == END || args[0] == PAD) {
-                args[1] = 0;
-                i = 2;
-            }
-            else if(!total_sz)
-                throw malformed_packet();
+    // While there's data left
+    while (stream) {
+        OptionTypes option_type;
+        uint8_t option_length = 0;
+        option_type = (OptionTypes)stream.read<uint8_t>();
+        // We should only read the length if it's not END nor PAD
+        if (option_type != END && option_type != PAD) {
+            option_length = stream.read<uint8_t>();
         }
-        if(total_sz < args[1])
+        // Make sure we can read the payload size
+        if (!stream.can_read(option_length)) {
             throw malformed_packet();
-        add_option(
-            option((OptionTypes)args[0], args[1], buffer)
-        );
-        buffer += args[1];
-        total_sz -= args[1];
+        }
+        add_option(option(option_type, option_length, stream.pointer()));
+        stream.skip(option_length);
     }
 }
 

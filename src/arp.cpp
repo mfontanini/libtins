@@ -37,16 +37,18 @@
 #include "constants.h"
 #include "network_interface.h"
 #include "exceptions.h"
-
+#include "memory_helpers.h"
 
 using std::runtime_error;
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
 ARP::ARP(ipaddress_type target_ip, ipaddress_type sender_ip, 
-  const hwaddress_type &target_hw, const hwaddress_type &sender_hw) 
+const hwaddress_type &target_hw, const hwaddress_type &sender_hw)
+: _arp() 
 {
-    memset(&_arp, 0, sizeof(arphdr));
     hw_addr_format((uint16_t)Constants::ARP::ETHER);
     prot_addr_format((uint16_t)Constants::Ethernet::IP);
     hw_addr_length(Tins::EthernetII::address_type::address_size);
@@ -59,13 +61,11 @@ ARP::ARP(ipaddress_type target_ip, ipaddress_type sender_ip,
 
 ARP::ARP(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(arphdr))
-        throw malformed_packet();
-    memcpy(&_arp, buffer, sizeof(arphdr));
-    total_sz -= sizeof(arphdr);
-    //TODO: Check whether this should be removed or not.
-    if(total_sz)
-        inner_pdu(new RawPDU(buffer + sizeof(arphdr), total_sz));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_arp);
+    if (stream) {
+        inner_pdu(new RawPDU(stream.pointer(), stream.size()));
+    }
 }
 
 void ARP::sender_hw_addr(const hwaddress_type &new_snd_hw_addr) {

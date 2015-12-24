@@ -39,6 +39,9 @@
 #include "utils.h"
 #include "exceptions.h"
 #include "icmp.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
@@ -51,36 +54,20 @@ ICMP::ICMP(Flags flag)
 
 ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(icmphdr))
-        throw malformed_packet();
-    std::memcpy(&_icmp, buffer, sizeof(icmphdr));
-    buffer += sizeof(icmphdr);
-    total_sz -= sizeof(icmphdr);
-    uint32_t uint32_t_buffer = 0;
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_icmp);
     if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
-        if(total_sz < sizeof(uint32_t) * 3)
-            throw malformed_packet();
-        memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
-        original_timestamp(uint32_t_buffer);
-        memcpy(&uint32_t_buffer, buffer + sizeof(uint32_t), sizeof(uint32_t));
-        receive_timestamp(uint32_t_buffer);
-        memcpy(&uint32_t_buffer, buffer + 2 * sizeof(uint32_t), sizeof(uint32_t));
-        transmit_timestamp(uint32_t_buffer);
-        total_sz -= sizeof(uint32_t) * 3;
-        buffer += sizeof(uint32_t) * 3;
+        original_timestamp(stream.read<uint32_t>());
+        receive_timestamp(stream.read<uint32_t>());
+        transmit_timestamp(stream.read<uint32_t>());
     }
     else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
-        if(total_sz < sizeof(uint32_t))
-            throw malformed_packet();
-        memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
-        address_mask(address_type(uint32_t_buffer));
-        total_sz -= sizeof(uint32_t);
-        buffer += sizeof(uint32_t);
+        address_mask(address_type(stream.read<uint32_t>()));
     }
     // Attempt to parse ICMP extensions
-    try_parse_extensions(buffer, total_sz);
-    if (total_sz) {
-        inner_pdu(new RawPDU(buffer, total_sz));
+    try_parse_extensions(stream);
+    if (stream) {
+        inner_pdu(new RawPDU(stream.pointer(), stream.size()));
     }
 }
 
@@ -288,10 +275,10 @@ uint32_t ICMP::get_adjusted_inner_pdu_size() const {
     return Internals::get_padded_icmp_inner_pdu_size(inner_pdu(), sizeof(uint32_t));
 }
 
-void ICMP::try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz) {
+void ICMP::try_parse_extensions(InputMemoryStream& stream) {
     // Check if this is one of the types defined in RFC 4884
     if (are_extensions_allowed()) {
-        Internals::try_parse_icmp_extensions(buffer, total_sz, length() * sizeof(uint32_t), 
+        Internals::try_parse_icmp_extensions(stream, length() * sizeof(uint32_t), 
             extensions_);
     }
 }

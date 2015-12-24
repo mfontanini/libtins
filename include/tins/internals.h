@@ -45,6 +45,9 @@
  * \cond
  */
 namespace Tins {
+namespace Memory {
+class InputMemoryStream;
+} // Memory
 class IPv4Address;
 class IPv6Address;
 class ICMPExtensionsStructure;
@@ -126,7 +129,7 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
 Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag);
 
 uint32_t get_padded_icmp_inner_pdu_size(const PDU* inner_pdu, uint32_t pad_alignment);
-void try_parse_icmp_extensions(const uint8_t* buffer, uint32_t& total_sz, 
+void try_parse_icmp_extensions(Memory::InputMemoryStream& stream, 
     uint32_t payload_length, ICMPExtensionsStructure& extensions);
 
 template<typename T>

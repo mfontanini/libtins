@@ -53,33 +53,33 @@
 #include "constants.h"
 #include "internals.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
+
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
 
 EthernetII::EthernetII(const address_type &dst_hw_addr, 
 const address_type &src_hw_addr) 
+: _eth()
 {
-    memset(&_eth, 0, sizeof(ethhdr));
     dst_addr(dst_hw_addr);
     src_addr(src_hw_addr);
-    _eth.payload_type = 0;
-
 }
 
 EthernetII::EthernetII(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(ethhdr))
-        throw malformed_packet();
-    memcpy(&_eth, buffer, sizeof(ethhdr));
-    buffer += sizeof(ethhdr);
-    total_sz -= sizeof(ethhdr);
-    if(total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_eth);
+    // If there's any size left
+    if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
                 (Constants::Ethernet::e)payload_type(), 
-                buffer, 
-                total_sz
+                stream.pointer(), 
+                stream.size()
             )
         );
     }

@@ -44,6 +44,10 @@
 #include "cxxstd.h"
 
 namespace Tins {
+namespace Memory {
+class InputMemoryStream;
+} // memory
+
 /**
  * \class ICMPv6
  * \brief Represents an ICMPv6 PDU.
@@ -1376,12 +1380,12 @@ private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     bool has_options() const;
     uint8_t *write_option(const option &opt, uint8_t *buffer);
-    void parse_options(const uint8_t *&buffer, uint32_t &total_sz);
+    void parse_options(Memory::InputMemoryStream& stream);
     void add_addr_list(uint8_t type, const addr_list_type &value);
     addr_list_type search_addr_list(OptionTypes type) const;
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);
-    void try_parse_extensions(const uint8_t* buffer, uint32_t& total_sz);
+    void try_parse_extensions(Memory::InputMemoryStream& stream);
     bool are_extensions_allowed() const;
     uint32_t get_adjusted_inner_pdu_size() const;
 

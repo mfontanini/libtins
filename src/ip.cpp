@@ -48,8 +48,11 @@
 #include "network_interface.h"
 #include "exceptions.h"
 #include "pdu_allocator.h"
+#include "memory_helpers.h"
 
 using std::list;
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
@@ -62,46 +65,51 @@ IP::IP(address_type ip_dst, address_type ip_src)
     this->src_addr(ip_src); 
 }
 
-IP::IP(const uint8_t *buffer, uint32_t total_sz) 
+IP::IP(const uint8_t *buffer, uint32_t total_sz)
+: _options_size(0)
 {
-    if(total_sz < sizeof(iphdr))
-        throw malformed_packet();
-    std::memcpy(&_ip, buffer, sizeof(iphdr));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_ip);
 
-    /* Options... */
-    /* Establish beginning and ending of the options */
-    const uint8_t* ptr_buffer = buffer + sizeof(iphdr);
-    if(total_sz < head_len() * sizeof(uint32_t))
+    // Make sure we have enough size for options and not less than we should
+    if (head_len() * sizeof(uint32_t) > total_sz || 
+        head_len() * sizeof(uint32_t) < sizeof(iphdr)) {
         throw malformed_packet();
-    if(head_len() * sizeof(uint32_t) < sizeof(iphdr))
-        throw malformed_packet();
-    buffer += head_len() * sizeof(uint32_t);
+    }
+    const uint8_t* options_end = buffer + head_len() * sizeof(uint32_t);
     
-    _options_size = 0;
-    //_padded_options_size = head_len() * sizeof(uint32_t) - sizeof(iphdr);
-    /* While the end of the options is not reached read an option */
-    while (ptr_buffer < buffer && (*ptr_buffer != 0)) {
-        //ip_option opt_to_add;
-        option_identifier opt_type;
-        memcpy(&opt_type, ptr_buffer, sizeof(uint8_t));
-        ptr_buffer++;
-        if(opt_type.number > NOOP) {
-            /* Multibyte options with length as second byte */
-            if(ptr_buffer == buffer || *ptr_buffer == 0)
+    // While the end of the options is not reached read an option
+    while (stream.pointer() < options_end) {
+        option_identifier opt_type = (option_identifier)stream.read<uint8_t>();
+        if (opt_type.number > NOOP) {
+            // Multibyte options with length as second byte
+            const uint32_t option_size = stream.read<uint8_t>();
+            if (TINS_UNLIKELY(option_size < (sizeof(uint8_t) << 1))) {
                 throw malformed_packet();
-                
-            const uint8_t data_size = *ptr_buffer - 2;
-            if(data_size > 0) {
-                ptr_buffer++;
-                if(buffer - ptr_buffer < data_size)
-                    throw malformed_packet();
-                _ip_options.push_back(option(opt_type, ptr_buffer, ptr_buffer + data_size));
             }
-            else
+            // The data size is the option size - the identifier and size fields
+            const uint32_t data_size = option_size - (sizeof(uint8_t) << 1);
+            if (data_size > 0) {
+                if (stream.pointer() + data_size > options_end) {
+                    throw malformed_packet();
+                }
+                _ip_options.push_back(
+                    option(opt_type, stream.pointer(), stream.pointer() + data_size)
+                );
+                stream.skip(data_size);
+            }
+            else {
                 _ip_options.push_back(option(opt_type));
-            
-            ptr_buffer += _ip_options.back().data_size() + 1;
-            _options_size += static_cast<uint16_t>(_ip_options.back().data_size() + 2);
+            }
+            _options_size += option_size;
+        }
+        else if (opt_type == END) {
+            // If the end option found, we're done
+            if (TINS_UNLIKELY(stream.pointer() != options_end)) {
+                // Make sure we found the END option at the end of the options list
+                throw malformed_packet();
+            }
+            break;
         }
         else {
             _ip_options.push_back(option(opt_type));
@@ -110,39 +118,43 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
     }
     uint8_t padding = _options_size % 4;
     _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
-    // Don't avoid consuming more than we should if tot_len is 0,
-    // since this is the case when using TCP segmentation offload
-    if (tot_len() != 0) 
-        total_sz = std::min(total_sz, (uint32_t)tot_len());
-    if (total_sz < head_len() * sizeof(uint32_t))
-        throw malformed_packet();
-    total_sz -= head_len() * sizeof(uint32_t);
-    if (total_sz) {
+    if (stream) {
+        // Don't avoid consuming more than we should if tot_len is 0,
+        // since this is the case when using TCP segmentation offload
+        if (tot_len() != 0) {
+            const uint32_t advertised_length = (uint32_t)tot_len() - head_len() * sizeof(uint32_t);
+            total_sz = std::min(stream.size(), advertised_length);
+        }
+        else {
+            total_sz = stream.size();
+        }
+
         // Don't try to decode it if it's fragmented
-        if(!is_fragmented()) {
+        if (!is_fragmented()) {
             inner_pdu(
                 Internals::pdu_from_flag(
                     static_cast<Constants::IP::e>(_ip.protocol),
-                    buffer, 
+                    stream.pointer(), 
                     total_sz,
                     false
                 )
             );
-            if(!inner_pdu()) {
+            if (!inner_pdu()) {
                 inner_pdu(
                     Internals::allocate<IP>(
                         _ip.protocol,
-                        buffer, 
+                        stream.pointer(), 
                         total_sz
                     )
                 );
-                if(!inner_pdu())
-                    inner_pdu(new RawPDU(buffer, total_sz));
+                if (!inner_pdu()) {
+                    inner_pdu(new RawPDU(stream.pointer(), total_sz));
+                }
             }
         }
         else {
             // It's fragmented, just use RawPDU
-            inner_pdu(new RawPDU(buffer, total_sz));
+            inner_pdu(new RawPDU(stream.pointer(), total_sz));
         }
     }
 }
