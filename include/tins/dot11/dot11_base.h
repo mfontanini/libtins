@@ -42,6 +42,10 @@
 #include "../macros.h"
 
 namespace Tins {
+namespace Memory {
+class InputMemoryStream;
+} // Memory
+
 class RSNInformation;
 
 /**
@@ -477,7 +481,7 @@ public:
 protected:
     virtual uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz) { return 0; }
     virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
-    void parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz);
+    void parse_tagged_parameters(Memory::InputMemoryStream& stream);
     void add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t *val);
 protected:
     /**

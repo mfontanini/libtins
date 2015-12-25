@@ -34,6 +34,9 @@
 #include <algorithm>
 #include "stp.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
@@ -45,9 +48,8 @@ STP::STP()
 
 STP::STP(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer ,sizeof(_header));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header);
 }
 
 void STP::proto_id(uint16_t new_proto_id) {

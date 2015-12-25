@@ -34,6 +34,9 @@
 #include "pppoe.h"
 #include "rawpdu.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
@@ -47,42 +50,27 @@ PPPoE::PPPoE()
 PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz) 
 : _tags_size()
 {
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
-    total_sz = std::min(total_sz, (uint32_t)payload_length());
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header); 
+    stream.size(std::min(stream.size(), (uint32_t)payload_length()));
     // If this is a session data packet
-    if(code() == 0) {
-        if(total_sz > 0) {
+    if (code() == 0) {
+        if (stream) {
             inner_pdu(
-                new RawPDU(buffer, total_sz)
+                new RawPDU(stream.pointer(), stream.size())
             );
         }
     }
     else {
-        const uint8_t *end = buffer + total_sz;
-        while(buffer < end) {
-            if(buffer + sizeof(uint32_t) * 2 > end)
+        const uint8_t *end = stream.pointer() + stream.size();
+        while (stream.pointer() < end) {
+            TagTypes opt_type = static_cast<TagTypes>(stream.read<uint16_t>());
+            uint16_t opt_len = Endian::be_to_host(stream.read<uint16_t>());
+            if(!stream.can_read(opt_len)) {
                 throw malformed_packet();
-            uint16_t opt_type;
-            std::memcpy(&opt_type, buffer, sizeof(uint16_t));
-            uint16_t opt_len;
-            std::memcpy(&opt_len, buffer + sizeof(uint16_t), sizeof(uint16_t));
-            buffer += sizeof(uint16_t) * 2;
-            total_sz -= sizeof(uint16_t) * 2;
-            if(Endian::be_to_host(opt_len) > total_sz)
-                throw malformed_packet();
-            add_tag(
-                tag(
-                    static_cast<TagTypes>(opt_type), 
-                    Endian::be_to_host(opt_len), 
-                    buffer
-                )
-            );
-            buffer += Endian::be_to_host(opt_len);
-            total_sz -= Endian::be_to_host(opt_len);
+            }
+            add_tag(tag(opt_type, opt_len, stream.pointer()));
+            stream.skip(opt_len);
         }
     }
 }

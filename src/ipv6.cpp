@@ -45,50 +45,48 @@
 #include "exceptions.h"
 #include "pdu_allocator.h"
 #include "internals.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
 IPv6::IPv6(address_type ip_dst, address_type ip_src, PDU *child) 
-: headers_size(0)
+: _header(), headers_size(0)
 {
-    std::memset(&_header, 0, sizeof(_header));
     version(6);
     dst_addr(ip_dst);
     src_addr(ip_src);
 }
 
 IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz) 
-: headers_size(0) {
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
+: headers_size(0) 
+{
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header);
     uint8_t current_header = _header.next_header;
-    while(total_sz) {
+    while (stream) {
         if(is_extension_header(current_header)) {
-            if(total_sz < 8)
-                throw malformed_packet();
+            const uint8_t ext_type = stream.read<uint8_t>();
             // every ext header is at least 8 bytes long
             // minus one, from the next_header field.
-            uint32_t size = static_cast<uint32_t>(buffer[1]) + 8;
+            const uint32_t ext_size = static_cast<uint32_t>(stream.read<uint8_t>()) + 8;
+            const uint32_t payload_size = ext_size - sizeof(uint8_t) * 2;
             // -1 -> next header identifier
-            if(total_sz < size) 
+            if(!stream.can_read(ext_size)) { 
                 throw malformed_packet();
+            }
             // minus one, from the size field
-            add_ext_header(
-                ext_header(buffer[0], size - sizeof(uint8_t)*2, buffer + 2)
-            );
-            current_header = buffer[0];
-            buffer += size;
-            total_sz -= size;
+            add_ext_header(ext_header(ext_type, payload_size, stream.pointer()));
+            current_header = ext_type;
+            stream.skip(payload_size);
         }
         else {
             inner_pdu(
                 Internals::pdu_from_flag(
                     static_cast<Constants::IP::e>(current_header),
-                    buffer, 
-                    total_sz,
+                    stream.pointer(), 
+                    stream.size(),
                     false
                 )
             );
@@ -96,14 +94,16 @@ IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz)
                 inner_pdu(
                     Internals::allocate<IPv6>(
                         current_header,
-                        buffer, 
-                        total_sz
+                        stream.pointer(), 
+                        stream.size()
                     )
                 );
-                if(!inner_pdu())
-                    inner_pdu(new Tins::RawPDU(buffer, total_sz));
+                if(!inner_pdu()) {
+                    inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+                }
             }
-            total_sz = 0;
+            // We got to an actual PDU, we're done
+            break;
         }
     }
 }

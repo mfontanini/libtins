@@ -36,61 +36,55 @@
 #include "stp.h"
 #include "rawpdu.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
+
 const uint8_t LLC::GLOBAL_DSAP_ADDR = 0xFF;
 const uint8_t LLC::NULL_ADDR = 0x00;
 
 LLC::LLC()
-: _type(LLC::INFORMATION) 
+: _header(), control_field(), _type(LLC::INFORMATION) 
 {
-	memset(&_header, 0, sizeof(llchdr));
 	control_field_length = 2;
-	memset(&control_field, 0, sizeof(control_field));
 	information_field_length = 0;
 }
 
 LLC::LLC(uint8_t dsap, uint8_t ssap) 
-: _type(LLC::INFORMATION) 
+: control_field(), _type(LLC::INFORMATION) 
 {
 	_header.dsap = dsap;
 	_header.ssap = ssap;
 	control_field_length = 2;
-	memset(&control_field, 0, sizeof(control_field));
 	information_field_length = 0;
 }
 
 LLC::LLC(const uint8_t *buffer, uint32_t total_sz) {
-    // header + 1 info byte
-	if(total_sz < sizeof(_header) + 1)
-		throw malformed_packet();
-	std::memcpy(&_header, buffer, sizeof(_header));
-	buffer += sizeof(_header);
-	total_sz -= sizeof(_header);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header);
+    if (!stream) {
+        throw malformed_packet();
+    }
 	information_field_length = 0;
-	if ((buffer[0] & 0x03) == LLC::UNNUMBERED) {
-        if(total_sz < sizeof(un_control_field))
-            throw malformed_packet();
+	if ((*stream.pointer() & 0x03) == LLC::UNNUMBERED) {
 		type(LLC::UNNUMBERED);
-		std::memcpy(&control_field.unnumbered, buffer, sizeof(un_control_field));
-		buffer += sizeof(un_control_field);
-		total_sz -= sizeof(un_control_field);
-		//TODO: Create information fields if corresponding.
+        stream.read(control_field.unnumbered);
+		// TODO: Create information fields if corresponding.
 	}
 	else {
-        if(total_sz < sizeof(info_control_field))
-            throw malformed_packet();
-		type((Format)(buffer[0] & 0x03));
+		type((Format)(*stream.pointer() & 0x03));
 		control_field_length = 2;
-		std::memcpy(&control_field.info, buffer, sizeof(info_control_field));
-		buffer += 2;
-		total_sz -= 2;
+		stream.read(control_field.info);
 	}
-    if(total_sz > 0) {
-        if(dsap() == 0x42 && ssap() == 0x42)
-            inner_pdu(new Tins::STP(buffer, total_sz));
-        else
-            inner_pdu(new Tins::RawPDU(buffer, total_sz));
+    if (stream) {
+        if (dsap() == 0x42 && ssap() == 0x42) {
+            inner_pdu(new Tins::STP(stream.pointer(), stream.size()));
+        }
+        else {
+            inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+        }
     }
 }
 

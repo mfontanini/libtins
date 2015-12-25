@@ -43,34 +43,34 @@
 #include "eapol.h"
 #include "internals.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
 
+using Tins::Memory::InputMemoryStream;
 
-Tins::SNAP::SNAP()
+namespace Tins {
+
+SNAP::SNAP() : _snap()
 {
-    std::memset(&_snap, 0, sizeof(_snap));
     _snap.dsap = _snap.ssap = 0xaa;
     control(3);
 }
 
-Tins::SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) 
+SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(_snap))
-        throw malformed_packet();
-    std::memcpy(&_snap, buffer, sizeof(_snap));
-    buffer += sizeof(_snap);
-    total_sz -= sizeof(_snap);
-    if(total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_snap);
+    if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
                 (Constants::Ethernet::e)eth_type(), 
-                buffer, 
-                total_sz
+                stream.pointer(), 
+                stream.size()
             )
         );
     }
 }
 
-void Tins::SNAP::control(uint8_t new_control) {
+void SNAP::control(uint8_t new_control) {
     #if TINS_IS_LITTLE_ENDIAN
     _snap.control_org = (_snap.control_org & 0xffffff00) | (new_control);
     #else
@@ -78,7 +78,7 @@ void Tins::SNAP::control(uint8_t new_control) {
     #endif
 }
 
-void Tins::SNAP::org_code(small_uint<24> new_org) {
+void SNAP::org_code(small_uint<24> new_org) {
     #if TINS_IS_LITTLE_ENDIAN
     _snap.control_org = Endian::host_to_be<uint32_t>(new_org) | control();
     #else
@@ -86,15 +86,15 @@ void Tins::SNAP::org_code(small_uint<24> new_org) {
     #endif
 }
 
-void Tins::SNAP::eth_type(uint16_t new_eth) {
+void SNAP::eth_type(uint16_t new_eth) {
     _snap.eth_type = Endian::host_to_be(new_eth); 
 }
 
-uint32_t Tins::SNAP::header_size() const {
+uint32_t SNAP::header_size() const {
     return sizeof(_snap);
 }
 
-void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     #ifdef TINS_DEBUG
     assert(total_sz >= sizeof(_snap));
     #endif
@@ -108,3 +108,5 @@ void Tins::SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
     }
     std::memcpy(buffer, &_snap, sizeof(_snap));
 }
+
+} // Tins

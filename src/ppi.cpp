@@ -42,50 +42,51 @@
 #include "ppi.h"
 #include "internals.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
+
 PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
-    if(total_sz < sizeof(_header))
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header);
+    if (length() > total_sz || length() < sizeof(_header)) {
         throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
-    if(length() > total_sz || length() < sizeof(_header))
-        throw malformed_packet();
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
+    }
     // There are some options
     const size_t options_length = length() - sizeof(_header);
-    if(options_length > 0) {
-        _data.assign(buffer, buffer + options_length);
-        buffer += options_length;
-        total_sz -= static_cast<uint32_t>(options_length);
+    if (options_length > 0) {
+        _data.assign(stream.pointer(), stream.pointer() + options_length);
+        stream.skip(options_length);
     }
-    if(total_sz > 0) {
-        switch(dlt()) {
+    if (stream) {
+        switch (dlt()) {
             case DLT_IEEE802_11:
                 #ifdef HAVE_DOT11
-                    parse_80211(buffer, total_sz);
+                    parse_80211(stream.pointer(), stream.size());
                 #else
                     throw protocol_disabled();
                 #endif
                 break;
             case DLT_EN10MB:
-                if(Internals::is_dot3(buffer, total_sz))
-                    inner_pdu(new Dot3(buffer, total_sz));
+                if(Internals::is_dot3(stream.pointer(), stream.size()))
+                    inner_pdu(new Dot3(stream.pointer(), stream.size()));
                 else
-                    inner_pdu(new EthernetII(buffer, total_sz));
+                    inner_pdu(new EthernetII(stream.pointer(), stream.size()));
                 break;
             case DLT_IEEE802_11_RADIO:
                 #ifdef HAVE_DOT11
-                    inner_pdu(new RadioTap(buffer, total_sz));
+                    inner_pdu(new RadioTap(stream.pointer(), stream.size()));
                 #else
                     throw protocol_disabled();
                 #endif
                 break;
             case DLT_NULL:
-                inner_pdu(new Loopback(buffer, total_sz));
+                inner_pdu(new Loopback(stream.pointer(), stream.size()));
                 break;
             case DLT_LINUX_SLL:
-                inner_pdu(new Tins::SLL(buffer, total_sz));
+                inner_pdu(new Tins::SLL(stream.pointer(), stream.size()));
                 break;
         }
     }

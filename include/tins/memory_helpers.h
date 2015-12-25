@@ -6,6 +6,7 @@
 #include "exceptions.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
+#include "hw_address.h"
 
 namespace Tins {
 namespace Memory {
@@ -65,6 +66,15 @@ public:
         }
         address = pointer();
         skip(IPv6Address::address_size);
+    }
+
+    template <size_t n>
+    void read(HWAddress<n>& address) {
+        if (!can_read(HWAddress<n>::address_size)) {
+            throw malformed_packet();
+        }
+        address = pointer();
+        skip(HWAddress<n>::address_size);
     }
 
     void read(void* output_buffer, uint32_t output_buffer_size) {

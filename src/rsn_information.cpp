@@ -34,15 +34,13 @@
 #include <stdexcept>
 #include "exceptions.h"
 #include "pdu_option.h"
+#include "memory_helpers.h"
 #include "dot11/dot11_base.h"
 
+using Tins::Memory::InputMemoryStream;
+
 namespace Tins {
-template<typename T>
-void check_size(uint32_t total_sz) {
-    if(total_sz < sizeof(T))
-        throw malformed_packet();
-}
-    
+
 RSNInformation::RSNInformation() : _version(1), _capabilities(0) {
 
 }
@@ -56,55 +54,28 @@ RSNInformation::RSNInformation(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 void RSNInformation::init(const uint8_t *buffer, uint32_t total_sz) {
-    if(total_sz <= sizeof(uint16_t) * 2 + sizeof(uint32_t))
+    InputMemoryStream stream(buffer, total_sz);
+    version(Endian::le_to_host(stream.read<uint16_t>()));    
+    group_suite((RSNInformation::CypherSuites)Endian::le_to_host(stream.read<uint32_t>()));
+    int pairwise_cyphers_size = Endian::le_to_host(stream.read<uint16_t>());
+    if (!stream.can_read(pairwise_cyphers_size)) {
         throw malformed_packet();
-
-    uint16_t uint16_t_buffer;
-    uint32_t uint32_t_buffer;
-
-    std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
-    version(Endian::le_to_host(uint16_t_buffer));
-    buffer += sizeof(uint16_t);
-    total_sz -= sizeof(uint16_t);
-    
-    std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
-    group_suite((RSNInformation::CypherSuites)Endian::le_to_host(uint32_t_buffer));
-    buffer += sizeof(uint32_t);
-    total_sz -= sizeof(uint32_t);
-
-    std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
-    uint16_t_buffer = Endian::le_to_host(uint16_t_buffer);
-    buffer += sizeof(uint16_t);
-    total_sz -= sizeof(uint16_t);
-    
-    if(uint16_t_buffer * sizeof(uint32_t) > total_sz) 
-        throw malformed_packet();
-    total_sz -= uint16_t_buffer * sizeof(uint32_t);
-    while(uint16_t_buffer--) {
-        std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
-        uint32_t_buffer = Endian::le_to_host(uint32_t_buffer);
-        add_pairwise_cypher((RSNInformation::CypherSuites)uint32_t_buffer);
-        buffer += sizeof(uint32_t);
     }
-    check_size<uint16_t>(total_sz);
-
-    std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
-    buffer += sizeof(uint16_t);
-    total_sz -= sizeof(uint16_t);
-    uint16_t_buffer = Endian::le_to_host(uint16_t_buffer);
-
-    if(uint16_t_buffer * sizeof(uint32_t) > total_sz)
-        throw malformed_packet();
-    total_sz -= uint16_t_buffer * sizeof(uint32_t);
-    while(uint16_t_buffer--) {
-        std::memcpy(&uint32_t_buffer, buffer, sizeof(uint32_t));
-        add_akm_cypher((RSNInformation::AKMSuites)Endian::le_to_host(uint32_t_buffer));
-        buffer += sizeof(uint32_t);
+    while (pairwise_cyphers_size--) {
+        add_pairwise_cypher(
+            (RSNInformation::CypherSuites)Endian::le_to_host(stream.read<uint32_t>())
+        );
     }
-    check_size<uint16_t>(total_sz);
-    
-    std::memcpy(&uint16_t_buffer, buffer, sizeof(uint16_t));
-    capabilities(Endian::le_to_host(uint16_t_buffer));
+    int akm_cyphers_size = Endian::le_to_host(stream.read<uint16_t>());
+    if (!stream.can_read(akm_cyphers_size)) {
+        throw malformed_packet();
+    }
+    while (akm_cyphers_size--) {
+        add_akm_cypher(
+            (RSNInformation::AKMSuites)Endian::le_to_host(stream.read<uint32_t>())
+        );
+    }
+    capabilities(Endian::le_to_host(stream.read<uint16_t>()));
 }
 
 void RSNInformation::add_pairwise_cypher(CypherSuites cypher) {

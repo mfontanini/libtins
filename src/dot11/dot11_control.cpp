@@ -32,6 +32,9 @@
 
 #include <cassert>
 #include <cstring>
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
  /* Dot11Control */
@@ -57,12 +60,9 @@ Dot11ControlTA::Dot11ControlTA(const address_type &dst_addr,
 }
 
 Dot11ControlTA::Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz) : Dot11Control(buffer, total_sz) {
-    buffer += sizeof(ieee80211_header);
-    total_sz -= sizeof(ieee80211_header);
-    if(total_sz < sizeof(_taddr))
-        throw malformed_packet();
-    //std::memcpy(_taddr, buffer, sizeof(_taddr));
-    _taddr = buffer;
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(sizeof(ieee80211_header));
+    stream.read(_taddr);
 }
 
 uint32_t Dot11ControlTA::header_size() const {
@@ -164,14 +164,10 @@ Dot11BlockAckRequest::Dot11BlockAckRequest(const address_type &dst_addr,
 Dot11BlockAckRequest::Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ControlTA(buffer, total_sz) 
 {
-    uint32_t padding = controlta_size();
-    buffer += padding;
-    total_sz -= padding;
-    if(total_sz < sizeof(_bar_control) + sizeof(_start_sequence))
-        throw malformed_packet();
-    std::memcpy(&_bar_control, buffer, sizeof(_bar_control));
-    buffer += sizeof(_bar_control);
-    std::memcpy(&_start_sequence, buffer, sizeof(_start_sequence));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(controlta_size());
+    stream.read(_bar_control);
+    stream.read(_start_sequence);
 }
 
 void Dot11BlockAckRequest::init_block_ack() {
@@ -228,16 +224,11 @@ Dot11BlockAck::Dot11BlockAck(const address_type &dst_addr,
 }
 
 Dot11BlockAck::Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz) : Dot11ControlTA(buffer, total_sz) {
-    uint32_t padding = controlta_size();
-    buffer += padding;
-    total_sz -= padding;
-    if(total_sz < sizeof(_bitmap) + sizeof(_bar_control) + sizeof(_start_sequence))
-        throw malformed_packet();
-    std::memcpy(&_bar_control, buffer, sizeof(_bar_control));
-    buffer += sizeof(_bar_control);
-    std::memcpy(&_start_sequence, buffer, sizeof(_start_sequence));
-    buffer += sizeof(_start_sequence);
-    std::memcpy(&_bitmap, buffer, sizeof(_bitmap));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(controlta_size());
+    stream.read(_bar_control);
+    stream.read(_start_sequence);
+    stream.read(_bitmap);
 }
 
 void Dot11BlockAck::bar_control(small_uint<4> bar) {
@@ -270,13 +261,12 @@ void Dot11BlockAck::bitmap(const uint8_t *bit) {
 
 uint32_t Dot11BlockAck::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
     uint32_t parent_size = Dot11ControlTA::write_ext_header(buffer, total_sz);
-    buffer += parent_size;
-    std::memcpy(buffer, &_bar_control, sizeof(_bar_control));
-    buffer += sizeof(_bar_control);
-    std::memcpy(buffer, &_start_sequence, sizeof(_start_sequence));
-    buffer += sizeof(_start_sequence);
-    std::memcpy(buffer, _bitmap, sizeof(_bitmap));
-    return parent_size + sizeof(_bitmap) + sizeof(_bar_control) + sizeof(_start_sequence);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(parent_size);
+    stream.read(_bar_control);
+    stream.read(_start_sequence);
+    stream.read(_bitmap);
+    return total_sz - stream.size();
 }
 
 uint32_t Dot11BlockAck::header_size() const {

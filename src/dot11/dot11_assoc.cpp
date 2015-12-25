@@ -32,29 +32,26 @@
 
 #include <cassert>
 #include <cstring>
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 /* Diassoc */
 
 Dot11Disassoc::Dot11Disassoc(const address_type &dst_hw_addr, 
   const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr), _body()
 {
     this->subtype(Dot11::DISASSOC);
-    memset(&_body, 0, sizeof(_body));
 }
 
 Dot11Disassoc::Dot11Disassoc(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11Disassoc::reason_code(uint16_t new_reason_code) {
@@ -78,24 +75,18 @@ uint32_t Dot11Disassoc::write_fixed_parameters(uint8_t *buffer, uint32_t total_s
 
 Dot11AssocRequest::Dot11AssocRequest(const address_type &dst_hw_addr, 
 const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr), _body()
 {
     subtype(Dot11::ASSOC_REQ);
-    memset(&_body, 0, sizeof(_body));
 }
 
 Dot11AssocRequest::Dot11AssocRequest(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) 
 {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11AssocRequest::listen_interval(uint16_t new_listen_interval) {
@@ -128,15 +119,10 @@ Dot11AssocResponse::Dot11AssocResponse(const address_type &dst_hw_addr,
 Dot11AssocResponse::Dot11AssocResponse(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) 
 {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11AssocResponse::status_code(uint16_t new_status_code) {
@@ -173,15 +159,10 @@ Dot11ReAssocRequest::Dot11ReAssocRequest(const address_type &dst_hw_addr,
 Dot11ReAssocRequest::Dot11ReAssocRequest(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) 
 {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11ReAssocRequest::listen_interval(uint16_t new_listen_interval) {
@@ -217,15 +198,10 @@ Dot11ReAssocResponse::Dot11ReAssocResponse(const address_type &dst_hw_addr,
 
 Dot11ReAssocResponse::Dot11ReAssocResponse(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11ReAssocResponse::status_code(uint16_t new_status_code) {

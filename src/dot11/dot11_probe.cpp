@@ -33,6 +33,9 @@
 
 #include <cstring>
 #include <cassert>
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 /* Probe Request */
@@ -47,34 +50,27 @@ Dot11ProbeRequest::Dot11ProbeRequest(const address_type &dst_hw_addr,
 Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) 
 {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    parse_tagged_parameters(stream);
 }
 
 /* Probe Response */
 
 Dot11ProbeResponse::Dot11ProbeResponse(const address_type &dst_hw_addr, 
   const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr), _body()
 {
     this->subtype(Dot11::PROBE_RESP);
-    memset(&_body, 0, sizeof(_body));
 }
 
 Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) 
 {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11ProbeResponse::timestamp(uint64_t new_timestamp) {

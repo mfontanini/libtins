@@ -32,6 +32,9 @@
 
 #include <cassert>
 #include <cstring>
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 /* Auth */
@@ -47,15 +50,10 @@ const address_type &src_hw_addr)
 Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) 
 {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11Authentication::auth_algorithm(uint16_t new_auth_algorithm) {
@@ -95,15 +93,10 @@ Dot11Deauthentication::Dot11Deauthentication(const address_type &dst_hw_addr,
 
 Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11Deauthentication::reason_code(uint16_t new_reason_code) {

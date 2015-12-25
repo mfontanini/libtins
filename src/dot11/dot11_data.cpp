@@ -34,6 +34,9 @@
 #include <cassert>
 #include "rawpdu.h"
 #include "snap.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 /* Dot11Data */
@@ -42,14 +45,16 @@ Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz)
 : Dot11(buffer, total_sz)
 {
     const uint32_t offset = init(buffer, total_sz);
-    buffer += offset;
-    total_sz -= offset;
-    if(total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(offset);
+    if (stream) {
         // If the wep bit is on, then just use a RawPDU
-        if(wep())
-            inner_pdu(new Tins::RawPDU(buffer, total_sz));
-        else
-            inner_pdu(new Tins::SNAP(buffer, total_sz));
+        if(wep()) {
+            inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+        }
+        else {
+            inner_pdu(new Tins::SNAP(stream.pointer(), stream.size()));
+        }
     }
 }
 
@@ -60,23 +65,13 @@ Dot11Data::Dot11Data(const uint8_t *buffer, uint32_t total_sz, no_inner_pdu)
 }
 
 uint32_t Dot11Data::init(const uint8_t *buffer, uint32_t total_sz) {
-    const uint8_t *start_ptr = buffer;
-    uint32_t sz = Dot11::header_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_ext_header))
-        throw malformed_packet();
-    std::memcpy(&_ext_header, buffer, sizeof(_ext_header));
-    buffer += sizeof(_ext_header);
-    total_sz -= sizeof(_ext_header);
-    if(from_ds() && to_ds()) {
-        if(total_sz < _addr4.size())
-            throw malformed_packet();
-        _addr4 = buffer;
-        buffer += _addr4.size();
-        total_sz -= static_cast<uint32_t>(_addr4.size());
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(Dot11::header_size());
+    stream.read(_ext_header);
+    if (from_ds() && to_ds()) {
+        stream.read(_addr4);
     }
-    return static_cast<uint32_t>(buffer - start_ptr);
+    return total_sz - stream.size();
 }
 
 Dot11Data::Dot11Data(const address_type &dst_hw_addr, 
@@ -148,20 +143,17 @@ Dot11QoSData::Dot11QoSData(const address_type &dst_hw_addr,
 Dot11QoSData::Dot11QoSData(const uint8_t *buffer, uint32_t total_sz) 
 // Am I breaking something? :S
 : Dot11Data(buffer, total_sz, no_inner_pdu()) {
-    uint32_t sz = data_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_qos_control))
-        throw malformed_packet();
-    std::memcpy(&_qos_control, buffer, sizeof(uint16_t));
-    total_sz -= sizeof(uint16_t);
-    buffer += sizeof(uint16_t);
-    if(total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(data_frame_size());
+    stream.read(_qos_control);
+    if (total_sz) {
         // If the wep bit is on, then just use a RawPDU
-        if(wep())
-            inner_pdu(new Tins::RawPDU(buffer, total_sz));
-        else
-            inner_pdu(new Tins::SNAP(buffer, total_sz));
+        if (wep()) {
+            inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+        }
+        else {
+            inner_pdu(new Tins::SNAP(stream.pointer(), stream.size()));
+        }
     }
 }
 

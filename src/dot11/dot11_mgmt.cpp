@@ -32,6 +32,9 @@
 
 #include <cstring>
 #include "rsn_information.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 /* Dot11ManagementFrame */
@@ -39,33 +42,27 @@ namespace Tins {
 Dot11ManagementFrame::Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11(buffer, total_sz) 
 {
-    buffer += sizeof(ieee80211_header);
-    total_sz -= sizeof(ieee80211_header);
-    if(total_sz < sizeof(_ext_header))
-        throw malformed_packet();
-    std::memcpy(&_ext_header, buffer, sizeof(_ext_header));
-    total_sz -= sizeof(_ext_header);
-    if(from_ds() && to_ds()) {
-        if(total_sz >= _addr4.size())
-            _addr4 = buffer + sizeof(_ext_header);
-        else
-            throw malformed_packet();
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(sizeof(ieee80211_header));
+    stream.read(_ext_header);
+    if (from_ds() && to_ds()) {
+        stream.read(_addr4);
     }
 }
 
 Dot11ManagementFrame::Dot11ManagementFrame(const address_type &dst_hw_addr, 
 const address_type &src_hw_addr) 
-: Dot11(dst_hw_addr) 
+: Dot11(dst_hw_addr), _ext_header()
 {
     type(Dot11::MANAGEMENT);
-    memset(&_ext_header, 0, sizeof(_ext_header));
     addr2(src_hw_addr);
 }
 
 uint32_t Dot11ManagementFrame::header_size() const {
     uint32_t sz = Dot11::header_size() + sizeof(_ext_header);
-    if (this->from_ds() && this->to_ds())
+    if (this->from_ds() && this->to_ds()) {
         sz += 6;
+    }
     return sz;
 }
 

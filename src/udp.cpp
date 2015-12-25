@@ -39,24 +39,25 @@
 #include "ipv6.h"
 #include "rawpdu.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
-UDP::UDP(uint16_t dport, uint16_t sport) 
+
+UDP::UDP(uint16_t dport, uint16_t sport) : _udp()
 {
     this->dport(dport);
     this->sport(sport);
-    _udp.check = 0;
-    _udp.len = 0;
 }
 
 UDP::UDP(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(udphdr))
-        throw malformed_packet();
-    std::memcpy(&_udp, buffer, sizeof(udphdr));
-    total_sz -= sizeof(udphdr);
-    if(total_sz)
-        inner_pdu(new RawPDU(buffer + sizeof(udphdr), total_sz));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_udp);
+    if (stream) {
+        inner_pdu(new RawPDU(stream.pointer(), stream.size()));
+    }
 }
 
 void UDP::dport(uint16_t new_dport) {

@@ -48,13 +48,17 @@
 #include "llc.h"
 #include "rawpdu.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
 
 #if !defined(PF_LLC)
     // compilation fix, nasty but at least works on BSD
     #define PF_LLC 26
 #endif
 
+using Tins::Memory::InputMemoryStream;
+
 namespace Tins {
+
 Loopback::Loopback()
 : _family()
 {
@@ -63,22 +67,19 @@ Loopback::Loopback()
 
 Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz) 
 {
-    if(total_sz < sizeof(_family))
-        throw malformed_packet();
-    _family = *reinterpret_cast<const uint32_t*>(buffer);
-    buffer += sizeof(uint32_t);
-    total_sz -= sizeof(uint32_t);
+    InputMemoryStream stream(buffer, total_sz);
+    _family = stream.read<uint32_t>();
     #ifndef _WIN32
-    if(total_sz) {
-        switch(_family) {
+    if (total_sz) {
+        switch (_family) {
             case PF_INET:
-                inner_pdu(new Tins::IP(buffer, total_sz));
+                inner_pdu(new Tins::IP(stream.pointer(), stream.size()));
                 break;
             case PF_LLC:
-                inner_pdu(new Tins::LLC(buffer, total_sz));
+                inner_pdu(new Tins::LLC(stream.pointer(), stream.size()));
                 break;
             default:
-                inner_pdu(new Tins::RawPDU(buffer, total_sz));
+                inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
                 break;
         };
     }

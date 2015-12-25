@@ -54,14 +54,16 @@
 #include "rsn_information.h"
 #include "packet_sender.h"
 #include "snap.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 const Dot11::address_type Dot11::BROADCAST = "ff:ff:ff:ff:ff:ff";
 
 Dot11::Dot11(const address_type &dst_hw_addr) 
-: _options_size(0)
+: _header(), _options_size(0)
 {
-    memset(&_header, 0, sizeof(ieee80211_header));
     addr1(dst_hw_addr);
 }
 
@@ -73,25 +75,20 @@ Dot11::Dot11(const ieee80211_header *header_ptr)
 Dot11::Dot11(const uint8_t *buffer, uint32_t total_sz) 
 : _options_size(0) 
 {
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header);
 }
 
-void Dot11::parse_tagged_parameters(const uint8_t *buffer, uint32_t total_sz) {
-    if(total_sz > 0) {
-        uint8_t opcode, length;
-        while(total_sz >= 2) {
-            opcode = buffer[0];
-            length = buffer[1];
-            buffer += 2;
-            total_sz -= 2;
-            if(length > total_sz) {
+void Dot11::parse_tagged_parameters(InputMemoryStream& stream) {
+    if (stream) {
+        while (stream.size() >= 2) {
+            OptionTypes opcode = static_cast<OptionTypes>(stream.read<uint8_t>());
+            uint8_t length = stream.read<uint8_t>();
+            if (!stream.can_read(length)) {
                 throw malformed_packet();
             }
-            add_tagged_option((OptionTypes)opcode, length, buffer);
-            buffer += length;
-            total_sz -= length;
+            add_tagged_option(opcode, length, stream.pointer());
+            stream.skip(length);
         }
     }
 }

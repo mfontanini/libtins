@@ -32,24 +32,25 @@
 #include "sll.h"
 #include "internals.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
+
 SLL::SLL() : _header() {
     
 }
     
 SLL::SLL(const uint8_t *buffer, uint32_t total_sz) {
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
-    if(total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(_header);
+    if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
                 (Constants::Ethernet::e)protocol(), 
-                buffer, 
-                total_sz
+                stream.pointer(), 
+                stream.size()
             )
         );
     }

@@ -32,6 +32,9 @@
 
 #include <cstring>
 #include <cassert>
+#include "memory_helpers.h"
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
  /* Dot11Beacon */
@@ -47,15 +50,10 @@ const address_type &src_hw_addr)
 Dot11Beacon::Dot11Beacon(const uint8_t *buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) 
 {
-    uint32_t sz = management_frame_size();
-    buffer += sz;
-    total_sz -= sz;
-    if(total_sz < sizeof(_body))
-        throw malformed_packet();
-    std::memcpy(&_body, buffer, sizeof(_body));
-    buffer += sizeof(_body);
-    total_sz -= sizeof(_body);
-    parse_tagged_parameters(buffer, total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(management_frame_size());
+    stream.read(_body);
+    parse_tagged_parameters(stream);
 }
 
 void Dot11Beacon::timestamp(uint64_t new_timestamp) {
