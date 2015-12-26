@@ -92,9 +92,14 @@ int main(int argc, char *argv[])
     config.set_promisc_mode(true);
     config.set_filter("arp");
 
-    // Sniff on the provided interface in promiscuous mode
-    Sniffer sniffer(argv[1], config);
-    
-    // Only capture arp packets
-    monitor.run(sniffer);
+    try {
+        // Sniff on the provided interface in promiscuous mode
+        Sniffer sniffer(argv[1], config);
+        
+        // Only capture arp packets
+        monitor.run(sniffer);
+    }
+    catch (std::exception& ex) {
+        std::cerr << "Error: " << ex.what() << std::endl;
+    }
 }
