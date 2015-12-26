@@ -28,7 +28,6 @@
  */
 
 #include <cstring>
-#include <cassert>
 #include <algorithm>
 #include "arp.h"
 #include "ip.h"
@@ -42,6 +41,7 @@
 using std::runtime_error;
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -109,10 +109,8 @@ uint32_t ARP::header_size() const {
 }
 
 void ARP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(arphdr));
-    #endif
-    memcpy(buffer, &_arp, sizeof(arphdr));
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(_arp);
 }
 
 bool ARP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {

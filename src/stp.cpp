@@ -37,6 +37,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -109,10 +110,8 @@ void STP::bridge_id(const bpdu_id_type &id) {
 }
 
 void STP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(_header));
-    #endif
-    std::memcpy(buffer, &_header, sizeof(_header));
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(_header);
 }
 
 uint32_t STP::header_size() const {

@@ -53,6 +53,7 @@
 using std::list;
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -353,17 +354,17 @@ IP::options_type::iterator IP::search_option_iterator(option_identifier id) {
     return find_if(_ip_options.begin(), _ip_options.end(), comparator);
 }
 
-uint8_t* IP::write_option(const option &opt, uint8_t* buffer) {
-    option_identifier opt_type = opt.option();
-    memcpy(buffer, &opt_type, 1);
-    if(*buffer <= 1)
-        return ++buffer;
-    buffer++;
-    *buffer = static_cast<uint8_t>(opt.length_field());
-    if(opt.data_size() == opt.length_field())
-        *buffer += 2;
-    buffer++;
-    return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
+void IP::write_option(const option &opt, OutputMemoryStream& stream) {
+    stream.write(opt.option());
+    // Check what we wrote. We'll do this for any option != [END, NOOP]
+    if (*(stream.pointer() - 1) > NOOP) {
+        uint8_t length = opt.length_field();
+        if (opt.data_size() == opt.length_field()) {
+            length += 2;
+        }
+        stream.write(length);
+        stream.write(opt.data_ptr(), opt.data_size());
+    }
 }
 
 /* Virtual method overriding. */
@@ -415,40 +416,40 @@ void IP::prepare_for_serialize(const PDU *parent) {
 }
 
 void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
-    uint32_t my_sz = header_size();
-    #ifdef TINS_DEBUG
-    assert(total_sz >= my_sz);
-    #endif
+    OutputMemoryStream stream(buffer, total_sz);
     checksum(0);
-    if(inner_pdu()) {
+    if (inner_pdu()) {
         uint32_t new_flag = Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type());
-        if(new_flag == 0xff && Internals::pdu_type_registered<IP>(inner_pdu()->pdu_type())) {
+        if (new_flag == 0xff && Internals::pdu_type_registered<IP>(inner_pdu()->pdu_type())) {
             new_flag = static_cast<Constants::IP::e>(
                 Internals::pdu_type_to_id<IP>(inner_pdu()->pdu_type())
             );
         }
-        if(!is_fragmented() && new_flag != 0xff)
+        if (!is_fragmented() && new_flag != 0xff) {
             protocol(new_flag);
+        }
     }
     
     #if __FreeBSD__ || defined(__FreeBSD_kernel__) || __APPLE__
-        if(!parent)
+        if(!parent) {
             total_sz = Endian::host_to_be<uint16_t>(total_sz);
+        }
     #endif
     tot_len(total_sz);
-    head_len(static_cast<uint8_t>(my_sz / sizeof(uint32_t)));
+    head_len(static_cast<uint8_t>(header_size() / sizeof(uint32_t)));
 
-    memcpy(buffer, &_ip, sizeof(_ip));
+    stream.write(_ip);
 
-    uint8_t* ptr_buffer = buffer + sizeof(_ip);
     for(options_type::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
-        ptr_buffer = write_option(*it, ptr_buffer);
+        write_option(*it, stream);
     }
-    memset(buffer + sizeof(_ip) + _options_size, 0, _padded_options_size - _options_size);
+    // Add option padding
+    stream.fill(_padded_options_size - _options_size, 0);
 
     uint32_t check = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
-    while (check >> 16)
+    while (check >> 16) {
         check = (check & 0xffff) + (check >> 16);
+    }
     checksum(~check);
     ((iphdr*)buffer)->check = _ip.check;
 }

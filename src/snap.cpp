@@ -46,6 +46,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -95,9 +96,7 @@ uint32_t SNAP::header_size() const {
 }
 
 void SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(_snap));
-    #endif
+    OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
             inner_pdu()->pdu_type()
@@ -106,7 +105,7 @@ void SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
             static_cast<uint16_t>(flag)
         );
     }
-    std::memcpy(buffer, &_snap, sizeof(_snap));
+    stream.write(_snap);
 }
 
 } // Tins

@@ -32,7 +32,9 @@
 #endif
 #include <algorithm>
 #include "rawpdu.h"
+#include "memory_helpers.h"
 
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 RawPDU::RawPDU(const uint8_t *pload, uint32_t size) 
@@ -51,10 +53,8 @@ uint32_t RawPDU::header_size() const {
 }
 
 void RawPDU::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= _payload.size());
-    #endif
-    std::copy(_payload.begin(), _payload.end(), buffer);
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(_payload.begin(), _payload.end());
 }
 
 void RawPDU::payload(const payload_type &pload) {

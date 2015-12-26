@@ -39,6 +39,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -198,33 +199,26 @@ void LLC::clear_information_fields() {
 }
 
 void LLC::write_serialization(uint8_t *buffer, uint32_t total_sz, const Tins::PDU *parent) {
-    #ifdef TINS_DEBUG
-	assert(total_sz >= header_size());
-    #endif
-    if(inner_pdu() && inner_pdu()->pdu_type() == PDU::STP) {
+    OutputMemoryStream stream(buffer, total_sz);
+    if (inner_pdu() && inner_pdu()->pdu_type() == PDU::STP) {
         dsap(0x42);
         ssap(0x42);
     }
-	std::memcpy(buffer, &_header, sizeof(_header));
-	buffer += sizeof(_header);
+    stream.write(_header);
 	switch (type()) {
 		case LLC::UNNUMBERED:
-			std::memcpy(buffer, &(control_field.unnumbered), sizeof(un_control_field));
-			buffer += sizeof(un_control_field);
+            stream.write(control_field.unnumbered);
 			break;
 		case LLC::INFORMATION:
-			std::memcpy(buffer, &(control_field.info), sizeof(info_control_field));
-			buffer += sizeof(info_control_field);
+            stream.write(control_field.info);
 			break;
 		case LLC::SUPERVISORY:
-			std::memcpy(buffer, &(control_field.super), sizeof(super_control_field));
-			buffer += sizeof(super_control_field);
+            stream.write(control_field.super);
 			break;
 	}
 
-	for (std::list<field_type>::const_iterator it = information_fields.begin(); it != information_fields.end(); it++) {
-        std::copy(it->begin(), it->end(), buffer);
-		buffer += it->size();
+	for (field_list::const_iterator it = information_fields.begin(); it != information_fields.end(); it++) {
+        stream.write(it->begin(), it->end());
 	}
 }
 

@@ -28,7 +28,6 @@
  */
 
 #include <stdexcept>
-#include <cassert>
 #include <cstring>
 #include "endianness.h"
 #include "dhcp.h"
@@ -43,6 +42,7 @@ using std::runtime_error;
 using std::find_if;
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -57,8 +57,8 @@ DHCP::DHCP()
 DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) 
 : BootP(buffer, total_sz, 0), _size(sizeof(uint32_t))
 {
-    const uint32_t bootp_size = BootP::header_size() - vend().size();
-    InputMemoryStream stream(buffer + bootp_size, total_sz - bootp_size);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(BootP::header_size() - vend().size());
     const uint32_t magic_number = stream.read<uint32_t>();
     if (magic_number != Endian::host_to_be<uint32_t>(0x63825363))
         throw malformed_packet();
@@ -238,22 +238,19 @@ uint32_t DHCP::header_size() const {
 }
 
 void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= header_size());
-    #endif
-    if(_size) {
-        vend_type &result(BootP::vend());
+    if (_size) {
+        vend_type &result = BootP::vend();
         result.resize(_size);
-        uint8_t *ptr = &result[0] + sizeof(uint32_t);
+        // Build a stream over the vend vector
+        OutputMemoryStream stream(&result[0], result.size());
         // Magic cookie
-        *((uint32_t*)&result[0]) = Endian::host_to_be<uint32_t>(0x63825363);
-        for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-            *(ptr++) = it->option();
-            *(ptr++) = static_cast<uint8_t>(it->length_field());
-            std::copy(it->data_ptr(), it->data_ptr() + it->data_size(), ptr);
-            ptr += it->data_size();
+        stream.write(Endian::host_to_be<uint32_t>(0x63825363));
+        for (options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+            stream.write(it->option());
+            stream.write<uint8_t>(it->length_field());
+            stream.write(it->data_ptr(), it->data_size());
         }
     }
     BootP::write_serialization(buffer, total_sz, parent);
 }
-}
+} // Tins

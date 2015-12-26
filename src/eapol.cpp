@@ -39,6 +39,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -96,11 +97,10 @@ void EAPOL::type(uint8_t new_type) {
 }
 
 void EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= header_size());
-    #endif
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(_header);
     std::memcpy(buffer, &_header, sizeof(_header));
-    write_body(buffer + sizeof(_header), total_sz - sizeof(_header));
+    write_body(stream);
 }
 
 /* RC4EAPOL */
@@ -157,16 +157,12 @@ uint32_t RC4EAPOL::header_size() const {
     return static_cast<uint32_t>(sizeof(eapolhdr) + sizeof(_header) + _key.size());
 }
 
-void RC4EAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(_header) + _key.size());
-    #endif
-    if(_key.size()) {
+void RC4EAPOL::write_body(OutputMemoryStream& stream) {
+    if (_key.size()) {
         _header.key_length = Endian::host_to_be(static_cast<uint16_t>(_key.size()));
     }
-    std::memcpy(buffer, &_header, sizeof(_header));
-    buffer += sizeof(_header);
-    std::copy(_key.begin(), _key.end(), buffer);
+    stream.write(_header);
+    stream.write(_key.begin(), _key.end());
 }
 
 /* RSNEAPOL */
@@ -273,21 +269,17 @@ uint32_t RSNEAPOL::header_size() const {
     return static_cast<uint32_t>(sizeof(eapolhdr) + sizeof(_header) + _key.size());
 }
 
-void RSNEAPOL::write_body(uint8_t *buffer, uint32_t total_sz) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= header_size() - sizeof(eapolhdr));
-    #endif
-    if(_key.size()) {
-        if(!_header.key_t) {
+void RSNEAPOL::write_body(OutputMemoryStream& stream) {
+    if (_key.size()) {
+        if (!_header.key_t) {
             _header.key_length = Endian::host_to_be<uint16_t>(32);
             wpa_length(static_cast<uint16_t>(_key.size()));
         }
-        else if(_key.size()) {
+        else if (_key.size()) {
             wpa_length(static_cast<uint16_t>(_key.size()));
         }
     }
-    std::memcpy(buffer, &_header, sizeof(_header));
-    buffer += sizeof(_header);
-    std::copy(_key.begin(), _key.end(), buffer);
+    stream.write(_header);
+    stream.write(_key.begin(), _key.end());
 }
 }

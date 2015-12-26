@@ -40,6 +40,9 @@
 #include "cxxstd.h"
 
 namespace Tins {
+namespace Memory {
+class OutputMemoryStream;
+} // Memory
 
     /**
      * \class IP
@@ -725,7 +728,7 @@ namespace Tins {
         void internal_add_option(const option &option);
         void init_ip_fields();
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-        uint8_t* write_option(const option &opt, uint8_t* buffer);
+        void write_option(const option &opt, Memory::OutputMemoryStream& stream);
         void add_route_option(option_identifier id, const generic_route_option_type &data);
         generic_route_option_type search_route_option(option_identifier id) const;
         void checksum(uint16_t new_check);

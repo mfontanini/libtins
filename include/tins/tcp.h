@@ -44,6 +44,10 @@
 #include "cxxstd.h"
 
 namespace Tins {
+namespace Memory {
+class OutputMemoryStream;
+} // Memory
+
     /**
      * \class TCP
      * \brief Represents a TCP PDU.
@@ -583,7 +587,7 @@ namespace Tins {
         options_type::const_iterator search_option_iterator(OptionTypes type) const;
         options_type::iterator search_option_iterator(OptionTypes type);
         
-        uint8_t *write_option(const option &opt, uint8_t *buffer);
+        void write_option(const option &opt, Memory::OutputMemoryStream& stream);
 
         tcphdr _tcp;
         uint16_t _options_size, _total_options_size;

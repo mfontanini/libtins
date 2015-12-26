@@ -48,6 +48,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -191,12 +192,10 @@ bool IPv6::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= header_size());
-    #endif
-    if(inner_pdu()) {
+    OutputMemoryStream stream(buffer, total_sz);
+    if (inner_pdu()) {
         uint8_t new_flag = Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type());
-        if(new_flag == 0xff && Internals::pdu_type_registered<IPv6>(inner_pdu()->pdu_type())) {
+        if (new_flag == 0xff && Internals::pdu_type_registered<IPv6>(inner_pdu()->pdu_type())) {
             new_flag = static_cast<Constants::IP::e>(
                 Internals::pdu_type_to_id<IPv6>(inner_pdu()->pdu_type())
             );
@@ -204,10 +203,9 @@ void IPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
         set_last_next_header(new_flag);
     }
     payload_length(static_cast<uint16_t>(total_sz - sizeof(_header)));
-    std::memcpy(buffer, &_header, sizeof(_header));
-    buffer += sizeof(_header);
+    stream.write(_header);
     for(headers_type::const_iterator it = ext_headers.begin(); it != ext_headers.end(); ++it) {
-        buffer = write_header(*it, buffer);
+        write_header(*it, stream);
     }
 }
 
@@ -249,10 +247,11 @@ void IPv6::set_last_next_header(uint8_t value) {
         ext_headers.back().option(value);
 }
 
-uint8_t *IPv6::write_header(const ext_header &header, uint8_t *buffer) {
-    *buffer++ = header.option();
-    *buffer++ = static_cast<uint8_t>((header.length_field() > 8) ? (header.length_field() - 8) : 0);
-    return std::copy(header.data_ptr(), header.data_ptr() + header.data_size(), buffer);
+void IPv6::write_header(const ext_header &header, OutputMemoryStream& stream) {
+    const uint8_t length = (header.length_field() > 8) ? (header.length_field() - 8) : 0;
+    stream.write(header.option());
+    stream.write(length);
+    stream.write(header.data_ptr(), header.data_size());
 }
 
-}
+} // Tins

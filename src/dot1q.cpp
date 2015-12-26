@@ -29,13 +29,13 @@
  
 #include <stdexcept>
 #include <cstring>
-#include <cassert>
 #include "dot1q.h"
 #include "internals.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -88,33 +88,35 @@ uint32_t Dot1Q::header_size() const {
 }
 
 uint32_t Dot1Q::trailer_size() const {
-    if(_append_padding) {
+    if (_append_padding) {
         uint32_t total_size = sizeof(_header);
-        if(inner_pdu())
+        if (inner_pdu()) {
             total_size += inner_pdu()->size();
+        }
         return (total_size > 50) ? 0 : (50 - total_size);
     }
-    else
+    else {
         return 0;
+    }
 }
 
 void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    uint32_t trailer = trailer_size();
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(_header) + trailer);
-    #endif
+    OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
+        // Set the appropriate payload type flag
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
             inner_pdu()->pdu_type()
         );
         payload_type(static_cast<uint16_t>(flag));
     }
-    std::memcpy(buffer, &_header, sizeof(_header));
-    
-    buffer += sizeof(_header);
-    if(inner_pdu())
-        buffer += inner_pdu()->size();
-    std::fill(buffer, buffer + trailer, 0);
+    stream.write(_header);
+
+    // Skip inner PDU size
+    if (inner_pdu()) {
+        stream.skip(inner_pdu()->size());
+    }
+    // Write trailer
+    stream.fill(trailer_size(), 0);
 }
 
 #if TINS_IS_LITTLE_ENDIAN

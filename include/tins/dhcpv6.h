@@ -38,7 +38,11 @@
 #include "ipv6_address.h"
 #include "pdu_option.h"
 
-namespace Tins {    
+namespace Tins {
+namespace Memory  {
+class OutputMemoryStream;
+} // Memory
+
 /**
  * \class DHCPv6
  * \brief Represents a DHCPv6 PDU.
@@ -869,7 +873,7 @@ public:
     }
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *);
-    uint8_t* write_option(const option &option, uint8_t* buffer) const;
+    void write_option(const option &option, Memory::OutputMemoryStream& stream) const;
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);
     

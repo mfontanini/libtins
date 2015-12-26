@@ -383,6 +383,7 @@ namespace Tins {
         #endif
         
         typedef std::vector<uint8_t> field_type;
+        typedef std::list<field_type> field_list;
 
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
@@ -395,7 +396,7 @@ namespace Tins {
         } control_field;
         Format _type;
         uint8_t information_field_length;
-        std::list<field_type> information_fields;
+        field_list information_fields;
     };
 
 }

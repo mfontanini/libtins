@@ -38,7 +38,10 @@
 
 
 namespace Tins {
-    
+namespace Memory {
+class OutputMemoryStream;
+} // Memory
+
     /** \cond 
      * Forward declaration. Avoid header inclusion.
      */
@@ -163,7 +166,7 @@ namespace Tins {
          * \param buffer The pointer in which to save the serialization.
          * \param total_sz The total size of the buffer.
          */
-        virtual void write_body(uint8_t *buffer, uint32_t total_sz) = 0;
+        virtual void write_body(Memory::OutputMemoryStream& stream) = 0;
     private:
         /** 
          * \brief Serialices this EAPOL PDU.
@@ -353,7 +356,7 @@ namespace Tins {
             uint8_t key_sign[16];
         } TINS_END_PACK;
         
-        void write_body(uint8_t *buffer, uint32_t total_sz);
+        void write_body(Memory::OutputMemoryStream& stream);
         
         
         key_type _key;
@@ -731,7 +734,7 @@ namespace Tins {
         #endif
         } TINS_END_PACK;
         
-        void write_body(uint8_t *buffer, uint32_t total_sz);
+        void write_body(Memory::OutputMemoryStream& stream);
         
         
         rsnhdr _header;

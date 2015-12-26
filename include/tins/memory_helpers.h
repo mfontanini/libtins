@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <cstring>
+#include <algorithm>
 #include "exceptions.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
@@ -18,6 +19,10 @@ inline void read_data(const uint8_t* buffer, uint8_t* output_buffer, uint32_t si
 template <typename T>
 void read_value(const uint8_t* buffer, T& value) {
     std::memcpy(&value, buffer, sizeof(value));
+}
+
+inline void write_data(uint8_t* buffer, const uint8_t* ptr, uint32_t size) {
+    std::memcpy(buffer, ptr, size);
 }
 
 template <typename T>
@@ -102,6 +107,73 @@ public:
     }
 private:
     const uint8_t* buffer_;
+    uint32_t size_;
+};
+
+class OutputMemoryStream {
+public:
+    OutputMemoryStream(uint8_t* buffer, uint32_t total_sz)
+    : buffer_(buffer), size_(total_sz) {
+    }
+
+    void skip(uint32_t size) {
+        buffer_ += size;
+        size_ -= size;
+    }
+
+    template <typename T>
+    void write(const T& value) {
+        if (TINS_UNLIKELY(size_ < sizeof(value))) {
+            throw serialization_error();
+        }
+        write_value(buffer_, value);
+        skip(sizeof(value));
+    }
+
+    template <typename ForwardIterator>
+    void write(ForwardIterator start, ForwardIterator end) {
+        const uint32_t length = std::distance(start, end); 
+        if (TINS_UNLIKELY(size_ < length)) {
+            throw serialization_error();
+        }
+        std::copy(start, end, buffer_);
+        skip(length);
+    }
+
+    void write(const uint8_t* ptr, uint32_t length) {
+        write(ptr, ptr + length);
+    }
+
+    void write(const IPv4Address& address) {
+        write(static_cast<uint32_t>(address));
+    }
+
+    void write(const IPv6Address& address) {
+        write(address.begin(), address.end());
+    }
+
+    template <size_t n>
+    void write(const HWAddress<n>& address) {
+        write(address.begin(), address.end());
+    }
+
+    void fill(uint32_t size, uint8_t value) {
+        if (TINS_UNLIKELY(size_ < size)) {
+            throw serialization_error();
+        }
+        std::fill(buffer_, buffer_ + size, value);
+        skip(size);
+    }
+
+    uint8_t* pointer() {
+        return buffer_;
+    }
+
+    uint32_t size() const {
+        return size_;
+    }
+private:
+    uint8_t* buffer_;
     uint32_t size_;
 };
 

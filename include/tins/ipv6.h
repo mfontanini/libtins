@@ -40,6 +40,10 @@
 #include "ipv6_address.h"
 
 namespace Tins {
+namespace Memory {
+class OutputMemoryStream;
+} // Memory
+
 class PacketSender;
     
 /**
@@ -299,7 +303,7 @@ public:
 private:
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     void set_last_next_header(uint8_t value);
-    static uint8_t *write_header(const ext_header &header, uint8_t *buffer);
+    static void write_header(const ext_header &header, Memory::OutputMemoryStream& stream);
     static bool is_extension_header(uint8_t header_id);
 
     TINS_BEGIN_PACK

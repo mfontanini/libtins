@@ -37,6 +37,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -109,25 +110,15 @@ uint32_t PPPoE::header_size() const {
 
 void PPPoE::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
 {
-    #ifdef TINS_DEBUG
-        assert(total_sz == sizeof(_header) + _tags_size);
-    #endif
-    std::memcpy(buffer, &_header, sizeof(_header));
-    if(_tags_size > 0)
-        ((pppoe_hdr*)buffer)->payload_length = Endian::host_to_be(_tags_size);
-    buffer += sizeof(_header);
-    uint16_t uint16_t_buffer;
+    OutputMemoryStream stream(buffer, total_sz);
+    if (_tags_size > 0) {
+        payload_length(_tags_size);
+    }
+    stream.write(_header);
     for(tags_type::const_iterator it = _tags.begin(); it != _tags.end(); ++it) {
-        uint16_t_buffer = it->option();
-        std::memcpy(buffer, &uint16_t_buffer, sizeof(uint16_t));
-        uint16_t_buffer = Endian::host_to_be(static_cast<uint16_t>(it->length_field()));
-        std::memcpy(buffer + sizeof(uint16_t), &uint16_t_buffer, sizeof(uint16_t));
-        std::copy(
-            it->data_ptr(), 
-            it->data_ptr() + it->data_size(),
-            buffer + sizeof(uint16_t) * 2
-        );
-        buffer += sizeof(uint16_t) * 2 + it->data_size();
+        stream.write<uint16_t>(it->option());
+        stream.write(Endian::host_to_be<uint16_t>(it->length_field()));
+        stream.write(it->data_ptr(), it->data_size());
     }
 }
 

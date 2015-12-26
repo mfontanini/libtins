@@ -56,6 +56,7 @@
 #endif
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -95,15 +96,15 @@ uint32_t Loopback::header_size() const {
 }
 
 void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(_family));
-    #endif
+    OutputMemoryStream stream(buffer, total_sz);
     #ifndef _WIN32
-    if(tins_cast<const Tins::IP*>(inner_pdu()))
+    if (tins_cast<const Tins::IP*>(inner_pdu())) {
         _family = PF_INET;
-    else if(tins_cast<const Tins::LLC*>(inner_pdu()))
+    }
+    else if (tins_cast<const Tins::LLC*>(inner_pdu())) {
         _family = PF_LLC;
-    *reinterpret_cast<uint32_t*>(buffer) = _family;
+    }
+    stream.write(_family);
     #endif // _WIN32
 }
 

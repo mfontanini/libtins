@@ -41,7 +41,9 @@
 #include "memory_helpers.h"
 
 using std::find_if;
+
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -291,46 +293,46 @@ uint32_t TCP::header_size() const {
 }
 
 void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    assert(total_sz >= header_size());
-    uint8_t *tcp_start = buffer;
+    OutputMemoryStream stream(buffer, total_sz);
+    // Set checksum to 0, we'll calculate it at the end
     checksum(0);
-    buffer += sizeof(tcphdr);
     _tcp.doff = (sizeof(tcphdr) + _total_options_size) / sizeof(uint32_t);
-    for(options_type::iterator it = _options.begin(); it != _options.end(); ++it)
-        buffer = write_option(*it, buffer);
-
-    if(_options_size < _total_options_size) {
-        uint16_t padding = _options_size;
-        while(padding < _total_options_size) {
-            *(buffer++) = 1;
-            padding++;
-        }
+    stream.write(_tcp);
+    for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+        write_option(*it, stream);
     }
 
-    memcpy(tcp_start, &_tcp, sizeof(tcphdr));
+    if (_options_size < _total_options_size) {
+        const uint16_t padding = _total_options_size - _options_size;
+        stream.fill(padding, 1);
+    }
 
     const Tins::IP *ip_packet = tins_cast<const Tins::IP*>(parent);
     if(ip_packet) {
-        uint32_t check = Utils::pseudoheader_checksum(ip_packet->src_addr(),  
-                                                         ip_packet->dst_addr(), 
-                                                         size(), Constants::IP::PROTO_TCP) +
-                            Utils::do_checksum(tcp_start, tcp_start + total_sz);
-        while (check >> 16)
+        uint32_t check = Utils::pseudoheader_checksum(
+            ip_packet->src_addr(),  
+            ip_packet->dst_addr(), 
+            size(), 
+            Constants::IP::PROTO_TCP) + Utils::do_checksum(buffer, buffer + total_sz);
+        while (check >> 16) {
             check = (check & 0xffff) + (check >> 16);
+        }
         checksum(~check);
-        ((tcphdr*)tcp_start)->check = _tcp.check;
+        ((tcphdr*)buffer)->check = _tcp.check;
     }
     else {
         const Tins::IPv6 *ipv6_packet = tins_cast<const Tins::IPv6*>(parent);
         if(ipv6_packet) {
-            uint32_t check = Utils::pseudoheader_checksum(ipv6_packet->src_addr(),  
-                                                         ipv6_packet->dst_addr(), 
-                                                         size(), Constants::IP::PROTO_TCP) +
-                                        Utils::do_checksum(tcp_start, tcp_start + total_sz);
-            while (check >> 16)
+            uint32_t check = Utils::pseudoheader_checksum(
+                ipv6_packet->src_addr(),  
+                ipv6_packet->dst_addr(), 
+                size(), 
+                Constants::IP::PROTO_TCP) + Utils::do_checksum(buffer, buffer + total_sz);
+            while (check >> 16) {
                 check = (check & 0xffff) + (check >> 16);
+            }
             checksum(~check);
-            ((tcphdr*)tcp_start)->check = _tcp.check;
+            ((tcphdr*)buffer)->check = _tcp.check;
         }
     }
 }
@@ -353,19 +355,18 @@ TCP::options_type::iterator TCP::search_option_iterator(OptionTypes type) {
 
 /* options */
 
-uint8_t *TCP::write_option(const option &opt, uint8_t *buffer) {
-    if(opt.option() == 0 || opt.option() == 1) {
-        *buffer = opt.option();
-        return buffer + 1;
-    }
-    else {
-        buffer[0] = opt.option();
-        buffer[1] = static_cast<uint8_t>(opt.length_field());
-        // only add the identifier and size field sizes if the length
+void TCP::write_option(const option &opt, OutputMemoryStream& stream) {
+    stream.write<uint8_t>(opt.option());
+    // Only do this for non EOL nor NOP options 
+    if(opt.option() > 1) {
+        uint8_t length = opt.length_field();
+        // Only add the identifier and size field sizes if the length
         // field hasn't been spoofed.
-        if(opt.length_field() == opt.data_size())
-            buffer[1] += (sizeof(uint8_t) << 1);
-        return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer + 2);
+        if(opt.length_field() == opt.data_size()) {
+            length += (sizeof(uint8_t) << 1);
+        }
+        stream.write(length);
+        stream.write(opt.data_ptr(), opt.data_size());
     }
 }
 

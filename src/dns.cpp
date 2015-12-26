@@ -29,7 +29,6 @@
 
 #include <utility>
 #include <stdexcept>
-#include <cassert>
 #include <sstream>
 #include <memory>
 #include <cstdio>
@@ -45,6 +44,7 @@ using std::string;
 using std::list;
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -361,12 +361,9 @@ const uint8_t* DNS::compose_name(const uint8_t *ptr, char *out_ptr) const {
 }
 
 void DNS::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(dns) + records_data.size());//extra_size);
-    #endif
-    std::memcpy(buffer, &dns, sizeof(dns)); 
-    buffer += sizeof(dns);
-    std::copy(records_data.begin(), records_data.end(), buffer);
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(dns);
+    stream.write(records_data.begin(), records_data.end());
 }
 
 // Optimization. Creating an IPv4Address and then using IPv4Address::to_string

@@ -36,6 +36,7 @@
 using std::find_if;
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -109,16 +110,10 @@ DHCPv6::options_type::iterator DHCPv6::search_option_iterator(OptionTypes type) 
     return find_if(options_.begin(), options_.end(), comparator);
 }
 
-uint8_t* DHCPv6::write_option(const option &opt, uint8_t* buffer) const {
-    uint16_t uint16_t_buffer = Endian::host_to_be(opt.option());
-    std::memcpy(buffer, &uint16_t_buffer, sizeof(uint16_t));
-    uint16_t_buffer = Endian::host_to_be(static_cast<uint16_t>(opt.length_field()));
-    std::memcpy(&buffer[sizeof(uint16_t)], &uint16_t_buffer, sizeof(uint16_t));
-    return std::copy(
-        opt.data_ptr(), 
-        opt.data_ptr() + opt.data_size(), 
-        buffer + sizeof(uint16_t) * 2
-    );
+void DHCPv6::write_option(const option &opt, OutputMemoryStream& stream) const {
+    stream.write(Endian::host_to_be<uint16_t>(opt.option()));
+    stream.write(Endian::host_to_be<uint16_t>(opt.length_field()));
+    stream.write(opt.data_ptr(), opt.data_size());
 }
     
 void DHCPv6::msg_type(MessageType type) {
@@ -163,13 +158,14 @@ bool DHCPv6::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 
 void DHCPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     const uint32_t required_size = is_relay_message() ? 2 : 4;
-    buffer = std::copy(header_data, header_data + required_size, buffer);
-    if(is_relay_message()) {
-        buffer = link_addr.copy(buffer);
-        buffer = peer_addr.copy(buffer);
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(header_data, required_size);
+    if (is_relay_message()) {
+        stream.write(link_addr);
+        stream.write(peer_addr);
     }
-    for(options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
-        buffer = write_option(*it, buffer);
+    for (options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
+        write_option(*it, stream);
     }
 }
 

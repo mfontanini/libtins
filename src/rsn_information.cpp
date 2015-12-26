@@ -38,6 +38,7 @@
 #include "dot11/dot11_base.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -107,27 +108,18 @@ RSNInformation::serialization_type RSNInformation::serialize() const {
     const uint16_t akm_cyphers_size = Endian::host_to_le<uint16_t>(_akm_cyphers.size());
     
     serialization_type buffer(size);
-    serialization_type::value_type *ptr = &buffer[0];
-    std::memcpy(ptr, &_version, sizeof(_version));
-    ptr += sizeof(uint16_t);
-    std::memcpy(ptr, &_group_suite, sizeof(uint32_t));
-    ptr += sizeof(uint32_t);
-    std::memcpy(ptr, &pairwise_cyphers_size, sizeof(pairwise_cyphers_size));
-    ptr += sizeof(uint16_t);
-    for(cyphers_type::const_iterator it = _pairwise_cyphers.begin(); it != _pairwise_cyphers.end(); ++it) {
-        const uint32_t value = Endian::host_to_le<uint32_t>(*it);
-        std::memcpy(ptr, &value, sizeof(uint32_t));
-        ptr += sizeof(uint32_t);
+    OutputMemoryStream stream(&buffer[0], buffer.size());
+    stream.write(_version);
+    stream.write(_group_suite);
+    stream.write(pairwise_cyphers_size);
+    for (cyphers_type::const_iterator it = _pairwise_cyphers.begin(); it != _pairwise_cyphers.end(); ++it) {
+        stream.write(Endian::host_to_le<uint32_t>(*it));
     }
-    std::memcpy(ptr, &akm_cyphers_size, sizeof(akm_cyphers_size));
-    ptr += sizeof(uint16_t);
-    for(akm_type::const_iterator it = _akm_cyphers.begin(); it != _akm_cyphers.end(); ++it) {
-        const uint32_t value = Endian::host_to_le<uint32_t>(*it);
-        std::memcpy(ptr, &value, sizeof(uint32_t));
-        ptr += sizeof(uint32_t);
+    stream.write(akm_cyphers_size);
+    for (akm_type::const_iterator it = _akm_cyphers.begin(); it != _akm_cyphers.end(); ++it) {
+        stream.write(Endian::host_to_le<uint32_t>(*it));
     }
-    std::memcpy(ptr, &_capabilities, sizeof(uint16_t));
-
+    stream.write(_capabilities);
     return buffer;
 }
 

@@ -46,6 +46,7 @@
 namespace Tins {
 namespace Memory {
 class InputMemoryStream;
+class OutputMemoryStream;
 } // memory
 
 /**
@@ -1379,7 +1380,7 @@ private:
     void internal_add_option(const option &option);
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     bool has_options() const;
-    uint8_t *write_option(const option &opt, uint8_t *buffer);
+    void write_option(const option &opt, Memory::OutputMemoryStream& stream);
     void parse_options(Memory::InputMemoryStream& stream);
     void add_addr_list(uint8_t type, const addr_list_type &value);
     addr_list_type search_addr_list(OptionTypes type) const;

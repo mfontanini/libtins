@@ -50,6 +50,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -129,12 +130,9 @@ bool Dot3::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= header_size());
-    #endif
-    _eth.length = Endian::host_to_be(static_cast<uint16_t>(size() - sizeof(_eth)));
-
-    memcpy(buffer, &_eth, sizeof(ethhdr));
+    OutputMemoryStream stream(buffer, total_sz);
+    _eth.length = Endian::host_to_be<uint16_t>(size() - sizeof(_eth));
+    stream.write(_eth);
 }
 
 #ifndef _WIN32

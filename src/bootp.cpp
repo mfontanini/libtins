@@ -29,12 +29,12 @@
 
 #include <stdexcept>
 #include <cstring>
-#include <cassert>
 #include "bootp.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins{
 
@@ -116,11 +116,9 @@ void BootP::vend(const vend_type &new_vend) {
 }
 
 void BootP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(bootphdr) + _vend.size());
-    #endif
-    std::memcpy(buffer, &_bootp, sizeof(bootphdr));
-    std::copy(_vend.begin(), _vend.end(), buffer + sizeof(bootphdr));
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(_bootp);
+    stream.write(_vend.begin(), _vend.end());
 }
 
 bool BootP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {

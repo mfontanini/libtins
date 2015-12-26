@@ -49,7 +49,7 @@ public:
 /**
  * \brief Exception thrown when an option is not found.
  */
-class option_not_found : exception_base {
+class option_not_found : public exception_base {
 public:
     // try to avoid allocations by doing this.
     const char* what() const throw() {
@@ -64,6 +64,16 @@ class malformed_packet : public exception_base {
 public:
     const char* what() const throw() {
         return "Malformed packet";
+    }
+};
+
+/**
+ * \brief Exception thrown when serializing a packet fails.
+ */
+class serialization_error : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Serialization error";
     }
 };
 

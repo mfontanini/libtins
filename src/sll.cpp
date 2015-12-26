@@ -35,6 +35,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -81,12 +82,14 @@ uint32_t SLL::header_size() const {
 }
 
 void SLL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    if(inner_pdu()) {
+    OutputMemoryStream stream(buffer, total_sz);
+    if (inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
             inner_pdu()->pdu_type()
         );
         protocol(static_cast<uint16_t>(flag));
     }
-    std::memcpy(buffer, &_header, sizeof(_header));
+    stream.write(_header);
 }
-}
+
+} // Tins

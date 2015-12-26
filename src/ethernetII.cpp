@@ -56,6 +56,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -152,11 +153,7 @@ bool EthernetII::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= header_size() + trailer_size());
-    #endif
-
-    /* Inner type defaults to IP */
+    OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
             inner_pdu()->pdu_type()
@@ -165,13 +162,13 @@ void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const P
             payload_type(static_cast<uint16_t>(flag));
         }
     }
-    memcpy(buffer, &_eth, sizeof(ethhdr));
-    uint32_t trailer = trailer_size();
+    stream.write(_eth);
+    const uint32_t trailer = trailer_size();
     if (trailer) {
-        uint32_t trailer_offset = header_size();
-        if (inner_pdu())
-            trailer_offset += inner_pdu()->size();
-        memset(buffer + trailer_offset, 0, trailer);
+        if (inner_pdu()) {
+            stream.skip(inner_pdu()->size());
+        }
+        stream.fill(trailer, 0);
     }
 
 }

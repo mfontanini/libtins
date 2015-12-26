@@ -40,6 +40,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -213,12 +214,7 @@ bool ICMPv6::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= header_size());
-    #endif
-    uint32_t full_sz = total_sz;
-    uint8_t *buffer_start = buffer;
-    _header.cksum = 0;
+    OutputMemoryStream stream(buffer, total_sz);
 
     // If extensions are allowed and we have to set the length field
     if (are_extensions_allowed()) {
@@ -230,36 +226,26 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
             _header.rfc4884.length = length_value / sizeof(uint64_t);
         }
     }
+    // Initially set checksum to 0, we'll calculate it at the end
+    _header.cksum = 0;
+    stream.write(_header);
 
-    std::memcpy(buffer, &_header, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
-    if(has_target_addr()) {
-        buffer = _target_address.copy(buffer);
-        total_sz -= sizeof(ipaddress_type::address_size);
+    if (has_target_addr()) {
+        stream.write(_target_address);
     }
-    if(has_dest_addr()) {
-        buffer = _dest_address.copy(buffer);
-        total_sz -= sizeof(ipaddress_type::address_size);
+    if (has_dest_addr()) {
+        stream.write(_dest_address);
     }
-    if(type() == ROUTER_ADVERT) {
-        std::memcpy(buffer, &reach_time, sizeof(uint32_t));
-        buffer += sizeof(uint32_t);
-        std::memcpy(buffer, &retrans_timer, sizeof(uint32_t));
-        buffer += sizeof(uint32_t);
-        total_sz -= sizeof(uint32_t) * 2;
+    if (type() == ROUTER_ADVERT) {
+        stream.write(reach_time);
+        stream.write(retrans_timer);
     }
     for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-        #ifdef TINS_DEBUG
-        assert(total_sz >= it->data_size() + sizeof(uint8_t) * 2);
-        // total_sz is only used if TINS_DEBUG is defined.
-        total_sz -= it->data_size() + sizeof(uint8_t) * 2;
-        #endif
-        buffer = write_option(*it, buffer);
+        write_option(*it, stream);
     }
 
     if (has_extensions()) {
-        uint8_t* extensions_ptr = buffer;
+        uint8_t* extensions_ptr = stream.pointer();
         if (inner_pdu()) {
             // Get the size of the next pdu, padded to the next 32 bit boundary
             uint32_t inner_pdu_size = get_adjusted_inner_pdu_size();
@@ -278,21 +264,25 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
             extensions_ptr += inner_pdu_size;
         }
         // Now serialize the exensions where they should be
-        extensions_.serialize(extensions_ptr, total_sz - (extensions_ptr - buffer));
+        extensions_.serialize(
+            extensions_ptr, 
+            total_sz - (extensions_ptr - stream.pointer())
+        );
     }
 
     const Tins::IPv6 *ipv6 = tins_cast<const Tins::IPv6*>(parent);
-    if(ipv6) {
+    if (ipv6) {
         uint32_t checksum = Utils::pseudoheader_checksum(
-                                ipv6->src_addr(),  
-                                ipv6->dst_addr(), 
-                                size(), 
-                                Constants::IP::PROTO_ICMPV6
-                            ) + Utils::do_checksum(buffer_start, buffer_start + full_sz);
-        while (checksum >> 16) 
+            ipv6->src_addr(),  
+            ipv6->dst_addr(), 
+            size(), 
+            Constants::IP::PROTO_ICMPV6
+        ) + Utils::do_checksum(buffer, buffer + total_sz);
+        while (checksum >> 16) {
             checksum = (checksum & 0xffff) + (checksum >> 16);
+        }
         this->checksum(~checksum);
-        memcpy(buffer_start + 2, &_header.cksum, sizeof(uint16_t));
+        memcpy(buffer + 2, &_header.cksum, sizeof(uint16_t));
     }
 }
 
@@ -329,10 +319,10 @@ bool ICMPv6::remove_option(OptionTypes type) {
     return true;
 }
 
-uint8_t *ICMPv6::write_option(const option &opt, uint8_t *buffer) {
-    *buffer++ = opt.option();
-    *buffer++ = static_cast<uint8_t>((opt.length_field() + sizeof(uint8_t) * 2) / 8);
-    return std::copy(opt.data_ptr(), opt.data_ptr() + opt.data_size(), buffer);
+void ICMPv6::write_option(const option &opt, OutputMemoryStream& stream) {
+    stream.write(opt.option());
+    stream.write<uint8_t>((opt.length_field() + sizeof(uint8_t) * 2) / 8);
+    stream.write(opt.data_ptr(), opt.data_size());
 }
 
 const ICMPv6::option *ICMPv6::search_option(OptionTypes type) const {

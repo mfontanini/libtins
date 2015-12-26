@@ -8,6 +8,7 @@
 using std::runtime_error;
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -57,16 +58,11 @@ uint32_t ICMPExtension::size() const {
 }
 
 void ICMPExtension::serialize(uint8_t* buffer, uint32_t buffer_size) const {
-    if (buffer_size < size()) {
-        throw runtime_error("Serialization buffer is too small");
-    }
-    *(uint16_t*)buffer = Endian::host_to_be<uint16_t>(size());
-    buffer += sizeof(uint16_t);
-    *buffer = extension_class_;
-    buffer += sizeof(uint8_t);
-    *buffer = extension_type_;
-    buffer += sizeof(uint8_t);
-    copy(payload_.begin(), payload_.end(), buffer);
+    OutputMemoryStream stream(buffer, buffer_size);
+    stream.write(Endian::host_to_be<uint16_t>(size()));
+    stream.write(extension_class_);
+    stream.write(extension_type_);
+    stream.write(payload_.begin(), payload_.end());
 }
 
 ICMPExtension::serialization_type ICMPExtension::serialize() const {
@@ -140,25 +136,18 @@ void ICMPExtensionsStructure::add_extension(const ICMPExtension& extension) {
 }
 
 void ICMPExtensionsStructure::serialize(uint8_t* buffer, uint32_t buffer_size) {
-    const uint32_t structure_size = size();
-    if (buffer_size < structure_size) {
-        throw malformed_packet();
-    }
+    OutputMemoryStream stream(buffer, buffer_size);
     uint8_t* original_ptr = buffer;
-    memcpy(buffer, &version_and_reserved_, sizeof(version_and_reserved_));
-    buffer += sizeof(uint16_t);
+    stream.write(version_and_reserved_);
     // Make checksum 0, for now, we'll compute it at the end
-    memset(buffer, 0, sizeof(uint16_t));
-    buffer += sizeof(uint16_t);
-    buffer_size -= BASE_HEADER_SIZE;
+    stream.write<uint16_t>(0);
 
     typedef extensions_type::const_iterator iterator;
     for (iterator iter = extensions_.begin(); iter != extensions_.end(); ++iter) {
-        iter->serialize(buffer, buffer_size);
-        buffer += iter->size();
-        buffer_size -= iter->size();
+        iter->serialize(stream.pointer(), stream.size());
+        stream.skip(iter->size());
     }
-    uint16_t checksum = ~Utils::sum_range(original_ptr, original_ptr + structure_size);
+    uint16_t checksum = ~Utils::sum_range(original_ptr, original_ptr + size());
     memcpy(original_ptr + sizeof(uint16_t), &checksum, sizeof(checksum));
     checksum_ = checksum;
 }

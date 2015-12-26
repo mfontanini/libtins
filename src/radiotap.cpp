@@ -50,8 +50,12 @@
 #include "utils.h"
 #include "packet_sender.h"
 #include "exceptions.h"
+#include "memory_helpers.h"
+
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
+
 void check_size(uint32_t total_sz, size_t field_size) {
     if(total_sz < field_size)
         throw malformed_packet();
@@ -471,87 +475,69 @@ bool RadioTap::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 }
 
 void RadioTap::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    uint32_t sz = header_size();
+    OutputMemoryStream stream(buffer, total_sz);
     uint8_t *buffer_start = buffer;
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sz);
-    #endif
-    _radio.it_len = Endian::host_to_le<uint16_t>(sz);
-    memcpy(buffer, &_radio, sizeof(_radio));
-    buffer += sizeof(_radio);
+    _radio.it_len = Endian::host_to_le<uint16_t>(header_size());
+    stream.write(_radio);
     if(_radio.flags.tsft) {
-        memcpy(buffer, &_tsft, sizeof(_tsft));
-        buffer += sizeof(_tsft);
+        stream.write(_tsft);
     }
     if(_radio.flags.flags) {
-        memcpy(buffer, &_flags, sizeof(_flags));
-        buffer += sizeof(_flags);
+        stream.write(_flags);
     }
     if(_radio.flags.rate) {
-        memcpy(buffer, &_rate, sizeof(_rate));
-        buffer += sizeof(_rate);
+        stream.write(_rate);
     }
     if(_radio.flags.channel) {
-        if(((buffer - buffer_start) & 1) == 1)
-            *(buffer++) = 0;
-        memcpy(buffer, &_channel_freq, sizeof(_channel_freq));
-        buffer += sizeof(_channel_freq);
-        memcpy(buffer, &_channel_type, sizeof(_channel_type));
-        buffer += sizeof(_channel_type);
+        if(((buffer - buffer_start) & 1) == 1) {
+            stream.write<uint8_t>(0);
+        }
+        stream.write(_channel_freq);
+        stream.write(_channel_type);
     }
     if(_radio.flags.dbm_signal) {
-        memcpy(buffer, &_dbm_signal, sizeof(_dbm_signal));
-        buffer += sizeof(_dbm_signal);
+        stream.write(_dbm_signal);
     }
     if(_radio.flags.dbm_noise) {
-        memcpy(buffer, &_dbm_noise, sizeof(_dbm_noise));
-        buffer += sizeof(_dbm_noise);
+        stream.write(_dbm_noise);
     }
     if(_radio.flags.lock_quality) {
-        if(((buffer - buffer_start) & 1) == 1)
-            *(buffer++) = 0;
-        memcpy(buffer, &_signal_quality, sizeof(_signal_quality));
-        buffer += sizeof(_signal_quality);
+        if(((buffer - buffer_start) & 1) == 1) {
+            stream.write<uint8_t>(0);
+        }
+        stream.write(_signal_quality);
     }
     if(_radio.flags.antenna) {
-        memcpy(buffer, &_antenna, sizeof(_antenna));
-        buffer += sizeof(_antenna);
+        stream.write(_antenna);
     }
     if(_radio.flags.db_signal) {
-        memcpy(buffer, &_db_signal, sizeof(_db_signal));
-        buffer += sizeof(_db_signal);
+        stream.write(_db_signal);
     }
     if(_radio.flags.rx_flags) {
-        if(((buffer - buffer_start) & 1) == 1)
-            *(buffer++) = 0;
-        memcpy(buffer, &_rx_flags, sizeof(_rx_flags));
-        buffer += sizeof(_rx_flags);
+        if(((buffer - buffer_start) & 1) == 1) {
+            stream.write<uint8_t>(0);
+        }
+        stream.write(_rx_flags);
     }
     if(_radio.flags.channel_plus) {
-        uint32_t offset = ((buffer - buffer_start) % 4);
-        if(offset) {
-            offset = 4 - offset;
-            while(offset--) {
-                *buffer++ = 0;
-            }
+        const uint32_t padding = ((stream.pointer() - buffer_start) % 4);
+        if (padding != 0) {
+            stream.fill(4 - padding, 0);
         }
         uint32_t dummy = _channel_type;
         // nasty Big Endian fix
         dummy = Endian::le_to_host<uint32_t>(Endian::host_to_le<uint16_t>(dummy));
-        memcpy(buffer, &dummy, sizeof(dummy));
-        buffer += sizeof(dummy);
-        memcpy(buffer, &_channel_freq, sizeof(_channel_freq));
-        buffer += sizeof(_channel_freq);
-        memcpy(buffer, &_channel, sizeof(_channel));
-        buffer += sizeof(_channel);
-        memcpy(buffer, &_max_power, sizeof(_max_power));
-        buffer += sizeof(_max_power);
+        stream.write(dummy);
+        stream.write(_channel_freq);
+        stream.write(_channel);
+        stream.write(_max_power);
     }
-    if((_flags & 0x10) != 0 && inner_pdu()) {
+    if ((_flags & 0x10) != 0 && inner_pdu()) {
     	uint32_t crc32 = Endian::host_to_le(
-            Utils::crc32(buffer, inner_pdu()->size())
+            Utils::crc32(stream.pointer(), inner_pdu()->size())
         );
-        memcpy(buffer + inner_pdu()->size(), &crc32, sizeof(uint32_t));
+        stream.skip(inner_pdu()->size());
+        stream.write(crc32);
     }
 }
 }

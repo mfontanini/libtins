@@ -42,6 +42,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
@@ -207,23 +208,7 @@ void ICMP::use_length_field(bool value) {
 }
 
 void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(icmphdr));
-    #endif
-
-    uint32_t uint32_t_buffer;
-    if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
-        uint32_t_buffer = original_timestamp();
-        memcpy(buffer + sizeof(icmphdr), &uint32_t_buffer, sizeof(uint32_t));
-        uint32_t_buffer = receive_timestamp();
-        memcpy(buffer + sizeof(icmphdr) + sizeof(uint32_t), &uint32_t_buffer, sizeof(uint32_t));
-        uint32_t_buffer = transmit_timestamp();
-        memcpy(buffer + sizeof(icmphdr) + 2 * sizeof(uint32_t), &uint32_t_buffer, sizeof(uint32_t));
-    }
-    else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
-        uint32_t_buffer = address_mask();
-        memcpy(buffer + sizeof(icmphdr), &uint32_t_buffer, sizeof(uint32_t));
-    }
+    OutputMemoryStream stream(buffer, total_sz);
 
     // If extensions are allowed and we have to set the length field
     if (are_extensions_allowed()) {
@@ -234,6 +219,19 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
             // This field uses 32 bit words as the unit
             _icmp.un.rfc4884.length = length_value / sizeof(uint32_t);
         }
+    }
+
+    // Write the header using checksum 0
+    _icmp.check = 0;
+    stream.write(_icmp);
+
+    if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
+        stream.write(original_timestamp());
+        stream.write(receive_timestamp());
+        stream.write(transmit_timestamp());
+    }
+    else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
+        stream.write(address_mask());
     }
 
     if (has_extensions()) {
@@ -258,14 +256,12 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
         extensions_.serialize(extensions_ptr, total_sz - (extensions_ptr - buffer));
     }
 
-    // checksum calc
-    _icmp.check = 0;
-    memcpy(buffer, &_icmp, sizeof(icmphdr));
+    // Calculate checksum
     uint32_t checksum = Utils::do_checksum(buffer, buffer + total_sz);
-
-    while (checksum >> 16)
+    while (checksum >> 16) {
         checksum = (checksum & 0xffff) + (checksum >> 16);
-
+    }
+    // Write back only the 2 checksum bytes
     _icmp.check = Endian::host_to_be<uint16_t>(~checksum);
     memcpy(buffer + 2, &_icmp.check, sizeof(uint16_t));
 }
