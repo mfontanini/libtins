@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
             auto info = monitor.stats().get_information();
             std::cout << "\rAverage " << info.average.count() 
                         << "ms. Worst: " << info.worst.count() << "ms. Count: "
-                        << info.count;
+                        << info.count << "   ";
             std::cout.flush();
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
