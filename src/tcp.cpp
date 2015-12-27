@@ -29,7 +29,6 @@
 
 #include <cstring>
 #include <algorithm>
-#include <cassert>
 #include "tcp.h"
 #include "ip.h"
 #include "ipv6.h"

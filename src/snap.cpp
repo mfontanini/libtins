@@ -28,9 +28,6 @@
  */
 
 #include <cstring>
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #include <stdexcept>
 #ifndef _WIN32
     #include <sys/types.h>

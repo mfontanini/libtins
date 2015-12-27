@@ -32,9 +32,6 @@
 #ifdef HAVE_DOT11
 
 #include <cstring>
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #include <stdexcept>
 #include "macros.h"
 #ifndef _WIN32

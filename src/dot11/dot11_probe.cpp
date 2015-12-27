@@ -32,7 +32,6 @@
 #ifdef HAVE_DOT11
 
 #include <cstring>
-#include <cassert>
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;

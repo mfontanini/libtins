@@ -29,9 +29,6 @@
 
 #include <stdexcept>
 #include <cstring>
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #include <algorithm>
 #ifndef _WIN32
     #include <netdb.h>

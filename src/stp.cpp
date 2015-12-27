@@ -28,9 +28,6 @@
  */
 
 #include <cstring>
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #include <algorithm>
 #include "stp.h"
 #include "exceptions.h"

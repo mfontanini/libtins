@@ -27,9 +27,6 @@
  *
  */
 
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #include <algorithm>
 #include "rawpdu.h"
 #include "memory_helpers.h"

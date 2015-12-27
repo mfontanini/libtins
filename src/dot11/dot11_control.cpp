@@ -30,7 +30,6 @@
 #include "dot11/dot11_control.h"
 #ifdef HAVE_DOT11
 
-#include <cassert>
 #include <cstring>
 #include "memory_helpers.h"
 

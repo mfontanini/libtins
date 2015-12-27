@@ -29,9 +29,6 @@
 
 #include <stdexcept>
 #include <cstring>
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #include "llc.h"
 #include "stp.h"
 #include "rawpdu.h"

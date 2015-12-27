@@ -29,9 +29,6 @@
 
 #include <stdexcept>
 #include <cstring>
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #ifndef _WIN32
     #include <netinet/in.h>
 #endif

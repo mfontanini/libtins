@@ -27,9 +27,6 @@
  *
  */
  
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #include <cstring>
 #include "icmpv6.h"
 #include "ipv6.h"

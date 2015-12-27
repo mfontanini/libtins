@@ -31,7 +31,6 @@
 
 #ifdef HAVE_DOT11
 
-#include <cassert>
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>

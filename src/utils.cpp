@@ -30,7 +30,6 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
-#include <cassert>
 #include <cstring>
 #include "utils.h"
 #ifndef _WIN32

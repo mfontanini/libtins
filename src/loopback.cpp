@@ -38,9 +38,6 @@
     #include <ws2tcpip.h>
 #endif
 #include <stdexcept>
-#ifdef TINS_DEBUG
-    #include <cassert>
-#endif
 #include <cstring>
 #include "loopback.h"
 #include "packet_sender.h"

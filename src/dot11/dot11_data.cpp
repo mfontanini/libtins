@@ -31,7 +31,6 @@
 #ifdef HAVE_DOT11
 
 #include <cstring>
-#include <cassert>
 #include "rawpdu.h"
 #include "snap.h"
 #include "memory_helpers.h"

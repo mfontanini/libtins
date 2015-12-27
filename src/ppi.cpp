@@ -27,9 +27,6 @@
  *
  */
 
-#ifdef TINS_DEBUG
-    #include <cassert>
-#endif // TINS_DEBUG
 #include <algorithm>
 #include <cstring>
 #include <pcap.h>

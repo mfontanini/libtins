@@ -27,9 +27,6 @@
  *
  */
 
-#ifdef TINS_DEBUG
-#include <cassert>
-#endif
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
