@@ -35,6 +35,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 /* Dot11ManagementFrame */
@@ -94,15 +95,11 @@ void Dot11ManagementFrame::addr4(const address_type &new_addr4) {
     _addr4 = new_addr4;
 }
 
-uint32_t Dot11ManagementFrame::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t written = sizeof(_ext_header);
-    memcpy(buffer, &_ext_header, sizeof(this->_ext_header));
-    buffer += sizeof(_ext_header);
+void Dot11ManagementFrame::write_ext_header(OutputMemoryStream& stream) {
+    stream.write(_ext_header);
     if (from_ds() && to_ds()) {
-        written += 6;
-        std::copy(_addr4.begin(), _addr4.end(), buffer);
+        stream.write(_addr4);
     }
-    return written;
 }
 
 void Dot11ManagementFrame::ssid(const std::string &new_ssid) {

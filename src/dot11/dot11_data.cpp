@@ -37,6 +37,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 /* Dot11Data */
@@ -118,16 +119,11 @@ void Dot11Data::addr4(const address_type &new_addr4) {
     _addr4 = new_addr4;
 }
 
-uint32_t Dot11Data::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t written = sizeof(_ext_header);
-    memcpy(buffer, &_ext_header, sizeof(_ext_header));
-    buffer += sizeof(_ext_header);
+void Dot11Data::write_ext_header(OutputMemoryStream& stream) {
+    stream.write(_ext_header);
     if (from_ds() && to_ds()) {
-        written += static_cast<uint32_t>(_addr4.size());
-        _addr4.copy(buffer);
+        stream.write(_addr4);
     }
-    return written;
-
 }
 
 /* QoS data. */
@@ -165,13 +161,8 @@ uint32_t Dot11QoSData::header_size() const {
     return Dot11Data::header_size() + sizeof(this->_qos_control);
 }
 
-uint32_t Dot11QoSData::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(this->_qos_control);
-    #ifdef TINS_DEBUG
-    assert(sz <= total_sz);
-    #endif
-    std::memcpy(buffer, &this->_qos_control, sizeof(uint16_t));
-    return sz;
+void Dot11QoSData::write_fixed_parameters(OutputMemoryStream& stream) {
+    stream.write(_qos_control);
 }
 } // namespace Tins
 

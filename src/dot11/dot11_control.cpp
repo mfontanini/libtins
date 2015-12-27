@@ -35,6 +35,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
  /* Dot11Control */
@@ -69,13 +70,8 @@ uint32_t Dot11ControlTA::header_size() const {
     return Dot11::header_size() + sizeof(_taddr);
 }
 
-uint32_t Dot11ControlTA::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= sizeof(_taddr));
-    #endif
-    //std::memcpy(buffer, _taddr, sizeof(_taddr));
-    _taddr.copy(buffer);
-    return sizeof(_taddr);
+void Dot11ControlTA::write_ext_header(OutputMemoryStream& stream) {
+    stream.write(_taddr);
 }
 
 void Dot11ControlTA::target_addr(const address_type &addr) {
@@ -176,13 +172,10 @@ void Dot11BlockAckRequest::init_block_ack() {
     std::memset(&_start_sequence, 0, sizeof(_start_sequence));
 }
 
-uint32_t Dot11BlockAckRequest::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t parent_size = Dot11ControlTA::write_ext_header(buffer, total_sz);
-    buffer += parent_size;
-    std::memcpy(buffer, &_bar_control, sizeof(_bar_control));
-    buffer += sizeof(_bar_control);
-    std::memcpy(buffer, &_start_sequence, sizeof(_start_sequence));
-    return parent_size + sizeof(_start_sequence) + sizeof(_bar_control);
+void Dot11BlockAckRequest::write_ext_header(OutputMemoryStream& stream) {
+    Dot11ControlTA::write_ext_header(stream);
+    stream.write(_bar_control);
+    stream.write(_start_sequence);
 }
 
 void Dot11BlockAckRequest::bar_control(small_uint<4> bar) {
@@ -259,14 +252,11 @@ void Dot11BlockAck::bitmap(const uint8_t *bit) {
     std::memcpy(_bitmap, bit, sizeof(_bitmap));
 }
 
-uint32_t Dot11BlockAck::write_ext_header(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t parent_size = Dot11ControlTA::write_ext_header(buffer, total_sz);
-    InputMemoryStream stream(buffer, total_sz);
-    stream.skip(parent_size);
-    stream.read(_bar_control);
-    stream.read(_start_sequence);
-    stream.read(_bitmap);
-    return total_sz - stream.size();
+void Dot11BlockAck::write_ext_header(OutputMemoryStream& stream) {
+    Dot11ControlTA::write_ext_header(stream);
+    stream.write(_bar_control);
+    stream.write(_start_sequence);
+    stream.write(_bitmap);
 }
 
 uint32_t Dot11BlockAck::header_size() const {

@@ -124,7 +124,7 @@ private:
         uint16_t reason_code;
     };
 
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
     DisassocBody _body;
 };
@@ -235,7 +235,7 @@ private:
         uint16_t listen_interval;
     };
 
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
     AssocReqBody _body;
 };
@@ -361,7 +361,7 @@ private:
         uint16_t aid;
     };
 
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
     AssocRespBody _body;
 };
@@ -487,7 +487,7 @@ private:
         uint8_t current_ap[address_type::address_size];
     };
 
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
     ReAssocReqBody _body;
 };
@@ -613,7 +613,7 @@ private:
         uint16_t aid;
     };
 
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
     ReAssocRespBody _body;
 };

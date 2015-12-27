@@ -57,6 +57,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 const Dot11::address_type Dot11::BROADCAST = "ff:ff:ff:ff:ff:ff";
@@ -210,27 +211,14 @@ void Dot11::send(PacketSender &sender, const NetworkInterface &iface) {
 #endif // _WIN32
 
 void Dot11::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    #ifdef TINS_DEBUG
-    assert(total_sz >= header_size());
-    #endif
-    memcpy(buffer, &_header, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
-
-    uint32_t written = write_ext_header(buffer, total_sz);
-    buffer += written;
-    total_sz -= written;
-
-    uint32_t child_len = write_fixed_parameters(buffer, total_sz - _options_size);
-    buffer += child_len;
-    #ifdef TINS_DEBUG
-    assert(total_sz >= child_len + _options_size);
-    #endif
-    for(std::list<option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
-        *(buffer++) = it->option();
-        *(buffer++) = static_cast<uint8_t>(it->length_field());
-        std::copy(it->data_ptr(), it->data_ptr() + it->data_size(), buffer);
-        buffer += it->data_size();
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(_header);
+    write_ext_header(stream);
+    write_fixed_parameters(stream);
+    for (std::list<option>::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+        stream.write<uint8_t>(it->option());
+        stream.write<uint8_t>(it->length_field());
+        stream.write(it->data_ptr(), it->data_size());
     }
 }
 

@@ -35,6 +35,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 /* Diassoc */
@@ -62,13 +63,8 @@ uint32_t Dot11Disassoc::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(DisassocBody);
 }
 
-uint32_t Dot11Disassoc::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(DisassocBody);
-    #ifdef TINS_DEBUG
-    assert(sz <= total_sz);
-    #endif
-    memcpy(buffer, &this->_body, sz);
-    return sz;
+void Dot11Disassoc::write_fixed_parameters(OutputMemoryStream& stream) {
+    stream.write(_body);
 }
 
 /* Assoc request. */
@@ -97,13 +93,8 @@ uint32_t Dot11AssocRequest::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(AssocReqBody);
 }
 
-uint32_t Dot11AssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(AssocReqBody);
-    #ifdef TINS_DEBUG
-    assert(sz <= total_sz);
-    #endif
-    memcpy(buffer, &this->_body, sz);
-    return sz;
+void Dot11AssocRequest::write_fixed_parameters(OutputMemoryStream& stream) {
+    stream.write(_body);
 }
 
 /* Assoc response. */
@@ -137,13 +128,8 @@ uint32_t Dot11AssocResponse::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(AssocRespBody);
 }
 
-uint32_t Dot11AssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(AssocRespBody);
-    #ifdef TINS_DEBUG
-    assert(sz <= total_sz);
-    #endif
-    memcpy(buffer, &this->_body, sz);
-    return sz;
+void Dot11AssocResponse::write_fixed_parameters(OutputMemoryStream& stream) {
+    stream.write(_body);
 }
 
 /* ReAssoc request. */
@@ -177,13 +163,8 @@ uint32_t Dot11ReAssocRequest::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(this->_body);
 }
 
-uint32_t Dot11ReAssocRequest::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(this->_body);
-    #ifdef TINS_DEBUG
-    assert(sz <= total_sz);
-    #endif
-    memcpy(buffer, &this->_body, sz);
-    return sz;
+void Dot11ReAssocRequest::write_fixed_parameters(OutputMemoryStream& stream) {
+    stream.write(_body);
 }
 
 /* ReAssoc response. */
@@ -216,13 +197,8 @@ uint32_t Dot11ReAssocResponse::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(this->_body);
 }
 
-uint32_t Dot11ReAssocResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(this->_body);
-    #ifdef TINS_DEBUG
-    assert(sz <= total_sz);
-    #endif
-    memcpy(buffer, &this->_body, sz);
-    return sz;
+void Dot11ReAssocResponse::write_fixed_parameters(OutputMemoryStream& stream) {
+    stream.write(_body);
 }
 } // namespace Tins
 

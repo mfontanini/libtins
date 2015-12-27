@@ -36,6 +36,7 @@
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 /* Probe Request */
@@ -85,13 +86,8 @@ uint32_t Dot11ProbeResponse::header_size() const {
     return Dot11ManagementFrame::header_size() + sizeof(this->_body);
 }
 
-uint32_t Dot11ProbeResponse::write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) {
-    uint32_t sz = sizeof(this->_body);
-    #ifdef TINS_DEBUG
-    assert(sz <= total_sz);
-    #endif
-    memcpy(buffer, &this->_body, sz);
-    return sz;
+void Dot11ProbeResponse::write_fixed_parameters(OutputMemoryStream& stream) {
+    stream.write(_body);
 }
 } // namespace Tins
 

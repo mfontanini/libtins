@@ -157,7 +157,7 @@ namespace Tins {
             capability_information capability;
         } TINS_END_PACK;
 
-        uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+        void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
         BeaconBody _body;
     };

@@ -1160,7 +1160,7 @@ protected:
      */
     Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
 
-    uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+    void write_ext_header(Memory::OutputMemoryStream& stream);
 
     uint32_t management_frame_size() { 
         return sizeof(ieee80211_header) + sizeof(_ext_header) + 

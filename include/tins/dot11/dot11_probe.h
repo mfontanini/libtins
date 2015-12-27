@@ -227,7 +227,7 @@ private:
 
     ProbeResp _body;
 
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 };
 } // namespace Tins
 #endif // TINS_DOT11_DOT11_PROBE_H

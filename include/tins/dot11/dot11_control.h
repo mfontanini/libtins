@@ -148,7 +148,7 @@ protected:
         return static_cast<uint32_t>(_taddr.size() + sizeof(ieee80211_header)); 
     }
 
-    uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+    void write_ext_header(Memory::OutputMemoryStream& stream);
 private:
 
     address_type _taddr;
@@ -582,7 +582,7 @@ public:
        return flag == pdu_flag || Dot11Control::matches_flag(flag);
     }
 protected:
-    uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+    void write_ext_header(Memory::OutputMemoryStream& stream);
 private:
     void init_block_ack();
 
@@ -739,7 +739,7 @@ public:
     }
 private:
     void init_block_ack();
-    uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+    void write_ext_header(Memory::OutputMemoryStream& stream);
 
     uint16_t _bar_control, _start_sequence;
     uint8_t _bitmap[bitmap_size];

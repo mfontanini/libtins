@@ -243,7 +243,7 @@ protected:
     Dot11Data(const uint8_t *buffer, uint32_t total_sz, no_inner_pdu);
 
     uint32_t init(const uint8_t *buffer, uint32_t total_sz);
-    uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
+    void write_ext_header(Memory::OutputMemoryStream& stream);
 
     uint32_t data_frame_size() { 
         return static_cast<uint32_t>(
@@ -337,8 +337,7 @@ public:
        return flag == PDU::DOT11_QOS_DATA || Dot11Data::matches_flag(flag);
     }
 private:
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
-
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
     uint16_t _qos_control;
 };

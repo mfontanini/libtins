@@ -155,7 +155,7 @@ private:
         uint16_t status_code;
     };
 
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
     AuthBody _body;
 
@@ -250,7 +250,7 @@ private:
         uint16_t reason_code;
     };
 
-    uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
     DeauthBody _body;
 };

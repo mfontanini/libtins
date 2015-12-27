@@ -44,6 +44,7 @@
 namespace Tins {
 namespace Memory {
 class InputMemoryStream;
+class OutputMemoryStream;
 } // Memory
 
 class RSNInformation;
@@ -479,8 +480,8 @@ public:
      */
     static Dot11 *from_bytes(const uint8_t *buffer, uint32_t total_sz);
 protected:
-    virtual uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz) { return 0; }
-    virtual uint32_t write_fixed_parameters(uint8_t *buffer, uint32_t total_sz) { return 0; }
+    virtual void write_ext_header(Memory::OutputMemoryStream& stream) { }
+    virtual void write_fixed_parameters(Memory::OutputMemoryStream& stream) { }
     void parse_tagged_parameters(Memory::InputMemoryStream& stream);
     void add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t *val);
 protected:
