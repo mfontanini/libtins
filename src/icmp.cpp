@@ -212,7 +212,15 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
         uint32_t length_value = get_adjusted_inner_pdu_size();
         // If the next pdu size is greater than 128, we are forced to set the length field
         if (length() != 0 || length_value > 128) {
-            length_value = length_value ? std::max(length_value, 128U) : 0;
+            if (length_value) {
+                // If we have extensions, we'll have at least 128 bytes.
+                // Otherwise, just use the length 
+                length_value = has_extensions() ? std::max(length_value, 128U) 
+                                                : length_value;
+            }
+            else {
+                length_value = 0;
+            }
             // This field uses 32 bit words as the unit
             _icmp.un.rfc4884.length = length_value / sizeof(uint32_t);
         }
