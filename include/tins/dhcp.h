@@ -30,11 +30,11 @@
 #ifndef TINS_DHCP_H
 #define TINS_DHCP_H
 
-
 #include <list>
 #include <vector>
 #include <string>
 #include "bootp.h"
+#include "macros.h"
 #include "pdu_option.h"
 #include "cxxstd.h"
 
@@ -64,7 +64,7 @@ namespace Tins {
      * 
      * \endcode
      */
-    class DHCP : public BootP {
+    class TINS_API DHCP : public BootP {
     public:
         /**
          * This PDU's flag.

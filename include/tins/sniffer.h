@@ -40,6 +40,7 @@
 #include "pdu.h"
 #include "packet.h"
 #include "cxxstd.h"
+#include "macros.h"
 #include "exceptions.h"
 #include "internals.h"
 
@@ -57,7 +58,7 @@ namespace Tins {
      *
      * Initialization must be done using the BaseSniffer::init method.
      */
-    class BaseSniffer {
+    class TINS_API BaseSniffer {
     public:
         /**
          * The iterator type.
@@ -279,7 +280,7 @@ namespace Tins {
      * \class Sniffer
      * \brief Sniffs packets from a network interface.
      */
-    class Sniffer : public BaseSniffer {
+    class TINS_API Sniffer : public BaseSniffer {
     public:
         /**
          * \deprecated This enum is no longer necessary. You should use the
@@ -359,7 +360,7 @@ namespace Tins {
      * This class acts exactly in the same way that Sniffer, but reads
      * packets from a pcap file instead of an interface.
      */
-    class FileSniffer : public BaseSniffer {
+    class TINS_API FileSniffer : public BaseSniffer {
     public:
         /**
          * \brief Constructs an instance of FileSniffer.
@@ -509,7 +510,7 @@ namespace Tins {
      * Sniffer sniffer("eth0", config);
      * \endcode
      */
-    class SnifferConfiguration {
+    class TINS_API SnifferConfiguration {
     public:
         /**
          * \brief The default snapshot length.

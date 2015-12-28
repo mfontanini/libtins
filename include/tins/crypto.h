@@ -39,6 +39,7 @@
 #include "utils.h"
 #include "snap.h"
 #include "rawpdu.h"
+#include "macros.h"
 #include "handshake_capturer.h"
 
 namespace Tins {
@@ -53,7 +54,7 @@ namespace Crypto {
         /**
          * \brief Class that represents the keys used to decrypt a session.
          */
-        class SessionKeys {
+        class TINS_API SessionKeys {
         public:
             /**
              * The size of the Pairwise Master Key.
@@ -136,7 +137,7 @@ namespace Crypto {
          * of some access point, and this will generate the Pairwise Master Key
          * from those parameters.
          */
-        class SupplicantData {
+        class TINS_API SupplicantData {
         public:
             /**
              * The type used to store the PMK.
@@ -185,7 +186,7 @@ namespace Crypto {
     /**
      * \brief Decrypts WEP-encrypted traffic.
      */
-    class WEPDecrypter {
+    class TINS_API WEPDecrypter {
     public:
         typedef HWAddress<6> address_type;
     
@@ -241,7 +242,7 @@ namespace Crypto {
      * This class takes valid PSK and SSID tuples, captures client handshakes,
      * and decrypts their traffic afterwards.
      */
-    class WPA2Decrypter {
+    class TINS_API WPA2Decrypter {
     public:
         /*
          * \brief The type used to store Dot11 addresses.

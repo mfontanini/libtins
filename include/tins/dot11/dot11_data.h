@@ -33,9 +33,11 @@
 #define TINS_DOT11_DOT11_DATA_H
 
 #include "../dot11/dot11_base.h"
+#include "../macros.h"
 
 namespace Tins {
-class Dot11Data : public Dot11 {
+
+class TINS_API Dot11Data : public Dot11 {
 public:
     /**
      * \brief This PDU's flag.
@@ -256,7 +258,7 @@ private:
     address_type _addr4;
 };
 
-class Dot11QoSData : public Dot11Data {
+class TINS_API Dot11QoSData : public Dot11Data {
 public:
     /**
      * \brief This PDU's flag.

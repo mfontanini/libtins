@@ -46,7 +46,7 @@ namespace Tins {
      * \brief Represents an ARP PDU.
      *
      */
-    class ARP : public PDU {
+    class TINS_API ARP : public PDU {
     public:
         /**
          * The type of the hardware address.

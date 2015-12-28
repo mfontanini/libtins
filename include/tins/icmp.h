@@ -51,7 +51,7 @@
 namespace Tins {
 namespace Memory {
 class InputMemoryStream;
-} // memory
+} // Memory
 
 /** 
  * \class ICMP
@@ -60,7 +60,7 @@ class InputMemoryStream;
  * ICMP is the representation of the ICMP PDU. Instances of this class
  * must be sent over a level 3 PDU, this will otherwise fail.
  */
-class ICMP : public PDU {
+class TINS_API ICMP : public PDU {
 public:
     /**
      * \brief This PDU's flag.

@@ -46,7 +46,7 @@ namespace Tins {
      * Note that this PDU contains the 802.3 LLC structure + SNAP frame.
      * So far only unnumbered information structure is supported.
      */
-    class SNAP : public PDU {
+    class TINS_API SNAP : public PDU {
     public:
         /**
          * \brief This PDU's flag.

@@ -31,6 +31,7 @@
 #define TINS_STP_H
 
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "hw_address.h"
 #include "small_uint.h"
@@ -40,7 +41,7 @@ namespace Tins {
  * \class STP
  * \brief Represents a Spanning Tree Protocol PDU.
  */
-class STP : public PDU {
+class TINS_API STP : public PDU {
 public:
     /**
      * This PDU's flag.

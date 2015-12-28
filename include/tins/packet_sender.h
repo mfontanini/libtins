@@ -113,7 +113,7 @@ namespace Tins {
      * \sa PacketSender::send
      * \sa PacketSender::send_recv
      */
-    class PacketSender {
+    class TINS_API PacketSender {
     public:
         /** 
          * The default timeout for receive actions.

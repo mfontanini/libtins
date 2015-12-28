@@ -33,6 +33,7 @@
 #include <vector>
 #include <string>
 #include "pdu.h"
+#include "macros.h"
 #include "cxxstd.h"
 
 namespace Tins {
@@ -60,7 +61,7 @@ namespace Tins {
      * DNS dns = raw.to<DNS>();
      * \endcode
      */
-    class RawPDU : public PDU {
+    class TINS_API RawPDU : public PDU {
     public:
         /**
          * The type used to store the payload.

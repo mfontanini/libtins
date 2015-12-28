@@ -34,6 +34,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include "macros.h"
 #include "endianness.h"
 
 namespace Tins{
@@ -43,7 +44,7 @@ class PDUOption;
 /**
  * \brief Class that models the RSN information structure.
  */
-class RSNInformation {
+class TINS_API RSNInformation {
 public:
     /**
      * \brief Enum that represents the different cypher suites.

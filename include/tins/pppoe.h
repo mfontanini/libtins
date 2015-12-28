@@ -34,6 +34,7 @@
 #include <string>
 #include <vector>
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "small_uint.h"
 #include "pdu_option.h"
@@ -44,7 +45,7 @@ namespace Tins {
  * \class PPPoE
  * \brief Represents a Point-to-point protocol over Ethernet PDU.
  */
-class PPPoE : public PDU {
+class TINS_API PPPoE : public PDU {
 public:
     /**
      * The tag types enum.

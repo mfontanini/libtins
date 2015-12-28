@@ -50,7 +50,7 @@ class PacketSender;
  * \class IPv6
  * Represents an IPv6 PDU.
  */
-class IPv6 : public PDU {
+class TINS_API IPv6 : public PDU {
 public:
     /**
      * This PDU's flag.

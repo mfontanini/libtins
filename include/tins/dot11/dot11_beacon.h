@@ -33,13 +33,14 @@
 #define TINS_DOT11_DOT11_BEACON_H
 
 #include "../dot11/dot11_mgmt.h"
+#include "../macros.h"
 
 namespace Tins {
     /**
      * \brief Class representing an 802.11 Beacon.
      *
      */
-    class Dot11Beacon : public Dot11ManagementFrame {
+    class TINS_API Dot11Beacon : public Dot11ManagementFrame {
     public:
         /**
          * \brief This PDU's flag.

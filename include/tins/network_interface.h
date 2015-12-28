@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include "macros.h"
 #include "hw_address.h"
 #include "ip_address.h"
 
@@ -41,7 +42,7 @@ namespace Tins {
  * \class NetworkInterface
  * \brief Abstraction of a network interface
  */
-class NetworkInterface {
+class TINS_API NetworkInterface {
 public:
     /**
      * \brief The type used to store the interface's identifier.

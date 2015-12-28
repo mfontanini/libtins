@@ -29,13 +29,14 @@
 
 #include "config.h"
 
-#if !defined(TINS_HANDSHAKE_CAPTURER_H)  && defined(HAVE_DOT11)
+#if !defined(TINS_HANDSHAKE_CAPTURER_H) && defined(HAVE_DOT11)
 #define TINS_HANDSHAKE_CAPTURER_H
 
 #include <vector>
 #include <map>
 #include <utility>
 #include "hw_address.h"
+#include "macros.h"
 #include "eapol.h"
 
 // .h
@@ -106,7 +107,7 @@ namespace Tins {
     /**
      * Captures 802.1X RSN handshakes.
      */
-    class RSNHandshakeCapturer {
+    class TINS_API RSNHandshakeCapturer {
     public:
         /**
          * The type of handshakes that will be captured.

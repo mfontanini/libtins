@@ -31,6 +31,7 @@
 #define TINS_IPSEC_H
 
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "small_uint.h"
 
@@ -39,7 +40,7 @@ namespace Tins {
  * \class IPSecAH
  * \brief Represents an IPSec Authentication Header.
  */
-class IPSecAH : public PDU {
+class TINS_API IPSecAH : public PDU {
 public:
     /**
      * This PDU's flag.
@@ -175,7 +176,7 @@ private:
 /**
  * \brief Represents an IPSec Authentication Header.
  */
-class IPSecESP : public PDU {
+class TINS_API IPSecESP : public PDU {
 public:
     /**
      * This PDU's flag.

@@ -31,6 +31,7 @@
 #define TINS_DOT1Q_H
 
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "small_uint.h"
 
@@ -39,7 +40,7 @@ namespace Tins {
  * \class Dot1Q
  * Represents an IEEE 802.1q PDU.
  */
-class Dot1Q : public PDU {
+class TINS_API Dot1Q : public PDU {
 public:
     /**
      * This PDU's flag.

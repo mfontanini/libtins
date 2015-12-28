@@ -33,6 +33,7 @@
 #include <vector>
 #include <map>
 #include "pdu.h"
+#include "macros.h"
 #include "ip_address.h"
 
 namespace Tins {
@@ -66,7 +67,7 @@ private:
     uint16_t offset_;
 };
 
-class IPv4Stream {
+class TINS_API IPv4Stream {
 public:
     IPv4Stream();
     
@@ -93,7 +94,7 @@ private:
 /**
  * \brief Reassembles fragmented IP packets.
  */
-class IPv4Reassembler {
+class TINS_API IPv4Reassembler {
 public:
     /**
      * The status of each processed packet.

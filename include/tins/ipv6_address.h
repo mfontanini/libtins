@@ -34,13 +34,14 @@
 #include <stdexcept>
 #include <stdint.h>
 #include "cxxstd.h"
+#include "macros.h"
 
 namespace Tins {
 
 /**
  * Represents an IPv6 address.
  */
-class IPv6Address {
+class TINS_API IPv6Address {
 public:
     /**
      * The exception thrown when a malformed address is parsed.

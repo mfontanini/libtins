@@ -31,10 +31,11 @@
 #define TINS_PKTAP_H
 
 #include "pdu.h"
+#include "macros.h"
 
 namespace Tins {
 
-class PKTAP : public PDU {
+class TINS_API PKTAP : public PDU {
 public:
     /**
      * This PDU's flag.

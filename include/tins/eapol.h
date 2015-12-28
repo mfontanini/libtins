@@ -36,7 +36,6 @@
 #include "small_uint.h"
 #include "endianness.h"
 
-
 namespace Tins {
 namespace Memory {
 class OutputMemoryStream;
@@ -52,7 +51,7 @@ class OutputMemoryStream;
      * \class EAPOL
      * \brief Represents the EAP encapsulation over LAN.
      */
-    class EAPOL : public PDU {
+    class TINS_API EAPOL : public PDU {
     public:
         /**
          * \brief This PDU's flag.
@@ -184,7 +183,7 @@ class OutputMemoryStream;
     /**
      * \brief Class that represents the RC4 EAPOL PDU.
      */
-    class RC4EAPOL : public EAPOL {
+    class TINS_API RC4EAPOL : public EAPOL {
     public:
         /**
          * The type used to store the key.
@@ -367,7 +366,7 @@ class OutputMemoryStream;
     /**
      * \brief Class that represents the RSN EAPOL PDU.
      */
-    class RSNEAPOL : public EAPOL {
+    class TINS_API RSNEAPOL : public EAPOL {
     public:
         /**
          * The type used to store the key.

@@ -43,7 +43,7 @@ namespace Tins {
      * \class EthernetII
      * \brief Represents an Ethernet II PDU.
      */
-    class EthernetII : public PDU {
+    class TINS_API EthernetII : public PDU {
     public:
         /**
          * \brief The hardware address type.

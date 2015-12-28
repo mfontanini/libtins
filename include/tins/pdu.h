@@ -36,6 +36,7 @@
 #include "macros.h"
 #include "cxxstd.h"
 #include "exceptions.h"
+#include "macros.h"
 
 /** \brief The Tins namespace.
  */
@@ -104,7 +105,7 @@ namespace Tins {
      * PDU::serialization_type buffer = packet.serialize();
      * \endcode
      */
-    class PDU {
+    class TINS_API PDU {
     public:
         /**
          * The type that will be returned when serializing PDUs.

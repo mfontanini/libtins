@@ -33,6 +33,7 @@
 #include <string>
 #include <stdint.h>
 #include "data_link_type.h"
+#include "macros.h"
 
 namespace Tins {
 class PDU;
@@ -74,7 +75,7 @@ class PDU;
  * }
  * \endcode
  */
-class OfflinePacketFilter {
+class TINS_API OfflinePacketFilter {
 public:
     /**
      * Constructs an OfflinePacketFilter object.

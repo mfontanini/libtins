@@ -34,6 +34,8 @@
     #include <sys/param.h>
 #endif
 
+#include "config.h"
+
 // Check if this is Visual Studio
 #ifdef _MSC_VER
     // This is Visual Studio
@@ -44,6 +46,18 @@
     #define TINS_NOEXCEPT
     #define TINS_LIKELY(x) (x)
     #define TINS_UNLIKELY(x) (x)
+    // If libtins was built into a shared library
+    #if !defined(TINS_STATIC_BUILD)
+        // Export/import symbols, depending on whether we're compiling or consuming the lib
+        #ifdef tins_EXPORTS
+            #define TINS_API __declspec(dllexport)
+        #else
+            #define TINS_API __declspec(dllimport)
+        #endif // tins_EXPORTS
+    #else // TINS_STATIC_BUILD
+        // Otherwise, default this to an empty macro
+        #define TINS_API
+    #endif // TINS_STATIC_BUILD
 #else
     // Not Vistual Studio. Assume this is gcc compatible
     #define TINS_BEGIN_PACK 
@@ -53,6 +67,9 @@
     #define TINS_NOEXCEPT noexcept
     #define TINS_LIKELY(x) __builtin_expect((x),1)
     #define TINS_UNLIKELY(x) __builtin_expect((x),0)
-#endif // 
+    #define TINS_API
+#endif // _MSC_VER
+
+
 
 #endif // TINS_MACROS_H

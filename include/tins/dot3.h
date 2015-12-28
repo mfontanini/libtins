@@ -43,7 +43,7 @@ namespace Tins {
      * \class Dot3
      * \brief Class representing an IEEE 802.3 PDU.
      */
-    class Dot3 : public PDU {
+    class TINS_API Dot3 : public PDU {
     public:
         /**
          * \brief The address type.

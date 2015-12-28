@@ -34,13 +34,14 @@
 #include <iostream>
 #include <stdint.h>
 #include "cxxstd.h"
+#include "macros.h"
 
 namespace Tins {
 /**
  * \class IPv4Address
  * \brief Abstraction of an IPv4 address.
  */
-class IPv4Address {
+class TINS_API IPv4Address {
 public:
     /**
      * The address size.

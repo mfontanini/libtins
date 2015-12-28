@@ -33,6 +33,7 @@
 #include <cstring>
 #include <list>
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "small_uint.h"
 #include "ipv6_address.h"
@@ -47,7 +48,7 @@ class OutputMemoryStream;
  * \class DHCPv6
  * \brief Represents a DHCPv6 PDU.
  */
-class DHCPv6 : public PDU {
+class TINS_API DHCPv6 : public PDU {
 public:
     /**
      * Represents a DHCPv6 option. 

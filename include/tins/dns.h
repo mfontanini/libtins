@@ -69,7 +69,7 @@ namespace Tins {
      * }
      * \endcode
      */
-    class DNS : public PDU {
+    class TINS_API DNS : public PDU {
     public:
         /**
          * \brief This PDU's flag.

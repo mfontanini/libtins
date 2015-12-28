@@ -59,7 +59,7 @@ class OutputMemoryStream;
      * and set as the source address. If you don't want this behaviour, simply
      * set the source address to 0.0.0.0.
      */
-    class IP : public PDU {
+    class TINS_API IP : public PDU {
     public:
         /**
          * This PDU's flag.

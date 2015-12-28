@@ -34,7 +34,7 @@
 #include "macros.h"
 
 namespace Tins {
-class Loopback : public PDU {
+class TINS_API Loopback : public PDU {
 public:
     /**
      * This PDU's type.

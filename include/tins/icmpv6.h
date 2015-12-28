@@ -53,7 +53,7 @@ class OutputMemoryStream;
  * \class ICMPv6
  * \brief Represents an ICMPv6 PDU.
  */
-class ICMPv6 : public PDU {
+class TINS_API ICMPv6 : public PDU {
 public:
     /**
      * \brief This PDU's flag.

@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <stdint.h>
 #include "sniffer.h"
+#include "macros.h"
 #include "tcp.h"
 #include "utils.h"
 #include "ip.h"
@@ -50,7 +51,7 @@ class RawPDU;
  * \class TCPStream
  * \brief Represents a TCP stream.
  */
-class TCPStream {
+class TINS_API TCPStream {
 public:
     /**
      * The stream information.
@@ -203,7 +204,7 @@ private:
  * \class TCPStreamFollower
  * \brief Follows TCP streams and notifies the user when data is available.
  */
-class TCPStreamFollower {
+class TINS_API TCPStreamFollower {
 public:
     /**
      * \brief Default constructor.

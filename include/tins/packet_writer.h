@@ -35,6 +35,7 @@
 #include <pcap.h>
 #include "data_link_type.h"
 #include "utils.h"
+#include "macros.h"
 #include "cxxstd.h"
 
 struct timeval;
@@ -75,7 +76,7 @@ class Packet;
  * writer.write(vt.begin(), vt.end());
  * \endcode
  */
-class PacketWriter {
+class TINS_API PacketWriter {
 public:
     /**
      * \brief The type of PDUs that will be written to this file (deprecated).

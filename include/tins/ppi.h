@@ -31,6 +31,7 @@
 #define TINS_PPI_H
 
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "small_uint.h"
 
@@ -43,7 +44,7 @@ namespace Tins {
  * cannot be serialized. Therefore, it is only useful while
  * sniffing packets.
  */
-class PPI : public PDU {
+class TINS_API PPI : public PDU {
 public:
     /**
      * This PDU's flag.

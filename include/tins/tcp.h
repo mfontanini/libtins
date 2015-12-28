@@ -76,7 +76,7 @@ class OutputMemoryStream;
      * \sa RawPDU
      */
 
-    class TCP : public PDU {
+    class TINS_API TCP : public PDU {
     public:
         /**
          * This PDU's flag.

@@ -52,7 +52,7 @@ class RSNInformation;
 /**
  * \brief Class representing an 802.11 frame.
  */
-class Dot11 : public PDU {
+class TINS_API Dot11 : public PDU {
 public:
     /**
      * The type used to store hardware addresses.

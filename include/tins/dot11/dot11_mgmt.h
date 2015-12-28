@@ -36,12 +36,13 @@
 #include <vector>
 #include <utility>
 #include "../dot11/dot11_base.h"
+#include "../macros.h"
 
 namespace Tins {
 /**
  * \brief Abstract class that englobes all Management frames in the 802.11 protocol.
  */
-class Dot11ManagementFrame : public Dot11 {
+class TINS_API Dot11ManagementFrame : public Dot11 {
 public:
     /**
      * The supported rates container type.

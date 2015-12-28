@@ -4,6 +4,7 @@
 #include <vector>
 #include <list>
 #include <stdint.h>
+#include "macros.h"
 #include "small_uint.h"
 #include "endianness.h"
 
@@ -12,7 +13,7 @@ namespace Tins {
 /**
  * \brief Class that represents an ICMP extension object
  */
-class ICMPExtension {
+class TINS_API ICMPExtension {
 public:
     /**
      * The type used to store the payload 
@@ -121,7 +122,7 @@ private:
 /**
  * \brief Class that represents an ICMP extensions structure
  */
-class ICMPExtensionsStructure {
+class TINS_API ICMPExtensionsStructure {
 public:
     /**
      * The minimum ICMP payload size that has to be present when the PDU

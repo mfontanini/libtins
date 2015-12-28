@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include "macros.h"
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 
 namespace Tins {
@@ -45,7 +46,7 @@ namespace Tins {
      *
      * This PDU follows the standard LLC frame described in the IEEE 802.2 specs.
      */
-    class LLC : public PDU {
+    class TINS_API LLC : public PDU {
     public:
         /**
          * \brief This PDU's flag.

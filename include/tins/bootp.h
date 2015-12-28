@@ -39,14 +39,13 @@
 #include "ip_address.h"
 #include "hw_address.h"
 
-
 namespace Tins {
 
     /**
      * \class BootP
      * \brief Class representing a BootP packet.
      */
-    class BootP : public PDU {
+    class TINS_API BootP : public PDU {
     public:
         /**
          * The type of the IP addresses.

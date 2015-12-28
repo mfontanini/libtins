@@ -47,7 +47,7 @@ class PacketSender;
  * the FCS-at-end flag is on, the channel is set to 1, TSFT is set to 0,
  * dbm_signal is set to -50, and the rx_flag and antenna fields to 0.
  */
-class RadioTap : public PDU {
+class TINS_API RadioTap : public PDU {
 public:
     /**
      * \brief This PDU's flag.

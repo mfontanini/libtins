@@ -34,12 +34,13 @@
 #define TINS_DOT11_DOT11_CONTROL_H
 
 #include "../dot11/dot11_base.h"
+#include "../macros.h"
 
 namespace Tins {
 /**
  * \brief Class that represents an 802.11 control frame.
  */
-class Dot11Control : public Dot11 {
+class TINS_API Dot11Control : public Dot11 {
 public:
     /**
      * \brief This PDU's flag.
@@ -92,7 +93,7 @@ public:
  * \brief Class that represents an abstraction of the 802.11 control frames
  * that contain a target address.
  */
-class Dot11ControlTA : public Dot11Control {
+class TINS_API Dot11ControlTA : public Dot11Control {
 public:
     /**
      * \brief Getter for the target address field.
@@ -157,7 +158,7 @@ private:
 /**
  * \brief IEEE 802.11 RTS frame.
  */
-class Dot11RTS : public Dot11ControlTA {
+class TINS_API Dot11RTS : public Dot11ControlTA {
 public:
     /**
      * \brief This PDU's flag.
@@ -216,7 +217,7 @@ public:
     }
 };
 
-class Dot11PSPoll : public Dot11ControlTA {
+class TINS_API Dot11PSPoll : public Dot11ControlTA {
 public:
     /**
      * \brief This PDU's flag.
@@ -276,7 +277,7 @@ public:
     }
 };
 
-class Dot11CFEnd : public Dot11ControlTA {
+class TINS_API Dot11CFEnd : public Dot11ControlTA {
 public:
     /**
      * \brief This PDU's flag.
@@ -336,7 +337,7 @@ public:
     }
 };
 
-class Dot11EndCFAck : public Dot11ControlTA {
+class TINS_API Dot11EndCFAck : public Dot11ControlTA {
 public:
     /**
      * \brief This PDU's flag.
@@ -396,7 +397,7 @@ public:
     }
 };
 
-class Dot11Ack : public Dot11Control {
+class TINS_API Dot11Ack : public Dot11Control {
 public:
     /**
      * \brief This PDU's flag.
@@ -457,7 +458,7 @@ public:
 /**
  * \brief Class that represents an 802.11 Block Ack Request PDU.
  */
-class Dot11BlockAckRequest : public Dot11ControlTA {
+class TINS_API Dot11BlockAckRequest : public Dot11ControlTA {
 public:
     /**
      * \brief This PDU's flag.
@@ -593,7 +594,7 @@ private:
 /**
  * \brief Class that represents an 802.11 block ack frame.
  */
-class Dot11BlockAck : public Dot11ControlTA {
+class TINS_API Dot11BlockAck : public Dot11ControlTA {
 public:
     /**
      * \brief This PDU's flag.

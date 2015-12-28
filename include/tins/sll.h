@@ -32,6 +32,7 @@
 
 #include <vector>
 #include "pdu.h"
+#include "macros.h"
 #include "endianness.h"
 #include "hw_address.h"
 
@@ -40,7 +41,7 @@ namespace Tins {
  * \class SLL
  * \brief Represents a Linux cooked-mode capture (SLL) PDU.
  */
-class SLL : public PDU {
+class TINS_API SLL : public PDU {
 public:
     /**
      * This PDU's flag.

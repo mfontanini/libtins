@@ -33,13 +33,14 @@
 #define TINS_DOT11_DOT11_ASSOC_H
 
 #include "../dot11/dot11_mgmt.h"
+#include "../macros.h"
 
 namespace Tins {
 /**
  * \brief Class representing a Disassociation frame in the IEEE 802.11 Protocol.
  *
  */
-class Dot11Disassoc : public Dot11ManagementFrame {
+class TINS_API Dot11Disassoc : public Dot11ManagementFrame {
 public:
    /**
      * \brief This PDU's flag.
@@ -133,7 +134,7 @@ private:
  * \brief Class representing an Association Request frame in the IEEE 802.11 Protocol.
  *
  */
-class Dot11AssocRequest : public Dot11ManagementFrame {
+class TINS_API Dot11AssocRequest : public Dot11ManagementFrame {
 public:
     /**
      * \brief This PDU's flag.
@@ -244,7 +245,7 @@ private:
  * \brief Class representing an Association Response frame in the IEEE 802.11 Protocol.
  *
  */
-class Dot11AssocResponse : public Dot11ManagementFrame {
+class TINS_API Dot11AssocResponse : public Dot11ManagementFrame {
 public:
     /**
      * \brief This PDU's flag.
@@ -370,7 +371,7 @@ private:
  * \brief Class representing an ReAssociation Request frame in the IEEE 802.11 Protocol.
  *
  */
-class Dot11ReAssocRequest : public Dot11ManagementFrame {
+class TINS_API Dot11ReAssocRequest : public Dot11ManagementFrame {
 public:
     /**
      * \brief This PDU's flag.
@@ -496,7 +497,7 @@ private:
  * \brief IEEE 802.11 ReAssociation Response frame.
  *
  */
-class Dot11ReAssocResponse : public Dot11ManagementFrame {
+class TINS_API Dot11ReAssocResponse : public Dot11ManagementFrame {
 public:
     /**
      * \brief This PDU's flag.
