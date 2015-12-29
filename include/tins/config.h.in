@@ -13,7 +13,4 @@
 /* Use pcap_sendpacket to send l2 packets */
 #cmakedefine HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
-/* Indicate whether libtins was built statically */
-#cmakedefine TINS_STATIC_BUILD
-
 #endif // TINS_CONFIG_H
