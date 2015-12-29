@@ -5,6 +5,7 @@
 #include "eapol.h"
 #include "snap.h"
 #include "utils.h"
+#include "ethernetII.h"
 #include "rsn_information.h"
 
 using namespace std;
@@ -14,6 +15,7 @@ class RSNEAPOLTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
     static const uint8_t eapol_over_snap[];
+    static const uint8_t broken_eapol[];
     
     void test_equals(const RSNEAPOL &eapol1, const RSNEAPOL &eapol2);
 };
@@ -63,6 +65,18 @@ const uint8_t RSNEAPOLTest::eapol_over_snap[] = {
     , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 216, 
     123, 212, 159
+};
+
+const uint8_t RSNEAPOLTest::broken_eapol[] = {
+    44, 240, 238, 33, 128, 46, 72, 248, 179, 139, 32, 112, 136, 142, 2, 
+    3, 0, 127, 2, 19, 130, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 231, 103, 200, 107, 89, 185, 187, 51, 27, 32, 91, 65, 95, 
+    165, 127, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 126, 
+    159, 123, 33, 66, 3, 254, 124, 6, 192, 129, 143, 215, 59, 38, 162, 
+    0, 24, 221, 22, 0, 15, 172, 1, 1, 0, 237, 214, 169, 68, 84, 98, 24, 
+    182, 8, 221, 81, 125, 222, 224, 243, 97, 229, 99, 186, 225, 196, 225, 
+    179, 86
 };
 
 void RSNEAPOLTest::test_equals(const RSNEAPOL &eapol1, const RSNEAPOL &eapol2) {
@@ -141,6 +155,19 @@ TEST_F(RSNEAPOLTest, Serialize) {
     RSNEAPOL::serialization_type buffer = eapol.serialize();
     ASSERT_EQ(sizeof(expected_packet), buffer.size());
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
+}
+
+// This is a test for a packet for which the serialization lacked the WPA key.
+// This packet contains a misterious 8 byte field that I can't seem to find 
+// on the standard. Wireshark doesn't understand it either. This will currently
+// be appended as a RawPDU at the end.
+TEST_F(RSNEAPOLTest, SerializeBrokenEapol) {
+    EthernetII eapol(broken_eapol, sizeof(broken_eapol));
+    RSNEAPOL::serialization_type buffer = eapol.serialize();
+    EXPECT_EQ(
+        RSNEAPOL::serialization_type(broken_eapol, broken_eapol + sizeof(broken_eapol)),
+        buffer
+    );
 }
 
 TEST_F(RSNEAPOLTest, ConstructionTest) {

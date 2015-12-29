@@ -33,6 +33,7 @@
 #include "eapol.h"
 #include "rsn_information.h"
 #include "exceptions.h"
+#include "rawpdu.h"
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
@@ -95,6 +96,7 @@ void EAPOL::type(uint8_t new_type) {
 
 void EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
     OutputMemoryStream stream(buffer, total_sz);
+    length(total_sz - 4);
     stream.write(_header);
     std::memcpy(buffer, &_header, sizeof(_header));
     write_body(stream);
@@ -111,15 +113,16 @@ RC4EAPOL::RC4EAPOL()
 RC4EAPOL::RC4EAPOL(const uint8_t *buffer, uint32_t total_sz) 
 : EAPOL(buffer, total_sz)
 {
-    buffer += sizeof(eapolhdr);
-    total_sz -= sizeof(eapolhdr);
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
-    if(total_sz == key_length())
-        _key.assign(buffer, buffer + total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(sizeof(eapolhdr));
+    stream.read(_header);
+    if (stream.size() >= key_length()) {
+        _key.assign(stream.pointer(), stream.pointer() + key_length());
+        stream.skip(key_length());
+        if (stream) {
+            inner_pdu(new RawPDU(stream.pointer(), stream.size()));
+        }
+    }
 }
 
 void RC4EAPOL::key_length(uint16_t new_key_length) {
@@ -174,15 +177,16 @@ RSNEAPOL::RSNEAPOL()
 RSNEAPOL::RSNEAPOL(const uint8_t *buffer, uint32_t total_sz) 
 : EAPOL(buffer, total_sz)
 {
-    buffer += sizeof(eapolhdr);
-    total_sz -= sizeof(eapolhdr);
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
-    if(total_sz == wpa_length())
-        _key.assign(buffer, buffer + total_sz);
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(sizeof(eapolhdr));
+    stream.read(_header);
+    if (stream.size() >= wpa_length()) {
+        _key.assign(stream.pointer(), stream.pointer() + wpa_length());
+        stream.skip(wpa_length());
+        if (stream) {
+            inner_pdu(new RawPDU(stream.pointer(), stream.size()));
+        }
+    }
 }
 
 void RSNEAPOL::nonce(const uint8_t *new_nonce) {
@@ -268,7 +272,7 @@ uint32_t RSNEAPOL::header_size() const {
 
 void RSNEAPOL::write_body(OutputMemoryStream& stream) {
     if (_key.size()) {
-        if (!_header.key_t) {
+        if (!_header.key_t && _header.install) {
             _header.key_length = Endian::host_to_be<uint16_t>(32);
             wpa_length(static_cast<uint16_t>(_key.size()));
         }
