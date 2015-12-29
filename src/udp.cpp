@@ -146,6 +146,8 @@ void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
         checksum = (checksum & 0xffff)+(checksum >> 16);
     }
     _udp.check = ~checksum;
+    // If checksum is 0, it has to be set to 0xffff
+    _udp.check = (_udp.check == 0) ? 0xffff : _udp.check;
     ((udphdr*)buffer)->check = _udp.check;
 }
 
