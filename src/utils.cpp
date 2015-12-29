@@ -56,9 +56,11 @@
 #include "network_interface.h"
 #include "packet_sender.h"
 #include "cxxstd.h"
+#include "memory_helpers.h"
 
 using namespace std;
 
+using Tins::Memory::OutputMemoryStream;
 
 /** \cond */
 struct InterfaceCollector {
@@ -248,33 +250,34 @@ uint16_t sum_range(const uint8_t *start, const uint8_t *end) {
     return checksum;  
 }
 
-uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
+template <size_t buffer_size, typename AddressType>
+uint32_t generic_pseudoheader_checksum(const AddressType& source_ip, const AddressType& dest_ip,
+    uint16_t len, uint16_t flag) {
     uint32_t checksum(0);
-    uint32_t source_ip_int = Endian::host_to_be<uint32_t>(source_ip),
-             dest_ip_int = Endian::host_to_be<uint32_t>(dest_ip);
-    char buffer[sizeof(uint32_t) * 2];
+    uint8_t buffer[buffer_size];
+    OutputMemoryStream stream(buffer, sizeof(buffer));
+    stream.write(source_ip);
+    stream.write(dest_ip);
+    stream.write(Endian::host_to_be(flag));
+    stream.write(Endian::host_to_be(len));
+
     uint16_t *ptr = (uint16_t*)buffer, *end = (uint16_t*)(buffer + sizeof(buffer));
-    std::memcpy(buffer, &source_ip_int, sizeof(source_ip_int));
-    std::memcpy(buffer + sizeof(uint32_t), &dest_ip_int, sizeof(dest_ip_int));
-    while(ptr < end) 
-        checksum += (uint32_t)*ptr++;
-    checksum += flag + len;
+    while (ptr < end) {
+        checksum += *ptr++;
+    }
     return checksum;
 }
 
-uint32_t pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip, uint32_t len, uint32_t flag) {
-    uint32_t checksum(0);
-    uint16_t *ptr = (uint16_t*) source_ip.begin();
-    uint16_t *end = (uint16_t*) source_ip.end();
-    while(ptr < end)
-        checksum += (uint32_t) Endian::be_to_host(*ptr++);
+uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint16_t len, uint16_t flag) {
+    return generic_pseudoheader_checksum<sizeof(uint32_t) * 3>(
+        source_ip, dest_ip, len, flag
+    );
+}
 
-    ptr = (uint16_t*) dest_ip.begin();
-    end = (uint16_t*) dest_ip.end();
-    while(ptr < end)
-        checksum += (uint32_t) Endian::be_to_host(*ptr++);
-    checksum += flag + len;
-    return checksum;
+uint32_t pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip, uint16_t len, uint16_t flag) {
+    return generic_pseudoheader_checksum<IPv6Address::address_size * 2 + sizeof(uint16_t) * 2>(
+        source_ip, dest_ip, len, flag
+    );
 }
 
 uint32_t crc32(const uint8_t* data, uint32_t data_size) {

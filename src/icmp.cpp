@@ -262,12 +262,12 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
     }
 
     // Calculate checksum
-    uint32_t checksum = Utils::do_checksum(buffer, buffer + total_sz);
+    uint32_t checksum = Utils::sum_range(buffer, buffer + total_sz);
     while (checksum >> 16) {
         checksum = (checksum & 0xffff) + (checksum >> 16);
     }
     // Write back only the 2 checksum bytes
-    _icmp.check = Endian::host_to_be<uint16_t>(~checksum);
+    _icmp.check = ~checksum;
     memcpy(buffer + 2, &_icmp.check, sizeof(uint16_t));
 }
 

@@ -274,11 +274,11 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
             ipv6->dst_addr(), 
             size(), 
             Constants::IP::PROTO_ICMPV6
-        ) + Utils::do_checksum(buffer, buffer + total_sz);
+        ) + Utils::sum_range(buffer, buffer + total_sz);
         while (checksum >> 16) {
             checksum = (checksum & 0xffff) + (checksum >> 16);
         }
-        this->checksum(~checksum);
+        this->checksum(Endian::host_to_be<uint16_t>(~checksum));
         memcpy(buffer + 2, &_header.cksum, sizeof(uint16_t));
     }
 }

@@ -11,7 +11,8 @@ using namespace Tins;
 
 class UDPTest : public testing::Test {
 public:
-    static const uint8_t expected_packet[], checksum_packet[];
+    static const uint8_t expected_packet[], checksum_packet[], 
+                         checksum_packet2[];
     
     void test_equals(const UDP& udp1, const UDP& udp2);
 };
@@ -26,6 +27,20 @@ const uint8_t UDPTest::checksum_packet[] = {
     173, 0, 53, 0, 50, 206, 155, 118, 39, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 11, 
     48, 45, 101, 100, 103, 101, 45, 99, 104, 97, 116, 8, 102, 97, 99, 101, 
     98, 111, 111, 107, 3, 99, 111, 109, 0, 0, 1, 0, 1
+};
+
+const uint8_t UDPTest::checksum_packet2[] = {
+    0, 20, 165, 53, 119, 224, 44, 240, 238, 33, 128, 46, 8, 0, 69, 184, 0, 
+    200, 9, 187, 0, 0, 63, 17, 107, 202, 192, 168, 6, 224, 198, 199, 118, 
+    152, 217, 252, 192, 0, 0, 180, 250, 82, 128, 0, 0, 106, 86, 129, 110, 
+    22, 2, 46, 39, 16, 0, 0, 7, 111, 0, 0, 34, 42, 86, 129, 110, 20, 0, 14, 
+    255, 229, 0, 0, 8, 234, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0
 };
 
 
@@ -49,12 +64,32 @@ TEST_F(UDPTest, ChecksumCheck) {
     EthernetII pkt1(checksum_packet, sizeof(checksum_packet)); 
     const UDP &udp1 = pkt1.rfind_pdu<UDP>();
     uint16_t checksum = udp1.checksum();
-    
     PDU::serialization_type buffer = pkt1.serialize();
+    EXPECT_EQ(
+        UDP::serialization_type(
+            checksum_packet, 
+            checksum_packet + sizeof(checksum_packet)
+        ),
+        buffer
+    );
+
     EthernetII pkt2(&buffer[0], (uint32_t)buffer.size());
     const UDP &udp2 = pkt2.rfind_pdu<UDP>();
     EXPECT_EQ(checksum, udp2.checksum());
     EXPECT_EQ(udp1.checksum(), udp2.checksum());
+}
+
+TEST_F(UDPTest, ChecksumCheck2) {
+    EthernetII pkt(checksum_packet2, sizeof(checksum_packet2));
+    PDU::serialization_type buffer = pkt.serialize();
+    EXPECT_EQ(
+        UDP::serialization_type(
+            checksum_packet2, 
+            checksum_packet2 + sizeof(checksum_packet2)
+        ),
+        buffer
+    );
+    EXPECT_EQ(0xfa52, pkt.rfind_pdu<UDP>().checksum());
 }
 
 TEST_F(UDPTest, CopyConstructor) {

@@ -306,34 +306,32 @@ void TCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
         stream.fill(padding, 1);
     }
 
-    const Tins::IP *ip_packet = tins_cast<const Tins::IP*>(parent);
-    if(ip_packet) {
-        uint32_t check = Utils::pseudoheader_checksum(
+    uint32_t check = 0;
+    if (const Tins::IP *ip_packet = tins_cast<const Tins::IP*>(parent)) {
+        check = Utils::pseudoheader_checksum(
             ip_packet->src_addr(),  
             ip_packet->dst_addr(), 
             size(), 
-            Constants::IP::PROTO_TCP) + Utils::do_checksum(buffer, buffer + total_sz);
-        while (check >> 16) {
-            check = (check & 0xffff) + (check >> 16);
-        }
-        checksum(~check);
-        ((tcphdr*)buffer)->check = _tcp.check;
+            Constants::IP::PROTO_TCP
+        ) + Utils::sum_range(buffer, buffer + total_sz);
+    }
+    else if (const Tins::IPv6 *ipv6_packet = tins_cast<const Tins::IPv6*>(parent)) {
+        check = Utils::pseudoheader_checksum(
+            ipv6_packet->src_addr(),  
+            ipv6_packet->dst_addr(), 
+            size(), 
+            Constants::IP::PROTO_TCP
+        ) + Utils::sum_range(buffer, buffer + total_sz);
     }
     else {
-        const Tins::IPv6 *ipv6_packet = tins_cast<const Tins::IPv6*>(parent);
-        if(ipv6_packet) {
-            uint32_t check = Utils::pseudoheader_checksum(
-                ipv6_packet->src_addr(),  
-                ipv6_packet->dst_addr(), 
-                size(), 
-                Constants::IP::PROTO_TCP) + Utils::do_checksum(buffer, buffer + total_sz);
-            while (check >> 16) {
-                check = (check & 0xffff) + (check >> 16);
-            }
-            checksum(~check);
-            ((tcphdr*)buffer)->check = _tcp.check;
-        }
+        return;
     }
+    // Convert this 32-bit value into a 16-bit value
+    while (check >> 16) {
+            check = (check & 0xffff) + (check >> 16);
+    }
+    checksum(Endian::host_to_be<uint16_t>(~check));
+    ((tcphdr*)buffer)->check = _tcp.check;
 }
 
 const TCP::option *TCP::search_option(OptionTypes type) const {

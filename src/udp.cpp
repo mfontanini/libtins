@@ -74,6 +74,43 @@ uint32_t UDP::header_size() const {
     return sizeof(udphdr);
 }
 
+uint32_t sum_range(const uint8_t *start, const uint8_t *end) {
+    uint32_t checksum(0);
+    const uint8_t *last = end;
+    uint16_t buffer = 0;
+    uint16_t padding = 0;
+    const uint8_t *ptr = start;
+
+    if(((end - start) & 1) == 1) {
+        last = end - 1;
+        padding = Endian::host_to_le<uint16_t>(*(end - 1));
+    }
+
+    while(ptr < last) {
+        memcpy(&buffer, ptr, sizeof(uint16_t));
+        checksum += buffer;
+        ptr += sizeof(uint16_t);
+    }
+
+    checksum += padding;
+    return checksum;  
+}
+
+uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag) {
+    uint32_t checksum(0);
+    uint8_t buffer[sizeof(uint32_t) * 3];
+    OutputMemoryStream stream(buffer, sizeof(buffer));
+    stream.write(source_ip);
+    stream.write(dest_ip);
+    stream.write(Endian::host_to_be<uint16_t>(flag));
+    stream.write(Endian::host_to_be<uint16_t>(len));
+    uint16_t *ptr = (uint16_t*)buffer, *end = (uint16_t*)(buffer + sizeof(buffer));
+    while (ptr < end) {
+        checksum += *ptr++;
+    }
+    return checksum;
+}
+
 void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     OutputMemoryStream stream(buffer, total_sz);
     // Set checksum to 0, we'll calculate it at the end
@@ -85,36 +122,31 @@ void UDP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *par
         length(static_cast<uint16_t>(sizeof(udphdr)));
     }
     stream.write(_udp);
-    const Tins::IP *ip_packet = tins_cast<const Tins::IP*>(parent);
-    if(ip_packet) {
-        uint32_t checksum = Utils::pseudoheader_checksum(
+    uint32_t checksum = 0;
+    if (const Tins::IP *ip_packet = tins_cast<const Tins::IP*>(parent)) {
+        checksum = Utils::pseudoheader_checksum(
             ip_packet->src_addr(), 
             ip_packet->dst_addr(), 
             size(), 
             Constants::IP::PROTO_UDP
-        ) + Utils::do_checksum(buffer, buffer + total_sz);
-        while (checksum >> 16) {
-            checksum = (checksum & 0xffff)+(checksum >> 16);
-        }
-        _udp.check = Endian::host_to_be<uint16_t>(~checksum);
-        ((udphdr*)buffer)->check = _udp.check;
+        ) + Utils::sum_range(buffer, buffer + total_sz);
+    }
+    else if (const Tins::IPv6 *ip6_packet = tins_cast<const Tins::IPv6*>(parent)) {
+        checksum = Utils::pseudoheader_checksum(
+            ip6_packet->src_addr(), 
+            ip6_packet->dst_addr(), 
+            size(), 
+            Constants::IP::PROTO_UDP
+        ) + Utils::sum_range(buffer, buffer + total_sz);
     }
     else {
-        const Tins::IPv6 *ip6_packet = tins_cast<const Tins::IPv6*>(parent);
-        if(ip6_packet) {
-            uint32_t checksum = Utils::pseudoheader_checksum(
-                ip6_packet->src_addr(), 
-                ip6_packet->dst_addr(), 
-                size(), 
-                Constants::IP::PROTO_UDP
-            ) + Utils::do_checksum(buffer, buffer + total_sz);
-            while (checksum >> 16) {
-                checksum = (checksum & 0xffff)+(checksum >> 16);
-            }
-            _udp.check = Endian::host_to_be<uint16_t>(~checksum);
-            ((udphdr*)buffer)->check = _udp.check;
-        }
+        return;
     }
+    while (checksum >> 16) {
+        checksum = (checksum & 0xffff)+(checksum >> 16);
+    }
+    _udp.check = ~checksum;
+    ((udphdr*)buffer)->check = _udp.check;
 }
 
 bool UDP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
