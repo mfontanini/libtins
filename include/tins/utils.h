@@ -247,7 +247,7 @@ namespace Tins {
          * \param flag The flag to use in the protocol field of the pseudo header.
          * \return The pseudo header checksum.
          */
-        uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag);
+        uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint16_t len, uint16_t flag);
         
         /** \brief Performs the pseudo header checksum used in TCP and UDP PDUs.
          *
@@ -257,7 +257,7 @@ namespace Tins {
          * \param flag The flag to use in the protocol field of the pseudo header.
          * \return The pseudo header checksum.
          */
-        uint32_t pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip, uint32_t len, uint32_t flag);
+        uint32_t pseudoheader_checksum(IPv6Address source_ip, IPv6Address dest_ip, uint16_t len, uint16_t flag);
 
         /** \brief Generic function to iterate through interface and collect
          * data.
