@@ -152,8 +152,8 @@ INSTALL(
 # Add subdirectories
 # ******************
 ADD_SUBDIRECTORY(include)
-ADD_SUBDIRECTORY(src)
 ADD_SUBDIRECTORY(examples)
+ADD_SUBDIRECTORY(src)
 
 # Only include googletest if the git submodule has been fetched
 IF(EXISTS "${CMAKE_SOURCE_DIR}/googletest/CMakeLists.txt")
