@@ -129,6 +129,7 @@ namespace Tins {
             RAW,
             ETHERNET_II,
             IEEE802_3,
+            DOT3 = IEEE802_3,
             RADIOTAP,
             DOT11,
             DOT11_ACK,
@@ -177,6 +178,7 @@ namespace Tins {
             IPSEC_AH,
             IPSEC_ESP,
             PKTAP,
+            MPLS,
             USER_DEFINED_PDU = 1000
         };
         

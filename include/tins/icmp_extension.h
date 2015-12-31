@@ -10,6 +10,8 @@
 
 namespace Tins {
 
+class MPLS;
+
 /**
  * \brief Class that represents an ICMP extension object
  */
@@ -207,9 +209,19 @@ public:
     /**
      * \brief Adds an extension to this structure
      *
-     * \param extension The extension to be added;
+     * \param extension The extension to be added
      */
     void add_extension(const ICMPExtension& extension);
+
+    /**
+     * \brief Adds an MPLS extension to this structure
+     *
+     * This will construct an extension using the provided MPLS packet as
+     * its payload. The class and type fields will be set appropriately.
+     *
+     * \param extension The MPLS payload to be used for the new extension
+     */
+    void add_extension(MPLS& mpls);
 
     /**
      * \brief Gets the size of this ICMP extensions structure

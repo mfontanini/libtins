@@ -43,6 +43,7 @@
 #include "sll.h"
 #include "ppi.h"
 #include "icmpv6.h"
+#include "mpls.h"
 #include "arp.h"
 #include "eapol.h"
 #include "rawpdu.h"
@@ -101,6 +102,8 @@ Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
             return EAPOL::from_bytes(buffer, size);
         case Tins::Constants::Ethernet::VLAN:
             return new Dot1Q(buffer, size);
+        case Tins::Constants::Ethernet::MPLS:
+            return new MPLS(buffer, size);
         default:
             {
                 PDU *pdu = Internals::allocate<EthernetII>(
@@ -231,6 +234,8 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
             return Constants::Ethernet::VLAN;
         case PDU::PPPOE:
             return Constants::Ethernet::PPPOED;
+        case PDU::MPLS:
+            return Constants::Ethernet::MPLS;
         case PDU::RSNEAPOL:
         case PDU::RC4EAPOL:
             return Constants::Ethernet::EAPOL;

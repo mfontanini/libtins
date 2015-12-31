@@ -45,6 +45,7 @@
 #include "dot3.h"
 #include "ip.h"
 #include "ipv6.h"
+#include "mpls.h"
 #include "packet_sender.h"
 #include "packet_writer.h"
 #include "pdu.h"

@@ -6,6 +6,7 @@
 #include "ip.h"
 #include "ethernetII.h"
 #include "utils.h"
+#include "mpls.h"
 #include "rawpdu.h"
 
 using namespace std;
@@ -313,6 +314,8 @@ TEST_F(ICMPTest, ExtensionsParsingWithoutALengthField) {
     ICMP icmp(packet_with_extensions, sizeof(packet_with_extensions));
     ICMPExtensionsStructure extensions = icmp.extensions();
     ASSERT_EQ(1, extensions.extensions().size());
+    MPLS mpls(*extensions.extensions().begin());
+    EXPECT_EQ(100704, mpls.label());
     EXPECT_EQ(
         ICMPExtension::payload_type(ext, ext + sizeof(ext)), 
         extensions.extensions().begin()->serialize()

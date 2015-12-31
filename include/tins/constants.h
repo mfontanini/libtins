@@ -78,6 +78,7 @@ namespace Tins {
                 SPRITE = 0x0500,  /* Sprite */
                 IP = 0x0800,      /* IP */
                 ARP = 0x0806,     /* Address resolution */
+                MPLS = 0x8847,    /* MPLS */
                 REVARP = 0x8035,  /* Reverse ARP */
                 AT = 0x809B,      /* AppleTalk protocol */
                 AARP = 0x80F3,    /* AppleTalk ARP */

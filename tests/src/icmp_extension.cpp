@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
 #include "icmp_extension.h"
+#include "mpls.h"
 
 using Tins::ICMPExtension;
 using Tins::ICMPExtensionsStructure;
+using Tins::MPLS;
+using Tins::PDU;
 
 class ICMPExtensionTest : public testing::Test {
 public:
@@ -92,4 +95,21 @@ TEST_F(ICMPExtensionTest, Version) {
     structure.version(0xf);
     EXPECT_EQ(0xdea, structure.reserved());
     EXPECT_EQ(0xf, structure.version());
+}
+
+TEST_F(ICMPExtensionTest, MPLSExtension) {
+    ICMPExtensionsStructure structure;
+    MPLS mpls1;
+    mpls1.label(10012);
+    mpls1.bottom_of_stack(1);
+    mpls1.ttl(15);
+    structure.add_extension(mpls1);
+    
+    PDU::serialization_type buffer = structure.serialize();
+    ICMPExtensionsStructure new_structure(&buffer[0], buffer.size());
+    ASSERT_EQ(1, new_structure.extensions().size());
+    MPLS mpls2(*new_structure.extensions().begin());
+    EXPECT_EQ(mpls1.label(), mpls2.label());
+    EXPECT_EQ(mpls1.bottom_of_stack(), mpls2.bottom_of_stack());
+    EXPECT_EQ(mpls1.ttl(), mpls2.ttl());
 }

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <cstring>
 #include <algorithm>
+#include <vector>
 #include "exceptions.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
@@ -34,6 +35,10 @@ class InputMemoryStream {
 public:
     InputMemoryStream(const uint8_t* buffer, uint32_t total_sz)
     : buffer_(buffer), size_(total_sz) {
+    }
+
+    InputMemoryStream(const std::vector<uint8_t>& data)
+    : buffer_(&data[0]), size_(data.size()) {
     }
 
     void skip(uint32_t size) {

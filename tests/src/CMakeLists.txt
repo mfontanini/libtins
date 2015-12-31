@@ -70,6 +70,7 @@ ADD_CUSTOM_TARGET(
     LLCTest
     LoopbackTest
     MatchesResponseTest
+    MPLSTest
     NetworkInterfaceTest
     OfflinePacketFilterTest
     PDUTest
@@ -112,6 +113,7 @@ ADD_EXECUTABLE(IPv6Test EXCLUDE_FROM_ALL ipv6.cpp)
 ADD_EXECUTABLE(IPv6AddressTest EXCLUDE_FROM_ALL ipv6address.cpp)
 ADD_EXECUTABLE(LLCTest EXCLUDE_FROM_ALL llc.cpp)
 ADD_EXECUTABLE(LoopbackTest EXCLUDE_FROM_ALL loopback.cpp)
+ADD_EXECUTABLE(MPLSTest EXCLUDE_FROM_ALL mpls.cpp)
 ADD_EXECUTABLE(MatchesResponseTest EXCLUDE_FROM_ALL matches_response.cpp)
 ADD_EXECUTABLE(NetworkInterfaceTest EXCLUDE_FROM_ALL network_interface.cpp)
 ADD_EXECUTABLE(OfflinePacketFilterTest EXCLUDE_FROM_ALL offline_packet_filter.cpp)
@@ -193,6 +195,7 @@ ADD_TEST(IPv6Address IPv6AddressTest)
 ADD_TEST(LLC LLCTest)
 ADD_TEST(Loopback LoopbackTest)
 ADD_TEST(MatchesResponse MatchesResponseTest)
+ADD_TEST(MPLS MPLSTest)
 ADD_TEST(NetworkInterface NetworkInterfaceTest)
 ADD_TEST(OfflinePacketFilter OfflinePacketFilterTest)
 ADD_TEST(PDU PDUTest)

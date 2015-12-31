@@ -4,6 +4,7 @@
 #include "exceptions.h"
 #include "utils.h"
 #include "memory_helpers.h"
+#include "mpls.h"
 
 using std::runtime_error;
 
@@ -133,6 +134,12 @@ uint32_t ICMPExtensionsStructure::size() const {
 
 void ICMPExtensionsStructure::add_extension(const ICMPExtension& extension) {
     extensions_.push_back(extension);
+}
+
+void ICMPExtensionsStructure::add_extension(MPLS& mpls) {
+    ICMPExtension extension(1, 1);
+    extension.payload(mpls.serialize());
+    add_extension(extension);
 }
 
 void ICMPExtensionsStructure::serialize(uint8_t* buffer, uint32_t buffer_size) {

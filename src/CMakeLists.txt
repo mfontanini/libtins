@@ -37,6 +37,7 @@ ADD_LIBRARY(
     ipsec.cpp
     llc.cpp
     loopback.cpp
+    mpls.cpp
     network_interface.cpp
     offline_packet_filter.cpp
     packet_sender.cpp
