@@ -63,7 +63,7 @@ MPLS::MPLS(const uint8_t* buffer, uint32_t total_sz) {
 void MPLS::label(small_uint<20> value) {
     const uint32_t label_value = value;
     const uint16_t label_high = Endian::host_to_be<uint16_t>(label_value >> 4);
-    const uint8_t label_low = (Endian::host_to_be<uint32_t>(label_value) >> 20) & 0xf0;
+    const uint8_t label_low = (label_value << 4) & 0xf0;
     header_.label_high = label_high & 0xffff;
     header_.label_low_and_bottom = (header_.label_low_and_bottom & 0x0f) | label_low;
 }
