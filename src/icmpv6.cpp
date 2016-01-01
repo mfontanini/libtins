@@ -63,6 +63,15 @@ ICMPv6::ICMPv6(const uint8_t *buffer, uint32_t total_sz)
         reach_time = stream.read<uint32_t>();
         retrans_timer = stream.read<uint32_t>();
     }
+    else if (type() == MLD2_REPORT) {
+        uint16_t record_count = Endian::be_to_host(_header.mlrm2.record_count);
+        for (uint16_t i = 0; i < record_count; ++i) {
+            multicast_records_.push_back(
+                multicast_address_record(stream.pointer(), stream.size())
+            );
+            stream.skip(multicast_records_.back().size());
+        }
+    }
     // Retrieve options
     if (has_options()) {
         parse_options(stream);
@@ -161,6 +170,10 @@ void ICMPv6::retransmit_timer(uint32_t new_retrans_timer) {
     retrans_timer = Endian::host_to_be(new_retrans_timer);
 }
 
+void ICMPv6::multicast_address_records(const multicast_address_records_list& records) {
+    multicast_records_ = records;
+}
+
 void ICMPv6::target_addr(const ipaddress_type &new_target_addr) {
     _target_address = new_target_addr;
 }
@@ -171,8 +184,16 @@ void ICMPv6::dest_addr(const ipaddress_type &new_dest_addr) {
 
 uint32_t ICMPv6::header_size() const {
     uint32_t extra = 0;
-    if(type() == ROUTER_ADVERT)
+    if(type() == ROUTER_ADVERT) {
         extra = sizeof(uint32_t) * 2;
+    }
+    else if (type() == MLD2_REPORT) {
+        typedef multicast_address_records_list::const_iterator iterator;
+        for (iterator iter = multicast_records_.begin(); 
+             iter != multicast_records_.end(); ++iter) {
+            extra += iter->size();
+        }
+    }
     return sizeof(_header) + _options_size + extra + 
         (has_target_addr() ? ipaddress_type::address_size : 0) +
         (has_dest_addr() ? ipaddress_type::address_size : 0);
@@ -225,6 +246,10 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     }
     // Initially set checksum to 0, we'll calculate it at the end
     _header.cksum = 0;
+    // Update the MLRM record count before writing the header
+    if (type() == MLD2_REPORT) {
+        _header.mlrm2.record_count = Endian::host_to_be<uint16_t>(multicast_records_.size());
+    }
     stream.write(_header);
 
     if (has_target_addr()) {
@@ -236,6 +261,14 @@ void ICMPv6::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *
     if (type() == ROUTER_ADVERT) {
         stream.write(reach_time);
         stream.write(retrans_timer);
+    }
+    else if (type() == MLD2_REPORT) {
+        typedef multicast_address_records_list::const_iterator iterator;
+        for (iterator iter = multicast_records_.begin(); 
+             iter != multicast_records_.end(); ++iter) {
+            iter->serialize(stream.pointer(), stream.size());
+            stream.skip(iter->size());
+        }
     }
     for(options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
         write_option(*it, stream);
@@ -999,5 +1032,45 @@ ICMPv6::new_advert_interval_type ICMPv6::new_advert_interval_type::from_option(c
     output.interval = Endian::be_to_host(output.interval);
     return output;
 }
+
+// multicast_address_record
+
+ICMPv6::multicast_address_record::multicast_address_record(const uint8_t* buffer, 
+    uint32_t total_sz) 
+{
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(type);
+    int aux_data_len = stream.read<uint8_t>() * sizeof(uint32_t);
+    int sources_count = Endian::be_to_host(stream.read<uint16_t>());
+    stream.read(multicast_address);
+    while (sources_count--) {
+        sources.push_back(stream.read<ipaddress_type>());
+    }
+    if (!stream.can_read(aux_data_len)) {
+        throw malformed_packet();
+    }
+    aux_data.assign(stream.pointer(), stream.pointer() + aux_data_len);
 }
+
+void ICMPv6::multicast_address_record::serialize(uint8_t* buffer, uint32_t total_sz) const
+{
+    OutputMemoryStream stream(buffer, total_sz);
+    stream.write(type);
+    stream.write<uint8_t>(aux_data.size() / sizeof(uint32_t));
+    stream.write(Endian::host_to_be<uint16_t>(sources.size()));
+    stream.write(multicast_address);
+    for (size_t i = 0; i < sources.size(); ++i) {
+        stream.write(sources[i]);
+    }
+    stream.write(aux_data.begin(), aux_data.end());
+}
+
+uint32_t ICMPv6::multicast_address_record::size() const 
+{
+    return sizeof(uint8_t) * 2 + sizeof(uint16_t) + ipaddress_type::address_size +
+           sources.size() * ipaddress_type::address_size +
+           aux_data.size();
+}
+
+} // Tins
 

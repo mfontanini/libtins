@@ -19,6 +19,7 @@ public:
     static const uint8_t expected_packet2[];
     static const uint8_t packet_with_extensions[];
     static const uint8_t packet_with_extensions_and_length[];
+    static const uint8_t mld2_icmpv6_layer[];
 
     void test_equals(const ICMPv6 &icmp1, const ICMPv6 &icmp2);
 };
@@ -61,6 +62,15 @@ const uint8_t ICMPv6Test::packet_with_extensions_and_length[] = {
     65, 65, 65, 65, 65, 65, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 
     0, 197, 95, 0, 8, 1, 1, 24, 150, 1, 1
+};
+
+const uint8_t ICMPv6Test::mld2_icmpv6_layer[] = { 
+    143, 0, 0, 0, 0, 0, 0, 1, 1, 2, 0, 8, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 0, 0, 9, 222, 173, 190, 239, 190, 173, 254, 237
 };
 
 TEST_F(ICMPv6Test, Constructor) {
@@ -116,6 +126,44 @@ TEST_F(ICMPv6Test, ConstructorFromBuffer2) {
     opt = icmp.search_option(ICMPv6::PREFIX_INFO);
     ASSERT_TRUE(opt != NULL);
     EXPECT_EQ(opt->data_size(), 30U);
+}
+
+TEST_F(ICMPv6Test, ConstructorFromBuffer_MLD2_Layer) {
+    ICMPv6 icmp(mld2_icmpv6_layer, sizeof(mld2_icmpv6_layer));
+
+    ICMPv6::multicast_address_records_list records = icmp.multicast_address_records();
+    ASSERT_EQ(1, records.size());
+    ICMPv6::multicast_address_record r = *records.begin();
+    EXPECT_EQ(1, r.type);
+    std::vector<uint8_t> aux_data;
+    aux_data.push_back(0xde);
+    aux_data.push_back(0xad);
+    aux_data.push_back(0xbe);
+    aux_data.push_back(0xef);
+    aux_data.push_back(0xbe);
+    aux_data.push_back(0xad);
+    aux_data.push_back(0xfe);
+    aux_data.push_back(0xed);
+    EXPECT_EQ(aux_data, r.aux_data);
+    std::vector<IPv6Address> sources;
+    sources.push_back("::");
+    sources.push_back("ff02::1");
+    sources.push_back("::");
+    sources.push_back("ff02::1");
+    sources.push_back("ff02::1");
+    sources.push_back("ff02::2");
+    sources.push_back("::1");
+    sources.push_back("ff02::1:ff00:9");
+    EXPECT_EQ(sources, r.sources);
+
+    PDU::serialization_type buffer = icmp.serialize();
+    EXPECT_EQ(
+        PDU::serialization_type(
+            mld2_icmpv6_layer, 
+            mld2_icmpv6_layer + sizeof(mld2_icmpv6_layer)
+        ),
+        buffer
+    );
 }
 
 TEST_F(ICMPv6Test, Type) {

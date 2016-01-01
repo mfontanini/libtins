@@ -522,6 +522,30 @@ public:
     };
 
     /**
+     * The type used to represent a multicast address record
+     */
+    struct multicast_address_record {
+        typedef std::vector<ipaddress_type> sources_type;
+        typedef std::vector<uint8_t> aux_data_type;
+
+        multicast_address_record(uint8_t type) : type(type) { }
+
+        multicast_address_record(const uint8_t* buffer, uint32_t total_sz);
+        void serialize(uint8_t* buffer, uint32_t total_sz) const;
+        uint32_t size() const;
+
+        uint8_t type;
+        ipaddress_type multicast_address;
+        sources_type sources;
+        aux_data_type aux_data;
+    };
+
+    /*
+     * The type used to store all multicast address records in a packet
+     */
+    typedef std::list<multicast_address_record> multicast_address_records_list;
+
+    /**
      * \brief Constructs an ICMPv6 object.
      * 
      * The type of the constructed object will be an echo request, unless
@@ -707,6 +731,13 @@ public:
         return _header.rfc4884.length;
     }
 
+    /**
+     * \brief Getter for the multicast address records field
+     */
+    const multicast_address_records_list& multicast_address_records() const {
+        return multicast_records_;
+    }
+
     // Setters
 
     /**
@@ -816,6 +847,13 @@ public:
      *  \param new_retrans_timer The new retrans_timer field value.
      */
     void retransmit_timer(uint32_t new_retrans_timer);
+
+    /**
+     *  \brief Setter for the multicast address records field.
+     *
+     * This field is only valid if the type of this PDU is MLD2_REPORT
+     */
+    void multicast_address_records(const multicast_address_records_list& records);
 
     /**
      * \brief Getter for the PDU's type.
@@ -1374,6 +1412,11 @@ private:
                 uint8_t length;
                 uint8_t unused[3];
             } rfc4884;
+            // Multicast Listener Report Message (mld2)
+            struct {
+                uint16_t reserved;
+                uint16_t record_count;
+            } mlrm2 ;
         };
     } TINS_END_PACK;
     
@@ -1411,6 +1454,7 @@ private:
     options_type _options;
     uint32_t _options_size;
     uint32_t reach_time, retrans_timer;
+    multicast_address_records_list multicast_records_;
     ICMPExtensionsStructure extensions_;
 };
 }
