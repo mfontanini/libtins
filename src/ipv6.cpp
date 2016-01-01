@@ -68,10 +68,10 @@ IPv6::IPv6(const uint8_t *buffer, uint32_t total_sz)
             const uint8_t ext_type = stream.read<uint8_t>();
             // every ext header is at least 8 bytes long
             // minus one, from the next_header field.
-            const uint32_t ext_size = static_cast<uint32_t>(stream.read<uint8_t>()) + 8;
+            const uint32_t ext_size = (static_cast<uint32_t>(stream.read<uint8_t>()) + 1) * 8;
             const uint32_t payload_size = ext_size - sizeof(uint8_t) * 2;
             // -1 -> next header identifier
-            if(!stream.can_read(ext_size)) { 
+            if (!stream.can_read(ext_size)) { 
                 throw malformed_packet();
             }
             // minus one, from the size field
@@ -245,7 +245,7 @@ void IPv6::set_last_next_header(uint8_t value) {
 }
 
 void IPv6::write_header(const ext_header &header, OutputMemoryStream& stream) {
-    const uint8_t length = (header.length_field() > 8) ? (header.length_field() - 8) : 0;
+    const uint8_t length = header.length_field() / 8;
     stream.write(header.option());
     stream.write(length);
     stream.write(header.data_ptr(), header.data_size());

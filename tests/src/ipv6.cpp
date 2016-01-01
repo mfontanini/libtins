@@ -23,7 +23,8 @@ using namespace Tins;
 
 class IPv6Test : public testing::Test {
 public:
-    static const uint8_t expected_packet1[], expected_packet2[];
+    static const uint8_t expected_packet1[], expected_packet2[], 
+                         hop_by_hop_options[];
     
     void test_equals(IPv6 &ip1, IPv6 &ip2);
 };
@@ -40,6 +41,18 @@ const uint8_t IPv6Test::expected_packet2[] = {
     254, 227, 232, 222, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     22, 58, 0, 5, 2, 0, 0, 1, 0, 143, 0, 116, 254, 0, 0, 0, 1, 4, 0, 0, 
     0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 152, 6, 225
+};
+
+const uint8_t IPv6Test::hop_by_hop_options[] = { 
+    0, 1, 1, 0, 0, 2, 0, 1, 1, 0, 0, 1, 134, 221, 96, 0, 0, 0, 0, 180, 0, 255, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 58, 1, 
+    0, 0, 0, 0, 0, 0, 5, 2, 0, 0, 0, 0, 0, 0, 143, 0, 27, 180, 0, 0, 0, 1, 1, 2, 0, 8, 255, 
+    2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 0, 0, 9, 
+    222, 173, 190, 239, 190, 173, 254, 237
 };
 
 void IPv6Test::test_equals(IPv6 &ip1, IPv6 &ip2) {
@@ -121,6 +134,19 @@ TEST_F(IPv6Test, ConstructorFromBuffer2) {
     const IPv6::ext_header *header = ipv6.search_header(IPv6::HOP_BY_HOP);
     ASSERT_TRUE(header != NULL);
     EXPECT_EQ(header->data_size(), 6U);
+}
+
+TEST_F(IPv6Test, ConstructorFromBuffer_MLD2_Packet) {
+    EthernetII eth(hop_by_hop_options, sizeof(hop_by_hop_options));
+
+    PDU::serialization_type buffer = eth.serialize();
+    EXPECT_EQ(
+        PDU::serialization_type(
+            hop_by_hop_options, 
+            hop_by_hop_options + sizeof(hop_by_hop_options)
+        ),
+        buffer
+    );
 }
 
 TEST_F(IPv6Test, Serialize) {
