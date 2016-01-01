@@ -14,6 +14,7 @@ public:
     static const uint8_t expected_packet[];
     static const uint8_t session_packet[];
     static const uint8_t full_session_packet[];
+    static const uint8_t full_session_packet2[];
 };
 
 const uint8_t PPPoETest::expected_packet[] = {
@@ -31,6 +32,13 @@ const uint8_t PPPoETest::full_session_packet[] = {
     0, 0, 98, 0, 21, 192, 33, 1, 11, 0, 19, 1, 4, 5, 212, 3, 5, 194, 
     35, 5, 5, 6, 22, 173, 224, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     , 0, 0, 0, 0, 0, 0, 0
+};
+
+const uint8_t PPPoETest::full_session_packet2[] = {
+    255, 255, 255, 255, 255, 255, 0, 12, 41, 87, 232, 60, 136, 100, 17, 
+    0, 0, 0, 0, 50, 0, 87, 96, 0, 0, 0, 0, 8, 58, 1, 254, 128, 0, 0, 0, 
+    0, 0, 0, 2, 12, 41, 255, 254, 87, 232, 60, 255, 2, 0, 0, 0, 0, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 2, 151, 20, 88, 131, 0, 0, 0, 0
 };
 
 TEST_F(PPPoETest, DefaultConstructor) {
@@ -69,6 +77,28 @@ TEST_F(PPPoETest, ConstructorFromFullSessionBuffer) {
     const RawPDU* raw = pdu.find_pdu<RawPDU>();
     ASSERT_TRUE(raw != NULL);
     EXPECT_EQ(21U, raw->payload_size());
+
+    PDU::serialization_type buffer = eth.serialize();
+    EXPECT_EQ(
+        PDU::serialization_type(
+            full_session_packet, 
+            full_session_packet + sizeof(full_session_packet)
+        ),
+        buffer
+    );
+}
+
+TEST_F(PPPoETest, ConstructorFromFullSessionBuffer2) {
+    EthernetII eth(full_session_packet2, sizeof(full_session_packet2));
+
+    PDU::serialization_type buffer = eth.serialize();
+    EXPECT_EQ(
+        PDU::serialization_type(
+            full_session_packet2, 
+            full_session_packet2 + sizeof(full_session_packet2)
+        ),
+        buffer
+    );
 }
 
 TEST_F(PPPoETest, ConstructorFromBuffer) {

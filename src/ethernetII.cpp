@@ -44,6 +44,7 @@
 #include "ethernetII.h"
 #include "packet_sender.h"
 #include "rawpdu.h"
+#include "pppoe.h"
 #include "ip.h"
 #include "ipv6.h"
 #include "arp.h"
@@ -152,9 +153,17 @@ bool EthernetII::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 void EthernetII::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
-        Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
-            inner_pdu()->pdu_type()
-        );
+        Constants::Ethernet::e flag;
+        const PDUType type = inner_pdu()->pdu_type();
+        // Dirty trick to sucessfully tag PPPoE session/discovery packets
+        if (type == PDU::PPPOE) {
+            const PPPoE* pppoe = static_cast<const PPPoE*>(inner_pdu());
+            flag = (pppoe->code() == 0) ? Constants::Ethernet::PPPOES 
+                                        : Constants::Ethernet::PPPOED;
+        }
+        else {
+            flag = Internals::pdu_flag_to_ether_type(type);
+        }
         if (flag != Constants::Ethernet::UNKNOWN) {
             payload_type(static_cast<uint16_t>(flag));
         }
@@ -188,4 +197,5 @@ PDU *EthernetII::recv_response(PacketSender &sender, const NetworkInterface &ifa
     #endif
 }
 #endif // _WIN32
-}
+
+} // Tins
