@@ -35,6 +35,9 @@
 
 namespace Tins {
 
+/**
+ * \brief Represents a PKTAP PDU
+ */
 class TINS_API PKTAP : public PDU {
 public:
     /**
@@ -64,7 +67,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Returns the header size.
@@ -77,7 +82,7 @@ public:
     /**
      * \sa PDU::clone
      */
-    PKTAP *clone() const {
+    PKTAP* clone() const {
         return new PKTAP(*this);
     }
 private:
@@ -99,8 +104,7 @@ private:
         uint8_t ecommand[20];
     };
 
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
-
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
 
     pktap_header header_;
 };

@@ -50,7 +50,9 @@
 
 namespace Tins {
 namespace Memory {
+
 class InputMemoryStream;
+
 } // Memory
 
 /** 
@@ -109,7 +111,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    ICMP(const uint8_t *buffer, uint32_t total_sz);
+    ICMP(const uint8_t* buffer, uint32_t total_sz);
     
     /**
      * \brief Sets the code field.
@@ -262,43 +264,53 @@ public:
      *
      * \return The type flag for this ICMP PDU.
      */
-    Flags type() const { return (Flags)_icmp.type; }
+    Flags type() const {
+        return (Flags)header_.type;
+    }
 
     /**
      * \brief Getter for the ICMP code flag.
      *
      * \return The code flag for this ICMP PDU.
      */
-    uint8_t code() const { return _icmp.code; }
+    uint8_t code() const {
+        return header_.code;
+    }
 
     /**
      * \brief Getter for the checksum field.
      *
      * \return Returns the checksum as an unit16_t.
      */
-    uint16_t checksum() const { return Endian::be_to_host(_icmp.check); }
+    uint16_t checksum() const {
+        return Endian::be_to_host(header_.check);
+    }
 
     /**
      * \brief Getter for the echo id.
      *
      * \return Returns the echo id.
      */
-    uint16_t id() const { return Endian::be_to_host(_icmp.un.echo.id); }
+    uint16_t id() const {
+        return Endian::be_to_host(header_.un.echo.id);
+    }
 
     /**
      * \brief Getter for the echo sequence number.
      *
      * \return Returns the echo sequence number.
      */
-    uint16_t sequence() const { return Endian::be_to_host(_icmp.un.echo.sequence); }
+    uint16_t sequence() const {
+        return Endian::be_to_host(header_.un.echo.sequence);
+    }
 
     /**
      * \brief Getter for the gateway field.
      *
      * \return Returns the gateway field value.
      */
-    address_type gateway() const { 
-        return address_type(Endian::be_to_host(_icmp.un.gateway)); 
+    address_type gateway() const {
+        return address_type(Endian::be_to_host(header_.un.gateway));
     }
 
     /**
@@ -306,50 +318,62 @@ public:
      *
      * \return Returns the pointer field value.
      */
-    uint8_t pointer() const { return _icmp.un.rfc4884.pointer; }
+    uint8_t pointer() const {
+        return header_.un.rfc4884.pointer;
+    }
 
     /**
      * \brief Getter for the length field.
      *
      * \return Returns the length field value.
      */
-    uint8_t length() const { return _icmp.un.rfc4884.length; }
+    uint8_t length() const {
+        return header_.un.rfc4884.length;
+    }
     
     /**
       * \brief Getter for the mtu field.
       *
       * \return Returns the mtu field value.
       */
-    uint16_t mtu() const { return Endian::be_to_host(_icmp.un.frag.mtu); }
+    uint16_t mtu() const {
+        return Endian::be_to_host(header_.un.frag.mtu);
+    }
 
     /**
       * \brief Getter for the original timestamp field.
       *
       * \return Returns the original timestamp value.
       */
-    uint32_t original_timestamp() const { return Endian::be_to_host(_orig_timestamp_or_address_mask); }
+    uint32_t original_timestamp() const {
+        return Endian::be_to_host(orig_timestamp_or_address_mask_);
+    }
 
     /**
       * \brief Getter for the receive timestamp field.
       *
       * \return Returns the receive timestamp value.
       */
-    uint32_t receive_timestamp() const { return Endian::be_to_host(_recv_timestamp); }
+    uint32_t receive_timestamp() const {
+        return Endian::be_to_host(recv_timestamp_);
+    }
 
     /**
       * \brief Getter for the transmit timestamp field.
       *
       * \return Returns the transmit timestamp value.
       */
-    uint32_t transmit_timestamp() const { return Endian::be_to_host(_trans_timestamp); }
+    uint32_t transmit_timestamp() const {
+        return Endian::be_to_host(trans_timestamp_);
+    }
 
     /**
       * \brief Getter for the address mask field.
       *
       * \return Returns the address mask value.
       */
-    address_type address_mask() const { 
-        return address_type(Endian::be_to_host(_orig_timestamp_or_address_mask)); 
+    address_type address_mask() const {
+        return address_type(Endian::be_to_host(orig_timestamp_or_address_mask_));
     }
 
     /**
@@ -378,26 +402,32 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
 
     /** 
      * \brief Getter for the extensions field.
      *
      * \return The extensions field
      */
-    const ICMPExtensionsStructure& extensions() const { return extensions_; }
+    const ICMPExtensionsStructure& extensions() const {
+        return extensions_;
+    }
 
     /** 
      * \brief Getter for the extensions field.
      *
      * \return The extensions field
      */
-    ICMPExtensionsStructure& extensions() { return extensions_; }
+    ICMPExtensionsStructure& extensions() {
+        return extensions_;
+    }
 
     /**
      * \brief Indicates whether this object contains ICMP extensions
      */
-    bool has_extensions() const { return !extensions_.extensions().empty(); }
+    bool has_extensions() const {
+        return !extensions_.extensions().empty();
+    }
 
     /**
      * \brief Sets whether the length field will be set for packets that use it
@@ -421,17 +451,19 @@ public:
      *
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return PDU::ICMP; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \sa PDU::clone
      */
-    ICMP *clone() const {
+    ICMP* clone() const {
         return new ICMP(*this);
     }
 private:
     TINS_BEGIN_PACK
-    struct icmphdr {
+    struct icmp_header {
         uint8_t	type;
         uint8_t	code;
         uint16_t check;
@@ -460,14 +492,14 @@ private:
      * \param total_sz The size available in the buffer.
      * \param parent The PDU that's one level below this one on the stack.
      */
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
     
     uint32_t get_adjusted_inner_pdu_size() const;
     void try_parse_extensions(Memory::InputMemoryStream& stream);
     bool are_extensions_allowed() const;
 
-    icmphdr _icmp;
-    uint32_t _orig_timestamp_or_address_mask, _recv_timestamp, _trans_timestamp;
+    icmp_header header_;
+    uint32_t orig_timestamp_or_address_mask_, recv_timestamp_, trans_timestamp_;
     ICMPExtensionsStructure extensions_;
 };
 

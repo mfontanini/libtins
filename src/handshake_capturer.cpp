@@ -33,68 +33,77 @@
 
 #include "dot11/dot11_data.h"
 
+using std::max_element;
+using std::pair;
+
 namespace Tins {
-    bool RSNHandshakeCapturer::process_packet(const PDU &pdu) {
-        const RSNEAPOL *eapol = pdu.find_pdu<RSNEAPOL>();
-        const Dot11Data *dot11 = pdu.find_pdu<Dot11Data>();
-        if(!eapol || !dot11)
-            return false;
-        
-        
-        std::pair<address_type, address_type> addresses;
-        if(dot11->to_ds()) {
-            addresses.first = dot11->addr1();
-            addresses.second = dot11->addr2();
-        }
-        else if(dot11->from_ds()) {
-            addresses.first = dot11->addr2();
-            addresses.second = dot11->addr1();
-        }
-        else
-            return false;
-            
-        // 1st    
-        if(eapol->key_t() && eapol->key_ack() && !eapol->key_mic() && !eapol->install()) {
-            handshakes_[addresses].assign(eapol, eapol + 1);
-        }
-        else if(eapol->key_t() && eapol->key_mic() && !eapol->install() && !eapol->key_ack()) {
-            if(*std::max_element(eapol->nonce(), eapol->nonce() + RSNEAPOL::nonce_size) > 0)
-                do_insert(addresses, eapol, 1);
-            else if(do_insert(addresses, eapol, 3)) {
-                completed_handshakes_.push_back(
-                    handshake_type(
-                        addresses.first,
-                        addresses.second,
-                        handshakes_[addresses]
-                    )
-                );
-                handshakes_.erase(addresses);
-                return true;
-            }
-        }
-        else if(eapol->key_t() && eapol->install() && eapol->key_ack() && eapol->key_mic()) {
-            do_insert(addresses, eapol, 2);
-        }
+
+bool RSNHandshakeCapturer::process_packet(const PDU& pdu) {
+    const RSNEAPOL* eapol = pdu.find_pdu<RSNEAPOL>();
+    const Dot11Data* dot11 = pdu.find_pdu<Dot11Data>();
+    if (!eapol || !dot11) {
         return false;
     }
     
-    bool RSNHandshakeCapturer::do_insert(const handshake_map::key_type &key, 
-      const RSNEAPOL *eapol, size_t expected)
-    {
-        handshake_map::iterator iter = handshakes_.find(key);
-        if(iter != handshakes_.end()) {
-            if(iter->second.size() != expected) {
-                // skip repeated
-                if(iter->second.size() != expected + 1)
-                    iter->second.clear();
-            }
-            else {
-                iter->second.push_back(*eapol);
-                return true;
-            }
-        }
+    
+    pair<address_type, address_type> addresses;
+    if (dot11->to_ds()) {
+        addresses.first = dot11->addr1();
+        addresses.second = dot11->addr2();
+    }
+    else if (dot11->from_ds()) {
+        addresses.first = dot11->addr2();
+        addresses.second = dot11->addr1();
+    }
+    else {
         return false;
     }
+        
+    // 1st    
+    if (eapol->key_t() && eapol->key_ack() && !eapol->key_mic() && !eapol->install()) {
+        handshakes_[addresses].assign(eapol, eapol + 1);
+    }
+    else if (eapol->key_t() && eapol->key_mic() && !eapol->install() && !eapol->key_ack()) {
+        if (*max_element(eapol->nonce(), eapol->nonce() + RSNEAPOL::nonce_size) > 0) {
+            do_insert(addresses, eapol, 1);
+        }
+        else if (do_insert(addresses, eapol, 3)) {
+            completed_handshakes_.push_back(
+                handshake_type(
+                    addresses.first,
+                    addresses.second,
+                    handshakes_[addresses]
+                )
+            );
+            handshakes_.erase(addresses);
+            return true;
+        }
+    }
+    else if (eapol->key_t() && eapol->install() && eapol->key_ack() && eapol->key_mic()) {
+        do_insert(addresses, eapol, 2);
+    }
+    return false;
+}
+
+bool RSNHandshakeCapturer::do_insert(const handshake_map::key_type& key,
+                                     const RSNEAPOL* eapol,
+                                     size_t expected) {
+    handshake_map::iterator iter = handshakes_.find(key);
+    if (iter != handshakes_.end()) {
+        if (iter->second.size() != expected) {
+            // skip repeated
+            if (iter->second.size() != expected + 1) {
+                iter->second.clear();
+            }
+        }
+        else {
+            iter->second.push_back(*eapol);
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace Tins;
 
 #endif // HAVE_DOT11

@@ -40,7 +40,7 @@
 
 namespace Tins {
 /**
- * \brief Abstract class that englobes all Management frames in the 802.11 protocol.
+ * \brief Base class for all management frames in the IEEE 802.11 protocol.
  */
 class TINS_API Dot11ManagementFrame : public Dot11 {
 public:
@@ -132,39 +132,39 @@ public:
     class capability_information {
     private:
         #if TINS_IS_LITTLE_ENDIAN
-            uint16_t _ess:1,
-                     _ibss:1,
-                     _cf_poll:1,
-                     _cf_poll_req:1,
-                     _privacy:1,
-                     _short_preamble:1,
-                     _pbcc:1,
-                     _channel_agility:1,
-                     _spectrum_mgmt:1,
-                     _qos:1,
-                     _sst:1,
-                     _apsd:1,
-                     _radio_measurement:1,
-                     _dsss_ofdm:1,
-                     _delayed_block_ack:1,
-                     _immediate_block_ack:1;
+            uint16_t ess_:1,
+                     ibss_:1,
+                     cf_poll_:1,
+                     cf_poll_req_:1,
+                     privacy_:1,
+                     short_preamble_:1,
+                     pbcc_:1,
+                     channel_agility_:1,
+                     spectrum_mgmt_:1,
+                     qos_:1,
+                     sst_:1,
+                     apsd_:1,
+                     radio_measurement_:1,
+                     dsss_ofdm_:1,
+                     delayed_block_ack_:1,
+                     immediate_block_ack_:1;
         #elif TINS_IS_BIG_ENDIAN
-            uint16_t _channel_agility:1,
-                     _pbcc:1,
-                     _short_preamble:1,
-                     _privacy:1,
-                     _cf_poll_req:1,
-                     _cf_poll:1,
-                     _ibss:1,
-                     _ess:1,
-                     _immediate_block_ack:1,
-                     _delayed_block_ack:1,
-                     _dsss_ofdm:1,
-                     _radio_measurement:1,
-                     _apsd:1,
-                     _sst:1,
-                     _qos:1,
-                     _spectrum_mgmt:1;
+            uint16_t channel_agility_:1,
+                     pbcc_:1,
+                     short_preamble_:1,
+                     privacy_:1,
+                     cf_poll_req_:1,
+                     cf_poll_:1,
+                     ibss_:1,
+                     ess_:1,
+                     immediate_block_ack_:1,
+                     delayed_block_ack_:1,
+                     dsss_ofdm_:1,
+                     radio_measurement_:1,
+                     apsd_:1,
+                     sst_:1,
+                     qos_:1,
+                     spectrum_mgmt_:1;
         #endif
     public:
         /**
@@ -172,225 +172,288 @@ public:
          *
          * \return Bool indicating the flag's value.
          */
-        bool ess() const { return _ess; }
+        bool ess() const {
+            return ess_;
+        }
 
         /**
          * \brief Getter for the ibss flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool ibss() const { return _ibss; }
+        bool ibss() const {
+            return ibss_;
+        }
 
         /**
          * \brief Getter for the cf_poll flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool cf_poll() const { return _cf_poll; }
+        bool cf_poll() const {
+            return cf_poll_;
+        }
 
         /**
          * \brief Getter for the cf_poll_req flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool cf_poll_req() const { return _cf_poll_req; }
+        bool cf_poll_req() const {
+            return cf_poll_req_;
+        }
 
         /**
          * \brief Getter for the privacy flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool privacy() const { return _privacy; }
+        bool privacy() const {
+            return privacy_;
+        }
 
         /**
          * \brief Getter for the short_preamble flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool short_preamble() const { return _short_preamble; }
+        bool short_preamble() const {
+            return short_preamble_;
+        }
 
         /**
          * \brief Getter for the pbcc flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool pbcc() const { return _pbcc; }
+        bool pbcc() const {
+            return pbcc_;
+        }
 
         /**
          * \brief Getter for the channel_agility flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool channel_agility() const { return _channel_agility; }
+        bool channel_agility() const {
+            return channel_agility_;
+        }
 
         /**
          * \brief Getter for the spectrum_mgmt flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool spectrum_mgmt() const { return _spectrum_mgmt; }
+        bool spectrum_mgmt() const {
+            return spectrum_mgmt_;
+        }
 
         /**
          * \brief Getter for the qos flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool qos() const { return _qos; }
+        bool qos() const {
+            return qos_;
+        }
 
         /**
          * \brief Getter for the sst flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool sst() const { return _sst; }
+        bool sst() const {
+            return sst_;
+        }
 
         /**
          * \brief Getter for the apsd flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool apsd() const { return _apsd; }
+        bool apsd() const {
+            return apsd_;
+        }
 
         /**
          * \brief Getter for the radio measurement flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool radio_measurement() const { return _radio_measurement; }
+        bool radio_measurement() const {
+            return radio_measurement_;
+        }
 
         /**
          * \brief Getter for the dsss_ofdm flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool dsss_ofdm() const { return _dsss_ofdm; }
+        bool dsss_ofdm() const {
+            return dsss_ofdm_;
+        }
 
         /**
          * \brief Getter for the delayed_block_ack flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool delayed_block_ack() const { return _delayed_block_ack; }
+        bool delayed_block_ack() const {
+            return delayed_block_ack_;
+        }
 
         /**
          * \brief Getter for the immediate_block_ack flag.
          *
          * \return Bool indicating the flag's value.
          */
-        bool immediate_block_ack() const { return _immediate_block_ack; }
+        bool immediate_block_ack() const {
+            return immediate_block_ack_;
+        }
 
         /**
          * \brief Setter for the ess flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void ess(bool new_value) { _ess = new_value; }
+        void ess(bool new_value) {
+            ess_ = new_value;
+        }
 
         /**
          * \brief Setter for the ibss flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void ibss(bool new_value) { _ibss = new_value; }
+        void ibss(bool new_value) {
+            ibss_ = new_value;
+        }
 
         /**
          * \brief Setter for the cf_poll flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void cf_poll(bool new_value) { _cf_poll = new_value; }
+        void cf_poll(bool new_value) {
+            cf_poll_ = new_value;
+        }
 
         /**
          * \brief Setter for the cf_poll_req flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void cf_poll_req(bool new_value) { _cf_poll_req = new_value; }
+        void cf_poll_req(bool new_value) {
+            cf_poll_req_ = new_value;
+        }
 
         /**
          * \brief Setter for the privacy flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void privacy(bool new_value) { _privacy = new_value; }
+        void privacy(bool new_value) {
+            privacy_ = new_value;
+        }
 
         /**
          * \brief Setter for the short_preamble flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void short_preamble(bool new_value) { _short_preamble = new_value; }
+        void short_preamble(bool new_value) {
+            short_preamble_ = new_value;
+        }
 
         /**
          * \brief Setter for the pbcc flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void pbcc(bool new_value) { _pbcc = new_value; }
+        void pbcc(bool new_value) {
+            pbcc_ = new_value;
+        }
 
         /**
          * \brief Setter for the channel_agility flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void channel_agility(bool new_value) { _channel_agility = new_value; }
+        void channel_agility(bool new_value) {
+            channel_agility_ = new_value;
+        }
 
         /**
          * \brief Setter for the spectrum_mgmt flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void spectrum_mgmt(bool new_value) { _spectrum_mgmt = new_value; }
+        void spectrum_mgmt(bool new_value) {
+            spectrum_mgmt_ = new_value;
+        }
 
         /**
          * \brief Setter for the qos flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void qos(bool new_value) { _qos = new_value; }
+        void qos(bool new_value) {
+            qos_ = new_value;
+        }
 
         /**
          * \brief Setter for the sst flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void sst(bool new_value) { _sst = new_value; }
+        void sst(bool new_value) {
+            sst_ = new_value;
+        }
 
         /**
          * \brief Setter for the apsd flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void apsd(bool new_value) { _apsd = new_value; }
+        void apsd(bool new_value) {
+            apsd_ = new_value;
+        }
 
         /**
          * \brief Setter for the radio measurement flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void radio_measurement(bool new_value) { _radio_measurement = new_value; }
+        void radio_measurement(bool new_value) {
+            radio_measurement_ = new_value;
+        }
 
         /**
          * \brief Setter for the dsss_ofdm flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void dsss_ofdm(bool new_value) { _dsss_ofdm = new_value; }
+        void dsss_ofdm(bool new_value) {
+            dsss_ofdm_ = new_value;
+        }
 
         /**
          * \brief Setter for the delayed_block_ack flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void delayed_block_ack(bool new_value) { _delayed_block_ack = new_value; }
+        void delayed_block_ack(bool new_value) {
+            delayed_block_ack_ = new_value;
+        }
 
         /**
          * \brief Setter for the immediate_block_ack flag.
          *
          * \param new_value bool indicating the flag's new value.
          */
-        void immediate_block_ack(bool new_value) { _immediate_block_ack = new_value; }
-
+        void immediate_block_ack(bool new_value) {
+            immediate_block_ack_ = new_value;
+        }
     } TINS_END_PACK;
     
     /**
@@ -402,12 +465,14 @@ public:
         
         fh_params_set() {}
         
-        fh_params_set(uint16_t dwell_time, uint8_t hop_set, 
-          uint8_t hop_pattern, uint8_t hop_index) 
+        fh_params_set(uint16_t dwell_time, 
+                      uint8_t hop_set, 
+                      uint8_t hop_pattern,
+                      uint8_t hop_index) 
         : dwell_time(dwell_time), hop_set(hop_set), 
           hop_pattern(hop_pattern), hop_index(hop_index) {}
 
-        static fh_params_set from_option(const option &opt);
+        static fh_params_set from_option(const option& opt);
     };
     
     /**
@@ -419,13 +484,15 @@ public:
         
         cf_params_set() {}
         
-        cf_params_set(uint8_t cfp_count, uint8_t cfp_period,
-          uint16_t cfp_max_duration, uint16_t cfp_dur_remaining) 
+        cf_params_set(uint8_t cfp_count, 
+                      uint8_t cfp_period,
+                      uint16_t cfp_max_duration,
+                      uint16_t cfp_dur_remaining) 
         : cfp_count(cfp_count), cfp_period(cfp_period), 
           cfp_max_duration(cfp_max_duration), 
           cfp_dur_remaining(cfp_dur_remaining) {}
 
-        static cf_params_set from_option(const option &opt);
+        static cf_params_set from_option(const option& opt);
     };
     
     /**
@@ -440,12 +507,13 @@ public:
        
         ibss_dfs_params() {}
        
-        ibss_dfs_params(const address_type &addr, 
-          uint8_t recovery_interval, const channel_map_type &channel_map)
+        ibss_dfs_params(const address_type& addr, 
+                        uint8_t recovery_interval,
+                        const channel_map_type& channel_map)
         : dfs_owner(addr), recovery_interval(recovery_interval),
           channel_map(channel_map) {}
 
-        static ibss_dfs_params from_option(const option &opt);
+        static ibss_dfs_params from_option(const option& opt);
     };
     
     /**
@@ -460,12 +528,14 @@ public:
         
         country_params() {}
         
-        country_params(const std::string &country, const byte_array &first,
-          const byte_array &number, const byte_array &max) 
+        country_params(const std::string& country, 
+                       const byte_array& first,
+                       const byte_array& number,
+                       const byte_array& max) 
         : country(country), first_channel(first), number_channels(number),
           max_transmit_power(max) {}
 
-        static country_params from_option(const option &opt);
+        static country_params from_option(const option& opt);
     };
     
     /**
@@ -479,12 +549,15 @@ public:
         
         fh_pattern_type() {}
         
-        fh_pattern_type(uint8_t flag, uint8_t sets, uint8_t modulus,
-          uint8_t offset, const byte_array& table) 
+        fh_pattern_type(uint8_t flag, 
+                        uint8_t sets,
+                        uint8_t modulus,
+                        uint8_t offset,
+                        const byte_array& table) 
         : flag(flag), number_of_sets(sets), modulus(modulus), 
           offset(offset), random_table(table) {}
 
-        static fh_pattern_type from_option(const option &opt);
+        static fh_pattern_type from_option(const option& opt);
     };
     
     /**
@@ -495,10 +568,12 @@ public:
         
         channel_switch_type() {}
         
-        channel_switch_type(uint8_t mode, uint8_t channel, uint8_t count)
+        channel_switch_type(uint8_t mode, 
+                            uint8_t channel,
+                            uint8_t count)
         : switch_mode(mode), new_channel(channel), switch_count(count) { }
 
-        static channel_switch_type from_option(const option &opt);
+        static channel_switch_type from_option(const option& opt);
     };
     
     /**
@@ -510,12 +585,14 @@ public:
         
         quiet_type() {}
         
-        quiet_type(uint8_t count, uint8_t period, uint16_t duration,
-          uint16_t offset)
+        quiet_type(uint8_t count, 
+                   uint8_t period,
+                   uint16_t duration,
+                   uint16_t offset)
         : quiet_count(count), quiet_period(period), 
         quiet_duration(duration), quiet_offset(offset) {}
 
-        static quiet_type from_option(const option &opt);
+        static quiet_type from_option(const option& opt);
     };
 
     /**
@@ -528,12 +605,11 @@ public:
         
         bss_load_type() {}
         
-        bss_load_type(uint16_t count, uint8_t utilization, 
-          uint16_t capacity) 
+        bss_load_type(uint16_t count, uint8_t utilization, uint16_t capacity) 
         : station_count(count), available_capacity(capacity),
         channel_utilization(utilization) {}
 
-        static bss_load_type from_option(const option &opt);
+        static bss_load_type from_option(const option& opt);
     };
     
     /**
@@ -545,12 +621,14 @@ public:
         
         tim_type() {}
         
-        tim_type(uint8_t count, uint8_t period, uint8_t control,
-          const byte_array &bitmap) 
+        tim_type(uint8_t count, 
+                 uint8_t period,
+                 uint8_t control,
+                 const byte_array& bitmap) 
         : dtim_count(count), dtim_period(period), bitmap_control(control),
         partial_virtual_bitmap(bitmap) {}
 
-        static tim_type from_option(const option &opt);
+        static tim_type from_option(const option& opt);
     };
 
     /**
@@ -562,11 +640,11 @@ public:
         oui_type oui;
         byte_array data;
 
-        vendor_specific_type(const oui_type &oui = oui_type(),
-            const byte_array &data = byte_array())
+        vendor_specific_type(const oui_type& oui = oui_type(),
+                             const byte_array& data = byte_array())
         : oui(oui), data(data) { }
 
-        static vendor_specific_type from_bytes(const uint8_t *buffer, uint32_t sz);
+        static vendor_specific_type from_bytes(const uint8_t* buffer, uint32_t sz);
     };
     
     /**
@@ -579,14 +657,18 @@ public:
      *
      * \return address_type containing the second address.
      */
-    address_type addr2() const { return _ext_header.addr2; }
+    address_type addr2() const {
+        return ext_header_.addr2;
+    }
 
     /**
      * \brief Getter for the third address.
      *
      * \return address_type containing the third address.
      */
-    address_type addr3() const { return _ext_header.addr3; }
+    address_type addr3() const {
+        return ext_header_.addr3;
+    }
 
     /**
      * \brief Getter for the fragment number.
@@ -595,9 +677,9 @@ public:
      */
     small_uint<4> frag_num() const { 
         #if TINS_IS_LITTLE_ENDIAN
-        return _ext_header.frag_seq & 0xf; 
+        return ext_header_.frag_seq & 0xf; 
         #else
-        return (_ext_header.frag_seq >> 8) & 0xf; 
+        return (ext_header_.frag_seq >> 8) & 0xf; 
         #endif
     }
 
@@ -608,9 +690,9 @@ public:
      */
     small_uint<12> seq_num() const { 
         #if TINS_IS_LITTLE_ENDIAN
-        return (_ext_header.frag_seq >> 4) & 0xfff; 
+        return (ext_header_.frag_seq >> 4) & 0xfff; 
         #else
-        return (Endian::le_to_host<uint16_t>(_ext_header.frag_seq) >> 4) & 0xfff; 
+        return (Endian::le_to_host<uint16_t>(ext_header_.frag_seq) >> 4) & 0xfff; 
         #endif
     }
 
@@ -619,21 +701,23 @@ public:
      *
      * \return The stored fourth address.
      */
-    const address_type &addr4() const { return _addr4; }
+    const address_type& addr4() const {
+        return addr4_;
+    }
 
     /**
      * \brief Setter for the second address.
      *
      * \param new_addr2 The new second address to be set.
      */
-    void addr2(const address_type &new_addr2);
+    void addr2(const address_type& new_addr2);
 
     /**
      * \brief Setter for the third address.
      *
      * \param new_addr3 The new third address to be set.
      */
-    void addr3(const address_type &new_addr3);
+    void addr3(const address_type& new_addr3);
 
     /**
      * \brief Setter for the fragment number.
@@ -654,7 +738,7 @@ public:
      *
      * \param new_addr4 The new fourth address to be set.
      */
-    void addr4(const address_type &new_addr4);
+    void addr4(const address_type& new_addr4);
 
     // Option setter helpers
 
@@ -663,7 +747,7 @@ public:
      *
      * \param new_ssid The SSID to be set.
      */
-    void ssid(const std::string &new_ssid);
+    void ssid(const std::string& new_ssid);
 
     /**
      * \brief Helper method to set the RSN information option.
@@ -677,14 +761,14 @@ public:
      *
      * \param new_rates The new rates to be set.
      */
-    void supported_rates(const rates_type &new_rates);
+    void supported_rates(const rates_type& new_rates);
 
     /**
      * \brief Helper method to set the extended supported rates option.
      *
      * \param new_rates The new rates to be set.
      */
-    void extended_supported_rates(const rates_type &new_rates);
+    void extended_supported_rates(const rates_type& new_rates);
 
     /**
      * \brief Helper method to set the QoS capabilities option.
@@ -710,7 +794,7 @@ public:
      *
      * \param new_channels A list of channels to be set.
      */
-    void supported_channels(const channels_type &new_channels);
+    void supported_channels(const channels_type& new_channels);
 
     /**
      * \brief Helper method to set the EDCA Parameter Set.
@@ -734,7 +818,7 @@ public:
      *
      * \param fh_params The new FH parameter set value.
      */
-    void fh_parameter_set(const fh_params_set &fh_params);
+    void fh_parameter_set(const fh_params_set& fh_params);
 
     /**
      * \brief Helper method to set the DS parameter tagged option.
@@ -748,7 +832,7 @@ public:
      *
      * \param params The new CF parameter set value.
      */
-    void cf_parameter_set(const cf_params_set &params);
+    void cf_parameter_set(const cf_params_set& params);
 
     /**
      * \brief Helper method to set the IBSS parameter set tagged option.
@@ -762,14 +846,14 @@ public:
      *
      * \param params The IBSS DFS data to be set.
      */
-    void ibss_dfs(const ibss_dfs_params &params);
+    void ibss_dfs(const ibss_dfs_params& params);
 
     /**
      * \brief Helper method to set the country tagged option.
      *
      * \param params The data to be used for this country option.
      */
-    void country(const country_params &params);
+    void country(const country_params& params);
 
     /**
      * \brief Helper method to set the FH parameters set tagged option.
@@ -784,7 +868,7 @@ public:
      *
      * \param params The data to be used for this FH pattern table option.
      */
-    void fh_pattern_table(const fh_pattern_type &params);
+    void fh_pattern_table(const fh_pattern_type& params);
 
     /**
      * \brief Helper method to set the Power Constraint tagged option.
@@ -798,14 +882,14 @@ public:
      *
      * \param data The value of the Channel Switch option.
      */
-    void channel_switch(const channel_switch_type &data);
+    void channel_switch(const channel_switch_type& data);
 
     /**
      * \brief Helper method to set the Quiet tagged option.
      *
      * \param data The value of the quiet count field.
      */
-    void quiet(const quiet_type &data);
+    void quiet(const quiet_type& data);
 
     /**
      * \brief Helper method to set the TPC Report tagged option.
@@ -827,28 +911,28 @@ public:
      *
      * \param data The value to set in this bss load option.
      */
-    void bss_load(const bss_load_type &data);
+    void bss_load(const bss_load_type& data);
 
     /**
      * \brief Helper method to set the TIM tagged option.
      *
      * \brief data The value to set in this tim option.
      */
-    void tim(const tim_type &data);
+    void tim(const tim_type& data);
 
     /**
      * \brief Helper method to set the Challenge Text tagged option.
      *
      * \brief text The challenge text to be added.
      */
-    void challenge_text(const std::string &text);
+    void challenge_text(const std::string& text);
 
     /**
      * \brief Helper method to add a Vendor Specific tagged option.
      *
      * \brief text The option to be added.
      */
-    void vendor_specific(const vendor_specific_type &data);
+    void vendor_specific(const vendor_specific_type& data);
     
     // Option searching helpers
     
@@ -1123,7 +1207,9 @@ public:
      *
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -1135,15 +1221,15 @@ public:
     }
 protected:
     TINS_BEGIN_PACK
-    struct ExtendedHeader {
+    struct dot11_extended_header {
         uint8_t addr2[address_type::address_size];
         uint8_t addr3[address_type::address_size];
         uint16_t frag_seq;
     } TINS_END_PACK;
 
     
-    Dot11ManagementFrame(const address_type &dst_hw_addr = address_type(), 
-                        const address_type &src_hw_addr = address_type());
+    Dot11ManagementFrame(const address_type& dst_hw_addr = address_type(), 
+                         const address_type& src_hw_addr = address_type());
     
     /**
      * \brief Constructs a Dot11ManagementFrame object from a buffer 
@@ -1159,29 +1245,30 @@ protected:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11ManagementFrame(const uint8_t *buffer, uint32_t total_sz);
+    Dot11ManagementFrame(const uint8_t* buffer, uint32_t total_sz);
 
     void write_ext_header(Memory::OutputMemoryStream& stream);
 
     uint32_t management_frame_size() { 
-        return sizeof(ieee80211_header) + sizeof(_ext_header) + 
-                ((from_ds() && to_ds()) ? address_type::address_size : 0); 
+        return Dot11ManagementFrame::header_size();
     }
 private:
-    static uint8_t *serialize_rates(const rates_type &rates);
-    static rates_type deserialize_rates(const option *option);
+    static std::vector<uint8_t> serialize_rates(const rates_type& rates);
+    static rates_type deserialize_rates(const option* option);
     
     template<typename T>
     T search_and_convert(OptionTypes opt_type) const {
-        const option *opt = search_option(opt_type);
-        if(!opt)
+        const option* opt = search_option(opt_type);
+        if (!opt) {
             throw option_not_found();
+        }
         return opt->to<T>();
     }
 
-    ExtendedHeader _ext_header;
-    address_type _addr4;
+    dot11_extended_header ext_header_;
+    address_type addr4_;
 };
+
 } // namespace Tins
 
 #endif // TINS_DOT11_DOT11_MGMT_H

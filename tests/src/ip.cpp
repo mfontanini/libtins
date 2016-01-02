@@ -26,7 +26,7 @@ public:
     static const uint8_t expected_packet[], fragmented_packet[], 
         fragmented_ether_ip_packet[], tot_len_zero_packet[];
     
-    void test_equals(const IP &ip1, const IP &ip2);
+    void test_equals(const IP& ip1, const IP& ip2);
     void test_overwrite_source_address(IP& ip);
 };
 
@@ -475,7 +475,7 @@ TEST_F(IPTest, CopyAssignmentOperator) {
 }
 
 TEST_F(IPTest, NestedCopy) {
-    IP *nested = new IP(expected_packet, sizeof(expected_packet));
+    IP* nested = new IP(expected_packet, sizeof(expected_packet));
     IP ip1;
     ip1.inner_pdu(nested);
     IP ip2(ip1);
@@ -625,13 +625,13 @@ TEST_F(IPTest, AddOption) {
     const uint8_t data[] = { 0x15, 0x17, 0x94, 0x66, 0xff };
     IP::option_identifier id(IP::SEC, IP::CONTROL, 1);
     ip.add_option(IP::option(id, data, data + sizeof(data)));
-    const IP::option *opt = ip.search_option(id);
+    const IP::option* opt = ip.search_option(id);
     ASSERT_TRUE(opt != NULL);
     ASSERT_EQ(opt->data_size(), sizeof(data));
     EXPECT_TRUE(memcmp(opt->data_ptr(), data, sizeof(data)) == 0);
 }
 
-void IPTest::test_equals(const IP &ip1, const IP &ip2) {
+void IPTest::test_equals(const IP& ip1, const IP& ip2) {
     EXPECT_EQ(ip1.dst_addr(), ip2.dst_addr());
     EXPECT_EQ(ip1.src_addr(), ip2.src_addr());
     EXPECT_EQ(ip1.id(), ip2.id());

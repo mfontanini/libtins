@@ -57,8 +57,8 @@ public:
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11ProbeRequest(const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type());
+    Dot11ProbeRequest(const address_type& dst_hw_addr = address_type(), 
+                      const address_type& src_hw_addr = address_type());
 
     /**
      * \brief Constructs a Dot11ProbeRequest object from a buffer 
@@ -74,13 +74,15 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz);
+    Dot11ProbeRequest(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return PDU::DOT11_PROBE_REQ; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -122,8 +124,8 @@ public:
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11ProbeResponse(const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type());
+    Dot11ProbeResponse(const address_type& dst_hw_addr = address_type(), 
+                       const address_type& src_hw_addr = address_type());
 
     /**
      * \brief Constructs a Dot11ProbeResponse object from a buffer 
@@ -139,21 +141,25 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz);
+    Dot11ProbeResponse(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Getter for the timestamp field.
      *
      * \return The stored timestamp value.
      */
-    uint64_t timestamp() const { return Endian::le_to_host(_body.timestamp); }
+    uint64_t timestamp() const {
+        return Endian::le_to_host(body_.timestamp);
+    }
 
     /**
      * \brief Getter for the interval field.
      *
      * \return The stored interval value.
      */
-    uint16_t interval() const { return Endian::le_to_host(_body.interval); }
+    uint16_t interval() const {
+        return Endian::le_to_host(body_.interval);
+    }
 
     /**
      * \brief Getter for the Capabilities Information.
@@ -161,7 +167,9 @@ public:
      * \return A constant reference to the stored Capabilities 
      * Information field.
      */
-    const capability_information& capabilities() const { return _body.capability;}
+    const capability_information& capabilities() const {
+        return body_.capability;
+    }
 
     /**
      * \brief Getter for the Capabilities Information.
@@ -169,7 +177,9 @@ public:
      * \return A reference to the stored Capabilities Information 
      * field.
      */
-    capability_information& capabilities() { return _body.capability;}
+    capability_information& capabilities() {
+        return body_.capability;
+    }
 
     /**
      * \brief Setter for the timestamp field.
@@ -214,21 +224,21 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
+        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
-protected:
-
 private:
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+
     TINS_BEGIN_PACK
-    struct ProbeResp {
+    struct dot11_probe_response_header {
         uint64_t timestamp;
         uint16_t interval;
         capability_information capability;
     } TINS_END_PACK;
 
-    ProbeResp _body;
-
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    dot11_probe_response_header body_;
 };
+
 } // namespace Tins
+
 #endif // TINS_DOT11_DOT11_PROBE_H

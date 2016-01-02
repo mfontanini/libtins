@@ -36,6 +36,7 @@
 #include "small_uint.h"
 
 namespace Tins {
+
 /**
  * \class PPI
  * \brief Represents a Per-Packet Information PDU.
@@ -62,7 +63,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    PPI(const uint8_t *buffer, uint32_t total_sz);
+    PPI(const uint8_t* buffer, uint32_t total_sz);
 
     // Getters
 
@@ -71,7 +72,7 @@ public:
      *  \return The stored version field value.
      */
     uint8_t version() const {
-        return _header.version;
+        return header_.version;
     }
 
     /**
@@ -79,7 +80,7 @@ public:
      *  \return The stored flags field value.
      */
     uint8_t flags() const {
-        return _header.flags;
+        return header_.flags;
     }
 
     /**
@@ -87,7 +88,7 @@ public:
      *  \return The stored length field value.
      */
     uint16_t length() const {
-        return Endian::le_to_host(_header.length);
+        return Endian::le_to_host(header_.length);
     }
 
     /**
@@ -95,7 +96,7 @@ public:
      *  \return The stored Data Link Type field value.
      */
     uint32_t dlt() const {
-        return Endian::le_to_host(_header.dlt);
+        return Endian::le_to_host(header_.dlt);
     }
 
     /**
@@ -109,28 +110,30 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Clones this PDU.
      *
      * \sa PDU::clone
      */
-    PPI *clone() const {
+    PPI* clone() const {
         return new PPI(*this);
     }
 private:
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
     void parse_80211(const uint8_t* buffer, uint32_t total_sz);
 
-    struct header {
+    struct ppi_header {
         uint8_t version, flags;
         uint16_t length;
         uint32_t dlt;
     };
 
-    header _header;
-    byte_array _data;
+    ppi_header header_;
+    byte_array data_;
 };
 }
 

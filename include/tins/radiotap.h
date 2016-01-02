@@ -137,7 +137,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    RadioTap(const uint8_t *buffer, uint32_t total_sz);
+    RadioTap(const uint8_t* buffer, uint32_t total_sz);
     
     /* Setters */
     
@@ -145,7 +145,7 @@ public:
     /**
      * \sa PDU::send()
      */
-    void send(PacketSender &sender, const NetworkInterface &iface);
+    void send(PacketSender& sender, const NetworkInterface& iface);
     #endif
     
     /**
@@ -365,8 +365,8 @@ public:
      * if its corresponding bit flag is set in the present field.
      */
     PresentFlags present() const { 
-        //return (PresentFlags)*(uint32_t*)(&_radio.it_len + 1); 
-        return (PresentFlags)Endian::le_to_host(_radio.flags_32);
+        //return (PresentFlags)*(uint32_t*)(&radio_.it_len + 1); 
+        return (PresentFlags)Endian::le_to_host(radio_.flags_32);
     }
     
     /** \brief Check wether ptr points to a valid response for this PDU.
@@ -375,7 +375,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
     
     /**
      * \brief Returns the RadioTap frame's header length.
@@ -394,7 +394,7 @@ public:
     /**
      * \sa PDU::clone
      */
-    RadioTap *clone() const {
+    RadioTap* clone() const {
         return new RadioTap(*this);
     }
     
@@ -402,7 +402,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return PDU::RADIOTAP; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 private:
     TINS_BEGIN_PACK
     #if TINS_IS_LITTLE_ENDIAN
@@ -484,13 +486,13 @@ private:
     } TINS_END_PACK;
     
     void init();
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
     uint32_t find_extra_flag_fields_size(const uint8_t* buffer, uint32_t total_sz);
 
     template <size_t n>
     void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t& size) {
         uint32_t offset = ((buffer - buffer_start) % n);
-        if(offset) {
+        if (offset) {
             offset = n - offset;
             if (offset > size) {
                 throw malformed_packet();
@@ -501,13 +503,13 @@ private:
     }
     
     
-    radiotap_hdr _radio;
+    radiotap_hdr radio_;
     // present fields...
-    uint64_t _tsft;
-    uint16_t _channel_type, _channel_freq, _rx_flags, _signal_quality, _tx_flags;
-    mcs_type _mcs;
-    uint8_t _antenna, _flags, _rate, _channel, _max_power, _db_signal, _data_retries;
-    int8_t _dbm_signal, _dbm_noise;
+    uint64_t tsft_;
+    uint16_t channel_type_, channel_freq_, rx_flags_, signal_quality_, tx_flags_;
+    mcs_type mcs_;
+    uint8_t antenna_, flags_, rate_, channel_, max_power_, db_signal_, data_retries_;
+    int8_t dbm_signal_, dbm_noise_;
 };
 }
 

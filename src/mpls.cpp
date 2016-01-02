@@ -29,6 +29,8 @@
 
 #include "mpls.h"
 #include "ip.h"
+#include "ipv6.h"
+#include "rawpdu.h"
 #include "memory_helpers.h"
 #include "icmp_extension.h"
 
@@ -52,7 +54,16 @@ MPLS::MPLS(const uint8_t* buffer, uint32_t total_sz) {
     if (stream) {
         // If this is the last MPLS, then construct an IP
         if (bottom_of_stack()) {
-            inner_pdu(new Tins::IP(stream.pointer(), stream.size()));
+            uint8_t version = (*stream.pointer() >> 4) & 0x0f;
+            if (version == 4) {
+                inner_pdu(new Tins::IP(stream.pointer(), stream.size()));
+            }
+            else if (version == 6) {
+                inner_pdu(new Tins::IPv6(stream.pointer(), stream.size()));
+            }
+            else {
+                inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+            }
         }
         else {
             inner_pdu(new MPLS(stream.pointer(), stream.size()));
@@ -80,7 +91,7 @@ uint32_t MPLS::header_size() const {
     return sizeof(header_);
 }
 
-void MPLS::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void MPLS::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
     OutputMemoryStream stream(buffer, total_sz);
     // If we have a parent PDU, we might set the bottom-of-stack field
     if (parent) {

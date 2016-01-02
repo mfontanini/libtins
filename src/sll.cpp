@@ -39,13 +39,13 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
-SLL::SLL() : _header() {
+SLL::SLL() : header_() {
     
 }
     
-SLL::SLL(const uint8_t *buffer, uint32_t total_sz) {
+SLL::SLL(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_header);
+    stream.read(header_);
     if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
@@ -58,30 +58,30 @@ SLL::SLL(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 void SLL::packet_type(uint16_t new_packet_type) {
-    _header.packet_type = Endian::host_to_be(new_packet_type);
+    header_.packet_type = Endian::host_to_be(new_packet_type);
 }
 
 void SLL::lladdr_type(uint16_t new_lladdr_type) {
-    _header.lladdr_type = Endian::host_to_be(new_lladdr_type);
+    header_.lladdr_type = Endian::host_to_be(new_lladdr_type);
 }
 
 void SLL::lladdr_len(uint16_t new_lladdr_len) {
-    _header.lladdr_len = Endian::host_to_be(new_lladdr_len);
+    header_.lladdr_len = Endian::host_to_be(new_lladdr_len);
 }
 
-void SLL::address(const address_type &new_address) {
-    new_address.copy(_header.address);
+void SLL::address(const address_type& new_address) {
+    new_address.copy(header_.address);
 }
 
 void SLL::protocol(uint16_t new_protocol) {
-    _header.protocol = Endian::host_to_be(new_protocol);
+    header_.protocol = Endian::host_to_be(new_protocol);
 }
 
 uint32_t SLL::header_size() const {
-    return sizeof(_header);
+    return sizeof(header_);
 }
 
-void SLL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+void SLL::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
@@ -89,7 +89,7 @@ void SLL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
         );
         protocol(static_cast<uint16_t>(flag));
     }
-    stream.write(_header);
+    stream.write(header_);
 }
 
 } // Tins

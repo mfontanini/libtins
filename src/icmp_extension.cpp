@@ -60,7 +60,7 @@ ICMPExtension::ICMPExtension(uint8_t ext_class, uint8_t ext_type)
 ICMPExtension::ICMPExtension(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
 
-    uint16_t length = Endian::be_to_host(stream.read<uint16_t>());
+    uint16_t length = stream.read_be<uint16_t>();
     extension_class_ = stream.read<uint8_t>();
     extension_type_ = stream.read<uint8_t>();
     // Length is BASE_HEADER_SIZE + payload size, make sure it's valid
@@ -68,7 +68,7 @@ ICMPExtension::ICMPExtension(const uint8_t* buffer, uint32_t total_sz) {
         throw malformed_packet();
     }
     length -= BASE_HEADER_SIZE;
-    payload_.assign(stream.pointer(), stream.pointer() + length);
+    stream.read(payload_, length);
 }
 
 void ICMPExtension::extension_class(uint8_t value) {
@@ -89,7 +89,7 @@ uint32_t ICMPExtension::size() const {
 
 void ICMPExtension::serialize(uint8_t* buffer, uint32_t buffer_size) const {
     OutputMemoryStream stream(buffer, buffer_size);
-    stream.write(Endian::host_to_be<uint16_t>(size()));
+    stream.write_be<uint16_t>(size());
     stream.write(extension_class_);
     stream.write(extension_type_);
     stream.write(payload_.begin(), payload_.end());
@@ -118,7 +118,7 @@ ICMPExtensionsStructure::ICMPExtensionsStructure(const uint8_t* buffer, uint32_t
     checksum_ = stream.read<uint16_t>();
     while (stream) {
         extensions_.push_back(ICMPExtension(stream.pointer(), stream.size()));
-        uint16_t size = Endian::be_to_host(stream.read<uint16_t>());
+        uint16_t size = stream.read_be<uint16_t>();
         stream.skip(size - sizeof(uint16_t));
     }
 }

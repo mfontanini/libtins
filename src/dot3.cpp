@@ -46,6 +46,9 @@
 #include "exceptions.h"
 #include "memory_helpers.h"
 
+using std::copy;
+using std::equal;
+
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
 
@@ -53,44 +56,41 @@ namespace Tins {
 
 const Dot3::address_type Dot3::BROADCAST("ff:ff:ff:ff:ff:ff");
 
-Dot3::Dot3(const address_type &dst_hw_addr, const address_type &src_hw_addr)
-{
-    memset(&_eth, 0, sizeof(ethhdr));
+Dot3::Dot3(const address_type& dst_hw_addr, const address_type& src_hw_addr)
+: header_() {
     this->dst_addr(dst_hw_addr);
     this->src_addr(src_hw_addr);
-    this->_eth.length = 0;
-
 }
 
-Dot3::Dot3(const uint8_t *buffer, uint32_t total_sz) 
-{
+Dot3::Dot3(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_eth);
+    stream.read(header_);
     if (stream) {
         inner_pdu(new Tins::LLC(stream.pointer(), stream.size()));
     }
 }
 
-void Dot3::dst_addr(const address_type &new_dst_mac) {
-    std::copy(new_dst_mac.begin(), new_dst_mac.end(), _eth.dst_mac);
+void Dot3::dst_addr(const address_type& address) {
+    copy(address.begin(), address.end(), header_.dst_mac);
 }
 
-void Dot3::src_addr(const address_type &new_src_mac) {
-    std::copy(new_src_mac.begin(), new_src_mac.end(), _eth.src_mac);
+void Dot3::src_addr(const address_type& address) {
+    copy(address.begin(), address.end(), header_.src_mac);
 }
 
-void Dot3::length(uint16_t new_length) {
-    this->_eth.length = Endian::host_to_be(new_length);
+void Dot3::length(uint16_t value) {
+    header_.length = Endian::host_to_be(value);
 }
 
 uint32_t Dot3::header_size() const {
-    return sizeof(ethhdr);
+    return sizeof(header_);
 }
 
 #if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
-void Dot3::send(PacketSender &sender, const NetworkInterface &iface) {
-    if(!iface)
+void Dot3::send(PacketSender& sender, const NetworkInterface& iface) {
+    if (!iface) {
         throw invalid_interface();
+    }
         
     #if defined(BSD) || defined(__FreeBSD_kernel__) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
         sender.send_l2(*this, 0, 0, iface);
@@ -103,39 +103,41 @@ void Dot3::send(PacketSender &sender, const NetworkInterface &iface) {
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
         addr.sll_halen = address_type::address_size;
         addr.sll_ifindex = iface.id();
-        memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
+        memcpy(&(addr.sll_addr), header_.dst_mac, sizeof(header_.dst_mac));
 
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #endif
 }
 #endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
-bool Dot3::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
-    if(total_sz < sizeof(ethhdr))
+bool Dot3::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
+    if (total_sz < sizeof(header_)) {
         return false;
+    }
     const size_t addr_sz = address_type::address_size;
-    const ethhdr *eth_ptr = (const ethhdr*)ptr;
-    if(std::equal(_eth.src_mac, _eth.src_mac + addr_sz, eth_ptr->dst_mac)) {
-        if(std::equal(_eth.src_mac, _eth.src_mac + addr_sz, eth_ptr->dst_mac) || dst_addr() == BROADCAST)
-        {
-            ptr += sizeof(ethhdr);
-            total_sz -= sizeof(ethhdr);
+    const dot3_header* eth_ptr = (const dot3_header*)ptr;
+    if (equal(header_.src_mac, header_.src_mac + addr_sz, eth_ptr->dst_mac)) {
+        if (equal(header_.src_mac, header_.src_mac + addr_sz, eth_ptr->dst_mac) || 
+           dst_addr() == BROADCAST) {
+            ptr += sizeof(dot3_header);
+            total_sz -= sizeof(dot3_header);
             return inner_pdu() ? inner_pdu()->matches_response(ptr, total_sz) : true;
         }
     }
     return false;
 }
 
-void Dot3::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void Dot3::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
     OutputMemoryStream stream(buffer, total_sz);
-    _eth.length = Endian::host_to_be<uint16_t>(size() - sizeof(_eth));
-    stream.write(_eth);
+    header_.length = Endian::host_to_be<uint16_t>(size() - sizeof(header_));
+    stream.write(header_);
 }
 
 #ifndef _WIN32
-PDU *Dot3::recv_response(PacketSender &sender, const NetworkInterface &iface) {
-    if(!iface)
+PDU* Dot3::recv_response(PacketSender& sender, const NetworkInterface& iface) {
+    if (!iface) {
         throw invalid_interface();
+    }
     #if !defined(BSD) && !defined(__FreeBSD_kernel__)
         struct sockaddr_ll addr;
         memset(&addr, 0, sizeof(struct sockaddr_ll));
@@ -144,12 +146,14 @@ PDU *Dot3::recv_response(PacketSender &sender, const NetworkInterface &iface) {
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_802_3);
         addr.sll_halen = address_type::address_size;
         addr.sll_ifindex = iface.id();
-        memcpy(&(addr.sll_addr), _eth.dst_mac, sizeof(_eth.dst_mac));
+        memcpy(&(addr.sll_addr), header_.dst_mac, sizeof(header_.dst_mac));
 
         return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #else
         return sender.recv_l2(*this, 0, 0, iface);
     #endif
 }
+
 #endif // _WIN32
-}
+
+} // Tins

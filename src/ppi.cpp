@@ -45,17 +45,16 @@ using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 
-PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
+PPI::PPI(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_header);
-    if (length() > total_sz || length() < sizeof(_header)) {
+    stream.read(header_);
+    if (length() > total_sz || length() < sizeof(header_)) {
         throw malformed_packet();
     }
     // There are some options
-    const size_t options_length = length() - sizeof(_header);
+    const size_t options_length = length() - sizeof(header_);
     if (options_length > 0) {
-        _data.assign(stream.pointer(), stream.pointer() + options_length);
-        stream.skip(options_length);
+        stream.read(data_, options_length);
     }
     if (stream) {
         switch (dlt()) {
@@ -67,10 +66,12 @@ PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
                 #endif
                 break;
             case DLT_EN10MB:
-                if(Internals::is_dot3(stream.pointer(), stream.size()))
+                if (Internals::is_dot3(stream.pointer(), stream.size())) {
                     inner_pdu(new Dot3(stream.pointer(), stream.size()));
-                else
+                }
+                else {
                     inner_pdu(new EthernetII(stream.pointer(), stream.size()));
+                }
                 break;
             case DLT_IEEE802_11_RADIO:
                 #ifdef HAVE_DOT11
@@ -90,18 +91,18 @@ PPI::PPI(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 uint32_t PPI::header_size() const {
-    return static_cast<uint32_t>(sizeof(_header) + _data.size());
+    return static_cast<uint32_t>(sizeof(header_) + data_.size());
 }
 
-void PPI::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    throw std::runtime_error("PPI serialization not supported");
+void PPI::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+    throw pdu_not_serializable();
 }
 
 void PPI::parse_80211(const uint8_t* buffer, uint32_t total_sz) {
     #ifdef HAVE_DOT11
-    if (_data.size() >= 13) {
+    if (data_.size() >= 13) {
         // Is FCS-at-end on?
-        if ((_data[12] & 1) == 1) {
+        if ((data_[12] & 1) == 1) {
             // We need to reduce the total size since we're skipping the FCS
             if (total_sz < sizeof(uint32_t)) {
                 throw malformed_packet();

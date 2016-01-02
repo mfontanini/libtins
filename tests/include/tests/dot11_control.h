@@ -12,12 +12,12 @@ inline void test_equals(const Dot11ControlTA& b1, const Dot11ControlTA& b2) {
 }
 
 
-inline void test_equals_expected(const Dot11ControlTA &dot11) {
+inline void test_equals_expected(const Dot11ControlTA& dot11) {
     EXPECT_EQ(dot11.target_addr(), "01:02:03:04:05:06");
     EXPECT_EQ(dot11.addr1(), "00:01:02:03:04:05");
 }
 
-inline void test_equals_empty(const Dot11ControlTA &dot11) {
+inline void test_equals_empty(const Dot11ControlTA& dot11) {
     Dot11::address_type empty_addr;
     
     EXPECT_EQ(dot11.target_addr(), empty_addr);

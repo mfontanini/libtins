@@ -20,7 +20,7 @@ public:
     static address_type empty_addr;
     static const uint16_t p_type;
 
-    void test_equals(const EthernetII &eth1, const EthernetII &eth2);
+    void test_equals(const EthernetII& eth1, const EthernetII& eth2);
 };
 
 const uint8_t EthernetIITest::expected_packet[] = {
@@ -53,7 +53,7 @@ address_type EthernetIITest::empty_addr;
 
 const uint16_t EthernetIITest::p_type = 0xd0ab;
 
-void EthernetIITest::test_equals(const EthernetII &eth1, const EthernetII &eth2) {
+void EthernetIITest::test_equals(const EthernetII& eth1, const EthernetII& eth2) {
     EXPECT_EQ(eth1.dst_addr(), eth2.dst_addr());
     EXPECT_EQ(eth1.src_addr(), eth2.src_addr());
     EXPECT_EQ(eth1.payload_type(), eth2.payload_type());
@@ -83,7 +83,7 @@ TEST_F(EthernetIITest, CopyAssignmentOperator) {
 }
 
 TEST_F(EthernetIITest, NestedCopy) {
-    EthernetII *nested = new EthernetII(expected_packet, sizeof(expected_packet));
+    EthernetII* nested = new EthernetII(expected_packet, sizeof(expected_packet));
     EthernetII eth1(expected_packet, sizeof(expected_packet));
     eth1.inner_pdu(nested);
     EthernetII eth2(eth1);

@@ -38,168 +38,174 @@
 
 namespace Tins {
 
-    /** 
-     * \class PDU
-     * \brief Represents a PDU which holds raw data.
-     *
-     * This class is a wrapper over a byte array. It can be used to hold
-     * the payload sent over transport layer protocols (such as TCP or UDP).
-     *
-     * While sniffing, this class is the one that will hold transport layer
-     * protocols' payload. You can simply convert a RawPDU into a specific
-     * application layer protocol using the RawPDU::to method:
-     *
-     * \code
-     * // Get a RawPDU from somewhere
-     * RawPDU raw = get_raw_pdu();
-     *
-     * // Parse it as a DHCP PDU.
-     * DHCP dhcp = raw.to<DHCP>();
-     *
-     * // Or parse it as DNS. Of course this will fail if the contents
-     * // don't look like DNS
-     * DNS dns = raw.to<DNS>();
-     * \endcode
+/** 
+ * \class PDU
+ * \brief Represents a PDU which holds raw data.
+ *
+ * This class is a wrapper over a byte array. It can be used to hold
+ * the payload sent over transport layer protocols (such as TCP or UDP).
+ *
+ * While sniffing, this class is the one that will hold transport layer
+ * protocols' payload. You can simply convert a RawPDU into a specific
+ * application layer protocol using the RawPDU::to method:
+ *
+ * \code
+ * // Get a RawPDU from somewhere
+ * RawPDU raw = get_raw_pdu();
+ *
+ * // Parse it as a DHCP PDU.
+ * DHCP dhcp = raw.to<DHCP>();
+ *
+ * // Or parse it as DNS. Of course this will fail if the contents
+ * // don't look like DNS
+ * DNS dns = raw.to<DNS>();
+ * \endcode
+ */
+class TINS_API RawPDU : public PDU {
+public:
+    /**
+     * The type used to store the payload.
      */
-    class TINS_API RawPDU : public PDU {
-    public:
-        /**
-         * The type used to store the payload.
-         */
-        typedef std::vector<uint8_t> payload_type;
-        
-        /**
-         * This PDU's flag.
-         */
-        static const PDU::PDUType pdu_flag = PDU::RAW;
+    typedef std::vector<uint8_t> payload_type;
     
-        /** 
-         * \brief Creates an instance of RawPDU.
-         *
-         * The payload is copied, therefore the original payload's memory
-         * must be freed by the user.
-         * \param pload The payload which the RawPDU will contain.
-         * \param size The size of the payload.
-         */
-        RawPDU(const uint8_t *pload, uint32_t size);
-        
-        /**
-         * \brief Constructs a RawPDU from an iterator range.
-         *
-         * The data in the iterator range is copied into the RawPDU
-         * internal buffer.
-         *
-         * \param start The beginning of the iterator range.
-         * \param end The end of the iterator range.
-         */
-        template<typename ForwardIterator>
-        RawPDU(ForwardIterator start, ForwardIterator end) 
-        : _payload(start, end) { }
+    /**
+     * This PDU's flag.
+     */
+    static const PDU::PDUType pdu_flag = PDU::RAW;
 
-        #if TINS_IS_CXX11
-            /** 
-             * \brief Creates an instance of RawPDU from a payload_type.
-             *
-             * The payload is moved into the RawPDU's internal buffer.
-             * 
-             * \param data The payload to use.
-             */
-            RawPDU(payload_type&& data)
-            : _payload(move(data)) { }
-        #endif // TINS_IS_CXX11
+    /** 
+     * \brief Creates an instance of RawPDU.
+     *
+     * The payload is copied, therefore the original payload's memory
+     * must be freed by the user.
+     * \param pload The payload which the RawPDU will contain.
+     * \param size The size of the payload.
+     */
+    RawPDU(const uint8_t* pload, uint32_t size);
+    
+    /**
+     * \brief Constructs a RawPDU from an iterator range.
+     *
+     * The data in the iterator range is copied into the RawPDU
+     * internal buffer.
+     *
+     * \param start The beginning of the iterator range.
+     * \param end The end of the iterator range.
+     */
+    template<typename ForwardIterator>
+    RawPDU(ForwardIterator start, ForwardIterator end) 
+    : payload_(start, end) { }
 
+    #if TINS_IS_CXX11
         /** 
-         * \brief Creates an instance of RawPDU from an input string.
+         * \brief Creates an instance of RawPDU from a payload_type.
+         *
+         * The payload is moved into the RawPDU's internal buffer.
          * 
-         * \param data The content of the payload.
+         * \param data The payload to use.
          */
-        RawPDU(const std::string &data);
+        RawPDU(payload_type&& data)
+        : payload_(move(data)) { }
+    #endif // TINS_IS_CXX11
 
-        /**
-         * \brief Setter for the payload field
-         * \param pload The payload to be set.
-         */
-        void payload(const payload_type &pload);
+    /** 
+     * \brief Creates an instance of RawPDU from an input string.
+     * 
+     * \param data The content of the payload.
+     */
+    RawPDU(const std::string& data);
 
-        /**
-         * \brief Setter for the payload field
-         * \param start The start of the new payload.
-         * \param end The end of the new payload.
-         */
-        template<typename ForwardIterator>
-        void payload(ForwardIterator start, ForwardIterator end) {
-            _payload.assign(start, end);
-        }
+    /**
+     * \brief Setter for the payload field
+     * \param pload The payload to be set.
+     */
+    void payload(const payload_type& pload);
 
-        /** 
-         * \brief Const getter for the payload.
-         * \return The RawPDU's payload.
-         */
-        const payload_type &payload() const { return _payload; }
-        
-        /** 
-         * \brief Non-const getter for the payload.
-         * \return The RawPDU's payload.
-         */
-        payload_type &payload() { return _payload; }
-        
-        /** 
-         * \brief Returns the header size.
-         * 
-         * This returns the same as RawPDU::payload_size().
-         *
-         * This metod overrides PDU::header_size. \sa PDU::header_size
-         */
-        uint32_t header_size() const;
-        
-        /** 
-         * \brief Returns the payload size.
-         *
-         * \return uint32_t containing the payload size.
-         */
-        uint32_t payload_size() const {
-            return static_cast<uint32_t>(_payload.size());
-        }
+    /**
+     * \brief Setter for the payload field
+     * \param start The start of the new payload.
+     * \param end The end of the new payload.
+     */
+    template<typename ForwardIterator>
+    void payload(ForwardIterator start, ForwardIterator end) {
+        payload_.assign(start, end);
+    }
 
-        /**
-         * \brief Check wether ptr points to a valid response for this PDU.
-         *
-         * This always returns true, since we don't know what this 
-         * RawPDU is holding.
-         * 
-         * \sa PDU::matches_response
-         * \param ptr The pointer to the buffer.
-         * \param total_sz The size of the buffer.
-         */
-        bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
+    /** 
+     * \brief Const getter for the payload.
+     * \return The RawPDU's payload.
+     */
+    const payload_type& payload() const {
+        return payload_;
+    }
+    
+    /** 
+     * \brief Non-const getter for the payload.
+     * \return The RawPDU's payload.
+     */
+    payload_type& payload() {
+        return payload_;
+    }
+    
+    /** 
+     * \brief Returns the header size.
+     * 
+     * This returns the same as RawPDU::payload_size().
+     *
+     * This metod overrides PDU::header_size. \sa PDU::header_size
+     */
+    uint32_t header_size() const;
+    
+    /** 
+     * \brief Returns the payload size.
+     *
+     * \return uint32_t containing the payload size.
+     */
+    uint32_t payload_size() const {
+        return static_cast<uint32_t>(payload_.size());
+    }
 
-        /**
-         * \brief Getter for the PDU's type.
-         * \sa PDU::pdu_type
-         */
-        PDUType pdu_type() const { return PDU::RAW; }
-        
-        /**
-         * \brief Constructs the given PDU type from the raw data stored
-         * in this RawPDU.
-         */
-        template<typename T>
-        T to() const {
-            return T(&_payload[0], static_cast<uint32_t>(_payload.size()));
-        }
-        
-        /**
-         * \sa PDU::clone
-         */
-        RawPDU *clone() const {
-            return new RawPDU(*this);
-        }
-    private:
-        void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    /**
+     * \brief Check wether ptr points to a valid response for this PDU.
+     *
+     * This always returns true, since we don't know what this 
+     * RawPDU is holding.
+     * 
+     * \sa PDU::matches_response
+     * \param ptr The pointer to the buffer.
+     * \param total_sz The size of the buffer.
+     */
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
 
-        payload_type _payload;
-    };
-}
+    /**
+     * \brief Getter for the PDU's type.
+     * \sa PDU::pdu_type
+     */
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
+    
+    /**
+     * \brief Constructs the given PDU type from the raw data stored
+     * in this RawPDU.
+     */
+    template<typename T>
+    T to() const {
+        return T(&payload_[0], static_cast<uint32_t>(payload_.size()));
+    }
+    
+    /**
+     * \sa PDU::clone
+     */
+    RawPDU* clone() const {
+        return new RawPDU(*this);
+    }
+private:
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
 
+    payload_type payload_;
+};
+
+} // Tins
 
 #endif // TINS_RAWPDU_H

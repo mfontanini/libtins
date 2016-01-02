@@ -104,21 +104,27 @@ public:
      *
      * \return The extension class field value
      */
-    uint8_t extension_class() const { return extension_class_; }
+    uint8_t extension_class() const {
+        return extension_class_;
+    }
 
     /**
      * \brief Getter for the extension sub-type field
      *
      * \return The extension sub-type field value
      */
-    uint8_t extension_type() const { return extension_type_; }
+    uint8_t extension_type() const {
+        return extension_type_;
+    }
 
     /**
      * \brief Getter for the extension payload field
      *
      * \return The extension payload field value
      */
-    const payload_type& payload() const { return payload_; }
+    const payload_type& payload() const {
+        return payload_;
+    }
 
     /**
      * \brief Gets the size of this ICMP extension
@@ -206,9 +212,9 @@ public:
      *
      * \return The version field value
      */
-    small_uint<4> version() const { 
+    small_uint<4> version() const {
         uint16_t value = Endian::be_to_host(version_and_reserved_);
-        return (value >> 12) & 0xf; 
+        return (value >> 12) & 0xf;
     }
 
     /**
@@ -216,7 +222,7 @@ public:
      *
      * \return The reserved field value
      */
-    small_uint<12> reserved() const { 
+    small_uint<12> reserved() const {
         uint16_t value = Endian::be_to_host(version_and_reserved_);
         return value & 0xfff;
     }
@@ -226,14 +232,18 @@ public:
      *
      * \return The checksum field value
      */
-    uint16_t checksum() const { return Endian::be_to_host(checksum_); }
+    uint16_t checksum() const {
+        return Endian::be_to_host(checksum_);
+    }
 
     /**
      * \brief Getter for the extensions stored by this structure
      *
      * \return The extensions stored in this structure
      */
-    const extensions_type& extensions() const { return extensions_; }
+    const extensions_type& extensions() const {
+        return extensions_;
+    }
 
     /**
      * \brief Adds an extension to this structure

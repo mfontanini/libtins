@@ -18,7 +18,7 @@ inline void test_equals(const Dot11ManagementFrame& b1, const Dot11ManagementFra
     test_equals(static_cast<const Dot11&>(b1), static_cast<const Dot11&>(b2));
 }
 
-inline void test_equals_expected(const Dot11ManagementFrame &dot11) {
+inline void test_equals_expected(const Dot11ManagementFrame& dot11) {
     EXPECT_EQ(dot11.protocol(), 1);
     EXPECT_EQ(dot11.type(), Dot11::MANAGEMENT);
     EXPECT_EQ(dot11.to_ds(), 1);
@@ -34,7 +34,7 @@ inline void test_equals_expected(const Dot11ManagementFrame &dot11) {
     EXPECT_EQ(dot11.addr3(), "02:03:04:05:06:07");
 }
 
-inline void test_equals_empty(const Dot11ManagementFrame &dot11) {
+inline void test_equals_empty(const Dot11ManagementFrame& dot11) {
     Dot11::address_type empty_addr;
     
     EXPECT_EQ(dot11.type(), Dot11::MANAGEMENT);
@@ -48,7 +48,7 @@ inline void test_equals_empty(const Dot11ManagementFrame &dot11) {
 }
 
 
-inline void test_equals(const capability_information &info1, const capability_information &info2) {
+inline void test_equals(const capability_information& info1, const capability_information& info2) {
      EXPECT_EQ(info1.ess(), info2.ess());
      EXPECT_EQ(info1.ibss(), info2.ibss());
      EXPECT_EQ(info1.cf_poll(), info2.cf_poll());
@@ -67,7 +67,7 @@ inline void test_equals(const capability_information &info1, const capability_in
      EXPECT_EQ(info1.immediate_block_ack(), info2.immediate_block_ack());
 }
 
-inline void test_equals_empty(const capability_information &info) {
+inline void test_equals_empty(const capability_information& info) {
     EXPECT_EQ(info.ess(), false);
     EXPECT_EQ(info.ibss(), false);
     EXPECT_EQ(info.cf_poll(), false);

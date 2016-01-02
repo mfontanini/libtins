@@ -31,28 +31,31 @@
 #include <iostream>
 #include <tins/network_interface.h>
 
+using std::cout;
+using std::endl;
+using std::string;
+
 using namespace Tins;
-using namespace std;
 
 int main() {
-	// Get all interfaces and iterate over them.
-	for (const NetworkInterface& iface : NetworkInterface::all()) {
-		// Get the name of this interface
-		string name = iface.name();
+    // Get all interfaces and iterate over them.
+    for (const NetworkInterface& iface : NetworkInterface::all()) {
+        // Get the name of this interface
+        string name = iface.name();
 
-		// "stringify" the status of the interface
-		string status = iface.is_up() ? "up" : "down";
-		
-		// Get this interface's information (addresses).
-		NetworkInterface::Info info = iface.info();
-		
-		// Now print all of this info.
-		cout << name << ": " << endl;
-		cout << "   HW address:  " << info.hw_addr << endl
-			 << "   IP address:  " << info.ip_addr << endl
-			 << "   Netmask:     " << info.netmask << endl
-			 << "   Broadcast:   " << info.bcast_addr << endl 
-			 << "   Iface index: " << iface.id() << endl
-			 << "   Status:      " << "interface " << status << endl << endl;
-	}
+        // "stringify" the status of the interface
+        string status = iface.is_up() ? "up" : "down";
+        
+        // Get this interface's information (addresses).
+        NetworkInterface::Info info = iface.info();
+        
+        // Now print all of this info.
+        cout << name << ": " << endl;
+        cout << "   HW address:  " << info.hw_addr << endl
+             << "   IP address:  " << info.ip_addr << endl
+             << "   Netmask:     " << info.netmask << endl
+             << "   Broadcast:   " << info.bcast_addr << endl 
+             << "   Iface index: " << iface.id() << endl
+             << "   Status:      " << "interface " << status << endl << endl;
+    }
 }

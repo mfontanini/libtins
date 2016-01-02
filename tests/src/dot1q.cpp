@@ -13,7 +13,7 @@ class Dot1QTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
     
-    void test_equals(const Dot1Q &pdu1, const Dot1Q &pdu2);
+    void test_equals(const Dot1Q& pdu1, const Dot1Q& pdu2);
 };
 
 const uint8_t Dot1QTest::expected_packet[] = { 
@@ -34,14 +34,14 @@ TEST_F(Dot1QTest, DefaultConstructor) {
 
 TEST_F(Dot1QTest, ConstructorFromBuffer) {
     EthernetII eth(expected_packet, sizeof(expected_packet));
-    const Dot1Q *dot1 = eth.find_pdu<Dot1Q>();
+    const Dot1Q* dot1 = eth.find_pdu<Dot1Q>();
     ASSERT_TRUE(dot1 != NULL);
     EXPECT_EQ(0x806, dot1->payload_type());
     EXPECT_EQ(5, dot1->priority());
     EXPECT_EQ(1, dot1->cfi());
     EXPECT_EQ(123, dot1->id());
     
-    const ARP *arp = dot1->find_pdu<ARP>();
+    const ARP* arp = dot1->find_pdu<ARP>();
     ASSERT_TRUE(arp != NULL);
     // just to check it the offset's OK
     EXPECT_EQ(ARP::hwaddress_type("00:19:06:ea:b8:c1"), arp->sender_hw_addr());

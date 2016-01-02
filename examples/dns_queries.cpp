@@ -30,10 +30,12 @@
 #include <tins/tins.h>
 #include <iostream>
 
+using std::cout;
+using std::endl;
+
 using namespace Tins;
 
-bool callback(const PDU &pdu) 
-{
+bool callback(const PDU& pdu) {
     // The packet probably looks like this:
     //
     // EthernetII / IP / UDP / RawPDU
@@ -43,15 +45,15 @@ bool callback(const PDU &pdu)
     DNS dns = pdu.rfind_pdu<RawPDU>().to<DNS>();
     
     // Retrieve the queries and print the domain name:
-    for(const auto &query : dns.queries()) 
-        std::cout << query.dname() << std::endl;
+    for (const auto& query : dns.queries()) {
+        cout << query.dname() << std::endl;
+    }
     return true;
 }
 
-int main(int argc, char *argv[]) 
-{
+int main(int argc, char* argv[]) {
     if(argc != 2) {
-        std::cout << "Usage: " << *argv << " <interface>" << std::endl;
+        cout << "Usage: " <<* argv << " <interface>" << endl;
         return 1;
     }
     // Sniff on the provided interface in promiscuos mode

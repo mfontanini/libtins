@@ -23,7 +23,7 @@ const uint8_t Dot11DisassocTest::expected_packet[] = {
     7, 0, 0, 18, 35
 };
 
-void test_equals(const Dot11Disassoc &dot1, const Dot11Disassoc &dot2) {
+void test_equals(const Dot11Disassoc& dot1, const Dot11Disassoc& dot2) {
     EXPECT_EQ(dot1.reason_code(), dot2.reason_code());
     test_equals(
         static_cast<const Dot11ManagementFrame&>(dot1),
@@ -31,7 +31,7 @@ void test_equals(const Dot11Disassoc &dot1, const Dot11Disassoc &dot2) {
     );
 }
 
-void test_equals_expected(const Dot11Disassoc &dot11) {
+void test_equals_expected(const Dot11Disassoc& dot11) {
     test_equals_expected(static_cast<const Dot11ManagementFrame&>(dot11));
     EXPECT_EQ(dot11.reason_code(), 0x2312);
     EXPECT_EQ(dot11.subtype(), Dot11::DISASSOC);
@@ -77,7 +77,7 @@ TEST_F(Dot11DisassocTest, ClonePDU) {
 TEST_F(Dot11DisassocTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11Disassoc *inner = dot11->find_pdu<Dot11Disassoc>();
+    const Dot11Disassoc* inner = dot11->find_pdu<Dot11Disassoc>();
     ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }

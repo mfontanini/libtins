@@ -12,11 +12,11 @@ using namespace Tins;
 class HWAddressTest : public testing::Test {
 public:
     static const std::string address;
-    static const uint8_t *byte_address, *empty_addr;
+    static const uint8_t* byte_address, *empty_addr;
 };
 
 const std::string HWAddressTest::address = "00:de:ad:be:ef:00";
-const uint8_t *HWAddressTest::byte_address = (const uint8_t*)"\x00\xde\xad\xbe\xef\x00",
+const uint8_t* HWAddressTest::byte_address = (const uint8_t*)"\x00\xde\xad\xbe\xef\x00",
               *HWAddressTest::empty_addr = (const uint8_t*)"\x00\x00\x00\x00\x00\x00";
 
 

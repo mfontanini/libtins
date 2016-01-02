@@ -58,18 +58,16 @@ using Tins::Memory::OutputMemoryStream;
 namespace Tins {
 
 Loopback::Loopback()
-: _family()
-{
+: family_() {
     
 }
 
-Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz) 
-{
+Loopback::Loopback(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    _family = stream.read<uint32_t>();
+    family_ = stream.read<uint32_t>();
     #ifndef _WIN32
     if (total_sz) {
-        switch (_family) {
+        switch (family_) {
             case PF_INET:
                 inner_pdu(new Tins::IP(stream.pointer(), stream.size()));
                 break;
@@ -85,44 +83,46 @@ Loopback::Loopback(const uint8_t *buffer, uint32_t total_sz)
 }
     
 void Loopback::family(uint32_t family_id) {
-    _family = family_id;
+    family_ = family_id;
 }
 
 uint32_t Loopback::header_size() const {
-    return sizeof(_family);
+    return sizeof(family_);
 }
 
-void Loopback::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+void Loopback::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
     OutputMemoryStream stream(buffer, total_sz);
     #ifndef _WIN32
     if (tins_cast<const Tins::IP*>(inner_pdu())) {
-        _family = PF_INET;
+        family_ = PF_INET;
     }
     else if (tins_cast<const Tins::LLC*>(inner_pdu())) {
-        _family = PF_LLC;
+        family_ = PF_LLC;
     }
-    stream.write(_family);
+    stream.write(family_);
     #endif // _WIN32
 }
 
-bool Loopback::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
-    if(total_sz < sizeof(_family)) {
+bool Loopback::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
+    if (total_sz < sizeof(family_)) {
         return false;
     }
     // If there's an inner_pdu, check if the inner pdu matches.
     // Otherwise, just check this loopback family.
     
     return inner_pdu() ? 
-        inner_pdu()->matches_response(ptr + sizeof(_family), total_sz - sizeof(_family)) :
-        (_family == *reinterpret_cast<const uint32_t*>(ptr));
+           inner_pdu()->matches_response(ptr + sizeof(family_), total_sz - sizeof(family_)) :
+           (family_ == *reinterpret_cast<const uint32_t*>(ptr));
 }
 
 #ifdef BSD
-void Loopback::send(PacketSender &sender, const NetworkInterface &iface) {
-    if(!iface)
+void Loopback::send(PacketSender& sender, const NetworkInterface& iface) {
+    if (!iface) {
         throw invalid_interface();
+    }
     
     sender.send_l2(*this, 0, 0, iface);
 }
 #endif // _WIN32
-}
+
+} // Tins

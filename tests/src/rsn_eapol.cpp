@@ -17,7 +17,7 @@ public:
     static const uint8_t eapol_over_snap[];
     static const uint8_t broken_eapol[];
     
-    void test_equals(const RSNEAPOL &eapol1, const RSNEAPOL &eapol2);
+    void test_equals(const RSNEAPOL& eapol1, const RSNEAPOL& eapol2);
 };
 
 uint8_t empty_iv[RSNEAPOL::key_iv_size] = { 0 };
@@ -79,7 +79,7 @@ const uint8_t RSNEAPOLTest::broken_eapol[] = {
     179, 86
 };
 
-void RSNEAPOLTest::test_equals(const RSNEAPOL &eapol1, const RSNEAPOL &eapol2) {
+void RSNEAPOLTest::test_equals(const RSNEAPOL& eapol1, const RSNEAPOL& eapol2) {
     EXPECT_EQ(eapol1.version(), eapol2.version());
     EXPECT_EQ(eapol1.packet_type(), eapol2.packet_type());
     EXPECT_EQ(eapol1.type(), eapol2.type());

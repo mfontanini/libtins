@@ -34,20 +34,24 @@
 #include "packet_writer.h"
 #include "packet.h"
 #include "pdu.h"
+#include "exceptions.h"
+
+using std::string;
 
 namespace Tins {
-PacketWriter::PacketWriter(const std::string &file_name, LinkType lt) {
+
+PacketWriter::PacketWriter(const string& file_name, LinkType lt) {
     init(file_name, lt);
 }
 
 PacketWriter::~PacketWriter() {
-    if(dumper && handle) {
-        pcap_dump_close(dumper);
-        pcap_close(handle);
+    if (dumper_ && handle_) {
+        pcap_dump_close(dumper_);
+        pcap_close(handle_);
     }
 }
 
-void PacketWriter::write(PDU &pdu) {
+void PacketWriter::write(PDU& pdu) {
     timeval tv;
     #ifndef _WIN32
         gettimeofday(&tv, 0);
@@ -58,7 +62,7 @@ void PacketWriter::write(PDU &pdu) {
     write(pdu, tv);
 }
 
-void PacketWriter::write(Packet &packet) {
+void PacketWriter::write(Packet& packet) {
     timeval tv;
     tv.tv_sec = packet.timestamp().seconds();
     tv.tv_usec = packet.timestamp().microseconds();
@@ -72,19 +76,19 @@ void PacketWriter::write(PDU& pdu, const struct timeval& tv) {
         static_cast<bpf_u_int32>(buffer.size()),
         static_cast<bpf_u_int32>(buffer.size())
     };
-    pcap_dump((u_char*)dumper, &header, &buffer[0]);
+    pcap_dump((u_char*)dumper_, &header, &buffer[0]);
 }
 
-void PacketWriter::init(const std::string& file_name, int link_type) {
-    handle = pcap_open_dead(link_type, 65535);
-    if(!handle)
-        throw std::runtime_error("Error creating pcap handle");
-    dumper = pcap_dump_open(handle, file_name.c_str());
-    if(!dumper) {
-        // RAII plx
-        pcap_close(handle);
-        throw std::runtime_error(pcap_geterr(handle));
+void PacketWriter::init(const string& file_name, int link_type) {
+    handle_ = pcap_open_dead(link_type, 65535);
+    if (!handle_) {
+        throw pcap_open_failed();
+    }
+    dumper_ = pcap_dump_open(handle_, file_name.c_str());
+    if (!dumper_) {
+        pcap_close(handle_);
+        throw pcap_error(pcap_geterr(handle_));
     }
 }
 
-}
+} // Tins

@@ -22,14 +22,14 @@ const uint8_t Dot11AckTest::expected_packet[] = {
     213, 1, 79, 35, 0, 1, 2, 3, 4, 5
 };
 
-void test_equals(const Dot11Ack &dot1, const Dot11Ack &dot2) {
+void test_equals(const Dot11Ack& dot1, const Dot11Ack& dot2) {
     test_equals(
         static_cast<const Dot11&>(dot1),
         static_cast<const Dot11&>(dot2)
     );
 }
 
-void test_equals_expected(const Dot11Ack &dot11) {
+void test_equals_expected(const Dot11Ack& dot11) {
     EXPECT_EQ(dot11.protocol(), 1);
     EXPECT_EQ(dot11.type(), Dot11::CONTROL);
     EXPECT_EQ(dot11.subtype(), Dot11::ACK);
@@ -89,7 +89,7 @@ TEST_F(Dot11AckTest, ClonePDU) {
 TEST_F(Dot11AckTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11Ack *inner = dot11->find_pdu<Dot11Ack>();
+    const Dot11Ack* inner = dot11->find_pdu<Dot11Ack>();
     ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }

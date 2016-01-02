@@ -42,61 +42,72 @@
 #include <sstream>
 #include "ipv6_address.h"
 #include "address_range.h"
+#include "exceptions.h"
+
+using std::fill;
+using std::string;
 
 namespace Tins {
+
 const IPv6Address loopback_address = "::1";
 const AddressRange<IPv6Address> multicast_range = IPv6Address("ff00::") / 8;
 
 IPv6Address::IPv6Address() {
-    std::fill(address, address + address_size, 0);
+    fill(address_, address_ + address_size, 0);
 }
 
-IPv6Address::IPv6Address(const char *addr) {
+IPv6Address::IPv6Address(const char* addr) {
     init(addr);
 }
 
 IPv6Address::IPv6Address(const_iterator ptr) {
-    std::copy(ptr, ptr + address_size, address);
+    std::copy(ptr, ptr + address_size, address_);
 }
 
-IPv6Address::IPv6Address(const std::string &addr) {
+IPv6Address::IPv6Address(const std::string& addr) {
     init(addr.c_str());
 }
 
-void IPv6Address::init(const char *addr) {
+void IPv6Address::init(const char* addr) {
     #ifdef _WIN32
         // mingw on linux somehow doesn't have InetPton
         #ifdef _MSC_VER
-            if(InetPtonA(AF_INET6, addr, address) != 1)
-                throw malformed_address();
+            if (InetPtonA(AF_INET6, addr, address_) != 1) {
+                throw invalid_address();
+            }
         #else
             ULONG dummy1;
             USHORT dummy2;
             // Maybe change this, mingw doesn't have any other conversion function
-            if(RtlIpv6StringToAddressExA(addr, (IN6_ADDR*)address, &dummy1, &dummy2) != NO_ERROR)
-                throw malformed_address();
+            if (RtlIpv6StringToAddressExA(addr, (IN6_ADDR*)address_, &dummy1, &dummy2) != NO_ERROR) {
+                throw invalid_address();
+            }
         #endif
     #else
-        if(inet_pton(AF_INET6, addr, address) == 0)
-            throw malformed_address();
+        if (inet_pton(AF_INET6, addr, address_) == 0) {
+            throw invalid_address();
+        }
     #endif            
 }
 
-std::string IPv6Address::to_string() const {
+string IPv6Address::to_string() const {
     char buffer[INET6_ADDRSTRLEN];
     #ifdef _WIN32
         // mingw on linux somehow doesn't have InetNtop
         #ifdef _MSC_VER
-            if(InetNtopA(AF_INET6, (PVOID)address, buffer, sizeof(buffer)) == 0)
-                throw malformed_address();
+            if (InetNtopA(AF_INET6, (PVOID)address_, buffer, sizeof(buffer)) == 0) {
+                throw invalid_address();
+            }
         #else
             ULONG sz = sizeof(buffer);
-            if(RtlIpv6AddressToStringExA((const IN6_ADDR*)address, 0, 0, buffer, &sz) != NO_ERROR)
-                throw malformed_address();
+            if (RtlIpv6AddressToStringExA((const IN6_ADDR*)address_, 0, 0, buffer, &sz) != NO_ERROR) {
+                throw invalid_address();
+            }
         #endif
     #else
-        if(inet_ntop(AF_INET6, address, buffer, sizeof(buffer)) == 0)
-            throw malformed_address();
+        if (inet_ntop(AF_INET6, address_, buffer, sizeof(buffer)) == 0) {
+            throw invalid_address();
+        }
     #endif
     return buffer;
 }
@@ -108,5 +119,5 @@ bool IPv6Address::is_loopback() const {
 bool IPv6Address::is_multicast() const {
     return multicast_range.contains(*this);
 }
-}
 
+} // Tins

@@ -16,7 +16,7 @@ public:
     static const uint8_t expected_packet[], checksum_packet[],
                             partial_packet[];
     
-    void test_equals(const TCP &tcp1, const TCP &tcp2);
+    void test_equals(const TCP& tcp1, const TCP& tcp2);
 };
 
 const uint8_t TCPTest::expected_packet[] = {
@@ -47,7 +47,7 @@ TEST_F(TCPTest, DefaultConstructor) {
 
 TEST_F(TCPTest, ChecksumCheck) {
     EthernetII pkt1(checksum_packet, sizeof(checksum_packet)); 
-    const TCP &tcp1 = pkt1.rfind_pdu<TCP>();
+    const TCP& tcp1 = pkt1.rfind_pdu<TCP>();
     uint16_t checksum = tcp1.checksum();
     
     PDU::serialization_type buffer = pkt1.serialize();
@@ -60,7 +60,7 @@ TEST_F(TCPTest, ChecksumCheck) {
     );
 
     EthernetII pkt2(&buffer[0], (uint32_t)buffer.size());
-    const TCP &tcp2 = pkt2.rfind_pdu<TCP>();
+    const TCP& tcp2 = pkt2.rfind_pdu<TCP>();
     EXPECT_EQ(checksum, tcp2.checksum());
     EXPECT_EQ(tcp1.checksum(), tcp2.checksum());
     
@@ -79,7 +79,7 @@ TEST_F(TCPTest, CopyAssignmentOperator) {
 }
 
 TEST_F(TCPTest, NestedCopy) {
-    TCP *nested_tcp = new TCP(0x6d1f, 0x78f2);
+    TCP* nested_tcp = new TCP(0x6d1f, 0x78f2);
     TCP tcp1(0x6d1f, 0x78f2);
     tcp1.inner_pdu(nested_tcp);
     TCP tcp2(tcp1);
@@ -200,7 +200,7 @@ TEST_F(TCPTest, Timestamp) {
     EXPECT_EQ(tcp.timestamp(), data);
 }
 
-void TCPTest::test_equals(const TCP &tcp1, const TCP &tcp2) {
+void TCPTest::test_equals(const TCP& tcp1, const TCP& tcp2) {
     EXPECT_EQ(tcp1.dport(), tcp2.dport());
     EXPECT_EQ(tcp2.sport(), tcp2.sport());
     EXPECT_EQ(tcp1.seq(), tcp2.seq());

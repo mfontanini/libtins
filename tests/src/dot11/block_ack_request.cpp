@@ -22,13 +22,13 @@ const uint8_t Dot11BlockAckRequestTest::expected_packet[] = {
     0, 176, 33
 };
 
-void test_equals(const Dot11BlockAckRequest &dot1, const Dot11BlockAckRequest &dot2) {
+void test_equals(const Dot11BlockAckRequest& dot1, const Dot11BlockAckRequest& dot2) {
     EXPECT_EQ(dot1.fragment_number(), dot2.fragment_number());
     EXPECT_EQ(dot1.start_sequence(), dot2.start_sequence());
     EXPECT_EQ(dot1.bar_control(), dot2.bar_control());
 }
 
-void test_equals_expected(const Dot11BlockAckRequest &dot11) {
+void test_equals_expected(const Dot11BlockAckRequest& dot11) {
     EXPECT_EQ(dot11.type(), Dot11::CONTROL);
     EXPECT_EQ(dot11.subtype(), Dot11::BLOCK_ACK_REQ);
     EXPECT_EQ(dot11.bar_control(), 4);
@@ -82,7 +82,7 @@ TEST_F(Dot11BlockAckRequestTest, ClonePDU) {
 TEST_F(Dot11BlockAckRequestTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11BlockAckRequest *inner = dot11->find_pdu<Dot11BlockAckRequest>();
+    const Dot11BlockAckRequest* inner = dot11->find_pdu<Dot11BlockAckRequest>();
     ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }

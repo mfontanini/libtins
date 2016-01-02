@@ -36,150 +36,159 @@
 
 namespace Tins {
 
-    /** 
-     * \class UDP
-     * \brief Represents an UDP PDU.
-     *
-     * This class represents an UDP PDU. 
-     * 
-     * While sniffing, the payload sent in each packet will be wrapped
-     * in a RawPDU, which is set as the UDP object's inner_pdu. Therefore,
-     * if you are sniffing and want to see the UDP packet's payload,
-     * you need to do the following:
-     *
-     * \code
-     * // Get a packet from somewhere.
-     * UDP udp = ...;
-     *
-     * // Extract the RawPDU object.
-     * const RawPDU& raw = udp.rfind_pdu<RawPDU>();
-     *
-     * // Finally, take the payload (this is a vector<uint8_t>)
-     * const RawPDU::payload_type& payload = raw.payload();
-     * \endcode
-     *
-     * \sa RawPDU
+/** 
+ * \class UDP
+ * \brief Represents an UDP PDU.
+ *
+ * This class represents an UDP PDU. 
+ * 
+ * While sniffing, the payload sent in each packet will be wrapped
+ * in a RawPDU, which is set as the UDP object's inner_pdu. Therefore,
+ * if you are sniffing and want to see the UDP packet's payload,
+ * you need to do the following:
+ *
+ * \code
+ * // Get a packet from somewhere.
+ * UDP udp = ...;
+ *
+ * // Extract the RawPDU object.
+ * const RawPDU& raw = udp.rfind_pdu<RawPDU>();
+ *
+ * // Finally, take the payload (this is a vector<uint8_t>)
+ * const RawPDU::payload_type& payload = raw.payload();
+ * \endcode
+ *
+ * \sa RawPDU
+ */
+class UDP : public PDU {
+public:
+    /**
+     * \brief This PDU's flag.
      */
-    class UDP : public PDU {
-    public:
-        /**
-         * \brief This PDU's flag.
-         */
-        static const PDU::PDUType pdu_flag = PDU::UDP;
+    static const PDU::PDUType pdu_flag = PDU::UDP;
+
+    /** 
+     * \brief UDP constructor.
+     *
+     * Constructs an instance of UDP. The destination and source 
+     * port can be provided, otherwise both of them will be 0.
+     * 
+     * \param dport Destination port.
+     * \param sport Source port.
+     * */
+    UDP(uint16_t dport = 0, uint16_t sport = 0);
+
+    /**
+     * \brief Constructs an UDP object from a buffer.
+     * 
+     * If there is not enough size for a UDP header a malformed_packet 
+     * exception is thrown.
+     * 
+     * Any extra data will be stored in a RawPDU.
+     * 
+     * \param buffer The buffer from which this PDU will be constructed.
+     * \param total_sz The total size of the buffer.
+     */
+    UDP(const uint8_t* buffer, uint32_t total_sz);
     
-        /** 
-         * \brief UDP constructor.
-         *
-         * Constructs an instance of UDP. The destination and source 
-         * port can be provided, otherwise both of them will be 0.
-         * 
-         * \param dport Destination port.
-         * \param sport Source port.
-         * */
-        UDP(uint16_t dport = 0, uint16_t sport = 0);
+    /** 
+     * \brief Getter for the destination port.
+     * \return The datagram's destination port.
+     */
+    uint16_t dport() const {
+        return Endian::be_to_host(header_.dport);
+    }
 
-        /**
-         * \brief Constructs an UDP object from a buffer.
-         * 
-         * If there is not enough size for a UDP header a malformed_packet 
-         * exception is thrown.
-         * 
-         * Any extra data will be stored in a RawPDU.
-         * 
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        UDP(const uint8_t *buffer, uint32_t total_sz);
-        
-        /** 
-         * \brief Getter for the destination port.
-         * \return The datagram's destination port.
-         */
-        uint16_t dport() const { return Endian::be_to_host(_udp.dport); }
+    /** 
+     * \brief Getter for the source port.
+     * \return The datagram's source port.
+     */
+    uint16_t sport() const {
+        return Endian::be_to_host(header_.sport);
+    }
+    
+    /**
+     * \brief Getter for the length of the datagram.
+     * \return The length of the datagram.
+     */
+    uint16_t length() const {
+        return Endian::be_to_host(header_.len);
+    }
+    
+    /**
+     * \brief Getter for the checksum of the datagram.
+     * \return The datagram's checksum.
+     */
+    uint16_t checksum() const {
+        return Endian::be_to_host(header_.check);
+    }
 
-        /** 
-         * \brief Getter for the source port.
-         * \return The datagram's source port.
-         */
-        uint16_t sport() const { return Endian::be_to_host(_udp.sport); }
-        
-        /**
-         * \brief Getter for the length of the datagram.
-         * \return The length of the datagram.
-         */
-        uint16_t length() const { return Endian::be_to_host(_udp.len); }
-        
-        /**
-         * \brief Getter for the checksum of the datagram.
-         * \return The datagram's checksum.
-         */
-        uint16_t checksum() const { return Endian::be_to_host(_udp.check); }
+    /** 
+     * \brief Set the destination port.
+     * \param new_dport The new destination port.
+     */
+    void dport(uint16_t new_dport);
 
-        /** 
-         * \brief Set the destination port.
-         * \param new_dport The new destination port.
-         */
-        void dport(uint16_t new_dport);
+    /** 
+     * \brief Set the source port.
+     *
+     * \param new_sport The new source port.
+     */
+    void sport(uint16_t new_sport);
+    
+    /** 
+     * \brief Getter for the length field.
+     * \param new_len The new length field.
+     * \return The length field.
+     */
+    void length(uint16_t new_len);
 
-        /** 
-         * \brief Set the source port.
-         *
-         * \param new_sport The new source port.
-         */
-        void sport(uint16_t new_sport);
-        
-        /** 
-         * \brief Getter for the length field.
-         * \param new_len The new length field.
-         * \return The length field.
-         */
-        void length(uint16_t new_len);
+    /**
+     * \brief Check wether ptr points to a valid response for this PDU.
+     *
+     * This compares the source and destination ports in the provided
+     * response with those stored in this PDU.
+     * 
+     * \sa PDU::matches_response
+     * \param ptr The pointer to the buffer.
+     * \param total_sz The size of the buffer.
+     */
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
 
-        /**
-         * \brief Check wether ptr points to a valid response for this PDU.
-         *
-         * This compares the source and destination ports in the provided
-         * response with those stored in this PDU.
-         * 
-         * \sa PDU::matches_response
-         * \param ptr The pointer to the buffer.
-         * \param total_sz The size of the buffer.
-         */
-        bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
+    /** 
+     * \brief Returns the header size.
+     *
+     * This metod overrides PDU::header_size. This size includes the
+     * payload and options size. \sa PDU::header_size
+     */
+    uint32_t header_size() const;
+    
+    /**
+     * \brief Getter for the PDU's type.
+     * \sa PDU::pdu_type
+     */
+    PDUType pdu_type() const { return PDU::UDP; }
+    
+    /**
+     * \sa PDU::clone
+     */
+    UDP* clone() const {
+        return new UDP(*this);
+    }
+private:
+    TINS_BEGIN_PACK
+    struct udp_header {
+        uint16_t sport;
+        uint16_t dport;
+        uint16_t len;
+        uint16_t check;
+    } TINS_END_PACK;
 
-        /** 
-         * \brief Returns the header size.
-         *
-         * This metod overrides PDU::header_size. This size includes the
-         * payload and options size. \sa PDU::header_size
-         */
-        uint32_t header_size() const;
-        
-        /**
-         * \brief Getter for the PDU's type.
-         * \sa PDU::pdu_type
-         */
-        PDUType pdu_type() const { return PDU::UDP; }
-        
-        /**
-         * \sa PDU::clone
-         */
-        UDP *clone() const {
-            return new UDP(*this);
-        }
-    private:
-        TINS_BEGIN_PACK
-        struct udphdr {
-            uint16_t sport;
-            uint16_t dport;
-            uint16_t len;
-            uint16_t check;
-        } TINS_END_PACK;
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
 
-        void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    udp_header header_;
+};
 
-        udphdr _udp;
-    };
-}
+} // Tins
 
 #endif // TINS_UDP_H

@@ -50,83 +50,79 @@ using std::string;
 using std::runtime_error;
 
 namespace Tins {
+
 BaseSniffer::BaseSniffer() 
-: handle(0), mask(0), extract_raw(false)
-{
+: handle_(0), mask_(0), extract_raw_(false) {
     
 }
     
-BaseSniffer::~BaseSniffer() 
-{
-    if (handle) {
-        pcap_close(handle);
+BaseSniffer::~BaseSniffer() {
+    if (handle_) {
+        pcap_close(handle_);
     }
 }
 
-void BaseSniffer::set_pcap_handle(pcap_t* const pcap_handle)
-{
-    handle = pcap_handle;
+void BaseSniffer::set_pcap_handle(pcap_t* pcap_handle) {
+    handle_ = pcap_handle;
 }
 
-pcap_t* BaseSniffer::get_pcap_handle()
-{
-    return handle;
+pcap_t* BaseSniffer::get_pcap_handle() {
+    return handle_;
 }
 
-const pcap_t* BaseSniffer::get_pcap_handle() const
-{
-    return handle;
+const pcap_t* BaseSniffer::get_pcap_handle() const {
+    return handle_;
 }
 
-void BaseSniffer::set_if_mask(bpf_u_int32 if_mask)
-{
-    mask = if_mask;
+void BaseSniffer::set_if_mask(bpf_u_int32 if_mask) {
+    mask_ = if_mask;
 }
 
-bpf_u_int32 BaseSniffer::get_if_mask() const
-{
-    return mask;
+bpf_u_int32 BaseSniffer::get_if_mask() const {
+    return mask_;
 }
 
 struct sniff_data {
     struct timeval tv;
-    PDU *pdu;
+    PDU* pdu;
     bool packet_processed;
 
     sniff_data() : pdu(0), packet_processed(true) { }
 };
 
 template<typename T>
-T *safe_alloc(const u_char *bytes, bpf_u_int32 len) {
+T* safe_alloc(const u_char* bytes, bpf_u_int32 len) {
     try {
         return new T((const uint8_t*)bytes, len);
     }
-    catch(malformed_packet&) {
+    catch (malformed_packet&) {
         return 0;
     }
 }
 
 template<typename T>
-void sniff_loop_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
-    sniff_data *data = (sniff_data*)user;
+void sniff_loop_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
+    sniff_data* data = (sniff_data*)user;
     data->packet_processed = true;
     data->tv = h->ts;
     data->pdu = safe_alloc<T>(bytes, h->caplen);
 }
 
-void sniff_loop_eth_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
-    sniff_data *data = (sniff_data*)user;
+void sniff_loop_eth_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
+    sniff_data* data = (sniff_data*)user;
     data->packet_processed = true;
     data->tv = h->ts;
-    if(Internals::is_dot3((const uint8_t*)bytes, h->caplen))
+    if (Internals::is_dot3((const uint8_t*)bytes, h->caplen)) {
         data->pdu = safe_alloc<Dot3>((const uint8_t*)bytes, h->caplen);
-    else
+    }
+    else {
         data->pdu = safe_alloc<EthernetII>((const uint8_t*)bytes, h->caplen);
+    }
 }
 
 #ifdef HAVE_DOT11
-void sniff_loop_dot11_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *bytes) {
-    sniff_data *data = (sniff_data*)user;
+void sniff_loop_dot11_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
+    sniff_data* data = (sniff_data*)user;
     data->packet_processed = true;
     data->tv = h->ts;
     try {
@@ -140,20 +136,22 @@ void sniff_loop_dot11_handler(u_char *user, const struct pcap_pkthdr *h, const u
 
 PtrPacket BaseSniffer::next_packet() {
     sniff_data data;
-    const int iface_type = pcap_datalink(handle);
+    const int iface_type = pcap_datalink(handle_);
     pcap_handler handler = 0;
-    if(extract_raw)
+    if (extract_raw_) {
         handler = &sniff_loop_handler<RawPDU>;
-    else if(iface_type == DLT_EN10MB)
+    }
+    else if (iface_type == DLT_EN10MB) {
         handler = sniff_loop_eth_handler;
-    else if(iface_type == DLT_IEEE802_11_RADIO) {
+    }
+    else if (iface_type == DLT_IEEE802_11_RADIO) {
         #ifdef HAVE_DOT11
             handler = &sniff_loop_handler<RadioTap>;
         #else
             throw protocol_disabled();
         #endif
     }
-    else if(iface_type == DLT_IEEE802_11) {
+    else if (iface_type == DLT_IEEE802_11) {
         #ifdef HAVE_DOT11
             handler = sniff_loop_dot11_handler;
         #else
@@ -165,41 +163,46 @@ PtrPacket BaseSniffer::next_packet() {
         handler = &sniff_loop_handler<PKTAP>;
     }
     #endif // DLT_PKTAP
-    else if(iface_type == DLT_NULL)
+    else if (iface_type == DLT_NULL) {
         handler = &sniff_loop_handler<Tins::Loopback>;
-    else if(iface_type == DLT_LINUX_SLL)
+    }
+    else if (iface_type == DLT_LINUX_SLL) {
         handler = &sniff_loop_handler<SLL>;
-    else if(iface_type == DLT_PPI)
+    }
+    else if (iface_type == DLT_PPI) {
         handler = &sniff_loop_handler<PPI>;
-    else
+    }
+    else {
         throw unknown_link_type();
+    }
     // keep calling pcap_loop until a well-formed packet is found.
-    while(data.pdu == 0 && data.packet_processed) {
+    while (data.pdu == 0 && data.packet_processed) {
         data.packet_processed = false;
-        if(pcap_loop(handle, 1, handler, (u_char*)&data) < 0)
+        if (pcap_loop(handle_, 1, handler, (u_char*)&data) < 0) {
             return PtrPacket(0, Timestamp());
+        }
     }
     return PtrPacket(data.pdu, data.tv);
 }
 
 void BaseSniffer::set_extract_raw_pdus(bool value) {
-    extract_raw = value;
+    extract_raw_ = value;
 }
 
 void BaseSniffer::stop_sniff() {
-    pcap_breakloop(handle);
+    pcap_breakloop(handle_);
 }
 
 int BaseSniffer::get_fd() {
     #ifndef _WIN32
-        return pcap_get_selectable_fd(handle);
+        return pcap_get_selectable_fd(handle_);
     #else
-        throw std::runtime_error("Method not supported in Windows platform");
+        throw unsupported_function();
     #endif // _WIN32
 }
 
 int BaseSniffer::link_type() const {
-    return pcap_datalink(handle);
+    return pcap_datalink(handle_);
 }
 
 BaseSniffer::iterator BaseSniffer::begin() {
@@ -210,24 +213,23 @@ BaseSniffer::iterator BaseSniffer::end() {
     return iterator(0);
 }
 
-bool BaseSniffer::set_filter(const std::string &filter) {
+bool BaseSniffer::set_filter(const string& filter) {
     bpf_program prog;
-    if(pcap_compile(handle, &prog, filter.c_str(), 0, mask) == -1) {
+    if (pcap_compile(handle_, &prog, filter.c_str(), 0, mask_) == -1) {
         return false;
     }
-    bool result = pcap_setfilter(handle, &prog) != -1;
+    bool result = pcap_setfilter(handle_, &prog) != -1;
     pcap_freecode(&prog);
     return result;
 }
 
 void BaseSniffer::set_timeout(int ms) {
-    pcap_set_timeout(handle, ms);
+    pcap_set_timeout(handle_, ms);
 }
 
 // ****************************** Sniffer ******************************
 
-Sniffer::Sniffer(const string &device, const SnifferConfiguration& configuration)
-{
+Sniffer::Sniffer(const string& device, const SnifferConfiguration& configuration) {
     char error[PCAP_ERRBUF_SIZE];
     pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
     if (!phandle) {
@@ -246,16 +248,18 @@ Sniffer::Sniffer(const string &device, const SnifferConfiguration& configuration
 
     // Finally, activate the pcap. In case of error throw runtime_error
     if (pcap_activate(get_pcap_handle()) < 0) {
-        throw std::runtime_error(pcap_geterr(get_pcap_handle()));
+        throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
 
     // Configure the sniffer's attributes after activation.
     configuration.configure_sniffer_post_activation(*this);
 }
 
-Sniffer::Sniffer(const std::string &device, unsigned max_packet_size, bool promisc, 
-                 const std::string &filter, bool rfmon)
-{
+Sniffer::Sniffer(const string& device,
+                 unsigned max_packet_size,
+                 bool promisc, 
+                 const string& filter,
+                 bool rfmon) {
     SnifferConfiguration configuration;
     configuration.set_snap_len(max_packet_size);
     configuration.set_promisc_mode(promisc);
@@ -280,16 +284,17 @@ Sniffer::Sniffer(const std::string &device, unsigned max_packet_size, bool promi
 
     // Finally, activate the pcap. In case of error throw runtime_error
     if (pcap_activate(get_pcap_handle()) < 0) {
-        throw std::runtime_error(pcap_geterr(get_pcap_handle()));
+        throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
 
     // Configure the sniffer's attributes after activation.
     configuration.configure_sniffer_post_activation(*this);
 }
 
-Sniffer::Sniffer(const std::string &device, promisc_type promisc, const std::string &filter,
-                 bool rfmon)
-{
+Sniffer::Sniffer(const string& device, 
+                 promisc_type promisc,
+                 const string& filter,
+                 bool rfmon) {
     SnifferConfiguration configuration;
     configuration.set_promisc_mode(promisc == PROMISC);
     configuration.set_filter(filter);
@@ -313,52 +318,47 @@ Sniffer::Sniffer(const std::string &device, promisc_type promisc, const std::str
 
     // Finally, activate the pcap. In case of error throw runtime_error
     if (pcap_activate(get_pcap_handle()) < 0) {
-        throw std::runtime_error(pcap_geterr(get_pcap_handle()));
+        throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
 
     // Configure the sniffer's attributes after activation.
     configuration.configure_sniffer_post_activation(*this);
 }
 
-void Sniffer::set_snap_len(unsigned snap_len)
-{
+void Sniffer::set_snap_len(unsigned snap_len) {
     if (pcap_set_snaplen(get_pcap_handle(), snap_len)) {
-        throw std::runtime_error(pcap_geterr(get_pcap_handle()));
+        throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
 }
 
-void Sniffer::set_buffer_size(unsigned buffer_size)
-{
+void Sniffer::set_buffer_size(unsigned buffer_size) {
     if (pcap_set_buffer_size(get_pcap_handle(), buffer_size)) {
-        throw std::runtime_error(pcap_geterr(get_pcap_handle()));
+        throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
 }
 
-void Sniffer::set_promisc_mode(bool promisc_enabled)
-{
+void Sniffer::set_promisc_mode(bool promisc_enabled) {
     if (pcap_set_promisc(get_pcap_handle(), promisc_enabled)) {
-        throw runtime_error(pcap_geterr(get_pcap_handle()));
+        throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
 }
 
-void Sniffer::set_immediate_mode(bool enabled) 
-{
+void Sniffer::set_immediate_mode(bool enabled) {
     // As of libpcap version 1.5.0 this function exists. Before, it was
     // technically always immediate mode since capture used TPACKET_V1/2
     // which doesn't do packet buffering.
     #ifdef HAVE_PCAP_IMMEDIATE_MODE
     if (pcap_set_immediate_mode(get_pcap_handle(), enabled)) {
-        throw runtime_error(pcap_geterr(get_pcap_handle()));
+        throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
     #endif // HAVE_PCAP_IMMEDIATE_MODE
 }
 
-void Sniffer::set_rfmon(bool rfmon_enabled)
-{
+void Sniffer::set_rfmon(bool rfmon_enabled) {
     #ifndef _WIN32
     if (pcap_can_set_rfmon(get_pcap_handle()) == 1) {
         if (pcap_set_rfmon(get_pcap_handle(), rfmon_enabled)) {
-            throw runtime_error(pcap_geterr(get_pcap_handle()));
+            throw pcap_error(pcap_geterr(get_pcap_handle()));
         }
     }
     #endif
@@ -367,11 +367,12 @@ void Sniffer::set_rfmon(bool rfmon_enabled)
 
 // **************************** FileSniffer ****************************
 
-FileSniffer::FileSniffer(const string &file_name, const SnifferConfiguration& configuration) {
+FileSniffer::FileSniffer(const string& file_name, 
+                         const SnifferConfiguration& configuration) {
     char error[PCAP_ERRBUF_SIZE];
-    pcap_t *phandle = pcap_open_offline(file_name.c_str(), error);
-    if(!phandle) {
-        throw std::runtime_error(error);
+    pcap_t* phandle = pcap_open_offline(file_name.c_str(), error);
+    if (!phandle) {
+        throw pcap_error(error);
     }
     set_pcap_handle(phandle);
 
@@ -380,15 +381,14 @@ FileSniffer::FileSniffer(const string &file_name, const SnifferConfiguration& co
     
 }
 
-FileSniffer::FileSniffer(const std::string &file_name, const std::string &filter)
-{
+FileSniffer::FileSniffer(const string& file_name, const string& filter) {
     SnifferConfiguration config;
     config.set_filter(filter);
 
     char error[PCAP_ERRBUF_SIZE];
-    pcap_t *phandle = pcap_open_offline(file_name.c_str(), error);
-    if(!phandle) {
-        throw std::runtime_error(error);
+    pcap_t* phandle = pcap_open_offline(file_name.c_str(), error);
+    if (!phandle) {
+        throw pcap_error(error);
     }
     set_pcap_handle(phandle);
 
@@ -401,92 +401,76 @@ FileSniffer::FileSniffer(const std::string &file_name, const std::string &filter
 const unsigned SnifferConfiguration::DEFAULT_SNAP_LEN = 65535;
 const unsigned SnifferConfiguration::DEFAULT_TIMEOUT = 1000;
 
-SnifferConfiguration::SnifferConfiguration() :
-    _flags(0),
-    _snap_len(DEFAULT_SNAP_LEN),
-    _buffer_size(0),
-    _timeout(DEFAULT_TIMEOUT),
-    _promisc(false),
-    _rfmon(false),
-    _immediate_mode(false)
-{
+SnifferConfiguration::SnifferConfiguration()
+: flags_(0), snap_len_(DEFAULT_SNAP_LEN), buffer_size_(0), timeout_(DEFAULT_TIMEOUT),
+  promisc_(false), rfmon_(false), immediate_mode_(false) {
 
 }
 
-void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) const
-{
-    sniffer.set_snap_len(_snap_len);
-    sniffer.set_timeout(_timeout);
-    if ((_flags & BUFFER_SIZE) != 0) {
-        sniffer.set_buffer_size(_buffer_size);
+void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) const {
+    sniffer.set_snap_len(snap_len_);
+    sniffer.set_timeout(timeout_);
+    if ((flags_ & BUFFER_SIZE) != 0) {
+        sniffer.set_buffer_size(buffer_size_);
     }
-    if ((_flags & PROMISCUOUS) != 0) {
-        sniffer.set_promisc_mode(_promisc);
+    if ((flags_ & PROMISCUOUS) != 0) {
+        sniffer.set_promisc_mode(promisc_);
     }
-    if ((_flags & RFMON) != 0) {
-        sniffer.set_rfmon(_rfmon);
+    if ((flags_ & RFMON) != 0) {
+        sniffer.set_rfmon(rfmon_);
     }
-    if ((_flags & IMMEDIATE_MODE) != 0) {
-        sniffer.set_immediate_mode(_immediate_mode);
+    if ((flags_ & IMMEDIATE_MODE) != 0) {
+        sniffer.set_immediate_mode(immediate_mode_);
     }
 }
 
-void SnifferConfiguration::configure_sniffer_pre_activation(FileSniffer& sniffer) const
-{
-    if ((_flags & PACKET_FILTER) != 0) {
-        if (!sniffer.set_filter(_filter)) {
-            throw std::runtime_error("Could not set the filter!");
+void SnifferConfiguration::configure_sniffer_pre_activation(FileSniffer& sniffer) const {
+    if ((flags_ & PACKET_FILTER) != 0) {
+        if (!sniffer.set_filter(filter_)) {
+            throw invalid_pcap_filter(pcap_geterr(sniffer.get_pcap_handle()));
         }
     }
 }
 
-void SnifferConfiguration::configure_sniffer_post_activation(Sniffer& sniffer) const
-{
-    if ((_flags & PACKET_FILTER) != 0) {
-        if (!sniffer.set_filter(_filter)) {
-            throw std::runtime_error("Could not set the filter! ");
+void SnifferConfiguration::configure_sniffer_post_activation(Sniffer& sniffer) const {
+    if ((flags_ & PACKET_FILTER) != 0) {
+        if (!sniffer.set_filter(filter_)) {
+            throw invalid_pcap_filter(pcap_geterr(sniffer.get_pcap_handle()));
         }
     }
 }
 
-void SnifferConfiguration::set_snap_len(unsigned snap_len)
-{
-    _snap_len = snap_len;
+void SnifferConfiguration::set_snap_len(unsigned snap_len) {
+    snap_len_ = snap_len;
 }
 
-void SnifferConfiguration::set_buffer_size(unsigned buffer_size)
-{
-    _flags |= BUFFER_SIZE;
-    _buffer_size = buffer_size;
+void SnifferConfiguration::set_buffer_size(unsigned buffer_size) {
+    flags_ |= BUFFER_SIZE;
+    buffer_size_ = buffer_size;
 }
 
-void SnifferConfiguration::set_promisc_mode(bool enabled)
-{
-    _flags |= PROMISCUOUS;
-    _promisc = enabled;
+void SnifferConfiguration::set_promisc_mode(bool enabled) {
+    flags_ |= PROMISCUOUS;
+    promisc_ = enabled;
 }
 
-void SnifferConfiguration::set_filter(const std::string& filter)
-{
-    _flags |= PACKET_FILTER;
-    _filter = filter;
+void SnifferConfiguration::set_filter(const string& filter) {
+    flags_ |= PACKET_FILTER;
+    filter_ = filter;
 }
 
-void SnifferConfiguration::set_rfmon(bool enabled)
-{
-    _flags |= RFMON;
-    _rfmon = enabled;
+void SnifferConfiguration::set_rfmon(bool enabled) {
+    flags_ |= RFMON;
+    rfmon_ = enabled;
 }
 
-void SnifferConfiguration::set_timeout(unsigned timeout)
-{
-    _timeout = timeout;
+void SnifferConfiguration::set_timeout(unsigned timeout) {
+    timeout_ = timeout;
 }
 
-void SnifferConfiguration::set_immediate_mode(bool enabled) 
-{
-    _flags |= IMMEDIATE_MODE;
-    _immediate_mode = enabled;
+void SnifferConfiguration::set_immediate_mode(bool enabled) {
+    flags_ |= IMMEDIATE_MODE;
+    immediate_mode_ = enabled;
 }
 
-}
+} // Tins

@@ -38,7 +38,7 @@
 
 namespace Tins {
 /**
- * \brief Class that represents an 802.11 control frame.
+ * \brief Represents an IEEE 802.11 control frame.
  */
 class TINS_API Dot11Control : public Dot11 {
 public:
@@ -55,7 +55,7 @@ public:
      *
      * \param dst_addr The destination hardware address.
      */
-    Dot11Control(const address_type &dst_addr = address_type());
+    Dot11Control(const address_type& dst_addr = address_type());
 
     /**
      * \brief Constructs a Dot11Control object from a buffer and
@@ -71,13 +71,15 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11Control(const uint8_t *buffer, uint32_t total_sz);
+    Dot11Control(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return PDU::DOT11_CONTROL; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -85,7 +87,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == PDU::DOT11_CONTROL || Dot11::matches_flag(flag);
+       return flag == pdu_flag || Dot11::matches_flag(flag);
     }
 };
 
@@ -98,13 +100,15 @@ public:
     /**
      * \brief Getter for the target address field.
      */
-    address_type target_addr() const { return _taddr; }
+    address_type target_addr() const {
+        return taddr_;
+    }
 
     /**
      * \brief Setter for the target address field.
      * \param addr The new target address.
      */
-    void target_addr(const address_type &addr);
+    void target_addr(const address_type& addr);
 protected:
     /**
      * \brief Constructor for creating a 802.11 control frame TA PDU
@@ -115,8 +119,8 @@ protected:
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11ControlTA(const address_type &dst_addr = address_type(), 
-                const address_type &target_addr = address_type());
+    Dot11ControlTA(const address_type& dst_addr = address_type(), 
+                const address_type& target_addr = address_type());
 
     /**
      * \brief Constructs a Dot11ControlTA object from a buffer and
@@ -132,7 +136,7 @@ protected:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11ControlTA(const uint8_t *buffer, uint32_t total_sz);
+    Dot11ControlTA(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Returns the 802.11 frame's header length.
@@ -146,13 +150,13 @@ protected:
      * \brief Getter for the control ta additional fields size.
      */
     uint32_t controlta_size() const { 
-        return static_cast<uint32_t>(_taddr.size() + sizeof(ieee80211_header)); 
+        return static_cast<uint32_t>(taddr_.size() + sizeof(dot11_header)); 
     }
 
     void write_ext_header(Memory::OutputMemoryStream& stream);
 private:
 
-    address_type _taddr;
+    address_type taddr_;
 };
 
 /**
@@ -174,8 +178,8 @@ public:
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11RTS(const address_type &dst_addr = address_type(), 
-            const address_type &target_addr = address_type());
+    Dot11RTS(const address_type& dst_addr = address_type(), 
+             const address_type& target_addr = address_type());
                 
     /**
      * \brief Constructs a Dot11RTS object from a buffer and adds all 
@@ -190,14 +194,14 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11RTS(const uint8_t *buffer, uint32_t total_sz);
+    Dot11RTS(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Clones this PDU.
      *
      * \sa PDU::clone
      */
-    Dot11RTS *clone() const {
+    Dot11RTS* clone() const {
         return new Dot11RTS(*this);
     }
 
@@ -205,7 +209,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -233,8 +239,8 @@ public:
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11PSPoll(const address_type &dst_addr = address_type(), 
-                const address_type &target_addr = address_type());
+    Dot11PSPoll(const address_type& dst_addr = address_type(), 
+                const address_type& target_addr = address_type());
 
     /**
      * \brief Constructs a Dot11PSPoll object from a buffer and
@@ -250,14 +256,14 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11PSPoll(const uint8_t *buffer, uint32_t total_sz);
+    Dot11PSPoll(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Clones this PDU.
      *
      * \sa PDU::clone
      */
-    Dot11PSPoll *clone() const {
+    Dot11PSPoll* clone() const {
         return new Dot11PSPoll(*this);
     }
 
@@ -265,7 +271,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -293,8 +301,8 @@ public:
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11CFEnd(const address_type &dst_addr = address_type(), 
-            const address_type &target_addr = address_type());
+    Dot11CFEnd(const address_type& dst_addr = address_type(), 
+               const address_type& target_addr = address_type());
                 
     /**
      * \brief Constructs a Dot11CFEnd object from a buffer and adds 
@@ -310,14 +318,14 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11CFEnd(const uint8_t *buffer, uint32_t total_sz);
+    Dot11CFEnd(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Clones this PDU.
      *
      * \sa PDU::clone
      */
-    Dot11CFEnd *clone() const {
+    Dot11CFEnd* clone() const {
         return new Dot11CFEnd(*this);
     }
 
@@ -325,7 +333,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -333,7 +343,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11Control::matches_flag(flag);
     }
 };
 
@@ -353,8 +363,8 @@ public:
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11EndCFAck(const address_type &dst_addr = address_type(), 
-                const address_type &target_addr = address_type());
+    Dot11EndCFAck(const address_type& dst_addr = address_type(), 
+                  const address_type& target_addr = address_type());
 
     /**
      * \brief Constructs a Dot11EndCFAck frame object from a buffer 
@@ -370,14 +380,14 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11EndCFAck(const uint8_t *buffer, uint32_t total_sz);
+    Dot11EndCFAck(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Clones this PDU.
      *
      * \sa PDU::clone
      */
-    Dot11EndCFAck *clone() const {
+    Dot11EndCFAck* clone() const {
         return new Dot11EndCFAck(*this);
     }
 
@@ -385,7 +395,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -393,7 +405,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11Control::matches_flag(flag);
     }
 };
 
@@ -412,7 +424,7 @@ public:
      *
      * \param dst_addr The destination hardware address.
      */
-    Dot11Ack(const address_type &dst_addr = address_type());
+    Dot11Ack(const address_type& dst_addr = address_type());
 
     /**
      * \brief Constructs a Dot11Ack frame object from a buffer and
@@ -428,14 +440,14 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11Ack(const uint8_t *buffer, uint32_t total_sz);
+    Dot11Ack(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Clones this PDU.
      *
      * \sa PDU::clone
      */
-    Dot11Ack *clone() const {
+    Dot11Ack* clone() const {
         return new Dot11Ack(*this);
     }
 
@@ -443,7 +455,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -451,7 +465,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11Control::matches_flag(flag);
     }
 };
 
@@ -474,8 +488,8 @@ public:
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11BlockAckRequest(const address_type &dst_addr = address_type(), 
-                        const address_type &target_addr = address_type());
+    Dot11BlockAckRequest(const address_type& dst_addr = address_type(), 
+                         const address_type& target_addr = address_type());
 
     /**
      * \brief Constructs a Dot11BlockAckRequest object from a buffer 
@@ -491,7 +505,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11BlockAckRequest(const uint8_t *buffer, uint32_t total_sz);
+    Dot11BlockAckRequest(const uint8_t* buffer, uint32_t total_sz);
 
     /* Getter */
 
@@ -501,9 +515,9 @@ public:
      */
     small_uint<4> bar_control() const { 
         #if TINS_IS_LITTLE_ENDIAN
-        return _bar_control & 0xf; 
+        return bar_control_ & 0xf; 
         #else
-        return (_bar_control >> 8) & 0xf; 
+        return (bar_control_ >> 8) & 0xf; 
         #endif
     }
 
@@ -513,9 +527,9 @@ public:
      */
     small_uint<12> start_sequence() const { 
         #if TINS_IS_LITTLE_ENDIAN
-        return (_start_sequence >> 4) & 0xfff; 
+        return (start_sequence_ >> 4) & 0xfff; 
         #else
-        return (Endian::le_to_host<uint16_t>(_start_sequence) >> 4) & 0xfff; 
+        return (Endian::le_to_host<uint16_t>(start_sequence_) >> 4) & 0xfff; 
         #endif
     }
     
@@ -525,9 +539,9 @@ public:
      */
     small_uint<4> fragment_number() const { 
         #if TINS_IS_LITTLE_ENDIAN
-        return _start_sequence & 0xf; 
+        return start_sequence_ & 0xf; 
         #else
-        return (_start_sequence >> 8) & 0xf; 
+        return (start_sequence_ >> 8) & 0xf; 
         #endif
     }
     
@@ -564,7 +578,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11BlockAckRequest *clone() const {
+    Dot11BlockAckRequest* clone() const {
         return new Dot11BlockAckRequest(*this);
     }
 
@@ -572,7 +586,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -580,15 +596,13 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11Control::matches_flag(flag);
     }
 protected:
     void write_ext_header(Memory::OutputMemoryStream& stream);
 private:
-    void init_block_ack();
-
-    uint16_t _bar_control;
-    uint16_t _start_sequence;
+    uint16_t bar_control_;
+    uint16_t start_sequence_;
 };
 
 /**
@@ -615,8 +629,8 @@ public:
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11BlockAck(const address_type &dst_addr = address_type(), 
-                const address_type &target_addr = address_type());
+    Dot11BlockAck(const address_type& dst_addr = address_type(), 
+                  const address_type& target_addr = address_type());
 
     /**
      * \brief Constructs a Dot11BlockAck frame object from a buffer 
@@ -632,7 +646,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot11BlockAck(const uint8_t *buffer, uint32_t total_sz);
+    Dot11BlockAck(const uint8_t* buffer, uint32_t total_sz);
 
     /* Getters */
 
@@ -642,9 +656,9 @@ public:
      */
     small_uint<4> bar_control() const { 
         #if TINS_IS_LITTLE_ENDIAN
-        return _bar_control & 0xf; 
+        return bar_control_ & 0xf; 
         #else
-        return (_bar_control >> 8) & 0xf; 
+        return (bar_control_ >> 8) & 0xf; 
         #endif
     }
 
@@ -654,9 +668,9 @@ public:
      */
     small_uint<12> start_sequence() const { 
         #if TINS_IS_LITTLE_ENDIAN
-        return (_start_sequence >> 4) & 0xfff; 
+        return (start_sequence_ >> 4) & 0xfff; 
         #else
-        return (Endian::le_to_host<uint16_t>(_start_sequence) >> 4) & 0xfff; 
+        return (Endian::le_to_host<uint16_t>(start_sequence_) >> 4) & 0xfff; 
         #endif
     }
     
@@ -666,9 +680,9 @@ public:
      */
     small_uint<4> fragment_number() const { 
         #if TINS_IS_LITTLE_ENDIAN
-        return _start_sequence & 0xf; 
+        return start_sequence_ & 0xf; 
         #else
-        return (_start_sequence >> 8) & 0xf; 
+        return (start_sequence_ >> 8) & 0xf; 
         #endif
     }
     
@@ -707,19 +721,23 @@ public:
      * 
      * \return The bitmap field.
      */
-    const uint8_t *bitmap() const { return _bitmap; }
+    const uint8_t* bitmap() const {
+        return bitmap_;
+    }
 
     /**
      * \brief Setter for the bitmap field.
      * \param bit The new bitmap field to be set.
      */
-    void bitmap(const uint8_t *bit);
+    void bitmap(const uint8_t* bit);
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \brief Check wether this PDU matches the specified flag.
@@ -727,7 +745,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11Control::matches_flag(flag);
     }
 
     /**
@@ -735,15 +753,16 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11BlockAck *clone() const {
+    Dot11BlockAck* clone() const {
         return new Dot11BlockAck(*this);
     }
 private:
-    void init_block_ack();
     void write_ext_header(Memory::OutputMemoryStream& stream);
 
-    uint16_t _bar_control, _start_sequence;
-    uint8_t _bitmap[bitmap_size];
+    uint16_t bar_control_, start_sequence_;
+    uint8_t bitmap_[bitmap_size];
 };
+
 } // namespace Tins
+
 #endif // TINS_DOT11_DOT11_CONTROL_H

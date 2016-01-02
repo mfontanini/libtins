@@ -15,9 +15,9 @@ public:
     static const uint8_t expected_packet[], dns_response1[],
                         dns_packet1[];
     
-    void test_equals(const DNS &dns1, const DNS &dns2);
-    void test_equals(const DNS::Query &q1, const DNS::Query &q2);
-    void test_equals(const DNS::Resource &q1, const DNS::Resource &q2);
+    void test_equals(const DNS& dns1, const DNS& dns2);
+    void test_equals(const DNS::Query& q1, const DNS::Query& q2);
+    void test_equals(const DNS::Resource& q1, const DNS::Resource& q2);
 };
 
 const uint8_t DNSTest::expected_packet[] = {
@@ -45,7 +45,7 @@ const uint8_t DNSTest::dns_packet1[] = {
 
 
 
-void DNSTest::test_equals(const DNS &dns1, const DNS &dns2) {
+void DNSTest::test_equals(const DNS& dns1, const DNS& dns2) {
     EXPECT_EQ(dns1.id(), dns2.id());
     EXPECT_EQ(dns1.type(), dns2.type());
     EXPECT_EQ(dns1.opcode(), dns2.opcode());
@@ -66,13 +66,13 @@ void DNSTest::test_equals(const DNS &dns1, const DNS &dns2) {
     EXPECT_EQ(dns1.inner_pdu() != NULL, dns2.inner_pdu() != NULL);
 }
 
-void DNSTest::test_equals(const DNS::Query &q1, const DNS::Query &q2) {
+void DNSTest::test_equals(const DNS::Query& q1, const DNS::Query& q2) {
     EXPECT_EQ(q1.dname(), q2.dname());
     EXPECT_EQ(q1.type(), q2.type());
     EXPECT_EQ(q1.query_class(), q2.query_class());
 }
 
-void DNSTest::test_equals(const DNS::Resource &q1, const DNS::Resource &q2) {
+void DNSTest::test_equals(const DNS::Resource& q1, const DNS::Resource& q2) {
     EXPECT_EQ(q1.dname(), q2.dname());
     EXPECT_EQ(q1.data(), q2.data());
     EXPECT_EQ(q1.type(), q2.type());
@@ -179,7 +179,7 @@ TEST_F(DNSTest, CopyAssignmentOperator) {
 }
 
 TEST_F(DNSTest, NestedCopy) {
-    DNS *nested = new DNS(expected_packet, sizeof(expected_packet));
+    DNS* nested = new DNS(expected_packet, sizeof(expected_packet));
     DNS dns1(expected_packet, sizeof(expected_packet));
     dns1.inner_pdu(nested);
     DNS dns2(dns1);
@@ -307,7 +307,7 @@ TEST_F(DNSTest, Answers) {
 TEST_F(DNSTest, Authority) {
     DNS dns;
     
-    const char *domain = "carlos.example.com";
+    const char* domain = "carlos.example.com";
     dns.add_authority(
         DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
     );
@@ -331,7 +331,7 @@ TEST_F(DNSTest, Authority) {
 TEST_F(DNSTest, Additional) {
     DNS dns;
     
-    const char *domain = "carlos.example.com";
+    const char* domain = "carlos.example.com";
     dns.add_additional(
         DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
     );
@@ -395,7 +395,7 @@ TEST_F(DNSTest, ItAintGonnaCorrupt) {
     EXPECT_EQ(dns.questions_count(), 1);
     EXPECT_EQ(dns.answers_count(), 5);
 
-    const char *domain = "carlos.example.com";
+    const char* domain = "carlos.example.com";
     dns.add_additional(
         DNS::Resource("www.example.com", domain, DNS::CNAME, DNS::IN, 0x762)
     );

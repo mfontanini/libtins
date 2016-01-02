@@ -31,31 +31,39 @@
 #include "ipsec.h"
 #include "internals.h"
 #include "rawpdu.h"
+#include "memory_helpers.h"
+
+using std::memcpy;
+using std::copy;
+
+using Tins::Memory::InputMemoryStream;
+using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
 IPSecAH::IPSecAH() 
-: _header(), _icv(4) {
+: header_(), icv_(4) {
     length(2);
 }
 
-IPSecAH::IPSecAH(const uint8_t *buffer, uint32_t total_sz) {
-    // At least size for the header + 32bits of ICV
-    if(total_sz < sizeof(_header) + sizeof(uint32_t))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
+IPSecAH::IPSecAH(const uint8_t* buffer, uint32_t total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(header_);
     const uint32_t ah_len = 4 * (static_cast<uint16_t>(length()) + 2);
-    if(ah_len > total_sz)
+    if (ah_len < sizeof(header_)) {
         throw malformed_packet();
-    _icv.assign(buffer + sizeof(_header), buffer + ah_len);
-    buffer += ah_len;
-    total_sz -= ah_len;
-    if(total_sz) {
+    }
+    const uint32_t icv_length = ah_len - sizeof(header_);
+    if (!stream.can_read(icv_length)) {
+        throw malformed_packet();
+    }
+    stream.read(icv_, icv_length);
+    if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
                 static_cast<Constants::IP::e>(next_header()),
-                buffer, 
-                total_sz,
+                stream.pointer(), 
+                stream.size(), 
                 true
             )
         );
@@ -63,73 +71,69 @@ IPSecAH::IPSecAH(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 void IPSecAH::next_header(uint8_t new_next_header) {
-    _header.next_header = new_next_header;
+    header_.next_header = new_next_header;
 }
 
 void IPSecAH::length(uint8_t new_length) {
-    _header.length = new_length;
+    header_.length = new_length;
 }
 
 void IPSecAH::spi(uint32_t new_spi) {
-    _header.spi = Endian::host_to_be(new_spi);
+    header_.spi = Endian::host_to_be(new_spi);
 }
 
 void IPSecAH::seq_number(uint32_t new_seq_number) {
-    _header.seq_number = Endian::host_to_be(new_seq_number);
+    header_.seq_number = Endian::host_to_be(new_seq_number);
 }
 
-void IPSecAH::icv(const byte_array &new_icv) {
-    _icv = new_icv;
+void IPSecAH::icv(const byte_array& newicv_) {
+    icv_ = newicv_;
 }
 
 uint32_t IPSecAH::header_size() const {
-    return static_cast<uint32_t>(sizeof(_header) + _icv.size());
+    return static_cast<uint32_t>(sizeof(header_) + icv_.size());
 }
 
-void IPSecAH::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    if(inner_pdu())
+void IPSecAH::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+    if (inner_pdu()) {
         next_header(Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type()));
-    std::memcpy(buffer, &_header, sizeof(_header));
-    std::copy(  
-        _icv.begin(),
-        _icv.end(),
-        buffer + sizeof(_header)
-    );
+    }
+    length(header_size() / sizeof(uint32_t) - 2);
+    OutputMemoryStream output(buffer, total_sz);
+    output.write(header_);
+    output.write(icv_.begin(), icv_.end());
 }
 
 // IPSecESP
 
 IPSecESP::IPSecESP() 
-: _header()
-{
+: header_() {
 
 }
 
-IPSecESP::IPSecESP(const uint8_t *buffer, uint32_t total_sz) {
-    if(total_sz < sizeof(_header))
-        throw malformed_packet();
-    std::memcpy(&_header, buffer, sizeof(_header));
-    buffer += sizeof(_header);
-    total_sz -= sizeof(_header);
-    if(total_sz) {
-        inner_pdu(new RawPDU(buffer, total_sz));
+IPSecESP::IPSecESP(const uint8_t* buffer, uint32_t total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    stream.read(header_);
+    if (stream) {
+        inner_pdu(new RawPDU(stream.pointer(), stream.size()));
     }
 }
 
 void IPSecESP::spi(uint32_t new_spi) {
-    _header.spi = Endian::host_to_be(new_spi);
+    header_.spi = Endian::host_to_be(new_spi);
 }
 
 void IPSecESP::seq_number(uint32_t new_seq_number) {
-    _header.seq_number = Endian::host_to_be(new_seq_number);
+    header_.seq_number = Endian::host_to_be(new_seq_number);
 }
 
 uint32_t IPSecESP::header_size() const {
-    return sizeof(_header);
+    return sizeof(header_);
 }
 
-void IPSecESP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
-    std::memcpy(buffer, &_header, sizeof(_header));
+void IPSecESP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+    OutputMemoryStream output(buffer, total_sz);
+    output.write(header_);
 }
 
-}
+} // Tins

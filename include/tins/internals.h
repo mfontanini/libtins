@@ -46,6 +46,7 @@
  */
 namespace Tins {
 namespace Memory {
+
 class InputMemoryStream;
 } // Memory
 class IPv4Address;
@@ -53,6 +54,7 @@ class IPv6Address;
 class ICMPExtensionsStructure;
 
 namespace Internals {
+
 template<size_t n>
 class byte_array {
 public:
@@ -73,7 +75,7 @@ public:
         std::copy(start, n, data);
     }
 
-    uint8_t &operator[](size_t i) {
+    uint8_t& operator[](size_t i) {
         return data[i];
     }
 
@@ -104,8 +106,8 @@ private:
     uint8_t data[n];
 };
 
-void skip_line(std::istream &input);
-bool from_hex(const std::string &str, uint32_t &result);
+void skip_line(std::istream& input);
+bool from_hex(const std::string& str, uint32_t& result);
 
 template<bool, typename T = void>
 struct enable_if {
@@ -117,13 +119,13 @@ struct enable_if<false, T> {
 
 };
 
-PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
+PDU* pdu_from_flag(Constants::Ethernet::e flag, const uint8_t* buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
-PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer,
+PDU* pdu_from_flag(Constants::IP::e flag, const uint8_t* buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
-PDU *pdu_from_dlt_flag(int flag, const uint8_t *buffer,
+PDU* pdu_from_dlt_flag(int flag, const uint8_t* buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
-PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size);
+PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size);
 
 Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
 Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag);
@@ -133,58 +135,60 @@ void try_parse_icmp_extensions(Memory::InputMemoryStream& stream,
     uint32_t payload_length, ICMPExtensionsStructure& extensions);
 
 template<typename T>
-bool increment_buffer(T &addr) {
+bool increment_buffer(T& addr) {
     typename T::iterator it = addr.end() - 1;
-    while(it >= addr.begin() && *it == 0xff) {
+    while (it >= addr.begin() && *it == 0xff) {
         *it = 0;
         --it;
     }
     // reached end
-    if(it < addr.begin())
+    if (it < addr.begin()) {
         return true;
+    }
     (*it)++;
     return false;
 }
 
 template<typename T>
-bool decrement_buffer(T &addr) {
+bool decrement_buffer(T& addr) {
     typename T::iterator it = addr.end() - 1;
-    while(it >= addr.begin() && *it == 0) {
+    while (it >= addr.begin() && *it == 0) {
         *it = 0xff;
         --it;
     }
     // reached end
-    if(it < addr.begin())
+    if (it < addr.begin()) {
         return true;
+    }
     (*it)--;
     return false;
 }
 
-bool increment(IPv4Address &addr);
-bool increment(IPv6Address &addr);
-bool decrement(IPv4Address &addr);
-bool decrement(IPv6Address &addr);
+bool increment(IPv4Address& addr);
+bool increment(IPv6Address& addr);
+bool decrement(IPv4Address& addr);
+bool decrement(IPv6Address& addr);
 template<size_t n>
-bool increment(HWAddress<n> &addr) {
+bool increment(HWAddress<n>& addr) {
     return increment_buffer(addr);
 }
 template<size_t n>
-bool decrement(HWAddress<n> &addr) {
+bool decrement(HWAddress<n>& addr) {
     return decrement_buffer(addr);
 }
 
 IPv4Address last_address_from_mask(IPv4Address addr, IPv4Address mask);
-IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address &mask);
+IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask);
 template<size_t n>
-HWAddress<n> last_address_from_mask(HWAddress<n> addr, const HWAddress<n> &mask) {
+HWAddress<n> last_address_from_mask(HWAddress<n> addr, const HWAddress<n>& mask) {
     typename HWAddress<n>::iterator addr_iter = addr.begin();
-    for(typename HWAddress<n>::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
+    for (typename HWAddress<n>::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
         *addr_iter = *addr_iter | ~*it;
     }
     return addr;
 }
 
-inline bool is_dot3(const uint8_t *ptr, size_t sz) {
+inline bool is_dot3(const uint8_t* ptr, size_t sz) {
     return (sz >= 13 && ptr[12] < 8);
 }
 

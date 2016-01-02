@@ -45,9 +45,9 @@ class IP;
 class IPv6;
 
 namespace Internals {
+
 template<typename PDUType>
-PDU *default_allocator(const uint8_t *buffer, uint32_t size)
-{
+PDU* default_allocator(const uint8_t* buffer, uint32_t size) {
     return new PDUType(buffer, size);
 }
 
@@ -58,25 +58,21 @@ public:
     typedef PDU *(*allocator_type)(const uint8_t *, uint32_t);
 
     template<typename PDUType>
-    static void register_allocator(id_type identifier)
-    {
+    static void register_allocator(id_type identifier) {
         allocators[identifier] = &default_allocator<PDUType>;
         pdu_types[PDUType::pdu_flag] = identifier;
     }
 
-    static PDU *allocate(id_type identifier, const uint8_t *buffer, uint32_t size) 
-    {
+    static PDU* allocate(id_type identifier, const uint8_t* buffer, uint32_t size) {
         typename allocators_type::const_iterator it = allocators.find(identifier);
         return (it == allocators.end()) ? 0 : (*it->second)(buffer, size);
     }
 
-    static bool pdu_type_registered(PDU::PDUType type)
-    {
+    static bool pdu_type_registered(PDU::PDUType type) {
         return pdu_types.count(type) != 0;
     }
 
-    static id_type pdu_type_to_id(PDU::PDUType type) 
-    {
+    static id_type pdu_type_to_id(PDU::PDUType type) {
         typename pdu_map_types::const_iterator it = pdu_types.find(type);
         return it->second;
     }
@@ -118,26 +114,23 @@ TINS_GENERATE_TAG_MAPPER(IPv6, uint8_t)
 #undef TINS_GENERATE_TAG_MAPPER
 
 template<typename PDUType>
-PDU* allocate(
-    typename pdu_tag_mapper<PDUType>::type::identifier_type id, 
-    const uint8_t *buffer, 
-    uint32_t size)
-{
+PDU* allocate(typename pdu_tag_mapper<PDUType>::type::identifier_type id, 
+              const uint8_t* buffer, 
+              uint32_t size) {
     return PDUAllocator<typename pdu_tag_mapper<PDUType>::type>::allocate(id, buffer, size);
 }
 
 template<typename PDUType>
-bool pdu_type_registered(PDU::PDUType type)
-{
+bool pdu_type_registered(PDU::PDUType type) {
     return PDUAllocator<typename pdu_tag_mapper<PDUType>::type>::pdu_type_registered(type);
 }
 
 template<typename PDUType>
-typename pdu_tag_mapper<PDUType>::type::identifier_type pdu_type_to_id(PDU::PDUType type) 
-{
+typename pdu_tag_mapper<PDUType>::type::identifier_type pdu_type_to_id(PDU::PDUType type)  {
     return PDUAllocator<typename pdu_tag_mapper<PDUType>::type>::pdu_type_to_id(type);
 }
-} // namespace Interals
+
+} // Interals
 /**
  * \endcond
  */
@@ -170,13 +163,13 @@ namespace Allocators {
  * the same way.
  */
 template<typename PDUType, typename AllocatedType>
-void register_allocator(typename Internals::pdu_tag_mapper<PDUType>::type::identifier_type id)
-{
+void register_allocator(typename Internals::pdu_tag_mapper<PDUType>::type::identifier_type id) {
     Internals::PDUAllocator<
         typename Internals::pdu_tag_mapper<PDUType>::type
     >::template register_allocator<AllocatedType>(id);
 }
-} // namespace Allocators
-} // namespace Tins
+
+} // Allocators
+} // Tins
 
 #endif // TINS_PDU_ALLOCATOR_H

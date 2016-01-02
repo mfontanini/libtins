@@ -33,7 +33,13 @@
 #include <functional>
 #include <tins/tins.h>
 
-using namespace std;
+using std::cout;
+using std::endl;
+using std::bind;
+using std::string;
+using std::runtime_error;
+using std::exception;
+
 using namespace Tins;
 
 // This class captured packets on an interface, using the specified filter
@@ -42,93 +48,93 @@ using namespace Tins;
 // has swapped HW and IP addresses (dst as src, src as dst).
 class ICMPResponder {
 public:
-	// Use the given interface and ICMP type/code on responses
-	ICMPResponder(string iface, int type, int code) 
-	: m_iface(iface), m_sender(iface), m_type(type), m_code(code) {
+    // Use the given interface and ICMP type/code on responses
+    ICMPResponder(string iface, int type, int code) 
+    : m_iface(iface), m_sender(iface), m_type(type), m_code(code) {
 
-	}
+    }
 
-	// Run using the given filter
-	void run(const string& filter) {
-		// Initialize the configuration
-		SnifferConfiguration config;
-		// Use promiscuous mode
-		config.set_promisc_mode(true);
-		// Use this packet filter
-		config.set_filter(filter);
-		// Use immediate mode (we don't want to buffer packets, we want the mright away).
-		config.set_immediate_mode(true);
+    // Run using the given filter
+    void run(const string& filter) {
+        // Initialize the configuration
+        SnifferConfiguration config;
+        // Use promiscuous mode
+        config.set_promisc_mode(true);
+        // Use this packet filter
+        config.set_filter(filter);
+        // Use immediate mode (we don't want to buffer packets, we want the mright away).
+        config.set_immediate_mode(true);
 
-		// Now create the Sniffer
-		Sniffer sniffer(m_iface, config);
-		if (sniffer.link_type() != DLT_EN10MB) {
-			throw runtime_error("Ethernet interfaces only supported");
-		}
-		// Start the sniffing! For each packet, ICMPReponder::callback will be called
-		sniffer.sniff_loop(bind(&ICMPResponder::callback, this, placeholders::_1));
-	}
+        // Now create the Sniffer
+        Sniffer sniffer(m_iface, config);
+        if (sniffer.link_type() != DLT_EN10MB) {
+            throw runtime_error("Ethernet interfaces only supported");
+        }
+        // Start the sniffing! For each packet, ICMPReponder::callback will be called
+        sniffer.sniff_loop(bind(&ICMPResponder::callback, this, std::placeholders::_1));
+    }
 private:
-	// Extracts the payload to be used over the ICMP layer in the response.
-	// This will be the entire IP header + 8 bytes of the next header.
-	RawPDU extract_icmp_payload(IP& pdu) {
-		PDU::serialization_type buffer = pdu.serialize();
-		// Use whole IP + 8 bytes of next header.
-		size_t end_index = pdu.header_size() + 8;
-		return RawPDU(buffer.begin(), buffer.begin() + end_index);
-	}
+    // Extracts the payload to be used over the ICMP layer in the response.
+    // This will be the entire IP header + 8 bytes of the next header.
+    RawPDU extract_icmp_payload(IP& pdu) {
+        PDU::serialization_type buffer = pdu.serialize();
+        // Use whole IP + 8 bytes of next header.
+        size_t end_index = pdu.header_size() + 8;
+        return RawPDU(buffer.begin(), buffer.begin() + end_index);
+    }
 
-	// Generates an ICMP response given a packet.
-	EthernetII generate_response(PDU& pdu) {
-		// Find Ethernet and IP headers.
-		EthernetII& received_eth = pdu.rfind_pdu<EthernetII>();
-		IP& received_ip = pdu.rfind_pdu<IP>();
+    // Generates an ICMP response given a packet.
+    EthernetII generate_response(PDU& pdu) {
+        // Find Ethernet and IP headers.
+        EthernetII& received_eth = pdu.rfind_pdu<EthernetII>();
+        IP& received_ip = pdu.rfind_pdu<IP>();
 
-		// Create an Ethernet response, flipping the addresses
-		EthernetII output(received_eth.src_addr(), received_eth.dst_addr());
-		// Append an IP PDU, again flipping addresses.
-		//output /= IP(received_ip.src_addr(), received_ip.dst_addr());
-		output /= IP(received_ip.src_addr(), "8.8.8.8");
+        // Create an Ethernet response, flipping the addresses
+        EthernetII output(received_eth.src_addr(), received_eth.dst_addr());
+        // Append an IP PDU, again flipping addresses.
+        //output /= IP(received_ip.src_addr(), received_ip.dst_addr());
+        output /= IP(received_ip.src_addr(), "8.8.8.8");
 
-		// Now generate the ICMP layer using the type and code provided.
-		ICMP icmp;
-		icmp.type(static_cast<ICMP::Flags>(m_type));
-		icmp.code(m_code);
-		// Append the ICMP layer to our packet
-		output /= icmp;
-		// Extract the payload to be used over ICMP.
-		output /= extract_icmp_payload(received_ip);
-		return output;
-	}
+        // Now generate the ICMP layer using the type and code provided.
+        ICMP icmp;
+        icmp.type(static_cast<ICMP::Flags>(m_type));
+        icmp.code(m_code);
+        // Append the ICMP layer to our packet
+        output /= icmp;
+        // Extract the payload to be used over ICMP.
+        output /= extract_icmp_payload(received_ip);
+        return output;
+    }
 
-	// Packet capture callback
-	bool callback(PDU& pdu) {
-		// Generate a response for this packet
-		EthernetII response = generate_response(pdu);
-		// Send this packet!
-		m_sender.send(response);
-		return true;
-	}
+    // Packet capture callback
+    bool callback(PDU& pdu) {
+        // Generate a response for this packet
+        EthernetII response = generate_response(pdu);
+        // Send this packet!
+        m_sender.send(response);
+        return true;
+    }
 
-	string m_iface;
-	PacketSender m_sender;
-	int m_type;
-	int m_code;
+    string m_iface;
+    PacketSender m_sender;
+    int m_type;
+    int m_code;
 };
 
-int main(int argc, char *argv[]) {
-	const int type = 3;
-	const int code = 0;
-	if (argc < 3) {
-		cout << "Usage: " << argv[0] << " <interface> <pcap_filter>" << endl;
-		return 1;
-	}
-	string iface = argv[1];
-	string filter = argv[2];
-	try {
-		ICMPResponder responder(iface, type, code);
-		responder.run(filter);
-	}
-	catch (exception& ex) {
-		cout << "Error: " << ex.what() << endl;
-	}
+int main(int argc, char* argv[]) {
+    const int type = 3;
+    const int code = 0;
+    if (argc < 3) {
+        cout << "Usage: " << argv[0] << " <interface> <pcap_filter>" << endl;
+        return 1;
+    }
+    string iface = argv[1];
+    string filter = argv[2];
+    try {
+        ICMPResponder responder(iface, type, code);
+        responder.run(filter);
+    }
+    catch (exception& ex) {
+        cout << "Error: " << ex.what() << endl;
+    }
 }

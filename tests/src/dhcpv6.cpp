@@ -10,7 +10,7 @@ class DHCPv6Test : public testing::Test {
 public:
     static const uint8_t expected_packet[];
 
-    void test_equals(const DHCPv6 &dhcp1, const DHCPv6 &dhcp2);
+    void test_equals(const DHCPv6& dhcp1, const DHCPv6& dhcp2);
 };
 
 const uint8_t DHCPv6Test::expected_packet[] = {

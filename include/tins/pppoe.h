@@ -93,10 +93,10 @@ public:
         uint32_t vendor_id;
         data_type data;
         
-        vendor_spec_type(uint32_t vendor_id = 0, const data_type &data = data_type())
+        vendor_spec_type(uint32_t vendor_id = 0, const data_type& data = data_type())
         : vendor_id(vendor_id), data(data) { }
         
-        static vendor_spec_type from_option(const tag &opt);
+        static vendor_spec_type from_option(const tag& opt);
     };
     
     /**
@@ -120,7 +120,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    PPPoE(const uint8_t *buffer, uint32_t total_sz);
+    PPPoE(const uint8_t* buffer, uint32_t total_sz);
 
     // Getters
 
@@ -129,7 +129,7 @@ public:
      *  \return The stored version field value.
      */
     small_uint<4> version() const {
-        return _header.version;
+        return header_.version;
     }
 
     /**
@@ -137,7 +137,7 @@ public:
      *  \return The stored type field value.
      */
     small_uint<4> type() const {
-        return _header.type;
+        return header_.type;
     }
 
     /**
@@ -145,7 +145,7 @@ public:
      *  \return The stored code field value.
      */
     uint8_t code() const {
-        return _header.code;
+        return header_.code;
     }
 
     /**
@@ -153,7 +153,7 @@ public:
      *  \return The stored session_id field value.
      */
     uint16_t session_id() const {
-        return Endian::be_to_host(_header.session_id);
+        return Endian::be_to_host(header_.session_id);
     }
 
     /**
@@ -161,7 +161,7 @@ public:
      *  \return The stored payload_length field value.
      */
     uint16_t payload_length() const {
-        return Endian::be_to_host(_header.payload_length);
+        return Endian::be_to_host(header_.payload_length);
     }
     
     /**
@@ -174,18 +174,18 @@ public:
     /**
      * \brief Returns the list of tags.
      */
-    const tags_type &tags() const {
-        return _tags;
+    const tags_type& tags() const {
+        return tags_;
     }
 
     /**
      * \sa PDU::clone
      */
-    PPPoE *clone() const {
+    PPPoE* clone() const {
         return new PPPoE(*this);
     }
     
-    const tag *search_tag(TagTypes identifier) const;
+    const tag* search_tag(TagTypes identifier) const;
     
     /**
      * \brief Getter for the PDU's type.
@@ -230,7 +230,7 @@ public:
      *
      * \param option The option to be added.
      */
-    void add_tag(const tag &option);
+    void add_tag(const tag& option);
     
     #if TINS_IS_CXX11
         /**
@@ -241,8 +241,8 @@ public:
          * \param option The option to be added.
          */
         void add_tag(tag &&option) {
-            _tags_size += static_cast<uint16_t>(option.data_size() + sizeof(uint16_t) * 2);
-            _tags.push_back(std::move(option));
+            tags_size_ += static_cast<uint16_t>(option.data_size() + sizeof(uint16_t) * 2);
+            tags_.push_back(std::move(option));
         }
     #endif
     
@@ -258,63 +258,63 @@ public:
      * 
      * \param value The service name.
      */
-    void service_name(const std::string &value);
+    void service_name(const std::string& value);
     
     /**
      * \brief Adds a AC-name tag.
      * 
      * \param value The AC name.
      */
-    void ac_name(const std::string &value);
+    void ac_name(const std::string& value);
     
     /**
      * \brief Adds a host-uniq tag.
      * 
      * \param value The tag's value.
      */
-    void host_uniq(const byte_array &value);
+    void host_uniq(const byte_array& value);
     
     /**
      * \brief Adds a AC-Cookie tag.
      * 
      * \param value The tag's value.
      */
-    void ac_cookie(const byte_array &value);
+    void ac_cookie(const byte_array& value);
     
     /**
      * \brief Adds a Vendor-Specific tag.
      * 
      * \param value The tag's value.
      */
-    void vendor_specific(const vendor_spec_type &value);
+    void vendor_specific(const vendor_spec_type& value);
     
     /**
      * \brief Adds a Relay-Session-Id tag.
      * 
      * \param value The tag's value.
      */
-    void relay_session_id(const byte_array &value);
+    void relay_session_id(const byte_array& value);
     
     /**
      * \brief Adds a Service-Name-Error tag.
      * 
      * \param value The tag's value.
      */
-    void service_name_error(const std::string &value);
+    void service_name_error(const std::string& value);
     
     /**
      * \brief Adds a AC-System-Error tag.
      * 
      * \param value The tag's value.
      */
-    void ac_system_error(const std::string &value);
+    void ac_system_error(const std::string& value);
     
     /**
      * \brief Adds a Generic-Error tag.
      * 
      * \param value The tag's value.
      */
-    void generic_error(const std::string &value);
+    void generic_error(const std::string& value);
     
     // Option getters
     
@@ -390,10 +390,10 @@ public:
      */
     std::string generic_error() const;
 private:
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
     
     template<typename T>
-    void add_tag_iterable(TagTypes id, const T &data) {
+    void add_tag_iterable(TagTypes id, const T& data) {
         add_tag(
             tag(
                 id,
@@ -405,14 +405,15 @@ private:
     
     template<typename T>
     T search_and_convert(TagTypes id) const {
-        const tag *t = search_tag(id);
-        if(!t)
+        const tag* t = search_tag(id);
+        if (!t) {
             throw option_not_found();
+        }
         return t->to<T>();
     }
 
     TINS_BEGIN_PACK
-    struct pppoe_hdr {
+    struct pppoe_header {
         #if TINS_IS_LITTLE_ENDIAN
             uint8_t version:4,  
                     type:4;
@@ -426,9 +427,9 @@ private:
         uint16_t payload_length;
     } TINS_END_PACK;
 
-    pppoe_hdr _header;
-    tags_type _tags;
-    uint16_t _tags_size;
+    pppoe_header header_;
+    tags_type tags_;
+    uint16_t tags_size_;
 };
 }
 

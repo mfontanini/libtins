@@ -22,7 +22,7 @@ const uint8_t Dot11ProbeResponseTest::expected_packet[] = {
     0, 0, 145, 138, 131, 39, 223, 152, 166, 23, 141, 146, 0, 0
 };
 
-void test_equals(const Dot11ProbeResponse &dot1, const Dot11ProbeResponse &dot2) {
+void test_equals(const Dot11ProbeResponse& dot1, const Dot11ProbeResponse& dot2) {
     EXPECT_EQ(dot1.interval(), dot2.interval());
     EXPECT_EQ(dot1.timestamp(), dot2.timestamp());
     test_equals(
@@ -31,7 +31,7 @@ void test_equals(const Dot11ProbeResponse &dot1, const Dot11ProbeResponse &dot2)
     );
 }
 
-void test_equals_expected(const Dot11ProbeResponse &dot11) {
+void test_equals_expected(const Dot11ProbeResponse& dot11) {
     test_equals_expected(static_cast<const Dot11ManagementFrame&>(dot11));
     EXPECT_EQ(dot11.timestamp(), 0x17a698df27838a91ULL);
     EXPECT_EQ(dot11.interval(), 0x928d);
@@ -85,7 +85,7 @@ TEST_F(Dot11ProbeResponseTest, ClonePDU) {
 TEST_F(Dot11ProbeResponseTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11ProbeResponse *inner = dot11->find_pdu<Dot11ProbeResponse>();
+    const Dot11ProbeResponse* inner = dot11->find_pdu<Dot11ProbeResponse>();
     ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }

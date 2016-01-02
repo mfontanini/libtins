@@ -63,7 +63,7 @@ public:
      * 
      * \param ip const char* containing the dotted-notation address.
      */
-    IPv4Address(const char *ip = 0);
+    IPv4Address(const char* ip = 0);
     
     /**
      * \brief Constructor taking a std::string.
@@ -72,7 +72,7 @@ public:
      * 
      * \param ip std::string containing the dotted-notation address.
      */
-    IPv4Address(const std::string &ip);
+    IPv4Address(const std::string& ip);
     
     /**
      * \brief Constructor taking a IP address represented as a
@@ -102,8 +102,8 @@ public:
      * \param rhs The address to be compared.
      * \return bool indicating whether this address equals rhs.
      */
-    bool operator==(const IPv4Address &rhs) const {
-        return ip_addr == rhs.ip_addr;
+    bool operator==(const IPv4Address& rhs) const {
+        return ip_addr_ == rhs.ip_addr_;
     }
     
     /**
@@ -113,7 +113,7 @@ public:
      * \return bool indicating whether this address is distinct 
      * from rhs.
      */
-    bool operator!=(const IPv4Address &rhs) const {
+    bool operator!=(const IPv4Address& rhs) const {
         return !(*this == rhs);
     }
     
@@ -123,8 +123,8 @@ public:
      * \param rhs The address to be compared.
      * \return bool indicating whether this address is less-than rhs.
      */
-    bool operator< (const IPv4Address &rhs) const {
-        return ip_addr < rhs.ip_addr;
+    bool operator< (const IPv4Address& rhs) const {
+        return ip_addr_ < rhs.ip_addr_;
     }
     
     /**
@@ -176,25 +176,27 @@ public:
      * \param addr The IPv4Address to be written.
      * \return std::stream& pointing to output.
      */
-    friend std::ostream &operator<<(std::ostream &output, const IPv4Address &addr);
+    friend std::ostream& operator<<(std::ostream& output, const IPv4Address& addr);
 private:
     uint32_t ip_to_int(const char* ip);
 
-    uint32_t ip_addr;
+    uint32_t ip_addr_;
 };
-} //namespace Tins
+
+} // Tins
 
 #if TINS_IS_CXX11
-namespace std
-{
+namespace std {
+
 template<>
 struct hash<Tins::IPv4Address> {
-    size_t operator()(const Tins::IPv4Address &addr) const {
+    size_t operator()(const Tins::IPv4Address& addr) const {
         return std::hash<uint32_t>()(addr);
     }
 };
-} // namespace std
-#endif
 
+} // std
+
+#endif // TINS_IS_CXX11
 
 #endif // TINS_IPADDRESS_H

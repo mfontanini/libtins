@@ -36,6 +36,7 @@
 #include "small_uint.h"
 
 namespace Tins {
+
 /**
  * \class Dot1Q
  * Represents an IEEE 802.1q PDU.
@@ -65,7 +66,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Dot1Q(const uint8_t *buffer, uint32_t total_sz);
+    Dot1Q(const uint8_t* buffer, uint32_t total_sz);
 
     // Getters
 
@@ -87,7 +88,7 @@ public:
      * \return The stored priority field value.
      */
     small_uint<3> priority() const {
-        return _header.priority;
+        return header_.priority;
     }
 
     /**
@@ -95,7 +96,7 @@ public:
      * \return The stored CFI field value.
      */
     small_uint<1> cfi() const {
-        return _header.cfi;
+        return header_.cfi;
     }
 
     /**
@@ -104,9 +105,9 @@ public:
      */
     small_uint<12> id() const {
         #if TINS_IS_LITTLE_ENDIAN
-            return _header.idL | (_header.idH << 8);
+            return header_.idL | (header_.idH << 8);
         #else
-            return _header.id;
+            return header_.id;
         #endif
     }
 
@@ -115,19 +116,21 @@ public:
      * \return The stored type field value.
      */
     uint16_t payload_type() const {
-        return Endian::be_to_host(_header.type);
+        return Endian::be_to_host(header_.type);
     }
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
     
     /**
      * \sa PDU::clone
      */
-    Dot1Q *clone() const {
+    Dot1Q* clone() const {
         return new Dot1Q(*this);
     }
 
@@ -136,7 +139,7 @@ public:
      * appended at the end of this packet.
      */
     bool append_padding() const {
-        return _append_padding;
+        return append_padding_;
     }
 
     // Setters
@@ -184,9 +187,9 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
 private:
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
 
     TINS_BEGIN_PACK
     struct dot1q_hdr {
@@ -204,10 +207,10 @@ private:
         #endif
     } TINS_END_PACK;
     
-    static uint16_t get_id(const dot1q_hdr *hdr);
+    static uint16_t get_id(const dot1q_hdr* hdr);
     
-    dot1q_hdr _header;
-    bool _append_padding;
+    dot1q_hdr header_;
+    bool append_padding_;
 };
 }
 

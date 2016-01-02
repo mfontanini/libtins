@@ -22,7 +22,7 @@ const uint8_t Dot11DeauthenticationTest::expected_packet[] = {
     7, 0, 0, 243, 146
 };
 
-void test_equals(const Dot11Deauthentication &dot1, const Dot11Deauthentication &dot2) {
+void test_equals(const Dot11Deauthentication& dot1, const Dot11Deauthentication& dot2) {
     EXPECT_EQ(dot1.reason_code(), dot2.reason_code());
     test_equals(
         static_cast<const Dot11ManagementFrame&>(dot1),
@@ -30,7 +30,7 @@ void test_equals(const Dot11Deauthentication &dot1, const Dot11Deauthentication 
     );
 }
 
-void test_equals_expected(const Dot11Deauthentication &dot11) {
+void test_equals_expected(const Dot11Deauthentication& dot11) {
     test_equals_expected(static_cast<const Dot11ManagementFrame&>(dot11));
     EXPECT_EQ(dot11.reason_code(), 0x92f3);
     EXPECT_EQ(dot11.subtype(), Dot11::DEAUTH);
@@ -76,7 +76,7 @@ TEST_F(Dot11DeauthenticationTest, ClonePDU) {
 TEST_F(Dot11DeauthenticationTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11Deauthentication *inner = dot11->find_pdu<Dot11Deauthentication>();
+    const Dot11Deauthentication* inner = dot11->find_pdu<Dot11Deauthentication>();
     ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }

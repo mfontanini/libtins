@@ -32,6 +32,7 @@
 #include "exceptions.h"
 #include "pktap.h"
 #include "internals.h"
+#include "exceptions.h"
 #include "memory_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
@@ -64,8 +65,8 @@ uint32_t PKTAP::header_size() const {
     return sizeof(header_);
 }
 
-void PKTAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    throw std::runtime_error("PKTAP cannot be serialized");
+void PKTAP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    throw pdu_not_serializable();
 }
 
 } // Tins

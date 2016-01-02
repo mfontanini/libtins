@@ -47,16 +47,15 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
-SNAP::SNAP() : _snap()
-{
-    _snap.dsap = _snap.ssap = 0xaa;
+SNAP::SNAP()
+: snap_() {
+    snap_.dsap = snap_.ssap = 0xaa;
     control(3);
 }
 
-SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz) 
-{
+SNAP::SNAP(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_snap);
+    stream.read(snap_);
     if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
@@ -70,39 +69,39 @@ SNAP::SNAP(const uint8_t *buffer, uint32_t total_sz)
 
 void SNAP::control(uint8_t new_control) {
     #if TINS_IS_LITTLE_ENDIAN
-    _snap.control_org = (_snap.control_org & 0xffffff00) | (new_control);
+    snap_.control_org = (snap_.control_org & 0xffffff00) | (new_control);
     #else
-    _snap.control_org = (_snap.control_org & 0xffffff) | (new_control << 24);
+    snap_.control_org = (snap_.control_org & 0xffffff) | (new_control << 24);
     #endif
 }
 
 void SNAP::org_code(small_uint<24> new_org) {
     #if TINS_IS_LITTLE_ENDIAN
-    _snap.control_org = Endian::host_to_be<uint32_t>(new_org) | control();
+    snap_.control_org = Endian::host_to_be<uint32_t>(new_org) | control();
     #else
-    _snap.control_org = new_org | (control() << 24);
+    snap_.control_org = new_org | (control() << 24);
     #endif
 }
 
 void SNAP::eth_type(uint16_t new_eth) {
-    _snap.eth_type = Endian::host_to_be(new_eth); 
+    snap_.eth_type = Endian::host_to_be(new_eth); 
 }
 
 uint32_t SNAP::header_size() const {
-    return sizeof(_snap);
+    return sizeof(snap_);
 }
 
-void SNAP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void SNAP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
             inner_pdu()->pdu_type()
         );
-        _snap.eth_type = Endian::host_to_be(
+        snap_.eth_type = Endian::host_to_be(
             static_cast<uint16_t>(flag)
         );
     }
-    stream.write(_snap);
+    stream.write(snap_);
 }
 
 } // Tins

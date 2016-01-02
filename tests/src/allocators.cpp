@@ -49,10 +49,10 @@ public:
     static const PDU::PDUType pdu_flag;
 
     DummyPDU(const uint8_t* data, uint32_t sz) : buffer(data, data + sz) { }
-    DummyPDU *clone() const { return new DummyPDU<n>(*this); }
+    DummyPDU* clone() const { return new DummyPDU<n>(*this); }
     uint32_t header_size() const { return (uint32_t)buffer.size(); }
     PDUType pdu_type() const { return pdu_flag; }
-    void write_serialization(uint8_t *data, uint32_t, const PDU *) 
+    void write_serialization(uint8_t* data, uint32_t, const PDU *) 
     { 
         std::copy(buffer.begin(), buffer.end(), data);
     }

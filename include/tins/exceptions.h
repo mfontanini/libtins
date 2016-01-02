@@ -34,6 +34,7 @@
 #include <stdexcept>
 
 namespace Tins {
+
 /**
  * \brief Base class for all libtins exceptions.
  */
@@ -99,6 +100,17 @@ public:
 };
 
 /**
+ * \brief Exception thrown when an invalid string representation of an address
+ * is provided
+ */
+class invalid_address : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Invalid address";
+    }
+};
+
+/**
  * \brief Exception thrown when a field is not present in frame.
  */
 class field_not_present : public exception_base {
@@ -113,7 +125,7 @@ public:
  */
 class socket_open_error : public exception_base {
 public:
-    socket_open_error(const std::string &msg)
+    socket_open_error(const std::string& msg)
     : exception_base(msg) { }
 };
 
@@ -122,7 +134,7 @@ public:
  */
 class socket_close_error : exception_base {
 public:
-    socket_close_error(const std::string &msg)
+    socket_close_error(const std::string& msg)
     : exception_base(msg) { }
 };
 
@@ -131,7 +143,7 @@ public:
  */
 class socket_write_error : public exception_base {
 public:
-    socket_write_error(const std::string &msg)
+    socket_write_error(const std::string& msg)
     : exception_base(msg) { }
 };
 
@@ -141,7 +153,7 @@ public:
  */
 class invalid_socket_type : public exception_base {
 public:
-    const char *what() const throw() {
+    const char* what() const throw() {
         return "The provided socket type is invalid";
     }
 };
@@ -152,7 +164,7 @@ public:
  */
 class unknown_link_type : public exception_base {
 public:
-    const char *what() const throw() {
+    const char* what() const throw() {
         return "The sniffed link layer PDU type is unknown";
     }
 };
@@ -162,7 +174,7 @@ public:
  */
 class malformed_option : public exception_base {
 public:
-    const char *what() const throw() {
+    const char* what() const throw() {
         return "Malformed option";
     }
 };
@@ -172,7 +184,7 @@ public:
  */
 class bad_tins_cast : public exception_base {
 public:
-    const char *what() const throw() {
+    const char* what() const throw() {
         return "Bad Tins cast";
     }
 };
@@ -183,7 +195,7 @@ public:
  */
 class protocol_disabled : public exception_base {
 public:
-    const char *what() const throw() {
+    const char* what() const throw() {
         return "Protocol disabled";
     }
 };
@@ -194,8 +206,60 @@ public:
  */
 class option_payload_too_large : public exception_base {
 public:
-    const char *what() const throw() {
+    const char* what() const throw() {
         return "Option payload too large";
+    }
+};
+
+/**
+ * \brief Generic pcap error
+ */
+class pcap_error : public exception_base {
+public:
+    pcap_error(const char* message) : exception_base(message) {
+
+    }
+};
+
+/**
+ * \brief Exception thrown when an invalid pcap filter is compiled
+ */
+class invalid_pcap_filter : public exception_base {
+public:
+    invalid_pcap_filter(const char* message) : exception_base(message) {
+
+    }
+};
+
+/**
+ * \brief Exception thrown when serialiation of a non-serializable PDU
+ * is attempted
+ */
+class pdu_not_serializable : public exception_base {
+public:
+    const char* what() const throw() {
+        return "PDU not serializable";
+    }
+};
+
+/**
+ * \brief Exception thrown when opening a pcap handle fails
+ */
+class pcap_open_failed : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Failed to create pcap handle";
+    }
+};
+
+/**
+ * \brief Exception thrown when a function not supported on the current OS
+ * is called
+ */
+class unsupported_function : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Function is not supported on this OS";
     }
 };
 
@@ -206,7 +270,7 @@ namespace WPA2 {
      */
     class invalid_handshake : public exception_base {
     public:
-        const char *what() const throw() {
+        const char* what() const throw() {
             return "Invalid WPA2 handshake";
         }
     };

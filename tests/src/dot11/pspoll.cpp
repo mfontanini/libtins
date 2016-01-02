@@ -21,14 +21,14 @@ const uint8_t Dot11PSPollTest::expected_packet[] = {
     165, 1, 79, 35, 0, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 6
 };
 
-void test_equals(const Dot11PSPoll &dot1, const Dot11PSPoll &dot2) {
+void test_equals(const Dot11PSPoll& dot1, const Dot11PSPoll& dot2) {
     test_equals(
         static_cast<const Dot11ControlTA&>(dot1),
         static_cast<const Dot11ControlTA&>(dot2)
     );
 }
 
-void test_equals_expected(const Dot11PSPoll &dot11) {
+void test_equals_expected(const Dot11PSPoll& dot11) {
     test_equals_expected(static_cast<const Dot11ControlTA&>(dot11));
     EXPECT_EQ(dot11.subtype(), Dot11::PS);
 }
@@ -66,7 +66,7 @@ TEST_F(Dot11PSPollTest, ClonePDU) {
 TEST_F(Dot11PSPollTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11PSPoll *inner = dot11->find_pdu<Dot11PSPoll>();
+    const Dot11PSPoll* inner = dot11->find_pdu<Dot11PSPoll>();
     ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }

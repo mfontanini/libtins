@@ -30,51 +30,47 @@
 #include <stdexcept>
 #include "offline_packet_filter.h"
 #include "pdu.h"
+#include "exceptions.h"
+
+using std::string;
 
 namespace Tins {
 
-OfflinePacketFilter::OfflinePacketFilter(const OfflinePacketFilter& other)
-{
+OfflinePacketFilter::OfflinePacketFilter(const OfflinePacketFilter& other) {
     *this = other;
 }
 
-OfflinePacketFilter& OfflinePacketFilter::operator=(const OfflinePacketFilter& other)
-{
-    string_filter = other.string_filter;
-    init(string_filter, pcap_datalink(other.handle), pcap_snapshot(other.handle));
-    return *this;
+OfflinePacketFilter& OfflinePacketFilter::operator=(const OfflinePacketFilter& other) {
+    string_filter_ = other.string_filter_;
+    init(string_filter_, pcap_datalink(other.handle_), pcap_snapshot(other.handle_));
+    return* this;
 }
 
-OfflinePacketFilter::~OfflinePacketFilter()
-{
-    pcap_freecode(&filter);
-    pcap_close(handle);
+OfflinePacketFilter::~OfflinePacketFilter() {
+    pcap_freecode(&filter_);
+    pcap_close(handle_);
 }
 
-void OfflinePacketFilter::init(const std::string& pcap_filter, int link_type, 
-    unsigned int snap_len) 
-{
-    handle = pcap_open_dead(
+void OfflinePacketFilter::init(const string& pcap_filter, 
+                               int link_type, 
+                               unsigned int snap_len) {
+    handle_ = pcap_open_dead(
         link_type,
         snap_len
     );
-    if(pcap_compile(handle, &filter, pcap_filter.c_str(), 1, 0xffffffff) == -1)
-    {
-        throw std::runtime_error(pcap_geterr(handle));
+    if (pcap_compile(handle_, &filter_, pcap_filter.c_str(), 1, 0xffffffff) == -1) {
+        throw invalid_pcap_filter(pcap_geterr(handle_));
     }
 }
 
-bool OfflinePacketFilter::matches_filter(const uint8_t* buffer, 
-    uint32_t total_sz) const
-{
+bool OfflinePacketFilter::matches_filter(const uint8_t* buffer, uint32_t total_sz) const {
     pcap_pkthdr header = {};
     header.len = total_sz;
     header.caplen = total_sz;
-    return pcap_offline_filter(&filter, &header, buffer) != 0;
+    return pcap_offline_filter(&filter_, &header, buffer) != 0;
 }
 
-bool OfflinePacketFilter::matches_filter(PDU& pdu) const
-{
+bool OfflinePacketFilter::matches_filter(PDU& pdu) const {
     PDU::serialization_type buffer = pdu.serialize();
     return matches_filter(&buffer[0], static_cast<uint32_t>(buffer.size()));
 }

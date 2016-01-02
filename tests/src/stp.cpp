@@ -12,7 +12,7 @@ using namespace Tins;
 class STPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
-    static void test_equals(const STP::bpdu_id_type &lhs, const STP::bpdu_id_type &rhs);
+    static void test_equals(const STP::bpdu_id_type& lhs, const STP::bpdu_id_type& rhs);
 };
 
 const uint8_t STPTest::expected_packet[] = { 
@@ -21,7 +21,7 @@ const uint8_t STPTest::expected_packet[] = {
     0
 };
 
-void STPTest::test_equals(const STP::bpdu_id_type &lhs, const STP::bpdu_id_type &rhs) {
+void STPTest::test_equals(const STP::bpdu_id_type& lhs, const STP::bpdu_id_type& rhs) {
     EXPECT_EQ(lhs.priority, rhs.priority);
     EXPECT_EQ(lhs.ext_id, rhs.ext_id);
     EXPECT_EQ(lhs.id, rhs.id);
@@ -78,8 +78,8 @@ TEST_F(STPTest, ChainedPDUs) {
         0, 0, 144, 76, 8, 23, 181, 128, 1, 0, 0, 20, 0, 2, 0, 0, 0
     };
     Dot3 pkt(input, sizeof(input));
-    STP *stp = pkt.find_pdu<STP>();
-    LLC *llc = pkt.find_pdu<LLC>();
+    STP* stp = pkt.find_pdu<STP>();
+    LLC* llc = pkt.find_pdu<LLC>();
     ASSERT_TRUE(stp != NULL);
     ASSERT_TRUE(llc != NULL);
     EXPECT_EQ(0x8001, stp->port_id());

@@ -36,33 +36,36 @@
 #include "rawpdu.h"
 #include "memory_helpers.h"
 
+using std::copy;
+using std::min;
+using std::memset;
+using std::memcpy;
+
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
 EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) 
-: _header()
-{
-    _header.version = 1;
-    _header.packet_type = packet_type;
-    _header.type = (uint8_t)type;
+: header_() {
+    header_.version = 1;
+    header_.packet_type = packet_type;
+    header_.type = (uint8_t)type;
 }
 
-EAPOL::EAPOL(const uint8_t *buffer, uint32_t total_sz) 
-{
+EAPOL::EAPOL(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_header);
+    stream.read(header_);
 }
 
-EAPOL *EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
-    if (total_sz < sizeof(eapolhdr)) {
+EAPOL* EAPOL::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
+    if (total_sz < sizeof(eapol_header)) {
         throw malformed_packet();
     }
-    const eapolhdr *ptr = (const eapolhdr*)buffer;
+    const eapol_header* ptr = (const eapol_header*)buffer;
     uint32_t data_len = Endian::be_to_host<uint16_t>(ptr->length);
     // at least 4 for fields always present
-    total_sz = std::min(
+    total_sz = min(
         total_sz, 
         data_len + 4
     );
@@ -79,208 +82,203 @@ EAPOL *EAPOL::from_bytes(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 void EAPOL::version(uint8_t new_version) {
-    _header.version = new_version;
+    header_.version = new_version;
 }
         
 void EAPOL::packet_type(uint8_t new_ptype) {
-    _header.packet_type = new_ptype;
+    header_.packet_type = new_ptype;
 }
 
 void EAPOL::length(uint16_t new_length) {
-    _header.length = Endian::host_to_be(new_length);
+    header_.length = Endian::host_to_be(new_length);
 }
 
 void EAPOL::type(uint8_t new_type) {
-    _header.type = new_type;
+    header_.type = new_type;
 }
 
-void EAPOL::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+void EAPOL::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
     OutputMemoryStream stream(buffer, total_sz);
     length(total_sz - 4);
-    stream.write(_header);
-    std::memcpy(buffer, &_header, sizeof(_header));
+    stream.write(header_);
+    memcpy(buffer, &header_, sizeof(header_));
     write_body(stream);
 }
 
 /* RC4EAPOL */
 
 RC4EAPOL::RC4EAPOL() 
-: EAPOL(0x03, RC4) 
-{
-    std::memset(&_header, 0, sizeof(_header));
+: EAPOL(0x03, RC4) {
+    memset(&header_, 0, sizeof(header_));
 }
 
-RC4EAPOL::RC4EAPOL(const uint8_t *buffer, uint32_t total_sz) 
-: EAPOL(buffer, total_sz)
-{
+RC4EAPOL::RC4EAPOL(const uint8_t* buffer, uint32_t total_sz) 
+: EAPOL(buffer, total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.skip(sizeof(eapolhdr));
-    stream.read(_header);
+    stream.skip(sizeof(eapol_header));
+    stream.read(header_);
     if (stream.size() >= key_length()) {
-        _key.assign(stream.pointer(), stream.pointer() + key_length());
-        stream.skip(key_length());
+        stream.read(key_, key_length());
         if (stream) {
             inner_pdu(new RawPDU(stream.pointer(), stream.size()));
         }
     }
 }
 
-void RC4EAPOL::key_length(uint16_t new_key_length) {
-    _header.key_length = Endian::host_to_be(new_key_length);
+void RC4EAPOL::key_length(uint16_t length) {
+    header_.key_length = Endian::host_to_be(length);
 }
         
-void RC4EAPOL::replay_counter(uint64_t new_replay_counter) {
-    _header.replay_counter = Endian::host_to_be(new_replay_counter);
+void RC4EAPOL::replay_counter(uint64_t value) {
+    header_.replay_counter = Endian::host_to_be(value);
 }
 
-void RC4EAPOL::key_iv(const uint8_t *new_key_iv) {
-    std::copy(new_key_iv, new_key_iv + sizeof(_header.key_iv), _header.key_iv);
+void RC4EAPOL::key_iv(const uint8_t* ptr) {
+    copy(ptr, ptr + sizeof(header_.key_iv), header_.key_iv);
 }
 
-void RC4EAPOL::key_flag(small_uint<1> new_key_flag) {
-    _header.key_flag = new_key_flag;
+void RC4EAPOL::key_flag(small_uint<1> flag) {
+    header_.key_flag = flag;
 }
 
 void RC4EAPOL::key_index(small_uint<7> new_key_index) {
-    _header.key_index = new_key_index;
+    header_.key_index = new_key_index;
 }
 
-void RC4EAPOL::key_sign(const uint8_t *new_key_sign) {
-    std::memcpy(_header.key_sign, new_key_sign, sizeof(_header.key_sign));
+void RC4EAPOL::key_sign(const uint8_t* ptr) {
+    memcpy(header_.key_sign, ptr, sizeof(header_.key_sign));
 }
 
-void RC4EAPOL::key(const key_type &new_key) {
-    _key = new_key;
+void RC4EAPOL::key(const key_type& new_key) {
+    key_ = new_key;
 }
 
 uint32_t RC4EAPOL::header_size() const {
-    return static_cast<uint32_t>(sizeof(eapolhdr) + sizeof(_header) + _key.size());
+    return static_cast<uint32_t>(sizeof(eapol_header) + sizeof(header_) + key_.size());
 }
 
 void RC4EAPOL::write_body(OutputMemoryStream& stream) {
-    if (_key.size()) {
-        _header.key_length = Endian::host_to_be(static_cast<uint16_t>(_key.size()));
+    if (key_.size()) {
+        header_.key_length = Endian::host_to_be(static_cast<uint16_t>(key_.size()));
     }
-    stream.write(_header);
-    stream.write(_key.begin(), _key.end());
+    stream.write(header_);
+    stream.write(key_.begin(), key_.end());
 }
 
 /* RSNEAPOL */
 
 
 RSNEAPOL::RSNEAPOL() 
-: EAPOL(0x03, RSN) 
-{
-    std::memset(&_header, 0, sizeof(_header));
+: EAPOL(0x03, RSN) {
+    memset(&header_, 0, sizeof(header_));
 }
 
-RSNEAPOL::RSNEAPOL(const uint8_t *buffer, uint32_t total_sz) 
-: EAPOL(buffer, total_sz)
-{
+RSNEAPOL::RSNEAPOL(const uint8_t* buffer, uint32_t total_sz) 
+: EAPOL(buffer, total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.skip(sizeof(eapolhdr));
-    stream.read(_header);
+    stream.skip(sizeof(eapol_header));
+    stream.read(header_);
     if (stream.size() >= wpa_length()) {
-        _key.assign(stream.pointer(), stream.pointer() + wpa_length());
-        stream.skip(wpa_length());
+        stream.read(key_, wpa_length());
         if (stream) {
             inner_pdu(new RawPDU(stream.pointer(), stream.size()));
         }
     }
 }
 
-void RSNEAPOL::nonce(const uint8_t *new_nonce) {
-    std::copy(new_nonce, new_nonce + nonce_size, _header.nonce);
+void RSNEAPOL::nonce(const uint8_t* ptr) {
+    copy(ptr, ptr + nonce_size, header_.nonce);
 }
 
-void RSNEAPOL::rsc(const uint8_t *new_rsc) {
-    std::copy(new_rsc, new_rsc + rsc_size, _header.rsc);
+void RSNEAPOL::rsc(const uint8_t* ptr) {
+    copy(ptr, ptr + rsc_size, header_.rsc);
 }
 
-void RSNEAPOL::id(const uint8_t *new_id) {
-    std::copy(new_id, new_id + id_size, _header.id);
+void RSNEAPOL::id(const uint8_t* ptr) {
+    copy(ptr, ptr + id_size, header_.id);
 }
 
 void RSNEAPOL::replay_counter(uint64_t new_replay_counter) {
-    _header.replay_counter = Endian::host_to_be(new_replay_counter);
+    header_.replay_counter = Endian::host_to_be(new_replay_counter);
 }
 
-void RSNEAPOL::mic(const uint8_t *new_mic) {
-    std::copy(new_mic, new_mic + mic_size, _header.mic);
+void RSNEAPOL::mic(const uint8_t* ptr) {
+    copy(ptr, ptr + mic_size, header_.mic);
 }
 
-void RSNEAPOL::wpa_length(uint16_t new_wpa_length) {
-    _header.wpa_length = Endian::host_to_be(new_wpa_length);
+void RSNEAPOL::wpa_length(uint16_t length) {
+    header_.wpa_length = Endian::host_to_be(length);
 }
 
-void RSNEAPOL::key_iv(const uint8_t *new_key_iv) {
-    std::copy(new_key_iv, new_key_iv + sizeof(_header.key_iv), _header.key_iv);
+void RSNEAPOL::key_iv(const uint8_t* ptr) {
+    copy(ptr, ptr + sizeof(header_.key_iv), header_.key_iv);
 }
 
-void RSNEAPOL::key_length(uint16_t new_key_length) {
-    _header.key_length = Endian::host_to_be(new_key_length);
+void RSNEAPOL::key_length(uint16_t length) {
+    header_.key_length = Endian::host_to_be(length);
 }
 
-void RSNEAPOL::key(const key_type &new_key) {
-    _key = new_key;
-    _header.key_t = 0;
+void RSNEAPOL::key(const key_type& value) {
+    key_ = value;
+    header_.key_t = 0;
 }
 
-void RSNEAPOL::key_mic(small_uint<1> new_key_mic) {
-    _header.key_mic = new_key_mic;
+void RSNEAPOL::key_mic(small_uint<1> flag) {
+    header_.key_mic = flag;
 }
 
-void RSNEAPOL::secure(small_uint<1> new_secure) {
-    _header.secure = new_secure;
+void RSNEAPOL::secure(small_uint<1> flag) {
+    header_.secure = flag;
 }
 
-void RSNEAPOL::error(small_uint<1> new_error) {
-    _header.error = new_error;
+void RSNEAPOL::error(small_uint<1> flag) {
+    header_.error = flag;
 }
 
-void RSNEAPOL::request(small_uint<1> new_request) {
-    _header.request = new_request;
+void RSNEAPOL::request(small_uint<1> flag) {
+    header_.request = flag;
 }
 
-void RSNEAPOL::encrypted(small_uint<1 > new_encrypted) {
-    _header.encrypted = new_encrypted;
+void RSNEAPOL::encrypted(small_uint<1> flag) {
+    header_.encrypted = flag;
 }
 
 void RSNEAPOL::key_descriptor(small_uint<3> new_key_descriptor) {
-    _header.key_descriptor = new_key_descriptor;
+    header_.key_descriptor = new_key_descriptor;
 }
 
-void RSNEAPOL::key_t(small_uint<1> new_key_t) {
-    _header.key_t = new_key_t;
+void RSNEAPOL::key_t(small_uint<1> flag) {
+    header_.key_t = flag;
 }
 
-void RSNEAPOL::key_index(small_uint<2> new_key_index) {
-    _header.key_index = new_key_index;
+void RSNEAPOL::key_index(small_uint<2> value) {
+    header_.key_index = value;
 }
 
-void RSNEAPOL::install(small_uint<1> new_install) {
-    _header.install = new_install;
+void RSNEAPOL::install(small_uint<1> flag) {
+    header_.install = flag;
 }
 
-void RSNEAPOL::key_ack(small_uint<1> new_key_ack) {
-    _header.key_ack = new_key_ack;
+void RSNEAPOL::key_ack(small_uint<1> flag) {
+    header_.key_ack = flag;
 }
 
 uint32_t RSNEAPOL::header_size() const {
-    return static_cast<uint32_t>(sizeof(eapolhdr) + sizeof(_header) + _key.size());
+    return static_cast<uint32_t>(sizeof(eapol_header) + sizeof(header_) + key_.size());
 }
 
 void RSNEAPOL::write_body(OutputMemoryStream& stream) {
-    if (_key.size()) {
-        if (!_header.key_t && _header.install) {
-            _header.key_length = Endian::host_to_be<uint16_t>(32);
-            wpa_length(static_cast<uint16_t>(_key.size()));
+    if (key_.size()) {
+        if (!header_.key_t && header_.install) {
+            header_.key_length = Endian::host_to_be<uint16_t>(32);
+            wpa_length(static_cast<uint16_t>(key_.size()));
         }
-        else if (_key.size()) {
-            wpa_length(static_cast<uint16_t>(_key.size()));
+        else if (key_.size()) {
+            wpa_length(static_cast<uint16_t>(key_.size()));
         }
     }
-    stream.write(_header);
-    stream.write(_key.begin(), _key.end());
+    stream.write(header_);
+    stream.write(key_.begin(), key_.end());
 }
-}
+
+} // Tins

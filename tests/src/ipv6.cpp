@@ -26,7 +26,7 @@ public:
     static const uint8_t expected_packet1[], expected_packet2[], 
                          hop_by_hop_options[];
     
-    void test_equals(IPv6 &ip1, IPv6 &ip2);
+    void test_equals(IPv6& ip1, IPv6& ip2);
 };
 
 const uint8_t IPv6Test::expected_packet1[] = {
@@ -55,7 +55,7 @@ const uint8_t IPv6Test::hop_by_hop_options[] = {
     222, 173, 190, 239, 190, 173, 254, 237
 };
 
-void IPv6Test::test_equals(IPv6 &ip1, IPv6 &ip2) {
+void IPv6Test::test_equals(IPv6& ip1, IPv6& ip2) {
     EXPECT_EQ(ip1.version(), ip2.version());
     EXPECT_EQ(ip1.traffic_class(), ip2.traffic_class());
     EXPECT_EQ(ip1.flow_label(), ip2.flow_label());
@@ -67,7 +67,7 @@ void IPv6Test::test_equals(IPv6 &ip1, IPv6 &ip2) {
     
     EXPECT_EQ(ip1.search_header(IPv6::HOP_BY_HOP) != NULL, 
                 ip2.search_header(IPv6::HOP_BY_HOP) != NULL);
-    const IPv6::ext_header *header1 = ip1.search_header(IPv6::HOP_BY_HOP),
+    const IPv6::ext_header* header1 = ip1.search_header(IPv6::HOP_BY_HOP),
                                     *header2 = ip2.search_header(IPv6::HOP_BY_HOP);
     if(header1 && header2) {
         EXPECT_EQ(header1->data_size(), header2->data_size());
@@ -75,7 +75,7 @@ void IPv6Test::test_equals(IPv6 &ip1, IPv6 &ip2) {
     
     EXPECT_EQ(ip1.inner_pdu() != NULL, ip2.inner_pdu() != NULL);
     
-    const ICMPv6 *icmp1 = ip1.find_pdu<ICMPv6>(), *icmp2 = ip2.find_pdu<ICMPv6>();
+    const ICMPv6* icmp1 = ip1.find_pdu<ICMPv6>(), *icmp2 = ip2.find_pdu<ICMPv6>();
     ASSERT_EQ(icmp1 != NULL, icmp2 != NULL);
     
     if(icmp1 && icmp2) {
@@ -106,7 +106,7 @@ TEST_F(IPv6Test, ConstructorFromBuffer) {
     EXPECT_EQ(ipv6.dst_addr(), "::1");
     EXPECT_EQ(ipv6.src_addr(), "::1");
     ASSERT_TRUE(ipv6.inner_pdu() != NULL);
-    TCP *tcp = ipv6.find_pdu<TCP>();
+    TCP* tcp = ipv6.find_pdu<TCP>();
     ASSERT_TRUE(tcp != NULL);
     EXPECT_EQ(tcp->sport(), 50828);
     EXPECT_EQ(tcp->dport(), 80);
@@ -124,14 +124,14 @@ TEST_F(IPv6Test, ConstructorFromBuffer2) {
     EXPECT_EQ(ipv6.dst_addr(), "ff02::16");
     EXPECT_EQ(ipv6.src_addr(), "fe80::2d0:9ff:fee3:e8de");
     
-    ICMPv6 *pdu = ipv6.find_pdu<ICMPv6>();
+    ICMPv6* pdu = ipv6.find_pdu<ICMPv6>();
     ASSERT_TRUE(pdu != NULL);
     EXPECT_EQ(pdu->type(), 143);
     EXPECT_EQ(pdu->code(), 0);
     EXPECT_EQ(pdu->checksum(), 0x74fe);
     EXPECT_EQ(pdu->checksum(), 0x74fe);
     
-    const IPv6::ext_header *header = ipv6.search_header(IPv6::HOP_BY_HOP);
+    const IPv6::ext_header* header = ipv6.search_header(IPv6::HOP_BY_HOP);
     ASSERT_TRUE(header != NULL);
     EXPECT_EQ(header->data_size(), 6U);
 }

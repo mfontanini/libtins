@@ -31,36 +31,40 @@
 #include "rawpdu.h"
 #include "packet_sender.h"
 
+using std::swap;
+using std::vector;
+
 namespace Tins {
 
 PDU::PDU()
-: _inner_pdu()
-{
+: inner_pdu_() {
 
 }
 
-PDU::PDU(const PDU &other) : _inner_pdu(0) {
+PDU::PDU(const PDU& other) 
+: inner_pdu_(0) {
     copy_inner_pdu(other);
 }
 
-PDU &PDU::operator=(const PDU &other) {
+PDU& PDU::operator=(const PDU& other) {
     copy_inner_pdu(other);
-    return *this;
+    return* this;
 }
 
 PDU::~PDU() {
-    delete _inner_pdu;
+    delete inner_pdu_;
 }
 
-void PDU::copy_inner_pdu(const PDU &pdu) {
-    if(pdu.inner_pdu())
+void PDU::copy_inner_pdu(const PDU& pdu) {
+    if (pdu.inner_pdu()) {
         inner_pdu(pdu.inner_pdu()->clone());
+    }
 }
 
 uint32_t PDU::size() const {
     uint32_t sz = header_size() + trailer_size();
-    const PDU *ptr(_inner_pdu);
-    while(ptr) {
+    const PDU* ptr(inner_pdu_);
+    while (ptr) {
         sz += ptr->header_size() + ptr->trailer_size();
         ptr = ptr->inner_pdu();
     }
@@ -71,42 +75,42 @@ void PDU::send(PacketSender &, const NetworkInterface &) {
     
 }
 
-PDU *PDU::recv_response(PacketSender &, const NetworkInterface &) { 
+PDU* PDU::recv_response(PacketSender &, const NetworkInterface &) { 
     return 0; 
 }
 
-void PDU::inner_pdu(PDU *next_pdu) {
-    delete _inner_pdu;
-    _inner_pdu = next_pdu;
+void PDU::inner_pdu(PDU* next_pdu) {
+    delete inner_pdu_;
+    inner_pdu_ = next_pdu;
 }
 
-void PDU::inner_pdu(const PDU &next_pdu) {
+void PDU::inner_pdu(const PDU& next_pdu) {
     inner_pdu(next_pdu.clone());
 }
 
-PDU *PDU::release_inner_pdu() {
-    PDU *result = 0;
-    std::swap(result, _inner_pdu);
+PDU* PDU::release_inner_pdu() {
+    PDU* result = 0;
+    swap(result, inner_pdu_);
     return result;
 }
 
 PDU::serialization_type PDU::serialize() {
-    std::vector<uint8_t> buffer(size());
+    vector<uint8_t> buffer(size());
     serialize(&buffer[0], static_cast<uint32_t>(buffer.size()), 0);
-    
-    // Copy elision, do your magic
     return buffer;
 }
 
-void PDU::serialize(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
+void PDU::serialize(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
     uint32_t sz = header_size() + trailer_size();
-    /* Must not happen... */
+    // Must not happen...
     #ifdef TINS_DEBUG
     assert(total_sz >= sz);
     #endif
     prepare_for_serialize(parent);
-    if(_inner_pdu)
-        _inner_pdu->serialize(buffer + header_size(), total_sz - sz, this);
+    if (inner_pdu_) {
+        inner_pdu_->serialize(buffer + header_size(), total_sz - sz, this);
+    }
     write_serialization(buffer, total_sz, parent);
 }
-}
+
+} // Tins

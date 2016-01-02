@@ -79,7 +79,7 @@ TEST_F(IPSecAHTest, EthPacket) {
 
 TEST_F(IPSecAHTest, ConstructorFromBuffer) {
     IPSecAH ipsec(expected_packet, sizeof(expected_packet));
-    const char *icv_ptr = "\x27\xcf\xc0\xa5\xe4\x3d\x69\xb3\x72\x8e\xc5\xb0";
+    const char* icv_ptr = "\x27\xcf\xc0\xa5\xe4\x3d\x69\xb3\x72\x8e\xc5\xb0";
     EXPECT_EQ(0x32, ipsec.next_header());
     EXPECT_EQ(4, ipsec.length());
     EXPECT_EQ(0x8179b705U, ipsec.spi());

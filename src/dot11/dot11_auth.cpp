@@ -37,74 +37,71 @@ using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
-/* Auth */
 
-Dot11Authentication::Dot11Authentication(const address_type &dst_hw_addr, 
-const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::AUTH);
-    memset(&_body, 0, sizeof(_body));
+// Auth
+
+Dot11Authentication::Dot11Authentication(const address_type& dst_hw_addr, 
+                                         const address_type& src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr), body_() {
+    subtype(Dot11::AUTH);
 }
 
-Dot11Authentication::Dot11Authentication(const uint8_t *buffer, uint32_t total_sz) 
-: Dot11ManagementFrame(buffer, total_sz) 
-{
+Dot11Authentication::Dot11Authentication(const uint8_t* buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     stream.skip(management_frame_size());
-    stream.read(_body);
+    stream.read(body_);
     parse_tagged_parameters(stream);
 }
 
 void Dot11Authentication::auth_algorithm(uint16_t new_auth_algorithm) {
-    this->_body.auth_algorithm = Endian::host_to_le(new_auth_algorithm);
+    body_.auth_algorithm = Endian::host_to_le(new_auth_algorithm);
 }
 
 void Dot11Authentication::auth_seq_number(uint16_t new_auth_seq_number) {
-    this->_body.auth_seq_number = Endian::host_to_le(new_auth_seq_number);
+    body_.auth_seq_number = Endian::host_to_le(new_auth_seq_number);
 }
 
 void Dot11Authentication::status_code(uint16_t new_status_code) {
-    this->_body.status_code = Endian::host_to_le(new_status_code);
+    body_.status_code = Endian::host_to_le(new_status_code);
 }
 
 uint32_t Dot11Authentication::header_size() const {
-    return Dot11ManagementFrame::header_size() + sizeof(_body);
+    return Dot11ManagementFrame::header_size() + sizeof(body_);
 }
 
 void Dot11Authentication::write_fixed_parameters(OutputMemoryStream& stream) {
-    stream.write(_body);
+    stream.write(body_);
 }
 
-/* Deauth */
+// Deauth
 
-Dot11Deauthentication::Dot11Deauthentication(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr)
-{
-    this->subtype(Dot11::DEAUTH);
-    memset(&_body, 0, sizeof(_body));
+Dot11Deauthentication::Dot11Deauthentication(const address_type& dst_hw_addr, 
+                                             const address_type& src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr), body_() {
+    subtype(Dot11::DEAUTH);
 }
 
-Dot11Deauthentication::Dot11Deauthentication(const uint8_t *buffer, uint32_t total_sz) 
+Dot11Deauthentication::Dot11Deauthentication(const uint8_t* buffer, uint32_t total_sz) 
 : Dot11ManagementFrame(buffer, total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     stream.skip(management_frame_size());
-    stream.read(_body);
+    stream.read(body_);
     parse_tagged_parameters(stream);
 }
 
 void Dot11Deauthentication::reason_code(uint16_t new_reason_code) {
-    this->_body.reason_code = Endian::host_to_le(new_reason_code);
+    body_.reason_code = Endian::host_to_le(new_reason_code);
 }
 
 uint32_t Dot11Deauthentication::header_size() const {
-    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+    return Dot11ManagementFrame::header_size() + sizeof(body_);
 }
 
 void Dot11Deauthentication::write_fixed_parameters(OutputMemoryStream& stream) {
-    stream.write(_body);
+    stream.write(body_);
 }
-} // namespace Tins
+
+} // Tins
 
 #endif // HAVE_DOT11

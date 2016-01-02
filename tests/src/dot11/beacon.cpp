@@ -27,12 +27,12 @@ const uint8_t Dot11BeaconTest::expected_packet[] = {
     7, 0, 0, 250, 1, 147, 40, 65, 35, 173, 31, 250, 20, 149, 32
 };
 
-void test_equals_expected(const Dot11Beacon &dot11) {
+void test_equals_expected(const Dot11Beacon& dot11) {
     EXPECT_EQ(dot11.subtype(), 8);
     EXPECT_EQ(dot11.timestamp(), 0x1fad2341289301faULL);
     EXPECT_EQ(dot11.interval(), 0x14fa);
     
-    const Dot11Beacon::capability_information &info = dot11.capabilities();
+    const Dot11Beacon::capability_information& info = dot11.capabilities();
     EXPECT_EQ(info.ess(), true);
     EXPECT_EQ(info.ibss(), false);
     EXPECT_EQ(info.cf_poll(), true);
@@ -111,7 +111,7 @@ TEST_F(Dot11BeaconTest, SeqNum) {
 TEST_F(Dot11BeaconTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11Beacon *beacon = dot11->find_pdu<Dot11Beacon>();
+    const Dot11Beacon* beacon = dot11->find_pdu<Dot11Beacon>();
     ASSERT_TRUE(beacon != NULL);
     test_equals_expected(*beacon);
 }

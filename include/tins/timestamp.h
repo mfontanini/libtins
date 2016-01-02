@@ -93,7 +93,7 @@ public:
      * Constructs a timestamp from a timeval object.
      * \param time_val The timeval object.
      */
-    Timestamp(const timeval &time_val) : tv(time_val) {}
+    Timestamp(const timeval& time_val) : tv(time_val) {}
     
     /**
      * Returns the amount of seconds in this timestamp.
@@ -121,6 +121,7 @@ public:
 private:
     timeval tv;
 };
-}
+
+} // Tins
 
 #endif // TINS_TIMESTAMP_H

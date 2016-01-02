@@ -23,7 +23,7 @@ const uint8_t Dot11AssocRequestTest::expected_packet[] = {
     0, 0, 21, 32, 243, 146
 };
 
-void test_equals(const Dot11AssocRequest &dot1, const Dot11AssocRequest &dot2) {
+void test_equals(const Dot11AssocRequest& dot1, const Dot11AssocRequest& dot2) {
     test_equals(dot1.capabilities(), dot2.capabilities());
     EXPECT_EQ(dot1.listen_interval(), dot2.listen_interval());
     test_equals(
@@ -32,7 +32,7 @@ void test_equals(const Dot11AssocRequest &dot1, const Dot11AssocRequest &dot2) {
     );
 }
 
-void test_equals_expected(const Dot11AssocRequest &dot11) {
+void test_equals_expected(const Dot11AssocRequest& dot11) {
     test_equals_expected(static_cast<const Dot11ManagementFrame&>(dot11));
     EXPECT_EQ(dot11.listen_interval(), 0x92f3);
     EXPECT_EQ(dot11.subtype(), Dot11::ASSOC_REQ);
@@ -78,7 +78,7 @@ TEST_F(Dot11AssocRequestTest, ClonePDU) {
 TEST_F(Dot11AssocRequestTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11AssocRequest *inner = dot11->find_pdu<Dot11AssocRequest>();
+    const Dot11AssocRequest* inner = dot11->find_pdu<Dot11AssocRequest>();
     ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }

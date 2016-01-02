@@ -37,6 +37,7 @@
 #include "ip_address.h"
 
 namespace Tins {
+
 /** 
  * \cond
  */
@@ -49,13 +50,12 @@ public:
     IPv4Fragment() : offset_() { }
 
     template<typename T>
-    IPv4Fragment(T *pdu, uint16_t offset)
-    : payload_(pdu->serialize()), offset_(offset) 
-    {
+    IPv4Fragment(T* pdu, uint16_t offset)
+    : payload_(pdu->serialize()), offset_(offset) {
         
     }
     
-    const payload_type &payload() const {
+    const payload_type& payload() const {
         return payload_;
     }
     
@@ -71,19 +71,19 @@ class TINS_API IPv4Stream {
 public:
     IPv4Stream();
     
-    void add_fragment(IP *ip);
+    void add_fragment(IP* ip);
     bool is_complete() const;
-    PDU *allocate_pdu() const;
+    PDU* allocate_pdu() const;
 private:
     typedef std::vector<IPv4Fragment> fragments_type;
     
-    uint16_t extract_offset(const IP *ip);
-    bool extract_more_frag(const IP *ip);
+    uint16_t extract_offset(const IP* ip);
+    bool extract_more_frag(const IP* ip);
 
-    fragments_type fragments;
-    bool received_end;
-    uint8_t transport_proto;
-    size_t received_size, total_size;
+    fragments_type fragments_;
+    bool received_end_;
+    uint8_t transport_proto_;
+    size_t received_size_, total_size_;
 };
 } // namespace Internals
 
@@ -134,7 +134,7 @@ public:
      * fragmented or REASSEMBLED if the packet was fragmented 
      * but has now been reassembled.
      */
-    packet_status process(PDU &pdu);
+    packet_status process(PDU& pdu);
 
     /**
      * Removes all of the packets and data stored.
@@ -157,11 +157,11 @@ private:
     typedef std::pair<uint16_t, address_pair> key_type;
     typedef std::map<key_type, Internals::IPv4Stream> streams_type;
 
-    key_type make_key(const IP *ip) const;
+    key_type make_key(const IP* ip) const;
     address_pair make_address_pair(IPv4Address addr1, IPv4Address addr2) const;
     
-    streams_type streams;
-    overlapping_technique technique;
+    streams_type streams_;
+    overlapping_technique technique_;
 };
 
 /**
@@ -176,8 +176,7 @@ public:
      * \param func The functor object.
      */
     IPv4ReassemblerProxy(Functor func)
-    : functor_(func)
-    {
+    : functor_(func) {
 
     }
 
@@ -189,15 +188,15 @@ public:
      * \return true if the packet wasn't forwarded, otherwise
      * the value returned by the functor.
      */
-    bool operator()(PDU &pdu) {
+    bool operator()(PDU& pdu) {
         // Forward it unless it's fragmented.
-        if(reassembler.process(pdu) != IPv4Reassembler::FRAGMENTED)
+        if(reassembler_.process(pdu) != IPv4Reassembler::FRAGMENTED)
             return functor_(pdu);
         else
             return true;
     }
 private:
-    IPv4Reassembler reassembler;
+    IPv4Reassembler reassembler_;
     Functor functor_;
 };
 

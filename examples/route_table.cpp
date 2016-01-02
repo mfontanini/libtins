@@ -32,17 +32,21 @@
 #include <vector>
 #include <tins/tins.h>
 
-using namespace std;
+using std::cout;
+using std::endl;
+using std::setw;
+using std::vector;
+
 using namespace Tins;
 
 int main() {
-	vector<Utils::RouteEntry> entries = Utils::route_entries();
-	for (size_t i = 0; i < entries.size(); ++i) {
-		cout << "Entry " << setw(2) << i << ": " << endl
-			 << "Interface:   " << entries[i].interface << endl
-			 << "Destination: " << entries[i].destination << endl
-			 << "Gateway:     " << entries[i].gateway << endl
-			 << "Genmask:     " << entries[i].mask << endl
-			 << "Metric:      " << entries[i].metric << endl << endl;
-	}
+    vector<Utils::RouteEntry> entries = Utils::route_entries();
+    for (size_t i = 0; i < entries.size(); ++i) {
+        cout << "Entry " << setw(2) << i << ": " << endl
+             << "Interface:   " << entries[i].interface << endl
+             << "Destination: " << entries[i].destination << endl
+             << "Gateway:     " << entries[i].gateway << endl
+             << "Genmask:     " << entries[i].mask << endl
+             << "Metric:      " << entries[i].metric << endl << endl;
+    }
 }

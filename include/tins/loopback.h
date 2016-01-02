@@ -34,6 +34,10 @@
 #include "macros.h"
 
 namespace Tins {
+
+/**
+ * \brief Represents a Loopback PDU
+ */
 class TINS_API Loopback : public PDU {
 public:
     /**
@@ -61,13 +65,15 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    Loopback(const uint8_t *buffer, uint32_t total_sz);
+    Loopback(const uint8_t* buffer, uint32_t total_sz);
     
     /**
      * \brief Getter for the family identifier.
      * \return The stored family identifier.
      */
-    uint32_t family() const { return _family; }
+    uint32_t family() const {
+        return family_;
+    }
     
     /**
      * \brief Setter for the family identifier.
@@ -84,7 +90,9 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
     
     /** 
      * \brief Check wether ptr points to a valid response for this PDU.
@@ -93,26 +101,27 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
     
     /**
      * \sa PDU::clone
      */
-    Loopback *clone() const {
+    Loopback* clone() const {
         return new Loopback(*this);
     }
-    // Null/Loopback can only be sent in *BSD
+    // Null/Loopback can only be sent in* BSD
     #ifdef BSD
     /**
      * \sa PDU::send()
      */
-    void send(PacketSender &sender, const NetworkInterface &iface);
+    void send(PacketSender& sender, const NetworkInterface& iface);
     #endif // BSD
 private:
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
 
-    uint32_t _family;
+    uint32_t family_;
 };
-}
+
+} // Tins
 
 #endif // TINS_LOOPBACK_H

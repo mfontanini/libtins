@@ -41,11 +41,11 @@ std::set<HWAddress<6>> addrs;
 const HWAddress<3> expected_oui("00:50:F2");
 
 bool handler(const PDU& pdu) {
-    const Dot11Beacon &beacon = pdu.rfind_pdu<Dot11Beacon>();
+    const Dot11Beacon& beacon = pdu.rfind_pdu<Dot11Beacon>();
     // Only process it once
     if(addrs.insert(beacon.addr3()).second) {
         // Iterate the tagged options
-        for(const auto &opt : beacon.options()) {
+        for(const auto& opt : beacon.options()) {
             // Is this a vendor-specific tag?
             if(opt.option() == Dot11::VENDOR_SPECIFIC) {
                 // Make sure there's enough size for the OUI + identifier
@@ -63,9 +63,9 @@ bool handler(const PDU& pdu) {
     return true;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if(argc != 2) {
-        std::cout << "Usage: " << *argv << " <DEVICE>\n";
+        std::cout << "Usage: " <<* argv << " <DEVICE>\n";
         return 1;
     }
     // Only sniff beacons

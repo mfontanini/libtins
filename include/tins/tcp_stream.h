@@ -65,7 +65,7 @@ public:
         StreamInfo(IPv4Address client, IPv4Address server,
             uint16_t cport, uint16_t sport);
         
-        bool operator<(const StreamInfo &rhs) const;
+        bool operator<(const StreamInfo& rhs) const;
     };
     
     /**
@@ -79,17 +79,17 @@ public:
      * \param tcp The TCP PDU from which to take the initial parameters.
      * \param identifier This stream's identifier number
      */
-    TCPStream(IP *ip, TCP *tcp, uint64_t identifier);
+    TCPStream(IP* ip, TCP* tcp, uint64_t identifier);
     
     /**
      * Copy constructor.
      */
-    TCPStream(const TCPStream &rhs);
+    TCPStream(const TCPStream& rhs);
     
     /**
      * Copy assignment operator.
      */
-    TCPStream& operator=(const TCPStream &rhs);
+    TCPStream& operator=(const TCPStream& rhs);
     
     /**
      * Destructor.
@@ -103,7 +103,7 @@ public:
      * 
      * \return const payload_type& containing the payload.
      */
-    const payload_type &client_payload() const {
+    const payload_type& client_payload() const {
         return client_payload_;
     }
     
@@ -114,7 +114,7 @@ public:
      * 
      * \return payload_type& containing the payload.
      */
-    payload_type &client_payload() {
+    payload_type& client_payload() {
         return client_payload_;
     }
     
@@ -125,7 +125,7 @@ public:
      * 
      * \return const payload_type& containing the payload.
      */
-    const payload_type &server_payload() const {
+    const payload_type& server_payload() const {
         return server_payload_;
     }
     
@@ -136,7 +136,7 @@ public:
      * 
      * \return payload_type& containing the payload.
      */
-    payload_type &server_payload() {
+    payload_type& server_payload() {
         return server_payload_;
     }
 
@@ -145,15 +145,15 @@ public:
      * \return uint64_t containing the identification number.
      */
     uint64_t id() const {
-        return identifier;
+        return identifier_;
     }
     
     /**
      * \brief Retrieves the stream information.
      * \return const StreamInfo& containing the stream information.
      */
-    const StreamInfo &stream_info() const {
-        return info;
+    const StreamInfo& stream_info() const {
+        return info_;
     }
 
     /**
@@ -165,7 +165,7 @@ public:
      * \return bool indicating whether the stream is finished.
      */
     bool is_finished() const {
-        return fin_sent;
+        return fin_sent_;
     }
     
     /**
@@ -178,25 +178,25 @@ public:
      * \return bool indicating whether any changes have been done to 
      * any of the stored payloads.
      */
-    bool update(IP *ip, TCP *tcp);
+    bool update(IP* ip, TCP* tcp);
 private:
     typedef std::map<uint32_t, RawPDU*> fragments_type;
     
-    static void free_fragments(fragments_type &frags);
-    static fragments_type clone_fragments(const fragments_type &frags);
+    static void free_fragments(fragments_type& frags);
+    static fragments_type clone_fragments(const fragments_type& frags);
     
-    bool generic_process(uint32_t &my_seq, uint32_t &other_seq, 
-      payload_type &pload, fragments_type &frags, TCP *tcp);
+    bool generic_process(uint32_t& my_seq, uint32_t& other_seq, 
+      payload_type& pload, fragments_type& frags, TCP* tcp);
 
-    void safe_insert(fragments_type &frags, uint32_t seq, RawPDU *raw);
+    void safe_insert(fragments_type& frags, uint32_t seq, RawPDU* raw);
 
 
-    uint32_t client_seq, server_seq;
-    StreamInfo info;
-    uint64_t identifier;
+    uint32_t client_seq_, server_seq_;
+    StreamInfo info_;
+    uint64_t identifier_;
     payload_type client_payload_, server_payload_;
-    fragments_type client_frags, server_frags;
-    bool syn_ack_sent, fin_sent;
+    fragments_type client_frags_, server_frags_;
+    bool syn_ack_sent_, fin_sent_;
 };
 
 
@@ -224,7 +224,7 @@ public:
      * closed.
      */
     template<typename DataFunctor, typename EndFunctor>
-    void follow_streams(BaseSniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun);
+    void follow_streams(BaseSniffer& sniffer, DataFunctor data_fun, EndFunctor end_fun);
     
     /**
      * \brief Starts following TCP streams.
@@ -263,7 +263,7 @@ public:
      * closed.
      */
     template<typename DataFunctor>
-    void follow_streams(BaseSniffer &sniffer, DataFunctor data_fun);
+    void follow_streams(BaseSniffer& sniffer, DataFunctor data_fun);
     
     /**
      * \brief Starts following TCP streams.
@@ -292,89 +292,97 @@ private:
     
     template<typename DataFunctor, typename EndFunctor>
     struct proxy_caller {
-        bool callback(PDU &pdu) {
+        bool callback(PDU& pdu) {
             return stream->callback(pdu, data_fun, end_fun);
         }
         
-        TCPStreamFollower *stream;
+        TCPStreamFollower* stream;
         DataFunctor data_fun;
         EndFunctor end_fun;
     };
     
     template<typename DataFunctor, typename EndFunctor>
-    bool callback(PDU &pdu, const DataFunctor &fun, const EndFunctor &end_fun);
+    bool callback(PDU& pdu, const DataFunctor& fun, const EndFunctor& end_fun);
     static void dummy_function(TCPStream&) { }
     
-    sessions_type sessions;
-    uint64_t last_identifier;
+    sessions_type sessions_;
+    uint64_t last_identifier_;
 };
 
 template<typename DataFunctor, typename EndFunctor>
-void TCPStreamFollower::follow_streams(BaseSniffer &sniffer, DataFunctor data_fun, EndFunctor end_fun) {
+void TCPStreamFollower::follow_streams(BaseSniffer& sniffer, 
+                                       DataFunctor data_fun,
+                                       EndFunctor end_fun) {
     typedef proxy_caller<DataFunctor, EndFunctor> proxy_type;
     proxy_type proxy = { this, data_fun, end_fun };
     sniffer.sniff_loop(make_sniffer_handler(&proxy, &proxy_type::callback));
 }
 
 template<typename ForwardIterator, typename DataFunctor, typename EndFunctor>
-void TCPStreamFollower::follow_streams(ForwardIterator start, ForwardIterator end, 
-  DataFunctor data_fun, EndFunctor end_fun) 
-{
+void TCPStreamFollower::follow_streams(ForwardIterator start, 
+                                       ForwardIterator end, 
+                                       DataFunctor data_fun,
+                                       EndFunctor end_fun)  {
     while(start != end) {
-        if(!callback(Utils::dereference_until_pdu(start), data_fun, end_fun))
+        if (!callback(Utils::dereference_until_pdu(start), data_fun, end_fun)) {
             return;
+        }
         start++;
     }
 }
 
 template<typename DataFunctor>
-void TCPStreamFollower::follow_streams(BaseSniffer &sniffer, DataFunctor data_fun) {
+void TCPStreamFollower::follow_streams(BaseSniffer& sniffer, DataFunctor data_fun) {
     return follow_streams(sniffer, data_fun, dummy_function);
 }
 
 template<typename ForwardIterator, typename DataFunctor>
-void TCPStreamFollower::follow_streams(ForwardIterator start, ForwardIterator end, 
-  DataFunctor data_fun) 
-{
+void TCPStreamFollower::follow_streams(ForwardIterator start,
+                                       ForwardIterator end, 
+                                       DataFunctor data_fun) {
     follow_streams(start, end, data_fun, dummy_function);
 }
 
 template<typename DataFunctor, typename EndFunctor>
-bool TCPStreamFollower::callback(PDU &pdu, const DataFunctor &data_fun, const EndFunctor &end_fun) {
-    IP *ip = pdu.find_pdu<IP>();
-    TCP *tcp = pdu.find_pdu<TCP>();
-    if(!ip || !tcp) {
+bool TCPStreamFollower::callback(PDU& pdu, 
+                                 const DataFunctor& data_fun,
+                                 const EndFunctor& end_fun) {
+    IP* ip = pdu.find_pdu<IP>();
+    TCP* tcp = pdu.find_pdu<TCP>();
+    if (!ip || !tcp) {
         return true;
     }
     TCPStream::StreamInfo info( 
         ip->src_addr(), ip->dst_addr(),
         tcp->sport(), tcp->dport()
     );
-    sessions_type::iterator it = sessions.find(info);
-    if(it == sessions.end()) {
+    sessions_type::iterator it = sessions_.find(info);
+    if (it == sessions_.end()) {
         std::swap(info.client_addr, info.server_addr);
         std::swap(info.client_port, info.server_port);
-        if((it = sessions.find(info)) == sessions.end()) {
-            if(tcp->get_flag(TCP::SYN) && !tcp->get_flag(TCP::ACK)) {
-                sessions.insert(
+        if ((it = sessions_.find(info)) == sessions_.end()) {
+            if (tcp->get_flag(TCP::SYN) && !tcp->get_flag(TCP::ACK)) {
+                sessions_.insert(
                     std::make_pair(
                         info,
-                        TCPStream(ip, tcp, last_identifier++)
+                        TCPStream(ip, tcp, last_identifier_++)
                     )
                 );
             }
             return true;
         }
     }
-    if(it->second.update(ip, tcp))
+    if (it->second.update(ip, tcp)) {
         data_fun(it->second);
+    }
     // We're done with this stream
-    if(it->second.is_finished()) {
+    if (it->second.is_finished()) {
         end_fun(it->second);
-        sessions.erase(it);
+        sessions_.erase(it);
     }
     return true;
 }
-}
+
+} // Tins
 
 #endif // TINS_TCP_STREAM_H

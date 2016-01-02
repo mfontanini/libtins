@@ -19,7 +19,7 @@ public:
                          packet_with_extensions_and_length[];
     static const uint32_t expected_packet_count;
     
-    void test_equals(const ICMP &icmp1, const ICMP &icmp2);
+    void test_equals(const ICMP& icmp1, const ICMP& icmp2);
 };
 
 const uint8_t ICMPTest::expected_packets[][8] = {
@@ -78,7 +78,7 @@ TEST_F(ICMPTest, CopyAssignmentOperator) {
 }
 
 TEST_F(ICMPTest, NestedCopy) {
-    ICMP *nested = new ICMP(expected_packets[0], sizeof(expected_packets[0]));
+    ICMP* nested = new ICMP(expected_packets[0], sizeof(expected_packets[0]));
     ICMP icmp1(expected_packets[0], sizeof(expected_packets[0]));
     icmp1.inner_pdu(nested);
     ICMP icmp2(icmp1);
@@ -256,7 +256,7 @@ TEST_F(ICMPTest, SetRedirect) {
     EXPECT_EQ(IPv4Address("1.2.3.4"), icmp.gateway());
 }
 
-void ICMPTest::test_equals(const ICMP &icmp1, const ICMP &icmp2) {
+void ICMPTest::test_equals(const ICMP& icmp1, const ICMP& icmp2) {
     EXPECT_EQ(icmp1.type(), icmp2.type());
     EXPECT_EQ(icmp1.code(), icmp2.code());
     EXPECT_EQ(icmp1.gateway(), icmp2.gateway());

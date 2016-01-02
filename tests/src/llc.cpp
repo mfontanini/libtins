@@ -14,7 +14,7 @@ public:
     static const uint8_t from_buffer_info[];
     static const uint8_t from_buffer_super[];
 
-    //void test_equals(const IP &ip1, const IP &ip2);
+    //void test_equals(const IP& ip1, const IP& ip2);
 };
 
 const uint8_t LLCTest::from_buffer_info[] = {

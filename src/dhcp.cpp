@@ -37,6 +37,7 @@
 #include "memory_helpers.h"
 
 using std::string;
+using std::vector;
 using std::list;
 using std::runtime_error;
 using std::find_if;
@@ -48,20 +49,20 @@ namespace Tins {
 
 // Magic cookie: uint32_t. 
 DHCP::DHCP() 
-: _size(sizeof(uint32_t)) {
+: size_(sizeof(uint32_t)) {
     opcode(BOOTREQUEST);
     htype(1); //ethernet
     hlen(EthernetII::address_type::address_size);
 }
 
-DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz) 
-: BootP(buffer, total_sz, 0), _size(sizeof(uint32_t))
-{
+DHCP::DHCP(const uint8_t* buffer, uint32_t total_sz) 
+: BootP(buffer, total_sz, 0), size_(sizeof(uint32_t)) {
     InputMemoryStream stream(buffer, total_sz);
     stream.skip(BootP::header_size() - vend().size());
     const uint32_t magic_number = stream.read<uint32_t>();
-    if (magic_number != Endian::host_to_be<uint32_t>(0x63825363))
+    if (magic_number != Endian::host_to_be<uint32_t>(0x63825363)) {
         throw malformed_packet();
+    }
     // While there's data left
     while (stream) {
         OptionTypes option_type;
@@ -80,39 +81,39 @@ DHCP::DHCP(const uint8_t *buffer, uint32_t total_sz)
     }
 }
 
-void DHCP::add_option(const option &opt) {
+void DHCP::add_option(const option& opt) {
     internal_add_option(opt);
-    _options.push_back(opt);
+    options_.push_back(opt);
 }
 
-void DHCP::internal_add_option(const option &opt) {
-    _size += static_cast<uint32_t>(opt.data_size() + (sizeof(uint8_t) << 1));
+void DHCP::internal_add_option(const option& opt) {
+    size_ += static_cast<uint32_t>(opt.data_size() + (sizeof(uint8_t) << 1));
 }
 
 bool DHCP::remove_option(OptionTypes type) {
     options_type::iterator iter = search_option_iterator(type);
-    if (iter == _options.end()) {
+    if (iter == options_.end()) {
         return false;
     }
-    _size -= static_cast<uint32_t>(iter->data_size() + (sizeof(uint8_t) << 1));
-    _options.erase(iter);
+    size_ -= static_cast<uint32_t>(iter->data_size() + (sizeof(uint8_t) << 1));
+    options_.erase(iter);
     return true;
 }
 
-const DHCP::option *DHCP::search_option(OptionTypes opt) const {
+const DHCP::option* DHCP::search_option(OptionTypes opt) const {
     // Search for the iterator. If we found something, return it, otherwise return nullptr.
     options_type::const_iterator iter = search_option_iterator(opt);
-    return (iter != _options.end()) ? &*iter : 0;
+    return (iter != options_.end()) ? &*iter : 0;
 }
 
 DHCP::options_type::const_iterator DHCP::search_option_iterator(OptionTypes opt) const {
     Internals::option_type_equality_comparator<option> comparator(opt);
-    return find_if(_options.begin(), _options.end(), comparator);
+    return find_if(options_.begin(), options_.end(), comparator);
 }
 
 DHCP::options_type::iterator DHCP::search_option_iterator(OptionTypes opt) {
     Internals::option_type_equality_comparator<option> comparator(opt);
-    return find_if(_options.begin(), _options.end(), comparator);
+    return find_if(options_.begin(), options_.end(), comparator);
 }
 
 void DHCP::type(Flags type) {
@@ -164,22 +165,22 @@ DHCP::ipaddress_type DHCP::subnet_mask() const {
     return search_and_convert<ipaddress_type>(SUBNET_MASK);
 }
 
-void DHCP::routers(const std::vector<ipaddress_type> &routers) {
+void DHCP::routers(const vector<ipaddress_type>& routers) {
     serialization_type buffer = serialize_list(routers);
     add_option(option(ROUTERS, buffer.begin(), buffer.end()));
 }
 
-std::vector<DHCP::ipaddress_type> DHCP::routers() const {
-    return search_and_convert<std::vector<DHCP::ipaddress_type> >(ROUTERS);
+vector<DHCP::ipaddress_type> DHCP::routers() const {
+    return search_and_convert<vector<DHCP::ipaddress_type> >(ROUTERS);
 }
 
-void DHCP::domain_name_servers(const std::vector<ipaddress_type> &dns) {
+void DHCP::domain_name_servers(const vector<ipaddress_type>& dns) {
     serialization_type buffer = serialize_list(dns);
     add_option(option(DOMAIN_NAME_SERVERS, buffer.begin(), buffer.end()));
 }
 
-std::vector<DHCP::ipaddress_type> DHCP::domain_name_servers() const {
-    return search_and_convert<std::vector<DHCP::ipaddress_type> >(DOMAIN_NAME_SERVERS);
+vector<DHCP::ipaddress_type> DHCP::domain_name_servers() const {
+    return search_and_convert<vector<DHCP::ipaddress_type> >(DOMAIN_NAME_SERVERS);
 }
 
 void DHCP::broadcast(ipaddress_type addr) {
@@ -200,20 +201,20 @@ DHCP::ipaddress_type DHCP::requested_ip() const {
     return search_and_convert<ipaddress_type>(DHCP_REQUESTED_ADDRESS);
 }
 
-void DHCP::domain_name(const string &name) {
+void DHCP::domain_name(const string& name) {
     add_option(option(DOMAIN_NAME, name.size(), (const uint8_t*)name.c_str()));
 }
 
-std::string DHCP::domain_name() const {
-    return search_and_convert<std::string>(DOMAIN_NAME);
+string DHCP::domain_name() const {
+    return search_and_convert<string>(DOMAIN_NAME);
 }
 
-void DHCP::hostname(const std::string &name) {
+void DHCP::hostname(const string& name) {
     add_option(option(HOST_NAME, name.size(), (const uint8_t*)name.c_str()));
 }
 
-std::string DHCP::hostname() const {
-    return search_and_convert<std::string>(HOST_NAME);
+string DHCP::hostname() const {
+    return search_and_convert<string>(HOST_NAME);
 }
 
 void DHCP::rebind_time(uint32_t time) {
@@ -225,27 +226,29 @@ uint32_t DHCP::rebind_time() const {
     return search_and_convert<uint32_t>(DHCP_REBINDING_TIME);
 }
 
-PDU::serialization_type DHCP::serialize_list(const std::vector<ipaddress_type> &ip_list) {
+PDU::serialization_type DHCP::serialize_list(const vector<ipaddress_type>& ip_list) {
     serialization_type buffer(ip_list.size() * sizeof(uint32_t));
-    uint32_t *ptr = (uint32_t*)&buffer[0];
-    for(std::vector<ipaddress_type>::const_iterator it = ip_list.begin(); it != ip_list.end(); ++it)
+    uint32_t* ptr = (uint32_t*)&buffer[0];
+    typedef vector<ipaddress_type>::const_iterator iterator;
+    for (iterator it = ip_list.begin(); it != ip_list.end(); ++it) {
         *(ptr++) = *it;
+    }
     return buffer;
 }
 
 uint32_t DHCP::header_size() const {
-    return static_cast<uint32_t>(BootP::header_size() - vend().size() + _size);
+    return static_cast<uint32_t>(BootP::header_size() - vend().size() + size_);
 }
 
-void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent) {
-    if (_size) {
-        vend_type &result = BootP::vend();
-        result.resize(_size);
+void DHCP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    if (size_) {
+        vend_type& result = BootP::vend();
+        result.resize(size_);
         // Build a stream over the vend vector
         OutputMemoryStream stream(&result[0], result.size());
         // Magic cookie
         stream.write(Endian::host_to_be<uint32_t>(0x63825363));
-        for (options_type::const_iterator it = _options.begin(); it != _options.end(); ++it) {
+        for (options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
             stream.write(it->option());
             stream.write<uint8_t>(it->length_field());
             stream.write(it->data_ptr(), it->data_size());
@@ -253,4 +256,5 @@ void DHCP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *pa
     }
     BootP::write_serialization(buffer, total_sz, parent);
 }
+
 } // Tins

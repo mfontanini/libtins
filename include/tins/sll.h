@@ -37,6 +37,7 @@
 #include "hw_address.h"
 
 namespace Tins {
+
 /**
  * \class SLL
  * \brief Represents a Linux cooked-mode capture (SLL) PDU.
@@ -70,7 +71,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    SLL(const uint8_t *buffer, uint32_t total_sz);
+    SLL(const uint8_t* buffer, uint32_t total_sz);
     
     // Getters
 
@@ -79,7 +80,7 @@ public:
      *  \return The stored Packet Type field value.
      */
     uint16_t packet_type() const {
-        return Endian::be_to_host(_header.packet_type);
+        return Endian::be_to_host(header_.packet_type);
     }
 
     /**
@@ -87,7 +88,7 @@ public:
      *  \return The stored LLADDR Type field value.
      */
     uint16_t lladdr_type() const {
-        return Endian::be_to_host(_header.lladdr_type);
+        return Endian::be_to_host(header_.lladdr_type);
     }
 
     /**
@@ -95,7 +96,7 @@ public:
      *  \return The stored LLADDR Length field value.
      */
     uint16_t lladdr_len() const {
-        return Endian::be_to_host(_header.lladdr_len);
+        return Endian::be_to_host(header_.lladdr_len);
     }
 
     /**
@@ -103,7 +104,7 @@ public:
      *  \return The stored Address field value.
      */
     address_type address() const {
-        return _header.address;
+        return header_.address;
     }
 
     /**
@@ -111,7 +112,7 @@ public:
      *  \return The stored Protocol field value.
      */
     uint16_t protocol() const {
-        return Endian::be_to_host(_header.protocol);
+        return Endian::be_to_host(header_.protocol);
     }
     
     /**
@@ -144,7 +145,7 @@ public:
      *  \brief Setter for the Address field.
      *  \param new_address The new Address field value.
      */
-    void address(const address_type &new_address);
+    void address(const address_type& new_address);
 
     /**
      *  \brief Setter for the Protocol field.
@@ -162,20 +163,20 @@ public:
     /**
      * \sa PDU::clone
      */
-    SLL *clone() const {
+    SLL* clone() const {
         return new SLL(*this);
     }
 private:
     TINS_BEGIN_PACK
-    struct sllhdr {
+    struct sll_header {
         uint16_t packet_type, lladdr_type, lladdr_len;
         uint8_t address[8];
         uint16_t protocol;
     } TINS_END_PACK;
     
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
     
-    sllhdr _header;
+    sll_header header_;
 };
 }
 

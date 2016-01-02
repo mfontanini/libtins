@@ -22,7 +22,7 @@ public:
     static const uint8_t expected_packet[];
     static const IPv4Address addr1, addr2;
 
-    void test_equals(const ARP &arp1, const ARP &arp2);
+    void test_equals(const ARP& arp1, const ARP& arp2);
 };
 
 const address_type ARPTest::empty_addr;
@@ -34,7 +34,7 @@ const uint8_t ARPTest::expected_packet[] = {
 };
 const IPv4Address ARPTest::addr1(0x1234), ARPTest::addr2(0xa3f1);
 
-void ARPTest::test_equals(const ARP &arp1, const ARP &arp2) {
+void ARPTest::test_equals(const ARP& arp1, const ARP& arp2) {
     EXPECT_EQ(arp1.opcode(), arp2.opcode());
     ASSERT_EQ(arp1.hw_addr_length(), arp2.hw_addr_length());
     EXPECT_EQ(arp1.hw_addr_format(), arp2.hw_addr_format());
@@ -69,7 +69,7 @@ TEST_F(ARPTest, CopyAssignmentOperator) {
 }
 
 TEST_F(ARPTest, NestedCopy) {
-    ARP *nested_arp = new ARP(addr1, addr2, hw_addr1, hw_addr2);
+    ARP* nested_arp = new ARP(addr1, addr2, hw_addr1, hw_addr2);
     ARP arp1(addr1, addr2, hw_addr1, hw_addr2);
     arp1.inner_pdu(nested_arp);
     ARP arp2(arp1);

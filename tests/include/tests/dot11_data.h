@@ -16,7 +16,7 @@ inline void test_equals(const Dot11Data& b1, const Dot11Data& b2) {
     test_equals(static_cast<const Dot11&>(b1), static_cast<const Dot11&>(b2));
 }
 
-inline void test_equals_expected(const Dot11Data &dot11) {
+inline void test_equals_expected(const Dot11Data& dot11) {
     EXPECT_EQ(dot11.type(), Dot11::DATA);
     EXPECT_EQ(dot11.addr1(), "00:01:02:03:04:05");
     EXPECT_EQ(dot11.addr2(), "01:02:03:04:05:06");
@@ -25,7 +25,7 @@ inline void test_equals_expected(const Dot11Data &dot11) {
     EXPECT_EQ(dot11.seq_num(), 0xf1d);
 }
 
-inline void test_equals_empty(const Dot11Data &dot11) {
+inline void test_equals_empty(const Dot11Data& dot11) {
     Dot11::address_type empty_addr;
     
     EXPECT_EQ(dot11.addr1(), empty_addr);

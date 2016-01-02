@@ -48,6 +48,9 @@
 #include "memory_helpers.h"
 
 using std::list;
+using std::min;
+using std::memcmp;
+using std::vector;
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
@@ -56,22 +59,20 @@ namespace Tins {
 
 const uint8_t IP::DEFAULT_TTL = 128;
 
-IP::IP(address_type ip_dst, address_type ip_src) 
-{
+IP::IP(address_type ip_dst, address_type ip_src) {
     init_ip_fields();
     this->dst_addr(ip_dst);
     this->src_addr(ip_src); 
 }
 
-IP::IP(const uint8_t *buffer, uint32_t total_sz)
-: _options_size(0)
-{
+IP::IP(const uint8_t* buffer, uint32_t total_sz)
+: options_size_(0) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_ip);
+    stream.read(ip_);
 
     // Make sure we have enough size for options and not less than we should
     if (head_len() * sizeof(uint32_t) > total_sz || 
-        head_len() * sizeof(uint32_t) < sizeof(iphdr)) {
+        head_len() * sizeof(uint32_t) < sizeof(ip_)) {
         throw malformed_packet();
     }
     const uint8_t* options_end = buffer + head_len() * sizeof(uint32_t);
@@ -91,15 +92,15 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
                 if (stream.pointer() + data_size > options_end) {
                     throw malformed_packet();
                 }
-                _ip_options.push_back(
+                ip_options_.push_back(
                     option(opt_type, stream.pointer(), stream.pointer() + data_size)
                 );
                 stream.skip(data_size);
             }
             else {
-                _ip_options.push_back(option(opt_type));
+                ip_options_.push_back(option(opt_type));
             }
-            _options_size += option_size;
+            options_size_ += option_size;
         }
         else if (opt_type == END) {
             // If the end option found, we're done
@@ -110,18 +111,17 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
             break;
         }
         else {
-            _ip_options.push_back(option(opt_type));
-            _options_size++;
+            ip_options_.push_back(option(opt_type));
+            options_size_++;
         }
     }
-    uint8_t padding = _options_size % 4;
-    _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
+    update_padded_options_size();
     if (stream) {
         // Don't avoid consuming more than we should if tot_len is 0,
         // since this is the case when using TCP segmentation offload
         if (tot_len() != 0) {
             const uint32_t advertised_length = (uint32_t)tot_len() - head_len() * sizeof(uint32_t);
-            total_sz = std::min(stream.size(), advertised_length);
+            total_sz = min(stream.size(), advertised_length);
         }
         else {
             total_sz = stream.size();
@@ -131,7 +131,7 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
         if (!is_fragmented()) {
             inner_pdu(
                 Internals::pdu_from_flag(
-                    static_cast<Constants::IP::e>(_ip.protocol),
+                    static_cast<Constants::IP::e>(ip_.protocol),
                     stream.pointer(), 
                     total_sz,
                     false
@@ -140,7 +140,7 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
             if (!inner_pdu()) {
                 inner_pdu(
                     Internals::allocate<IP>(
-                        _ip.protocol,
+                        ip_.protocol,
                         stream.pointer(), 
                         total_sz
                     )
@@ -158,74 +158,72 @@ IP::IP(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void IP::init_ip_fields() {
-    memset(&_ip, 0, sizeof(iphdr));
-    _ip.version = 4;
+    memset(&ip_, 0, sizeof(ip_));
+    ip_.version = 4;
     ttl(DEFAULT_TTL);
     id(1);
-    _options_size = 0;
-    _padded_options_size = 0;
+    options_size_ = 0;
+    padded_options_size_ = 0;
 }
 
 bool IP::is_fragmented() const {
     return flags() == IP::MORE_FRAGMENTS || fragment_offset() != 0;
 }
 
-/* Setters */
+// Setters
 
 void IP::tos(uint8_t new_tos) {
-    _ip.tos = new_tos;
+    ip_.tos = new_tos;
 }
 
 void IP::tot_len(uint16_t new_tot_len) {
-    _ip.tot_len = Endian::host_to_be(new_tot_len);
+    ip_.tot_len = Endian::host_to_be(new_tot_len);
 }
 
 void IP::id(uint16_t new_id) {
-    _ip.id = Endian::host_to_be(new_id);
+    ip_.id = Endian::host_to_be(new_id);
 }
 
 void IP::frag_off(uint16_t new_frag_off) {
-    _ip.frag_off = Endian::host_to_be(new_frag_off);
+    ip_.frag_off = Endian::host_to_be(new_frag_off);
 }
 
 void IP::fragment_offset(small_uint<13> new_frag_off) {
-    uint16_t value = (Endian::be_to_host(_ip.frag_off) & 0xe000) | new_frag_off;
-    _ip.frag_off = Endian::host_to_be(value);
+    uint16_t value = (Endian::be_to_host(ip_.frag_off) & 0xe000) | new_frag_off;
+    ip_.frag_off = Endian::host_to_be(value);
 }
 
 void IP::flags(Flags new_flags) {
-    uint16_t value = (Endian::be_to_host(_ip.frag_off) & 0x1fff) | (new_flags << 13);
-    _ip.frag_off = Endian::host_to_be(value);
+    uint16_t value = (Endian::be_to_host(ip_.frag_off) & 0x1fff) | (new_flags << 13);
+    ip_.frag_off = Endian::host_to_be(value);
 }
 
 void IP::ttl(uint8_t new_ttl) {
-    _ip.ttl = new_ttl;
+    ip_.ttl = new_ttl;
 }
 
 void IP::protocol(uint8_t new_protocol) {
-    _ip.protocol = new_protocol;
+    ip_.protocol = new_protocol;
 }
 
 void IP::checksum(uint16_t new_check) {
-    _ip.check = Endian::host_to_be(new_check);
+    ip_.check = Endian::host_to_be(new_check);
 }
-
 
 void IP::src_addr(address_type ip) {
-    _ip.saddr = ip;
+    ip_.saddr = ip;
 }
 
-
 void IP::dst_addr(address_type ip) {
-    _ip.daddr = ip;
+    ip_.daddr = ip;
 }
 
 void IP::head_len(small_uint<4> new_head_len) {
-    _ip.ihl = new_head_len;
+    ip_.ihl = new_head_len;
 }
 
 void IP::version(small_uint<4> ver) {
-    _ip.version = ver;
+    ip_.version = ver;
 }
 
 void IP::eol() {
@@ -236,16 +234,16 @@ void IP::noop() {
     add_option(option_identifier(IP::NOOP, IP::CONTROL, 0));
 }
 
-void IP::security(const security_type &data) {
+void IP::security(const security_type& data) {
     uint8_t array[9];
-    uint16_t *ptr = reinterpret_cast<uint16_t*>(array);
+    OutputMemoryStream stream(array, sizeof(array));
     uint32_t value = data.transmission_control;
-    *ptr++ = Endian::host_to_be(data.security);
-    *ptr++ = Endian::host_to_be(data.compartments);
-    *ptr++ = Endian::host_to_be(data.handling_restrictions);
-    array[8] = (value & 0xff);
-    array[7] = ((value >> 8) & 0xff);
-    array[6] = ((value >> 16) & 0xff);
+    stream.write_be(data.security);
+    stream.write_be(data.compartments);
+    stream.write_be(data.handling_restrictions);
+    stream.write<uint8_t>((value >> 16) & 0xff);
+    stream.write<uint8_t>((value >> 8) & 0xff);
+    stream.write<uint8_t>(value & 0xff);
     
     add_option(
         option(
@@ -258,7 +256,7 @@ void IP::security(const security_type &data) {
 
 void IP::stream_identifier(uint16_t stream_id) {
     stream_id = Endian::host_to_be(stream_id);
-        add_option(
+    add_option(
         option(
             136,
             sizeof(uint16_t),
@@ -267,10 +265,10 @@ void IP::stream_identifier(uint16_t stream_id) {
     );
 }
 
-void IP::add_route_option(option_identifier id, const generic_route_option_type &data) {
-    std::vector<uint8_t> opt_data(1 + sizeof(uint32_t) * data.routes.size());
+void IP::add_route_option(option_identifier id, const generic_route_option_type& data) {
+    vector<uint8_t> opt_data(1 + sizeof(uint32_t) * data.routes.size());
     opt_data[0] = data.pointer;
-    for(size_t i(0); i < data.routes.size(); ++i) {
+    for (size_t i(0); i < data.routes.size(); ++i) {
         uint32_t ip = data.routes[i];
         #if TINS_IS_BIG_ENDIAN
             ip = Endian::change_endian(ip);
@@ -290,68 +288,71 @@ void IP::add_route_option(option_identifier id, const generic_route_option_type 
 }
 
 IP::generic_route_option_type IP::search_route_option(option_identifier id) const {
-    const option *opt = search_option(id);
-    if(!opt)
+    const option* opt = search_option(id);
+    if (!opt) {
         throw option_not_found();
+    }
     return opt->to<generic_route_option_type>();
 }
 
 IP::security_type IP::security() const {
-    const option *opt = search_option(130);
-    if(!opt)
+    const option* opt = search_option(130);
+    if (!opt) {
         throw option_not_found();
+    }
     return opt->to<security_type>();
 }
 
 uint16_t IP::stream_identifier() const {
-    const option *opt = search_option(136);
-    if(!opt)
+    const option* opt = search_option(136);
+    if (!opt) {
         throw option_not_found();
+    }
     return opt->to<uint16_t>();
 }
 
-void IP::add_option(const option &opt) {
+void IP::add_option(const option& opt) {
     internal_add_option(opt);
-    _ip_options.push_back(opt);
+    ip_options_.push_back(opt);
 }
 
 void IP::update_padded_options_size() {
-    uint8_t padding = _options_size % 4;
-    _padded_options_size = padding ? (_options_size - padding + 4) : _options_size;
+    uint8_t padding = options_size_ % 4;
+    padded_options_size_ = padding ? (options_size_ - padding + 4) : options_size_;
 }
 
-void IP::internal_add_option(const option &opt) {
-    _options_size += static_cast<uint16_t>(1 + opt.data_size());
+void IP::internal_add_option(const option& opt) {
+    options_size_ += static_cast<uint16_t>(1 + opt.data_size());
     update_padded_options_size();
 }
 
 bool IP::remove_option(option_identifier id) {
     options_type::iterator iter = search_option_iterator(id);
-    if (iter == _ip_options.end()) {
+    if (iter == ip_options_.end()) {
         return false;
     }
-    _options_size -= static_cast<uint16_t>(1 + iter->data_size());
-    _ip_options.erase(iter);
+    options_size_ -= static_cast<uint16_t>(1 + iter->data_size());
+    ip_options_.erase(iter);
     update_padded_options_size();
     return true;
 }
 
-const IP::option *IP::search_option(option_identifier id) const {
+const IP::option* IP::search_option(option_identifier id) const {
     options_type::const_iterator iter = search_option_iterator(id);
-    return (iter != _ip_options.end()) ? &*iter : 0;
+    return (iter != ip_options_.end()) ? &*iter : 0;
 }
 
 IP::options_type::const_iterator IP::search_option_iterator(option_identifier id) const {
     Internals::option_type_equality_comparator<option> comparator(id);
-    return find_if(_ip_options.begin(), _ip_options.end(), comparator);
+    return find_if(ip_options_.begin(), ip_options_.end(), comparator);
 }
 
 IP::options_type::iterator IP::search_option_iterator(option_identifier id) {
     Internals::option_type_equality_comparator<option> comparator(id);
-    return find_if(_ip_options.begin(), _ip_options.end(), comparator);
+    return find_if(ip_options_.begin(), ip_options_.end(), comparator);
 }
 
-void IP::write_option(const option &opt, OutputMemoryStream& stream) {
+void IP::write_option(const option& opt, OutputMemoryStream& stream) {
     stream.write(opt.option());
     // Check what we wrote. We'll do this for any option != [END, NOOP]
     if (*(stream.pointer() - 1) > NOOP) {
@@ -364,10 +365,10 @@ void IP::write_option(const option &opt, OutputMemoryStream& stream) {
     }
 }
 
-/* Virtual method overriding. */
+// Virtual method overriding
 
 uint32_t IP::header_size() const {
-    return sizeof(iphdr) + _padded_options_size;
+    return sizeof(ip_) + padded_options_size_;
 }
 
 PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
@@ -388,31 +389,33 @@ void IP::send(PacketSender& sender, const NetworkInterface &) {
     PacketSender::SocketType type = PacketSender::IP_RAW_SOCKET;
     link_addr.sin_family = AF_INET;
     link_addr.sin_port = 0;
-    link_addr.sin_addr.s_addr = _ip.daddr;
-    if(inner_pdu())
+    link_addr.sin_addr.s_addr = ip_.daddr;
+    if (inner_pdu()) {
         type = pdu_type_to_sender_type(inner_pdu()->pdu_type());
+    }
 
     sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
 
-PDU *IP::recv_response(PacketSender &sender, const NetworkInterface &) {
+PDU* IP::recv_response(PacketSender& sender, const NetworkInterface &) {
     sockaddr_in link_addr;
     PacketSender::SocketType type = PacketSender::IP_RAW_SOCKET;
-    std::memset(&link_addr, 0, sizeof(link_addr));
-    if(inner_pdu())
+    memset(&link_addr, 0, sizeof(link_addr));
+    if (inner_pdu()) {
         type = pdu_type_to_sender_type(inner_pdu()->pdu_type());
+    }
 
     return sender.recv_l3(*this, 0, sizeof(link_addr), type);
 }
 
-void IP::prepare_for_serialize(const PDU *parent) {
-    if(!parent && _ip.saddr == 0) {
+void IP::prepare_for_serialize(const PDU* parent) {
+    if (!parent && ip_.saddr == 0) {
         NetworkInterface iface(dst_addr());
         src_addr(iface.addresses().ip_addr);
     }
 }
 
-void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* parent) {
+void IP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
     OutputMemoryStream stream(buffer, total_sz);
     checksum(0);
     if (inner_pdu()) {
@@ -428,51 +431,54 @@ void IP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU* pare
     }
     
     #if __FreeBSD__ || defined(__FreeBSD_kernel__) || __APPLE__
-        if(!parent) {
+        if (!parent) {
             total_sz = Endian::host_to_be<uint16_t>(total_sz);
         }
     #endif
     tot_len(total_sz);
     head_len(static_cast<uint8_t>(header_size() / sizeof(uint32_t)));
 
-    stream.write(_ip);
+    stream.write(ip_);
 
-    for(options_type::const_iterator it = _ip_options.begin(); it != _ip_options.end(); ++it) {
+    for (options_type::const_iterator it = ip_options_.begin(); it != ip_options_.end(); ++it) {
         write_option(*it, stream);
     }
     // Add option padding
-    stream.fill(_padded_options_size - _options_size, 0);
+    stream.fill(padded_options_size_ - options_size_, 0);
 
-    uint32_t check = Utils::do_checksum(buffer, buffer + sizeof(_ip) + _padded_options_size);
+    uint32_t check = Utils::do_checksum(buffer, stream.pointer());
     while (check >> 16) {
         check = (check & 0xffff) + (check >> 16);
     }
     checksum(~check);
-    ((iphdr*)buffer)->check = _ip.check;
+    ((ip_header*)buffer)->check = ip_.check;
 }
 
-bool IP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
-    if(total_sz < sizeof(iphdr))
+bool IP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
+    if (total_sz < sizeof(ip_)) {
         return false;
-    const iphdr *ip_ptr = (const iphdr*)ptr;
+    }
+    const ip_header* ip_ptr = (const ip_header*)ptr;
     // dest unreachable?
-    if(ip_ptr->protocol == Constants::IP::PROTO_ICMP) {
-        const uint8_t *pkt_ptr = ptr + sizeof(iphdr);
-        uint32_t pkt_sz = total_sz - sizeof(iphdr);
+    if (ip_ptr->protocol == Constants::IP::PROTO_ICMP) {
+        const uint8_t* pkt_ptr = ptr + sizeof(ip_header);
+        uint32_t pkt_sz = total_sz - sizeof(ip_header);
         // It's an ICMP dest unreachable
-        if(pkt_sz > 4 && pkt_ptr[0] == 3) {
+        if (pkt_sz > 4 && pkt_ptr[0] == 3) {
             pkt_ptr += 4;
             pkt_sz -= 4;
             // If our IP header is in the ICMP payload, then it's the same packet.
             // This keeps in mind checksum and IP identifier, so I guess it's enough.
-            if(pkt_sz >= sizeof(iphdr) && std::memcmp(&_ip, pkt_ptr, sizeof(iphdr))) 
+            if (pkt_sz >= sizeof(ip_) && memcmp(&ip_, pkt_ptr, sizeof(ip_header))) {
                 return true;
+            }
         }
     }
     // checks for broadcast addr
-    if((_ip.saddr == ip_ptr->daddr && (_ip.daddr == ip_ptr->saddr || dst_addr().is_broadcast())) ||
-        (dst_addr().is_broadcast() && _ip.saddr == 0)) {
-        uint32_t sz = std::min<uint32_t>(header_size(), total_sz);
+    if ((ip_.saddr == ip_ptr->daddr && 
+        (ip_.daddr == ip_ptr->saddr || dst_addr().is_broadcast())) ||
+        (dst_addr().is_broadcast() && ip_.saddr == 0)) {
+        uint32_t sz = min<uint32_t>(header_size(), total_sz);
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
     return false;
@@ -480,41 +486,38 @@ bool IP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
 
 // Option static constructors from options
 
-IP::security_type IP::security_type::from_option(const option &opt) 
-{
-    if(opt.data_size() != 9)
+IP::security_type IP::security_type::from_option(const option& opt)  {
+    if (opt.data_size() != 9) {
         throw malformed_option();
+    }
     security_type output;
-
-    memcpy(&output.security, opt.data_ptr(), sizeof(uint16_t));
-    output.security = Endian::be_to_host(output.security);
-    memcpy(&output.compartments, opt.data_ptr() + sizeof(uint16_t), sizeof(uint16_t));
-    output.compartments = Endian::be_to_host(output.compartments);
-    memcpy(&output.handling_restrictions, opt.data_ptr() + 2 * sizeof(uint16_t), sizeof(uint16_t));
-    output.handling_restrictions = Endian::be_to_host(output.handling_restrictions);
-    uint32_t tcc = opt.data_ptr()[6];
-    tcc = (tcc << 8) | opt.data_ptr()[7];
-    tcc = (tcc << 8) | opt.data_ptr()[8];
+    InputMemoryStream stream(opt.data_ptr(), opt.data_size());
+    output.security = stream.read_be<uint16_t>();
+    output.compartments = stream.read_be<uint16_t>();
+    output.handling_restrictions = stream.read_be<uint16_t>();
+    uint32_t tcc = stream.read<uint8_t>();
+    tcc = (tcc << 8) | stream.read<uint8_t>();
+    tcc = (tcc << 8) | stream.read<uint8_t>();
     output.transmission_control = tcc;
     return output;
 }
 
-IP::generic_route_option_type IP::generic_route_option_type::from_option(
-  const option &opt) 
-{
-    if(opt.data_size() < 1 + sizeof(uint32_t) || ((opt.data_size() - 1) % sizeof(uint32_t)) != 0)
+IP::generic_route_option_type IP::generic_route_option_type::from_option(const option& opt)  {
+    if (opt.data_size() < 1 + sizeof(uint32_t) || ((opt.data_size() - 1) % sizeof(uint32_t)) != 0) {
         throw malformed_option();
+    }
     generic_route_option_type output;
     output.pointer = *opt.data_ptr();
-    const uint8_t *route = opt.data_ptr() + 1;
-    const uint8_t *end = route + opt.data_size() - 1;
+    const uint8_t* route = opt.data_ptr() + 1;
+    const uint8_t* end = route + opt.data_size() - 1;
 
     uint32_t uint32_t_buffer;
-    while(route < end) {
+    while (route < end) {
         memcpy(&uint32_t_buffer, route, sizeof(uint32_t));
         output.routes.push_back(address_type(uint32_t_buffer));
         route += sizeof(uint32_t);
     }
     return output;
 }
-}
+
+} // Tins

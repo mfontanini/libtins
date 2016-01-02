@@ -21,7 +21,7 @@ public:
     static const uint8_t packet_with_extensions_and_length[];
     static const uint8_t mld2_icmpv6_layer[];
 
-    void test_equals(const ICMPv6 &icmp1, const ICMPv6 &icmp2);
+    void test_equals(const ICMPv6& icmp1, const ICMPv6& icmp2);
 };
 
 const uint8_t ICMPv6Test::expected_packet[] = {
@@ -114,7 +114,7 @@ TEST_F(ICMPv6Test, ConstructorFromBuffer2) {
     EXPECT_EQ(icmp.router_lifetime(), 1800);
     EXPECT_EQ(icmp.reachable_time(), 30000U);
     EXPECT_EQ(icmp.retransmit_timer(), 1000U);
-    const ICMPv6::option *opt = icmp.search_option(ICMPv6::SOURCE_ADDRESS);
+    const ICMPv6::option* opt = icmp.search_option(ICMPv6::SOURCE_ADDRESS);
     ASSERT_TRUE(opt != NULL);
     EXPECT_EQ(opt->data_size(), 6U);
     EXPECT_EQ(HWAddress<6>(opt->data_ptr()), "00:60:97:07:69:ea");
@@ -281,7 +281,7 @@ TEST_F(ICMPv6Test, PrefixInformation) {
     EXPECT_EQ(result.L, info.L);
     EXPECT_EQ(result.valid_lifetime, info.valid_lifetime);
     EXPECT_EQ(result.preferred_lifetime, info.preferred_lifetime);
-    EXPECT_EQ(IPv6Address(result.prefix), IPv6Address(result.prefix));
+    EXPECT_EQ(IPv6Address(info.prefix), IPv6Address(result.prefix));
     EXPECT_EQ(IPv6Address(result.prefix), "827d:adae::1");
 }
 
@@ -325,7 +325,7 @@ TEST_F(ICMPv6Test, NewAdvertisementInterval) {
 TEST_F(ICMPv6Test, NewHomeAgentInformation) {
     ICMPv6 icmp;
     ICMPv6::new_ha_info_type data;
-    data.push_back(0);
+    data.push_back(0xfeed);
     data.push_back(0x92fa);
     data.push_back(0xaab3);
     icmp.new_home_agent_info(data);
@@ -426,6 +426,7 @@ TEST_F(ICMPv6Test, MAP) {
     EXPECT_EQ(output.dist, data.dist);
     EXPECT_EQ(output.pref, data.pref);
     EXPECT_EQ(output.r, data.r);
+    EXPECT_EQ(output.valid_lifetime, data.valid_lifetime);
     EXPECT_EQ(output.address, data.address);
 }
 

@@ -12,7 +12,7 @@ using namespace Tins;
 
 const uint8_t empty_addr[IPv6Address::address_size] = { 0 };
 
-void test_to_string(const std::string &str) {
+void test_to_string(const std::string& str) {
     EXPECT_EQ(str, IPv6Address(str).to_string());
 }
 

@@ -36,6 +36,7 @@
 #include "macros.h"
 
 namespace Tins {
+
 class PDU;
 
 /**
@@ -85,10 +86,10 @@ public:
      * \param snap_len The snapshot length to use.
      */
     template<typename T>
-    OfflinePacketFilter(const std::string& filter, const DataLinkType<T>& lt,
-        unsigned int snap_len = 65535)
-    : string_filter(filter)
-    {
+    OfflinePacketFilter(const std::string& filter, 
+                        const DataLinkType<T>& lt,
+                        unsigned int snap_len = 65535)
+    : string_filter_(filter) {
         init(filter, lt.get_type(), snap_len);
     }
 
@@ -149,9 +150,9 @@ private:
         unsigned int snap_len);
 
 
-    pcap_t* handle;
-    mutable bpf_program filter;
-    std::string string_filter;
+    pcap_t* handle_;
+    mutable bpf_program filter_;
+    std::string string_filter_;
 };
 } // Tins
 

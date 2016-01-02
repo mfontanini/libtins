@@ -43,16 +43,6 @@ namespace Tins {
  */
 class TINS_API IPv6Address {
 public:
-    /**
-     * The exception thrown when a malformed address is parsed.
-     */
-    class malformed_address : public std::exception {
-    public:
-        const char *what() const throw() {
-            return "Malformed address";
-        }
-    };
-    
     static const size_t address_size = 16;
     
     /**
@@ -76,14 +66,14 @@ public:
      * \param addr The text representation from which to construct this
      * object.
      */
-    IPv6Address(const char *addr);
+    IPv6Address(const char* addr);
     
     /**
      * \brief Constructor from a text representation std::string.
      * \param addr The text representation from which to construct this
      * object.
      */
-    IPv6Address(const std::string &addr);
+    IPv6Address(const std::string& addr);
     
     /**
      * \brief Constructor from a buffer.
@@ -105,21 +95,21 @@ public:
      * Returns an iterator to the beginning of this address.
      */
     iterator begin() {
-        return address;
+        return address_;
     }
     
     /**
      * Returns a const iterator to the beginning of this address.
      */
     const_iterator begin() const {
-        return address;
+        return address_;
     }
     
     /**
      * Returns an iterator to the one-past-the-end element of this address.
      */
     iterator end() {
-        return address + address_size;
+        return address_ + address_size;
     }
     
     /**
@@ -127,7 +117,7 @@ public:
      * address.
      */
     const_iterator end() const {
-        return address + address_size;
+        return address_ + address_size;
     }
     
     /**
@@ -137,8 +127,8 @@ public:
      * 
      * \return bool indicating whether addresses are equal.
      */
-    bool operator==(const IPv6Address &rhs) const {
-        return std::equal(begin(), end(), rhs.address);
+    bool operator==(const IPv6Address& rhs) const {
+        return std::equal(begin(), end(), rhs.address_);
     }
     
     /**
@@ -148,7 +138,7 @@ public:
      * 
      * \return bool indicating whether addresses are distinct.
      */
-    bool operator!=(const IPv6Address &rhs) const {
+    bool operator!=(const IPv6Address& rhs) const {
         return !(*this == rhs);
     }
     
@@ -159,7 +149,7 @@ public:
      * 
      * \return bool indicating whether this address is less-than rhs.
      */
-    bool operator<(const IPv6Address &rhs) const {
+    bool operator<(const IPv6Address& rhs) const {
         return std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
     }
     
@@ -206,26 +196,29 @@ public:
      * \param addr The parameter to be written.
      * \return std::ostream& pointing to the os parameter.
      */
-    friend std::ostream &operator<<(std::ostream &os, const IPv6Address &addr) {
+    friend std::ostream& operator<<(std::ostream& os, const IPv6Address& addr) {
         return os << addr.to_string();
     }
 private:
-    void init(const char *addr);
+    void init(const char* addr);
 
-    uint8_t address[address_size];
+    uint8_t address_[address_size];
 };
-} //namespace Tins
+
+} // Tins
 
 #if TINS_IS_CXX11
-namespace std
-{
+namespace std {
+
 template<>
 struct hash<Tins::IPv6Address> {
-    size_t operator()(const Tins::IPv6Address &addr) const {
+    size_t operator()(const Tins::IPv6Address& addr) const {
         return std::hash<std::string>()(addr.to_string());
     }
 };
-} // namespace std
-#endif
+
+} // std
+
+#endif // TINS_IS_CXX11
 
 #endif // TINS_IPV6_ADDRESS

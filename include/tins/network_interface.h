@@ -38,6 +38,7 @@
 #include "ip_address.h"
 
 namespace Tins {
+
 /**
  * \class NetworkInterface
  * \brief Abstraction of a network interface
@@ -89,14 +90,14 @@ public:
      * 
      * \param name The name of the interface this object will abstract.
      */
-    NetworkInterface(const std::string &name);
+    NetworkInterface(const std::string& name);
     
     /**
      * \brief Constructor from const char*.
      * 
      * \param name The name of the interface this object will abstract.
      */
-    NetworkInterface(const char *name);
+    NetworkInterface(const char* name);
     
     /**
      * \brief Constructs a NetworkInterface from an ip address.
@@ -114,7 +115,7 @@ public:
      * \return id_type containing the identifier.
      */
     id_type id() const {
-        return iface_id;
+        return iface_id_;
     }
     
     /**
@@ -153,7 +154,7 @@ public:
      * default constructor. 
      */
     operator bool() const {
-        return iface_id != 0;
+        return iface_id_ != 0;
     }
 
     /**
@@ -175,8 +176,8 @@ public:
      * 
      * \param rhs The interface being compared.
      */
-    bool operator==(const NetworkInterface &rhs) const {
-        return iface_id == rhs.iface_id;
+    bool operator==(const NetworkInterface& rhs) const {
+        return iface_id_ == rhs.iface_id_;
     }
     
     /**
@@ -184,13 +185,15 @@ public:
      * 
      * \param rhs The interface being compared.
      */
-    bool operator!=(const NetworkInterface &rhs) const {
+    bool operator!=(const NetworkInterface& rhs) const {
         return !(*this == rhs);
     }
 private:
-    id_type resolve_index(const char *name);
+    id_type resolve_index(const char* name);
 
-    id_type iface_id;
+    id_type iface_id_;
 };
-}
+
+} // Tins
+
 #endif // TINS_NETWORK_INTERFACE_H

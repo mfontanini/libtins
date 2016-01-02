@@ -104,8 +104,8 @@ TEST_F(MatchesResponseTest, DHCP) {
     };
     
     EthernetII discover(dhcp_discover, sizeof(dhcp_discover));
-    UDP *udp = discover.find_pdu<UDP>();
-    const RawPDU *raw = discover.find_pdu<RawPDU>();
+    UDP* udp = discover.find_pdu<UDP>();
+    const RawPDU* raw = discover.find_pdu<RawPDU>();
     ASSERT_TRUE(udp != NULL);
     ASSERT_TRUE(raw != NULL);
     
@@ -221,8 +221,8 @@ TEST_F(MatchesResponseTest, DHCPv6) {
     };
     
     EthernetII pkt(request, sizeof(request));
-    UDP *udp = pkt.find_pdu<UDP>();
-    const RawPDU *raw = pkt.find_pdu<RawPDU>();
+    UDP* udp = pkt.find_pdu<UDP>();
+    const RawPDU* raw = pkt.find_pdu<RawPDU>();
     ASSERT_TRUE(udp != NULL);
     ASSERT_TRUE(raw != NULL);
     

@@ -22,14 +22,14 @@ const uint8_t Dot11ProbeRequestTest::expected_packet[] = {
     0, 0
 };
 
-void test_equals(const Dot11ProbeRequest &dot1, const Dot11ProbeRequest &dot2) {
+void test_equals(const Dot11ProbeRequest& dot1, const Dot11ProbeRequest& dot2) {
     test_equals(
         static_cast<const Dot11ManagementFrame&>(dot1),
         static_cast<const Dot11ManagementFrame&>(dot2)
     );
 }
 
-void test_equals_expected(const Dot11ProbeRequest &dot11) {
+void test_equals_expected(const Dot11ProbeRequest& dot11) {
     test_equals_expected(static_cast<const Dot11ManagementFrame&>(dot11));
     EXPECT_EQ(dot11.subtype(), Dot11::PROBE_REQ);
 }
@@ -67,7 +67,7 @@ TEST_F(Dot11ProbeRequestTest, ClonePDU) {
 TEST_F(Dot11ProbeRequestTest, FromBytes) {
     Internals::smart_ptr<PDU>::type dot11(Dot11::from_bytes(expected_packet, sizeof(expected_packet)));
     ASSERT_TRUE(dot11.get() != NULL);
-    const Dot11ProbeRequest *inner = dot11->find_pdu<Dot11ProbeRequest>();
+    const Dot11ProbeRequest* inner = dot11->find_pdu<Dot11ProbeRequest>();
     ASSERT_TRUE(inner != NULL);
     test_equals_expected(*inner);
 }

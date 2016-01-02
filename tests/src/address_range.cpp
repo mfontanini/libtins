@@ -12,12 +12,12 @@ using namespace Tins;
 
 class AddressRangeTest : public testing::Test {
 public:
-    void contain_tests24(const IPv4Range &range);
-    void contain_tests24(const IPv6Range &range);
-    void contain_tests26(const IPv4Range &range);
+    void contain_tests24(const IPv4Range& range);
+    void contain_tests24(const IPv6Range& range);
+    void contain_tests26(const IPv4Range& range);
 };
 
-void AddressRangeTest::contain_tests24(const IPv4Range &range) {
+void AddressRangeTest::contain_tests24(const IPv4Range& range) {
     EXPECT_TRUE(range.contains("192.168.0.0"));
     EXPECT_TRUE(range.contains("192.168.0.1"));
     EXPECT_TRUE(range.contains("192.168.0.254"));
@@ -26,14 +26,14 @@ void AddressRangeTest::contain_tests24(const IPv4Range &range) {
     EXPECT_FALSE(range.contains("192.168.1.1"));
 }
 
-void AddressRangeTest::contain_tests26(const IPv4Range &range) {
+void AddressRangeTest::contain_tests26(const IPv4Range& range) {
     EXPECT_TRUE(range.contains("192.168.254.192"));
     EXPECT_TRUE(range.contains("192.168.254.255"));
     EXPECT_FALSE(range.contains("192.168.254.0"));
     EXPECT_FALSE(range.contains("192.168.254.191"));
 }
 
-void AddressRangeTest::contain_tests24(const IPv6Range &range) {
+void AddressRangeTest::contain_tests24(const IPv6Range& range) {
     EXPECT_TRUE(range.contains("dead::1"));
     EXPECT_TRUE(range.contains("dead::1fee"));
     EXPECT_TRUE(range.contains("dead::ffee"));

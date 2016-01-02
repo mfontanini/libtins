@@ -128,12 +128,14 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \sa PDU::clone
      */
-    MPLS *clone() const {
+    MPLS* clone() const {
         return new MPLS(*this);
     }
 private:
@@ -144,7 +146,7 @@ private:
         uint8_t ttl;
     } TINS_END_PACK;
 
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
 
     mpls_header header_;
 };

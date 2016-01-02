@@ -40,16 +40,14 @@ using Tins::Memory::OutputMemoryStream;
 namespace Tins {
 
 Dot1Q::Dot1Q(small_uint<12> tag_id, bool append_pad) 
-: _header(), _append_padding(append_pad)
-{
+: header_(), append_padding_(append_pad) {
     id(tag_id);
 }
 
-Dot1Q::Dot1Q(const uint8_t *buffer, uint32_t total_sz) 
-: _append_padding()
-{
+Dot1Q::Dot1Q(const uint8_t* buffer, uint32_t total_sz) 
+: append_padding_() {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_header);
+    stream.read(header_);
     
     if (stream) {
         inner_pdu(
@@ -63,33 +61,33 @@ Dot1Q::Dot1Q(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void Dot1Q::priority(small_uint<3> new_priority) {
-    _header.priority = new_priority;
+    header_.priority = new_priority;
 }
 
 void Dot1Q::cfi(small_uint<1> new_cfi) {
-    _header.cfi = new_cfi;
+    header_.cfi = new_cfi;
 }
 
 void Dot1Q::id(small_uint<12> new_id) {
     #if TINS_IS_LITTLE_ENDIAN
-    _header.idL = new_id & 0xff;
-    _header.idH = new_id >> 8;
+    header_.idL = new_id & 0xff;
+    header_.idH = new_id >> 8;
     #else
-    _header.id = new_id;
+    header_.id = new_id;
     #endif
 }
 
 void Dot1Q::payload_type(uint16_t new_type) {
-    _header.type = Endian::host_to_be(new_type);
+    header_.type = Endian::host_to_be(new_type);
 }
 
 uint32_t Dot1Q::header_size() const {
-    return sizeof(_header);
+    return sizeof(header_);
 }
 
 uint32_t Dot1Q::trailer_size() const {
-    if (_append_padding) {
-        uint32_t total_size = sizeof(_header);
+    if (append_padding_) {
+        uint32_t total_size = sizeof(header_);
         if (inner_pdu()) {
             total_size += inner_pdu()->size();
         }
@@ -100,7 +98,7 @@ uint32_t Dot1Q::trailer_size() const {
     }
 }
 
-void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+void Dot1Q::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         // Set the appropriate payload type flag
@@ -109,7 +107,7 @@ void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
         );
         payload_type(static_cast<uint16_t>(flag));
     }
-    stream.write(_header);
+    stream.write(header_);
 
     // Skip inner PDU size
     if (inner_pdu()) {
@@ -120,29 +118,31 @@ void Dot1Q::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *)
 }
 
 #if TINS_IS_LITTLE_ENDIAN
-    uint16_t Dot1Q::get_id(const dot1q_hdr *hdr) {
+    uint16_t Dot1Q::get_id(const dot1q_hdr* hdr) {
         return hdr->idL | (hdr->idH << 8);
     }
 #else
-    uint16_t Dot1Q::get_id(const dot1q_hdr *hdr) {
+    uint16_t Dot1Q::get_id(const dot1q_hdr* hdr) {
         return hdr->id;
     }
 #endif
 
 void Dot1Q::append_padding(bool value) {
-    _append_padding = value;
+    append_padding_ = value;
 }
 
-bool Dot1Q::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
-    if(total_sz < sizeof(_header))
+bool Dot1Q::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
+    if (total_sz < sizeof(header_)) {
         return false;
-    const dot1q_hdr *dot1q_ptr = (const dot1q_hdr*)ptr;
-    if(get_id(dot1q_ptr) == get_id(&_header)) {
-        ptr += sizeof(_header);
-        total_sz -= sizeof(_header);
+    }
+    const dot1q_hdr* dot1q_ptr = (const dot1q_hdr*)ptr;
+    if (get_id(dot1q_ptr) == get_id(&header_)) {
+        ptr += sizeof(header_);
+        total_sz -= sizeof(header_);
         return inner_pdu() ? inner_pdu()->matches_response(ptr, total_sz) : true;
     }
     return false;
     
 }
-}
+
+} // Tins

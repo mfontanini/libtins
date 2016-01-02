@@ -80,7 +80,7 @@ public:
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    STP(const uint8_t *buffer, uint32_t total_sz);
+    STP(const uint8_t* buffer, uint32_t total_sz);
 
     // Getters
 
@@ -89,7 +89,7 @@ public:
      *  \return The stored Protocol ID field value.
      */
     uint16_t proto_id() const {
-        return Endian::be_to_host(_header.proto_id);
+        return Endian::be_to_host(header_.proto_id);
     }
 
     /**
@@ -97,7 +97,7 @@ public:
      *  \return The stored Protocol Version field value.
      */
     uint8_t proto_version() const {
-        return _header.proto_version;
+        return header_.proto_version;
     }
 
     /**
@@ -105,7 +105,7 @@ public:
      *  \return The stored BDU Type field value.
      */
     uint8_t bpdu_type() const {
-        return _header.bpdu_type;
+        return header_.bpdu_type;
     }
 
     /**
@@ -113,7 +113,7 @@ public:
      *  \return The stored BDU Flags field value.
      */
     uint8_t bpdu_flags() const {
-        return _header.bpdu_flags;
+        return header_.bpdu_flags;
     }
 
     /**
@@ -121,7 +121,7 @@ public:
      *  \return The stored Root Path Cost field value.
      */
     uint32_t root_path_cost() const {
-        return Endian::be_to_host(_header.root_path_cost);
+        return Endian::be_to_host(header_.root_path_cost);
     }
 
     /**
@@ -129,7 +129,7 @@ public:
      *  \return The stored Port ID field value.
      */
     uint16_t port_id() const {
-        return Endian::be_to_host(_header.port_id);
+        return Endian::be_to_host(header_.port_id);
     }
 
     /**
@@ -137,7 +137,7 @@ public:
      *  \return The stored Message Age field value.
      */
     uint16_t msg_age() const {
-        return Endian::be_to_host(_header.msg_age) / 256;
+        return Endian::be_to_host(header_.msg_age) / 256;
     }
 
     /**
@@ -145,7 +145,7 @@ public:
      *  \return The stored Maximum Age field value.
      */
     uint16_t max_age() const {
-        return Endian::be_to_host(_header.max_age) / 256;
+        return Endian::be_to_host(header_.max_age) / 256;
     }
 
     /**
@@ -153,7 +153,7 @@ public:
      *  \return The stored Hello Time field value.
      */
     uint16_t hello_time() const {
-        return Endian::be_to_host(_header.hello_time) / 256;
+        return Endian::be_to_host(header_.hello_time) / 256;
     }
 
     /**
@@ -161,7 +161,7 @@ public:
      *  \return The stored Forward Delay field value.
      */
     uint16_t fwd_delay() const {
-        return Endian::be_to_host(_header.fwd_delay) / 256;
+        return Endian::be_to_host(header_.fwd_delay) / 256;
     }
     
     /**
@@ -180,12 +180,14 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
 
     /**
      * \sa PDU::clone
      */
-    STP *clone() const {
+    STP* clone() const {
         return new STP(*this);
     }
     
@@ -262,13 +264,13 @@ public:
      *  \brief Setter for the Root ID field.
      *  \param new_fwd_delay The new Root ID field value.
      */
-    void root_id(const bpdu_id_type &id);
+    void root_id(const bpdu_id_type& id);
     
     /**
      *  \brief Setter for the Bridge ID field.
      *  \param new_fwd_delay The new Bridge ID field value.
      */
-    void bridge_id(const bpdu_id_type &id);
+    void bridge_id(const bpdu_id_type& id);
 private:
     TINS_BEGIN_PACK
     struct pvt_bpdu_id {
@@ -285,7 +287,7 @@ private:
     } TINS_END_PACK;
 
     TINS_BEGIN_PACK
-    struct stphdr {
+    struct stp_header {
         uint16_t proto_id;
         uint8_t proto_version;
         uint8_t bpdu_type;
@@ -300,12 +302,12 @@ private:
         uint16_t fwd_delay;
     } TINS_END_PACK;
     
-    static bpdu_id_type convert(const pvt_bpdu_id &id);
-    static pvt_bpdu_id convert(const bpdu_id_type &id);
+    static bpdu_id_type convert(const pvt_bpdu_id& id);
+    static pvt_bpdu_id convert(const bpdu_id_type& id);
     
-    void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
     
-    stphdr _header;
+    stp_header header_;
 };
 }
 

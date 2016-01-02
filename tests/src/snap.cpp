@@ -12,7 +12,7 @@ class SNAPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
     
-    void test_equals(const SNAP &snap1, const SNAP &snap2);
+    void test_equals(const SNAP& snap1, const SNAP& snap2);
 };
 
 const uint8_t SNAPTest::expected_packet[] = {
@@ -87,7 +87,7 @@ TEST_F(SNAPTest, ClonePDU) {
     snap1.eth_type(0xfab1);
     snap1.org_code(0xfab1c3);
     snap1.control(0x1);
-    SNAP *snap2 = static_cast<SNAP*>(snap1.clone());
+    SNAP* snap2 = static_cast<SNAP*>(snap1.clone());
     ASSERT_TRUE(snap2 != NULL);
     test_equals(snap1, *snap2);
     
@@ -108,7 +108,7 @@ TEST_F(SNAPTest, ConstructorFromBuffer) {
     test_equals(snap1, snap2);
 }
 
-void SNAPTest::test_equals(const SNAP &snap1, const SNAP &snap2) {
+void SNAPTest::test_equals(const SNAP& snap1, const SNAP& snap2) {
     EXPECT_EQ(snap1.dsap(), snap2.dsap());
     EXPECT_EQ(snap1.ssap(), snap2.ssap());
     EXPECT_EQ(snap1.control(), snap2.control());

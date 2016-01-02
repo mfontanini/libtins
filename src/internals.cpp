@@ -62,33 +62,38 @@ using Tins::Memory::InputMemoryStream;
 namespace Tins {
 namespace Internals {
 
-bool from_hex(const string &str, uint32_t &result) {
+bool from_hex(const string& str, uint32_t& result) {
     unsigned i(0);
     result = 0;
-    while(i < str.size()) {
+    while (i < str.size()) {
         uint8_t tmp;
-        if(str[i] >= 'A' && str[i] <= 'F')
+        if (str[i] >= 'A' && str[i] <= 'F') {
             tmp = (str[i] - 'A' + 10);
-        else if(str[i] >= '0' && str[i] <= '9')
+        }
+        else if (str[i] >= '0' && str[i] <= '9') {
             tmp = (str[i] - '0');
-        else
+        }
+        else {
             return false;
+        }
         result = (result << 4) | tmp;
         i++;
     }
     return true;
 }
 
-void skip_line(std::istream &input) {
+void skip_line(std::istream& input) {
     int c = 0;
-    while(c != '\n' && input)
-         c = input.get();
+    while (c != '\n' && input) {
+        c = input.get();
+    }
 }
 
-Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer, 
-  uint32_t size, bool rawpdu_on_no_match) 
-{
-    switch(flag) {
+Tins::PDU* pdu_from_flag(Constants::Ethernet::e flag,
+                         const uint8_t* buffer,
+                         uint32_t size,
+                         bool rawpdu_on_no_match) {
+    switch (flag) {
         case Tins::Constants::Ethernet::IP:
             return new IP(buffer, size);
         case Constants::Ethernet::IPV6:
@@ -106,22 +111,24 @@ Tins::PDU *pdu_from_flag(Constants::Ethernet::e flag, const uint8_t *buffer,
             return new MPLS(buffer, size);
         default:
             {
-                PDU *pdu = Internals::allocate<EthernetII>(
+                PDU* pdu = Internals::allocate<EthernetII>(
                     static_cast<uint16_t>(flag),
                     buffer, 
                     size
                 );
-                if(pdu)
+                if (pdu) {
                     return pdu;
+                }
             }
             return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
     };
 }
 
-Tins::PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer, 
-  uint32_t size, bool rawpdu_on_no_match) 
-{
-    switch(flag) {
+Tins::PDU* pdu_from_flag(Constants::IP::e flag, 
+                         const uint8_t* buffer, 
+                         uint32_t size,
+                         bool rawpdu_on_no_match) {
+    switch (flag) {
         case Constants::IP::PROTO_IPIP:
             return new Tins::IP(buffer, size);
         case Constants::IP::PROTO_TCP:
@@ -141,14 +148,16 @@ Tins::PDU *pdu_from_flag(Constants::IP::e flag, const uint8_t *buffer,
         default:
             break;
     }
-    if(rawpdu_on_no_match)
+    if (rawpdu_on_no_match) {
         return new Tins::RawPDU(buffer, size);
+    }
     return 0;
 }
 
-PDU *pdu_from_dlt_flag(int flag, const uint8_t *buffer, 
-  uint32_t size, bool rawpdu_on_no_match)
-{
+PDU* pdu_from_dlt_flag(int flag, 
+                       const uint8_t* buffer, 
+                       uint32_t size,
+                       bool rawpdu_on_no_match) {
     switch (flag) {
         case DLT_EN10MB:
             return new EthernetII(buffer, size);
@@ -175,8 +184,7 @@ PDU *pdu_from_dlt_flag(int flag, const uint8_t *buffer,
     };
 }
 
-Tins::PDU *pdu_from_flag(PDU::PDUType type, const uint8_t *buffer, uint32_t size) 
-{
+Tins::PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size) {
     switch(type) {
         case Tins::PDU::ETHERNET_II:
             return new Tins::EthernetII(buffer, size);
@@ -240,10 +248,11 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
         case PDU::RC4EAPOL:
             return Constants::Ethernet::EAPOL;
         default:
-            if(Internals::pdu_type_registered<EthernetII>(flag)) 
+            if (Internals::pdu_type_registered<EthernetII>(flag)) {
                 return static_cast<Constants::Ethernet::e>(
                     Internals::pdu_type_to_id<EthernetII>(flag)
                 );
+            }
             return Constants::Ethernet::UNKNOWN;
     }
 }
@@ -284,8 +293,9 @@ uint32_t get_padded_icmp_inner_pdu_size(const PDU* inner_pdu, uint32_t pad_align
     }
 }
 
-void try_parse_icmp_extensions(InputMemoryStream& stream, uint32_t payload_length, 
-    ICMPExtensionsStructure& extensions) {
+void try_parse_icmp_extensions(InputMemoryStream& stream, 
+                               uint32_t payload_length, 
+                               ICMPExtensionsStructure& extensions) {
     if (!stream) {
         return;
     }
@@ -315,40 +325,41 @@ void try_parse_icmp_extensions(InputMemoryStream& stream, uint32_t payload_lengt
     }
 }
 
-bool increment(IPv4Address &addr) {
+bool increment(IPv4Address& addr) {
     uint32_t addr_int = Endian::be_to_host<uint32_t>(addr);
     bool reached_end = ++addr_int == 0xffffffff;
     addr = IPv4Address(Endian::be_to_host<uint32_t>(addr_int));
     return reached_end;
 }
 
-bool increment(IPv6Address &addr) {
+bool increment(IPv6Address& addr) {
     return increment_buffer(addr);
 }
 
-bool decrement(IPv4Address &addr) {
+bool decrement(IPv4Address& addr) {
     uint32_t addr_int = Endian::be_to_host<uint32_t>(addr);
     bool reached_end = --addr_int == 0;
     addr = IPv4Address(Endian::be_to_host<uint32_t>(addr_int));
     return reached_end;
 }
 
-bool decrement(IPv6Address &addr) {
+bool decrement(IPv6Address& addr) {
     return decrement_buffer(addr);
 }
 
 IPv4Address last_address_from_mask(IPv4Address addr, IPv4Address mask) {
     uint32_t addr_int = Endian::be_to_host<uint32_t>(addr),
-            mask_int = Endian::be_to_host<uint32_t>(mask);
+             mask_int = Endian::be_to_host<uint32_t>(mask);
     return IPv4Address(Endian::host_to_be(addr_int | ~mask_int));
 }
 
-IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address &mask) {
+IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask) {
     IPv6Address::iterator addr_iter = addr.begin();
-    for(IPv6Address::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
+    for (IPv6Address::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
         *addr_iter = *addr_iter | ~*it;
     }
     return addr;
 }
+
 } // namespace Internals
 } // namespace Tins

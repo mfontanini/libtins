@@ -14,7 +14,7 @@ class SLLTest : public testing::Test {
 public:
     static const uint8_t expected_packet[];
     
-    void test_equals(const SLL &sll1, const SLL &sll2);
+    void test_equals(const SLL& sll1, const SLL& sll2);
 };
 
 const uint8_t SLLTest::expected_packet[] = { 

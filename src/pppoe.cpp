@@ -33,23 +33,26 @@
 #include "exceptions.h"
 #include "memory_helpers.h"
 
+using std::string;
+using std::vector;
+using std::memcpy;
+using std::copy;
+
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
 PPPoE::PPPoE() 
-: _header(), _tags_size()
-{
+: header_(), tags_size_() {
     version(1);
     type(1);
 }
 
-PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz) 
-: _tags_size()
-{
+PPPoE::PPPoE(const uint8_t* buffer, uint32_t total_sz) 
+: tags_size_() {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_header); 
+    stream.read(header_); 
     stream.size(std::min(stream.size(), (uint32_t)payload_length()));
     // If this is a session data packet
     if (code() == 0) {
@@ -60,11 +63,10 @@ PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz)
         }
     }
     else {
-        const uint8_t *end = stream.pointer() + stream.size();
-        while (stream.pointer() < end) {
+        while (stream) {
             TagTypes opt_type = static_cast<TagTypes>(stream.read<uint16_t>());
-            uint16_t opt_len = Endian::be_to_host(stream.read<uint16_t>());
-            if(!stream.can_read(opt_len)) {
+            uint16_t opt_len = stream.read_be<uint16_t>();
+            if (!stream.can_read(opt_len)) {
                 throw malformed_packet();
             }
             add_tag(tag(opt_type, opt_len, stream.pointer()));
@@ -73,55 +75,55 @@ PPPoE::PPPoE(const uint8_t *buffer, uint32_t total_sz)
     }
 }
 
-const PPPoE::tag *PPPoE::search_tag(TagTypes identifier) const {
-    for(tags_type::const_iterator it = _tags.begin(); it != _tags.end(); ++it) {
-        if(it->option() == identifier)
+const PPPoE::tag* PPPoE::search_tag(TagTypes identifier) const {
+    for (tags_type::const_iterator it = tags_.begin(); it != tags_.end(); ++it) {
+        if (it->option() == identifier) {
             return &*it;
+        }
     }
     return 0;
 }
 
 void PPPoE::version(small_uint<4> new_version) {
-    _header.version = new_version;
+    header_.version = new_version;
 }
 
 void PPPoE::type(small_uint<4> new_type) {
-    _header.type = new_type;
+    header_.type = new_type;
 }
 
 void PPPoE::code(uint8_t new_code) {
-    _header.code = new_code;
+    header_.code = new_code;
 }
 
 void PPPoE::session_id(uint16_t new_session_id) {
-    _header.session_id = Endian::host_to_be(new_session_id);
+    header_.session_id = Endian::host_to_be(new_session_id);
 }
 
 void PPPoE::payload_length(uint16_t new_payload_length) {
-    _header.payload_length = Endian::host_to_be(new_payload_length);
+    header_.payload_length = Endian::host_to_be(new_payload_length);
 }
 
 uint32_t PPPoE::header_size() const {
-    return sizeof(_header) + _tags_size;
+    return sizeof(header_) + tags_size_;
 }
 
-void PPPoE::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
-{
+void PPPoE::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
     OutputMemoryStream stream(buffer, total_sz);
-    if (_tags_size > 0) {
-        payload_length(_tags_size);
+    if (tags_size_ > 0) {
+        payload_length(tags_size_);
     }
-    stream.write(_header);
-    for(tags_type::const_iterator it = _tags.begin(); it != _tags.end(); ++it) {
+    stream.write(header_);
+    for (tags_type::const_iterator it = tags_.begin(); it != tags_.end(); ++it) {
         stream.write<uint16_t>(it->option());
         stream.write(Endian::host_to_be<uint16_t>(it->length_field()));
         stream.write(it->data_ptr(), it->data_size());
     }
 }
 
-void PPPoE::add_tag(const tag &option) {
-    _tags_size += static_cast<uint16_t>(option.data_size() + sizeof(uint16_t) * 2);
-    _tags.push_back(option);
+void PPPoE::add_tag(const tag& option) {
+    tags_size_ += static_cast<uint16_t>(option.data_size() + sizeof(uint16_t) * 2);
+    tags_.push_back(option);
 }
 
 // *********************** Setters *************************
@@ -132,27 +134,27 @@ void PPPoE::end_of_list() {
     );
 }
 
-void PPPoE::service_name(const std::string &value) {
+void PPPoE::service_name(const string& value) {
     add_tag_iterable(SERVICE_NAME, value);
 }
 
-void PPPoE::ac_name(const std::string &value) {
+void PPPoE::ac_name(const string& value) {
     add_tag_iterable(AC_NAME, value);
 }
 
-void PPPoE::host_uniq(const byte_array &value) {
+void PPPoE::host_uniq(const byte_array& value) {
     add_tag_iterable(HOST_UNIQ, value);
 }
 
-void PPPoE::ac_cookie(const byte_array &value) {
+void PPPoE::ac_cookie(const byte_array& value) {
     add_tag_iterable(AC_COOKIE, value);
 }
 
-void PPPoE::vendor_specific(const vendor_spec_type &value) {
-    std::vector<uint8_t> buffer(sizeof(uint32_t) + value.data.size());
+void PPPoE::vendor_specific(const vendor_spec_type& value) {
+    vector<uint8_t> buffer(sizeof(uint32_t) + value.data.size());
     uint32_t tmp_vendor_id = Endian::host_to_be(value.vendor_id);
-    std::memcpy(&buffer[0], &tmp_vendor_id, sizeof(uint32_t));
-    std::copy(
+    memcpy(&buffer[0], &tmp_vendor_id, sizeof(uint32_t));
+    copy(
         value.data.begin(), 
         value.data.end(), 
         buffer.begin() + sizeof(uint32_t)
@@ -166,29 +168,29 @@ void PPPoE::vendor_specific(const vendor_spec_type &value) {
     );
 }
 
-void PPPoE::relay_session_id(const byte_array &value) {
+void PPPoE::relay_session_id(const byte_array& value) {
     add_tag_iterable(RELAY_SESSION_ID, value);
 }
 
-void PPPoE::service_name_error(const std::string &value) {
+void PPPoE::service_name_error(const std::string& value) {
     add_tag_iterable(SERVICE_NAME_ERROR, value);
 }
 
-void PPPoE::ac_system_error(const std::string &value) {
+void PPPoE::ac_system_error(const std::string& value) {
     add_tag_iterable(AC_SYSTEM_ERROR, value);
 }
 
-void PPPoE::generic_error(const std::string &value) {
+void PPPoE::generic_error(const std::string& value) {
     add_tag_iterable(GENERIC_ERROR, value);
 }
 
 // *********************** Getters *************************
 
-std::string PPPoE::service_name() const {
+string PPPoE::service_name() const {
     return search_and_convert<std::string>(SERVICE_NAME);
 }
 
-std::string PPPoE::ac_name() const {
+string PPPoE::ac_name() const {
     return search_and_convert<std::string>(AC_NAME);
 }
 
@@ -201,9 +203,10 @@ byte_array PPPoE::ac_cookie() const {
 }
 
 PPPoE::vendor_spec_type PPPoE::vendor_specific() const {
-    const tag *t = search_tag(VENDOR_SPECIFIC);
-    if(!t)
+    const tag* t = search_tag(VENDOR_SPECIFIC);
+    if (!t) {
         throw option_not_found();
+    }
     return t->to<vendor_spec_type>();
 }
 
@@ -211,29 +214,27 @@ byte_array PPPoE::relay_session_id() const {
     return search_and_convert<byte_array>(RELAY_SESSION_ID);
 }
 
-std::string PPPoE::service_name_error() const {
-    return search_and_convert<std::string>(SERVICE_NAME_ERROR);
+string PPPoE::service_name_error() const {
+    return search_and_convert<string>(SERVICE_NAME_ERROR);
 }
 
-std::string PPPoE::ac_system_error() const {
-    return search_and_convert<std::string>(AC_SYSTEM_ERROR);
+string PPPoE::ac_system_error() const {
+    return search_and_convert<string>(AC_SYSTEM_ERROR);
 }
 
-std::string PPPoE::generic_error() const {
-    return search_and_convert<std::string>(GENERIC_ERROR);
+string PPPoE::generic_error() const {
+    return search_and_convert<string>(GENERIC_ERROR);
 }
 
-PPPoE::vendor_spec_type PPPoE::vendor_spec_type::from_option(const tag &opt) {
-    if(opt.data_size() < sizeof(uint32_t))
+PPPoE::vendor_spec_type PPPoE::vendor_spec_type::from_option(const tag& opt) {
+    if (opt.data_size() < sizeof(uint32_t)) {
         throw malformed_option();
+    }
     vendor_spec_type output;
-    std::memcpy(&output.vendor_id, opt.data_ptr(), sizeof(uint32_t));
-    output.vendor_id = Endian::be_to_host(output.vendor_id);
-    output.data.assign(
-        opt.data_ptr() + sizeof(uint32_t), 
-        opt.data_ptr() + opt.data_size()
-    );
+    InputMemoryStream stream(opt.data_ptr(), opt.data_size());
+    output.vendor_id = stream.read_be<uint32_t>();
+    stream.read(output.data, stream.size());
     return output;
 }
-} //namespace Tins
 
+} //namespace Tins

@@ -51,187 +51,183 @@
     #define TINS_IS_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)
 #endif
 
-
-
 namespace Tins {
 namespace Endian {
+
+/** 
+ * \brief "Changes" a 8-bit integral value's endianess. This is an
+ * identity function.
+ *
+ * \param data The data to convert.
+ */
+inline uint8_t do_change_endian(uint8_t data) {
+    return data;
+}
+
+/** 
+ * \brief Changes a 16-bit integral value's endianess.
+ *
+ * \param data The data to convert.
+ */
+inline uint16_t do_change_endian(uint16_t data) {
+    return ((data & 0xff00) >> 8)  | ((data & 0x00ff) << 8);
+}
+
+/**
+ * \brief Changes a 32-bit integral value's endianess.
+ *
+ * \param data The data to convert.
+ */
+inline uint32_t do_change_endian(uint32_t data) {
+    return (((data & 0xff000000) >> 24) | ((data & 0x00ff0000) >> 8)  |
+            ((data & 0x0000ff00) << 8)  | ((data & 0x000000ff) << 24));
+}
+
+/**
+ * \brief Changes a 64-bit integral value's endianess.
+ *
+ * \param data The data to convert.
+ */
+ inline uint64_t do_change_endian(uint64_t data) {
+    return (((uint64_t)(do_change_endian((uint32_t)(data & 0xffffffff))) << 32) |
+            (do_change_endian(((uint32_t)(data >> 32)))));
+ }
+ 
+/**
+ * \cond
+ */
+
+// Helpers to convert
+template<typename T>
+struct conversion_dispatch_helper {
+    static T dispatch(T data) {
+        return do_change_endian(data);
+    }
+};
+
+
+template<size_t>
+struct conversion_dispatcher;
+
+template<>
+struct conversion_dispatcher<sizeof(uint8_t)> 
+: public conversion_dispatch_helper<uint8_t> { };
+
+template<>
+struct conversion_dispatcher<sizeof(uint16_t)> 
+: public conversion_dispatch_helper<uint16_t> { };
+
+template<>
+struct conversion_dispatcher<sizeof(uint32_t)> 
+: public conversion_dispatch_helper<uint32_t> { };
+
+template<>
+struct conversion_dispatcher<sizeof(uint64_t)> 
+: public conversion_dispatch_helper<uint64_t> { };
+
+/**
+ * \endcond
+ */
+
+/**
+ * \brief Changes an integral value's endianess.
+ * 
+ * This dispatchs to the corresponding function.
+ *
+ * \param data The data to convert.
+ */ 
+ template<typename T>
+ inline T change_endian(T data) {
+     return conversion_dispatcher<sizeof(T)>::dispatch(data);
+ }
+
+#if TINS_IS_LITTLE_ENDIAN
     /** 
-     * \brief "Changes" a 8-bit integral value's endianess. This is an
-     * identity function.
+     * \brief Convert any integral type to big endian.
      *
      * \param data The data to convert.
      */
-    inline uint8_t do_change_endian(uint8_t data) {
-        return data;
+    template<typename T>
+    inline T host_to_be(T data) {
+        return change_endian(data);
     }
-    
-    /** 
-     * \brief Changes a 16-bit integral value's endianess.
-     *
-     * \param data The data to convert.
-     */
-    inline uint16_t do_change_endian(uint16_t data) {
-        return ((data & 0xff00) >> 8)  | ((data & 0x00ff) << 8);
-    }
-    
+     
     /**
-     * \brief Changes a 32-bit integral value's endianess.
+     * \brief Convert any integral type to little endian.
      *
+     * On little endian platforms, the parameter is simply returned.
+     * 
      * \param data The data to convert.
      */
-    inline uint32_t do_change_endian(uint32_t data) {
-        return (((data & 0xff000000) >> 24) | ((data & 0x00ff0000) >> 8)  |
-                ((data & 0x0000ff00) << 8)  | ((data & 0x000000ff) << 24));
-    }
-    
-    /**
-     * \brief Changes a 64-bit integral value's endianess.
-     *
-     * \param data The data to convert.
-     */
-     inline uint64_t do_change_endian(uint64_t data) {
-        return (((uint64_t)(do_change_endian((uint32_t)(data & 0xffffffff))) << 32) |
-                (do_change_endian(((uint32_t)(data >> 32)))));
+     template<typename T>
+     inline T host_to_le(T data) {
+         return data;
      }
      
     /**
-     * \cond
-     */
-    
-    // Helpers to convert
-    template<typename T>
-    struct conversion_dispatch_helper {
-        static T dispatch(T data) {
-            return do_change_endian(data);
-        }
-    };
-    
-    
-    template<size_t>
-    struct conversion_dispatcher;
-    
-    template<>
-    struct conversion_dispatcher<sizeof(uint8_t)> 
-    : public conversion_dispatch_helper<uint8_t> 
-    { };
-    
-    template<>
-    struct conversion_dispatcher<sizeof(uint16_t)> 
-    : public conversion_dispatch_helper<uint16_t> 
-    { };
-    
-    template<>
-    struct conversion_dispatcher<sizeof(uint32_t)> 
-    : public conversion_dispatch_helper<uint32_t> 
-    { };
-    
-    template<>
-    struct conversion_dispatcher<sizeof(uint64_t)> 
-    : public conversion_dispatch_helper<uint64_t> 
-    { };
-    
-    /**
-     * \endcond
-     */
-    
-    /**
-     * \brief Changes an integral value's endianess.
+     * \brief Convert any big endian value to the host's endianess.
      * 
-     * This dispatchs to the corresponding function.
+     * \param data The data to convert.
+     */
+     template<typename T>
+     inline T be_to_host(T data) {
+         return change_endian(data);
+     }
+     
+    /**
+     * \brief Convert any little endian value to the host's endianess.
+     * 
+     * \param data The data to convert.
+     */
+     template<typename T>
+     inline T le_to_host(T data) {
+         return data;
+     }
+#elif TINS_IS_BIG_ENDIAN
+    /** 
+     * \brief Convert any integral type to big endian.
      *
      * \param data The data to convert.
-     */ 
+     */
+    template<typename T>
+    inline T host_to_be(T data) {
+        return data;
+    }
+     
+    /**
+     * \brief Convert any integral type to little endian.
+     *
+     * On little endian platforms, the parameter is simply returned.
+     * 
+     * \param data The data to convert.
+     */
      template<typename T>
-     inline T change_endian(T data) {
-         return conversion_dispatcher<sizeof(T)>::dispatch(data);
+     inline T host_to_le(T data) {
+         return change_endian(data);
      }
-    
-    #if TINS_IS_LITTLE_ENDIAN
-        /** 
-         * \brief Convert any integral type to big endian.
-         *
-         * \param data The data to convert.
-         */
-        template<typename T>
-        inline T host_to_be(T data) {
-            return change_endian(data);
-        }
-         
-        /**
-         * \brief Convert any integral type to little endian.
-         *
-         * On little endian platforms, the parameter is simply returned.
-         * 
-         * \param data The data to convert.
-         */
-         template<typename T>
-         inline T host_to_le(T data) {
-             return data;
-         }
-         
-        /**
-         * \brief Convert any big endian value to the host's endianess.
-         * 
-         * \param data The data to convert.
-         */
-         template<typename T>
-         inline T be_to_host(T data) {
-             return change_endian(data);
-         }
-         
-        /**
-         * \brief Convert any little endian value to the host's endianess.
-         * 
-         * \param data The data to convert.
-         */
-         template<typename T>
-         inline T le_to_host(T data) {
-             return data;
-         }
-    #elif TINS_IS_BIG_ENDIAN
-        /** 
-         * \brief Convert any integral type to big endian.
-         *
-         * \param data The data to convert.
-         */
-        template<typename T>
-        inline T host_to_be(T data) {
-            return data;
-        }
-         
-        /**
-         * \brief Convert any integral type to little endian.
-         *
-         * On little endian platforms, the parameter is simply returned.
-         * 
-         * \param data The data to convert.
-         */
-         template<typename T>
-         inline T host_to_le(T data) {
-             return change_endian(data);
-         }
-         
-        /**
-         * \brief Convert any big endian value to the host's endianess.
-         * 
-         * \param data The data to convert.
-         */
-         template<typename T>
-         inline T be_to_host(T data) {
-             return data;
-         }
-         
-        /**
-         * \brief Convert any little endian value to the host's endianess.
-         * 
-         * \param data The data to convert.
-         */
-         template<typename T>
-         inline T le_to_host(T data) {
-             return change_endian(data);
-         }
-    #endif
-}
-}
+     
+    /**
+     * \brief Convert any big endian value to the host's endianess.
+     * 
+     * \param data The data to convert.
+     */
+     template<typename T>
+     inline T be_to_host(T data) {
+         return data;
+     }
+     
+    /**
+     * \brief Convert any little endian value to the host's endianess.
+     * 
+     * \param data The data to convert.
+     */
+     template<typename T>
+     inline T le_to_host(T data) {
+         return change_endian(data);
+     }
+#endif
+     
+} // Endian
+} // Tins
 
 #endif // TINS_ENDIANNESS_H

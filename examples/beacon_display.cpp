@@ -32,21 +32,27 @@
 #include <string>
 #include <tins/tins.h>
  
+using std::set;
+using std::cout;
+using std::endl;
+using std::string;
+using std::runtime_error;
+
 using namespace Tins;
  
 class BeaconSniffer {
 public:
-    void run(const std::string &iface);
+    void run(const string& iface);
 private:
     typedef Dot11::address_type address_type;
-    typedef std::set<address_type> ssids_type;
+    typedef set<address_type> ssids_type;
  
-    bool callback(PDU &pdu);
+    bool callback(PDU& pdu);
      
     ssids_type ssids;
 };
  
-void BeaconSniffer::run(const std::string &iface) {
+void BeaconSniffer::run(const std::string& iface) {
     SnifferConfiguration config;
     config.set_promisc_mode(true);
     config.set_filter("type mgt subtype beacon");
@@ -55,28 +61,28 @@ void BeaconSniffer::run(const std::string &iface) {
     sniffer.sniff_loop(make_sniffer_handler(this, &BeaconSniffer::callback));
 }
  
-bool BeaconSniffer::callback(PDU &pdu) {
+bool BeaconSniffer::callback(PDU& pdu) {
     // Get the Dot11 layer
-    const Dot11Beacon &beacon = pdu.rfind_pdu<Dot11Beacon>();
+    const Dot11Beacon& beacon = pdu.rfind_pdu<Dot11Beacon>();
     // All beacons must have from_ds == to_ds == 0
-    if(!beacon.from_ds() && !beacon.to_ds()) {
+    if (!beacon.from_ds() && !beacon.to_ds()) {
         // Get the AP address
         address_type addr = beacon.addr2();
         // Look it up in our set
         ssids_type::iterator it = ssids.find(addr);
-        if(it == ssids.end()) {
+        if (it == ssids.end()) {
             // First time we encounter this BSSID.
             try {
                 /* If no ssid option is set, then Dot11::ssid will throw 
                  * a std::runtime_error.
                  */
-                std::string ssid = beacon.ssid();
+                string ssid = beacon.ssid();
                 // Save it so we don't show it again.
                 ssids.insert(addr);
                 // Display the tuple "address - ssid".
-                std::cout << addr << " - " << ssid << std::endl;
+                cout << addr << " - " << ssid << endl;
             }
-            catch(std::runtime_error&) {
+            catch (runtime_error&) {
                 // No ssid, just ignore it.
             }
         }
@@ -85,10 +91,11 @@ bool BeaconSniffer::callback(PDU &pdu) {
 }
  
 int main(int argc, char* argv[]) {
-    // By default, sniff wlan0
-    std::string interface = "wlan0";
-    if(argc == 2)
-        interface = argv[1];
+    if (argc != 2) {
+        cout << "Usage: " <<* argv << " <interface>" << endl;
+        return 1;
+    }
+    string interface = argv[1];
     BeaconSniffer sniffer;
     sniffer.run(interface);
 }

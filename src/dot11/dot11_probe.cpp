@@ -38,56 +38,54 @@ using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
-/* Probe Request */
 
-Dot11ProbeRequest::Dot11ProbeRequest(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) 
-{
-    this->subtype(Dot11::PROBE_REQ);
+// Probe Request
+
+Dot11ProbeRequest::Dot11ProbeRequest(const address_type& dst_hw_addr, 
+                                     const address_type& src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr) {
+    subtype(Dot11::PROBE_REQ);
 }
 
-Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t *buffer, uint32_t total_sz) 
-: Dot11ManagementFrame(buffer, total_sz) 
-{
+Dot11ProbeRequest::Dot11ProbeRequest(const uint8_t* buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     stream.skip(management_frame_size());
     parse_tagged_parameters(stream);
 }
 
-/* Probe Response */
+// Probe Response
 
-Dot11ProbeResponse::Dot11ProbeResponse(const address_type &dst_hw_addr, 
-  const address_type &src_hw_addr) 
-: Dot11ManagementFrame(dst_hw_addr, src_hw_addr), _body()
-{
-    this->subtype(Dot11::PROBE_RESP);
+Dot11ProbeResponse::Dot11ProbeResponse(const address_type& dst_hw_addr, 
+                                       const address_type& src_hw_addr) 
+: Dot11ManagementFrame(dst_hw_addr, src_hw_addr), body_() {
+    subtype(Dot11::PROBE_RESP);
 }
 
-Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t *buffer, uint32_t total_sz) 
-: Dot11ManagementFrame(buffer, total_sz) 
-{
+Dot11ProbeResponse::Dot11ProbeResponse(const uint8_t* buffer, uint32_t total_sz) 
+: Dot11ManagementFrame(buffer, total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     stream.skip(management_frame_size());
-    stream.read(_body);
+    stream.read(body_);
     parse_tagged_parameters(stream);
 }
 
 void Dot11ProbeResponse::timestamp(uint64_t new_timestamp) {
-    this->_body.timestamp = Endian::host_to_le(new_timestamp);
+    body_.timestamp = Endian::host_to_le(new_timestamp);
 }
 
 void Dot11ProbeResponse::interval(uint16_t new_interval) {
-    this->_body.interval = Endian::host_to_le(new_interval);
+    body_.interval = Endian::host_to_le(new_interval);
 }
 
 uint32_t Dot11ProbeResponse::header_size() const {
-    return Dot11ManagementFrame::header_size() + sizeof(this->_body);
+    return Dot11ManagementFrame::header_size() + sizeof(body_);
 }
 
 void Dot11ProbeResponse::write_fixed_parameters(OutputMemoryStream& stream) {
-    stream.write(_body);
+    stream.write(body_);
 }
+
 } // namespace Tins
 
 #endif // HAVE_DOT11

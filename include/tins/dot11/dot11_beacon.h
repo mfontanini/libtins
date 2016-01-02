@@ -36,132 +36,144 @@
 #include "../macros.h"
 
 namespace Tins {
+
+/**
+ * \brief Represents an IEEE 802.11 Beacon.
+ *
+ */
+class TINS_API Dot11Beacon : public Dot11ManagementFrame {
+public:
     /**
-     * \brief Class representing an 802.11 Beacon.
-     *
+     * \brief This PDU's flag.
      */
-    class TINS_API Dot11Beacon : public Dot11ManagementFrame {
-    public:
-        /**
-         * \brief This PDU's flag.
-         */
-        static const PDU::PDUType pdu_flag = PDU::DOT11_BEACON;
+    static const PDU::PDUType pdu_flag = PDU::DOT11_BEACON;
 
-        /**
-         * \brief Constructor for creating a 802.11 Beacon.
-         *
-         * Constructs a 802.11 Beacon taking destination and source 
-         * hardware address.
-         *
-         * \param dst_hw_addr The destination hardware address.
-         * \param src_hw_addr The source hardware address.
-         */
-        Dot11Beacon(const address_type &dst_hw_addr = address_type(), 
-                    const address_type &src_hw_addr = address_type());
+    /**
+     * \brief Constructor for creating a 802.11 Beacon.
+     *
+     * Constructs a 802.11 Beacon taking destination and source 
+     * hardware address.
+     *
+     * \param dst_hw_addr The destination hardware address.
+     * \param src_hw_addr The source hardware address.
+     */
+    Dot11Beacon(const address_type& dst_hw_addr = address_type(), 
+                const address_type& src_hw_addr = address_type());
 
-        /**
-         * \brief Constructs a Dot11Beacon object from a buffer and adds
-         * all identifiable PDUs found in the buffer as children of this 
-         * one.
-         *
-         * If the next PDU is not recognized, then a RawPDU is used.
-         * 
-         * If there is not enough size for the header in the buffer
-         * or the input data is malformed, a malformed_packet exception 
-         * is thrown.
-         * 
-         * \param buffer The buffer from which this PDU will be constructed.
-         * \param total_sz The total size of the buffer.
-         */
-        Dot11Beacon(const uint8_t *buffer, uint32_t total_sz);
+    /**
+     * \brief Constructs a Dot11Beacon object from a buffer and adds
+     * all identifiable PDUs found in the buffer as children of this 
+     * one.
+     *
+     * If the next PDU is not recognized, then a RawPDU is used.
+     * 
+     * If there is not enough size for the header in the buffer
+     * or the input data is malformed, a malformed_packet exception 
+     * is thrown.
+     * 
+     * \param buffer The buffer from which this PDU will be constructed.
+     * \param total_sz The total size of the buffer.
+     */
+    Dot11Beacon(const uint8_t* buffer, uint32_t total_sz);
 
-        /**
-         * \brief Getter for the timestamp field.
-         *
-         * \return The stored timestamp value.
-         */
-        uint64_t timestamp() const { return Endian::le_to_host(_body.timestamp); }
+    /**
+     * \brief Getter for the timestamp field.
+     *
+     * \return The stored timestamp value.
+     */
+    uint64_t timestamp() const {
+        return Endian::le_to_host(body_.timestamp);
+    }
 
-        /**
-         * \brief Getter for the interval field.
-         *
-         * \return The stored interval value.
-         */
-        uint16_t interval() const { return Endian::le_to_host(_body.interval); }
+    /**
+     * \brief Getter for the interval field.
+     *
+     * \return The stored interval value.
+     */
+    uint16_t interval() const {
+        return Endian::le_to_host(body_.interval);
+    }
 
-        /**
-         * \brief Getter for the Capabilities Information structure.
-         *
-         * \return A constant refereence to the stored Capabilities 
-         * Information field.
-         */
-        const capability_information& capabilities() const { return _body.capability; }
+    /**
+     * \brief Getter for the Capabilities Information structure.
+     *
+     * \return A constant refereence to the stored Capabilities 
+     * Information field.
+     */
+    const capability_information& capabilities() const {
+        return body_.capability;
+    }
 
-        /**
-         * \brief Getter for the Capabilities Information.
-         *
-         * \return A refereence to the stored Capabilities Information 
-         * field.
-         */
-        capability_information& capabilities() { return _body.capability; }
+    /**
+     * \brief Getter for the Capabilities Information.
+     *
+     * \return A refereence to the stored Capabilities Information 
+     * field.
+     */
+    capability_information& capabilities() {
+        return body_.capability;
+    }
 
-        /**
-         * \brief Setter for the timestamp field.
-         *
-         * \param new_timestamp The timestamp to be set.
-         */
-        void timestamp(uint64_t new_timestamp);
+    /**
+     * \brief Setter for the timestamp field.
+     *
+     * \param new_timestamp The timestamp to be set.
+     */
+    void timestamp(uint64_t new_timestamp);
 
-        /**
-         * \brief Setter for the interval field.
-         *
-         * \param new_interval The interval to be set.
-         */
-        void interval(uint16_t new_interval);
+    /**
+     * \brief Setter for the interval field.
+     *
+     * \param new_interval The interval to be set.
+     */
+    void interval(uint16_t new_interval);
 
-        /**
-         * \brief Returns the frame's header length.
-         *
-         * \return An uint32_t with the header's size.
-         * \sa PDU::header_size()
-         */
-        uint32_t header_size() const;
+    /**
+     * \brief Returns the frame's header length.
+     *
+     * \return An uint32_t with the header's size.
+     * \sa PDU::header_size()
+     */
+    uint32_t header_size() const;
 
-        /**
-         * \brief Check wether this PDU matches the specified flag.
-         * \param flag The flag to match
-         * \sa PDU::matches_flag
-         */
-        bool matches_flag(PDUType flag) const {
-           return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
-        }
+    /**
+     * \brief Check wether this PDU matches the specified flag.
+     * \param flag The flag to match
+     * \sa PDU::matches_flag
+     */
+    bool matches_flag(PDUType flag) const {
+       return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
+    }
 
-        /**
-         * \brief Clones this PDU.
-         *
-         * \sa PDU::clone
-         */
-        Dot11Beacon *clone() const {
-            return new Dot11Beacon(*this);
-        }
+    /**
+     * \brief Clones this PDU.
+     *
+     * \sa PDU::clone
+     */
+    Dot11Beacon* clone() const {
+        return new Dot11Beacon(*this);
+    }
 
-        /**
-         * \brief Getter for the PDU's type.
-         * \sa PDU::pdu_type
-         */
-        PDUType pdu_type() const { return pdu_flag; }
-    private:
-        TINS_BEGIN_PACK
-        struct BeaconBody {
-            uint64_t timestamp;
-            uint16_t interval;
-            capability_information capability;
-        } TINS_END_PACK;
+    /**
+     * \brief Getter for the PDU's type.
+     * \sa PDU::pdu_type
+     */
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
+private:
+    TINS_BEGIN_PACK
+    struct dot11_beacon_body {
+        uint64_t timestamp;
+        uint16_t interval;
+        capability_information capability;
+    } TINS_END_PACK;
 
-        void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
 
-        BeaconBody _body;
-    };
+    dot11_beacon_body body_;
+};
+
 } // namespace Tins
 
 #endif // TINS_DOT11_DOT11_BEACON_H

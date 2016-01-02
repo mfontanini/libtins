@@ -54,13 +54,16 @@ class PDUOption;
 namespace Internals {
     template<typename T, typename X, typename PDUType>
     T convert_to_integral(const PDUOption<X, PDUType> & opt) {
-        if(opt.data_size() != sizeof(T))
+        if (opt.data_size() != sizeof(T)) {
             throw malformed_option();
+        }
         T data = *(T*)opt.data_ptr();
-        if(PDUType::endianness == PDUType::BE)
+        if (PDUType::endianness == PDUType::BE) {
             data = Endian::be_to_host(data);
-        else
+        }
+        else {
             data = Endian::le_to_host(data);
+        }
         return data;
     }
     
@@ -76,9 +79,10 @@ namespace Internals {
     struct converter<uint8_t> {
         template<typename X, typename PDUType>
         static uint8_t convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() != 1)
+            if (opt.data_size() != 1) {
                 throw malformed_option();
-            return *opt.data_ptr();
+            }
+            return* opt.data_ptr();
         }
     };
     
@@ -110,8 +114,9 @@ namespace Internals {
     struct converter<HWAddress<n> > {
         template<typename X, typename PDUType>
         static HWAddress<n> convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() != n)
+            if (opt.data_size() != n) {
                 throw malformed_option();
+            }
             return HWAddress<n>(opt.data_ptr());
         }
     };
@@ -120,13 +125,16 @@ namespace Internals {
     struct converter<IPv4Address> {
         template<typename X, typename PDUType>
         static IPv4Address convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() != sizeof(uint32_t))
+            if (opt.data_size() != sizeof(uint32_t)) {
                 throw malformed_option();
-            const uint32_t *ptr = (const uint32_t*)opt.data_ptr();
-            if(PDUType::endianness == PDUType::BE)
+            }
+            const uint32_t* ptr = (const uint32_t*)opt.data_ptr();
+            if (PDUType::endianness == PDUType::BE) {
                 return IPv4Address(*ptr);
-            else
+            }
+            else {
                 return IPv4Address(Endian::change_endian(*ptr));
+            }
         }
     };
 
@@ -134,8 +142,9 @@ namespace Internals {
     struct converter<IPv6Address> {
         template<typename X, typename PDUType>
         static IPv6Address convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() != IPv6Address::address_size)
+            if (opt.data_size() != IPv6Address::address_size) {
                 throw malformed_option();
+            }
             return IPv6Address(opt.data_ptr());
         }
     };
@@ -156,8 +165,8 @@ namespace Internals {
         template<typename X, typename PDUType>
         static std::vector<float> convert(const PDUOption<X, PDUType>& opt) {
             std::vector<float> output;
-            const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
-            while(ptr != end) {
+            const uint8_t* ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+            while (ptr != end) {
                 output.push_back(float(*(ptr++) & 0x7f) / 2);
             }
             return output;
@@ -168,18 +177,21 @@ namespace Internals {
     struct converter<std::vector<T>, typename enable_if<is_unsigned_integral<T>::value>::type> {
         template<typename X, typename PDUType>
         static std::vector<T> convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() % sizeof(T) != 0)
+            if (opt.data_size() % sizeof(T) != 0) {
                 throw malformed_option();
-            const T *ptr = (const T*)opt.data_ptr();
-            const T *end = (const T*)(opt.data_ptr() + opt.data_size());
+            }
+            const T* ptr = (const T*)opt.data_ptr();
+            const T* end = (const T*)(opt.data_ptr() + opt.data_size());
             
             std::vector<T> output(std::distance(ptr, end));
             typename std::vector<T>::iterator it = output.begin();
-            while(ptr < end) {
-                if(PDUType::endianness == PDUType::BE)
+            while (ptr < end) {
+                if (PDUType::endianness == PDUType::BE) {
                     *it++ = Endian::be_to_host(*ptr++);
-                else
+                }
+                else {
                     *it++ = Endian::le_to_host(*ptr++);
+                }
             }
             return output;
         }
@@ -194,18 +206,19 @@ namespace Internals {
     > {
         template<typename X, typename PDUType>
         static std::vector<std::pair<T, U> > convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() % (sizeof(T) + sizeof(U)) != 0)
+            if (opt.data_size() % (sizeof(T) + sizeof(U)) != 0) {
                 throw malformed_option();
-            const uint8_t *ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+            }
+            const uint8_t* ptr = opt.data_ptr(), *end = ptr + opt.data_size();
             
             std::vector<std::pair<T, U> > output;
-            while(ptr < end) {
+            while (ptr < end) {
                 std::pair<T, U> data;
                 data.first = *(const T*)ptr;
                 ptr += sizeof(T);
                 data.second = *(const U*)ptr;
                 ptr += sizeof(U);
-                if(PDUType::endianness == PDUType::BE) {
+                if (PDUType::endianness == PDUType::BE) {
                     data.first = Endian::be_to_host(data.first);
                     data.second = Endian::be_to_host(data.second);
                 }
@@ -223,18 +236,21 @@ namespace Internals {
     struct converter<std::vector<IPv4Address> > {
         template<typename X, typename PDUType>
         static std::vector<IPv4Address> convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() % 4 != 0)
+            if (opt.data_size() % 4 != 0) {
                 throw malformed_option();
-            const uint32_t *ptr = (const uint32_t*)opt.data_ptr();
-            const uint32_t *end = (const uint32_t*)(opt.data_ptr() + opt.data_size());
+            }
+            const uint32_t* ptr = (const uint32_t*)opt.data_ptr();
+            const uint32_t* end = (const uint32_t*)(opt.data_ptr() + opt.data_size());
             
             std::vector<IPv4Address> output(std::distance(ptr, end));
             std::vector<IPv4Address>::iterator it = output.begin();
-            while(ptr < end) {
-                if(PDUType::endianness == PDUType::BE)
+            while (ptr < end) {
+                if (PDUType::endianness == PDUType::BE) {
                     *it++ = IPv4Address(*ptr++);
-                else
+                }
+                else {
                     *it++ = IPv4Address(Endian::change_endian(*ptr++));
+                }
             }
             return output;
         }
@@ -244,11 +260,12 @@ namespace Internals {
     struct converter<std::vector<IPv6Address> > {
         template<typename X, typename PDUType>
         static std::vector<IPv6Address> convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() % IPv6Address::address_size != 0)
+            if (opt.data_size() % IPv6Address::address_size != 0) {
                 throw malformed_option();
-            const uint8_t *ptr = opt.data_ptr(), *end = opt.data_ptr() + opt.data_size();
+            }
+            const uint8_t* ptr = opt.data_ptr(), *end = opt.data_ptr() + opt.data_size();
             std::vector<IPv6Address> output;
-            while(ptr < end) {
+            while (ptr < end) {
                 output.push_back(IPv6Address(ptr));
                 ptr += IPv6Address::address_size;
             }
@@ -265,12 +282,13 @@ namespace Internals {
     > {
         template<typename X, typename PDUType>
         static std::pair<T, U> convert(const PDUOption<X, PDUType>& opt) {
-            if(opt.data_size() != sizeof(T) + sizeof(U))
+            if (opt.data_size() != sizeof(T) + sizeof(U)) {
                 throw malformed_option();
+            }
             std::pair<T, U> output;
             std::memcpy(&output.first, opt.data_ptr(), sizeof(T));
             std::memcpy(&output.second, opt.data_ptr() + sizeof(T), sizeof(U));
-            if(PDUType::endianness == PDUType::BE) {
+            if (PDUType::endianness == PDUType::BE) {
                 output.first = Endian::be_to_host(output.first);
                 output.second = Endian::be_to_host(output.second);
             }
@@ -312,7 +330,9 @@ public:
      * \param length The option's data length.
      * \param data The option's data(if any).
      */
-    PDUOption(option_type opt = option_type(), size_t length = 0, const data_type *data = 0) 
+    PDUOption(option_type opt = option_type(), 
+              size_t length = 0,
+              const data_type* data = 0) 
     : option_(opt), size_(static_cast<uint16_t>(length)) {
         set_payload_contents(data, data + (data ? length : 0));
     }
@@ -343,11 +363,11 @@ public:
     PDUOption& operator=(PDUOption&& rhs) {
         option_ = rhs.option_;
         size_ = rhs.size_;
-        if(real_size_ > small_buffer_size) {
+        if (real_size_ > small_buffer_size) {
             delete[] payload_.big_buffer_ptr;
         }
         real_size_ = rhs.real_size_;
-        if(real_size_ > small_buffer_size) {
+        if (real_size_ > small_buffer_size) {
             payload_.big_buffer_ptr = nullptr;
             std::swap(payload_.big_buffer_ptr, rhs.payload_.big_buffer_ptr);
             rhs.real_size_ = 0;
@@ -359,7 +379,7 @@ public:
                 payload_.small_buffer
             );
         }
-        return *this;
+        return* this;
     }
     
     #endif // TINS_IS_CXX11
@@ -371,19 +391,19 @@ public:
     PDUOption& operator=(const PDUOption& rhs) {
         option_ = rhs.option_;
         size_ = rhs.size_;
-        if(real_size_ > small_buffer_size) {
+        if (real_size_ > small_buffer_size) {
             delete[] payload_.big_buffer_ptr;
         }
         real_size_ = rhs.real_size_;
         set_payload_contents(rhs.data_ptr(), rhs.data_ptr() + rhs.data_size());
-        return *this;
+        return* this;
     }
     
     /**
      * \brief Destructor.
      */
     ~PDUOption() {
-        if(real_size_ > small_buffer_size) {
+        if (real_size_ > small_buffer_size) {
             delete[] payload_.big_buffer_ptr;
         }
     }
@@ -448,10 +468,10 @@ public:
      * 
      * \return const data_type& containing this option's value.
      */
-    const data_type *data_ptr() const {
+    const data_type* data_ptr() const {
         return real_size_ <= small_buffer_size ?
-            payload_.small_buffer : 
-            payload_.big_buffer_ptr;
+               payload_.small_buffer : 
+               payload_.big_buffer_ptr;
     }
     
     /**
@@ -498,7 +518,7 @@ private:
             throw option_payload_too_large();
         }
         real_size_ = static_cast<uint16_t>(total_size);
-        if(real_size_ <= small_buffer_size) {
+        if (real_size_ <= small_buffer_size) {
             std::copy(
                 start,
                 end,

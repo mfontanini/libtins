@@ -20,8 +20,8 @@ public:
     static const uint8_t sname[], file[];
     static const IPv4Address addr;
 
-    void test_equals(const DHCP &dhcp1, const DHCP &dhcp2);
-    void test_option(const DHCP &dhcp, DHCP::OptionTypes opt, uint32_t len = 0, uint8_t *value = 0);
+    void test_equals(const DHCP& dhcp1, const DHCP& dhcp2);
+    void test_option(const DHCP& dhcp, DHCP::OptionTypes opt, uint32_t len = 0, uint8_t* value = 0);
 };
 
 const BootP::chaddr_type DHCPTest::chaddr("16:ab:54:12:fa:ca:56:7f:1b:65:11:fa:da:ab:19:18");
@@ -167,8 +167,8 @@ TEST_F(DHCPTest, File) {
     EXPECT_TRUE(memcmp(dhcp.file(), file, 128) == 0);
 }
 
-void DHCPTest::test_option(const DHCP &dhcp, DHCP::OptionTypes opt, uint32_t len, uint8_t *value) {
-    const DHCP::option *option = dhcp.search_option(opt);
+void DHCPTest::test_option(const DHCP& dhcp, DHCP::OptionTypes opt, uint32_t len, uint8_t* value) {
+    const DHCP::option* option = dhcp.search_option(opt);
     ASSERT_TRUE(option != 0);
     EXPECT_EQ(option->option(), opt);
     ASSERT_EQ(option->data_size(), len);
@@ -244,7 +244,7 @@ TEST_F(DHCPTest, BroadcastOption) {
     EXPECT_EQ(ip, dhcp.broadcast());
 }
 
-void DHCPTest::test_equals(const DHCP &dhcp1, const DHCP &dhcp2) {
+void DHCPTest::test_equals(const DHCP& dhcp1, const DHCP& dhcp2) {
     EXPECT_EQ(dhcp1.opcode(), dhcp2.opcode());
     EXPECT_EQ(dhcp1.htype(), dhcp2.htype());
     ASSERT_EQ(dhcp1.hlen(), dhcp2.hlen());

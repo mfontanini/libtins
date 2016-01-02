@@ -43,6 +43,25 @@
 #include <mutex>
 #include <tins/tins.h>
 
+using std::cout;
+using std::endl;
+using std::move;
+using std::map;
+using std::min;
+using std::setw;
+using std::atomic;
+using std::runtime_error;
+using std::string;
+using std::to_string;
+using std::thread;
+using std::this_thread::sleep_for;
+using std::lock_guard;
+using std::mutex;
+using std::random_device;
+using std::numeric_limits;
+using std::bind;
+using std::chrono::milliseconds;
+
 using namespace Tins;
 
 class Traceroute {
@@ -50,8 +69,8 @@ public:
     typedef std::map<uint16_t, IPv4Address> result_type;
 
     Traceroute(NetworkInterface interface, IPv4Address address) 
-    : iface(interface), addr(address), lowest_dest_ttl(std::numeric_limits<int>::max()) { 
-        sequence = std::random_device()();
+    : iface(interface), addr(address), lowest_dest_ttl(numeric_limits<int>::max()) { 
+        sequence = random_device()();
     }
     
     result_type trace() {
@@ -64,7 +83,7 @@ public:
         
         PacketSender sender;
         // Create our handler
-        auto handler = std::bind(
+        auto handler = bind(
             &Traceroute::sniff_callback, 
             this, 
             std::placeholders::_1
@@ -72,7 +91,7 @@ public:
         // We're running
         running = true;
         // Start the sniff thread
-        std::thread sniff_thread(
+        thread sniff_thread(
             [&]() {
                 sniffer.sniff_loop(handler);
             }
@@ -80,23 +99,23 @@ public:
         send_packets(sender);
         sniff_thread.join();
         // If the final hop responded, add its address at the appropriate ttl
-        if (lowest_dest_ttl != std::numeric_limits<int>::max()) {
+        if (lowest_dest_ttl != numeric_limits<int>::max()) {
             results[lowest_dest_ttl] = addr;
         }
         // Clear our results and return what we've found
-        return std::move(results);
+        return move(results);
     }
 private:
-    typedef std::map<uint16_t, size_t> ttl_map;
+    typedef map<uint16_t, size_t> ttl_map;
 
-    void send_packets(PacketSender &sender) {
+    void send_packets(PacketSender& sender) {
         // ICMPs are icmp-requests by default
         IP ip = IP(addr, iface.addresses().ip_addr) / ICMP();
         ICMP& icmp = ip.rfind_pdu<ICMP>();
         icmp.sequence(sequence);
         // We'll find at most 20 hops.
         
-        for(auto i = 1; i <= 20; ++i) {
+        for (auto i = 1; i <= 20; ++i) {
             // Set this ICMP id
             icmp.id(i);
             // Set the time-to-live option
@@ -104,22 +123,22 @@ private:
             
             // Critical section
             {
-                std::lock_guard<std::mutex> _(lock);
+                lock_guard<mutex> _(lock);
                 ttls[i] = i;
             }
             
             sender.send(ip);
             // Give him a little time
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            sleep_for(milliseconds(100));
         }
         running = false;
         sender.send(ip);
     }
 
-    bool sniff_callback(PDU &pdu) {
+    bool sniff_callback(PDU& pdu) {
         // Find IP and ICMP PDUs
-        const IP &ip = pdu.rfind_pdu<IP>();
-        const ICMP &icmp = pdu.rfind_pdu<ICMP>();
+        const IP& ip = pdu.rfind_pdu<IP>();
+        const ICMP& icmp = pdu.rfind_pdu<ICMP>();
         // Check if this is an ICMP TTL exceeded error response
         if (icmp.type() == ICMP::TIME_EXCEEDED) {
             // Fetch the IP PDU attached to the ICMP response
@@ -147,39 +166,42 @@ private:
         else if (icmp.type() == ICMP::ECHO_REPLY && icmp.sequence() == sequence && 
                 ip.src_addr() == addr) {
             // Keep the lowest ttl seen for the destination.
-            lowest_dest_ttl = std::min(lowest_dest_ttl, static_cast<int>(icmp.id()));
+            lowest_dest_ttl = min(lowest_dest_ttl, static_cast<int>(icmp.id()));
         }
         return running;
     }
 
     NetworkInterface iface;
     IPv4Address addr;
-    std::atomic<bool> running;
+    atomic<bool> running;
     ttl_map ttls;
     result_type results;
-    std::mutex lock;
+    mutex lock;
     uint16_t sequence;
     int lowest_dest_ttl;
 };
 
 int main(int argc, char* argv[]) {
-    if(argc <= 1 && std::cout << "Usage: " << *argv << " <ip_address>\n") 
+    if (argc <= 1) { 
+        cout << "Usage: " <<* argv << " <ip_address>" << endl;
         return 1;
+    }
     try {
-        IPv4Address addr((std::string(argv[1])));
+        IPv4Address addr = string(argv[1]);
         Traceroute tracer(addr, addr);
         auto results = tracer.trace();
-        if(results.empty())
-            std::cout << "No hops found" << std::endl;
+        if (results.empty()) {
+            cout << "No hops found" << endl;
+        }
         else {
-            std::cout << "Results: " << std::endl;
-            for(const auto &entry : results) {
-                std::cout << std::setw(2) << entry.first << " - " << entry.second << std::endl;
+            cout << "Results: " << endl;
+            for(const auto& entry : results) {
+                cout << setw(2) << entry.first << " - " << entry.second << endl;
             }
         }
     }
-    catch(std::runtime_error &ex) {
-        std::cout << "Error - " << ex.what() << std::endl;
+    catch (runtime_error& ex) {
+        cout << "Error - " << ex.what() << endl;
         return 2;
     }
 }

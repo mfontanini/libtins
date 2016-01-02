@@ -7,7 +7,7 @@ using Tins::Dot11;
 
 typedef Dot11::address_type address_type;
 
-inline void test_equals(const Dot11 &dot1, const Dot11 &dot2) {
+inline void test_equals(const Dot11& dot1, const Dot11& dot2) {
     EXPECT_EQ(dot1.protocol(), dot2.protocol());
     EXPECT_EQ(dot1.type(), dot2.type());
     EXPECT_EQ(dot1.subtype(), dot2.subtype());
@@ -22,7 +22,7 @@ inline void test_equals(const Dot11 &dot1, const Dot11 &dot2) {
     EXPECT_EQ(dot1.addr1(), dot2.addr1());
 }
 
-inline void test_equals_empty(const Dot11 &dot11) {
+inline void test_equals_empty(const Dot11& dot11) {
     Dot11::address_type empty_addr;
     
     EXPECT_EQ(dot11.protocol(), 0);

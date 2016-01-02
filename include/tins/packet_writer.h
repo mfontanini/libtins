@@ -115,8 +115,7 @@ public:
      * \sa PcapIdentifier.
      */
     template<typename T>
-    PacketWriter(const std::string &file_name, const DataLinkType<T>& lt)
-    {
+    PacketWriter(const std::string& file_name, const DataLinkType<T>& lt) {
         init(file_name, lt.get_type());
     }
 
@@ -130,7 +129,7 @@ public:
      * \param lt The link type which will be written to this file.
      * \sa LinkType.
      */
-    PacketWriter(const std::string &file_name, LinkType lt);
+    PacketWriter(const std::string& file_name, LinkType lt);
     
     #if TINS_IS_CXX11
         /**
@@ -154,11 +153,11 @@ public:
          * \param rhs The PacketWriter to be moved.
          */
         PacketWriter& operator=(PacketWriter &&rhs) TINS_NOEXCEPT {
-            handle = 0;
-            dumper = 0;
-            std::swap(handle, rhs.handle);
-            std::swap(dumper, rhs.dumper);
-            return *this;
+            handle_ = 0;
+            dumper_ = 0;
+            std::swap(handle_, rhs.handle_);
+            std::swap(dumper_, rhs.dumper_);
+            return* this;
         }
     #endif
     
@@ -173,7 +172,7 @@ public:
      * \brief Writes a PDU to this file. 
      * \param pdu The PDU to be written.
      */
-    void write(PDU &pdu);
+    void write(PDU& pdu);
 
     /**
      * \brief Writes a Packet to this file. 
@@ -183,7 +182,7 @@ public:
      *
      * \param packet The packet to be written.
      */
-    void write(Packet &packet);
+    void write(Packet& packet);
     
     /**
      * \brief Writes a PDU to this file. 
@@ -193,7 +192,7 @@ public:
      * raw and smart pointers.
      */
     template<typename T>
-    void write(T &pdu) {
+    void write(T& pdu) {
         write(Utils::dereference_until_pdu(pdu));
     }
     
@@ -206,8 +205,9 @@ public:
      */
     template<typename ForwardIterator>
     void write(ForwardIterator start, ForwardIterator end) {
-        while(start != end) 
+        while (start != end) {
             write(Utils::dereference_until_pdu(*start++));
+        }
     }
 private:
     // You shall not copy
@@ -217,8 +217,8 @@ private:
     void init(const std::string& file_name, int link_type);
     void write(PDU& pdu, const struct timeval& tv);
 
-    pcap_t *handle;
-    pcap_dumper_t *dumper; 
+    pcap_t* handle_;
+    pcap_dumper_t* dumper_; 
 };
 }
 

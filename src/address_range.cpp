@@ -31,22 +31,27 @@
 #include "ip_address.h"
 #include "ipv6_address.h"
 
+using std::logic_error;
+
 namespace Tins {
-IPv4Range operator/(const IPv4Address &addr, int mask) {
-    if(mask > 32)
-        throw std::logic_error("Prefix length cannot exceed 32");
+
+IPv4Range operator/(const IPv4Address& addr, int mask) {
+    if (mask > 32) {
+        throw logic_error("Prefix length cannot exceed 32");
+    }
     return IPv4Range::from_mask(
         addr, 
         IPv4Address(Endian::host_to_be(0xffffffff << (32 - mask)))
     );
 }
 
-IPv6Range operator/(const IPv6Address &addr, int mask) {
-    if(mask > 128)
+IPv6Range operator/(const IPv6Address& addr, int mask) {
+    if (mask > 128) {
         throw std::logic_error("Prefix length cannot exceed 128");
+    }
     IPv6Address last_addr;
     IPv6Address::iterator it = last_addr.begin();
-    while(mask > 8) {
+    while (mask > 8) {
         *it = 0xff;
         ++it;
         mask -= 8;
@@ -54,4 +59,5 @@ IPv6Range operator/(const IPv6Address &addr, int mask) {
     *it = 0xff << (8 - mask);
     return IPv6Range::from_mask(addr, last_addr);
 }
-}
+
+} // Tins

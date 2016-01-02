@@ -14,7 +14,7 @@ public:
     static const uint8_t packets[][1514];
     static const size_t packet_sizes[], orderings[][11];
     
-    void test_packets(const std::vector<std::pair<const uint8_t*, size_t> > &vt);
+    void test_packets(const std::vector<std::pair<const uint8_t*, size_t> >& vt);
 };
 
 const uint8_t IPv4ReassemblerTest::packets[][1514] = {
@@ -42,7 +42,7 @@ const size_t IPv4ReassemblerTest::orderings[][11] = {
     { 1, 9, 8, 5, 4, 2, 0, 7, 6, 3, 10 }
 };
 
-void IPv4ReassemblerTest::test_packets(const std::vector<std::pair<const uint8_t*, size_t> > &vt) {
+void IPv4ReassemblerTest::test_packets(const std::vector<std::pair<const uint8_t*, size_t> >& vt) {
     IPv4Reassembler reassembler;
     for(size_t i = 0; i < vt.size(); ++i) {
         EthernetII eth(vt[i].first, (uint32_t)vt[i].second);
@@ -51,7 +51,7 @@ void IPv4ReassemblerTest::test_packets(const std::vector<std::pair<const uint8_t
         if(status == IPv4Reassembler::REASSEMBLED) {
             ASSERT_EQ(static_cast<size_t>(vt.size() - 1), i);
             ASSERT_TRUE(eth.find_pdu<UDP>() != NULL);
-            RawPDU *raw = eth.find_pdu<RawPDU>();
+            RawPDU* raw = eth.find_pdu<RawPDU>();
             ASSERT_TRUE(raw != NULL);
             ASSERT_EQ(15000ULL, raw->payload().size());
         }

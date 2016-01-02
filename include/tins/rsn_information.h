@@ -92,7 +92,7 @@ public:
      * 
      * \param buffer The buffer from which to construct this object.
      */
-    RSNInformation(const serialization_type &buffer);
+    RSNInformation(const serialization_type& buffer);
     
     /**
      * \brief Constructs a RSNInformation from a buffer.
@@ -103,7 +103,7 @@ public:
      * \param buffer The buffer from which this object will be constructed.
      * \param total_sz The total size of the buffer.
      */
-    RSNInformation(const uint8_t *buffer, uint32_t total_sz);
+    RSNInformation(const uint8_t* buffer, uint32_t total_sz);
 
     /**
      * \brief Helper function to create a WPA2-PSK RSNInformation
@@ -149,32 +149,40 @@ public:
      * \return The group suite field.
      */
     CypherSuites group_suite() const { 
-        return static_cast<CypherSuites>(Endian::le_to_host<uint32_t>(_group_suite)); 
+        return static_cast<CypherSuites>(Endian::le_to_host<uint32_t>(group_suite_)); 
     }
 
     /**
      * \brief Getter for the version field.
      * \return The version field.
      */
-    uint16_t version() const { return Endian::le_to_host(_version); }
+    uint16_t version() const {
+        return Endian::le_to_host(version_);
+    }
     
     /**
      * \brief Getter for the capabilities field.
      * \return The version field.
      */
-    uint16_t capabilities() const { return Endian::le_to_host(_capabilities); }
+    uint16_t capabilities() const {
+        return Endian::le_to_host(capabilities_);
+    }
 
     /**
      * \brief Getter for the pairwise cypher suite list.
      * \return A list of pairwise cypher suites.
      */
-    const cyphers_type &pairwise_cyphers() const { return _pairwise_cyphers; }
+    const cyphers_type& pairwise_cyphers() const {
+        return pairwise_cyphers_;
+    }
 
     /**
      * \brief Getter for the akm suite list.
      * \return A list of akm suites.
      */
-    const akm_type &akm_cyphers() const { return _akm_cyphers; }
+    const akm_type& akm_cyphers() const {
+        return akm_cyphers_;
+    }
 
     /**
      * \brief Serializes this object.
@@ -185,14 +193,14 @@ public:
      /**
       * Constructs an RSNInformation object from a Dot11 tagged option.
       */
-     static RSNInformation from_option(const PDUOption<uint8_t, Dot11> &opt);
+     static RSNInformation from_option(const PDUOption<uint8_t, Dot11>& opt);
 private:
-    void init(const uint8_t *buffer, uint32_t total_sz);
+    void init(const uint8_t* buffer, uint32_t total_sz);
 
-    uint16_t _version, _capabilities;
-    CypherSuites _group_suite;
-    akm_type _akm_cyphers;
-    cyphers_type _pairwise_cyphers;
+    uint16_t version_, capabilities_;
+    CypherSuites group_suite_;
+    akm_type akm_cyphers_;
+    cyphers_type pairwise_cyphers_;
 };
 } // namespace Tins
 

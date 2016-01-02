@@ -38,28 +38,29 @@
 #include "icmp.h"
 #include "memory_helpers.h"
 
+using std::memset;
+using std::max;
+
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
 ICMP::ICMP(Flags flag) 
-: _orig_timestamp_or_address_mask(), _recv_timestamp(), _trans_timestamp()
-{
-    std::memset(&_icmp, 0, sizeof(icmphdr));
+: orig_timestamp_or_address_mask_(), recv_timestamp_(), trans_timestamp_() {
+    memset(&header_, 0, sizeof(icmp_header));
     type(flag);
 }
 
-ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz) 
-{
+ICMP::ICMP(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(_icmp);
-    if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
+    stream.read(header_);
+    if (type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
         original_timestamp(stream.read<uint32_t>());
         receive_timestamp(stream.read<uint32_t>());
         transmit_timestamp(stream.read<uint32_t>());
     }
-    else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
+    else if (type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
         address_mask(address_type(stream.read<uint32_t>()));
     }
     // Attempt to parse ICMP extensions
@@ -70,61 +71,63 @@ ICMP::ICMP(const uint8_t *buffer, uint32_t total_sz)
 }
 
 void ICMP::code(uint8_t new_code) {
-    _icmp.code = new_code;
+    header_.code = new_code;
 }
 
 void ICMP::type(Flags new_type) {
-    _icmp.type = new_type;
+    header_.type = new_type;
 }
 
 void ICMP::checksum(uint16_t new_check) {
-    _icmp.check = Endian::host_to_be(new_check);
+    header_.check = Endian::host_to_be(new_check);
 }
 
 void ICMP::id(uint16_t new_id) {
-    _icmp.un.echo.id = Endian::host_to_be(new_id);
+    header_.un.echo.id = Endian::host_to_be(new_id);
 }
 
 void ICMP::sequence(uint16_t new_seq) {
-    _icmp.un.echo.sequence = Endian::host_to_be(new_seq);
+    header_.un.echo.sequence = Endian::host_to_be(new_seq);
 }
 
 void ICMP::gateway(address_type new_gw) {
-    _icmp.un.gateway = Endian::host_to_be(static_cast<uint32_t>(new_gw));
+    header_.un.gateway = Endian::host_to_be(static_cast<uint32_t>(new_gw));
 }
 
 void ICMP::mtu(uint16_t new_mtu) {
-    _icmp.un.frag.mtu = Endian::host_to_be(new_mtu);
+    header_.un.frag.mtu = Endian::host_to_be(new_mtu);
 }
 
 void ICMP::pointer(uint8_t new_pointer) {
-    _icmp.un.rfc4884.pointer = new_pointer;
+    header_.un.rfc4884.pointer = new_pointer;
 }
 
 void ICMP::original_timestamp(uint32_t new_timestamp) {
-    _orig_timestamp_or_address_mask = Endian::host_to_be(new_timestamp);
+    orig_timestamp_or_address_mask_ = Endian::host_to_be(new_timestamp);
 }
 
 void ICMP::receive_timestamp(uint32_t new_timestamp) {
-    _recv_timestamp = Endian::host_to_be(new_timestamp);
+    recv_timestamp_ = Endian::host_to_be(new_timestamp);
 }
 
 void ICMP::transmit_timestamp(uint32_t new_timestamp) {
-    _trans_timestamp = Endian::host_to_be(new_timestamp);
+    trans_timestamp_ = Endian::host_to_be(new_timestamp);
 }
 
 void ICMP::address_mask(address_type new_mask) {
-    _orig_timestamp_or_address_mask = Endian::host_to_be(static_cast<uint32_t>(new_mask));
+    orig_timestamp_or_address_mask_ = Endian::host_to_be(static_cast<uint32_t>(new_mask));
 }
 
 uint32_t ICMP::header_size() const {
     uint32_t extra = 0;
-    if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) 
+    if (type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
         extra = sizeof(uint32_t) * 3;
-    else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) 
+    }
+    else if (type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY)  {
         extra = sizeof(uint32_t);
+    }
 
-    return sizeof(icmphdr) + extra;
+    return sizeof(icmp_header) + extra;
 }
 
 uint32_t ICMP::trailer_size() const {
@@ -136,7 +139,7 @@ uint32_t ICMP::trailer_size() const {
             // If the next pdu size is lower than 128 bytes, then padding = 128 - pdu size
             // If the next pdu size is greater than 128 bytes, 
             // then padding = pdu size padded to next 32 bit boundary - pdu size
-            const uint32_t upper_bound = std::max(get_adjusted_inner_pdu_size(), 128U);
+            const uint32_t upper_bound = max(get_adjusted_inner_pdu_size(), 128U);
             output += upper_bound - inner_pdu()->size();
         }
     }
@@ -180,12 +183,13 @@ void ICMP::set_time_exceeded(bool ttl_exceeded) {
 
 void ICMP::set_param_problem(bool set_pointer, uint8_t bad_octet) {
     type(PARAM_PROBLEM);
-    if(set_pointer) {
+    if (set_pointer) {
         code(0);
         pointer(bad_octet);
     }
-    else
+    else {
         code(1);
+    }
 }
 
 void ICMP::set_source_quench() {
@@ -201,10 +205,10 @@ void ICMP::set_redirect(uint8_t icode, address_type address) {
 void ICMP::use_length_field(bool value) {
     // We just need a non 0 value here, we'll use the right value on 
     // write_serialization
-    _icmp.un.rfc4884.length = value ? 1 : 0;
+    header_.un.rfc4884.length = value ? 1 : 0;
 }
 
-void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) {
+void ICMP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
     OutputMemoryStream stream(buffer, total_sz);
 
     // If extensions are allowed and we have to set the length field
@@ -215,32 +219,32 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
             if (length_value) {
                 // If we have extensions, we'll have at least 128 bytes.
                 // Otherwise, just use the length 
-                length_value = has_extensions() ? std::max(length_value, 128U) 
+                length_value = has_extensions() ? max(length_value, 128U) 
                                                 : length_value;
             }
             else {
                 length_value = 0;
             }
             // This field uses 32 bit words as the unit
-            _icmp.un.rfc4884.length = length_value / sizeof(uint32_t);
+            header_.un.rfc4884.length = length_value / sizeof(uint32_t);
         }
     }
 
     // Write the header using checksum 0
-    _icmp.check = 0;
-    stream.write(_icmp);
+    header_.check = 0;
+    stream.write(header_);
 
-    if(type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
+    if (type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {
         stream.write(original_timestamp());
         stream.write(receive_timestamp());
         stream.write(transmit_timestamp());
     }
-    else if(type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
+    else if (type() == ADDRESS_MASK_REQUEST || type() == ADDRESS_MASK_REPLY) {
         stream.write(address_mask());
     }
 
     if (has_extensions()) {
-        uint8_t* extensions_ptr = buffer + sizeof(icmphdr);
+        uint8_t* extensions_ptr = buffer + sizeof(icmp_header);
         if (inner_pdu()) {
             // Get the size of the next pdu, padded to the next 32 bit boundary
             uint32_t inner_pdu_size = get_adjusted_inner_pdu_size();
@@ -267,8 +271,8 @@ void ICMP::write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *) 
         checksum = (checksum & 0xffff) + (checksum >> 16);
     }
     // Write back only the 2 checksum bytes
-    _icmp.check = ~checksum;
-    memcpy(buffer + 2, &_icmp.check, sizeof(uint16_t));
+    header_.check = ~checksum;
+    memcpy(buffer + 2, &header_.check, sizeof(uint16_t));
 }
 
 uint32_t ICMP::get_adjusted_inner_pdu_size() const {
@@ -288,15 +292,18 @@ bool ICMP::are_extensions_allowed() const {
     return type() == DEST_UNREACHABLE || type() == TIME_EXCEEDED || type() == PARAM_PROBLEM;
 }
 
-bool ICMP::matches_response(const uint8_t *ptr, uint32_t total_sz) const {
-    if(total_sz < sizeof(icmphdr))
+bool ICMP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
+    if (total_sz < sizeof(icmp_header)) {
         return false;
-    const icmphdr *icmp_ptr = (const icmphdr*)ptr;
-    if((_icmp.type == ECHO_REQUEST && icmp_ptr->type == ECHO_REPLY) || 
-        (_icmp.type == TIMESTAMP_REQUEST && icmp_ptr->type == TIMESTAMP_REPLY) ||
-        (_icmp.type == ADDRESS_MASK_REQUEST && icmp_ptr->type == ADDRESS_MASK_REPLY)) {
-        return icmp_ptr->un.echo.id == _icmp.un.echo.id && icmp_ptr->un.echo.sequence == _icmp.un.echo.sequence;
+    }
+    const icmp_header* icmp_ptr = (const icmp_header*)ptr;
+    if ((header_.type == ECHO_REQUEST && icmp_ptr->type == ECHO_REPLY) || 
+        (header_.type == TIMESTAMP_REQUEST && icmp_ptr->type == TIMESTAMP_REPLY) ||
+        (header_.type == ADDRESS_MASK_REQUEST && icmp_ptr->type == ADDRESS_MASK_REPLY)) {
+        return icmp_ptr->un.echo.id == header_.un.echo.id && 
+               icmp_ptr->un.echo.sequence == header_.un.echo.sequence;
     }
     return false;
 }
+
 } // namespace Tins

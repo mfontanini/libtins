@@ -19,11 +19,11 @@ public:
     static const uint8_t tkip_packets[7][211];
     static const size_t ccmp_packets_size[], tkip_packets_size[];
     
-    void check_ccmp_packet5(const PDU &pdu);
-    void check_ccmp_packet6(const PDU &pdu);
+    void check_ccmp_packet5(const PDU& pdu);
+    void check_ccmp_packet6(const PDU& pdu);
     
-    void check_tkip_packet5(const PDU &pdu);
-    void check_tkip_packet6(const PDU &pdu);
+    void check_tkip_packet5(const PDU& pdu);
+    void check_tkip_packet6(const PDU& pdu);
 };
 
 // packet taken from aircrack's site.
@@ -63,30 +63,30 @@ const size_t WPA2DecryptTest::tkip_packets_size[] = {
     108, 149, 171, 211, 149, 134, 134
 };
 
-void WPA2DecryptTest::check_ccmp_packet5(const PDU &pdu) {
-    const UDP *udp = pdu.find_pdu<UDP>();
+void WPA2DecryptTest::check_ccmp_packet5(const PDU& pdu) {
+    const UDP* udp = pdu.find_pdu<UDP>();
     ASSERT_TRUE(udp);
     EXPECT_EQ(udp->sport(), 68);
     EXPECT_EQ(udp->dport(), 67);
 }
 
-void WPA2DecryptTest::check_ccmp_packet6(const PDU &pdu) {
-    const UDP *udp = pdu.find_pdu<UDP>();
+void WPA2DecryptTest::check_ccmp_packet6(const PDU& pdu) {
+    const UDP* udp = pdu.find_pdu<UDP>();
     ASSERT_TRUE(udp);
     EXPECT_EQ(udp->sport(), 67);
     EXPECT_EQ(udp->dport(), 68);
 }
 
-void WPA2DecryptTest::check_tkip_packet5(const PDU &pdu) {
-    const TCP *tcp = pdu.find_pdu<TCP>();
+void WPA2DecryptTest::check_tkip_packet5(const PDU& pdu) {
+    const TCP* tcp = pdu.find_pdu<TCP>();
     ASSERT_TRUE(tcp);
     EXPECT_EQ(tcp->sport(), 44934);
     EXPECT_EQ(tcp->dport(), 80);
     EXPECT_EQ(tcp->window(), 1215);
 }
 
-void WPA2DecryptTest::check_tkip_packet6(const PDU &pdu) {
-    const TCP *tcp = pdu.find_pdu<TCP>();
+void WPA2DecryptTest::check_tkip_packet6(const PDU& pdu) {
+    const TCP* tcp = pdu.find_pdu<TCP>();
     ASSERT_TRUE(tcp);
     EXPECT_EQ(tcp->sport(), 44934);
     EXPECT_EQ(tcp->dport(), 80);
