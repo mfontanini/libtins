@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -37,7 +37,7 @@
 
 namespace Tins {
 
-    /** 
+    /**
      * \class PDU
      * \brief Represents a PDU which holds raw data.
      *
@@ -66,13 +66,13 @@ namespace Tins {
          * The type used to store the payload.
          */
         typedef std::vector<uint8_t> payload_type;
-        
+
         /**
          * This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::RAW;
-    
-        /** 
+
+        /**
          * \brief Creates an instance of RawPDU.
          *
          * The payload is copied, therefore the original payload's memory
@@ -81,7 +81,7 @@ namespace Tins {
          * \param size The size of the payload.
          */
         RawPDU(const uint8_t *pload, uint32_t size);
-        
+
         /**
          * \brief Constructs a RawPDU from an iterator range.
          *
@@ -92,24 +92,24 @@ namespace Tins {
          * \param end The end of the iterator range.
          */
         template<typename ForwardIterator>
-        RawPDU(ForwardIterator start, ForwardIterator end) 
+        RawPDU(ForwardIterator start, ForwardIterator end)
         : _payload(start, end) { }
 
         #if TINS_IS_CXX11
-            /** 
+            /**
              * \brief Creates an instance of RawPDU from a payload_type.
              *
              * The payload is moved into the RawPDU's internal buffer.
-             * 
+             *
              * \param data The payload to use.
              */
             RawPDU(payload_type&& data)
             : _payload(move(data)) { }
         #endif // TINS_IS_CXX11
 
-        /** 
+        /**
          * \brief Creates an instance of RawPDU from an input string.
-         * 
+         *
          * \param data The content of the payload.
          */
         RawPDU(const std::string &data);
@@ -130,28 +130,28 @@ namespace Tins {
             _payload.assign(start, end);
         }
 
-        /** 
+        /**
          * \brief Const getter for the payload.
          * \return The RawPDU's payload.
          */
         const payload_type &payload() const { return _payload; }
-        
-        /** 
+
+        /**
          * \brief Non-const getter for the payload.
          * \return The RawPDU's payload.
          */
         payload_type &payload() { return _payload; }
-        
-        /** 
+
+        /**
          * \brief Returns the header size.
-         * 
+         *
          * This returns the same as RawPDU::payload_size().
          *
          * This metod overrides PDU::header_size. \sa PDU::header_size
          */
         uint32_t header_size() const;
-        
-        /** 
+
+        /**
          * \brief Returns the payload size.
          *
          * \return uint32_t containing the payload size.
@@ -161,11 +161,11 @@ namespace Tins {
         }
 
         /**
-         * \brief Check wether ptr points to a valid response for this PDU.
+         * \brief Check whether ptr points to a valid response for this PDU.
          *
-         * This always returns true, since we don't know what this 
+         * This always returns true, since we don't know what this
          * RawPDU is holding.
-         * 
+         *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
          * \param total_sz The size of the buffer.
@@ -177,7 +177,7 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::RAW; }
-        
+
         /**
          * \brief Constructs the given PDU type from the raw data stored
          * in this RawPDU.
@@ -186,7 +186,7 @@ namespace Tins {
         T to() const {
             return T(&_payload[0], static_cast<uint32_t>(_payload.size()));
         }
-        
+
         /**
          * \sa PDU::clone
          */

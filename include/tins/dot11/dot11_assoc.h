@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -55,20 +55,20 @@ public:
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11Disassoc(const address_type &dst_hw_addr = address_type(), 
+    Dot11Disassoc(const address_type &dst_hw_addr = address_type(),
                 const address_type &src_hw_addr = address_type());
 
     /**
-     * \brief Constructs a Dot11Disassoc object from a buffer and 
-     * adds all identifiable PDUs found in the buffer as children 
+     * \brief Constructs a Dot11Disassoc object from a buffer and
+     * adds all identifiable PDUs found in the buffer as children
      * of this one.
      *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -103,7 +103,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -149,18 +149,18 @@ public:
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11AssocRequest(const address_type &dst_hw_addr = address_type(), 
+    Dot11AssocRequest(const address_type &dst_hw_addr = address_type(),
                     const address_type &src_hw_addr = address_type());
 
     /**
-     * \brief Constructs a Dot11AssocRequest object from a buffer 
-     * and adds all identifiable PDUs found in the buffer as children 
+     * \brief Constructs a Dot11AssocRequest object from a buffer
+     * and adds all identifiable PDUs found in the buffer as children
      * of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
      *
      * \param buffer The buffer from which this PDU will be constructed.
@@ -171,7 +171,7 @@ public:
     /**
      * \brief Getter for the Capabilities Information.
      *
-     * \return A constant refereence to the stored Capabilities 
+     * \return A constant refereence to the stored Capabilities
      * Information field.
      */
     const capability_information& capabilities() const { return _body.capability;}
@@ -179,7 +179,7 @@ public:
     /**
      * \brief Getter for the Capabilities Information.
      *
-     * \return A refereence to the stored Capabilities Information 
+     * \return A refereence to the stored Capabilities Information
      * field.
      */
     capability_information& capabilities() { return _body.capability;}
@@ -213,7 +213,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -254,26 +254,26 @@ public:
     /**
      * \brief Constructor for creating a 802.11 Association Response.
      *
-     * Constructors a 802.11 Association Response taking destination 
+     * Constructors a 802.11 Association Response taking destination
      * and source hardware address.
      *
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11AssocResponse(const address_type &dst_hw_addr = address_type(), 
+    Dot11AssocResponse(const address_type &dst_hw_addr = address_type(),
                         const address_type &src_hw_addr = address_type());
 
     /**
-     * \brief Constructor which creates a Dot11AssocResponse object 
-     * from a buffer and adds all identifiable PDUs found in the 
+     * \brief Constructor which creates a Dot11AssocResponse object
+     * from a buffer and adds all identifiable PDUs found in the
      * buffer as children of this one.
      *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -282,7 +282,7 @@ public:
     /**
      * \brief Getter for the Capabilities Information field.
      *
-     * \return A constant reference to the stored Capabilities 
+     * \return A constant reference to the stored Capabilities
      * Information field.
      */
     const capability_information& capabilities() const { return _body.capability;}
@@ -290,7 +290,7 @@ public:
     /**
      * \brief Getter for the Capabilities Information field.
      *
-     * \return A reference to the stored Capabilities 
+     * \return A reference to the stored Capabilities
      * Information field.
      */
     capability_information& capabilities() { return _body.capability;}
@@ -338,7 +338,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -380,24 +380,24 @@ public:
     /**
      * \brief Constructor for creating a 802.11 ReAssociation Request.
      *
-     * Constructors a 802.11 Association Request taking the destination 
+     * Constructors a 802.11 Association Request taking the destination
      * and source hardware address.
      *
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11ReAssocRequest(const address_type &dst_hw_addr = address_type(), 
+    Dot11ReAssocRequest(const address_type &dst_hw_addr = address_type(),
                         const address_type &src_hw_addr = address_type());
 
     /**
-     * \brief Constructs a Dot11AssocRequest object from a buffer 
-     * and adds all identifiable PDUs found in the buffer as 
+     * \brief Constructs a Dot11AssocRequest object from a buffer
+     * and adds all identifiable PDUs found in the buffer as
      * children of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
      *
      * \param buffer The buffer from which this PDU will be constructed.
@@ -408,7 +408,7 @@ public:
     /**
      * \brief Getter for the Capabilities Information.
      *
-     * \return A constant reference to the stored Capabilities 
+     * \return A constant reference to the stored Capabilities
      * Information field.
      */
     const capability_information& capabilities() const { return _body.capability;}
@@ -416,7 +416,7 @@ public:
     /**
      * \brief Getter for the Capabilities Information.
      *
-     * \return A reference to the stored Capabilities Information 
+     * \return A reference to the stored Capabilities Information
      * field.
      */
     capability_information& capabilities() { return _body.capability;}
@@ -464,7 +464,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -506,24 +506,24 @@ public:
     /**
      * \brief Constructor for creating a 802.11 Association Response.
      *
-     * Constructs a 802.11 ReAssociation Response taking the 
+     * Constructs a 802.11 ReAssociation Response taking the
      * destination and source hardware address.
      *
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11ReAssocResponse(const address_type &dst_hw_addr = address_type(), 
+    Dot11ReAssocResponse(const address_type &dst_hw_addr = address_type(),
                         const address_type &src_hw_addr = address_type());
 
     /**
-     * \brief Constructs a Dot11ReAssocResponse object from a buffer 
-     * and adds all identifiable PDUs found in the buffer as children 
+     * \brief Constructs a Dot11ReAssocResponse object from a buffer
+     * and adds all identifiable PDUs found in the buffer as children
      * of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
      *
      * \param buffer The buffer from which this PDU will be constructed.
@@ -534,7 +534,7 @@ public:
     /**
      * \brief Getter for the Capabilities Information.
      *
-     * \return A constant reference to the stored Capabilities 
+     * \return A constant reference to the stored Capabilities
      * Information field.
      */
     const capability_information& capabilities() const { return _body.capability;}
@@ -542,7 +542,7 @@ public:
     /**
      * \brief Getter for the Capabilities Information.
      *
-     * \return A reference to the stored Capabilities Information 
+     * \return A reference to the stored Capabilities Information
      * field.
      */
     capability_information& capabilities() { return _body.capability;}
@@ -590,7 +590,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */

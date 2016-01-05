@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -52,17 +52,17 @@ namespace Tins {
          * The type of the hardware address.
          */
         typedef HWAddress<6> hwaddress_type;
-        
+
         /**
          * The type of the IP address.
          */
         typedef IPv4Address ipaddress_type;
-    
+
         /**
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::ARP;
-    
+
         /**
          * \brief Enum which indicates the type of ARP packet.
          */
@@ -73,32 +73,32 @@ namespace Tins {
 
         /**
          * \brief Constructs an ARP object using the provided addresses.
-         * 
+         *
          * ARP requests and replies can be constructed easily using
          * ARP::make_arp_request/reply static member functions.
-         * 
+         *
          * \sa ARP::make_arp_request
          * \sa ARP::make_arp_reply
-         * 
+         *
          * \param target_ip The target IP address.
          * \param sender_ip The sender IP address.
          * \param target_hw The target hardware address.
          * \param sender_hw The sender hardware address.
          */
-        ARP(ipaddress_type target_ip = ipaddress_type(), 
-            ipaddress_type sender_ip = ipaddress_type(), 
-            const hwaddress_type &target_hw = hwaddress_type(), 
+        ARP(ipaddress_type target_ip = ipaddress_type(),
+            ipaddress_type sender_ip = ipaddress_type(),
+            const hwaddress_type &target_hw = hwaddress_type(),
             const hwaddress_type &sender_hw = hwaddress_type());
 
         /**
          * \brief Constructs an ARP object from a buffer.
-         * 
+         *
          * If there is not enough size for an ARP header in the buffer,
-         * a malformed_packet exception is thrown. 
-         * 
-         * If the buffer is bigger than the size of the ARP header, 
+         * a malformed_packet exception is thrown.
+         *
+         * If the buffer is bigger than the size of the ARP header,
          * then the extra data is stored in a RawPDU.
-         * 
+         *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -168,7 +168,7 @@ namespace Tins {
          */
         uint16_t opcode() const { return Endian::be_to_host(_arp.ar_op); }
 
-        /** 
+        /**
          * \brief Getter for the header size.
          * \return Returns the ARP header size.
          * \sa PDU::header_size
@@ -256,13 +256,13 @@ namespace Tins {
          * \param hw_snd The sender's hardware address.
          * \return EthernetII object containing the ARP Request.
          */
-        static EthernetII make_arp_request(ipaddress_type target, 
+        static EthernetII make_arp_request(ipaddress_type target,
           ipaddress_type sender, const hwaddress_type &hw_snd = hwaddress_type());
 
         /**
          * \brief Creates an ARP Reply within an EthernetII PDU.
          *
-         * Creates an ARP Reply PDU and embeds it inside an EthernetII 
+         * Creates an ARP Reply PDU and embeds it inside an EthernetII
          * PDU.
          *
          * \param target The target's IP address.
@@ -271,19 +271,19 @@ namespace Tins {
          * \param hw_snd The sender's hardware address.
          * \return EthetnetII containing the ARP Replay.
          */
-        static EthernetII make_arp_reply(ipaddress_type target, 
-          ipaddress_type sender, const hwaddress_type &hw_tgt = hwaddress_type(), 
+        static EthernetII make_arp_reply(ipaddress_type target,
+          ipaddress_type sender, const hwaddress_type &hw_tgt = hwaddress_type(),
           const hwaddress_type &hw_snd = hwaddress_type());
 
-        /** 
-         * \brief Check wether ptr points to a valid response for this PDU.
+        /**
+         * \brief Check whether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
          * \param total_sz The size of the buffer.
          */
         bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
-        
+
         /**
          * \sa PDU::clone
          */
@@ -300,11 +300,11 @@ namespace Tins {
             uint16_t ar_op;		/* ARP opcode (command)		*/
 
             /* sender hardware address	*/
-            uint8_t ar_sha[hwaddress_type::address_size];	
+            uint8_t ar_sha[hwaddress_type::address_size];
             /* sender IP address		*/
-            uint32_t ar_sip;	
+            uint32_t ar_sip;
             /* target hardware address	*/
-            uint8_t ar_tha[hwaddress_type::address_size];	
+            uint8_t ar_tha[hwaddress_type::address_size];
             /* target IP address		*/
             uint32_t ar_tip;
         } TINS_END_PACK;

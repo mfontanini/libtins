@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- */ 
+ */
 
 #include "../config.h"
 
@@ -181,7 +181,7 @@ public:
         QOS_DATA_CF_ACK_POLL = 11,
         QOS_DATA_NULL = 12
     };
-    
+
     /**
      * \brief Constructs an 802.11 PDU.
      *
@@ -190,14 +190,14 @@ public:
     Dot11(const address_type &dst_hw_addr = address_type());
 
     /**
-     * \brief Constructs 802.11 PDU from a buffer and adds all 
+     * \brief Constructs 802.11 PDU from a buffer and adds all
      * identifiable PDUs found in the buffer as children of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
-     * If there is not enough size for a 802.11 header in the 
+     *
+     * If there is not enough size for a 802.11 header in the
      * buffer, a malformed_packet exception is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -381,26 +381,26 @@ public:
      * \sa PDU::header_size()
      */
     uint32_t header_size() const;
-    
+
     #ifndef _WIN32
     /**
      * \sa PDU::send()
      */
     void send(PacketSender &sender, const NetworkInterface &iface);
     #endif // _WIN32
-    
+
     /**
      * \brief Adds a new option to this Dot11 PDU.
      * \param opt The option to be added.
      */
     void add_option(const option &opt);
-    
+
     #if TINS_IS_CXX11
         /**
          * \brief Adds a new option to this Dot11 PDU.
-         * 
+         *
          * The option is move-constructed
-         * 
+         *
          * \param opt The option to be added.
          */
         void add_option(option &&opt) {
@@ -411,7 +411,7 @@ public:
 
     /**
      * \brief Removes a Dot11 option.
-     * 
+     *
      * If there are multiple options of the given type, only the first one
      * will be removed.
      *
@@ -422,9 +422,9 @@ public:
 
     /**
      * \brief Looks up a tagged option in the option list.
-     * 
+     *
      * The returned pointer <b>must not</b> be free'd.
-     * 
+     *
      * \param type The option identifier.
      * \return The option found, or 0 if no such option has been set.
      */
@@ -435,7 +435,7 @@ public:
      * \sa PDU::pdu_type
      */
     PDUType pdu_type() const { return pdu_flag; }
-    
+
     /**
      * \sa PDU::clone
      */
@@ -444,31 +444,31 @@ public:
     }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
        return flag == pdu_flag;
     }
-    
+
     /**
      * \brief Getter for the option list.
-     * 
+     *
      * \return The options list.
      */
     const options_type &options() const { return _options; }
 
     /**
      * \brief Allocates an Dot11 PDU from a buffer.
-     * 
-     * This can be used somehow as a "virtual constructor". This 
-     * method instantiates the appropriate subclass of Dot11 from the 
+     *
+     * This can be used somehow as a "virtual constructor". This
+     * method instantiates the appropriate subclass of Dot11 from the
      * given buffer.
-     * 
+     *
      * The allocated class' type will be figured out from the
      * information provided in the buffer.
-     * 
+     *
      * \param buffer The buffer from which to take the PDU data.
      * \param total_sz The total size of the buffer.
      * \return The allocated Dot11 PDU.
@@ -519,7 +519,7 @@ protected:
     } TINS_END_PACK;
 private:
     Dot11(const ieee80211_header *header_ptr);
-    
+
     void internal_add_option(const option &opt);
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     options_type::const_iterator search_option_iterator(OptionTypes type) const;

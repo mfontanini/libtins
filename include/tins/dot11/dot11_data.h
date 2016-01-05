@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -41,7 +41,7 @@ public:
      * \brief This PDU's flag.
      */
     static const PDU::PDUType pdu_flag = PDU::DOT11_DATA;
-    
+
     /**
      * \brief Constructor for creating a 802.11 Data frame.
      *
@@ -51,25 +51,25 @@ public:
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11Data(const address_type &dst_hw_addr = address_type(), 
+    Dot11Data(const address_type &dst_hw_addr = address_type(),
             const address_type &src_hw_addr = address_type());
-                
+
     /**
-     * \brief Constructs a Dot11Data object from a buffer and adds 
-     * all identifiable PDUs found in the buffer as children of 
+     * \brief Constructs a Dot11Data object from a buffer and adds
+     * all identifiable PDUs found in the buffer as children of
      * this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
     Dot11Data(const uint8_t *buffer, uint32_t total_sz);
-    
+
     /**
      * \brief Getter for the second address.
      *
@@ -89,11 +89,11 @@ public:
      *
      * \return The stored fragment number.
      */
-    small_uint<4> frag_num() const { 
+    small_uint<4> frag_num() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return _ext_header.frag_seq & 0xf; 
+        return _ext_header.frag_seq & 0xf;
         #else
-        return (_ext_header.frag_seq >> 8) & 0xf; 
+        return (_ext_header.frag_seq >> 8) & 0xf;
         #endif
     }
 
@@ -102,11 +102,11 @@ public:
      *
      * \return The stored sequence number.
      */
-    small_uint<12> seq_num() const { 
+    small_uint<12> seq_num() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return (_ext_header.frag_seq >> 4) & 0xfff; 
+        return (_ext_header.frag_seq >> 4) & 0xfff;
         #else
-        return (Endian::le_to_host<uint16_t>(_ext_header.frag_seq) >> 4) & 0xfff; 
+        return (Endian::le_to_host<uint16_t>(_ext_header.frag_seq) >> 4) & 0xfff;
         #endif
     }
 
@@ -215,7 +215,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -238,18 +238,18 @@ protected:
         uint8_t addr3[address_type::address_size];
         uint16_t frag_seq;
     } TINS_END_PACK;
-    
+
     struct no_inner_pdu { };
     Dot11Data(const uint8_t *buffer, uint32_t total_sz, no_inner_pdu);
 
     uint32_t init(const uint8_t *buffer, uint32_t total_sz);
     uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 
-    uint32_t data_frame_size() { 
+    uint32_t data_frame_size() {
         return static_cast<uint32_t>(
-            Dot11::header_size() + sizeof(_ext_header) + 
+            Dot11::header_size() + sizeof(_ext_header) +
                 ((from_ds() && to_ds()) ? _addr4.size() : 0)
-        ); 
+        );
     }
 private:
     ExtendedHeader _ext_header;
@@ -272,25 +272,25 @@ public:
      * \param dst_hw_addr The destination hardware address.
      * \param src_hw_addr The source hardware address.
      */
-    Dot11QoSData(const address_type &dst_hw_addr = address_type(), 
+    Dot11QoSData(const address_type &dst_hw_addr = address_type(),
                 const address_type &src_hw_addr = address_type());
 
     /**
      * \brief Constructors Dot11QoSData object from a buffer and adds
-     * all identifiable PDUs found in the buffer as children of this 
+     * all identifiable PDUs found in the buffer as children of this
      * one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
     Dot11QoSData(const uint8_t *buffer, uint32_t total_sz);
-    
+
     /**
      * \brief Getter for the QOS Control field.
      *
@@ -329,7 +329,7 @@ public:
     PDUType pdu_type() const { return PDU::DOT11_QOS_DATA; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */

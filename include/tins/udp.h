@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -36,12 +36,12 @@
 
 namespace Tins {
 
-    /** 
+    /**
      * \class UDP
      * \brief Represents an UDP PDU.
      *
-     * This class represents an UDP PDU. 
-     * 
+     * This class represents an UDP PDU.
+     *
      * While sniffing, the payload sent in each packet will be wrapped
      * in a RawPDU, which is set as the UDP object's inner_pdu. Therefore,
      * if you are sniffing and want to see the UDP packet's payload,
@@ -66,13 +66,13 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::UDP;
-    
-        /** 
+
+        /**
          * \brief UDP constructor.
          *
-         * Constructs an instance of UDP. The destination and source 
+         * Constructs an instance of UDP. The destination and source
          * port can be provided, otherwise both of them will be 0.
-         * 
+         *
          * \param dport Destination port.
          * \param sport Source port.
          * */
@@ -80,55 +80,55 @@ namespace Tins {
 
         /**
          * \brief Constructs an UDP object from a buffer.
-         * 
-         * If there is not enough size for a UDP header a malformed_packet 
+         *
+         * If there is not enough size for a UDP header a malformed_packet
          * exception is thrown.
-         * 
+         *
          * Any extra data will be stored in a RawPDU.
-         * 
+         *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         UDP(const uint8_t *buffer, uint32_t total_sz);
-        
-        /** 
+
+        /**
          * \brief Getter for the destination port.
          * \return The datagram's destination port.
          */
         uint16_t dport() const { return Endian::be_to_host(_udp.dport); }
 
-        /** 
+        /**
          * \brief Getter for the source port.
          * \return The datagram's source port.
          */
         uint16_t sport() const { return Endian::be_to_host(_udp.sport); }
-        
+
         /**
          * \brief Getter for the length of the datagram.
          * \return The length of the datagram.
          */
         uint16_t length() const { return Endian::be_to_host(_udp.len); }
-        
+
         /**
          * \brief Getter for the checksum of the datagram.
          * \return The datagram's checksum.
          */
         uint16_t checksum() const { return Endian::be_to_host(_udp.check); }
 
-        /** 
+        /**
          * \brief Set the destination port.
          * \param new_dport The new destination port.
          */
         void dport(uint16_t new_dport);
 
-        /** 
+        /**
          * \brief Set the source port.
          *
          * \param new_sport The new source port.
          */
         void sport(uint16_t new_sport);
-        
-        /** 
+
+        /**
          * \brief Getter for the length field.
          * \param new_len The new length field.
          * \return The length field.
@@ -136,31 +136,31 @@ namespace Tins {
         void length(uint16_t new_len);
 
         /**
-         * \brief Check wether ptr points to a valid response for this PDU.
+         * \brief Check whether ptr points to a valid response for this PDU.
          *
          * This compares the source and destination ports in the provided
          * response with those stored in this PDU.
-         * 
+         *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
          * \param total_sz The size of the buffer.
          */
         bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
 
-        /** 
+        /**
          * \brief Returns the header size.
          *
          * This metod overrides PDU::header_size. This size includes the
          * payload and options size. \sa PDU::header_size
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Getter for the PDU's type.
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::UDP; }
-        
+
         /**
          * \sa PDU::clone
          */

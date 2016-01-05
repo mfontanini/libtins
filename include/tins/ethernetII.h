@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -49,7 +49,7 @@ namespace Tins {
          * \brief The hardware address type.
          */
         typedef HWAddress<6> address_type;
-        
+
         /**
          * \brief This PDU's flag.
          */
@@ -66,19 +66,19 @@ namespace Tins {
          * \param dst_hw_addr address_type containing the destination's MAC.
          * \param src_hw_addr address_type containing the source's MAC.
          */
-        EthernetII(const address_type &dst_hw_addr = address_type(), 
+        EthernetII(const address_type &dst_hw_addr = address_type(),
                     const address_type &src_hw_addr = address_type());
 
         /**
-         * \brief Constructs a EthernetII object from a buffer and adds 
-         * all identifiable PDUs found in the buffer as children of 
+         * \brief Constructs a EthernetII object from a buffer and adds
+         * all identifiable PDUs found in the buffer as children of
          * this one.
-         * 
+         *
          * If the next PDU is not recognized, then a RawPDU is used.
-         * 
-         * If there is not enough size for a EthernetII header in the 
+         *
+         * If there is not enough size for a EthernetII header in the
          * buffer, a malformed_packet exception is thrown.
-         * 
+         *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -88,7 +88,7 @@ namespace Tins {
         /**
          * \brief Getter for the destination's hardware address.
          *
-         * \return address_type containing the destination hardware 
+         * \return address_type containing the destination hardware
          * address.
          */
         address_type dst_addr() const { return _eth.dst_mac; }
@@ -137,7 +137,7 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         /**
          * \brief Returns the ethernet II frame's padding.
          *
@@ -151,8 +151,8 @@ namespace Tins {
          */
         void send(PacketSender &sender, const NetworkInterface &iface);
 
-        /** 
-         * \brief Check wether ptr points to a valid response for this PDU.
+        /**
+         * \brief Check whether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
@@ -161,7 +161,7 @@ namespace Tins {
         bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
 
         #ifndef _WIN32
-        /** 
+        /**
          * \brief Receives a matching response for this packet.
          *
          * \sa PDU::recv_response
@@ -191,7 +191,7 @@ namespace Tins {
             uint8_t src_mac[address_type::address_size];
             uint16_t payload_type;
         } TINS_END_PACK;
-        
+
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
 
         ethhdr _eth;

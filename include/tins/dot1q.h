@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -45,22 +45,22 @@ public:
      * This PDU's flag.
      */
     static const PDU::PDUType pdu_flag = PDU::DOT1Q;
-    
+
     /**
      * Default constructor
      */
     Dot1Q(small_uint<12> tag_id = 0, bool append_pad = true);
 
     /**
-     * \brief Constructs a Dot1Q object from a buffer and adds all 
-     * identifiable PDUs found in the buffer as children of this 
-     * one. 
-     * 
+     * \brief Constructs a Dot1Q object from a buffer and adds all
+     * identifiable PDUs found in the buffer as children of this
+     * one.
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for a Dot1Q header in the buffer,
      * a malformed_packet exception is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -122,7 +122,7 @@ public:
      * \sa PDU::pdu_type
      */
     PDUType pdu_type() const { return pdu_flag; }
-    
+
     /**
      * \sa PDU::clone
      */
@@ -163,21 +163,21 @@ public:
      * \param new_type The new type field value.
      */
     void payload_type(uint16_t new_type);
-    
+
     /**
-     * \brief Indicates whether the appropriate padding will be 
+     * \brief Indicates whether the appropriate padding will be
      * at the end of the packet.
-     * 
-     * This flag could be disabled in case two or more contiguous Dot1Q 
-     * PDUs are added to a packet. In that case, only the Dot1Q which is 
+     *
+     * This flag could be disabled in case two or more contiguous Dot1Q
+     * PDUs are added to a packet. In that case, only the Dot1Q which is
      * closer to the link layer should add the padding at the end.
-     * 
+     *
      * \param value A boolean indicating whether padding will be appended.
      */
     void append_padding(bool value);
-    
-    /** 
-     * \brief Check wether ptr points to a valid response for this PDU.
+
+    /**
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * \sa PDU::matches_response
      * \param ptr The pointer to the buffer.
@@ -202,9 +202,9 @@ private:
             uint16_t type;
         #endif
     } TINS_END_PACK;
-    
+
     static uint16_t get_id(const dot1q_hdr *hdr);
-    
+
     dot1q_hdr _header;
     bool _append_padding;
 };

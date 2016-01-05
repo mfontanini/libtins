@@ -158,9 +158,9 @@ namespace Tins {
          *
          * Note that the pcap handle stored in a BaseSniffer will always be the
          * same. This means that if you start sniffing using sniff_loop, then stop
-         * and at some point in the future you call sniff_loop again, you will keep 
+         * and at some point in the future you call sniff_loop again, you will keep
          * iterating over the same handle. If the handle points to a pcap file, then
-         * you will continue processing packets from it. If the handle points to 
+         * you will continue processing packets from it. If the handle points to
          * a network device, you will keep sniffing from it.
          *
          * This method catches both malformed_packet and pdu_not_found exceptions,
@@ -315,7 +315,7 @@ namespace Tins {
          * constructor.
          * \param device The device which will be sniffed.
          * \param max_packet_size The maximum packet size to be read.
-         * \param promisc bool indicating wether to put the interface in promiscuous mode.(optional)
+         * \param promisc bool indicating whether to put the interface in promiscuous mode.(optional)
          * \param filter A capture filter to be used on the sniffing session.(optional);
          * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
          */

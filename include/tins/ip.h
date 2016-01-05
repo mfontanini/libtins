@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -44,7 +44,7 @@ namespace Tins {
     /**
      * \class IP
      * \brief Class that represents an IP PDU.
-     * 
+     *
      * By default, IP PDUs are initialized, setting TTL to IP::DEFAULT_TTL,
      * id field to 1 and version to 4. Taking this into account, users
      * should set destination and source port and would be enough to send one.
@@ -62,7 +62,7 @@ namespace Tins {
          * This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::IP;
-    
+
         /**
          * The type used to store addresses.
          */
@@ -114,7 +114,7 @@ namespace Tins {
             UMP = 24,
             QS = 25
         };
-        
+
         /**
          * \brief The type used to represent an option's type.
          */
@@ -131,36 +131,36 @@ namespace Tins {
         #endif
             /**
              * \brief Default constructor.
-             * 
+             *
              * Initializes every field to 0.
              */
-            option_identifier() 
+            option_identifier()
             #if TINS_IS_LITTLE_ENDIAN
             : number(0), op_class(0), copied(0) {}
             #else
             : copied(0), op_class(0), number(0) {}
             #endif
-            
+
             /**
              * \brief Constructs this option from a single uint8_t value.
-             * 
+             *
              * This parses the value and initializes each field with the
              * appropriate value.
-             * 
-             * \param value The value to be parsed and used for 
+             *
+             * \param value The value to be parsed and used for
              * initialization
              */
-            option_identifier(uint8_t value) 
+            option_identifier(uint8_t value)
             #if TINS_IS_LITTLE_ENDIAN
-            : number(value & 0x1f), 
-              op_class((value >> 5) & 0x03), 
+            : number(value & 0x1f),
+              op_class((value >> 5) & 0x03),
               copied((value >> 7) & 0x01) {}
             #elif TINS_IS_BIG_ENDIAN
             : copied((value >> 7) & 0x01),
-              op_class((value >> 5) & 0x03), 
+              op_class((value >> 5) & 0x03),
               number(value & 0x1f) {}
             #endif
-            
+
             /**
              * Constructor using user provided values for each field.
              * \param number The number field value.
@@ -168,13 +168,13 @@ namespace Tins {
              * \param copied The copied field value.
              */
             option_identifier(OptionNumber number, OptionClass op_class,
-              small_uint<1> copied) 
+              small_uint<1> copied)
             #if TINS_IS_LITTLE_ENDIAN
             : number(number), op_class(op_class), copied(copied) {}
             #else
             : copied(copied), op_class(op_class), number(number) {}
             #endif
-            
+
             /**
              * \brief Equality operator.
              */
@@ -182,7 +182,7 @@ namespace Tins {
                 return number == rhs.number && op_class == rhs.op_class && copied == rhs.copied;
             }
         } TINS_END_PACK;
-        
+
         /**
          * The IP options type.
          */
@@ -195,42 +195,42 @@ namespace Tins {
             uint16_t security, compartments;
             uint16_t handling_restrictions;
             small_uint<24> transmission_control;
-            
+
             security_type(uint16_t sec = 0, uint16_t comp = 0,
               uint16_t hand_res = 0, small_uint<24> tcc = 0)
-            : security(sec), compartments(comp), 
-              handling_restrictions(hand_res), transmission_control(tcc) 
+            : security(sec), compartments(comp),
+              handling_restrictions(hand_res), transmission_control(tcc)
               {}
-            
+
             static security_type from_option(const option &opt);
         };
-        
+
         /**
          * The type of the Loose Source and Record Route
          */
         struct generic_route_option_type {
             typedef std::vector<address_type> routes_type;
-            
+
             uint8_t pointer;
             routes_type routes;
-            
-            generic_route_option_type(uint8_t ptr = 0, 
+
+            generic_route_option_type(uint8_t ptr = 0,
               routes_type rts = routes_type())
             : pointer(ptr), routes(rts) {}
-            
+
             static generic_route_option_type from_option(const option &opt);
         };
-        
+
         /**
          * The type of the Loose Source and Record Route
          */
         typedef generic_route_option_type lsrr_type;
-        
+
         /**
          * The type of the Strict Source and Record Route
          */
         typedef generic_route_option_type ssrr_type;
-        
+
         /**
          * The type of the Record Route
          */
@@ -245,23 +245,23 @@ namespace Tins {
          * \brief Constructor for building the IP PDU.
          *
          * Both the destination and source IP address can be supplied.
-         * By default, those fields are initialized using the IP 
+         * By default, those fields are initialized using the IP
          * address 0.0.0.0.
          *
          * \param ip_dst The destination ip address(optional).
          * \param ip_src The source ip address(optional).
          */
-        IP(address_type ip_dst = address_type(), 
+        IP(address_type ip_dst = address_type(),
             address_type ip_src = address_type());
 
         /**
-         * \brief Constructs an IP object from a buffer and adds all 
-         * identifiable PDUs found in the buffer as children of this 
+         * \brief Constructs an IP object from a buffer and adds all
+         * identifiable PDUs found in the buffer as children of this
          * one.
-         * 
-         * If there is not enough size for an IP header, a 
+         *
+         * If there is not enough size for an IP header, a
          * malformed_packet exception is thrown.
-         * 
+         *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -288,8 +288,8 @@ namespace Tins {
          *
          * \return The total length of this IP PDU.
          */
-        uint16_t tot_len() const { 
-            return Endian::be_to_host(_ip.tot_len); 
+        uint16_t tot_len() const {
+            return Endian::be_to_host(_ip.tot_len);
         }
 
         /**
@@ -301,7 +301,7 @@ namespace Tins {
 
         /**
          * \brief Getter for the fragment offset field.
-         * 
+         *
          * This method is deprecated. Use IP::fragment_offset and IP::flags.
          *
          * \deprecated
@@ -313,13 +313,13 @@ namespace Tins {
 
         /**
          * \brief Getter for the fragment offset field.
-         * 
-         * This will return the fragment offset field, as present in the packet, 
-         * which indicates the offset of this fragment in blocks of 8 bytes. 
-         * 
-         * \return The fragment offset, measured in units of 8 byte blocks 
+         *
+         * This will return the fragment offset field, as present in the packet,
+         * which indicates the offset of this fragment in blocks of 8 bytes.
+         *
+         * \return The fragment offset, measured in units of 8 byte blocks
          */
-        small_uint<13> fragment_offset() const { 
+        small_uint<13> fragment_offset() const {
             return Endian::be_to_host(_ip.frag_off) & 0x1fff;
         }
 
@@ -329,7 +329,7 @@ namespace Tins {
          * \return The IP flags field
          */
         Flags flags() const {
-            return static_cast<Flags>(Endian::be_to_host(_ip.frag_off) >> 13); 
+            return static_cast<Flags>(Endian::be_to_host(_ip.frag_off) >> 13);
         }
 
         /**
@@ -360,19 +360,19 @@ namespace Tins {
          */
         address_type src_addr() const { return address_type(_ip.saddr); }
 
-        /** 
+        /**
          * \brief Getter for the destination address field.
          * \return The destination address for this IP PDU.
          */
         address_type dst_addr() const  { return address_type(_ip.daddr); }
-        
-        /** 
+
+        /**
          * \brief Getter for the version field.
          * \return The version for this IP PDU.
          */
         small_uint<4> version() const  { return _ip.version; }
 
-        /** 
+        /**
          * \brief Getter for the IP options.
          * \return The stored options.
          */
@@ -405,21 +405,21 @@ namespace Tins {
          * \sa IP::flags
          */
         TINS_DEPRECATED(void frag_off(uint16_t new_frag_off));
-        
+
         /**
          * \brief Setter for the fragment offset field.
          *
          * The value provided is measured in units of 8 byte blocks. This means that
-         * if you want this packet to have a fragment offset of <i>X</i>, 
+         * if you want this packet to have a fragment offset of <i>X</i>,
          * you need to provide <i>X / 8</i> as the argument to this method.
-         *  
+         *
          * \param new_frag_off The new fragment offset, measured in units of 8 byte blocks.
          */
         void fragment_offset(small_uint<13> new_frag_off);
 
         /**
          * \brief Setter for the flags field.
-         * 
+         *
          * \param new_flags The new IP flags field value.
          */
         void flags(Flags new_flags);
@@ -434,17 +434,17 @@ namespace Tins {
         /**
          * \brief Setter for the protocol field.
          *
-         * Note that this protocol will be overwritten using the 
-         * inner_pdu's protocol type during serialization unless the IP 
-         * datagram is fragmented. 
-         * 
+         * Note that this protocol will be overwritten using the
+         * inner_pdu's protocol type during serialization unless the IP
+         * datagram is fragmented.
+         *
          * If the packet is fragmented and was originally sniffed, the
          * original protocol type will be kept when serialized.
-         * 
+         *
          * If this packet has been crafted manually and the inner_pdu
          * is, for example, a RawPDU, then setting the protocol yourself
          * is necessary.
-         * 
+         *
          * \param new_protocol The new protocol.
          */
         void protocol(uint8_t new_protocol);
@@ -462,7 +462,7 @@ namespace Tins {
          * \param ip The destination address to be set.
          */
         void dst_addr(address_type ip);
-        
+
         /**
          * \brief Setter for the version field.
          *
@@ -472,20 +472,20 @@ namespace Tins {
 
         /**
          * \brief Adds an IP option.
-         * 
-         * The option is added after the last option in the option 
+         *
+         * The option is added after the last option in the option
          * fields.
-         * 
+         *
          * \param opt The option to be added
          */
         void add_option(const option &opt);
-        
+
         #if TINS_IS_CXX11
             /**
              * \brief Adds an IP option.
-             * 
+             *
              * The option is move-constructed.
-             * 
+             *
              * \param opt The option to be added.
              */
             void add_option(option &&opt) {
@@ -495,10 +495,10 @@ namespace Tins {
 
             /**
              * \brief Adds an IP option.
-             * 
+             *
              * The option is constructed from the provided parameters.
-             * 
-             * \param args The arguments to be used in the option's 
+             *
+             * \param args The arguments to be used in the option's
              * constructor.
              */
             template<typename... Args>
@@ -510,7 +510,7 @@ namespace Tins {
 
         /**
          * \brief Removes an IP option.
-         * 
+         *
          * If there are multiple options of the given type, only the first one
          * will be removed.
          *
@@ -521,17 +521,17 @@ namespace Tins {
 
         /**
          * \brief Searchs for an option that matchs the given flag.
-         * 
-         * If the option is not found, a null pointer is returned. 
-         * Deleting the returned pointer will result in <b>undefined 
+         *
+         * If the option is not found, a null pointer is returned.
+         * Deleting the returned pointer will result in <b>undefined
          * behaviour</b>.
-         * 
+         *
          * \param id The option identifier to be searched.
          */
         const option *search_option(option_identifier id) const;
 
         // Option setters
-        
+
         /**
          * \brief Adds an End Of List option.
          */
@@ -548,7 +548,7 @@ namespace Tins {
          * \param data The data to be stored in this option.
          */
         void security(const security_type &data);
-        
+
         /**
          * \brief Adds a Loose Source and Record Route option.
          *
@@ -557,7 +557,7 @@ namespace Tins {
         void lsrr(const lsrr_type &data) {
             add_route_option(131, data);
         }
-        
+
         /**
          * \brief Adds a Strict Source and Record Route option.
          *
@@ -566,7 +566,7 @@ namespace Tins {
         void ssrr(const ssrr_type &data) {
             add_route_option(137, data);
         }
-        
+
         /**
          * \brief Adds a Record Route option.
          *
@@ -575,58 +575,58 @@ namespace Tins {
         void record_route(const record_route_type &data) {
             add_route_option(7, data);
         }
-        
+
         /**
          * \brief Adds a Stream Identifier option.
          *
          * \param stream_id The stream id to be stored in this option.
          */
         void stream_identifier(uint16_t stream_id);
-        
+
         // Option getters
-        
+
         /**
          * \brief Searchs and returns a security option.
-         * 
+         *
          * If no such option exists, an option_not_found exception
          * is thrown.
-         * 
+         *
          * \return security_type containing the option found.
          */
         security_type security() const;
-        
+
         /**
-         * \brief Searchs and returns a Loose Source and Record Route 
+         * \brief Searchs and returns a Loose Source and Record Route
          * option.
-         * 
+         *
          * If no such option exists, an option_not_found exception
          * is thrown.
-         * 
+         *
          * \return lsrr_type containing the option found.
          */
         lsrr_type lsrr() const {
             return search_route_option(131);
         }
-        
+
         /**
-         * \brief Searchs and returns a Strict Source and Record Route 
+         * \brief Searchs and returns a Strict Source and Record Route
          * option.
-         * 
+         *
          * If no such option exists, an option_not_found exception
          * is thrown.
-         * 
+         *
          * \return ssrr_type containing the option found.
          */
         ssrr_type ssrr() const {
             return search_route_option(137);
         }
-        
+
         /**
          * \brief Searchs and returns a Record Route option.
-         * 
+         *
          * If no such option exists, an option_not_found exception
          * is thrown.
-         * 
+         *
          * \return record_route_type containing the option found.
          */
         record_route_type record_route() const {
@@ -635,10 +635,10 @@ namespace Tins {
 
         /**
          * \brief Searchs and returns a Stream Identifier option.
-         * 
+         *
          * If no such option exists, an option_not_found exception
          * is thrown.
-         * 
+         *
          * \return uint16_t containing the option found.
          */
         uint16_t stream_identifier() const;
@@ -658,7 +658,7 @@ namespace Tins {
         void send(PacketSender &sender, const NetworkInterface &);
 
         /**
-         * \brief Check wether ptr points to a valid response for this PDU.
+         * \brief Check whether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
