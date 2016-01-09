@@ -106,6 +106,8 @@ Tins::PDU* pdu_from_flag(Constants::Ethernet::e flag,
         case Tins::Constants::Ethernet::EAPOL:
             return EAPOL::from_bytes(buffer, size);
         case Tins::Constants::Ethernet::VLAN:
+        case Tins::Constants::Ethernet::QINQ:
+        case Tins::Constants::Ethernet::OLD_QINQ:
             return new Dot1Q(buffer, size);
         case Tins::Constants::Ethernet::MPLS:
             return new MPLS(buffer, size);

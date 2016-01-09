@@ -75,20 +75,22 @@ struct IP {
 struct Ethernet {
     enum e {
         UNKNOWN = 0,
-        SPRITE = 0x0500,  // Sprite
-        IP = 0x0800,      // IP
-        ARP = 0x0806,     // Address resolution
-        MPLS = 0x8847,    // MPLS
-        REVARP = 0x8035,  // Reverse ARP
-        AT = 0x809B,      // AppleTalk protocol
-        AARP = 0x80F3,    // AppleTalk ARP
-        VLAN = 0x8100,    // IEEE 802.1Q VLAN tagging
-        IPX = 0x8137,	  // IPX
-        IPV6 = 0x86dd,    // IP protocol version 6
-        PPPOED = 0x8863,  // PPPoE Discovery
-        PPPOES = 0x8864,  // PPPoE Session
-        EAPOL = 0x888e,   // EAPOL
-        LOOPBACK = 0x9000 // used to test interfaces
+        SPRITE = 0x0500,   // Sprite
+        IP = 0x0800,       // IP
+        ARP = 0x0806,      // Address resolution
+        MPLS = 0x8847,     // MPLS
+        REVARP = 0x8035,   // Reverse ARP
+        AT = 0x809B,       // AppleTalk protocol
+        AARP = 0x80F3,     // AppleTalk ARP
+        VLAN = 0x8100,     // IEEE 802.1Q VLAN tagging
+        QINQ = 0x88a8,     // IEEE 802.1ad VLAN tagging
+        OLD_QINQ = 0x9100, // IEEE 802.1ad VLAN tagging (old, deprecated, value)
+        IPX = 0x8137,	   // IPX
+        IPV6 = 0x86dd,     // IP protocol version 6
+        PPPOED = 0x8863,   // PPPoE Discovery
+        PPPOES = 0x8864,   // PPPoE Session
+        EAPOL = 0x888e,    // EAPOL
+        LOOPBACK = 0x9000  // used to test interfaces
     };
 };
 

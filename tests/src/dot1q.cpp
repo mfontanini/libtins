@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include "dot1q.h"
 #include "arp.h"
+#include "ip.h"
+#include "tcp.h"
+#include "rawpdu.h"
 #include "ethernetII.h"
 
 using namespace std;
@@ -21,7 +24,6 @@ const uint8_t Dot1QTest::expected_packet[] = {
     123, 8, 6, 0, 1, 8, 0, 6, 4, 0, 2, 0, 25, 6, 234, 184, 193, 192, 168, 
     123, 1, 255, 255, 255, 255, 255, 255, 192, 168, 123, 1, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-
 };
 
 TEST_F(Dot1QTest, DefaultConstructor) {
@@ -78,4 +80,16 @@ TEST_F(Dot1QTest, Id) {
     Dot1Q dot1;
     dot1.id(3543);
     EXPECT_EQ(3543, dot1.id());
+}
+
+TEST_F(Dot1QTest, QinQ) {
+    EthernetII pkt = EthernetII() / Dot1Q(10) / Dot1Q(42) / IP("192.168.1.2") / 
+                     TCP(23, 45) / RawPDU("asdasdasd");
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII pkt2(&buffer[0], buffer.size());
+    const Dot1Q& q1 = pkt2.rfind_pdu<Dot1Q>();
+    ASSERT_TRUE(q1.inner_pdu() != NULL);
+    const Dot1Q& q2 = q1.inner_pdu()->rfind_pdu<Dot1Q>();
+    EXPECT_EQ(10, q1.id());
+    EXPECT_EQ(42, q2.id());
 }

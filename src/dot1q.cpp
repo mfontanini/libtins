@@ -101,10 +101,15 @@ uint32_t Dot1Q::trailer_size() const {
 void Dot1Q::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
-        // Set the appropriate payload type flag
-        Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
-            inner_pdu()->pdu_type()
-        );
+        Constants::Ethernet::e flag;
+        PDUType type = inner_pdu()->pdu_type();
+        if (type == PDU::DOT1Q) {
+            flag = Constants::Ethernet::QINQ;
+        }
+        else {
+            // Set the appropriate payload type flag
+            flag = Internals::pdu_flag_to_ether_type(type);
+        }
         payload_type(static_cast<uint16_t>(flag));
     }
     stream.write(header_);
