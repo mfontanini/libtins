@@ -38,24 +38,15 @@ namespace Tins {
 
 // As defined by RFC 1982 - 2 ^ (SERIAL_BITS - 1)
 static const uint32_t seq_number_diff = 2147483648U;
-// As defined by RFC 1982 - 2 ^ (SERIAL_BITS)
-static const uint32_t addition_modulo = numeric_limits<uint32_t>::max();
 
-// Sequence number add as defined by RFC 1982
+// Adds sequence numbers
 uint32_t add_sequence_numbers(uint32_t seq1, uint32_t seq2) {
-    return (static_cast<uint64_t>(seq1) + seq2) % addition_modulo;
+    return seq1 + seq2;
 }
 
 // Subtract sequence numbers
 uint32_t subtract_sequence_numbers(uint32_t seq1, uint32_t seq2) {
-    if (seq1 > seq2) {
-        return seq1 - seq2;
-    }
-    else  {
-        // the numbers between seq2 and the maximum sequence number(including seq1)
-        // + the numbers between 0 and seq1
-        return (numeric_limits<uint32_t>::max() - seq2) + seq1 + 1;
-    }
+    return seq1 - seq2;
 }
 
 // Compares sequence numbers as defined by RFC 1982.
