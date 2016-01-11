@@ -31,7 +31,7 @@
 #include <vector>
 #include <cstring>
 #include "macros.h"
-#ifndef WIN32
+#ifndef _WIN32
     #include <netinet/in.h>
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <ifaddrs.h>
@@ -51,6 +51,7 @@
 #include "exceptions.h"
 
 using std::string;
+using std::wstring;
 using std::vector;
 using std::set;
 using std::copy;
@@ -67,7 +68,7 @@ struct InterfaceInfoCollector {
     InterfaceInfoCollector(info_type* res, int id, const char* if_name) 
     : info(res), iface_id(id), iface_name(if_name), found_hw(false), found_ip(false) { }
     
-    #ifndef WIN32
+    #ifndef _WIN32
     bool operator() (const struct ifaddrs* addr) {
         using Tins::Endian::host_to_be;
         using Tins::IPv4Address;
@@ -115,7 +116,7 @@ struct InterfaceInfoCollector {
         
         return found_ip && found_hw;
     }
-    #else // WIN32
+    #else // _WIN32
     bool operator() (const IP_ADAPTER_ADDRESSES* iface) {
         using Tins::IPv4Address;
         using Tins::Endian::host_to_be;
@@ -133,8 +134,28 @@ struct InterfaceInfoCollector {
         }
         return found_ip && found_hw;
     }
-    #endif // WIN32
+    #endif // _WIN32
 };
+
+#ifdef _WIN32
+template <typename T, typename U>
+T find_adapter_address_info(uint32_t iface_id, U (IP_ADAPTER_ADDRESSES::*member)) {
+    ULONG size;
+    ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
+    vector<uint8_t> buffer(size);
+    if (::GetAdaptersAddresses(AF_INET, 0, 0, (IP_ADAPTER_ADDRESSES *)&buffer[0], &size) == ERROR_SUCCESS) {
+        PIP_ADAPTER_ADDRESSES iface = (IP_ADAPTER_ADDRESSES *)&buffer[0];
+        while (iface) {
+            if (iface->IfIndex == iface_id) {
+                return T(iface->*member);
+            }
+            iface = iface->Next;
+        }
+    }
+    throw Tins::invalid_interface();
+}
+#endif // _WIN32
+
 /** \endcond */
 
 namespace Tins {
@@ -203,26 +224,23 @@ NetworkInterface::NetworkInterface(IPv4Address ip)
 }
 
 string NetworkInterface::name() const {
-    #ifndef WIN32
+    #ifndef _WIN32
     char iface_name[IF_NAMESIZE];
     if (!if_indextoname(iface_id_, iface_name)) {
         throw invalid_interface();
     }
     return iface_name;
-    #else // WIN32
-    ULONG size;
-    ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
-    vector<uint8_t> buffer(size);
-    if (::GetAdaptersAddresses(AF_INET, 0, 0, (IP_ADAPTER_ADDRESSES *)&buffer[0], &size) == ERROR_SUCCESS) {
-        PIP_ADAPTER_ADDRESSES iface = (IP_ADAPTER_ADDRESSES *)&buffer[0];
-        while (iface) {
-            if (iface->IfIndex == iface_id_) {
-                return iface->AdapterName;
-            }
-            iface = iface->Next;
-        }
-    }
-    throw invalid_interface();
+    #else // _WIN32
+    return find_adapter_address_info<string>(iface_id_, &IP_ADAPTER_ADDRESSES::AdapterName);
+    #endif // WIN32
+}
+
+wstring NetworkInterface::friendly_name() const {
+    #ifndef _WIN32
+    string n = name();
+    return wstring(n.begin(), n.end());
+    #else // _WIN32
+    return find_adapter_address_info<wstring>(iface_id_, &IP_ADAPTER_ADDRESSES::FriendlyName);
     #endif // WIN32
 }
 
@@ -254,13 +272,13 @@ bool NetworkInterface::is_up() const {
 }
 
 NetworkInterface::id_type NetworkInterface::resolve_index(const char* name) {
-    #ifndef WIN32
+    #ifndef _WIN32
     id_type id = if_nametoindex(name);
     if (!id) {
         throw invalid_interface();
     }
     return id;
-    #else // Win32
+    #else // _WIN32
     ULONG size;
     ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
     vector<uint8_t> buffer(size);
@@ -274,7 +292,7 @@ NetworkInterface::id_type NetworkInterface::resolve_index(const char* name) {
         }
     }
     throw invalid_interface();
-    #endif // Win32
+    #endif // _WIN32
 }
 
 } // Tins

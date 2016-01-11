@@ -128,6 +128,26 @@ public:
      * \return std::string containing this interface's name.
      */
     std::string name() const;
+
+    /**
+     * \brief Retrieves this interface's friendly name.
+     *
+     * The name returned by this method can be more human-friendly than
+     * the one returned by NetworkInterface::name, depending on the platform
+     * in which it's used. 
+     *
+     * On GNU/Linux and OSX/FreeBSD, this returns the same string as 
+     * NetworkInterface::name.
+     *
+     * On Windows, this method returns a name such as 
+     * "Local Area Connection 1".
+     *
+     * Note thaat this returns a wstring rather than a string, to comply
+     * with Window's adapter's FriendlyName type.
+     *
+     * \return std::wstring containing this interface's name.
+     */
+    std::wstring friendly_name() const;
     
     /**
      * \brief Retrieve this interface's addresses.
