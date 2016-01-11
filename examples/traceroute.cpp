@@ -70,7 +70,7 @@ public:
 
     Traceroute(NetworkInterface interface, IPv4Address address) 
     : iface(interface), addr(address), lowest_dest_ttl(numeric_limits<int>::max()) { 
-        sequence = random_device()();
+        sequence = random_device()() & 0xffff;
     }
     
     result_type trace() {
