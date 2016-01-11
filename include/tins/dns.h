@@ -236,11 +236,16 @@ public:
          * \param rclass The class of this record.
          * \param ttl The time-to-live of this record.
          */
-        Resource(const std::string& dname, const std::string& data, 
-          uint16_t type, uint16_t rclass, uint32_t ttl) 
-        : dname_(dname), data_(data), type_(type), qclass_(rclass), ttl_(ttl) {}
+        Resource(const std::string& dname, 
+                 const std::string& data, 
+                 uint16_t type,
+                 uint16_t rclass,
+                 uint32_t ttl,
+                 uint16_t preference = 0) 
+        : dname_(dname), data_(data), type_(type), qclass_(rclass), 
+          ttl_(ttl), preference_(preference) {}
         
-        Resource() : type_(), qclass_(), ttl_() {}
+        Resource() : type_(), qclass_(), ttl_(), preference_() {}
         
         /**
          * \brief Getter for the domain name field.
@@ -248,27 +253,46 @@ public:
          * This returns the domain name for which this record 
          * provides an answer.
          */
-        const std::string& dname() const { return dname_; }
+        const std::string& dname() const {
+            return dname_;
+        }
         
         /**
          * Getter for the data field. 
          */
-        const std::string& data() const { return data_; }
+        const std::string& data() const {
+            return data_;
+        }
         
         /**
          * Getter for the query type field.
          */
-        uint16_t type() const { return type_; }
+        uint16_t type() const {
+            return type_;
+        }
         
         /**
          * Getter for the query class field.
          */
-        uint16_t query_class() const { return qclass_; }
+        uint16_t query_class() const {
+            return qclass_;
+        }
         
         /**
-         * Getter for the type field.
+         * Getter for the time-to-live field.
          */
-        uint32_t ttl() const { return ttl_; }
+        uint32_t ttl() const {
+            return ttl_;
+        }
+
+        /**
+         * \brief Getter for the preferece field.
+         *
+         * This field is only valid for MX resources.
+         */
+        uint16_t preference() const {
+            return preference_;
+        }
 
         /**
          * Setter for the domain name field.
@@ -313,10 +337,20 @@ public:
         void ttl(uint32_t data) {
             ttl_ = data;
         }
+
+        /**
+         * \brief Setter for the preference field.
+         *
+         * This field is only valid for MX resources.
+         */
+        void preference(uint16_t data) {
+            preference_ = data;
+        }
     private:
         std::string dname_, data_;
         uint16_t type_, qclass_;
         uint32_t ttl_;
+        uint16_t preference_;
     };
     
     typedef std::list<Query> queries_type;
@@ -711,11 +745,16 @@ private:
     typedef std::vector<std::pair<uint32_t*, uint32_t> > sections_type;
     
     uint32_t compose_name(const uint8_t* ptr, char* out_ptr) const;
-    void convert_records(const uint8_t* ptr, const uint8_t* end, resources_type& res) const;
+    void convert_records(const uint8_t* ptr, 
+                         const uint8_t* end,
+                         resources_type& res) const;
     void skip_to_section_end(Memory::InputMemoryStream& stream, 
                              const uint32_t num_records) const;
     void skip_to_dname_end(Memory::InputMemoryStream& stream) const;
-    void update_records(uint32_t& section_start, uint32_t num_records, uint32_t threshold, uint32_t offset);
+    void update_records(uint32_t& section_start, 
+                        uint32_t num_records,
+                        uint32_t threshold,
+                        uint32_t offset);
     uint8_t* update_dname(uint8_t* ptr, uint32_t threshold, uint32_t offset);
     static void inline_convert_v4(uint32_t value, char* output);
     static bool contains_dname(uint16_t type);

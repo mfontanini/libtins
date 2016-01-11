@@ -118,6 +118,7 @@ TEST_F(DNSTest, ConstructorFromBuffer2) {
         }
          
         DNS::resources_type resources = dns.answers();
+        size_t resource_index = 0;
         for(DNS::resources_type::const_iterator it = resources.begin(); it != resources.end(); ++it) {
             EXPECT_EQ("google.com", it->dname());
             EXPECT_EQ(DNS::MX, it->type());
@@ -130,6 +131,13 @@ TEST_F(DNSTest, ConstructorFromBuffer2) {
                 it->data() == "alt5.aspmx.l.google.com" ||
                 it->data() == "aspmx.l.google.com"
             );
+            if (resource_index == 0) {
+                EXPECT_EQ(50, it->preference());
+            }
+            else if (resource_index == 1) {
+                EXPECT_EQ(40, it->preference());
+            }
+            resource_index++;
         }
         // Add some stuff and see if something gets broken
         if(i == 0) {
@@ -449,4 +457,19 @@ TEST_F(DNSTest, ItAintGonnaCorrupt) {
         EXPECT_EQ(it->data(), domain);
         EXPECT_EQ(it->query_class(), DNS::IN);
     }
+}
+
+TEST_F(DNSTest, MXPreferenceField) {
+    DNS dns1;
+    dns1.add_answer(
+        DNS::Resource("example.com", "mail.example.com", DNS::MX, DNS::IN, 0x762, 42)
+    );
+    DNS::serialization_type buffer = dns1.serialize();
+    DNS dns2(&buffer[0], buffer.size());
+    DNS::resources_type answers = dns1.answers();
+    ASSERT_EQ(1, answers.size());
+
+    const DNS::Resource& resource = *answers.begin();
+    EXPECT_EQ(42, resource.preference());
+    EXPECT_EQ("example.com", resource.dname());
 }

@@ -203,7 +203,8 @@ void DNS::add_record(const Resource& resource, const sections_type& sections) {
     // will end up being inconsistent.
     IPv4Address v4_addr;
     IPv6Address v6_addr;
-    string buffer = encode_domain_name(resource.dname()), encoded_data;
+    string buffer = encode_domain_name(resource.dname()), 
+           encoded_data;
     // By default the data size is the length of the data field.
     size_t data_size = resource.data().size();
     if (resource.type() == A) {
@@ -220,13 +221,17 @@ void DNS::add_record(const Resource& resource, const sections_type& sections) {
     }
     size_t offset = buffer.size() + sizeof(uint16_t) * 3 + sizeof(uint32_t) + data_size, 
            threshold = sections.empty() ? records_data_.size() :* sections.front().first;
-    // Skip the preference field
+    // Take into account the MX preference field
     if (resource.type() == MX) {
         offset += sizeof(uint16_t);
     }
     for (size_t i = 0; i < sections.size(); ++i) {
-        update_records(*sections[i].first, sections[i].second, 
-            static_cast<uint32_t>(threshold), static_cast<uint32_t>(offset));
+        update_records(
+            *sections[i].first, 
+            sections[i].second, 
+            static_cast<uint32_t>(threshold),
+            static_cast<uint32_t>(offset)
+        );
     }
     
     records_data_.insert(
@@ -241,7 +246,7 @@ void DNS::add_record(const Resource& resource, const sections_type& sections) {
     stream.write_be(resource.ttl());
     stream.write_be<uint16_t>(data_size + (resource.type() == MX ? 2 : 0));
     if (resource.type() == MX) {
-        stream.skip(sizeof(uint16_t));
+        stream.write_be(resource.preference());
     }
     if (resource.type() == A) {
         stream.write(v4_addr);
@@ -380,15 +385,15 @@ void DNS::convert_records(const uint8_t* ptr,
         // Retrieve the record's domain name.
         stream.skip(compose_name(stream.pointer(), dname));
         // Retrieve the following fields.
-        uint16_t type, qclass, data_size;
+        uint16_t type, qclass, data_size, preference = 0;
         uint32_t ttl;
         type = stream.read_be<uint16_t>();
         qclass = stream.read_be<uint16_t>();
         ttl = stream.read_be<uint32_t>();
         data_size = stream.read_be<uint16_t>();
-        // Skip the preference field if it's MX
+        // Read the preference field if it's MX
         if (type ==  MX) {
-            stream.skip(sizeof(uint16_t));
+            preference = stream.read_be<uint16_t>();
             data_size -= sizeof(uint16_t);
         }
         if (!stream.can_read(data_size)) {
@@ -431,7 +436,8 @@ void DNS::convert_records(const uint8_t* ptr,
                 (used_small_buffer) ? small_addr_buf : addr, 
                 type, 
                 qclass, 
-                ttl
+                ttl,
+                preference
             )
         );
     }
