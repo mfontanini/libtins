@@ -128,8 +128,7 @@ private:
     map<packet_info, time_point_type> m_packet_info;
 };
 
-void dns_monitor::run(BaseSniffer& sniffer)
-{
+void dns_monitor::run(BaseSniffer& sniffer) {
     sniffer.sniff_loop(
         bind(
             &dns_monitor::callback, 
@@ -139,8 +138,7 @@ void dns_monitor::run(BaseSniffer& sniffer)
     );
 }
 
-bool dns_monitor::callback(const PDU& pdu)
-{
+bool dns_monitor::callback(const PDU& pdu) {
     auto now = clock_type::now();
     auto dns = pdu.rfind_pdu<RawPDU>().to<DNS>();
     auto info = make_packet_info(pdu, dns);
@@ -170,8 +168,7 @@ bool dns_monitor::callback(const PDU& pdu)
 // hold the same DNS id as belonging to the same query. 
 // 
 // This function retrieves a tuple (addr, addr, id) that will achieve it.
-auto dns_monitor::make_packet_info(const PDU& pdu, const DNS& dns) -> packet_info
-{
+auto dns_monitor::make_packet_info(const PDU& pdu, const DNS& dns) -> packet_info {
     const auto& ip = pdu.rfind_pdu<IP>();
     return make_tuple( 
         // smallest address first

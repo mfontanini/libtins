@@ -37,8 +37,7 @@ using namespace Tins;
 
 PacketSender sender;
 
-bool callback(const PDU& pdu) 
-{
+bool callback(const PDU& pdu) {
     // The packet probably looks like this:
     //
     // EthernetII / IP / UDP / RawPDU
@@ -54,7 +53,7 @@ bool callback(const PDU& pdu)
     if (dns.type() == DNS::QUERY) {
         // Let's see if there's any query for an "A" record.
         for (const auto& query : dns.queries()) {
-            if (query.type() == DNS::A) {
+            if (query.query_type() == DNS::A) {
                 // Here's one! Let's add an answer.
                 dns.add_answer(
                     DNS::Resource(

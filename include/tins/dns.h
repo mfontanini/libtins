@@ -157,7 +157,7 @@ public:
     /**
      * \brief Struct that represent DNS queries.
      */
-    class Query {
+    class query {
     public:
         /**
          * \brief Constructs a DNS query.
@@ -166,13 +166,13 @@ public:
          * \param tp The query type.
          * \param cl The query class.
          */
-        Query(const std::string& nm, QueryType tp, QueryClass cl) 
+        query(const std::string& nm, QueryType tp, QueryClass cl) 
         : name_(nm), type_(tp), qclass_(cl) {}
         
         /**
          * \brief Default constructs this Query.
          */
-        Query() : type_(), qclass_() {}
+        query() : type_(), qclass_() {}
         
         /**
          * \brief Setter for the name field.
@@ -188,7 +188,19 @@ public:
          * 
          * \param tp The query type to be set.
          */
-        void type(QueryType tp) {
+        void query_type(QueryType tp) {
+            type_ = tp;
+        }
+
+         /**
+         * \brief Setter for the query type field.
+         *
+         * This method is deprecated. Use query::query_type
+         *
+         * \deprecated
+         * \sa query::query_type
+         */
+        TINS_DEPRECATED(void type(QueryType tp)) {
             type_ = tp;
         }
         
@@ -204,24 +216,42 @@ public:
         /**
          * \brief Getter for the name field.
          */
-        const std::string& dname() const { return name_; }
+        const std::string& dname() const {
+            return name_;
+        }
         
         /**
          * \brief Getter for the query type field.
          */
-        QueryType type() const { return type_; }
+        QueryType query_type() const {
+            return type_;
+        }
+
+        /**
+         * \brief Getter for the query type field.
+         *
+         * This method is deprecated. Use query::query_type
+         *
+         * \deprecated
+         * \sa query::query_type
+         */
+        TINS_DEPRECATED(QueryType type() const) {
+            return type_;
+        }
         
         /**
          * \brief Getter for the query class field.
          */
-        QueryClass query_class() const { return qclass_; }
+        QueryClass query_class() const {
+            return qclass_;
+        }
     private:
         std::string name_;
         QueryType type_;
         QueryClass qclass_;
     };
     
-    class Resource;
+    class resource;
 
     /**
      * \brief Class that represents a Start Of Authority record
@@ -239,7 +269,7 @@ public:
          * \brief Constructs a SOA record from a DNS::resource
          * \param resource The resource from which to construct this record
          */
-        soa_record(const DNS::Resource& resource);
+        soa_record(const DNS::resource& resource);
 
         /**
          * \brief Constructs a SOA record from a buffer
@@ -392,7 +422,7 @@ public:
     /**
      * \brief Class that represent DNS resource records.
      */
-    class Resource {
+    class resource {
     public:
         /**
          * Constructs a Resource object.
@@ -404,7 +434,7 @@ public:
          * \param rclass The class of this record.
          * \param ttl The time-to-live of this record.
          */
-        Resource(const std::string& dname, 
+        resource(const std::string& dname, 
                  const std::string& data, 
                  uint16_t type,
                  uint16_t rclass,
@@ -413,7 +443,7 @@ public:
         : dname_(dname), data_(data), type_(type), qclass_(rclass), 
           ttl_(ttl), preference_(preference) {}
         
-        Resource() : type_(), qclass_(), ttl_(), preference_() {}
+        resource() : type_(), qclass_(), ttl_(), preference_() {}
         
         /**
          * \brief Getter for the domain name field.
@@ -435,10 +465,22 @@ public:
         /**
          * Getter for the query type field.
          */
-        uint16_t type() const {
+        uint16_t query_type() const {
             return type_;
         }
         
+        /**
+         * \brief Getter for the query type field.
+         *
+         * This method is deprecated. Use resource::query_type
+         *
+         * \deprecated
+         * \sa resource::query_type
+         */
+        TINS_DEPRECATED(uint16_t type() const) {
+            return type_;
+        }
+
         /**
          * Getter for the query class field.
          */
@@ -495,14 +537,26 @@ public:
         }
 
         /**
-         * Setter for the type field.
+         * Setter for the query type field.
          */
-        void type(uint16_t data) {
+        void query_type(uint16_t data) {
             type_ = data;
         }
 
         /**
-         * Setter for the class field.
+         * \brief Setter for the query type field.
+         * 
+         * This method is deprecated. Use query::query_type
+         *
+         * \deprecated
+         * \sa resource::query_type
+         */
+        TINS_DEPRECATED(void type(uint16_t data)) {
+            type_ = data;
+        }
+
+        /**
+         * Setter for the query class field.
          */
         void query_class(uint16_t data) {
             qclass_ = data;
@@ -529,9 +583,12 @@ public:
         uint32_t ttl_;
         uint16_t preference_;
     };
+
+    TINS_DEPRECATED(typedef query Query);
+    TINS_DEPRECATED(typedef resource Resource);
     
-    typedef std::list<Query> queries_type;
-    typedef std::list<Resource> resources_type;
+    typedef std::list<query> queries_type;
+    typedef std::list<resource> resources_type;
     typedef IPv4Address address_type;
     typedef IPv6Address address_v6_type;
     
@@ -802,28 +859,28 @@ public:
      * 
      * \param query The query to be added.
      */
-    void add_query(const Query& query);
+    void add_query(const query& query);
     
     /**
      * \brief Add an answer resource record.
      * 
      * \param resource The resource to be added.
      */
-    void add_answer(const Resource& resource);
+    void add_answer(const resource& resource);
 
     /**
      * \brief Add an authority resource record.
      * 
      * \param resource The resource to be added.
      */
-    void add_authority(const Resource& resource);
+    void add_authority(const resource& resource);
     
     /**
      * \brief Add an additional resource record.
      * 
      * \param resource The resource to be added.
      */
-    void add_additional(const Resource& resource);
+    void add_additional(const resource& resource);
     
     /**
      * \brief Getter for this PDU's DNS queries.
@@ -934,7 +991,6 @@ private:
                  authority, additional;
     } TINS_END_PACK;
     
-    typedef std::list<Query> QueriesType;
     typedef std::vector<std::pair<uint32_t*, uint32_t> > sections_type;
     
     uint32_t compose_name(const uint8_t* ptr, char* out_ptr) const;
@@ -952,7 +1008,7 @@ private:
     static void inline_convert_v4(uint32_t value, char* output);
     static bool contains_dname(uint16_t type);
     void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
-    void add_record(const Resource& resource, const sections_type& sections);
+    void add_record(const resource& resource, const sections_type& sections);
     
     dns_header header_;
     byte_array records_data_;
