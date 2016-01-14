@@ -258,8 +258,6 @@ public:
      */
     class soa_record {
     public:
-
-        friend class DNSTest;
         /**
          * \brief Default constructor
          */
@@ -407,7 +405,6 @@ public:
          */
          PDU::serialization_type serialize() const;
     private:
-        friend class DNS;
         void init(const uint8_t* buffer, uint32_t total_sz);
 
         std::string mname_;
