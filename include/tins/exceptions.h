@@ -263,6 +263,16 @@ public:
     }
 };
 
+/**
+ * \brief Exception thrown when an invalid domain name is parsed
+ */
+class invalid_domain_name : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Invalid domain name";
+    }
+};
+
 namespace Crypto {
 namespace WPA2 {
     /**

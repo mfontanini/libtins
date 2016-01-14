@@ -221,8 +221,176 @@ public:
         QueryClass qclass_;
     };
     
+    class Resource;
+
     /**
-     * \brief Struct that represent DNS resource records.
+     * \brief Class that represents a Start Of Authority record
+     */
+    class soa_record {
+    public:
+
+        friend class DNSTest;
+        /**
+         * \brief Default constructor
+         */
+        soa_record();
+
+        /**
+         * \brief Constructs a SOA record from a DNS::resource
+         * \param resource The resource from which to construct this record
+         */
+        soa_record(const DNS::Resource& resource);
+
+        /**
+         * \brief Constructs a SOA record from a buffer
+         * \param buffer The buffer from which to construct this SOA record
+         * \param total_sz The size of the buffer
+         */
+        soa_record(const uint8_t* buffer, uint32_t total_sz);
+
+        /**
+         * \brief Constructs a SOA record
+         *
+         * \param mname The primary source name
+         * \param rname The responsible person name
+         * \param serial The serial number
+         * \param refresh The refresh value
+         * \param retry The retry value
+         * \param expire The expire value
+         * \param minimum_ttl The minimum TTL value
+         */
+        soa_record(const std::string& mname,
+                   const std::string& rname,
+                   uint32_t serial,
+                   uint32_t refresh,
+                   uint32_t retry,
+                   uint32_t expire,
+                   uint32_t minimum_ttl);
+
+        /**
+         * \brief Getter for the primary source name field
+         *
+         * The returned domain name is already decoded.
+         *
+         * \return mname The primary source name field
+         */
+        const std::string& mname() const {
+            return mname_;
+        }
+
+        /**
+         * \brief Getter for the responsible person name field
+         *
+         * The returned domain name is already decoded.
+         *
+         * \return mname The responsible person name field
+         */
+        const std::string& rname() const {
+            return rname_;
+        }
+
+        /**
+         * \brief Getter for the serial number field
+         * \return The serial number field
+         */
+        uint32_t serial() const {
+            return serial_;
+        }
+
+        /**
+         * \brief Getter for the refresh field
+         * \return The refresh field
+         */
+        uint32_t refresh() const {
+            return refresh_;
+        }
+
+        /**
+         * \brief Getter for the retry field
+         * \return The retry field
+         */
+        uint32_t retry() const {
+            return retry_;
+        }
+
+        /**
+         * \brief Getter for the expire field
+         * \return The expire field
+         */
+        uint32_t expire() const {
+            return expire_;
+        }
+
+        /**
+         * \brief Getter for the minimum TTL field
+         * \return The minimum TTL field
+         */
+        uint32_t minimum_ttl() const {
+            return minimum_ttl_;
+        }
+
+        /**
+         * \brief Getter for the primary source name field
+         * \param value The new primary source name field value
+         */
+        void mname(const std::string& value);
+
+        /**
+         * \brief Getter for the responsible person name field
+         * \param value The new responsible person name field value
+         */
+        void rname(const std::string& value);
+
+        /**
+         * \brief Getter for the serial number field
+         * \param value The new serial number field value
+         */
+        void serial(uint32_t value);
+
+        /**
+         * \brief Getter for the refresh field
+         * \param value The new refresh field value
+         */
+        void refresh(uint32_t value);
+
+        /**
+         * \brief Getter for the retry field
+         * \param value The new retry field value
+         */
+        void retry(uint32_t value);
+
+        /**
+         * \brief Getter for the expire field
+         * \param value The new expire field value
+         */
+        void expire(uint32_t value);
+
+        /**
+         * \brief Getter for the minimum TTL field
+         * \param value The new minimum TTL field value
+         */
+        void minimum_ttl(uint32_t value);
+
+        /**
+         * \brief Serialize this SOA record
+         * \return The serialized SOA record
+         */
+         PDU::serialization_type serialize() const;
+    private:
+        friend class DNS;
+        void init(const uint8_t* buffer, uint32_t total_sz);
+
+        std::string mname_;
+        std::string rname_;
+        uint32_t serial_;
+        uint32_t refresh_;
+        uint32_t retry_;
+        uint32_t expire_;
+        uint32_t minimum_ttl_;
+    };
+
+    /**
+     * \brief Class that represent DNS resource records.
      */
     class Resource {
     public:
@@ -315,6 +483,15 @@ public:
          */
         void data(const std::string& data) {
             data_ = data;
+        }
+
+        /**
+         * \brief Sets the contents of this resource to the provided SOA record
+         * \param data The SOA record that will be stored in this resource
+         */
+        void data(const soa_record& data) {
+            serialization_type buffer = data.serialize();
+            data_.assign(buffer.begin(), buffer.end());
         }
 
         /**
@@ -693,6 +870,20 @@ public:
      */
     static std::string encode_domain_name(const std::string& domain_name);
 
+    /**
+     * \brief Decodes a domain name
+     *
+     * This method processes an encoded domain name and returns the decoded
+     * version. This <b>can't handle</b> offset labels.
+     *
+     * For example, given the input "\x03www\x07example\x03com\x00", 
+     * the output would be www.example.com".
+     * 
+     * \param domain_name The domain name to decode.
+     * \return The decoded domain name.
+     */
+    static std::string decode_domain_name(const std::string& domain_name);
+
     /** 
      * \brief Check wether ptr points to a valid response for this PDU.
      *
@@ -709,6 +900,8 @@ public:
         return new DNS(*this);
     }
 private:
+    friend class soa_record;
+
     TINS_BEGIN_PACK
     struct dns_header {
         uint16_t id;

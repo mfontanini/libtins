@@ -294,6 +294,39 @@ string DNS::encode_domain_name(const string& dn) {
     return output;
 }
 
+string DNS::decode_domain_name(const string& domain_name) {
+    string output;
+    if (domain_name.empty()) {
+        return output;
+    }
+    const uint8_t* ptr = (const uint8_t*)&domain_name[0];
+    const uint8_t* end = ptr + domain_name.size();
+    while (*ptr) {
+        // We can't handle offsets
+        if ((*ptr & 0xc0)) {
+            throw invalid_domain_name();
+        }
+        else {
+            // It's a label, grab its size.
+            uint8_t size = *ptr;
+            ptr++;
+            if (ptr + size > end) {
+                throw malformed_packet();
+            }
+            // Append a dot if it's not the first one.
+            if (!output.empty()) {
+                output.push_back('.');
+            }
+            output.insert(output.end(), ptr, ptr + size);
+            ptr += size;
+        }
+        if (output.size() > 256) {
+            throw invalid_domain_name();
+        }
+    }
+    return output;
+}
+
 // The output buffer should be at least 256 bytes long. This used to use
 // a std::string but it worked about 50% slower, so this is somehow 
 // unsafe but a lot faster.
@@ -380,7 +413,7 @@ void DNS::convert_records(const uint8_t* ptr,
     InputMemoryStream stream(ptr, end - ptr);
     char dname[256], small_addr_buf[256];
     while (stream) {
-        string addr;
+        string data;
         bool used_small_buffer = false;
         // Retrieve the record's domain name.
         stream.skip(compose_name(stream.pointer(), dname));
@@ -402,7 +435,7 @@ void DNS::convert_records(const uint8_t* ptr,
 
         switch (type) {
             case AAAA:
-                addr = stream.read<IPv6Address>().to_string();
+                data = stream.read<IPv6Address>().to_string();
                 break;
             case A:
                 inline_convert_v4(stream.read<uint32_t>(), small_addr_buf);
@@ -417,23 +450,29 @@ void DNS::convert_records(const uint8_t* ptr,
                 stream.skip(data_size);
                 used_small_buffer = true;
                 break;
+            case SOA:
+                {
+                    stream.skip(compose_name(stream.pointer(), small_addr_buf));
+                    data = encode_domain_name(small_addr_buf);
+                    stream.skip(compose_name(stream.pointer(), small_addr_buf));
+                    data += encode_domain_name(small_addr_buf);
+                    const uint32_t size_left = sizeof(uint32_t) * 5;
+                    if (!stream.can_read(size_left)) {
+                        throw malformed_packet();
+                    }
+                    data.insert(data.end(), stream.pointer(), stream.pointer() + size_left);
+                    stream.skip(size_left);
+                }
+                break;
             default:
-                if (data_size < sizeof(small_addr_buf) - 1) {
-                    stream.read(small_addr_buf, data_size);
-                    // null terminator
-                    small_addr_buf[data_size] = 0;
-                    used_small_buffer = true;
-                }
-                else {
-                    addr.assign(stream.pointer(), stream.pointer() + data_size);
-                    stream.skip(data_size);
-                }
+                data.assign(stream.pointer(), stream.pointer() + data_size);
+                stream.skip(data_size);
                 break;
         }
         res.push_back(
             Resource(
                 dname, 
-                (used_small_buffer) ? small_addr_buf : addr, 
+                (used_small_buffer) ? small_addr_buf : data, 
                 type, 
                 qclass, 
                 ttl,
@@ -554,6 +593,93 @@ bool DNS::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     }
     const dns_header* hdr = (const dns_header*)ptr;
     return hdr->id == header_.id;
+}
+
+// SOA record
+
+DNS::soa_record::soa_record() 
+: serial_(0), refresh_(0), retry_(0), expire_(0) {
+
+}
+
+DNS::soa_record::soa_record(const string& mname,
+                            const string& rname,
+                            uint32_t serial,
+                            uint32_t refresh,
+                            uint32_t retry,
+                            uint32_t expire,
+                            uint32_t minimum_ttl) 
+: mname_(mname), rname_(rname), serial_(serial), refresh_(refresh), retry_(retry),
+  expire_(expire), minimum_ttl_(minimum_ttl) {
+
+}
+
+DNS::soa_record::soa_record(const uint8_t* buffer, uint32_t total_sz) {
+    init(buffer, total_sz);
+}
+
+DNS::soa_record::soa_record(const DNS::Resource& resource) {
+    init((const uint8_t*)&resource.data()[0], resource.data().size());
+}
+
+void DNS::soa_record::mname(const string& value) {
+    mname_ = value;
+}
+
+void DNS::soa_record::rname(const string& value) {
+    rname_ = value;
+}
+
+void DNS::soa_record::serial(uint32_t value) {
+    serial_ = value;
+}
+
+void DNS::soa_record::refresh(uint32_t value) {
+    refresh_ = value;
+}
+
+void DNS::soa_record::retry(uint32_t value) {
+    retry_ = value;
+}
+
+void DNS::soa_record::expire(uint32_t value) {
+    expire_ = value;
+}
+    
+void DNS::soa_record::minimum_ttl(uint32_t value) {
+    minimum_ttl_ = value;
+}
+
+PDU::serialization_type DNS::soa_record::serialize() const {
+    string encoded_mname = DNS::encode_domain_name(mname_);
+    string encoded_rname = DNS::encode_domain_name(rname_);
+    PDU::serialization_type output(
+        encoded_mname.size() + encoded_rname.size() + sizeof(uint32_t) * 5
+    );
+    OutputMemoryStream stream(output);
+    stream.write(encoded_mname.begin(), encoded_mname.end());
+    stream.write(encoded_rname.begin(), encoded_rname.end());
+    stream.write_be(serial_);
+    stream.write_be(refresh_);
+    stream.write_be(retry_);
+    stream.write_be(expire_);
+    stream.write_be(minimum_ttl_);
+    return output;
+}
+
+void DNS::soa_record::init(const uint8_t* buffer, uint32_t total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    string domain = (const char*)stream.pointer();
+    mname_ = DNS::decode_domain_name(domain);
+    stream.skip(domain.size() + 1);
+    domain = (const char*)stream.pointer();
+    stream.skip(domain.size() + 1);
+    rname_ = DNS::decode_domain_name(domain);
+    serial_ = stream.read_be<uint32_t>();
+    refresh_ = stream.read_be<uint32_t>();
+    retry_ = stream.read_be<uint32_t>();
+    expire_ = stream.read_be<uint32_t>();
+    minimum_ttl_ = stream.read_be<uint32_t>();
 }
 
 } // Tins

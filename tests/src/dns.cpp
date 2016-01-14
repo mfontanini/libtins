@@ -473,3 +473,83 @@ TEST_F(DNSTest, MXPreferenceField) {
     EXPECT_EQ(42, resource.preference());
     EXPECT_EQ("example.com", resource.dname());
 }
+
+TEST_F(DNSTest, SOARecordConstructor) {
+    DNS::soa_record r(
+        "hehehehe.example.com", 
+        "john.example.com",
+        0x9823ade9,
+        0x918273aa,
+        0x827361ad,
+        0x8ad71928,
+        0x1ad92871
+    );
+    EXPECT_EQ("hehehehe.example.com", r.mname());
+    EXPECT_EQ("john.example.com", r.rname());
+    EXPECT_EQ(0x9823ade9, r.serial());
+    EXPECT_EQ(0x918273aa, r.refresh());
+    EXPECT_EQ(0x827361ad, r.retry());
+    EXPECT_EQ(0x8ad71928, r.expire());
+    EXPECT_EQ(0x1ad92871, r.minimum_ttl());
+}
+
+TEST_F(DNSTest, SOARecordGettersAndSetters) {
+    DNS::soa_record r;
+    r.mname("hehehehe.example.com");
+    r.rname("john.example.com");
+    r.serial(0x9823ade9);
+    r.refresh(0x918273aa);
+    r.retry(0x827361ad);
+    r.expire(0x8ad71928);
+    r.minimum_ttl(0x1ad92871);
+    EXPECT_EQ("hehehehe.example.com", r.mname());
+    EXPECT_EQ("john.example.com", r.rname());
+    EXPECT_EQ(0x9823ade9, r.serial());
+    EXPECT_EQ(0x918273aa, r.refresh());
+    EXPECT_EQ(0x827361ad, r.retry());
+    EXPECT_EQ(0x8ad71928, r.expire());
+    EXPECT_EQ(0x1ad92871, r.minimum_ttl());
+}
+
+TEST_F(DNSTest, SOARecordFromBuffer) {
+    const uint8_t raw[] = {
+        232, 101, 129, 128, 0, 1, 0, 1, 0, 0, 0, 0, 6, 103, 111, 111, 103, 108,
+        101, 3, 99, 111, 109, 0, 0, 6, 0, 1, 192, 12, 0, 6, 0, 1, 0, 0, 0, 59, 
+        0, 38, 3, 110, 115, 50, 192, 12, 9, 100, 110, 115, 45, 97, 100, 109, 105,
+        110, 192, 12, 6, 174, 163, 84, 0, 0, 3, 132, 0, 0, 3, 132, 0, 0, 7, 8, 0,
+        0, 0, 60
+    };
+
+    DNS dns(raw, sizeof(raw));
+    ASSERT_EQ(1, dns.answers().size());
+    DNS::Resource r(dns.answers().front());
+    DNS::soa_record soa(r);
+    EXPECT_EQ("ns2.google.com", soa.mname());
+    EXPECT_EQ("dns-admin.google.com", soa.rname());
+    EXPECT_EQ(112108372, soa.serial());
+    EXPECT_EQ(900, soa.refresh());
+    EXPECT_EQ(900, soa.retry());
+    EXPECT_EQ(1800, soa.expire());
+    EXPECT_EQ(60, soa.minimum_ttl());
+}
+
+TEST_F(DNSTest, SOARecordSerialize) {
+    DNS::soa_record r1;
+    r1.mname("hehehehe.example.com");
+    r1.rname("john.example.com");
+    r1.serial(0x9823ade9);
+    r1.refresh(0x918273aa);
+    r1.retry(0x827361ad);
+    r1.expire(0x8ad71928);
+    r1.minimum_ttl(0x1ad92871);
+
+    DNS::serialization_type buffer = r1.serialize();
+    DNS::soa_record r2(&buffer[0], buffer.size());
+    EXPECT_EQ("hehehehe.example.com", r2.mname());
+    EXPECT_EQ("john.example.com", r2.rname());
+    EXPECT_EQ(0x9823ade9, r2.serial());
+    EXPECT_EQ(0x918273aa, r2.refresh());
+    EXPECT_EQ(0x827361ad, r2.retry());
+    EXPECT_EQ(0x8ad71928, r2.expire());
+    EXPECT_EQ(0x1ad92871, r2.minimum_ttl());
+}
