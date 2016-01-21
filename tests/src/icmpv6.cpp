@@ -20,6 +20,7 @@ public:
     static const uint8_t packet_with_extensions[];
     static const uint8_t packet_with_extensions_and_length[];
     static const uint8_t mld2_icmpv6_layer[];
+    static const uint8_t mlqm_icmpv6_layer[];
 
     void test_equals(const ICMPv6& icmp1, const ICMPv6& icmp2);
 };
@@ -71,6 +72,16 @@ const uint8_t ICMPv6Test::mld2_icmpv6_layer[] = {
     0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 0, 0, 9, 222, 173, 190, 239, 190, 173, 254, 237
+};
+
+// Multicast Listener Query Message
+const uint8_t ICMPv6Test::mlqm_icmpv6_layer[] = { 
+    130, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+    8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 2, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 0, 0, 9
 };
 
 TEST_F(ICMPv6Test, Constructor) {
@@ -161,6 +172,34 @@ TEST_F(ICMPv6Test, ConstructorFromBuffer_MLD2_Layer) {
         PDU::serialization_type(
             mld2_icmpv6_layer, 
             mld2_icmpv6_layer + sizeof(mld2_icmpv6_layer)
+        ),
+        buffer
+    );
+}
+
+TEST_F(ICMPv6Test, ConstructorFromBuffer_MLQM_Layer) {
+    ICMPv6 icmp(mlqm_icmpv6_layer, sizeof(mlqm_icmpv6_layer));
+    ICMPv6::sources_list sources;
+    sources.push_back("::");
+    sources.push_back("ff02::1");
+    sources.push_back("::");
+    sources.push_back("ff02::1");
+    sources.push_back("ff02::1");
+    sources.push_back("ff02::2");
+    sources.push_back("::1");
+    sources.push_back("ff02::1:ff00:9");
+    EXPECT_EQ(sources, icmp.sources());
+    EXPECT_EQ(0, icmp.supress());
+    EXPECT_EQ(0, icmp.qrv());
+    EXPECT_EQ(0, icmp.qqic());
+    EXPECT_EQ(0, icmp.maximum_response_code());
+    EXPECT_EQ(IPv6Address("ff02::1"), icmp.multicast_addr());
+
+    PDU::serialization_type buffer = icmp.serialize();
+    EXPECT_EQ(
+        PDU::serialization_type(
+            mlqm_icmpv6_layer, 
+            mlqm_icmpv6_layer + sizeof(mlqm_icmpv6_layer)
         ),
         buffer
     );
@@ -514,6 +553,59 @@ TEST_F(ICMPv6Test, DNSSearchList) {
     output = icmp.dns_search_list();
     EXPECT_EQ(output.lifetime, data.lifetime);
     EXPECT_EQ(data.domains, output.domains);
+}
+
+TEST_F(ICMPv6Test, MLD2Fields) {
+    ICMPv6 icmp;
+    ICMPv6::multicast_address_records_list records;
+    ICMPv6::multicast_address_record r;
+    r.type = 1;
+    r.aux_data.push_back(0xde);
+    r.aux_data.push_back(0xad);
+    r.aux_data.push_back(0xbe);
+    r.aux_data.push_back(0xef);
+    r.aux_data.push_back(0xbe);
+    r.aux_data.push_back(0xad);
+    r.aux_data.push_back(0xfe);
+    r.aux_data.push_back(0xed);
+    r.sources.push_back("::");
+    r.sources.push_back("ff02::1");
+    r.sources.push_back("::");
+    r.sources.push_back("ff02::1");
+    r.sources.push_back("ff02::1");
+    r.sources.push_back("ff02::2");
+    r.sources.push_back("::1");
+    r.sources.push_back("ff02::1:ff00:9");
+
+    records.push_back(r);
+    icmp.multicast_address_records(records);
+    ICMPv6::multicast_address_records_list stored_records;
+    stored_records = icmp.multicast_address_records();
+    ASSERT_EQ(1, stored_records.size());
+
+    ICMPv6::multicast_address_record r2 = *stored_records.begin();    
+    EXPECT_EQ(r.type, r2.type);
+    EXPECT_EQ(r.sources, r2.sources);
+    EXPECT_EQ(r.aux_data, r2.aux_data);
+}
+
+TEST_F(ICMPv6Test, MLQMFields) {
+    ICMPv6 icmp;
+    ICMPv6::sources_list sources;
+    sources.push_back("::");
+    sources.push_back("ff02::1");
+    icmp.sources(sources);
+    icmp.qrv(3);
+    icmp.maximum_response_code(0x928a);
+    icmp.supress(1);
+    icmp.qqic(0xa8);
+    icmp.multicast_addr("feed::beef");
+    EXPECT_EQ(sources, icmp.sources());
+    EXPECT_EQ(1, icmp.supress());
+    EXPECT_EQ(3, icmp.qrv());
+    EXPECT_EQ(0xa8, icmp.qqic());
+    EXPECT_EQ(0x928a, icmp.maximum_response_code());
+    EXPECT_EQ(IPv6Address("feed::beef"), icmp.multicast_addr());
 }
 
 TEST_F(ICMPv6Test, SpoofedOptions) {

@@ -75,6 +75,16 @@ ICMPv6::ICMPv6(const uint8_t* buffer, uint32_t total_sz)
             stream.skip(multicast_records_.back().size());
         }
     }
+    else if (type() == MGM_QUERY) {
+        stream.read(multicast_address_);
+        stream.read(mlqm_);
+        int sources_count = stream.read_be<uint16_t>();
+        while (sources_count--) {
+            ipaddress_type address;
+            stream.read(address);
+            sources_.push_back(address);
+        }
+    }
     // Retrieve options
     if (has_options()) {
         parse_options(stream);
@@ -145,6 +155,10 @@ void ICMPv6::hop_limit(uint8_t new_hop_limit) {
     header_.u_nd_ra.hop_limit = new_hop_limit;
 }
 
+void ICMPv6::maximum_response_code(uint16_t maximum_response_code) {
+    header_.u_echo.identifier = Endian::host_to_be(maximum_response_code);
+}
+
 void ICMPv6::router_pref(small_uint<2> new_router_pref) {
     header_.u_nd_ra.router_pref = new_router_pref;
 }
@@ -177,12 +191,32 @@ void ICMPv6::multicast_address_records(const multicast_address_records_list& rec
     multicast_records_ = records;
 }
 
+void ICMPv6::sources(const sources_list& new_sources) {
+    sources_ = new_sources;
+}
+
+void ICMPv6::supress(small_uint<1> value) {
+    mlqm_.supress = value;
+}
+
+void ICMPv6::qrv(small_uint<3> value) {
+    mlqm_.qrv = value;
+}
+
+void ICMPv6::qqic(uint8_t value) {
+    mlqm_.qqic = value;
+}
+
 void ICMPv6::target_addr(const ipaddress_type& new_target_addr) {
     target_address_ = new_target_addr;
 }
 
 void ICMPv6::dest_addr(const ipaddress_type& new_dest_addr) {
     dest_address_ = new_dest_addr;
+}
+
+void ICMPv6::multicast_addr(const ipaddress_type& new_multicast_addr) {
+    multicast_address_ = new_multicast_addr;
 }
 
 uint32_t ICMPv6::header_size() const {
@@ -196,6 +230,10 @@ uint32_t ICMPv6::header_size() const {
              iter != multicast_records_.end(); ++iter) {
             extra += iter->size();
         }
+    }
+    else if (type() == MGM_QUERY) {
+        extra += ipaddress_type::address_size + sizeof(mlqm_) + sizeof(uint16_t) +
+                 ipaddress_type::address_size * sources_.size();
     }
     return sizeof(header_) + options_size_ + extra + 
         (has_target_addr() ? ipaddress_type::address_size : 0) +
@@ -275,6 +313,15 @@ void ICMPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* 
             stream.skip(iter->size());
         }
     }
+    else if (type() == MGM_QUERY) {
+        stream.write(multicast_address_);
+        stream.write(mlqm_);
+        stream.write_be<uint16_t>(sources_.size());
+        typedef sources_list::const_iterator iterator;
+        for (iterator iter = sources_.begin(); iter != sources_.end(); ++iter) {
+            stream.write(*iter);
+        } 
+    }
     for (options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
         write_option(*it, stream);
     }
@@ -286,8 +333,7 @@ void ICMPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* 
             uint32_t inner_pdu_size = get_adjusted_inner_pdu_size();
             // If it's lower than 128, we need to padd enough zeroes to make it 128 bytes long
             if (inner_pdu_size < 128) {
-                memset(extensions_ptr + inner_pdu_size, 0, 
-                    128 - inner_pdu_size);
+                memset(extensions_ptr + inner_pdu_size, 0, 128 - inner_pdu_size);
                 inner_pdu_size = 128;
             }
             else {

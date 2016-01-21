@@ -527,7 +527,7 @@ public:
         typedef std::vector<ipaddress_type> sources_type;
         typedef std::vector<uint8_t> aux_data_type;
 
-        multicast_address_record(uint8_t type) : type(type) { }
+        multicast_address_record(uint8_t type = 0) : type(type) { }
 
         multicast_address_record(const uint8_t* buffer, uint32_t total_sz);
         void serialize(uint8_t* buffer, uint32_t total_sz) const;
@@ -543,6 +543,12 @@ public:
      * The type used to store all multicast address records in a packet
      */
     typedef std::list<multicast_address_record> multicast_address_records_list;
+
+    /*
+     * The type used to store all source address (from Multicast 
+     * Listener Query messages) in a packet 
+     */
+    typedef std::list<ipaddress_type> sources_list;
 
     /**
      * \brief Constructs an ICMPv6 object.
@@ -634,11 +640,19 @@ public:
     }
 
     /**
-     *  \brief Getter for the hop_limit field.
-     *  \return The stored hop_limit field value.
+     *  \brief Getter for the hop limit field.
+     *  \return The stored hop limit field value.
      */
     uint8_t hop_limit() const {
         return header_.u_nd_ra.hop_limit;
+    }
+
+    /**
+     * \brief Getter for the maximum response code field.
+     * \return The stored maximum response code field value.
+     */
+    uint16_t maximum_response_code() const {
+        return Endian::be_to_host(header_.u_echo.identifier);
     }
 
     /**
@@ -714,6 +728,17 @@ public:
     }
 
     /**
+     * \brief Getter for the multicast address field.
+     *
+     * Note that this field is only valid for Multicast Listener Query
+     * Message packets
+     * \return The stored multicast address field value.
+     */
+    const ipaddress_type& multicast_addr() const {
+        return multicast_address_;
+    }
+
+    /**
      *  \brief Getter for the ICMPv6 options.
      *  \return The stored options.
      */
@@ -735,6 +760,46 @@ public:
      */
     const multicast_address_records_list& multicast_address_records() const {
         return multicast_records_;
+    }
+
+    /**
+     * \brief Getter for the multicast address records field.
+     *
+     * Note that this field is only valid for Multicast Listener Query Message
+     * packets
+     */
+    const sources_list& sources() const {
+        return sources_;
+    }
+
+    /**
+     * \brief Getter for the Suppress Router-Side Processing field.
+     *
+     * Note that this field is only valid for Multicast Listener Query Message
+     * packets
+     */
+    small_uint<1> supress() const {
+        return mlqm_.supress;
+    }
+
+    /**
+     * \brief Getter for the Querier's Robustnes Variable field.
+     *
+     * Note that this field is only valid for Multicast Listener Query Message
+     * packets
+     */
+    small_uint<3> qrv() const {
+        return mlqm_.qrv;
+    }
+
+    /**
+     * \brief Getter for the Querier's Query Interval Code field.
+     *
+     * Note that this field is only valid for Multicast Listener Query Message
+     * packets
+     */
+    uint8_t qqic() const {
+        return mlqm_.qqic;
     }
 
     // Setters
@@ -794,6 +859,12 @@ public:
     void hop_limit(uint8_t new_hop_limit);
 
     /**
+     *  \brief Setter for the maximum response code field.
+     *  \param new_hop_limit The new maximum response code field value.
+     */
+    void maximum_response_code(uint16_t maximum_response_code);
+
+    /**
      *  \brief Setter for the router_pref field.
      *  \param new_router_pref The new router_pref field value.
      */
@@ -836,6 +907,15 @@ public:
     void dest_addr(const ipaddress_type& new_dest_addr);
 
     /**
+     * \brief Setter for the multicast address field.
+     *
+     * Note that this field is only valid if the type is MGM_QUERY
+     *
+     * \param new_multicast_addr The new multicast address field value.
+     */
+    void multicast_addr(const ipaddress_type& new_multicast_addr);
+
+    /**
      *  \brief Setter for the reachable_time field.
      *  \param new_reachable_time The new reachable_time field value.
      */
@@ -853,6 +933,34 @@ public:
      * This field is only valid if the type of this PDU is MLD2_REPORT
      */
     void multicast_address_records(const multicast_address_records_list& records);
+
+    /**
+     * \brief Setter for the sources field.
+     *
+     * This field is only valid if the type of this PDU is MGM_QUERY
+     */
+    void sources(const sources_list& new_sources);
+
+    /**
+     * \brief Setter for the supress field.
+     *
+     * This field is only valid if the type of this PDU is MGM_QUERY
+     */
+    void supress(small_uint<1> value);
+
+    /**
+     * \brief Setter for the Querier's Robustness Variable field.
+     *
+     * This field is only valid if the type of this PDU is MGM_QUERY
+     */
+    void qrv(small_uint<3> value);
+
+    /**
+     * \brief Setter for the Querier's Query Interval Code field.
+     *
+     * This field is only valid if the type of this PDU is MGM_QUERY
+     */
+    void qqic(uint8_t value);
 
     /**
      * \brief Getter for the PDU's type.
@@ -1421,8 +1529,16 @@ private:
             struct {
                 uint16_t reserved;
                 uint16_t record_count;
-            } mlrm2 ;
+            } mlrm2;
         };
+    } TINS_END_PACK;
+
+    TINS_BEGIN_PACK
+    struct multicast_listener_query_message_fields {
+        uint8_t reserved:4,
+                supress:1,
+                qrv:3;
+        uint8_t qqic;
     } TINS_END_PACK;
     
     void internal_add_option(const option& option);
@@ -1458,14 +1574,18 @@ private:
     }
 
     icmp6_header header_;
-    ipaddress_type target_address_, dest_address_;
+    ipaddress_type target_address_;
+    ipaddress_type dest_address_;
+    ipaddress_type multicast_address_;
     options_type options_;
     uint32_t options_size_;
     uint32_t reach_time_, retrans_timer_;
     multicast_address_records_list multicast_records_;
+    multicast_listener_query_message_fields mlqm_;
+    sources_list sources_;
     ICMPExtensionsStructure extensions_;
 };
-}
 
+} // Tins
 
 #endif // TINS_ICMPV6_H
