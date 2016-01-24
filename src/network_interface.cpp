@@ -40,10 +40,11 @@
     #else
         #include <linux/if_packet.h>
     #endif
+    #include <ifaddrs.h>
     #include <net/if.h>
 #else
     #include <winsock2.h>
-    #include <Iphlpapi.h>
+    #include <iphlpapi.h>
 #endif
 #include "network_interface.h"
 #include "utils.h"
@@ -76,7 +77,7 @@ struct InterfaceInfoCollector {
             const struct sockaddr_dl* addr_ptr = ((struct sockaddr_dl*)addr->ifa_addr);
             
             if (addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id) {
-                info->hw_addr = (const uint8_t*)LLADDR(addr_ptr); // mmmm
+                info->hw_addr = (const uint8_t*)LLADDR(addr_ptr);
                 found_hw = true;
             }
             else if (addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
@@ -253,7 +254,33 @@ NetworkInterface::Info NetworkInterface::info() const {
     Info info;
     InterfaceInfoCollector collector(&info, iface_id_, iface_name.c_str());
     info.is_up = false;
-    Utils::generic_iface_loop(collector);
+
+    #ifdef _WIN32
+
+    ULONG size;
+    ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
+    std::vector<uint8_t> buffer(size);
+    if (::GetAdaptersAddresses(AF_INET, 0, 0, (IP_ADAPTER_ADDRESSES *)&buffer[0], &size) == ERROR_SUCCESS) {
+        PIP_ADAPTER_ADDRESSES iface = (IP_ADAPTER_ADDRESSES *)&buffer[0];
+        while (iface) {
+            collector(iface);
+            iface = iface->Next;
+        }
+    }
+
+    #else // _WIN32
+
+    struct ifaddrs* ifaddrs = 0;
+    struct ifaddrs* if_it = 0;
+    getifaddrs(&ifaddrs);
+    for (if_it = ifaddrs; if_it; if_it = if_it->ifa_next) {
+        collector(if_it);
+    }
+    if (ifaddrs) {
+        freeifaddrs(ifaddrs);
+    }
+
+    #endif // _WIN32
     
      // If we didn't even get the hw address or ip address, this went wrong
     if (!collector.found_hw && !collector.found_ip) {

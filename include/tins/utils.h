@@ -30,38 +30,22 @@
 #ifndef TINS_UTILS_H
 #define TINS_UTILS_H
 
-#ifndef _WIN32
-    #include <ifaddrs.h>
-#else
-    #include <winsock2.h>
-    #include <iphlpapi.h>
-    #undef interface
-    #include "network_interface.h"
-#endif
 #include "macros.h"
-#if defined(BSD) || defined(__FreeBSD_kernel__)
-    #include <sys/file.h>
-    #include <sys/socket.h>
-    #include <sys/sysctl.h>
-
-    #include <net/if.h>
-    #include <net/route.h>
-    #include <netinet/in.h>
-#endif
 #include <string>
 #include <set>
-#include <fstream>
 #include <vector>
 #include <stdint.h>
 #include "ip_address.h"
-#include "ipv6_address.h"
-#include "hw_address.h"
 #include "internals.h"
 
 namespace Tins {
+
 class NetworkInterface;
 class PacketSender;
 class PDU;
+class IPv6Address;
+template <size_t n, typename Storage>
+class HWAddress;
 
 /** 
  * \brief Network utils namespace.
@@ -71,8 +55,9 @@ class PDU;
  * interface listing, etc.
  */
 namespace Utils {
+
 /**
- * Struct that represents an entry in /proc/net/route
+ * Struct that represents an entry the routing table
  */
 struct RouteEntry {
     /**
@@ -266,46 +251,6 @@ TINS_API uint32_t pseudoheader_checksum(IPv6Address source_ip,
                                         uint16_t len,
                                         uint16_t flag);
 
-/** \brief Generic function to iterate through interface and collect
- * data.
- *
- * The parameter is applied to every interface found, allowing
- * the object to collect data from them.
- * \param functor An instance of an class which implements operator(struct ifaddrs*).
- */
-#ifndef _WIN32
-template<class Functor> 
-void generic_iface_loop(Functor& functor) {
-    struct ifaddrs* ifaddrs = 0;
-    struct ifaddrs* if_it = 0;
-    getifaddrs(&ifaddrs);
-    for (if_it = ifaddrs; if_it; if_it = if_it->ifa_next) {
-        if (functor(if_it)) {
-            break;
-        }
-    }
-    if (ifaddrs) {
-        freeifaddrs(ifaddrs);
-    }
-}
-#else // _WIN32
-template<class Functor> 
-void generic_iface_loop(Functor& functor) {
-    ULONG size;
-    ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
-    std::vector<uint8_t> buffer(size);
-    if (::GetAdaptersAddresses(AF_INET, 0, 0, (IP_ADAPTER_ADDRESSES *)&buffer[0], &size) == ERROR_SUCCESS) {
-        PIP_ADAPTER_ADDRESSES iface = (IP_ADAPTER_ADDRESSES *)&buffer[0];
-        while (iface) {
-            if (functor(iface)) {
-                break;
-            }
-            iface = iface->Next;
-        }
-    }
-}
-#endif // _WIN32
-
 template <typename T>
 struct is_pdu {  
     template <typename U>
@@ -338,130 +283,16 @@ dereference_until_pdu(T& value) {
     return dereference_until_pdu(*value);
 }
 
-#if defined(BSD) || defined(__FreeBSD_kernel__)
-inline std::vector<char> query_route_table() {
-    int mib[6];
-    std::vector<char> buf;
-    size_t len;
-
-    mib[0] = CTL_NET;
-    mib[1] = AF_ROUTE;
-    mib[2] = 0;
-    mib[3] = AF_INET;
-    mib[4] = NET_RT_DUMP;
-    mib[5] = 0;	
-    if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0) {
-        throw std::runtime_error("sysctl failed");
-    }
-
-    buf.resize(len);
-    if (sysctl(mib, 6, &buf[0], &len, NULL, 0) < 0) {
-        throw std::runtime_error("sysctl failed");
-    }
-
-    return buf;
-}
-
-template<typename ForwardIterator>
-void parse_header(struct rt_msghdr* rtm, ForwardIterator iter) {
-    char* ptr = (char *)(rtm + 1);
-    sockaddr* sa = 0;
-
-    for (int i = 0; i < RTAX_MAX; i++) {
-        if (rtm->rtm_addrs & (1 << i)) {
-            sa = (struct sockaddr *)ptr;
-            ptr += sa->sa_len;
-            if (sa->sa_family == 0) {
-                sa = 0;
-            }
-        } 
-        *iter++ = sa;
-    }
-}
-#endif
-
 } // Utils
 } // Tins
 
-#if defined(BSD) || defined(__FreeBSD_kernel__)
 template<class ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
-    std::vector<char> buffer = query_route_table();
-    char* next = &buffer[0], *end = &buffer[buffer.size()];
-    rt_msghdr* rtm;
-    std::vector<sockaddr*> sa(RTAX_MAX);
-    char iface_name[IF_NAMESIZE];
-    while (next < end) {
-        rtm = (rt_msghdr*)next;
-        parse_header(rtm, sa.begin());
-        if (sa[RTAX_DST] && sa[RTAX_GATEWAY] && if_indextoname(rtm->rtm_index, iface_name)) {
-            RouteEntry entry;
-            entry.destination = IPv4Address(((struct sockaddr_in *)sa[RTAX_DST])->sin_addr.s_addr);
-            entry.gateway = IPv4Address(((struct sockaddr_in *)sa[RTAX_GATEWAY])->sin_addr.s_addr);
-            if (sa[RTAX_GENMASK]) {
-                entry.mask = IPv4Address(((struct sockaddr_in *)sa[RTAX_GENMASK])->sin_addr.s_addr);
-            }
-            else {
-                entry.mask = IPv4Address(uint32_t());
-            }
-            entry.interface = iface_name;
-            entry.metric = 0;
-            *output++ = entry;
-        }
-        next += rtm->rtm_msglen;
-    }
-}
-#elif defined(_WIN32)
-template<class ForwardIterator>
-void Tins::Utils::route_entries(ForwardIterator output) {
-    MIB_IPFORWARDTABLE* table;
-    ULONG size = 0;
-    GetIpForwardTable(0, &size, 0);
-    std::vector<uint8_t> buffer(size);
-    table = (MIB_IPFORWARDTABLE*)&buffer[0];
-    GetIpForwardTable(table, &size, 0);
-    
-    for (DWORD i = 0; i < table->dwNumEntries; i++) {
-        MIB_IPFORWARDROW* row = &table->table[i];
-        if (row->dwForwardType == MIB_IPROUTE_TYPE_INDIRECT || 
-            row->dwForwardType == MIB_IPROUTE_TYPE_DIRECT) {
-            RouteEntry entry;
-            entry.interface = NetworkInterface::from_index(row->dwForwardIfIndex).name();
-            entry.destination = IPv4Address(row->dwForwardDest);
-            entry.mask = IPv4Address(row->dwForwardMask);
-            entry.gateway = IPv4Address(row->dwForwardNextHop);
-            entry.metric = row->dwForwardMetric1;
-            *output++ = entry;
-        }
-    }
-}
-#else
-template<class ForwardIterator>
-void Tins::Utils::route_entries(ForwardIterator output) {
-    using namespace Tins::Internals;
-    std::ifstream input("/proc/net/route");
-    std::string destination, mask, metric, gw;
-    uint32_t dummy;
-    skip_line(input);
-    RouteEntry entry;
-    while (input >> entry.interface >> destination >> gw) {
-        for (unsigned i(0); i < 4; ++i) {
-            input >> metric;
-        }
-        input >> mask;
-        from_hex(destination, dummy);
-        entry.destination = IPv4Address(dummy);
-        from_hex(mask, dummy);
-        entry.mask = IPv4Address(dummy);
-        from_hex(gw, dummy);
-        entry.gateway = IPv4Address(dummy);
-        from_hex(metric, dummy);
-        entry.metric = dummy;
-        skip_line(input);
-        *output = entry;
+    std::vector<RouteEntry> entries = route_entries();
+    for (size_t i = 0; i < entries.size(); ++i) {
+        *output = entries[i];
         ++output;
     }
 }
-#endif
 
 #endif // TINS_UTILS_H
