@@ -32,7 +32,7 @@
 #include <memory>
 #include <cstring>
 #include <fstream>
-#include "utils.h"
+#include "macros.h"
 #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <sys/socket.h>
@@ -58,6 +58,7 @@
     #include <ws2tcpip.h>
     #undef interface
 #endif
+#include "utils.h"
 #include "pdu.h"
 #include "arp.h"
 #include "ethernetII.h"

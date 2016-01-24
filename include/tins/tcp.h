@@ -482,7 +482,7 @@ public:
          * \param args The arguments to be used in the option's 
          * constructor.
          */
-        template<typename... Args>
+        template <typename... Args>
         void add_option(Args&&... args) {
             options_.emplace_back(std::forward<Args>(args)...);
             internal_add_option(options_.back());
@@ -592,7 +592,7 @@ private:
 
     static const uint16_t DEFAULT_WINDOW;
     
-    template<class T> 
+    template <typename T> 
     T generic_search(OptionTypes opt_type) const {
         const option* opt = search_option(opt_type);
         if (!opt) {

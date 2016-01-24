@@ -52,7 +52,7 @@ namespace Tins {
  * serialized, such as performing checksums, iterate and copy options,
  * etc.
  */
-template<typename T>
+template <typename T>
 class PDUCacher : public PDU {
 public:
     /**

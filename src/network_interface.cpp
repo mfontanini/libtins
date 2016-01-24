@@ -31,6 +31,7 @@
 #include <vector>
 #include <cstring>
 #include "macros.h"
+#include "utils.h"
 #ifndef _WIN32
     #include <netinet/in.h>
     #if defined(BSD) || defined(__FreeBSD_kernel__)
@@ -45,9 +46,9 @@
 #else
     #include <winsock2.h>
     #include <iphlpapi.h>
+    #undef interface
 #endif
 #include "network_interface.h"
-#include "utils.h"
 #include "endianness.h"
 #include "exceptions.h"
 

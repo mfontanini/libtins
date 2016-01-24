@@ -288,7 +288,7 @@ public:
          * \param end A forward iterator pointing to the end of the 
          * sequence used to initialize signature.
          */
-        template<typename RAIterator, typename ForwardIterator>
+        template <typename RAIterator, typename ForwardIterator>
         rsa_sign_type(RAIterator hash, ForwardIterator start, ForwardIterator end)
         : signature(start, end) {
             std::copy(hash, hash + sizeof(key_hash), key_hash);
@@ -306,7 +306,7 @@ public:
          * key_hash member.
          * \param sign The signature to be set.
          */
-        template<typename RAIterator>
+        template <typename RAIterator>
         rsa_sign_type(RAIterator hash, const signature_type& sign)
         : signature(sign) {
             std::copy(hash, hash + sizeof(key_hash), key_hash);
@@ -1555,7 +1555,7 @@ private:
     uint32_t get_adjusted_inner_pdu_size() const;
     uint8_t get_option_padding(uint32_t data_size);
 
-    template<template <typename> class Functor>
+    template <template <typename> class Functor>
     const option* safe_search_option(OptionTypes opt, uint32_t size) const {
         const option* option = search_option(opt);
         if (!option || Functor<uint32_t>()(option->data_size(), size)) {
@@ -1564,7 +1564,7 @@ private:
         return option;
     }
 
-    template<typename T>
+    template <typename T>
     T search_and_convert(OptionTypes type) const {
         const option* opt = search_option(type);
         if (!opt) {

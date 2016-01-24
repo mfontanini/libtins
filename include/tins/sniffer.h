@@ -181,7 +181,7 @@ public:
      * \param function The callback handler object which should process packets.
      * \param max_packets The maximum amount of packets to sniff. 0 == infinite.
      */
-    template<class Functor>
+    template <typename Functor>
     void sniff_loop(Functor function, uint32_t max_packets = 0);
 
     /**
@@ -378,7 +378,7 @@ public:
     FileSniffer(const std::string& file_name, const std::string& filter = "");
 };
 
-template<class T>
+template <typename T>
 class HandlerProxy {
 public:
     typedef T* ptr_type;
@@ -395,7 +395,7 @@ private:
     fun_type fun_;
 };
 
-template<class T>
+template <typename T>
 HandlerProxy<T> make_sniffer_handler(T* ptr, 
                                      typename HandlerProxy<T>::fun_type function) {
     return HandlerProxy<T>(ptr, function);
@@ -599,7 +599,7 @@ protected:
     bool immediate_mode_;
 };
 
-template<class Functor>
+template <typename Functor>
 void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
     for(iterator it = begin(); it != end(); ++it) {
         try {

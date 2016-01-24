@@ -30,11 +30,11 @@
 #ifndef TINS_PACKET_WRITER_H
 #define TINS_PACKET_WRITER_H
 
+#include "utils.h"
 #include <string>
 #include <iterator>
 #include <pcap.h>
 #include "data_link_type.h"
-#include "utils.h"
 #include "macros.h"
 #include "cxxstd.h"
 

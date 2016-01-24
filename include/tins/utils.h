@@ -38,6 +38,9 @@
 #include "ip_address.h"
 #include "internals.h"
 
+// Fix for Windows interface define on combaseapi.h
+#undef interface
+
 namespace Tins {
 
 class NetworkInterface;
@@ -163,7 +166,7 @@ TINS_API bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr);
  * 
  * \brief output ForwardIterator in which entries will be stored.
  */
-template<class ForwardIterator>
+template<typename ForwardIterator>
 void route_entries(ForwardIterator output);
 
 /**
@@ -286,7 +289,7 @@ dereference_until_pdu(T& value) {
 } // Utils
 } // Tins
 
-template<class ForwardIterator>
+template<typename ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
     std::vector<RouteEntry> entries = route_entries();
     for (size_t i = 0; i < entries.size(); ++i) {

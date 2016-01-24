@@ -48,11 +48,11 @@ namespace Tins {
 /**
  * \cond
  */
-template<typename OptionType, class PDUType>
+template <typename OptionType, typename PDUType>
 class PDUOption;
 
 namespace Internals {
-    template<typename T, typename X, typename PDUType>
+    template <typename T, typename X, typename PDUType>
     T convert_to_integral(const PDUOption<X, PDUType> & opt) {
         if (opt.data_size() != sizeof(T)) {
             throw malformed_option();
@@ -67,17 +67,17 @@ namespace Internals {
         return data;
     }
     
-    template<typename T, typename = void>
+    template <typename T, typename = void>
     struct converter {
-        template<typename X, typename PDUType>
+        template <typename X, typename PDUType>
         static T convert(const PDUOption<X, PDUType>& opt) {
             return T::from_option(opt);
         }
     };
     
-    template<>
+    template <>
     struct converter<uint8_t> {
-        template<typename X, typename PDUType>
+        template <typename X, typename PDUType>
         static uint8_t convert(const PDUOption<X, PDUType>& opt) {
             if (opt.data_size() != 1) {
                 throw malformed_option();
@@ -316,7 +316,7 @@ namespace Internals {
  * The OptionType template parameter indicates the type that will be
  * used to store this option's identifier.
  */
-template<typename OptionType, class PDUType>
+template <typename OptionType, typename PDUType>
 class PDUOption {
 private:
     static const int small_buffer_size = 8;

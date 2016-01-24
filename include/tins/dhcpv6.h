@@ -887,7 +887,7 @@ private:
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);
     
-    template<template <typename> class Functor>
+    template <template <typename> class Functor>
     const option* safe_search_option(OptionTypes opt, uint32_t size) const {
         const option* option = search_option(opt);
         if (!option || Functor<uint32_t>()(option->data_size(), size)) {

@@ -503,7 +503,7 @@ private:
   
     void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
 
-    template<class T> 
+    template <typename T> 
     T search_and_convert(OptionTypes opt) const {
         const option* option = search_option(opt);
         if (!option) {
