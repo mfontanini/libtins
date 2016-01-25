@@ -454,9 +454,12 @@ void SnifferConfiguration::configure_sniffer_post_activation(Sniffer& sniffer) c
             throw std::runtime_error("Could not set the filter! ");
         }
     }
+    // TODO: see how to actually do this on winpcap
+    #ifndef _WIN32
     if (!sniffer.set_direction(_direction)) {
         throw std::runtime_error("Could not set the direction! ");
     }
+    #endif // _WIN32
 }
 
 void SnifferConfiguration::set_snap_len(unsigned snap_len)
