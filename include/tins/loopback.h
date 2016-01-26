@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -43,58 +43,58 @@ public:
 
     /**
      * \brief Default constructs a Loopback PDU.
-     * 
+     *
      * The family identifier is left as zero.
      */
     Loopback();
-    
+
     /**
-     * \brief Construct a Loopback object from a buffer and adds 
-     * all identifiable PDUs found in the buffer as children of 
-     * this one. 
-     * 
+     * \brief Construct a Loopback object from a buffer and adds
+     * all identifiable PDUs found in the buffer as children of
+     * this one.
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
-     * If there is not enough size for a Loopback header, a 
+     *
+     * If there is not enough size for a Loopback header, a
      * malformed_packet exception is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
     Loopback(const uint8_t *buffer, uint32_t total_sz);
-    
+
     /**
      * \brief Getter for the family identifier.
      * \return The stored family identifier.
      */
     uint32_t family() const { return _family; }
-    
+
     /**
      * \brief Setter for the family identifier.
      * \param family_id The family identifier to be set.
      */
     void family(uint32_t family_id);
-    
+
     /**
      * \sa PDU::header_size
      */
     uint32_t header_size() const;
-    
+
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
     PDUType pdu_type() const { return pdu_flag; }
-    
-    /** 
-     * \brief Check wether ptr points to a valid response for this PDU.
+
+    /**
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * \sa PDU::matches_response
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
     bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
-    
+
     /**
      * \sa PDU::clone
      */

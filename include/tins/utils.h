@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -62,12 +62,12 @@ namespace Tins {
     class NetworkInterface;
     class PacketSender;
     class PDU;
-    
-    /** 
+
+    /**
      * \brief Network utils namespace.
      *
      * This namespace provides utils to convert between integer IP addresses
-     * and dotted notation strings, "net to host" integer conversions, 
+     * and dotted notation strings, "net to host" integer conversions,
      * interface listing, etc.
      */
     namespace Utils {
@@ -79,17 +79,17 @@ namespace Tins {
              * This interface's name.
              */
             std::string interface;
-            
+
             /**
              * This route entry's destination.
              */
             IPv4Address destination;
-            
+
             /**
              * This route entry's gateway.
              */
             IPv4Address gateway;
-            
+
             /**
              * This route entry's subnet mask.
              */
@@ -100,8 +100,8 @@ namespace Tins {
              */
             int metric;
         };
-        
-        /** 
+
+        /**
          * \brief Resolves a domain name and returns its corresponding ip address.
          *
          * If an ip address is given, its integer representation is returned.
@@ -110,8 +110,8 @@ namespace Tins {
          * \param to_resolve The domain name/ip address to resolve.
          */
         IPv4Address resolve_domain(const std::string &to_resolve);
-        
-        /** 
+
+        /**
          * \brief Resolves a domain name and returns its corresponding ip address.
          *
          * If an ip address is given, its integer representation is returned.
@@ -120,30 +120,30 @@ namespace Tins {
          * \param to_resolve The domain name/ip address to resolve.
          */
         IPv6Address resolve_domain6(const std::string &to_resolve);
-        
-        /** 
+
+        /**
          * \brief Resolves the hardware address for a given ip.
          *
          * If the address can't be resolved, a std::runtime_error
          * exception is thrown.
-         * 
+         *
          * \param iface The interface in which the packet will be sent.
          * \param ip The ip to resolve, in integer format.
          * \param sender The sender to use to send and receive the ARP requests.
          * \return HWAddress<6> containing the resolved hardware address.
          */
-        HWAddress<6> resolve_hwaddr(const NetworkInterface &iface, 
+        HWAddress<6> resolve_hwaddr(const NetworkInterface &iface,
           IPv4Address ip, PacketSender &sender);
-        
-        /** 
+
+        /**
          * \brief Resolves the hardware address for a given ip.
          *
          * If the address can't be resolved, a std::runtime_error
          * exception is thrown.
-         * 
+         *
          * This method sends and receives the packet through
          * PacketSender::default_interface.
-         * 
+         *
          * \param ip The ip to resolve, in integer format.
          * \param sender The sender to use to send and receive the ARP requests.
          * \return HWAddress<6> containing the resolved hardware address.
@@ -157,24 +157,24 @@ namespace Tins {
          * interface for Utils::interface_ip, Utils::interface_hwaddr, etc.
          */
         std::set<std::string> network_interfaces();
-        
+
         /**
-         * \brief Finds the gateway's IP address for the given IP 
+         * \brief Finds the gateway's IP address for the given IP
          * address.
-         * 
+         *
          * \param ip The IP address for which the default gateway will
          * be searched.
          * \param gw_addr This parameter will contain the gateway's IP
          * address in case it is found.
-         * 
-         * \return bool indicating wether the lookup was successfull.
+         *
+         * \return bool indicating whether the lookup was successfull.
          */
         bool gateway_from_ip(IPv4Address ip, IPv4Address &gw_addr);
-        
-        
+
+
         /**
          * \brief Retrieves entries in the routing table.
-         * 
+         *
          * \brief output ForwardIterator in which entries will be stored.
          */
         template<class ForwardIterator>
@@ -182,7 +182,7 @@ namespace Tins {
 
         /**
          * \brief Retrieves entries in the routing table.
-         * 
+         *
          * \return a vector which contains all of the route entries.
          */
         std::vector<RouteEntry> route_entries();
@@ -200,14 +200,14 @@ namespace Tins {
          * \return The channel's mhz representation.
          */
         uint16_t channel_to_mhz(uint16_t channel);
-        
+
         /**
          * \brief Converts mhz units to the appropriate channel number.
          * \param mhz The mhz units to be converted.
          * \return The channel number.
          */
         uint16_t mhz_to_channel(uint16_t mhz);
-        
+
         /**
          * \brief Converts a PDUType to a string.
          * \param pduType The PDUType to be converted.
@@ -235,7 +235,7 @@ namespace Tins {
          * \return The pseudo header checksum.
          */
         uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint32_t len, uint32_t flag);
-        
+
         /** \brief Performs the pseudo header checksum used in TCP and UDP PDUs.
          *
          * \param source_ip The source ip address.
@@ -254,7 +254,7 @@ namespace Tins {
          * \param functor An instance of an class which implements operator(struct ifaddrs*).
          */
         #ifndef _WIN32
-        template<class Functor> 
+        template<class Functor>
         void generic_iface_loop(Functor &functor) {
             struct ifaddrs *ifaddrs = 0;
             struct ifaddrs *if_it = 0;
@@ -267,7 +267,7 @@ namespace Tins {
                 freeifaddrs(ifaddrs);
         }
         #else // _WIN32
-        template<class Functor> 
+        template<class Functor>
         void generic_iface_loop(Functor &functor) {
             ULONG size;
             ::GetAdaptersAddresses(AF_INET, 0, 0, 0, &size);
@@ -282,15 +282,15 @@ namespace Tins {
             }
         }
         #endif // _WIN32
-        
+
         template <typename T>
-        struct is_pdu {  
+        struct is_pdu {
             template <typename U>
             static char test(typename U::PDUType*);
-             
+
             template <typename U>
             static long test(...);
-         
+
             static const bool value = sizeof(test<T>(0)) == 1;
         };
 
@@ -300,17 +300,17 @@ namespace Tins {
         inline PDU& dereference_until_pdu(PDU &pdu) {
             return pdu;
         }
-        
+
         /**
          * \brief Dereferences the parameter until a PDU is found.
-         * 
+         *
          * This function dereferences the parameter until a PDU object
-         * is found. When it's found, it is returned. 
-         * 
+         * is found. When it's found, it is returned.
+         *
          * \param value The parameter to be dereferenced.
          */
-        template<typename T> 
-        inline typename Internals::enable_if<!is_pdu<T>::value, PDU&>::type 
+        template<typename T>
+        inline typename Internals::enable_if<!is_pdu<T>::value, PDU&>::type
         dereference_until_pdu(T &value) {
             return dereference_until_pdu(*value);
         }
@@ -325,7 +325,7 @@ namespace Tins {
             mib[2] = 0;
             mib[3] = AF_INET;
             mib[4] = NET_RT_DUMP;
-            mib[5] = 0;	
+            mib[5] = 0;
             if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0)
                 throw std::runtime_error("sysctl failed");
 
@@ -349,7 +349,7 @@ namespace Tins {
                     ptr += sa->sa_len;
                     if (sa->sa_family == 0)
                         sa = 0;
-                } 
+                }
                 *iter++ = sa;
             }
         }
@@ -391,10 +391,10 @@ void Tins::Utils::route_entries(ForwardIterator output) {
     std::vector<uint8_t> buffer(size);
     table = (MIB_IPFORWARDTABLE*)&buffer[0];
     GetIpForwardTable(table, &size, 0);
-    
+
     for (DWORD i = 0; i < table->dwNumEntries; i++) {
         MIB_IPFORWARDROW *row = &table->table[i];
-        if(row->dwForwardType == MIB_IPROUTE_TYPE_INDIRECT || 
+        if(row->dwForwardType == MIB_IPROUTE_TYPE_INDIRECT ||
                 row->dwForwardType == MIB_IPROUTE_TYPE_DIRECT) {
             RouteEntry entry;
             entry.interface = NetworkInterface::from_index(row->dwForwardIfIndex).name();

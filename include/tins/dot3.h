@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -39,7 +39,7 @@
 
 namespace Tins {
 
-    /** 
+    /**
      * \class Dot3
      * \brief Class representing an IEEE 802.3 PDU.
      */
@@ -48,8 +48,8 @@ namespace Tins {
         /**
          * \brief The address type.
          */
-        typedef HWAddress<6> address_type; 
-        
+        typedef HWAddress<6> address_type;
+
         /**
          * \brief This PDU's flag.
          */
@@ -70,16 +70,16 @@ namespace Tins {
          * \param src_hw_addr The source hardware address.
          * \param child The PDU which will be set as the inner PDU.
          */
-        Dot3(const address_type &dst_hw_addr = address_type(), 
+        Dot3(const address_type &dst_hw_addr = address_type(),
             const address_type &src_hw_addr = address_type());
 
         /**
          * \brief Constructs a Dot3 object from a buffer and adds a
          * LLC object with the remaining data as the inner PDU.
-         * 
-         * If there is not enough size for a Dot3 header, a 
+         *
+         * If there is not enough size for a Dot3 header, a
          * malformed_packet exception is thrown.
-         * 
+         *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -137,7 +137,7 @@ namespace Tins {
          * \sa PDU::header_size()
          */
         uint32_t header_size() const;
-        
+
         #if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
         /**
          * \sa PDU::send()
@@ -145,8 +145,8 @@ namespace Tins {
         void send(PacketSender &sender, const NetworkInterface &iface);
         #endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
-        /** 
-         * \brief Check wether ptr points to a valid response for this PDU.
+        /**
+         * \brief Check whether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
@@ -155,7 +155,7 @@ namespace Tins {
         bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
 
         #ifndef _WIN32
-        /** 
+        /**
          * \sa PDU::recv_response
          */
         PDU *recv_response(PacketSender &sender, const NetworkInterface &iface);

@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -49,7 +49,7 @@
 
 namespace Tins {
 
-    /** 
+    /**
      * \class ICMP
      * \brief Class that represents an ICMP PDU.
      *
@@ -62,7 +62,7 @@ namespace Tins {
          * \brief This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::ICMP;
-    
+
         /**
          * The type used to store addresses.
          */
@@ -96,17 +96,17 @@ namespace Tins {
 
         /**
          * \brief Constructs an ICMP object from a buffer.
-         * 
-         * If there is not enough size for an ICMP header, a 
+         *
+         * If there is not enough size for an ICMP header, a
          * malformed_packet exception is thrown.
-         * 
+         *
          * Any extra data in the buffer will be stored in a RawPDU.
-         * 
+         *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
         ICMP(const uint8_t *buffer, uint32_t total_sz);
-        
+
         /**
          * \brief Sets the code field.
          *
@@ -147,7 +147,7 @@ namespace Tins {
          * \param new_mtu uint16_t with the new sequence.
          */
         void mtu(uint16_t new_mtu);
-        
+
         /**
          * \brief Setter for the pointer field.
          *
@@ -232,7 +232,7 @@ namespace Tins {
         /**
          * \brief Sets parameter problem flag for this PDU.
          *
-         * \param set_pointer Indicates wether a pointer to the bad octet
+         * \param set_pointer Indicates whether a pointer to the bad octet
          * is provided.
          * \param bad_octet Identifies the octet in which the error was
          * detected. If set_pointer == false, it is ignored.
@@ -293,8 +293,8 @@ namespace Tins {
          *
          * \return Returns the gateway field value.
          */
-        address_type gateway() const { 
-            return address_type(Endian::be_to_host(_icmp.un.gateway)); 
+        address_type gateway() const {
+            return address_type(Endian::be_to_host(_icmp.un.gateway));
         }
 
          /**
@@ -303,7 +303,7 @@ namespace Tins {
           * \return Returns the pointer field value.
           */
         uint8_t pointer() const { return this->_icmp.un.pointer; }
-        
+
         /**
           * \brief Getter for the mtu field.
           *
@@ -337,8 +337,8 @@ namespace Tins {
           *
           * \return Returns the address mask value.
           */
-        address_type address_mask() const { 
-            return address_type(Endian::be_to_host(_orig_timestamp_or_address_mask)); 
+        address_type address_mask() const {
+            return address_type(Endian::be_to_host(_orig_timestamp_or_address_mask));
         }
 
         /**
@@ -350,7 +350,7 @@ namespace Tins {
         uint32_t header_size() const;
 
         /**
-         * \brief Check wether ptr points to a valid response for this PDU.
+         * \brief Check whether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
@@ -364,7 +364,7 @@ namespace Tins {
          * \sa PDU::pdu_type
          */
         PDUType pdu_type() const { return PDU::ICMP; }
-        
+
         /**
          * \sa PDU::clone
          */
@@ -392,7 +392,7 @@ namespace Tins {
         } TINS_END_PACK;
 
         void checksum(uint16_t new_check);
-        
+
         /** \brief Serialices this ICMP PDU.
          * \param buffer The buffer in which the PDU will be serialized.
          * \param total_sz The size available in the buffer.

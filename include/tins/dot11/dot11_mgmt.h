@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -47,7 +47,7 @@ public:
      * The supported rates container type.
      */
     typedef std::vector<float> rates_type;
-    
+
     /**
      * The supported channels container type.
      */
@@ -123,7 +123,7 @@ public:
         UNMEASURED          = 0x10,
         RESERVED            = 0xE0
     };
-    
+
     /**
      * Represents the IEEE 802.11 frames' capability information.
      */
@@ -391,127 +391,127 @@ public:
         void immediate_block_ack(bool new_value) { _immediate_block_ack = new_value; }
 
     } TINS_END_PACK;
-    
+
     /**
      * The type used to store the FS parameters set option data.
      */
     struct fh_params_set {
         uint16_t dwell_time;
         uint8_t hop_set, hop_pattern, hop_index;
-        
+
         fh_params_set() {}
-        
-        fh_params_set(uint16_t dwell_time, uint8_t hop_set, 
-          uint8_t hop_pattern, uint8_t hop_index) 
-        : dwell_time(dwell_time), hop_set(hop_set), 
+
+        fh_params_set(uint16_t dwell_time, uint8_t hop_set,
+          uint8_t hop_pattern, uint8_t hop_index)
+        : dwell_time(dwell_time), hop_set(hop_set),
           hop_pattern(hop_pattern), hop_index(hop_index) {}
 
         static fh_params_set from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the CF parameters set option data.
      */
     struct cf_params_set {
         uint8_t cfp_count, cfp_period;
         uint16_t cfp_max_duration, cfp_dur_remaining;
-        
+
         cf_params_set() {}
-        
+
         cf_params_set(uint8_t cfp_count, uint8_t cfp_period,
-          uint16_t cfp_max_duration, uint16_t cfp_dur_remaining) 
-        : cfp_count(cfp_count), cfp_period(cfp_period), 
-          cfp_max_duration(cfp_max_duration), 
+          uint16_t cfp_max_duration, uint16_t cfp_dur_remaining)
+        : cfp_count(cfp_count), cfp_period(cfp_period),
+          cfp_max_duration(cfp_max_duration),
           cfp_dur_remaining(cfp_dur_remaining) {}
 
         static cf_params_set from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the IBSS DFS parameters option data.
      */
     struct ibss_dfs_params {
         static const size_t minimum_size = address_type::address_size + sizeof(uint8_t) + 2 * sizeof(uint8_t);
-        
+
         address_type dfs_owner;
-        uint8_t recovery_interval; 
+        uint8_t recovery_interval;
         channel_map_type channel_map;
-       
+
         ibss_dfs_params() {}
-       
-        ibss_dfs_params(const address_type &addr, 
+
+        ibss_dfs_params(const address_type &addr,
           uint8_t recovery_interval, const channel_map_type &channel_map)
         : dfs_owner(addr), recovery_interval(recovery_interval),
           channel_map(channel_map) {}
 
         static ibss_dfs_params from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the Country parameters option data.
      */
     struct country_params {
         // String identifier: 3 bytes
         static const size_t minimum_size = 3 + sizeof(uint8_t) * 3;
-        
+
         std::string country;
         byte_array first_channel, number_channels, max_transmit_power;
-        
+
         country_params() {}
-        
+
         country_params(const std::string &country, const byte_array &first,
-          const byte_array &number, const byte_array &max) 
+          const byte_array &number, const byte_array &max)
         : country(country), first_channel(first), number_channels(number),
           max_transmit_power(max) {}
 
         static country_params from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the FH pattern option data.
      */
     struct fh_pattern_type {
         static const size_t minimum_size = sizeof(uint8_t) * 4;
-        
+
         uint8_t flag, number_of_sets, modulus, offset;
         byte_array random_table;
-        
+
         fh_pattern_type() {}
-        
+
         fh_pattern_type(uint8_t flag, uint8_t sets, uint8_t modulus,
-          uint8_t offset, const byte_array& table) 
-        : flag(flag), number_of_sets(sets), modulus(modulus), 
+          uint8_t offset, const byte_array& table)
+        : flag(flag), number_of_sets(sets), modulus(modulus),
           offset(offset), random_table(table) {}
 
         static fh_pattern_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the Channel Switch option data.
      */
     struct channel_switch_type {
         uint8_t switch_mode, new_channel, switch_count;
-        
+
         channel_switch_type() {}
-        
+
         channel_switch_type(uint8_t mode, uint8_t channel, uint8_t count)
         : switch_mode(mode), new_channel(channel), switch_count(count) { }
 
         static channel_switch_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the Quiet option data.
      */
     struct quiet_type {
         uint8_t quiet_count, quiet_period;
         uint16_t quiet_duration, quiet_offset;
-        
+
         quiet_type() {}
-        
+
         quiet_type(uint8_t count, uint8_t period, uint16_t duration,
           uint16_t offset)
-        : quiet_count(count), quiet_period(period), 
+        : quiet_count(count), quiet_period(period),
         quiet_duration(duration), quiet_offset(offset) {}
 
         static quiet_type from_option(const option &opt);
@@ -524,28 +524,28 @@ public:
         uint16_t station_count;
         uint16_t available_capacity;
         uint8_t channel_utilization;
-        
+
         bss_load_type() {}
-        
-        bss_load_type(uint16_t count, uint8_t utilization, 
-          uint16_t capacity) 
+
+        bss_load_type(uint16_t count, uint8_t utilization,
+          uint16_t capacity)
         : station_count(count), available_capacity(capacity),
         channel_utilization(utilization) {}
 
         static bss_load_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the TIM option data.
      */
     struct tim_type {
         uint8_t dtim_count, dtim_period, bitmap_control;
         byte_array partial_virtual_bitmap;
-        
+
         tim_type() {}
-        
+
         tim_type(uint8_t count, uint8_t period, uint8_t control,
-          const byte_array &bitmap) 
+          const byte_array &bitmap)
         : dtim_count(count), dtim_period(period), bitmap_control(control),
         partial_virtual_bitmap(bitmap) {}
 
@@ -567,7 +567,7 @@ public:
 
         static vendor_specific_type from_bytes(const uint8_t *buffer, uint32_t sz);
     };
-    
+
     /**
      * The type used to store the QOS capability tagged option data.
      */
@@ -592,11 +592,11 @@ public:
      *
      * \return The stored fragment number.
      */
-    small_uint<4> frag_num() const { 
+    small_uint<4> frag_num() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return _ext_header.frag_seq & 0xf; 
+        return _ext_header.frag_seq & 0xf;
         #else
-        return (_ext_header.frag_seq >> 8) & 0xf; 
+        return (_ext_header.frag_seq >> 8) & 0xf;
         #endif
     }
 
@@ -605,11 +605,11 @@ public:
      *
      * \return The stored sequence number.
      */
-    small_uint<12> seq_num() const { 
+    small_uint<12> seq_num() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return (_ext_header.frag_seq >> 4) & 0xfff; 
+        return (_ext_header.frag_seq >> 4) & 0xfff;
         #else
-        return (Endian::le_to_host<uint16_t>(_ext_header.frag_seq) >> 4) & 0xfff; 
+        return (Endian::le_to_host<uint16_t>(_ext_header.frag_seq) >> 4) & 0xfff;
         #endif
     }
 
@@ -702,8 +702,8 @@ public:
 
     /**
      * \brief Helper method to set the supported channels option.
-     * 
-     * Each element in the provided vector should be a tuple 
+     *
+     * Each element in the provided vector should be a tuple
      * (First channel number, number of channels), as defined in the
      * standard.
      *
@@ -848,26 +848,26 @@ public:
      * \brief text The option to be added.
      */
     void vendor_specific(const vendor_specific_type &data);
-    
+
     // Option searching helpers
-    
+
     /**
-     * \brief Helper method to search for this PDU's rsn information 
+     * \brief Helper method to search for this PDU's rsn information
      * option.
-     * 
-     * An option_not_found exception is thrown if the option has not 
+     *
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return std::string containing the ssid.
      */
     RSNInformation rsn_information() const;
-    
+
     /**
      * \brief Helper method to search for this PDU's SSID.
-     * 
-     * An option_not_found exception is thrown if the option has not 
+     *
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return std::string containing the SSID.
      */
     std::string ssid() const;
@@ -875,9 +875,9 @@ public:
     /**
      * \brief Helper method to get the supported rates.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return rates_type containing the supported rates.
      */
     rates_type supported_rates() const;
@@ -885,9 +885,9 @@ public:
     /**
      * \brief Helper method to get the extended supported rates.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return rates_type containing the extended supported rates.
      */
     rates_type extended_supported_rates() const;
@@ -895,9 +895,9 @@ public:
     /**
      * \brief Helper method to get the QOS capability.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return uint8_t containing the QOS capability.
      */
     qos_capability_type qos_capability() const;
@@ -905,53 +905,53 @@ public:
     /**
      * \brief Helper method to get the power capability.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return std::pair<uint8_t, uint8_t> containing the power capability.
      */
     std::pair<uint8_t, uint8_t> power_capability() const;
-    
+
     /**
      * \brief Helper method to get the supported channels.
      *
-     * Each element in the provided vector is a tuple 
+     * Each element in the provided vector is a tuple
      * (First channel number, number of channels), as defined in the
      * standard.
-     * 
-     * An option_not_found exception is thrown if the option has not 
+     *
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return channels_type containing the power capability.
      */
     channels_type supported_channels() const;
-    
+
     /**
      * \brief Helper method to get the request information.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return request_info_type containing the request information.
      */
     request_info_type request_information() const;
-    
+
     /**
      * \brief Helper method to get the fh parameter set.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return fh_params_set containing the fh parameter set.
      */
     fh_params_set fh_parameter_set() const;
-    
+
     /**
      * \brief Helper method to get the DSSS parameter set.
-     * 
-     * An option_not_found exception is thrown if the option has not 
+     *
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return The access point's current channel.
      */
     uint8_t ds_parameter_set() const;
@@ -959,150 +959,150 @@ public:
     /**
      * \brief Helper method to get the CF parameter set.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return The CF parameter set.
      */
     cf_params_set cf_parameter_set() const;
-    
-    
+
+
     /**
      * \brief Helper method to get the ibss parameter set.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return uint16_t containing the ibss parameter set.
      */
     uint16_t ibss_parameter_set() const;
-    
+
     /**
      * \brief Helper method to get the ibss dfs.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return ibss_dfs_params containing the ibss dfs.
      */
     ibss_dfs_params ibss_dfs() const;
-    
+
     /**
      * \brief Helper method to get the country option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return country_params containing the country attributes.
      */
     country_params country() const;
-    
+
     /**
      * \brief Helper method to get the fh parameters option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return std::pair<uint8_t, uint8_t> containing the fh parameters.
      */
     std::pair<uint8_t, uint8_t> fh_parameters() const;
-    
+
     /**
      * \brief Helper method to get the fh patterns option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return fh_pattern_type containing the fh patterns.
      */
     fh_pattern_type fh_pattern_table() const;
-    
+
     /**
      * \brief Helper method to get the power constraint option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return uint8_t containing the power constraint.
      */
     uint8_t power_constraint() const;
-    
+
     /**
      * \brief Helper method to get the channel switch option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return channel_switch_type containing the channel switch.
      */
     channel_switch_type channel_switch() const;
-    
+
     /**
      * \brief Helper method to get the quiet option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return quiet_type containing the quiet option value.
      */
     quiet_type quiet() const;
-    
+
     /**
      * \brief Helper method to get the tpc report option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return quiet_type containing the tpc report option value.
      */
     std::pair<uint8_t, uint8_t> tpc_report() const;
-    
+
     /**
      * \brief Helper method to get the erp information option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return quiet_type containing the erp information option value.
      */
     uint8_t erp_information() const;
-    
+
     /**
      * \brief Helper method to get the bss load option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return quiet_type containing the bss load option value.
      */
     bss_load_type bss_load() const;
-    
+
     /**
      * \brief Helper method to get the tim option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return tim_type containing the tim option value.
      */
     tim_type tim() const;
-    
+
     /**
      * \brief Helper method to get the challenge text option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return std::string containing the challenge text option value.
      */
     std::string challenge_text() const;
-    
+
     /**
      * \brief Helper method to get a Vendor Specific option.
      *
-     * An option_not_found exception is thrown if the option has not 
+     * An option_not_found exception is thrown if the option has not
      * been set.
-     * 
+     *
      * \return vendor_specific_type containing the option value.
      */
     vendor_specific_type vendor_specific() const;
@@ -1125,7 +1125,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -1140,21 +1140,21 @@ protected:
         uint16_t frag_seq;
     } TINS_END_PACK;
 
-    
-    Dot11ManagementFrame(const address_type &dst_hw_addr = address_type(), 
+
+    Dot11ManagementFrame(const address_type &dst_hw_addr = address_type(),
                         const address_type &src_hw_addr = address_type());
-    
+
     /**
-     * \brief Constructs a Dot11ManagementFrame object from a buffer 
-     * and adds all identifiable PDUs found in the buffer as children 
+     * \brief Constructs a Dot11ManagementFrame object from a buffer
+     * and adds all identifiable PDUs found in the buffer as children
      * of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -1162,14 +1162,14 @@ protected:
 
     uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
 
-    uint32_t management_frame_size() { 
-        return sizeof(ieee80211_header) + sizeof(_ext_header) + 
-                ((from_ds() && to_ds()) ? address_type::address_size : 0); 
+    uint32_t management_frame_size() {
+        return sizeof(ieee80211_header) + sizeof(_ext_header) +
+                ((from_ds() && to_ds()) ? address_type::address_size : 0);
     }
 private:
     static uint8_t *serialize_rates(const rates_type &rates);
     static rates_type deserialize_rates(const option *option);
-    
+
     template<typename T>
     T search_and_convert(OptionTypes opt_type) const {
         const option *opt = search_option(opt_type);

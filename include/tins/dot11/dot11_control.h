@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -45,11 +45,11 @@ public:
      * \brief This PDU's flag.
      */
     static const PDU::PDUType pdu_flag = PDU::DOT11_CONTROL;
-    
+
     /**
      * \brief Constructor for creating a 802.11 control frame PDU
      *
-     * Constructs a 802.11 Control PDU taking the destination and 
+     * Constructs a 802.11 Control PDU taking the destination and
      * source hardware addresses.
      *
      * \param dst_addr The destination hardware address.
@@ -58,15 +58,15 @@ public:
 
     /**
      * \brief Constructs a Dot11Control object from a buffer and
-     * adds all identifiable PDUs found in the buffer as children 
+     * adds all identifiable PDUs found in the buffer as children
      * of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -79,7 +79,7 @@ public:
     PDUType pdu_type() const { return PDU::DOT11_CONTROL; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -108,26 +108,26 @@ protected:
     /**
      * \brief Constructor for creating a 802.11 control frame TA PDU
      *
-     * Constructs a 802.11 PDU taking the destination and source 
+     * Constructs a 802.11 PDU taking the destination and source
      * hardware addresses.
      *
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11ControlTA(const address_type &dst_addr = address_type(), 
+    Dot11ControlTA(const address_type &dst_addr = address_type(),
                 const address_type &target_addr = address_type());
 
     /**
      * \brief Constructs a Dot11ControlTA object from a buffer and
-     * adds all identifiable PDUs found in the buffer as children 
+     * adds all identifiable PDUs found in the buffer as children
      * of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -144,8 +144,8 @@ protected:
     /**
      * \brief Getter for the control ta additional fields size.
      */
-    uint32_t controlta_size() const { 
-        return static_cast<uint32_t>(_taddr.size() + sizeof(ieee80211_header)); 
+    uint32_t controlta_size() const {
+        return static_cast<uint32_t>(_taddr.size() + sizeof(ieee80211_header));
     }
 
     uint32_t write_ext_header(uint8_t *buffer, uint32_t total_sz);
@@ -173,19 +173,19 @@ public:
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11RTS(const address_type &dst_addr = address_type(), 
+    Dot11RTS(const address_type &dst_addr = address_type(),
             const address_type &target_addr = address_type());
-                
+
     /**
-     * \brief Constructs a Dot11RTS object from a buffer and adds all 
+     * \brief Constructs a Dot11RTS object from a buffer and adds all
      * identifiable PDUs found in the buffer as children of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -207,7 +207,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -226,26 +226,26 @@ public:
     /**
      * \brief Constructor for creating a 802.11 PS-Poll frame PDU
      *
-     * Constructs a 802.11 PDU taking the destination and source 
+     * Constructs a 802.11 PDU taking the destination and source
      * hardware addresses.
      *
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11PSPoll(const address_type &dst_addr = address_type(), 
+    Dot11PSPoll(const address_type &dst_addr = address_type(),
                 const address_type &target_addr = address_type());
 
     /**
      * \brief Constructs a Dot11PSPoll object from a buffer and
-     * adds all identifiable PDUs found in the buffer as children of 
+     * adds all identifiable PDUs found in the buffer as children of
      * this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -267,7 +267,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -286,26 +286,26 @@ public:
     /**
      * \brief Constructor for creating a 802.11 CF-End frame PDU
      *
-     * Constructs a 802.11 PDU taking the destination and source 
+     * Constructs a 802.11 PDU taking the destination and source
      * hardware addresses.
      *
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11CFEnd(const address_type &dst_addr = address_type(), 
+    Dot11CFEnd(const address_type &dst_addr = address_type(),
             const address_type &target_addr = address_type());
-                
+
     /**
-     * \brief Constructs a Dot11CFEnd object from a buffer and adds 
-     * all identifiable PDUs found in the buffer as children of this 
+     * \brief Constructs a Dot11CFEnd object from a buffer and adds
+     * all identifiable PDUs found in the buffer as children of this
      * one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -327,7 +327,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -346,26 +346,26 @@ public:
     /**
      * \brief Constructor for creating a 802.11 End-CF-Ack frame PDU
      *
-     * Constructs a 802.11 PDU taking the destination and source 
+     * Constructs a 802.11 PDU taking the destination and source
      * hardware addresses.
-     * 
+     *
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11EndCFAck(const address_type &dst_addr = address_type(), 
+    Dot11EndCFAck(const address_type &dst_addr = address_type(),
                 const address_type &target_addr = address_type());
 
     /**
-     * \brief Constructs a Dot11EndCFAck frame object from a buffer 
-     * and adds all identifiable PDUs found in the buffer as children 
+     * \brief Constructs a Dot11EndCFAck frame object from a buffer
+     * and adds all identifiable PDUs found in the buffer as children
      * of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -387,7 +387,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -406,7 +406,7 @@ public:
     /**
      * \brief Constructor for creating a 802.11 Ack frame PDU
      *
-     * Constructs a 802.11 PDU taking the destination and source 
+     * Constructs a 802.11 PDU taking the destination and source
      * hardware addresses.
      *
      * \param dst_addr The destination hardware address.
@@ -415,15 +415,15 @@ public:
 
     /**
      * \brief Constructs a Dot11Ack frame object from a buffer and
-     * adds all identifiable PDUs found in the buffer as children of 
+     * adds all identifiable PDUs found in the buffer as children of
      * this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -445,7 +445,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -467,26 +467,26 @@ public:
     /**
      * \brief Constructor for creating a 802.11 Block Ack request frame PDU
      *
-     * Constructs a 802.11 PDU taking the destination and source 
+     * Constructs a 802.11 PDU taking the destination and source
      * hardware addresses.
-     * 
+     *
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11BlockAckRequest(const address_type &dst_addr = address_type(), 
+    Dot11BlockAckRequest(const address_type &dst_addr = address_type(),
                         const address_type &target_addr = address_type());
 
     /**
-     * \brief Constructs a Dot11BlockAckRequest object from a buffer 
-     * and adds all identifiable PDUs found in the buffer as children 
+     * \brief Constructs a Dot11BlockAckRequest object from a buffer
+     * and adds all identifiable PDUs found in the buffer as children
      * of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -498,11 +498,11 @@ public:
      * \brief Getter for the bar control field.
      * \return The stored bar control field.
      */
-    small_uint<4> bar_control() const { 
+    small_uint<4> bar_control() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return _bar_control & 0xf; 
+        return _bar_control & 0xf;
         #else
-        return (_bar_control >> 8) & 0xf; 
+        return (_bar_control >> 8) & 0xf;
         #endif
     }
 
@@ -510,26 +510,26 @@ public:
      * \brief Getter for the start sequence field.
      * \return The stored start sequence.
      */
-    small_uint<12> start_sequence() const { 
+    small_uint<12> start_sequence() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return (_start_sequence >> 4) & 0xfff; 
+        return (_start_sequence >> 4) & 0xfff;
         #else
-        return (Endian::le_to_host<uint16_t>(_start_sequence) >> 4) & 0xfff; 
+        return (Endian::le_to_host<uint16_t>(_start_sequence) >> 4) & 0xfff;
         #endif
     }
-    
+
     /**
      * \brief Getter for the fragment number field.
      * \return The stored fragment number field.
      */
-    small_uint<4> fragment_number() const { 
+    small_uint<4> fragment_number() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return _start_sequence & 0xf; 
+        return _start_sequence & 0xf;
         #else
-        return (_start_sequence >> 8) & 0xf; 
+        return (_start_sequence >> 8) & 0xf;
         #endif
     }
-    
+
     /**
      * \brief Returns the 802.11 frame's header length.
      *
@@ -551,7 +551,7 @@ public:
      * \param bar The start sequence field to be set.
      */
     void start_sequence(small_uint<12> seq);
-    
+
     /**
      * \brief Setter for the fragment number field.
      * \param frag The fragment number field to be set.
@@ -574,7 +574,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
@@ -599,7 +599,7 @@ public:
      * \brief This PDU's flag.
      */
     static const PDU::PDUType pdu_flag = PDU::DOT11_BLOCK_ACK;
-    
+
     /**
      * The size of the bitmap field.
      */
@@ -608,26 +608,26 @@ public:
     /**
      * \brief Constructor for creating a 802.11 Block Ack frame PDU
      *
-     * Constructs a 802.11 PDU taking the destination and source 
+     * Constructs a 802.11 PDU taking the destination and source
      * hardware addresses.
-     * 
+     *
      * \param dst_addr The destination hardware address.
      * \param target_addr The source hardware address.
      */
-    Dot11BlockAck(const address_type &dst_addr = address_type(), 
+    Dot11BlockAck(const address_type &dst_addr = address_type(),
                 const address_type &target_addr = address_type());
 
     /**
-     * \brief Constructs a Dot11BlockAck frame object from a buffer 
-     * and adds all identifiable PDUs found in the buffer as children 
+     * \brief Constructs a Dot11BlockAck frame object from a buffer
+     * and adds all identifiable PDUs found in the buffer as children
      * of this one.
-     * 
+     *
      * If the next PDU is not recognized, then a RawPDU is used.
-     * 
+     *
      * If there is not enough size for the header in the buffer
-     * or the input data is malformed, a malformed_packet exception 
+     * or the input data is malformed, a malformed_packet exception
      * is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -639,11 +639,11 @@ public:
      * \brief Getter for the bar control field.
      * \return The stored bar control field.
      */
-    small_uint<4> bar_control() const { 
+    small_uint<4> bar_control() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return _bar_control & 0xf; 
+        return _bar_control & 0xf;
         #else
-        return (_bar_control >> 8) & 0xf; 
+        return (_bar_control >> 8) & 0xf;
         #endif
     }
 
@@ -651,26 +651,26 @@ public:
      * \brief Getter for the start sequence field.
      * \return The stored start sequence.
      */
-    small_uint<12> start_sequence() const { 
+    small_uint<12> start_sequence() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return (_start_sequence >> 4) & 0xfff; 
+        return (_start_sequence >> 4) & 0xfff;
         #else
-        return (Endian::le_to_host<uint16_t>(_start_sequence) >> 4) & 0xfff; 
+        return (Endian::le_to_host<uint16_t>(_start_sequence) >> 4) & 0xfff;
         #endif
     }
-    
+
     /**
      * \brief Getter for the fragment number field.
      * \return The stored fragment number field.
      */
-    small_uint<4> fragment_number() const { 
+    small_uint<4> fragment_number() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return _start_sequence & 0xf; 
+        return _start_sequence & 0xf;
         #else
-        return (_start_sequence >> 8) & 0xf; 
+        return (_start_sequence >> 8) & 0xf;
         #endif
     }
-    
+
     /**
      * \brief Returns the 802.11 frame's header length.
      *
@@ -692,7 +692,7 @@ public:
      * \param bar The start sequence field to be set.
      */
     void start_sequence(small_uint<12> seq);
-    
+
     /**
      * \brief Setter for the fragment number field.
      * \param frag The fragment number field to be set.
@@ -701,9 +701,9 @@ public:
 
     /**
      * \brief Getter for the bitmap field.
-     * 
+     *
      * The returned pointer <b>must not</b> be free'd.
-     * 
+     *
      * \return The bitmap field.
      */
     const uint8_t *bitmap() const { return _bitmap; }
@@ -721,7 +721,7 @@ public:
     PDUType pdu_type() const { return pdu_flag; }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */

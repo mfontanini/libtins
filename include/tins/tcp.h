@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -48,11 +48,11 @@ namespace Tins {
      * \class TCP
      * \brief Represents a TCP PDU.
      *
-     * This class represents a TCP PDU. 
+     * This class represents a TCP PDU.
      *
      * When sending TCP PDUs, the checksum is calculated automatically
      * every time you send the packet.
-     * 
+     *
      * While sniffing, the payload sent in each packet will be wrapped
      * in a RawPDU, which is set as the TCP object's inner_pdu. Therefore,
      * if you are sniffing and want to see the TCP packet's payload,
@@ -78,7 +78,7 @@ namespace Tins {
          * This PDU's flag.
          */
         static const PDU::PDUType pdu_flag = PDU::TCP;
-    
+
         /**
          * \brief TCP flags enum.
          *
@@ -110,7 +110,7 @@ namespace Tins {
             TSOPT   = 8,
             ALTCHK  = 14
         };
-        
+
         /**
          * \brief Alternate checksum enum.
          */
@@ -119,7 +119,7 @@ namespace Tins {
             CHK_8FLETCHER,
             CHK_16FLETCHER
         };
-        
+
         /**
          * The type used to store TCP options.
          */
@@ -129,7 +129,7 @@ namespace Tins {
          * The type used to store the options.
          */
         typedef std::list<option> options_type;
-        
+
         /**
          * The type used to store the sack option.
          */
@@ -140,7 +140,7 @@ namespace Tins {
          *
          * Creates an instance of TCP. Destination and source port can
          * be provided, otherwise both will be 0.
-         * 
+         *
          * \param dport Destination port.
          * \param sport Source port.
          * */
@@ -148,13 +148,13 @@ namespace Tins {
 
         /**
          * \brief Constructs TCP object from a buffer.
-         * 
+         *
          * If there is not enough size for a TCP header, or any of the
-         * TLV options are malformed, a malformed_packet exception is 
+         * TLV options are malformed, a malformed_packet exception is
          * thrown.
-         * 
+         *
          * Any extra data will be stored in a RawPDU.
-         * 
+         *
          * \param buffer The buffer from which this PDU will be constructed.
          * \param total_sz The total size of the buffer.
          */
@@ -218,7 +218,7 @@ namespace Tins {
 
         /**
          * \brief Getter for the option list.
-         * 
+         *
          * \return The options list.
          */
         const options_type &options() const { return _options; }
@@ -226,7 +226,7 @@ namespace Tins {
         /**
          * \brief Gets the value of a flag.
          *
-         * This method gets the value of a specific flag. If you 
+         * This method gets the value of a specific flag. If you
          * want to check for multiple flags at the same time,
          * use TCP::flags.
          *
@@ -241,7 +241,7 @@ namespace Tins {
          *     // The SYN flag is on!
          * }
          * \endcode
-         * 
+         *
          * \sa TCP::flags
          * \param tcp_flag The polled flag.
          * \return The value of the flag.
@@ -249,24 +249,24 @@ namespace Tins {
         small_uint<1> get_flag(Flags tcp_flag) const;
 
         /**
-         * 
+         *
          * \brief Gets the flags' values.
          *
          * All of the set flags will be joined together into
          * a 12 bit value. This way, you can check for multiple
          * flags at the same time:
-         * 
+         *
          * \code
          * TCP tcp = ...;
          * if(tcp.flags() == (TCP::SYN | TCP::ACK)) {
          *     // It's a SYN+ACK!
          * }
          * \endcode
-         * 
+         *
          * \return The value of the flags field.
          */
         small_uint<12> flags() const;
-        
+
         /* Setters */
 
         /**
@@ -340,7 +340,7 @@ namespace Tins {
          * \param value The new window scale.
          */
         void winscale(uint8_t value);
-        
+
         /**
          * \brief Searchs for a window scale option.
          * \param value A pointer in which the option's value will be stored.
@@ -352,20 +352,20 @@ namespace Tins {
          * \brief Add a sack permitted option.
          */
         void sack_permitted();
-        
+
         /**
          * \brief Searchs for a sack permitted option.
          * \return True if the option was found, false otherwise.
          */
         bool has_sack_permitted() const;
-        
+
         /**
          * \brief Add a sack option.
          *
          * \param value The new window scale.
          */
         void sack(const sack_type &edges);
-        
+
         /**
          * \brief Searchs for a sack option.
          * \param value A pointer in which the option's value will be stored.
@@ -395,7 +395,7 @@ namespace Tins {
          * \param value The new alternate checksum scale.
          */
         void altchecksum(AltChecksums value);
-        
+
         /**
          * \brief Searchs for a alternate checksum option.
          * \param value A pointer in which the option's value will be stored.
@@ -410,27 +410,27 @@ namespace Tins {
          * \param value The new value for this flag. Must be 0 or 1.
          */
         void set_flag(Flags tcp_flag, small_uint<1> value);
-        
+
         /**
          * \brief Sets the value of the flag fields.
          *
-         * This method can be used to set several flags at the 
+         * This method can be used to set several flags at the
          * same time.
-         * 
+         *
          * \code
          * // Get a TCP packet from somewhere and set the flags to SYN && ACK
          * TCP tcp = ...;
          * tcp.flags(TCP::SYN | TCP::ACK);
-         * 
-         * // Now also set the PSH flag, without modifying 
+         *
+         * // Now also set the PSH flag, without modifying
          * // the rest of the flags.
          * tcp.flags(tcp.flags() | TCP::PSH);
          * \endcode
-         * 
+         *
          * \param value The new value of the flags.
          */
         void flags(small_uint<12> value);
-        
+
 
         /**
          * \brief Adds a TCP option.
@@ -438,13 +438,13 @@ namespace Tins {
          * \param option The option to be added.
          */
         void add_option(const option &opt);
-        
+
         #if TINS_IS_CXX11
             /**
              * \brief Adds a TCP option.
              *
              * This move-constructs the option.
-             * 
+             *
              * \param option The option to be added.
              */
             void add_option(option &&opt) {
@@ -456,8 +456,8 @@ namespace Tins {
              * \brief Adds a TCP option using the provided arguments.
              *
              * The option is constructed from the provided parameters.
-             * 
-             * \param args The arguments to be used in the option's 
+             *
+             * \param args The arguments to be used in the option's
              * constructor.
              */
             template<typename... Args>
@@ -469,7 +469,7 @@ namespace Tins {
 
         /**
          * \brief Removes a TCP option.
-         * 
+         *
          * If there are multiple options of the given type, only the first one
          * will be removed.
          *
@@ -487,9 +487,9 @@ namespace Tins {
          * \sa PDU::header_size
          */
         uint32_t header_size() const;
-        
+
         /**
-         * \brief Check wether ptr points to a valid response for this PDU.
+         * \brief Check whether ptr points to a valid response for this PDU.
          *
          * \sa PDU::matches_response
          * \param ptr The pointer to the buffer.
@@ -510,7 +510,7 @@ namespace Tins {
          * \return A pointer to the option, or 0 if it was not found.
          */
         const option *search_option(OptionTypes type) const;
-        
+
         /**
          * \sa PDU::clone
          */
@@ -567,22 +567,22 @@ namespace Tins {
         } TINS_END_PACK;
 
         static const uint16_t DEFAULT_WINDOW;
-        
-        template<class T> 
+
+        template<class T>
         T generic_search(OptionTypes opt_type) const {
             const option *opt = search_option(opt_type);
             if(!opt)
                 throw option_not_found();
             return opt->to<T>();
         }
-        
+
         void internal_add_option(const option &option);
         void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
         void checksum(uint16_t new_check);
         void update_options_size();
         options_type::const_iterator search_option_iterator(OptionTypes type) const;
         options_type::iterator search_option_iterator(OptionTypes type);
-        
+
         uint8_t *write_option(const option &opt, uint8_t *buffer);
 
         tcphdr _tcp;

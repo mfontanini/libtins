@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -41,7 +41,7 @@
 
 namespace Tins {
 class PacketSender;
-    
+
 /**
  * \class IPv6
  * Represents an IPv6 PDU.
@@ -52,17 +52,17 @@ public:
      * This PDU's flag.
      */
     static const PDU::PDUType pdu_flag = PDU::IPv6;
-    
+
     /**
      * The type used to store addresses.
      */
     typedef IPv6Address address_type;
-    
+
     /**
      * The type used to represent IPv6 extension headers.
      */
     typedef PDUOption<uint8_t, IPv6> ext_header;
-    
+
     /**
      * The type used to store the extension headers.
      */
@@ -85,23 +85,23 @@ public:
 
     /**
      * \brief Constructs an IPv6 object.
-     * 
+     *
      * \param ip_dst The destination ip address(optional).
      * \param ip_src The source ip address(optional).
-     * \param child pointer to a PDU which will be set as the inner_pdu 
+     * \param child pointer to a PDU which will be set as the inner_pdu
      * for the packet being constructed(optional).
      */
-    IPv6(address_type ip_dst = address_type(), 
-        address_type ip_src = address_type(), 
+    IPv6(address_type ip_dst = address_type(),
+        address_type ip_src = address_type(),
         PDU *child = 0);
 
     /**
-     * \brief Constructs an IPv6 object from a buffer and adds all 
+     * \brief Constructs an IPv6 object from a buffer and adds all
      * identifiable PDUs found in the buffer as children of this one.
-     * 
+     *
      * If there is not enough size for an IPv6 header, a malformed_packet
      * exception is thrown.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
@@ -123,7 +123,7 @@ public:
      */
     uint8_t traffic_class() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return ((_header.traffic_class << 4) & 0xf0) | 
+        return ((_header.traffic_class << 4) & 0xf0) |
                 ((_header.flow_label[0] >> 4) & 0x0f);
         #else
         return _header.traffic_class;
@@ -241,58 +241,58 @@ public:
      * \param new_dst_addr The new dst_addr field value.
      */
     void dst_addr(const address_type &new_dst_addr);
-    
+
     /**
      * \brief Returns the header size.
      *
      * This metod overrides PDU::header_size. \sa PDU::header_size
      */
     uint32_t header_size() const;
-    
-    /** 
-     * \brief Check wether ptr points to a valid response for this PDU.
+
+    /**
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * \sa PDU::matches_response
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
     bool matches_response(const uint8_t *ptr, uint32_t total_sz) const;
-    
+
     /**
      * \sa PDU::clone
      */
     IPv6 *clone() const {
         return new IPv6(*this);
     }
-    
+
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
     PDUType pdu_type() const { return pdu_flag; }
-    
+
     #ifndef BSD
     /**
      * \sa PDU::send()
      */
     void send(PacketSender &sender, const NetworkInterface &);
     #endif
-    
+
     /**
      * Adds an extension header.
-     * 
+     *
      * \param header The extension header to be added.
      */
     void add_ext_header(const ext_header &header);
-    
+
     /**
-     * \brief Searchs for an extension header that matchs the given 
+     * \brief Searchs for an extension header that matchs the given
      * flag.
-     * 
-     * If the header is not found, a null pointer is returned. 
-     * Deleting the returned pointer will result in <b>undefined 
+     *
+     * If the header is not found, a null pointer is returned.
+     * Deleting the returned pointer will result in <b>undefined
      * behaviour</b>.
-     * 
+     *
      * \param id The header identifier to be searched.
      */
     const ext_header *search_header(ExtensionHeader id) const;

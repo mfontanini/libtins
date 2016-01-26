@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -26,7 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
+
 #ifndef TINS_ICMPV6_H
 #define TINS_ICMPV6_H
 
@@ -53,7 +53,7 @@ public:
      * \brief This PDU's flag.
      */
     static const PDU::PDUType pdu_flag = PDU::ICMPv6;
-    
+
     /**
      * The types of ICMPv6 messages
      */
@@ -81,7 +81,7 @@ public:
         MOBILE_PREFIX_SOL = 146,
         MOBILE_PREFIX_ADV = 147
     };
-    
+
     /**
      * The types of ICMPv6 options.
      */
@@ -122,119 +122,119 @@ public:
         CARD_REQUEST = 138,
         CARD_REPLY
     };
-    
+
     /**
      * The type used to store addresses.
      */
     typedef IPv6Address ipaddress_type;
-    
+
     /**
      * The type used to store addresses.
      */
     typedef HWAddress<6> hwaddress_type;
-    
+
     /**
      * The type used to represent ICMPv6 options.
      */
     typedef PDUOption<uint8_t, ICMPv6> option;
-    
+
     /**
      * The type used to store options.
      */
     typedef std::list<option> options_type;
-    
+
     /**
-     * \brief The type used to store the new home agent information 
+     * \brief The type used to store the new home agent information
      * option data.
      */
     typedef std::vector<uint16_t> new_ha_info_type;
-    
+
     /**
      * The type used to store the source/target address list options.
      */
     struct addr_list_type {
         typedef std::vector<ipaddress_type> addresses_type;
-        
+
         uint8_t reserved[6];
         addresses_type addresses;
-        
+
         addr_list_type(const addresses_type &addresses = addresses_type())
-        : addresses(addresses) 
+        : addresses(addresses)
         {
             std::fill(reserved, reserved + sizeof(reserved), 0);
         }
-        
+
         static addr_list_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the nonce option data.
      */
     typedef std::vector<uint8_t> nonce_type;
-    
+
     /**
      * The type used to store the MTU option.
      */
     typedef std::pair<uint16_t, uint32_t> mtu_type;
-    
+
     /**
-     * \brief The type used to store the neighbour advertisement 
+     * \brief The type used to store the neighbour advertisement
      * acknowledgement option data.
      */
     struct naack_type {
         uint8_t code, status;
         uint8_t reserved[4];
-        
+
         naack_type(uint8_t code = 0, uint8_t status = 0)
         : code(code), status(status)
         {
             std::fill(reserved, reserved + 4, 0);
         }
-        
+
         static naack_type from_option(const option &opt);
     };
-    
+
     /**
      * \brief The type used to store the link layer address option data.
      */
     struct lladdr_type {
         typedef std::vector<uint8_t> address_type;
-        
+
         uint8_t option_code;
         address_type address;
-        
+
         /**
          * Constructor taking an option code and an address.
-         * 
+         *
          * \param option_code The option code.
          * \param address The address to be stored.
          */
-        lladdr_type(uint8_t option_code = 0, 
+        lladdr_type(uint8_t option_code = 0,
           const address_type &address = address_type())
-        : option_code(option_code), address(address) 
+        : option_code(option_code), address(address)
         {
-            
+
         }
-        
+
         /**
          * \brief Constructor taking an option code and hwaddress_type.
-         * 
+         *
          * This is a helper constructor, since it'll be common to use
          * hwaddress_type as the link layer address.
-         * 
+         *
          * \param option_code The option code.
          * \param address The address to be stored.
          */
-        lladdr_type(uint8_t option_code, 
+        lladdr_type(uint8_t option_code,
           const hwaddress_type &address)
-        : option_code(option_code), address(address.begin(), address.end()) 
+        : option_code(option_code), address(address.begin(), address.end())
         {
-            
+
         }
-        
+
         static lladdr_type from_option(const option &opt);
     };
-    
+
     /**
      * Type type used to store the prefix information option data.
      */
@@ -245,42 +245,42 @@ public:
                 preferred_lifetime,
                 reserved2;
         ipaddress_type prefix;
-        
+
         prefix_info_type(uint8_t prefix_len=0, small_uint<1> A=0, small_uint<1> L=0,
           uint32_t valid_lifetime=0, uint32_t preferred_lifetime=0,
           const ipaddress_type &prefix = ipaddress_type())
-        : prefix_len(prefix_len), A(A), L(L), 
+        : prefix_len(prefix_len), A(A), L(L),
           valid_lifetime(valid_lifetime), preferred_lifetime(preferred_lifetime),
           prefix(prefix) { }
-          
+
         static prefix_info_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the RSA signature option.
      */
     struct rsa_sign_type {
         typedef std::vector<uint8_t> signature_type;
-        
+
         uint8_t key_hash[16];
         signature_type signature;
-        
+
         /**
          * \brief Constructs a rsa_sign_type object.
-         * 
+         *
          * The first parameter must be a random access iterator
-         * which will be used to initialize the key_hash member. 
+         * which will be used to initialize the key_hash member.
          * It is assumed that std::distance(hash, end_of_hash) >= 16.
-         * 
-         * The second and third arguments indicate the start and end of 
+         *
+         * The second and third arguments indicate the start and end of
          * the sequence which will be used to initialize the signature
          * member.
-         * 
+         *
          * \param hash A random access iterator used to initialize the
          * key_hash member.
-         * \param start A forward iterator pointing to the start of the 
+         * \param start A forward iterator pointing to the start of the
          * sequence which will be used to initialize the signature member.
-         * \param end A forward iterator pointing to the end of the 
+         * \param end A forward iterator pointing to the end of the
          * sequence used to initialize signature.
          */
         template<typename RAIterator, typename ForwardIterator>
@@ -289,15 +289,15 @@ public:
         {
             std::copy(hash, hash + sizeof(key_hash), key_hash);
         }
-        
+
         /**
          * \brief Constructs a rsa_sign_type object.
-         * 
+         *
          * The first parameter must be a random access iterator
-         * which will be used to initialize the key_hash member. 
+         * which will be used to initialize the key_hash member.
          * It is assumed that std::distance(hash, end_of_hash) >= 16.
-         * 
-         * 
+         *
+         *
          * \param hash A random access iterator used to initialize the
          * key_hash member.
          * \param sign The signature to be set.
@@ -308,10 +308,10 @@ public:
         {
             std::copy(hash, hash + sizeof(key_hash), key_hash);
         }
-        
+
         /**
          * \brief Default constructs a rsa_sign_type.
-         * 
+         *
          * The key_hash member will be 0-initialized.
          */
         rsa_sign_type()
@@ -321,14 +321,14 @@ public:
 
         static rsa_sign_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store IP address/preffix option.
      */
     struct ip_prefix_type {
         uint8_t option_code, prefix_len;
         ipaddress_type address;
-        
+
         ip_prefix_type(uint8_t option_code = 0, uint8_t prefix_len = 0,
           const ipaddress_type &address = ipaddress_type())
         : option_code(option_code), prefix_len(prefix_len), address(address)
@@ -336,7 +336,7 @@ public:
 
         static ip_prefix_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the map option.
      */
@@ -345,121 +345,121 @@ public:
         small_uint<1> r;
         uint32_t valid_lifetime;
         ipaddress_type address;
-        
-        map_type(small_uint<4> dist = 0, small_uint<4> pref = 0, 
-          small_uint<1> r = 0, uint32_t valid_lifetime = 0, 
+
+        map_type(small_uint<4> dist = 0, small_uint<4> pref = 0,
+          small_uint<1> r = 0, uint32_t valid_lifetime = 0,
           const ipaddress_type &address = ipaddress_type())
         : dist(dist), pref(pref), r(r), valid_lifetime(valid_lifetime),
           address(address) { }
 
         static map_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the route information option.
      */
     struct route_info_type {
         typedef std::vector<uint8_t> prefix_type;
-        
+
         uint8_t prefix_len;
         small_uint<2> pref;
         uint32_t route_lifetime;
         prefix_type prefix;
-        
-        route_info_type(uint8_t prefix_len = 0, small_uint<2> pref = 0, 
+
+        route_info_type(uint8_t prefix_len = 0, small_uint<2> pref = 0,
           uint32_t route_lifetime = 0, const prefix_type &prefix = prefix_type())
         : prefix_len(prefix_len), pref(pref), route_lifetime(route_lifetime),
           prefix(prefix) { }
 
         static route_info_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the recursive DNS servers option.
      */
     struct recursive_dns_type {
         typedef std::vector<ipaddress_type> servers_type;
-        
+
         uint32_t lifetime;
         servers_type servers;
-        
-        recursive_dns_type(uint32_t lifetime = 0, 
+
+        recursive_dns_type(uint32_t lifetime = 0,
           const servers_type &servers = servers_type())
         : lifetime(lifetime), servers(servers) {}
 
         static recursive_dns_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the handover key request option.
      */
     struct handover_key_req_type {
         typedef std::vector<uint8_t> key_type;
-        
+
         small_uint<4> AT;
         key_type key;
-        
+
         handover_key_req_type(small_uint<4> AT = 0,
           const key_type &key = key_type())
         : AT(AT), key(key) { }
 
         static handover_key_req_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the handover key reply option.
      */
     struct handover_key_reply_type : handover_key_req_type {
         uint16_t lifetime;
-        
+
         handover_key_reply_type(uint16_t lifetime = 0, small_uint<4> AT = 0,
           const key_type &key = key_type())
         : handover_key_req_type(AT, key), lifetime(lifetime) { }
 
         static handover_key_reply_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the handover assist information option.
      */
     struct handover_assist_info_type {
         typedef std::vector<uint8_t> hai_type;
-        
+
         uint8_t option_code;
         hai_type hai;
-        
-        handover_assist_info_type(uint8_t option_code=0, 
+
+        handover_assist_info_type(uint8_t option_code=0,
           const hai_type &hai = hai_type())
         : option_code(option_code), hai(hai) { }
 
         static handover_assist_info_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the mobile node identifier option.
      */
     struct mobile_node_id_type {
         typedef std::vector<uint8_t> mn_type;
-        
+
         uint8_t option_code;
         mn_type mn;
-        
-        mobile_node_id_type(uint8_t option_code=0, 
+
+        mobile_node_id_type(uint8_t option_code=0,
           const mn_type &mn = mn_type())
         : option_code(option_code), mn(mn) { }
 
         static mobile_node_id_type from_option(const option &opt);
     };
-    
+
     /**
      * The type used to store the DNS search list option.
      */
     struct dns_search_list_type {
         typedef std::vector<std::string> domains_type;
-        
+
         uint32_t lifetime;
         domains_type domains;
-        
+
         dns_search_list_type(uint32_t lifetime = 0,
           const domains_type &domains = domains_type())
         : lifetime(lifetime), domains(domains) { }
@@ -517,27 +517,27 @@ public:
 
     /**
      * \brief Constructs an ICMPv6 object.
-     * 
+     *
      * The type of the constructed object will be an echo request, unless
      * you provide another one in the tp parameter.
-     * 
+     *
      * \param tp The message type of this ICMPv6 object.
      */
     ICMPv6(Types tp = ECHO_REQUEST);
-    
+
     /**
      * \brief Constructs an ICMPv6 object from a buffer.
-     * 
+     *
      * If there is not enough size for an ICMPv6 header, a
      * malformed_packet exception is thrown.
-     * 
+     *
      * Any extra data is stored in a RawPDU.
-     * 
+     *
      * \param buffer The buffer from which this PDU will be constructed.
      * \param total_sz The total size of the buffer.
      */
     ICMPv6(const uint8_t *buffer, uint32_t total_sz);
-    
+
     // Getters
 
     /**
@@ -651,7 +651,7 @@ public:
     uint16_t router_lifetime() const {
         return Endian::be_to_host(_header.u_nd_ra.router_lifetime);
     }
-    
+
     /**
      *  \brief Getter for the reachable_time field.
      *  \return The stored reachable_time field value.
@@ -659,7 +659,7 @@ public:
     uint32_t reachable_time() const {
         return Endian::be_to_host(reach_time);
     }
-    
+
     /**
      *  \brief Getter for the retransmit_timer field.
      *  \return The stored retransmit_timer field value.
@@ -667,7 +667,7 @@ public:
     uint32_t retransmit_timer() const {
         return Endian::be_to_host(retrans_timer);
     }
-    
+
     /**
      *  \brief Getter for the target address field.
      *  \return The stored target address field value.
@@ -675,7 +675,7 @@ public:
     const ipaddress_type &target_addr() const {
         return _target_address;
     }
-    
+
     /**
      *  \brief Getter for the destination address field.
      *  \return The stored destination address field value.
@@ -777,13 +777,13 @@ public:
      *  \param new_router_lifetime The new router_lifetime field value.
      */
     void router_lifetime(uint16_t new_router_lifetime);
-    
+
     /**
      *  \brief Setter for the target address field.
      *  \param new_target_addr The new target address field value.
      */
     void target_addr(const ipaddress_type &new_target_addr);
-    
+
     /**
      *  \brief Setter for the destination address field.
      *  \param new_dest_addr The new destination address field value.
@@ -795,7 +795,7 @@ public:
      *  \param new_reachable_time The new reachable_time field value.
      */
     void reachable_time(uint32_t new_reachable_time);
-    
+
     /**
      *  \brief Setter for the retransmit_timer field.
      *  \param new_retrans_timer The new retrans_timer field value.
@@ -811,40 +811,40 @@ public:
 
     /**
      * \brief Checks whether this ICMPv6 object has a target_addr field.
-     * 
+     *
      * This depends on the type field.
      */
     bool has_target_addr() const {
-        return type() == NEIGHBOUR_SOLICIT || 
-                type() == NEIGHBOUR_ADVERT || 
+        return type() == NEIGHBOUR_SOLICIT ||
+                type() == NEIGHBOUR_ADVERT ||
                 type() == REDIRECT;
     }
-    
+
     /**
      * \brief Checks whether this ICMPv6 object has a target_addr field.
-     * 
+     *
      * This depends on the type field.
      */
     bool has_dest_addr() const {
         return type() == REDIRECT;
     }
-    
+
     /**
      * \brief Adds an ICMPv6 option.
-     * 
-     * The option is added after the last option in the option 
+     *
+     * The option is added after the last option in the option
      * fields.
-     * 
+     *
      * \param option The option to be added
      */
     void add_option(const option &option);
-    
+
     #if TINS_IS_CXX11
         /**
          * \brief Adds an ICMPv6 option.
-         * 
+         *
          * The option is move-constructed.
-         * 
+         *
          * \param option The option to be added.
          */
         void add_option(option &&option) {
@@ -855,7 +855,7 @@ public:
 
     /**
      * \brief Removes an ICMPv6 option.
-     * 
+     *
      * If there are multiple options of the given type, only the first one
      * will be removed.
      *
@@ -871,9 +871,9 @@ public:
      * payload and options size. \sa PDU::header_size
      */
     uint32_t header_size() const;
-    
-    /** 
-     * \brief Check wether ptr points to a valid response for this PDU.
+
+    /**
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * \sa PDU::matches_response
      * \param ptr The pointer to the buffer.
@@ -883,11 +883,11 @@ public:
 
     /**
      * \brief Searchs for an option that matchs the given flag.
-     * 
-     * If the header is not found, a null pointer is returned. 
-     * Deleting the returned pointer will result in <b>undefined 
+     *
+     * If the header is not found, a null pointer is returned.
+     * Deleting the returned pointer will result in <b>undefined
      * behaviour</b>.
-     * 
+     *
      * \param type The option identifier to be searched.
      */
     const option *search_option(OptionTypes type) const;
@@ -898,371 +898,371 @@ public:
     ICMPv6 *clone() const {
         return new ICMPv6(*this);
     }
-    
+
     // ****************************************************************
     //                          Option setters
     // ****************************************************************
-    
+
     /**
      * \brief Setter for the source link layer address option.
-     * 
+     *
      * \param addr The source link layer address.
      */
     void source_link_layer_addr(const hwaddress_type &addr);
-    
+
     /**
      * \brief Setter for the target link layer address option.
-     * 
+     *
      * \param addr The target link layer address.
      */
     void target_link_layer_addr(const hwaddress_type &addr);
-    
+
     /**
      * \brief Setter for the prefix information option.
-     * 
+     *
      * \param info The prefix information.
      */
     void prefix_info(prefix_info_type info);
-    
+
     /**
      * \brief Setter for the redirect header option.
-     * 
+     *
      * \param data The redirect header option data.
      */
     void redirect_header(const byte_array &data);
-    
+
     /**
      * \brief Setter for the MTU option.
-     * 
+     *
      * \param value The MTU option data.
      */
     void mtu(const mtu_type& value);
-    
+
     /**
      * \brief Setter for the shortcut limit option.
-     * 
+     *
      * \param value The shortcut limit option data.
      */
     void shortcut_limit(const shortcut_limit_type& value);
-    
+
     /**
      * \brief Setter for the new advertisement interval option.
-     * 
+     *
      * \param value The new advertisement interval option data.
      */
     void new_advert_interval(const new_advert_interval_type &value);
-    
+
     /**
      * \brief Setter for the new home agent information option.
-     * 
+     *
      * \param value The new home agent information option data.
      */
     void new_home_agent_info(const new_ha_info_type &value);
-    
+
     /**
      * \brief Setter for the new source address list option.
-     * 
+     *
      * \param value The new source address list option data.
      */
     void source_addr_list(const addr_list_type &value);
-    
+
     /**
      * \brief Setter for the new target address list option.
-     * 
+     *
      * \param value The new target address list option data.
      */
     void target_addr_list(const addr_list_type &value);
-    
+
     /**
      * \brief Setter for the new RSA signature option.
-     * 
+     *
      * \param value The new RSA signature option data.
      */
     void rsa_signature(const rsa_sign_type &value);
-    
+
     /**
      * \brief Setter for the new timestamp option.
-     * 
+     *
      * \param value The new timestamp option data.
      */
     void timestamp(const timestamp_type &value);
-    
+
     /**
      * \brief Setter for the new nonce option.
-     * 
+     *
      * \param value The new nonce option data.
      */
     void nonce(const nonce_type &value);
-    
+
     /**
      * \brief Setter for the new IP address/prefix option.
-     * 
+     *
      * \param value The new IP address/prefix option data.
      */
     void ip_prefix(const ip_prefix_type &value);
 
     /**
      * \brief Setter for the new link layer address option.
-     * 
+     *
      * \param value The new link layer address option data.
      */
     void link_layer_addr(lladdr_type value);
 
     /**
      * \brief Setter for the neighbour advertisement acknowledgement option.
-     * 
+     *
      * \param value The new naack option data.
      */
     void naack(const naack_type &value);
-    
+
     /**
      * \brief Setter for the map option.
-     * 
+     *
      * \param value The new map option data.
      */
     void map(const map_type &value);
-    
+
     /**
      * \brief Setter for the route information option.
-     * 
+     *
      * \param value The new route information option data.
      */
     void route_info(const route_info_type &value);
-    
+
     /**
      * \brief Setter for the recursive DNS servers option.
-     * 
+     *
      * \param value The new recursive DNS servers option data.
      */
     void recursive_dns_servers(const recursive_dns_type &value);
-    
+
     /**
      * \brief Setter for the handover key request option.
-     * 
+     *
      * \param value The new handover key request option data.
      */
     void handover_key_request(const handover_key_req_type &value);
-    
+
     /**
      * \brief Setter for the handover key reply option.
-     * 
+     *
      * \param value The new handover key reply option data.
      */
     void handover_key_reply(const handover_key_reply_type &value);
-    
+
     /**
      * \brief Setter for the handover assist info option.
-     * 
+     *
      * \param value The new handover assist info option data.
      */
     void handover_assist_info(const handover_assist_info_type &value);
-    
+
     /**
      * \brief Setter for the mobile node identifier option.
-     * 
+     *
      * \param value The new mobile node identifier option data.
      */
     void mobile_node_identifier(const mobile_node_id_type &value);
-    
+
     /**
      * \brief Setter for the DNS search list option.
-     * 
+     *
      * \param value The new DNS search list option data.
      */
     void dns_search_list(const dns_search_list_type &value);
-    
+
     // ****************************************************************
     //                          Option getters
     // ****************************************************************
-    
+
     /**
      * \brief Getter for the source link layer address option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     hwaddress_type source_link_layer_addr() const;
-    
+
     /**
      * \brief Getter for the target link layer address option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     hwaddress_type target_link_layer_addr() const;
-        
+
     /**
      * \brief Getter for the prefix information option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     prefix_info_type prefix_info() const;
-    
+
     /**
      * \brief Getter for the redirect header option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     byte_array redirect_header() const;
-    
+
     /**
      * \brief Getter for the MTU option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     mtu_type mtu() const;
-    
+
     /**
      * \brief Getter for the shortcut limit option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     shortcut_limit_type shortcut_limit() const;
-    
+
     /**
      * \brief Getter for the new advertisement interval option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     new_advert_interval_type new_advert_interval() const;
-    
+
     /**
      * \brief Getter for the new home agent information option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     new_ha_info_type new_home_agent_info() const;
-    
+
     /**
      * \brief Getter for the source address list option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     addr_list_type source_addr_list() const;
-    
+
     /**
      * \brief Getter for the target address list option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     addr_list_type target_addr_list() const;
-    
+
     /**
      * \brief Getter for the RSA signature option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     rsa_sign_type rsa_signature() const;
-    
+
     /**
      * \brief Getter for the timestamp option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     timestamp_type timestamp() const;
-    
+
     /**
      * \brief Getter for the nonce option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     nonce_type nonce() const;
-    
+
     /**
      * \brief Getter for the IP address/prefix option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     ip_prefix_type ip_prefix() const;
-    
+
     /**
      * \brief Getter for the link layer address option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     lladdr_type link_layer_addr() const;
-    
+
     /**
      * \brief Getter for the neighbour advertisement acknowledgement
      * option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     naack_type naack() const;
-    
+
     /**
      * \brief Getter for the map option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     map_type map() const;
-    
+
     /**
      * \brief Getter for the route information option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     route_info_type route_info() const;
-    
+
     /**
      * \brief Getter for the recursive dns servers option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     recursive_dns_type recursive_dns_servers() const;
-    
+
     /**
      * \brief Getter for the handover key request option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     handover_key_req_type handover_key_request() const;
-    
+
     /**
      * \brief Getter for the handover key reply option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     handover_key_reply_type handover_key_reply() const;
-    
+
     /**
      * \brief Getter for the handover key reply option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     handover_assist_info_type handover_assist_info() const;
-    
+
     /**
      * \brief Getter for the mobile node identifier option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
     mobile_node_id_type mobile_node_identifier() const;
-    
+
     /**
      * \brief Getter for the mobile node identifier option.
-     * 
+     *
      * This method will throw an option_not_found exception if the
      * option is not found.
      */
@@ -1278,7 +1278,7 @@ private:
                 uint16_t identifier;
                 uint16_t sequence;
             } u_echo;
-            
+
             struct {
         #if TINS_IS_LITTLE_ENDIAN
             uint32_t reserved:5,
@@ -1291,7 +1291,7 @@ private:
                         solicited:1,
                         override:1,
                         reserved:29;
-        #endif						
+        #endif
             } u_nd_advt;
             struct {
                 uint8_t	hop_limit;
@@ -1312,7 +1312,7 @@ private:
             } u_nd_ra;
         };
     } TINS_END_PACK;
-    
+
     void internal_add_option(const option &option);
     void write_serialization(uint8_t *buffer, uint32_t total_sz, const PDU *parent);
     bool has_options() const;
@@ -1322,7 +1322,7 @@ private:
     addr_list_type search_addr_list(OptionTypes type) const;
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);
-    
+
     template<template <typename> class Functor>
     const option *safe_search_option(OptionTypes opt, uint32_t size) const {
         const option *option = search_option(opt);
