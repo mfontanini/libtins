@@ -205,6 +205,14 @@ public:
     int get_fd();
 
     /**
+     * \brief Sets direction for the sniffer.
+     *
+     * This calls pcap_setdirection using the provided parameter.
+     * \param d The direction for the sniffer.
+     */
+    bool set_direction(pcap_direction_t d);
+
+    /**
      * \brief Sets the read timeout for this sniffer.
      *
      * This calls pcap_set_timeout using the provided parameter.
@@ -568,6 +576,12 @@ public:
     void set_timeout(unsigned timeout);
 
     /**
+     * Sets the direction option.
+     * \param direction The direction to be set.
+     */
+    void set_direction(pcap_direction_t direction);
+
+    /**
      * Sets the immediate mode option.
      * \param enabled The immediate mode option value.
      */
@@ -581,7 +595,8 @@ protected:
         PROMISCUOUS = 2,
         RFMON = 4,
         PACKET_FILTER = 8,
-        IMMEDIATE_MODE = 16
+        IMMEDIATE_MODE = 16,
+        DIRECTION = 16
     };
 
     void configure_sniffer_pre_activation(Sniffer& sniffer) const;
@@ -597,6 +612,7 @@ protected:
     bool promisc_;
     bool rfmon_;
     bool immediate_mode_;
+    pcap_direction_t direction_;
 };
 
 template <typename Functor>

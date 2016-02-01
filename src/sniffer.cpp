@@ -227,6 +227,11 @@ void BaseSniffer::set_timeout(int ms) {
     pcap_set_timeout(handle_, ms);
 }
 
+bool BaseSniffer::set_direction(pcap_direction_t d) {
+	bool result = pcap_setdirection(handle_, d) != -1;
+	return result;
+}
+
 // ****************************** Sniffer ******************************
 
 Sniffer::Sniffer(const string& device, const SnifferConfiguration& configuration) {
@@ -438,6 +443,14 @@ void SnifferConfiguration::configure_sniffer_post_activation(Sniffer& sniffer) c
             throw invalid_pcap_filter(pcap_geterr(sniffer.get_pcap_handle()));
         }
     }
+    // TODO: see how to actually do this on winpcap
+    #ifndef _WIN32
+    if ((flags_ & DIRECTION) != 0) {
+        if (!sniffer.set_direction(direction_)) {
+            throw pcap_error(pcap_geterr(sniffer.get_pcap_handle()));
+        }
+    }
+    #endif // _WIN32
 }
 
 void SnifferConfiguration::set_snap_len(unsigned snap_len) {
@@ -471,6 +484,11 @@ void SnifferConfiguration::set_timeout(unsigned timeout) {
 void SnifferConfiguration::set_immediate_mode(bool enabled) {
     flags_ |= IMMEDIATE_MODE;
     immediate_mode_ = enabled;
+}
+
+void SnifferConfiguration::set_direction(pcap_direction_t direction) {
+    direction_ =  direction;
+    flags_ |= DIRECTION;
 }
 
 } // Tins
