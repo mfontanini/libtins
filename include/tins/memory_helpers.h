@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Matias Fontanini
+ * Copyright (c) 2016, Matias Fontanini
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,10 @@
 #include "endianness.h"
 
 namespace Tins {
+
+/** 
+ * \cond
+ */
 namespace Memory {
 
 inline void read_data(const uint8_t* buffer, uint8_t* output_buffer, uint32_t size) {
@@ -249,6 +253,10 @@ private:
     uint8_t* buffer_;
     uint32_t size_;
 };
+
+/** 
+ * \endcond
+ */
 
 } // Memory
 } // Tins
