@@ -156,7 +156,7 @@ TINS_API std::set<std::string> network_interfaces();
  * \param gw_addr This parameter will contain the gateway's IP
  * address in case it is found.
  * 
- * \return bool indicating wether the lookup was successfull.
+ * \return bool indicating whether the lookup was successfull.
  */
 TINS_API bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr);
 

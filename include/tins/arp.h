@@ -298,7 +298,7 @@ public:
                                      const hwaddress_type& hw_snd = hwaddress_type());
 
     /** 
-     * \brief Check wether ptr points to a valid response for this PDU.
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * \sa PDU::matches_response
      * \param ptr The pointer to the buffer.

@@ -393,9 +393,9 @@ public:
     virtual PDU* recv_response(PacketSender& sender, const NetworkInterface& iface);
 
     /** 
-     * \brief Check wether ptr points to a valid response for this PDU.
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
-     * This method must check wether the buffer pointed by ptr is a valid
+     * This method must check whether the buffer pointed by ptr is a valid
      * response for this PDU. If it is valid, then it might want to propagate
      * the call to the next PDU. Note that in some cases, such as ICMP
      * Host Unreachable, there is no need to ask the next layer for matching.
@@ -407,7 +407,7 @@ public:
     }
 
     /**
-     * \brief Check wether this PDU matches the specified flag.
+     * \brief Check whether this PDU matches the specified flag.
      *
      * This method should be reimplemented in PDU classes which have
      * subclasses, and try to match the given PDU to each of its parent

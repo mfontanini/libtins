@@ -181,7 +181,7 @@ public:
     void append_padding(bool value);
     
     /** 
-     * \brief Check wether ptr points to a valid response for this PDU.
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * \sa PDU::matches_response
      * \param ptr The pointer to the buffer.

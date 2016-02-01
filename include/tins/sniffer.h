@@ -315,7 +315,7 @@ public:
      * constructor.
      * \param device The device which will be sniffed.
      * \param max_packet_size The maximum packet size to be read.
-     * \param promisc bool indicating wether to put the interface in promiscuous mode.(optional)
+     * \param promisc bool indicating whether to put the interface in promiscuous mode.(optional)
      * \param filter A capture filter to be used on the sniffing session.(optional);
      * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
      */

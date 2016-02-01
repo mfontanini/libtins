@@ -299,7 +299,7 @@ public:
     void vend(const vend_type& newvend_);
 
     /**
-     * \brief Check wether ptr points to a valid response for this PDU.
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * This returns true if the xid field is equal.
      * 

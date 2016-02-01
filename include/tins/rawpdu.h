@@ -166,7 +166,7 @@ public:
     }
 
     /**
-     * \brief Check wether ptr points to a valid response for this PDU.
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * This always returns true, since we don't know what this 
      * RawPDU is holding.

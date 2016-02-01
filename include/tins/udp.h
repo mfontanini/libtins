@@ -144,7 +144,7 @@ public:
     void length(uint16_t new_len);
 
     /**
-     * \brief Check wether ptr points to a valid response for this PDU.
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * This compares the source and destination ports in the provided
      * response with those stored in this PDU.

@@ -939,7 +939,7 @@ public:
     static std::string decode_domain_name(const std::string& domain_name);
 
     /** 
-     * \brief Check wether ptr points to a valid response for this PDU.
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * \sa PDU::matches_response
      * \param ptr The pointer to the buffer.

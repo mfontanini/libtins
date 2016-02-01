@@ -238,7 +238,7 @@ public:
     /**
      * \brief Sets parameter problem flag for this PDU.
      *
-     * \param set_pointer Indicates wether a pointer to the bad octet
+     * \param set_pointer Indicates whether a pointer to the bad octet
      * is provided.
      * \param bad_octet Identifies the octet in which the error was
      * detected. If set_pointer == false, it is ignored.
@@ -396,7 +396,7 @@ public:
     uint32_t trailer_size() const;
 
     /**
-     * \brief Check wether ptr points to a valid response for this PDU.
+     * \brief Check whether ptr points to a valid response for this PDU.
      *
      * \sa PDU::matches_response
      * \param ptr The pointer to the buffer.
