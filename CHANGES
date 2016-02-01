@@ -1,4 +1,169 @@
-v3.2
+v3.3 - Sun Jan 31 21:06:04 PST 2016
+
+- Add TCP connection close example
+
+- Move implementations on utils.h to utils.cpp
+
+- Add ICMPv6 Multicast Listener Query Messages support 
+
+- Add ICMPv6 Multicast Listener Report Message support
+
+- Make DNS::Query and DNS::Resource lowercase and deprecate the old names
+
+- Change DNS::query/resource::type to query_type and deprecate old name
+
+- Add DNS Start Of Authority parsing and serialization
+
+- Parse and serialize MX preference field correctly
+
+- Add NetworkInterface::friendly_name to get Windows friendly names
+
+- Mask 16 bits on random number generated on traceroute example
+
+- Fix TCP sequence number addition/subtraction when wrapping around
+
+- Use 802.1ad protocol flag when seralizing stacked Dot1Q
+
+- Code cleanup and use same syntax on the entire project
+
+- Correctly serialize PPPoE session packets
+
+- Fix IPv6 extension headers parsing/serialization
+
+- Include examples before src to avoid duplicate tins target issue
+
+- Add MPLS PDU and hook it up with ICMP extensions
+
+- Set UDP checksum to 0xffff if it's 0
+
+- Don't define TINS_STATIC in config.h
+
+- Fix invalid RSNEAPOL parsing issue
+
+- Remove special clang on OSX case when building gtest
+
+- Update pseudoheader_checksum signature
+
+- Fix overall checksum calculation
+
+- Set ICMP payload length without padding if no extensions are present
+
+- Export classes on Windows shared lib builds
+
+- Use google/googletest submodule and update to HEAD
+
+- Remove unused cassert header inclusions
+
+- Add input/output memory stream classes port PDU classes to use them
+
+- Add extensions for ICMP/ICMPv6
+
+- Fix RSNInformation issues on big endian architectures
+
+- Add IP::fragment_offset and IP::flags
+
+- Don't set Ethernet type if inner PDU type is unknown
+
+- Don't run IP source address overwrite tests on OSX
+
+- Always calculate IP/IPv6 checksum
+
+- Fix invalid constant value on PPPoE
+
+- Define default constructor for PKTAP
+
+- Guard 802.11 parsing code on PPI around HAVE_DOT11
+
+- Fix parsing of Dot11 packets encapsulated on PPI having FCS-at-end
+
+- Fix DataLinkType typo on doxygen docs
+
+- Update docs on sniff_loop handle persistency
+
+- Use uint32_t for DNS resource TTL setter
+
+- Erase streams when they're reassembed on IPv4Reassembler
+
+- Make all exceptions derive from exception_base
+
+- Add remove_option member to IP, TCP, Dot11, ICMPv6, DHCP and DHCPv6
+
+- Allow HW addresses to be 00:00:00:00:00 on NetworkInterface::info
+
+- Increment option size when adding a new DHCPv6 option
+
+- Use NOMINMAX on examples
+
+- Add metric field to RouteEntry
+
+- Allow setting immediate mode on Sniffer
+
+- Use one flags field for all flags on SnifferConfiguration
+
+- Add ICMP responses example
+
+- Add interfaces_info example
+
+- Fix bug on SessionKeys::SessionKeys
+
+- Fix compilation errors on android platform
+
+- Fix example compilation on Windows
+
+- Add PacketWriter::write overload that takes a Packet
+
+- Use different IP addresses on IP tests depending on OS
+
+- Allow retrieving keys on WPA2Decrypter
+
+- Add NetworkInterface::is_up and NetworkInterface::info
+
+- Add NetworkInterface::Info::is_up
+
+- Fix compilation warnings on Windows x64
+
+- Fix FindPCAP.cmake to find winpcap on x64
+
+- Fix more tests warnings triggered on Windows
+
+- Fix tests compilation warnings on Windows
+
+- Fix error on VC triggered by pcap redefining the "inline" keyword
+
+- Soften DNS parsing rules
+
+- Replace WIN32 macro with _WIN32
+
+- Fix IPv6Address::to_string on Windows
+
+- Fix DNS issues triggered on VC
+
+- Add google test as git submodule
+
+- Perserve IP protocol when using RawPDU
+
+- Use pcap_sendpacket by default to send packets on Windows
+
+- Don't allow receiving l2 packets on windows
+
+- Added RadioTap channel map type
+
+- Made rsn_information() a const member function to make Dot11ManagementFrame 
+immutable
+
+- Ensure HAVE_CXX11 is checked when defining TINS_IS_CXX11
+
+- Use one integer field for all flags on TCP
+
+- Fix invalid DNS IPv4 address parsing on big endian arch
+
+- Don't compile WPA2 test if LIBTINS_ENABLE_WPA2=0
+
+- Add Dot11 radio measurement name corresponding to IEEE 802.11-2012
+
+-------------------------------------------------------------------------------
+
+v3.2 - Fri Mar 20 22:12:23 PST 2015
 
 - Added include guard for config.h.
 
@@ -79,6 +244,8 @@ conversion on integral constant.
 
 - IPv4Address now uses inet_pton when constructing from string. 
 
+-------------------------------------------------------------------------------
+
 v3.1 - Sun Aug 24 21:39:43 ART 2014
 
 - Fixed ICMPv6 checksum error on serialization.
@@ -86,6 +253,8 @@ v3.1 - Sun Aug 24 21:39:43 ART 2014
 - Fixed empty domain name encoding on DNS.
 
 - Changed the build system to CMake.
+
+-------------------------------------------------------------------------------
 
 v3.0 - Thu Aug  7 21:39:09 ART 2014
 
@@ -150,6 +319,8 @@ PDU types.
 
 - Fixed bug triggered by not including the string header.
 
+-------------------------------------------------------------------------------
+
 v2.0 - Thu Jan 23 11:09:38 ART 2014 
 
 - DNSResourceRecord was removed. Now DNS records are added using 
@@ -203,6 +374,8 @@ examples.
 capture size.
 
 - Added tins_cast as a replacement for dynamic_cast on PDUs.
+
+-------------------------------------------------------------------------------
 
 v1.2 - Mon oct  7 23:33:49 ART 2013
 
@@ -298,6 +471,8 @@ that used them.
 
 - Added Utils::resolve_domain and Utils::resolve_domain6
 
+-------------------------------------------------------------------------------
+
 v0.3 - Thu Jan 31 16:47:27 ART 2013
 
 - Added IPv6, ICMPv6 and DHCPv6 classes.
@@ -317,6 +492,7 @@ pseudo protocol.
 
 - Fixed several bugs in DNS.
 
+-------------------------------------------------------------------------------
 
 v0.2 - Sat Oct 20 11:26:40 2012
 
