@@ -522,7 +522,7 @@ void RadioTap::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU
         stream.write(rate_);
     }
     if (radio_.flags.channel) {
-        if (((buffer - buffer_start) & 1) == 1) {
+        if (((stream.pointer() - buffer_start) & 1) == 1) {
             stream.write<uint8_t>(0);
         }
         stream.write(channel_freq_);
@@ -535,7 +535,7 @@ void RadioTap::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU
         stream.write(dbm_noise_);
     }
     if (radio_.flags.lock_quality) {
-        if (((buffer - buffer_start) & 1) == 1) {
+        if (((stream.pointer() - buffer_start) & 1) == 1) {
             stream.write<uint8_t>(0);
         }
         stream.write(signal_quality_);
@@ -547,7 +547,7 @@ void RadioTap::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU
         stream.write(db_signal_);
     }
     if (radio_.flags.rx_flags) {
-        if (((buffer - buffer_start) & 1) == 1) {
+        if (((stream.pointer() - buffer_start) & 1) == 1) {
             stream.write<uint8_t>(0);
         }
         stream.write(rx_flags_);

@@ -9,6 +9,8 @@
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
 #include "arp.h"
+#include "snap.h"
+#include "eapol.h"
 #include "utils.h"
 
 using namespace std;
@@ -377,6 +379,25 @@ TEST_F(RadioTapTest, TSFT) {
     RadioTap radio;
     radio.tsft(0x7afb9a8d);
     EXPECT_EQ(radio.tsft(), 0x7afb9a8dU);
+}
+
+TEST_F(RadioTapTest, SerializationWorksFine) {
+    const uint8_t expected[] = {
+        0, 0, 26, 0, 43, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 108,
+        9, 160, 0, 206, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 170, 170, 3, 0, 0, 0, 136, 142,
+        1, 3, 0, 95, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 55, 43, 4, 210
+    };
+    RadioTap radio = RadioTap() / Dot11Data() / SNAP() / RSNEAPOL();
+    RadioTap::serialization_type buffer = radio.serialize();
+    EXPECT_EQ(
+        RadioTap::serialization_type(expected, expected + sizeof(expected)),
+        buffer
+    );
 }
 
 #endif // HAVE_DOT11
