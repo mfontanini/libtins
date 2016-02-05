@@ -280,7 +280,7 @@ public:
      * \return The number of dwords the header occupies in an uin8_t.
      */
     small_uint<4> head_len() const {
-        return this->ip_.ihl;
+        return this->header_.ihl;
     }
 
     /**
@@ -289,7 +289,7 @@ public:
      * \return The this IP PDU's type of service.
      */
     uint8_t tos() const {
-        return ip_.tos;
+        return header_.tos;
     }
 
     /**
@@ -298,7 +298,7 @@ public:
      * \return The total length of this IP PDU.
      */
     uint16_t tot_len() const {
-        return Endian::be_to_host(ip_.tot_len);
+        return Endian::be_to_host(header_.tot_len);
     }
 
     /**
@@ -307,7 +307,7 @@ public:
      * \return The id for this IP PDU.
      */
     uint16_t id() const {
-        return Endian::be_to_host(ip_.id);
+        return Endian::be_to_host(header_.id);
     }
 
     /**
@@ -321,7 +321,7 @@ public:
      * \sa IP::flags
      */
     TINS_DEPRECATED(uint16_t frag_off() const) {
-        return Endian::be_to_host(ip_.frag_off);
+        return Endian::be_to_host(header_.frag_off);
     }
 
     /**
@@ -333,7 +333,7 @@ public:
      * \return The fragment offset, measured in units of 8 byte blocks 
      */
     small_uint<13> fragment_offset() const {
-        return Endian::be_to_host(ip_.frag_off) & 0x1fff;
+        return Endian::be_to_host(header_.frag_off) & 0x1fff;
     }
 
     /**
@@ -342,7 +342,7 @@ public:
      * \return The IP flags field
      */
     Flags flags() const {
-        return static_cast<Flags>(Endian::be_to_host(ip_.frag_off) >> 13);
+        return static_cast<Flags>(Endian::be_to_host(header_.frag_off) >> 13);
     }
 
     /**
@@ -351,7 +351,7 @@ public:
      * \return The time to live for this IP PDU.
      */
     uint8_t ttl() const {
-        return ip_.ttl;
+        return header_.ttl;
     }
 
     /**
@@ -360,7 +360,7 @@ public:
      * \return The protocol for this IP PDU.
      */
     uint8_t protocol() const {
-        return ip_.protocol;
+        return header_.protocol;
     }
 
     /**
@@ -369,7 +369,7 @@ public:
      * \return The checksum for this IP PDU.
      */
     uint16_t checksum() const {
-        return Endian::be_to_host(ip_.check);
+        return Endian::be_to_host(header_.check);
     }
 
     /**
@@ -378,7 +378,7 @@ public:
      * \return The source address for this IP PDU.
      */
     address_type src_addr() const {
-        return address_type(ip_.saddr);
+        return address_type(header_.saddr);
     }
 
     /** 
@@ -386,7 +386,7 @@ public:
      * \return The destination address for this IP PDU.
      */
     address_type dst_addr() const  {
-        return address_type(ip_.daddr);
+        return address_type(header_.daddr);
     }
     
     /** 
@@ -394,7 +394,7 @@ public:
      * \return The version for this IP PDU.
      */
     small_uint<4> version() const {
-        return ip_.version;
+        return header_.version;
     }
 
     /** 
@@ -760,7 +760,7 @@ private:
     options_type::iterator search_option_iterator(option_identifier id);
     void update_padded_options_size();
 
-    ip_header ip_;
+    ip_header header_;
     uint16_t options_size_, padded_options_size_;
     options_type ip_options_;
 };

@@ -68,11 +68,11 @@ IP::IP(address_type ip_dst, address_type ip_src) {
 IP::IP(const uint8_t* buffer, uint32_t total_sz)
 : options_size_(0) {
     InputMemoryStream stream(buffer, total_sz);
-    stream.read(ip_);
+    stream.read(header_);
 
     // Make sure we have enough size for options and not less than we should
     if (head_len() * sizeof(uint32_t) > total_sz || 
-        head_len() * sizeof(uint32_t) < sizeof(ip_)) {
+        head_len() * sizeof(uint32_t) < sizeof(header_)) {
         throw malformed_packet();
     }
     const uint8_t* options_end = buffer + head_len() * sizeof(uint32_t);
@@ -131,7 +131,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
         if (!is_fragmented()) {
             inner_pdu(
                 Internals::pdu_from_flag(
-                    static_cast<Constants::IP::e>(ip_.protocol),
+                    static_cast<Constants::IP::e>(header_.protocol),
                     stream.pointer(), 
                     total_sz,
                     false
@@ -140,7 +140,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
             if (!inner_pdu()) {
                 inner_pdu(
                     Internals::allocate<IP>(
-                        ip_.protocol,
+                        header_.protocol,
                         stream.pointer(), 
                         total_sz
                     )
@@ -158,8 +158,8 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
 }
 
 void IP::init_ip_fields() {
-    memset(&ip_, 0, sizeof(ip_));
-    ip_.version = 4;
+    memset(&header_, 0, sizeof(header_));
+    header_.version = 4;
     ttl(DEFAULT_TTL);
     id(1);
     options_size_ = 0;
@@ -173,57 +173,57 @@ bool IP::is_fragmented() const {
 // Setters
 
 void IP::tos(uint8_t new_tos) {
-    ip_.tos = new_tos;
+    header_.tos = new_tos;
 }
 
 void IP::tot_len(uint16_t new_tot_len) {
-    ip_.tot_len = Endian::host_to_be(new_tot_len);
+    header_.tot_len = Endian::host_to_be(new_tot_len);
 }
 
 void IP::id(uint16_t new_id) {
-    ip_.id = Endian::host_to_be(new_id);
+    header_.id = Endian::host_to_be(new_id);
 }
 
 void IP::frag_off(uint16_t new_frag_off) {
-    ip_.frag_off = Endian::host_to_be(new_frag_off);
+    header_.frag_off = Endian::host_to_be(new_frag_off);
 }
 
 void IP::fragment_offset(small_uint<13> new_frag_off) {
-    uint16_t value = (Endian::be_to_host(ip_.frag_off) & 0xe000) | new_frag_off;
-    ip_.frag_off = Endian::host_to_be(value);
+    uint16_t value = (Endian::be_to_host(header_.frag_off) & 0xe000) | new_frag_off;
+    header_.frag_off = Endian::host_to_be(value);
 }
 
 void IP::flags(Flags new_flags) {
-    uint16_t value = (Endian::be_to_host(ip_.frag_off) & 0x1fff) | (new_flags << 13);
-    ip_.frag_off = Endian::host_to_be(value);
+    uint16_t value = (Endian::be_to_host(header_.frag_off) & 0x1fff) | (new_flags << 13);
+    header_.frag_off = Endian::host_to_be(value);
 }
 
 void IP::ttl(uint8_t new_ttl) {
-    ip_.ttl = new_ttl;
+    header_.ttl = new_ttl;
 }
 
 void IP::protocol(uint8_t new_protocol) {
-    ip_.protocol = new_protocol;
+    header_.protocol = new_protocol;
 }
 
 void IP::checksum(uint16_t new_check) {
-    ip_.check = Endian::host_to_be(new_check);
+    header_.check = Endian::host_to_be(new_check);
 }
 
 void IP::src_addr(address_type ip) {
-    ip_.saddr = ip;
+    header_.saddr = ip;
 }
 
 void IP::dst_addr(address_type ip) {
-    ip_.daddr = ip;
+    header_.daddr = ip;
 }
 
 void IP::head_len(small_uint<4> new_head_len) {
-    ip_.ihl = new_head_len;
+    header_.ihl = new_head_len;
 }
 
 void IP::version(small_uint<4> ver) {
-    ip_.version = ver;
+    header_.version = ver;
 }
 
 void IP::eol() {
@@ -368,7 +368,7 @@ void IP::write_option(const option& opt, OutputMemoryStream& stream) {
 // Virtual method overriding
 
 uint32_t IP::header_size() const {
-    return sizeof(ip_) + padded_options_size_;
+    return sizeof(header_) + padded_options_size_;
 }
 
 PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
@@ -389,7 +389,7 @@ void IP::send(PacketSender& sender, const NetworkInterface &) {
     PacketSender::SocketType type = PacketSender::IP_RAW_SOCKET;
     link_addr.sin_family = AF_INET;
     link_addr.sin_port = 0;
-    link_addr.sin_addr.s_addr = ip_.daddr;
+    link_addr.sin_addr.s_addr = header_.daddr;
     if (inner_pdu()) {
         type = pdu_type_to_sender_type(inner_pdu()->pdu_type());
     }
@@ -409,7 +409,7 @@ PDU* IP::recv_response(PacketSender& sender, const NetworkInterface &) {
 }
 
 void IP::prepare_for_serialize(const PDU* parent) {
-    if (!parent && ip_.saddr == 0) {
+    if (!parent && header_.saddr == 0) {
         NetworkInterface iface(dst_addr());
         src_addr(iface.addresses().ip_addr);
     }
@@ -430,21 +430,21 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pare
         }
     }
 
-    uint16_t original_frag_off = ip_.frag_off;
+    uint16_t original_frag_off = header_.frag_off;
     
     #if __FreeBSD__ || defined(__FreeBSD_kernel__) || __APPLE__
         if (!parent) {
             total_sz = Endian::host_to_be<uint16_t>(total_sz);
-            ip_.frag_off = Endian::be_to_host(ip_.frag_off);
+            header_.frag_off = Endian::be_to_host(header_.frag_off);
         }
     #endif
     tot_len(total_sz);
     head_len(static_cast<uint8_t>(header_size() / sizeof(uint32_t)));
 
-    stream.write(ip_);
+    stream.write(header_);
 
     // Restore the fragment offset field in case we flipped it
-    ip_.frag_off = original_frag_off;
+    header_.frag_off = original_frag_off;
 
     for (options_type::const_iterator it = ip_options_.begin(); it != ip_options_.end(); ++it) {
         write_option(*it, stream);
@@ -457,11 +457,11 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pare
         check = (check & 0xffff) + (check >> 16);
     }
     checksum(~check);
-    ((ip_header*)buffer)->check = ip_.check;
+    ((ip_header*)buffer)->check = header_.check;
 }
 
 bool IP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
-    if (total_sz < sizeof(ip_)) {
+    if (total_sz < sizeof(header_)) {
         return false;
     }
     const ip_header* ip_ptr = (const ip_header*)ptr;
@@ -475,15 +475,15 @@ bool IP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
             pkt_sz -= 4;
             // If our IP header is in the ICMP payload, then it's the same packet.
             // This keeps in mind checksum and IP identifier, so I guess it's enough.
-            if (pkt_sz >= sizeof(ip_) && memcmp(&ip_, pkt_ptr, sizeof(ip_header))) {
+            if (pkt_sz >= sizeof(header_) && memcmp(&header_, pkt_ptr, sizeof(ip_header))) {
                 return true;
             }
         }
     }
     // checks for broadcast addr
-    if ((ip_.saddr == ip_ptr->daddr && 
-        (ip_.daddr == ip_ptr->saddr || dst_addr().is_broadcast())) ||
-        (dst_addr().is_broadcast() && ip_.saddr == 0)) {
+    if ((header_.saddr == ip_ptr->daddr && 
+        (header_.daddr == ip_ptr->saddr || dst_addr().is_broadcast())) ||
+        (dst_addr().is_broadcast() && header_.saddr == 0)) {
         uint32_t sz = min<uint32_t>(header_size(), total_sz);
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
