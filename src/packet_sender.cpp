@@ -156,7 +156,7 @@ bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const
     #endif
 }
 
-int PacketSender::getether_socket_(const NetworkInterface& iface) {
+int PacketSender::get_ether_socket(const NetworkInterface& iface) {
     if (!ether_socket_initialized(iface)) {
         open_l2_socket(iface);
     }
@@ -355,7 +355,7 @@ void PacketSender::send_l2(PDU& pdu,
                                 string(pcap_geterr(handle)));
         }
     #else // HAVE_PACKET_SENDER_PCAP_SENDPACKET
-        int sock = getether_socket_(iface);
+        int sock = get_ether_socket(iface);
         if (!buffer.empty()) {
             #if defined(BSD) || defined(__FreeBSD_kernel__)
             if (::write(sock, &buffer[0], buffer.size()) == -1) {
@@ -375,7 +375,7 @@ PDU* PacketSender::recv_l2(PDU& pdu,
                            struct sockaddr* link_addr, 
                            uint32_t len_addr,
                            const NetworkInterface& iface) {
-    int sock = getether_socket_(iface);
+    int sock = get_ether_socket(iface);
     vector<int> sockets(1, sock);
     return recv_match_loop(sockets, pdu, link_addr, len_addr);
 }
