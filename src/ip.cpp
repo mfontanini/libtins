@@ -429,16 +429,22 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pare
             protocol(new_flag);
         }
     }
+
+    uint16_t original_frag_off = ip_.frag_off;
     
     #if __FreeBSD__ || defined(__FreeBSD_kernel__) || __APPLE__
         if (!parent) {
             total_sz = Endian::host_to_be<uint16_t>(total_sz);
+            ip_.frag_off = Endian::be_to_host(ip_.frag_off);
         }
     #endif
     tot_len(total_sz);
     head_len(static_cast<uint8_t>(header_size() / sizeof(uint32_t)));
 
     stream.write(ip_);
+
+    // Restore the fragment offset field in case we flipped it
+    ip_.frag_off = original_frag_off;
 
     for (options_type::const_iterator it = ip_options_.begin(); it != ip_options_.end(); ++it) {
         write_option(*it, stream);
