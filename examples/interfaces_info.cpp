@@ -32,6 +32,7 @@
 #include <tins/network_interface.h>
 
 using std::cout;
+using std::wcout;
 using std::endl;
 using std::string;
 
@@ -50,7 +51,14 @@ int main() {
         NetworkInterface::Info info = iface.info();
         
         // Now print all of this info.
-        cout << name << ": " << endl;
+        cout << name;
+
+        #ifdef _WIN32
+        // If this is running on Windows, also print the friendly name
+        wcout << " (" << iface.friendly_name() << ")";
+        #endif // _WIN32
+        cout << ": " << endl;
+
         cout << "   HW address:  " << info.hw_addr << endl
              << "   IP address:  " << info.ip_addr << endl
              << "   Netmask:     " << info.netmask << endl
