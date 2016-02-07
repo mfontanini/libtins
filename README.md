@@ -119,3 +119,8 @@ You might want to have a look at the examples located  in the "examples"
 directory. The same samples can be found online at:
 
 http://libtins.github.io/examples/
+
+## Contributing ##
+
+If you want to report a bug or make a pull request, please have a look at 
+the [contributing](CONTRIBUTING.md) file before doing so.
