@@ -583,6 +583,7 @@ Stream& StreamFollower::find_stream(const stream_id& id) {
 StreamFollower::address_type StreamFollower::serialize(IPv4Address address) {
     address_type addr;
     OutputMemoryStream output(addr.data(), addr.size());
+    addr.fill(0);
     output.write(address);
     return addr; 
 }
@@ -590,6 +591,7 @@ StreamFollower::address_type StreamFollower::serialize(IPv4Address address) {
 StreamFollower::address_type StreamFollower::serialize(const IPv6Address& address) {
     address_type addr;
     OutputMemoryStream output(addr.data(), addr.size());
+    addr.fill(0);
     output.write(address);
     return addr;
 }
