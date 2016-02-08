@@ -51,7 +51,7 @@ class IPv6Address;
 
 namespace TCPIP {
 
-class TINS_API TCPFlow {
+class TINS_API Flow {
 public:
     enum State {
         UNKNOWN,
@@ -63,13 +63,13 @@ public:
 
     typedef std::vector<uint8_t> payload_type;
     typedef std::map<uint32_t, payload_type> buffered_payload_type;
-    typedef std::function<void(TCPFlow&)> event_callback;
+    typedef std::function<void(Flow&)> event_callback;
 
-    TCPFlow(const IPv4Address& dest_address, uint16_t dest_port,
-            uint32_t sequence_number);
+    Flow(const IPv4Address& dest_address, uint16_t dest_port,
+         uint32_t sequence_number);
 
-    TCPFlow(const IPv6Address& dest_address, uint16_t dest_port,
-            uint32_t sequence_number);
+    Flow(const IPv6Address& dest_address, uint16_t dest_port,
+         uint32_t sequence_number);
 
     void data_callback(const event_callback& callback);
     void buffering_callback(const event_callback& callback);
@@ -85,10 +85,12 @@ public:
     uint16_t dport() const;
     const payload_type& payload() const;
     payload_type& payload();
-
-    void state(State new_state);
     State state() const;
     uint32_t sequence_number() const;
+    const buffered_payload_type& buffered_payload() const;
+    buffered_payload_type& buffered_payload();
+
+    void state(State new_state);
 private:
     void store_payload(uint32_t seq, const payload_type& payload);
     buffered_payload_type::iterator erase_iterator(buffered_payload_type::iterator iter);
@@ -105,7 +107,7 @@ private:
     State state_;
 };
 
-class TINS_API TCPStream {
+class TINS_API Stream {
 public:
     enum State {
         SYN_SENT,
@@ -118,18 +120,34 @@ public:
         CLOSED
     };
 
-    typedef std::function<void(TCPStream&)> stream_callback;
+    typedef std::function<void(Stream&)> stream_callback;
+    typedef Flow::payload_type payload_type;
 
-    TCPStream(const PDU& initial_packet);
-    TCPStream(const TCPFlow& client_flow, const TCPFlow& server_flow);
+    Stream(const PDU& initial_packet);
+    Stream(const Flow& client_flow, const Flow& server_flow);
 
     void process_packet(PDU& packet);
 
-    TCPFlow& client_flow();
-    const TCPFlow& client_flow() const;
-    TCPFlow& server_flow();
-    const TCPFlow& server_flow() const;
+    Flow& client_flow();
+    const Flow& client_flow() const;
+    Flow& server_flow();
+    const Flow& server_flow() const;
 
+    bool is_finished() const;
+    bool is_v6() const;
+
+    IPv4Address client_addr_v4() const;
+    IPv6Address client_addr_v6() const;
+    IPv4Address server_addr_v4() const;
+    IPv6Address server_addr_v6() const;
+    uint16_t client_port() const;
+    uint16_t server_port() const;
+    const payload_type& client_payload() const;
+    payload_type& client_payload();
+    const payload_type& server_payload() const;
+    payload_type& server_payload();
+
+    void stream_closed_callback(const stream_callback& callback);
     void client_data_callback(const stream_callback& callback);
     void server_data_callback(const stream_callback& callback);
     void client_buffering_callback(const stream_callback& callback);
@@ -137,17 +155,17 @@ public:
 
     void setup_flows_callbacks();
 private:
-    static TCPFlow extract_client_flow(const PDU& packet);
-    static TCPFlow extract_server_flow(const PDU& packet);
+    static Flow extract_client_flow(const PDU& packet);
+    static Flow extract_server_flow(const PDU& packet);
 
+    void on_client_flow_data(const Flow& flow);
+    void on_server_flow_data(const Flow& flow);
+    void on_client_buffering(const Flow& flow);
+    void on_server_buffering(const Flow& flow);
 
-    void on_client_flow_data(const TCPFlow& flow);
-    void on_server_flow_data(const TCPFlow& flow);
-    void on_client_buffering(const TCPFlow& flow);
-    void on_server_buffering(const TCPFlow& flow);
-
-    TCPFlow client_flow_;
-    TCPFlow server_flow_;
+    Flow client_flow_;
+    Flow server_flow_;
+    stream_callback on_stream_closed_;
     stream_callback on_client_data_callback_;
     stream_callback on_server_data_callback_;
     stream_callback on_client_buffering_callback_;
@@ -155,22 +173,19 @@ private:
     State state_;
 };
 
-class TINS_API TCPStreamFollower {
+class TINS_API StreamFollower {
 public:
-    typedef TCPStream::stream_callback stream_callback;
+    typedef Stream::stream_callback stream_callback;
 
-    TCPStreamFollower();
+    StreamFollower();
 
-    void process_packet(PDU& packet);
+    bool process_packet(PDU& packet);
+    void new_stream_callback(const stream_callback& callback);
 
-    void client_data_callback(const stream_callback& callback);
-    void server_data_callback(const stream_callback& callback);
-    void client_buffering_callback(const stream_callback& callback);
-    void server_buffering_callback(const stream_callback& callback);
-
-    TCPStream& find_stream(IPv4Address client_addr, uint16_t client_port,
+    Stream& find_stream(IPv4Address client_addr, uint16_t client_port,
                            IPv4Address server_addr, uint16_t server_port);
 private:
+    static const size_t DEFAULT_MAX_BUFFERED_CHUNKS;
     typedef std::array<uint8_t, 16> address_type;
 
     struct stream_id {
@@ -187,18 +202,15 @@ private:
         static size_t hash(const stream_id& id);
     };
 
-    typedef std::map<stream_id, TCPStream> streams_type;
+    typedef std::map<stream_id, Stream> streams_type;
 
     stream_id make_stream_id(const PDU& packet);
-    TCPStream make_stream(const PDU& packet);
     static address_type serialize(IPv4Address address);
     static address_type serialize(const IPv6Address& address);
 
     streams_type streams_;
-    stream_callback on_client_data_callback_;
-    stream_callback on_server_data_callback_;
-    stream_callback on_client_buffering_callback_;
-    stream_callback on_server_buffering_callback_;
+    stream_callback on_new_connection_;
+    size_t max_buffered_chunks_;
     bool attach_to_flows_;
 };
 
