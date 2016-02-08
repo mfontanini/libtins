@@ -27,9 +27,12 @@
  *
  */
 
+#include "tcp_ip.h"
+
+#if TINS_IS_CXX11
+
 #include <limits>
 #include <algorithm>
-#include "tcp_ip.h"
 #include "memory.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
@@ -41,6 +44,7 @@
 #include "memory_helpers.h"
 
 using std::make_pair;
+using std::bind;
 using std::runtime_error;
 using std::numeric_limits;
 using std::max;
@@ -611,3 +615,5 @@ bool StreamFollower::stream_id::operator<(const stream_id& rhs) const {
 
 } // TCPIP
 } // Tins
+
+#endif // TINS_IS_CXX11
