@@ -273,6 +273,16 @@ public:
     }
 };
 
+/**
+ * \brief Exception thrown when a stream is not found
+ */
+class stream_not_found : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Stream not found";
+    }
+};
+
 namespace Crypto {
 namespace WPA2 {
     /**

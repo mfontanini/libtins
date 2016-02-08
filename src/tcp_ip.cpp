@@ -72,16 +72,16 @@ int seq_compare(uint32_t seq1, uint32_t seq2) {
 
 Flow::Flow(const IPv4Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
-: seq_number_(sequence_number), dest_port_(dest_port), is_v6_(false),
-  state_(UNKNOWN) {
+: seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN),
+  is_v6_(false) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
 }
 
 Flow::Flow(const IPv6Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
-: seq_number_(sequence_number), dest_port_(dest_port), is_v6_(true),
-  state_(UNKNOWN) {
+: seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN),
+  is_v6_(true) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
 }
@@ -282,14 +282,13 @@ void Flow::state(State new_state) {
 // Stream
 
 Stream::Stream(const PDU& packet) 
-: client_flow_(extract_client_flow(packet)), 
-server_flow_(extract_server_flow(packet)) {
-
-}
-
-Stream::Stream(const Flow& client_flow, const Flow& server_flow) 
-: client_flow_(client_flow), server_flow_(server_flow) {
-
+: client_flow_(extract_client_flow(packet)),
+  server_flow_(extract_server_flow(packet)), auto_cleanup_(true) {
+    const TCP& tcp = packet.rfind_pdu<TCP>();
+    // If it's a SYN, set the proper state
+    if (tcp.flags() == TCP::SYN) {
+        client_flow().state(Flow::SYN_SENT);
+    }
 }
 
 void Stream::process_packet(PDU& packet) {
@@ -441,16 +440,25 @@ void Stream::setup_flows_callbacks() {
     server_flow_.buffering_callback(bind(&Stream::on_server_buffering, this, _1));
 }
 
+void Stream::auto_cleanup_payloads(bool value) {
+    auto_cleanup_ = value;
+}
 
-void Stream::on_client_flow_data(const Flow& flow) {
+void Stream::on_client_flow_data(const Flow& /*flow*/) {
     if (on_client_data_callback_) {
         on_client_data_callback_(*this);
     }
+    if (auto_cleanup_) {
+        client_payload().clear();
+    }
 }
 
-void Stream::on_server_flow_data(const Flow& flow) {
+void Stream::on_server_flow_data(const Flow& /*flow*/) {
     if (on_server_data_callback_) {
         on_server_data_callback_(*this);
+    }
+    if (auto_cleanup_) {
+        server_payload().clear();
     }
 }
 
@@ -494,8 +502,6 @@ bool StreamFollower::process_packet(PDU& packet) {
                 throw runtime_error("No new connection callback set");
             }
             if (tcp.flags() == TCP::SYN) {
-                // If it's a SYN, set the proper state
-                iter->second.client_flow().state(Flow::SYN_SENT);
                 process = false;
             }
             else {
@@ -530,14 +536,14 @@ Stream& StreamFollower::find_stream(IPv4Address client_addr, uint16_t client_por
                                     IPv4Address server_addr, uint16_t server_port) {
     stream_id identifier(serialize(client_addr), client_port,
                          serialize(server_addr), server_port);
-    streams_type::iterator iter = streams_.find(identifier);
-    if (iter == streams_.end()) {
-        // TODO: define proper exception
-        throw runtime_error("Stream not found");
-    }
-    else {
-        return iter->second;
-    }
+    return find_stream(identifier);
+}
+
+Stream& StreamFollower::find_stream(IPv6Address client_addr, uint16_t client_port,
+                                    IPv6Address server_addr, uint16_t server_port) {
+    stream_id identifier(serialize(client_addr), client_port,
+                         serialize(server_addr), server_port);
+    return find_stream(identifier);
 }
 
 StreamFollower::stream_id StreamFollower::make_stream_id(const PDU& packet) {
@@ -557,6 +563,16 @@ StreamFollower::stream_id StreamFollower::make_stream_id(const PDU& packet) {
     else {
         // TODO: define proper exception
         throw runtime_error("No layer 3");
+    }
+}
+
+Stream& StreamFollower::find_stream(const stream_id& id) {
+    streams_type::iterator iter = streams_.find(id);
+    if (iter == streams_.end()) {
+        throw stream_not_found();
+    }
+    else {
+        return iter->second;
     }
 }
 

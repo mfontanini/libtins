@@ -37,7 +37,7 @@ after_build:
 - 7z a libtins-%platform%-%Configuration%.zip libtins
 test_script:
 - cd c:\projects\libtins\build
-- ctest -C %Configuration%
+- ctest -C %Configuration% -V
 deploy_script:
 - ps: Push-AppveyorArtifact "install\libtins-$env:Platform-$env:Configuration.zip"
 skip_commits:

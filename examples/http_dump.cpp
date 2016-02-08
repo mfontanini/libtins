@@ -89,10 +89,6 @@ void on_client_data(Stream& stream) {
     // Now print it, prepending some information about the stream
     cout << client_endpoint(stream) << " >> " 
          << server_endpoint(stream) << ": " << endl << data << endl;
-    // Now erase the stored data, as we've already processed it. This is important,
-    // since if we don't do this, the connection will keep buffering data until
-    // the stream is closed
-    stream.client_payload().clear();
 }
 
 // Whenever there's new server data on the stream, this callback is executed.
@@ -101,7 +97,6 @@ void on_server_data(Stream& stream) {
     string data(stream.server_payload().begin(), stream.server_payload().end());
     cout << server_endpoint(stream) << " >> " 
          << client_endpoint(stream) << ": " << endl << data << endl;
-    stream.server_payload().clear();
 }
 
 // When a connection is closed, this callback is executed.

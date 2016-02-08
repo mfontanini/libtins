@@ -13,6 +13,7 @@
 #include "ip.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
+#include "exceptions.h"
 #include "ethernetII.h"
 #include "rawpdu.h"
 #include "utils.h"
@@ -120,12 +121,10 @@ void FlowTest::on_new_stream(Stream& stream) {
 
 void FlowTest::cumulative_stream_client_data_handler(Stream& stream) {
     stream_client_payload_chunks.push_back(stream.client_flow().payload());
-    stream.client_flow().payload().clear();
 }
 
 void FlowTest::cumulative_stream_server_data_handler(Stream& stream) {
     stream_server_payload_chunks.push_back(stream.server_flow().payload());
-    stream.server_flow().payload().clear();
 }
 
 void FlowTest::buffered_payload_handle(Flow& session) {
@@ -286,7 +285,8 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     for (size_t i = 0; i < packets.size(); ++i) {
         follower.process_packet(packets[i]);
     }
-    Stream& stream = follower.find_stream("1.2.3.4", 22, "4.3.2.1", 25);
+    Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
+                                          IPv4Address("4.3.2.1"), 25);
     EXPECT_EQ(Flow::ESTABLISHED, stream.client_flow().state());
     EXPECT_EQ(Flow::SYN_SENT, stream.server_flow().state());
     EXPECT_EQ(30, stream.client_flow().sequence_number());
@@ -317,7 +317,8 @@ TEST_F(FlowTest, StreamFollower_RSTClosesStream) {
     for (size_t i = 0; i < packets.size(); ++i) {
         follower.process_packet(packets[i]);
     }
-    Stream stream = follower.find_stream("1.2.3.4", 22, "4.3.2.1", 25);
+    Stream stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
+                                         IPv4Address("4.3.2.1"), 25);
 
     IP server_packet = IP("1.2.3.4", "4.3.2.1") / TCP(22, 25);
     server_packet.rfind_pdu<TCP>().flags(TCP::RST);
@@ -336,7 +337,8 @@ TEST_F(FlowTest, StreamFollower_FINClosesStream) {
     for (size_t i = 0; i < packets.size(); ++i) {
         follower.process_packet(packets[i]);
     }
-    Stream stream = follower.find_stream("1.2.3.4", 22, "4.3.2.1", 25);
+    Stream stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
+                                         IPv4Address("4.3.2.1"), 25);
 
     IP server_packet = IP("1.2.3.4", "4.3.2.1") / TCP(22, 25);
     server_packet.rfind_pdu<TCP>().flags(TCP::FIN | TCP::ACK);
@@ -367,7 +369,10 @@ TEST_F(FlowTest, StreamFollower_StreamIsRemovedWhenFinished) {
     follower.process_packet(server_packet);
 
     // We shouldn't be able to find it
-    EXPECT_THROW(follower.find_stream("1.2.3.4", 22, "4.3.2.1", 25), runtime_error);
+    EXPECT_THROW(
+        follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25), 
+        stream_not_found
+    );
 }
 
 TEST_F(FlowTest, StreamFollower_FollowStream) {
