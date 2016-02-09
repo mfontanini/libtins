@@ -276,6 +276,22 @@ TEST_F(FlowTest, Overlapping) {
     run_tests(chunks, payload);
 }
 
+TEST_F(FlowTest, IgnoreDataPackets) {
+    using std::placeholders::_1;
+
+    ordering_info_type chunks = split_payload(payload, 5);
+    Flow flow(IPv4Address("1.2.3.4"), 22, 0);
+    flow.data_callback(bind(&FlowTest::cumulative_flow_data_handler, this, _1));
+    flow.ignore_data_packets();
+    vector<EthernetII> packets = chunks_to_packets(0, chunks, payload);
+    for (size_t i = 0; i < packets.size(); ++i) {
+        flow.process_packet(packets[i]);
+    }
+    EXPECT_TRUE(flow_payload_chunks.empty());
+}
+
+// Stream follower tests
+
 TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     using std::placeholders::_1;
 

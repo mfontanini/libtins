@@ -45,6 +45,7 @@
 
 using std::make_pair;
 using std::bind;
+using std::pair;
 using std::runtime_error;
 using std::numeric_limits;
 using std::max;
@@ -77,7 +78,7 @@ int seq_compare(uint32_t seq1, uint32_t seq2) {
 Flow::Flow(const IPv4Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
 : seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN),
-  is_v6_(false) {
+  is_v6_(false), ignore_data_packets_(false) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
 }
@@ -85,7 +86,7 @@ Flow::Flow(const IPv4Address& dest_address, uint16_t dest_port,
 Flow::Flow(const IPv6Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
 : seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN),
-  is_v6_(true) {
+  is_v6_(true), ignore_data_packets_(false) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
 }
@@ -105,6 +106,9 @@ void Flow::process_packet(PDU& pdu) {
     if (tcp) {
         update_state(*tcp);
     }
+    if (ignore_data_packets_) {
+        return;
+    }
     if (!tcp || !raw) {
         return;
     }
@@ -123,7 +127,7 @@ void Flow::process_packet(PDU& pdu) {
             seq = seq_number_;
         }
         // Store this payload
-        store_payload(seq, raw->payload());
+        store_payload(seq, move(raw->payload()));
         // Keep looping while the fragments seq is lower or equal to our seq
         buffered_payload_type::iterator iter = buffered_payload_.find(seq_number_);
         while (iter != buffered_payload_.end() && seq_compare(iter->first, seq_number_) <= 0) {
@@ -139,7 +143,7 @@ void Flow::process_packet(PDU& pdu) {
                         payload.begin(),
                         payload.begin() + (seq_number_ - iter->first)
                     );
-                    store_payload(seq_number_, iter->second);
+                    store_payload(seq_number_, move(iter->second));
                     iter = erase_iterator(iter);
                 }
                 else {
@@ -176,16 +180,16 @@ void Flow::process_packet(PDU& pdu) {
     }
 }
 
-void Flow::store_payload(uint32_t seq, const payload_type& payload) {
+void Flow::store_payload(uint32_t seq, payload_type payload) {
     buffered_payload_type::iterator iter = buffered_payload_.find(seq);
     // New segment, store it
     if (iter == buffered_payload_.end()) {
-        buffered_payload_.insert(make_pair(seq, payload));
+        buffered_payload_.insert(make_pair(seq, move(payload)));
     }
     else if (iter->second.size() < payload.size()) {
         // If we already have payload on this position but it's a shorter
         // chunk than the new one, replace it
-        iter->second = payload;
+        iter->second = move(payload);
     }
 }
 
@@ -283,6 +287,10 @@ void Flow::state(State new_state) {
     state_ = new_state;
 }
 
+void Flow::ignore_data_packets() {
+    ignore_data_packets_ = true;
+}
+
 // Stream
 
 Stream::Stream(const PDU& packet) 
@@ -341,6 +349,14 @@ void Stream::client_buffering_callback(const stream_callback& callback) {
 
 void Stream::server_buffering_callback(const stream_callback& callback) {
     on_server_buffering_callback_ = callback;
+}
+
+void Stream::ignore_client_data() {
+    client_flow().ignore_data_packets();
+}
+
+void Stream::ignore_server_data() {
+    server_flow().ignore_data_packets();
 }
 
 bool Stream::is_finished() const {

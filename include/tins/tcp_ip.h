@@ -231,8 +231,16 @@ public:
      * \param new_state The new state of this flow
      */
     void state(State new_state);
+
+    /**
+     * \brief Sets whether this flow should ignore data packets
+     *
+     * If the data packets are ignored then the flow will just be 
+     * followed to keep track of its state.
+     */
+    void ignore_data_packets();
 private:
-    void store_payload(uint32_t seq, const payload_type& payload);
+    void store_payload(uint32_t seq, payload_type payload);
     buffered_payload_type::iterator erase_iterator(buffered_payload_type::iterator iter);
     void update_state(const TCP& tcp);
 
@@ -245,6 +253,7 @@ private:
     event_callback on_buffering_callback_;
     State state_;
     bool is_v6_;
+    bool ignore_data_packets_;
 };
 
 /** 
@@ -416,6 +425,22 @@ public:
      * \param callback The callback to be set
      */
     void server_buffering_callback(const stream_callback& callback);
+
+    /**
+     * \brief Indicates that the data packets sent by the client should be 
+     * ignored
+     *
+     * \sa Flow::ignore_data_packets
+     */
+    void ignore_client_data();
+
+    /**
+     * \brief Indicates that the data packets sent by the server should be 
+     * ignored
+     *
+     * \sa Flow::ignore_data_packets
+     */
+    void ignore_server_data();
 
     /**
      * \brief Sets the internal callbacks. 
