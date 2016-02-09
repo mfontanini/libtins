@@ -296,6 +296,8 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     using std::placeholders::_1;
 
     vector<EthernetII> packets = three_way_handshake(29, 60, "1.2.3.4", 22, "4.3.2.1", 25);
+    packets[0].src_addr("00:01:02:03:04:05");
+    packets[0].dst_addr("05:04:03:02:01:00");
     StreamFollower follower;
     follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
     for (size_t i = 0; i < packets.size(); ++i) {
@@ -313,6 +315,8 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     EXPECT_EQ(22, stream.server_flow().dport());
     EXPECT_EQ(IPv4Address("1.2.3.4"), stream.client_addr_v4());
     EXPECT_EQ(IPv4Address("4.3.2.1"), stream.server_addr_v4());
+    EXPECT_EQ(HWAddress<6>("00:01:02:03:04:05"), stream.client_hw_addr());
+    EXPECT_EQ(HWAddress<6>("05:04:03:02:01:00"), stream.server_hw_addr());
     EXPECT_EQ(22, stream.client_port());
     EXPECT_EQ(25, stream.server_port());
 

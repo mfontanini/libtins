@@ -39,6 +39,7 @@
 #include "tcp.h"
 #include "ip.h"
 #include "ipv6.h"
+#include "ethernetII.h"
 #include "rawpdu.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
@@ -301,6 +302,11 @@ Stream::Stream(const PDU& packet)
     if (tcp.flags() == TCP::SYN) {
         client_flow().state(Flow::SYN_SENT);
     }
+    const EthernetII* eth = packet.find_pdu<EthernetII>();
+    if (eth) {
+        client_hw_addr_ = eth->src_addr();
+        server_hw_addr_ = eth->dst_addr();
+    }
 }
 
 void Stream::process_packet(PDU& packet) {
@@ -382,6 +388,14 @@ IPv4Address Stream::client_addr_v4() const {
 
 IPv6Address Stream::client_addr_v6() const {
     return server_flow().dst_addr_v6();
+}
+
+const Stream::hwaddress_type& Stream::client_hw_addr() const {
+    return client_hw_addr_;
+}
+
+const Stream::hwaddress_type& Stream::server_hw_addr() const {
+    return server_hw_addr_;
 }
 
 IPv4Address Stream::server_addr_v4() const {

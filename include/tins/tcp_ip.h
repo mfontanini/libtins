@@ -41,6 +41,7 @@
 #include <functional>
 #include <stdint.h>
 #include "macros.h"
+#include "hw_address.h"
 
 namespace Tins {
 
@@ -277,6 +278,11 @@ public:
     typedef std::function<void(Stream&)> stream_callback;
 
     /**
+     * The type used to store hardware addresses
+     */
+    typedef HWAddress<6> hwaddress_type;
+
+    /**
      * The type used to store payloads
      */
     typedef Flow::payload_type payload_type;
@@ -340,6 +346,26 @@ public:
      * Note that it's only valid to call this method if is_v6() == true
      */
     IPv6Address client_addr_v6() const;
+
+    /**
+     * \brief Retrieves the client's hardware address.
+     *
+     * Note that this is not the actual hardware address of the client, but
+     * just the address seen from packets coming from it. If the client
+     * is on another network, then this will be the address of the last
+     * device (switch, route, etc) the packet went through.
+     */
+    const hwaddress_type& client_hw_addr() const;
+
+    /**
+     * \brief Retrieves the server's hardware address.
+     *
+     * Note that this is not the actual hardware address of the server, but
+     * just the address seen from packets coming from it. If the server
+     * is on another network, then this will be the address of the last
+     * device (switch, route, etc) the packet went through.
+     */
+    const hwaddress_type& server_hw_addr() const;
 
     /**
      * \brief Retrieves the server's IPv4 address
@@ -486,6 +512,8 @@ private:
     stream_callback on_server_data_callback_;
     stream_callback on_client_buffering_callback_;
     stream_callback on_server_buffering_callback_;
+    hwaddress_type client_hw_addr_;
+    hwaddress_type server_hw_addr_;
     bool auto_cleanup_;
 };
 
