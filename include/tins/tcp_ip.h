@@ -94,9 +94,19 @@ public:
     typedef std::map<uint32_t, payload_type> buffered_payload_type;
 
     /**
-     * The type used to store the callbacks that this class triggers
+     * The type used to store the callback called when new data is available
      */
-    typedef std::function<void(Flow&)> event_callback;
+    typedef std::function<void(Flow&)> data_available_callback_type;
+
+    /**
+     * \brief The type used to store the callback called when data is buffered
+     *
+     * The arguments are the flow, the sequence number and payload that will
+     * be buffered.
+     */
+    typedef std::function<void(Flow&,
+                               uint32_t,
+                               const payload_type&)> out_of_order_callback_type;
 
     /** 
      * Construct a Flow from an IPv4 address
@@ -126,17 +136,17 @@ public:
      *
      * \param callback The callback to be executed   
      */
-    void data_callback(const event_callback& callback);
+    void data_callback(const data_available_callback_type& callback);
 
     /**
-     * \brief Sets the callback that will be executed when data is buffered.
+     * \brief Sets the callback that will be executed when out of order data arrives
      *
      * Whenever this flow receives out-of-order data, this callback will be
      * executed.
      * 
      * \param callback The callback to be executed
      */
-    void buffering_callback(const event_callback& callback);
+    void out_of_order_callback(const out_of_order_callback_type& callback);
 
     /**
      * \brief Processes a packet.
@@ -250,8 +260,8 @@ private:
     uint32_t seq_number_;
     std::array<uint8_t, 16> dest_address_;
     uint16_t dest_port_;
-    event_callback on_data_callback_;
-    event_callback on_buffering_callback_;
+    data_available_callback_type on_data_callback_;
+    out_of_order_callback_type on_out_of_order_callback_;
     State state_;
     bool is_v6_;
     bool ignore_data_packets_;
@@ -275,17 +285,27 @@ public:
     /**
      * The type used for callbacks
      */
-    typedef std::function<void(Stream&)> stream_callback;
+    typedef std::function<void(Stream&)> stream_callback_type;
+
+    /**
+     * The type used to store payloads
+     */
+    typedef Flow::payload_type payload_type;
+
+    /**
+     * The type used for callbacks
+     *
+     * /sa Flow::buffering_callback
+     */
+    typedef std::function<void(Stream&,
+                               uint32_t,
+                               const payload_type&)> out_of_order_callback_type;
 
     /**
      * The type used to store hardware addresses
      */
     typedef HWAddress<6> hwaddress_type;
 
-    /**
-     * The type used to store payloads
-     */
-    typedef Flow::payload_type payload_type;
 
     /**
      * \brief Constructs a TCP stream using the provided packet.
@@ -416,7 +436,7 @@ public:
      *
      * \param callback The callback to be set
      */
-    void stream_closed_callback(const stream_callback& callback);
+    void stream_closed_callback(const stream_callback_type& callback);
 
     /**
      * \brief Sets the callback to be executed when there's client data
@@ -424,7 +444,7 @@ public:
      * \sa Flow::data_callback
      * \param callback The callback to be set
      */
-    void client_data_callback(const stream_callback& callback);
+    void client_data_callback(const stream_callback_type& callback);
 
     /**
      * \brief Sets the callback to be executed when there's server data
@@ -432,7 +452,7 @@ public:
      * \sa Flow::data_callback
      * \param callback The callback to be set
      */
-    void server_data_callback(const stream_callback& callback);
+    void server_data_callback(const stream_callback_type& callback);
 
     /**
      * \brief Sets the callback to be executed when there's new buffered 
@@ -441,7 +461,7 @@ public:
      * \sa Flow::buffering_callback
      * \param callback The callback to be set
      */
-    void client_buffering_callback(const stream_callback& callback);
+    void client_out_of_order_callback(const out_of_order_callback_type& callback);
 
     /**
      * \brief Sets the callback to be executed when there's new buffered 
@@ -450,7 +470,7 @@ public:
      * \sa Flow::buffering_callback
      * \param callback The callback to be set
      */
-    void server_buffering_callback(const stream_callback& callback);
+    void server_out_of_order_callback(const out_of_order_callback_type& callback);
 
     /**
      * \brief Indicates that the data packets sent by the client should be 
@@ -502,16 +522,20 @@ private:
 
     void on_client_flow_data(const Flow& flow);
     void on_server_flow_data(const Flow& flow);
-    void on_client_buffering(const Flow& flow);
-    void on_server_buffering(const Flow& flow);
+    void on_client_out_of_order(const Flow& flow,
+                                uint32_t seq,
+                                const payload_type& payload);
+    void on_server_out_of_order(const Flow& flow,
+                                uint32_t seq,
+                                const payload_type& payload);
 
     Flow client_flow_;
     Flow server_flow_;
-    stream_callback on_stream_closed_;
-    stream_callback on_client_data_callback_;
-    stream_callback on_server_data_callback_;
-    stream_callback on_client_buffering_callback_;
-    stream_callback on_server_buffering_callback_;
+    stream_callback_type on_stream_closed_;
+    stream_callback_type on_client_data_callback_;
+    stream_callback_type on_server_data_callback_;
+    out_of_order_callback_type on_client_out_of_order_callback_;
+    out_of_order_callback_type on_server_out_of_order_callback_;
     hwaddress_type client_hw_addr_;
     hwaddress_type server_hw_addr_;
     bool auto_cleanup_;
@@ -546,7 +570,7 @@ public:
     /**
      * \brief The type used for callbacks
      */
-    typedef Stream::stream_callback stream_callback;
+    typedef Stream::stream_callback_type stream_callback_type;
 
     /** 
      * Default constructor
@@ -576,7 +600,7 @@ public:
      *
      * \param callback The callback to be set
      */
-    void new_stream_callback(const stream_callback& callback);
+    void new_stream_callback(const stream_callback_type& callback);
 
     /**
      * Finds the stream identified by the provided arguments.
@@ -625,7 +649,7 @@ private:
     static address_type serialize(const IPv6Address& address);
 
     streams_type streams_;
-    stream_callback on_new_connection_;
+    stream_callback_type on_new_connection_;
     size_t max_buffered_chunks_;
     bool attach_to_flows_;
 };

@@ -92,12 +92,12 @@ Flow::Flow(const IPv6Address& dest_address, uint16_t dest_port,
     output.write(dest_address);
 }
 
-void Flow::data_callback(const event_callback& callback) {
+void Flow::data_callback(const data_available_callback_type& callback) {
     on_data_callback_ = callback;
 }
 
-void Flow::buffering_callback(const event_callback& callback) {
-    on_buffering_callback_= callback;
+void Flow::out_of_order_callback(const out_of_order_callback_type& callback) {
+    on_out_of_order_callback_ = callback;
 }
 
 void Flow::process_packet(PDU& pdu) {
@@ -118,6 +118,11 @@ void Flow::process_packet(PDU& pdu) {
     if (seq_compare(chunk_end, seq_number_) >= 0) {
         bool added_some = false;
         uint32_t seq = tcp->seq();
+        // If we're going to buffer this and we have a buffering callback, execute it
+        if (seq > seq_number_ && on_out_of_order_callback_) {
+            on_out_of_order_callback_(*this, seq, raw->payload());
+        }
+
         // If it starts before our sequence number, slice it
         if (seq_compare(seq, seq_number_) < 0) {
             const uint32_t diff = seq_number_ - seq;
@@ -171,11 +176,6 @@ void Flow::process_packet(PDU& pdu) {
         if (added_some) {
             if (on_data_callback_) {
                 on_data_callback_(*this);
-            }
-        }
-        else {
-            if (on_buffering_callback_) {
-                on_buffering_callback_(*this);
             }
         }
     }
@@ -337,24 +337,24 @@ const Flow& Stream::server_flow() const {
     return server_flow_;
 }
 
-void Stream::stream_closed_callback(const stream_callback& callback) {
+void Stream::stream_closed_callback(const stream_callback_type& callback) {
     on_stream_closed_ = callback;
 }
 
-void Stream::client_data_callback(const stream_callback& callback) {
+void Stream::client_data_callback(const stream_callback_type& callback) {
     on_client_data_callback_ = callback;
 }
 
-void Stream::server_data_callback(const stream_callback& callback) {
+void Stream::server_data_callback(const stream_callback_type& callback) {
     on_server_data_callback_ = callback;
 }
 
-void Stream::client_buffering_callback(const stream_callback& callback) {
-    on_client_buffering_callback_ = callback;
+void Stream::client_out_of_order_callback(const out_of_order_callback_type& callback) {
+    on_client_out_of_order_callback_ = callback;
 }
 
-void Stream::server_buffering_callback(const stream_callback& callback) {
-    on_server_buffering_callback_ = callback;
+void Stream::server_out_of_order_callback(const out_of_order_callback_type& callback) {
+    on_server_out_of_order_callback_ = callback;
 }
 
 void Stream::ignore_client_data() {
@@ -467,11 +467,14 @@ Flow Stream::extract_server_flow(const PDU& packet) {
 }
 
 void Stream::setup_flows_callbacks() {
-    using std::placeholders::_1;
+    using namespace std::placeholders;
+
     client_flow_.data_callback(bind(&Stream::on_client_flow_data, this, _1));
     server_flow_.data_callback(bind(&Stream::on_server_flow_data, this, _1));
-    client_flow_.buffering_callback(bind(&Stream::on_client_buffering, this, _1));
-    server_flow_.buffering_callback(bind(&Stream::on_server_buffering, this, _1));
+    client_flow_.out_of_order_callback(bind(&Stream::on_client_out_of_order,
+                                            this, _1, _2, _3));
+    server_flow_.out_of_order_callback(bind(&Stream::on_server_out_of_order,
+                                            this, _1, _2, _3));
 }
 
 void Stream::auto_cleanup_payloads(bool value) {
@@ -496,15 +499,19 @@ void Stream::on_server_flow_data(const Flow& /*flow*/) {
     }
 }
 
-void Stream::on_client_buffering(const Flow& flow) {
-    if (on_client_buffering_callback_) {
-        on_client_buffering_callback_(*this);
+void Stream::on_client_out_of_order(const Flow& flow,
+                                 uint32_t seq,
+                                 const payload_type& payload) {
+    if (on_client_out_of_order_callback_) {
+        on_client_out_of_order_callback_(*this, seq, payload);
     }
 }
 
-void Stream::on_server_buffering(const Flow& flow) {
-    if (on_server_buffering_callback_) {
-        on_server_buffering_callback_(*this);
+void Stream::on_server_out_of_order(const Flow& flow,
+                                 uint32_t seq,
+                                 const payload_type& payload) {
+    if (on_server_out_of_order_callback_) {
+        on_server_out_of_order_callback_(*this, seq, payload);
     }
 }
 
@@ -562,7 +569,7 @@ bool StreamFollower::process_packet(PDU& packet) {
     return true;
 }
 
-void StreamFollower::new_stream_callback(const stream_callback& callback) {
+void StreamFollower::new_stream_callback(const stream_callback_type& callback) {
     on_new_connection_ = callback;
 }
 
@@ -633,7 +640,7 @@ StreamFollower::stream_id::stream_id(const address_type& client_addr,
                                      const address_type& server_addr,
                                      uint16_t server_port) 
 : min_address(client_addr), max_address(server_addr), min_address_port(client_port),
-max_address_port(server_port) {
+  max_address_port(server_port) {
     if (min_address > max_address) {
         swap(min_address, max_address);
         swap(min_address_port, max_address_port);

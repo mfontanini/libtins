@@ -45,7 +45,7 @@ public:
     void on_new_stream(Stream& stream);
     void cumulative_stream_client_data_handler(Stream& stream);
     void cumulative_stream_server_data_handler(Stream& stream);
-    void buffered_payload_handle(Flow& session);
+    void out_of_order_handler(Flow& session, uint32_t seq, Flow::payload_type payload);
     void run_test(uint32_t initial_seq, const ordering_info_type& chunks, 
                   const string& payload);
     void run_test(uint32_t initial_seq, const ordering_info_type& chunks);
@@ -64,6 +64,7 @@ public:
                        uint16_t dst_port);
     
     vector<Flow::payload_type> flow_payload_chunks;
+    vector<pair<uint32_t, Flow::payload_type> > flow_out_of_order_chunks;
     vector<Flow::payload_type> stream_client_payload_chunks;
     vector<Flow::payload_type> stream_server_payload_chunks;
 };
@@ -127,8 +128,8 @@ void FlowTest::cumulative_stream_server_data_handler(Stream& stream) {
     stream_server_payload_chunks.push_back(stream.server_flow().payload());
 }
 
-void FlowTest::buffered_payload_handle(Flow& session) {
-
+void FlowTest::out_of_order_handler(Flow& session, uint32_t seq, Flow::payload_type payload) {
+    flow_out_of_order_chunks.push_back(make_pair(seq, move(payload)));
 }
 
 void FlowTest::run_test(uint32_t initial_seq, const ordering_info_type& chunks, 
@@ -288,6 +289,36 @@ TEST_F(FlowTest, IgnoreDataPackets) {
         flow.process_packet(packets[i]);
     }
     EXPECT_TRUE(flow_payload_chunks.empty());
+}
+
+TEST_F(FlowTest, OutOfOrderCallback) {
+    using namespace std::placeholders;
+
+    ordering_info_type chunks = split_payload(payload, 5);
+    Flow flow(IPv4Address("1.2.3.4"), 22, 0);
+    flow.out_of_order_callback(bind(&FlowTest::out_of_order_handler, this, _1, _2, _3));
+    vector<EthernetII> packets = chunks_to_packets(0, chunks, payload);
+    reverse(packets.begin(), packets.end());
+    // Copy, as Flow::process_packet takes ownership of the payload
+    vector<EthernetII> original_packets = packets;
+    for (size_t i = 0; i < packets.size(); ++i) {
+        flow.process_packet(packets[i]);
+    }
+    // All elements should be out of order except the first
+    // one (last one in reverse order)
+    ASSERT_EQ(original_packets.size() - 1, flow_out_of_order_chunks.size());
+    for (size_t i = 0; i < original_packets.size() - 1; ++i) {
+        // Compare sequence number
+        EXPECT_EQ(
+            original_packets[i].rfind_pdu<TCP>().seq(),
+            flow_out_of_order_chunks[i].first
+        );
+        // Compare payload
+        EXPECT_EQ(
+            original_packets[i].rfind_pdu<RawPDU>().payload(),
+            flow_out_of_order_chunks[i].second
+        );
+    }
 }
 
 // Stream follower tests
