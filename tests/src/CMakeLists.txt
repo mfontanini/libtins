@@ -2,7 +2,7 @@
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}/include/tins/ 
     ../include/
-    ${gtest_SOURCE_DIR}/include
+    ${GOOGLETEST_INCLUDE}
     ${PCAP_INCLUDE_DIR}
 )
 
@@ -10,7 +10,7 @@ INCLUDE_DIRECTORIES(
 FIND_PACKAGE(Threads REQUIRED)
 
 LINK_DIRECTORIES(
-    ${gtest_BINARY_DIR}
+    ${GOOGLETEST_LIBRARY}
 )
 # Link against GoogleTest, libtins and pthread.
 # Pthread is required by GoogleTest
@@ -212,4 +212,3 @@ ADD_TEST(TCPStream TCPStreamTest)
 ADD_TEST(UDP UDPTest)
 ADD_TEST(Utils UtilsTest)
 ADD_TEST(WEPDecrypt WEPDecryptTest)
-
