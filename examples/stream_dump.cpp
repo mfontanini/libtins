@@ -29,7 +29,7 @@
 
 #include <iostream>
 #include <sstream>
-#include "tins/tcp_ip.h"
+#include "tins/tcp_ip/stream_follower.h"
 #include "tins/sniffer.h"
 #include "tins/ip_address.h"
 #include "tins/ipv6_address.h"
@@ -46,6 +46,11 @@ using Tins::Sniffer;
 using Tins::SnifferConfiguration;
 using Tins::TCPIP::StreamFollower;
 using Tins::TCPIP::Stream;
+
+// This example takes an interface and a port as an argument and
+// it listens for TCP streams on the given interface and port.
+// It will reassemble TCP streams and show the traffic sent by
+// both the client and the server.
 
 // Convert the client endpoint to a readable string
 string client_endpoint(const Stream& stream) {
@@ -94,6 +99,7 @@ void on_client_data(Stream& stream) {
 // Whenever there's new server data on the stream, this callback is executed.
 // This does the same thing as on_client_data
 void on_server_data(Stream& stream) {
+    std::cout << "server data\n";
     string data(stream.server_payload().begin(), stream.server_payload().end());
     cout << server_endpoint(stream) << " >> " 
          << client_endpoint(stream) << ": " << endl << data << endl;
@@ -118,8 +124,8 @@ void on_new_connection(Stream& stream) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        cout << "Usage: " << argv[0] << " <interface>" << endl;
+    if (argc != 3) {
+        cout << "Usage: " << argv[0] << " <interface> <port>" << endl;
         return 1;
     }
     using std::placeholders::_1;
@@ -128,7 +134,7 @@ int main(int argc, char* argv[]) {
         // Construct the sniffer configuration object
         SnifferConfiguration config;
         // Only capture TCP traffic sent from/to port 80
-        config.set_filter("tcp port 80");
+        config.set_filter("tcp port " + string(argv[2]));
         // Construct the sniffer we'll use
         Sniffer sniffer(argv[1], config);
 

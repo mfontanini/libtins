@@ -8,7 +8,7 @@
 #include <string>
 #include <limits>
 #include <cassert>
-#include "tcp_ip.h"
+#include "tcp_ip/stream_follower.h"
 #include "tcp.h"
 #include "ip.h"
 #include "ip_address.h"

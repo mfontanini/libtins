@@ -15,7 +15,7 @@ IF(libtins_FOUND)
             dns_queries
             dns_spoof
             dns_stats
-            http_dump
+            stream_dump
             icmp_responses
             interfaces_info
             tcp_connection_close
@@ -41,7 +41,7 @@ IF(libtins_FOUND)
         ADD_EXECUTABLE(arpmonitor EXCLUDE_FROM_ALL arpmonitor.cpp)
         ADD_EXECUTABLE(dns_queries EXCLUDE_FROM_ALL dns_queries.cpp)
         ADD_EXECUTABLE(dns_spoof EXCLUDE_FROM_ALL dns_spoof.cpp)
-        ADD_EXECUTABLE(http_dump EXCLUDE_FROM_ALL http_dump.cpp)
+        ADD_EXECUTABLE(stream_dump EXCLUDE_FROM_ALL stream_dump.cpp)
         ADD_EXECUTABLE(icmp_responses EXCLUDE_FROM_ALL icmp_responses.cpp)
         ADD_EXECUTABLE(interfaces_info EXCLUDE_FROM_ALL interfaces_info.cpp)
         ADD_EXECUTABLE(tcp_connection_close EXCLUDE_FROM_ALL tcp_connection_close.cpp)
