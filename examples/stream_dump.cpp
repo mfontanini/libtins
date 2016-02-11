@@ -99,7 +99,6 @@ void on_client_data(Stream& stream) {
 // Whenever there's new server data on the stream, this callback is executed.
 // This does the same thing as on_client_data
 void on_server_data(Stream& stream) {
-    std::cout << "server data\n";
     string data(stream.server_payload().begin(), stream.server_payload().end());
     cout << server_endpoint(stream) << " >> " 
          << client_endpoint(stream) << ": " << endl << data << endl;

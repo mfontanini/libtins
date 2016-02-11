@@ -250,7 +250,24 @@ public:
      * followed to keep track of its state.
      */
     void ignore_data_packets();
+
+    /**
+     * \brief Returns the MSS for this Flow.
+     *
+     * If the MSS option wasn't provided by the peer, -1 is returned
+     */
+    int mss() const;
 private:
+    // Compress all flags into just one struct using bitfields 
+    struct flags {
+        flags() : ignore_data_packets(0) {
+
+        }
+
+        uint32_t is_v6:1,
+                 ignore_data_packets:1;
+    };
+
     void store_payload(uint32_t seq, payload_type payload);
     buffered_payload_type::iterator erase_iterator(buffered_payload_type::iterator iter);
     void update_state(const TCP& tcp);
@@ -263,8 +280,8 @@ private:
     data_available_callback_type on_data_callback_;
     out_of_order_callback_type on_out_of_order_callback_;
     State state_;
-    bool is_v6_;
-    bool ignore_data_packets_;
+    int mss_;
+    flags flags_;
 };
 
 /** 
@@ -310,7 +327,7 @@ public:
     /**
      * \brief Constructs a TCP stream using the provided packet.
      */
-    Stream(const PDU& initial_packet);
+    Stream(PDU& initial_packet);
 
     /**
      * \brief Processes this packet.

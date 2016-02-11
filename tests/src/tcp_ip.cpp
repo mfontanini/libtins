@@ -359,6 +359,26 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     EXPECT_EQ(61, stream.server_flow().sequence_number());
 }
 
+TEST_F(FlowTest, StreamFollower_MSS) {
+    using std::placeholders::_1;
+
+    vector<EthernetII> packets = three_way_handshake(29, 60, "1.2.3.4", 22, "4.3.2.1", 25);
+    // Client's mss is 1220
+    packets[0].rfind_pdu<TCP>().mss(1220);
+    // Server's mss is 1460
+    packets[1].rfind_pdu<TCP>().mss(1460);
+    StreamFollower follower;
+    follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
+    for (size_t i = 0; i < packets.size(); ++i) {
+        follower.process_packet(packets[i]);
+    }
+    Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
+                                          IPv4Address("4.3.2.1"), 25);
+    EXPECT_EQ(1220, stream.client_flow().mss());
+    EXPECT_EQ(1460, stream.server_flow().mss());
+}
+
+
 TEST_F(FlowTest, StreamFollower_RSTClosesStream) {
     using std::placeholders::_1;
 

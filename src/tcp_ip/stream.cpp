@@ -78,18 +78,18 @@ int seq_compare(uint32_t seq1, uint32_t seq2) {
 
 Flow::Flow(const IPv4Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
-: seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN),
-  is_v6_(false), ignore_data_packets_(false) {
+: seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN), mss_(-1) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
+    flags_.is_v6 = false;
 }
 
 Flow::Flow(const IPv6Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
-: seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN),
-  is_v6_(true), ignore_data_packets_(false) {
+: seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN), mss_(-1) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
+    flags_.is_v6 = true;
 }
 
 void Flow::data_callback(const data_available_callback_type& callback) {
@@ -107,7 +107,7 @@ void Flow::process_packet(PDU& pdu) {
     if (tcp) {
         update_state(*tcp);
     }
-    if (ignore_data_packets_) {
+    if (flags_.ignore_data_packets) {
         return;
     }
     if (!tcp || !raw) {
@@ -218,11 +218,15 @@ void Flow::update_state(const TCP& tcp) {
     else if (state_ == UNKNOWN && (tcp.flags() & TCP::SYN) != 0) {
         state_ = SYN_SENT;
         seq_number_ = tcp.seq();
+        const TCP::option* mss_option = tcp.search_option(TCP::MSS);
+        if (mss_option) {
+            mss_ = mss_option->to<uint16_t>();
+        }
     }
 }
 
 bool Flow::is_v6() const {
-    return is_v6_;
+    return flags_.is_v6;
 }
 
 bool Flow::is_finished() const {
@@ -289,19 +293,20 @@ void Flow::state(State new_state) {
 }
 
 void Flow::ignore_data_packets() {
-    ignore_data_packets_ = true;
+    flags_.ignore_data_packets = true;
+}
+
+int Flow::mss() const {
+    return mss_;
 }
 
 // Stream
 
-Stream::Stream(const PDU& packet) 
+Stream::Stream(PDU& packet) 
 : client_flow_(extract_client_flow(packet)),
   server_flow_(extract_server_flow(packet)), auto_cleanup_(true) {
-    const TCP& tcp = packet.rfind_pdu<TCP>();
-    // If it's a SYN, set the proper state
-    if (tcp.flags() == TCP::SYN) {
-        client_flow().state(Flow::SYN_SENT);
-    }
+    // Update client flow state
+    client_flow().process_packet(packet);
     const EthernetII* eth = packet.find_pdu<EthernetII>();
     if (eth) {
         client_hw_addr_ = eth->src_addr();
