@@ -39,9 +39,11 @@
 #include <array>
 #include <map>
 #include <functional>
+#include <chrono>
 #include <stdint.h>
 #include "../macros.h"
 #include "../hw_address.h"
+#include "flow.h"
 
 namespace Tins {
 
@@ -51,238 +53,6 @@ class IPv4Address;
 class IPv6Address;
 
 namespace TCPIP {
-
-/**
- * \brief Represents an unidirectional TCP flow between 2 endpoints
- *
- * This class will keep the state for all the traffic sent by
- * one of the peers in a TCP connection. This contains the sequence number,
- * payload ready to be read and buffered payload, along with some other
- * properties of the flow.
- *
- * A TCP stream (see class Stream) is made out of 2 Flows, so you should 
- * probably have a look at that class first.
- *
- * You shouldn't normally need to interact with this class. Stream already
- * provides proxys to most of its Flow's attributes.
- */
-class TINS_API Flow {
-public:
-    /**
-     * \brief Enum that indicates the state of this flow.
-     * 
-     * Note that although similar, this is not mapped to a TCP state-machine 
-     * state. This is mostly used internally to know which packets the flow is
-     * expecting and to know when it's done sending data.
-     */
-    enum State {
-        UNKNOWN,
-        SYN_SENT,
-        ESTABLISHED,
-        FIN_SENT,
-        RST_SENT
-    };
-
-    /** 
-     * The type used to store the payload
-     */
-    typedef std::vector<uint8_t> payload_type;
-
-    /**
-     * The type used to store the buffered payload
-     */
-    typedef std::map<uint32_t, payload_type> buffered_payload_type;
-
-    /**
-     * The type used to store the callback called when new data is available
-     */
-    typedef std::function<void(Flow&)> data_available_callback_type;
-
-    /**
-     * \brief The type used to store the callback called when data is buffered
-     *
-     * The arguments are the flow, the sequence number and payload that will
-     * be buffered.
-     */
-    typedef std::function<void(Flow&,
-                               uint32_t,
-                               const payload_type&)> out_of_order_callback_type;
-
-    /** 
-     * Construct a Flow from an IPv4 address
-     *
-     * \param dst_address This flow's destination address
-     * \param dst_port This flow's destination port
-     * \param sequence_number The initial sequence number to be used 
-     */
-    Flow(const IPv4Address& dst_address, uint16_t dst_port,
-         uint32_t sequence_number);
-    
-    /** 
-     * Construct a Flow from an IPv6 address
-     *
-     * \param dst_address This flow's destination address
-     * \param dst_port This flow's destination port
-     * \param sequence_number The initial sequence number to be used 
-     */
-    Flow(const IPv6Address& dst_address, uint16_t dst_port,
-         uint32_t sequence_number);
-
-    /**
-     * \brief Sets the callback that will be executed when data is readable
-     *
-     * Whenever this flow has readable data, this callback will be executed.
-     * By readable, this means that there's non-out-of-order data captured.
-     *
-     * \param callback The callback to be executed   
-     */
-    void data_callback(const data_available_callback_type& callback);
-
-    /**
-     * \brief Sets the callback that will be executed when out of order data arrives
-     *
-     * Whenever this flow receives out-of-order data, this callback will be
-     * executed.
-     * 
-     * \param callback The callback to be executed
-     */
-    void out_of_order_callback(const out_of_order_callback_type& callback);
-
-    /**
-     * \brief Processes a packet.
-     *
-     * If this packet contains data and starts or overlaps with the current
-     * sequence number, then the data will be appended to this flow's payload
-     * and the data_callback will be executed.
-     *
-     * If this packet contains out-of-order data, it will be buffered and the
-     * buffering_callback will be executed.
-     *
-     * \param pdu The packet to be processed
-     * \sa Flow::data_callback
-     * \sa Flow::buffering_callback
-     */
-    void process_packet(PDU& pdu);
-
-    /**
-     * Indicates whether this flow uses IPv6 addresses
-     */
-    bool is_v6() const;
-
-    /**
-     * \brief Indicates whether this flow is finished
-     *
-     * A finished is considered to be finished if either it sent a
-     * packet with the FIN or RST flags on. 
-     */
-    bool is_finished() const;
-
-    /**
-     * \brief Indicates whether a packet belongs to this flow
-     *
-     * Since Flow represents a unidirectional stream, this will only check
-     * the destination endpoint and not the source one.
-     *
-     * \param packet The packet to be checked
-     */
-    bool packet_belongs(const PDU& packet) const;
-
-    /**
-     * \brief Getter for the IPv4 destination address
-     *
-     * Note that it's only safe to execute this method if is_v6() == false
-     */
-    IPv4Address dst_addr_v4() const;
-
-    /**
-     * \brief Getter for the IPv6 destination address
-     *
-     * Note that it's only safe to execute this method if is_v6() == true
-     */
-    IPv6Address dst_addr_v6() const;
-
-    /** 
-     * Getter for this flow's destination port
-     */
-    uint16_t dport() const;
-
-    /** 
-     * Getter for this flow's payload (const)
-     */
-    const payload_type& payload() const;
-
-    /** 
-     * Getter for this flow's destination port
-     */
-    payload_type& payload();
-
-    /** 
-     * Getter for this flow's state
-     */
-    State state() const;
-
-    /** 
-     * Getter for this flow's sequence number
-     */
-    uint32_t sequence_number() const;
-
-    /** 
-     * Getter for this flow's buffered payload (const)
-     */
-    const buffered_payload_type& buffered_payload() const;
-
-    /** 
-     * Getter for this flow's buffered payload
-     */
-    buffered_payload_type& buffered_payload();
-
-    /**
-     * Sets the state of this flow
-     *
-     * \param new_state The new state of this flow
-     */
-    void state(State new_state);
-
-    /**
-     * \brief Sets whether this flow should ignore data packets
-     *
-     * If the data packets are ignored then the flow will just be 
-     * followed to keep track of its state.
-     */
-    void ignore_data_packets();
-
-    /**
-     * \brief Returns the MSS for this Flow.
-     *
-     * If the MSS option wasn't provided by the peer, -1 is returned
-     */
-    int mss() const;
-private:
-    // Compress all flags into just one struct using bitfields 
-    struct flags {
-        flags() : ignore_data_packets(0) {
-
-        }
-
-        uint32_t is_v6:1,
-                 ignore_data_packets:1;
-    };
-
-    void store_payload(uint32_t seq, payload_type payload);
-    buffered_payload_type::iterator erase_iterator(buffered_payload_type::iterator iter);
-    void update_state(const TCP& tcp);
-
-    payload_type payload_;
-    buffered_payload_type buffered_payload_;
-    uint32_t seq_number_;
-    std::array<uint8_t, 16> dest_address_;
-    uint16_t dest_port_;
-    data_available_callback_type on_data_callback_;
-    out_of_order_callback_type on_out_of_order_callback_;
-    State state_;
-    int mss_;
-    flags flags_;
-};
 
 /** 
  * \brief Represents a TCP stream
@@ -300,14 +70,19 @@ private:
 class TINS_API Stream {
 public:
     /**
-     * The type used for callbacks
-     */
-    typedef std::function<void(Stream&)> stream_callback_type;
-
-    /**
      * The type used to store payloads
      */
     typedef Flow::payload_type payload_type;
+
+    /** 
+     * The type used to represent timestamps
+     */
+    typedef std::chrono::microseconds timestamp_type;
+    
+    /**
+     * The type used for callbacks
+     */
+    typedef std::function<void(Stream&)> stream_callback_type;
 
     /**
      * The type used for callbacks
@@ -326,14 +101,30 @@ public:
 
     /**
      * \brief Constructs a TCP stream using the provided packet.
+     * 
+     * \param initial_packet The first packet of the stream
+     * \param ts The first packet's timestamp
      */
-    Stream(PDU& initial_packet);
+    Stream(PDU& initial_packet, const timestamp_type& ts = timestamp_type());
 
     /**
      * \brief Processes this packet.
      *
      * This will forward the packet appropriately to the client
      * or server flow.
+     *
+     * \param packet The packet to be processed
+     * \param ts The packet's timestamp
+     */
+    void process_packet(PDU& packet, const timestamp_type& ts);
+
+    /**
+     * \brief Processes this packet.
+     *
+     * This will forward the packet appropriately to the client
+     * or server flow.
+     *
+     * \param packet The packet to be processed
      */
     void process_packet(PDU& packet);
 
@@ -449,6 +240,16 @@ public:
     payload_type& server_payload();
 
     /**
+     * Getter for the creation time of this stream
+     */
+    const timestamp_type& create_time() const;
+
+    /**
+     * Getter for the last seen time of this stream
+     */
+    const timestamp_type& last_seen() const;
+
+    /**
      * \brief Sets the callback to be executed when the stream is closed
      *
      * \param callback The callback to be set
@@ -555,6 +356,8 @@ private:
     out_of_order_callback_type on_server_out_of_order_callback_;
     hwaddress_type client_hw_addr_;
     hwaddress_type server_hw_addr_;
+    timestamp_type create_time_;
+    timestamp_type last_seen_;
     bool auto_cleanup_;
 };
 

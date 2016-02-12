@@ -53,6 +53,7 @@ ADD_LIBRARY(
     snap.cpp
     sniffer.cpp
     tcp.cpp
+    tcp_ip/flow.cpp
     tcp_ip/stream.cpp
     tcp_ip/stream_follower.cpp
     tcp_stream.cpp

@@ -44,6 +44,7 @@ class PDU;
 class TCP;
 class IPv4Address;
 class IPv6Address;
+class Packet;
 
 namespace TCPIP {
 
@@ -90,13 +91,20 @@ public:
      * and process it, or if it belongs to a new one, in which case it
      * starts tracking it.
      *
-     * This method always returns true so it can be easily plugged as
-     * the argument to Sniffer::sniff_loop.
+     * \param packet The packet to be processed
+     */
+    void process_packet(PDU& packet);
+
+    /** 
+     * \brief Processes a packet
+     *
+     * This will detect if this packet belongs to an existing stream 
+     * and process it, or if it belongs to a new one, in which case it
+     * starts tracking it.
      *
      * \param packet The packet to be processed
-     * \return Always true
      */
-    bool process_packet(PDU& packet);
+    void process_packet(Packet& packet);
 
     /**
      * \brief Sets the callback to be executed when a new stream is captured.
@@ -107,6 +115,17 @@ public:
      * \param callback The callback to be set
      */
     void new_stream_callback(const stream_callback_type& callback);
+
+    /**
+     * \brief Sets the maximum time a stream will be followed without capturing
+     * packets that belong to it.
+     *
+     * \param keep_alive The maximum time to keep unseen streams
+     */
+    template <typename Rep, typename Period>
+    void stream_keep_alive(const std::chrono::duration<Rep, Period>& keep_alive) {
+        stream_keep_alive_ = keep_alive;
+    }
 
     /**
      * Finds the stream identified by the provided arguments.
@@ -130,8 +149,12 @@ public:
     Stream& find_stream(IPv6Address client_addr, uint16_t client_port,
                         IPv6Address server_addr, uint16_t server_port);
 private:
-    static const size_t DEFAULT_MAX_BUFFERED_CHUNKS;
     typedef std::array<uint8_t, 16> address_type;
+    typedef Stream::timestamp_type timestamp_type;
+
+    static const size_t DEFAULT_MAX_BUFFERED_CHUNKS;
+    static const timestamp_type DEFAULT_CLEANUP_INTERVAL;
+    static const timestamp_type DEFAULT_KEEP_ALIVE;
 
     struct stream_id {
         stream_id(const address_type& client_addr, uint16_t client_port,
@@ -153,10 +176,14 @@ private:
     Stream& find_stream(const stream_id& id);
     static address_type serialize(IPv4Address address);
     static address_type serialize(const IPv6Address& address);
+    void process_packet(PDU& packet, const timestamp_type& ts);
+    void cleanup_streams(const timestamp_type& now);
 
     streams_type streams_;
     stream_callback_type on_new_connection_;
     size_t max_buffered_chunks_;
+    timestamp_type last_cleanup_;
+    timestamp_type stream_keep_alive_;
     bool attach_to_flows_;
 };
 

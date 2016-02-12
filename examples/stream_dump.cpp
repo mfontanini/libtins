@@ -31,6 +31,7 @@
 #include <sstream>
 #include "tins/tcp_ip/stream_follower.h"
 #include "tins/sniffer.h"
+#include "tins/packet.h"
 #include "tins/ip_address.h"
 #include "tins/ipv6_address.h"
 
@@ -44,6 +45,7 @@ using std::exception;
 
 using Tins::Sniffer;
 using Tins::SnifferConfiguration;
+using Tins::Packet;
 using Tins::TCPIP::StreamFollower;
 using Tins::TCPIP::Stream;
 
@@ -148,7 +150,10 @@ int main(int argc, char* argv[]) {
         follower.new_stream_callback(&on_new_connection);
         // Now start capturing. Every time there's a new packet, call 
         // follower.process_packet
-        sniffer.sniff_loop(bind(&StreamFollower::process_packet, &follower, _1));
+        sniffer.sniff_loop([&](Packet& packet) {
+            follower.process_packet(packet);
+            return true;
+        });
     }
     catch (exception& ex) {
         cerr << "Error: " << ex.what() << endl;

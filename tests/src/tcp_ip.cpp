@@ -16,9 +16,11 @@
 #include "exceptions.h"
 #include "ethernetII.h"
 #include "rawpdu.h"
+#include "packet.h"
 #include "utils.h"
 
 using namespace std;
+using namespace std::chrono;
 using namespace Tins;
 using namespace Tins::TCPIP;
 
@@ -331,8 +333,15 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     packets[0].dst_addr("05:04:03:02:01:00");
     StreamFollower follower;
     follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
+
+    Stream::timestamp_type ts(10000);
+    Stream::timestamp_type create_time = ts;
     for (size_t i = 0; i < packets.size(); ++i) {
-        follower.process_packet(packets[i]);
+        if (i != 0) {
+            ts += milliseconds(100);
+        }
+        Packet packet(packets[i], ts);
+        follower.process_packet(packet);
     }
     Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
                                           IPv4Address("4.3.2.1"), 25);
@@ -350,6 +359,8 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     EXPECT_EQ(HWAddress<6>("05:04:03:02:01:00"), stream.server_hw_addr());
     EXPECT_EQ(22, stream.client_port());
     EXPECT_EQ(25, stream.server_port());
+    EXPECT_EQ(create_time, stream.create_time());
+    EXPECT_EQ(ts, stream.last_seen());
 
     IP server_packet = IP("1.2.3.4", "4.3.2.1") / TCP(22, 25);
     server_packet.rfind_pdu<TCP>().flags(TCP::ACK);
@@ -359,7 +370,7 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     EXPECT_EQ(61, stream.server_flow().sequence_number());
 }
 
-TEST_F(FlowTest, StreamFollower_MSS) {
+TEST_F(FlowTest, StreamFollower_TCPOptions) {
     using std::placeholders::_1;
 
     vector<EthernetII> packets = three_way_handshake(29, 60, "1.2.3.4", 22, "4.3.2.1", 25);
@@ -367,6 +378,8 @@ TEST_F(FlowTest, StreamFollower_MSS) {
     packets[0].rfind_pdu<TCP>().mss(1220);
     // Server's mss is 1460
     packets[1].rfind_pdu<TCP>().mss(1460);
+    // Server supports SACK
+    packets[1].rfind_pdu<TCP>().sack_permitted();
     StreamFollower follower;
     follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
     for (size_t i = 0; i < packets.size(); ++i) {
@@ -376,8 +389,33 @@ TEST_F(FlowTest, StreamFollower_MSS) {
                                           IPv4Address("4.3.2.1"), 25);
     EXPECT_EQ(1220, stream.client_flow().mss());
     EXPECT_EQ(1460, stream.server_flow().mss());
+    EXPECT_FALSE(stream.client_flow().sack_permitted());
+    EXPECT_TRUE(stream.server_flow().sack_permitted());
 }
 
+TEST_F(FlowTest, StreamFollower_CleanupWorks) {
+    using std::placeholders::_1;
+
+    vector<EthernetII> packets = three_way_handshake(29, 60, "1.2.3.4", 22, "4.3.2.1", 25);
+    StreamFollower follower;
+    follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
+    packets[2].rfind_pdu<IP>().src_addr("6.6.6.6");
+    auto base_time = duration_cast<Stream::timestamp_type>(system_clock::now().time_since_epoch());
+    Packet packet1(packets[0], base_time);   
+    Packet packet2(packets[1], base_time + seconds(50));   
+    Packet packet3(packets[2], base_time + minutes(10));   
+    follower.process_packet(packet1);
+    Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
+                                          IPv4Address("4.3.2.1"), 25);
+    EXPECT_EQ(base_time, stream.create_time());
+    follower.process_packet(packet2);
+    follower.process_packet(packet3);
+    // At this point, it should be cleaned up
+    EXPECT_THROW(
+        follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25), 
+        stream_not_found
+    );   
+}
 
 TEST_F(FlowTest, StreamFollower_RSTClosesStream) {
     using std::placeholders::_1;

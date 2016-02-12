@@ -40,6 +40,7 @@
 #include "ip.h"
 #include "ipv6.h"
 #include "rawpdu.h"
+#include "packet.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 
@@ -50,6 +51,9 @@ using std::runtime_error;
 using std::numeric_limits;
 using std::max;
 using std::swap;
+using std::chrono::system_clock;
+using std::chrono::minutes;
+using std::chrono::duration_cast;
 
 using Tins::Memory::OutputMemoryStream;
 using Tins::Memory::InputMemoryStream;
@@ -58,13 +62,25 @@ namespace Tins {
 namespace TCPIP {
 
 const size_t StreamFollower::DEFAULT_MAX_BUFFERED_CHUNKS = 512;
+const StreamFollower::timestamp_type StreamFollower::DEFAULT_KEEP_ALIVE = minutes(5);
 
 StreamFollower::StreamFollower() 
-: max_buffered_chunks_(DEFAULT_MAX_BUFFERED_CHUNKS), attach_to_flows_(false) {
+: max_buffered_chunks_(DEFAULT_MAX_BUFFERED_CHUNKS), last_cleanup_(0),
+  stream_keep_alive_(DEFAULT_KEEP_ALIVE), attach_to_flows_(false) {
 
 }
 
-bool StreamFollower::process_packet(PDU& packet) {
+void StreamFollower::process_packet(PDU& packet) {
+    // Use current time
+    const system_clock::duration ts = system_clock::now().time_since_epoch();
+    process_packet(packet, duration_cast<timestamp_type>(ts));
+}
+
+void StreamFollower::process_packet(Packet& packet) {
+    process_packet(*packet.pdu(), packet.timestamp());
+}
+
+void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
     stream_id identifier = make_stream_id(packet);
     streams_type::iterator iter = streams_.find(identifier);
     bool process = true;
@@ -73,7 +89,7 @@ bool StreamFollower::process_packet(PDU& packet) {
         // Start tracking if they're either SYNs or they contain data (attach
         // to an already running flow).
         if (tcp.flags() == TCP::SYN || (attach_to_flows_ && tcp.find_pdu<RawPDU>() != 0)) {
-            iter = streams_.insert(make_pair(identifier, Stream(packet))).first;
+            iter = streams_.insert(make_pair(identifier, Stream(packet, ts))).first;
             iter->second.setup_flows_callbacks();
             if (on_new_connection_) {
                 on_new_connection_(iter->second);
@@ -99,14 +115,16 @@ bool StreamFollower::process_packet(PDU& packet) {
     // it and it contains payload
     if (process) {
         Stream& stream = iter->second;
-        stream.process_packet(packet);
+        stream.process_packet(packet, ts);
         size_t total_chunks = stream.client_flow().buffered_payload().size() + 
                               stream.server_flow().buffered_payload().size();
         if (stream.is_finished() || total_chunks > max_buffered_chunks_) {
             streams_.erase(iter);
         }
     }
-    return true;
+    if (last_cleanup_ + stream_keep_alive_ <= ts) {
+        cleanup_streams(ts);
+    }
 }
 
 void StreamFollower::new_stream_callback(const stream_callback_type& callback) {
@@ -171,6 +189,20 @@ StreamFollower::address_type StreamFollower::serialize(const IPv6Address& addres
     addr.fill(0);
     output.write(address);
     return addr;
+}
+
+void StreamFollower::cleanup_streams(const timestamp_type& now) {
+    streams_type::iterator iter = streams_.begin();
+    while (iter != streams_.end()) {
+        if (iter->second.last_seen() + stream_keep_alive_ <= now) {
+            // TODO: execute some callback here
+            streams_.erase(iter++);
+        }
+        else {
+            ++iter;
+        }
+    }
+    last_cleanup_ = now;
 }
 
 // stream_id
