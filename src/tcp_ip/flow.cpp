@@ -75,32 +75,40 @@ int seq_compare(uint32_t seq1, uint32_t seq2) {
 
 Flow::Flow(const IPv4Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
-: seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN), mss_(-1) {
+: seq_number_(sequence_number), dest_port_(dest_port) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
     flags_.is_v6 = false;
+    initialize();
 }
 
 Flow::Flow(const IPv6Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
-: seq_number_(sequence_number), dest_port_(dest_port), state_(UNKNOWN), mss_(-1) {
+: seq_number_(sequence_number), dest_port_(dest_port) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
     flags_.is_v6 = true;
+    initialize();
+}
+
+void Flow::initialize() {
+    total_buffered_bytes_ = 0;
+    state_ = UNKNOWN;
+    mss_ = -1;
 }
 
 void Flow::data_callback(const data_available_callback_type& callback) {
     on_data_callback_ = callback;
 }
 
-void Flow::out_of_order_callback(const out_of_order_callback_type& callback) {
+void Flow::out_of_order_callback(const flow_packet_callback_type& callback) {
     on_out_of_order_callback_ = callback;
 }
 
 void Flow::process_packet(PDU& pdu) {
     TCP* tcp = pdu.find_pdu<TCP>();
     RawPDU* raw = pdu.find_pdu<RawPDU>(); 
-    // If we sent a packet with RST or FIN on, this flow is done
+    // Update the internal state first
     if (tcp) {
         update_state(*tcp);
     }
@@ -142,6 +150,8 @@ void Flow::process_packet(PDU& pdu) {
                 if (comparison > 0) {
                     // Then slice it
                     payload_type& payload = iter->second;
+                    // First update this counter
+                    total_buffered_bytes_ -= payload.size();
                     payload.erase(
                         payload.begin(),
                         payload.begin() + (seq_number_ - iter->first)
@@ -164,10 +174,6 @@ void Flow::process_packet(PDU& pdu) {
                 seq_number_ += iter->second.size();
                 iter = erase_iterator(iter);
                 added_some = true;
-                // If we don't have any other payload, we're done
-                if (buffered_payload_.empty()) {
-                    break;
-                }
             }
         }
         if (added_some) {
@@ -182,9 +188,12 @@ void Flow::store_payload(uint32_t seq, payload_type payload) {
     buffered_payload_type::iterator iter = buffered_payload_.find(seq);
     // New segment, store it
     if (iter == buffered_payload_.end()) {
+        total_buffered_bytes_ += payload.size();
         buffered_payload_.insert(make_pair(seq, move(payload)));
     }
     else if (iter->second.size() < payload.size()) {
+        // Increment by the diff between sizes
+        total_buffered_bytes_ += (payload.size() - iter->second.size());
         // If we already have payload on this position but it's a shorter
         // chunk than the new one, replace it
         iter->second = move(payload);
@@ -193,6 +202,7 @@ void Flow::store_payload(uint32_t seq, payload_type payload) {
 
 Flow::buffered_payload_type::iterator Flow::erase_iterator(buffered_payload_type::iterator iter) {
     buffered_payload_type::iterator output = iter;
+    total_buffered_bytes_ -= iter->second.size();
     ++output;
     buffered_payload_.erase(iter);
     if (output == buffered_payload_.end()) {
@@ -280,6 +290,10 @@ const Flow::buffered_payload_type& Flow::buffered_payload() const {
 
 Flow::buffered_payload_type& Flow::buffered_payload() {
     return buffered_payload_;
+}
+
+uint32_t Flow::total_buffered_bytes() const {
+    return total_buffered_bytes_;
 }
 
 Flow::payload_type& Flow::payload() {

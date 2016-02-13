@@ -116,11 +116,11 @@ void Stream::server_data_callback(const stream_callback_type& callback) {
     on_server_data_callback_ = callback;
 }
 
-void Stream::client_out_of_order_callback(const out_of_order_callback_type& callback) {
+void Stream::client_out_of_order_callback(const stream_packet_callback_type& callback) {
     on_client_out_of_order_callback_ = callback;
 }
 
-void Stream::server_out_of_order_callback(const out_of_order_callback_type& callback) {
+void Stream::server_out_of_order_callback(const stream_packet_callback_type& callback) {
     on_server_out_of_order_callback_ = callback;
 }
 

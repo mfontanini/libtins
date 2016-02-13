@@ -147,6 +147,8 @@ void FlowTest::run_test(uint32_t initial_seq, const ordering_info_type& chunks,
     }
     string flow_payload = merge_chunks(flow_payload_chunks);
     EXPECT_EQ(payload, string(flow_payload.begin(), flow_payload.end()));
+    EXPECT_EQ(0, flow.total_buffered_bytes());
+    EXPECT_TRUE(flow.buffered_payload().empty());
 }
 
 void FlowTest::run_test(uint32_t initial_seq, const ordering_info_type& chunks) {
@@ -396,9 +398,13 @@ TEST_F(FlowTest, StreamFollower_TCPOptions) {
 TEST_F(FlowTest, StreamFollower_CleanupWorks) {
     using std::placeholders::_1;
 
+    bool timed_out = false;
     vector<EthernetII> packets = three_way_handshake(29, 60, "1.2.3.4", 22, "4.3.2.1", 25);
     StreamFollower follower;
     follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
+    follower.stream_termination_callback([&](Stream&, StreamFollower::TerminationReason reason) {
+        timed_out = (reason == StreamFollower::TIMEOUT);
+    });
     packets[2].rfind_pdu<IP>().src_addr("6.6.6.6");
     auto base_time = duration_cast<Stream::timestamp_type>(system_clock::now().time_since_epoch());
     Packet packet1(packets[0], base_time);   
@@ -414,7 +420,8 @@ TEST_F(FlowTest, StreamFollower_CleanupWorks) {
     EXPECT_THROW(
         follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25), 
         stream_not_found
-    );   
+    );
+    EXPECT_TRUE(timed_out);
 }
 
 TEST_F(FlowTest, StreamFollower_RSTClosesStream) {

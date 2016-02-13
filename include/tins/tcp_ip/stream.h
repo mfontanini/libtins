@@ -85,13 +85,13 @@ public:
     typedef std::function<void(Stream&)> stream_callback_type;
 
     /**
-     * The type used for callbacks
+     * The type used for packet-triggered callbacks
      *
      * /sa Flow::buffering_callback
      */
     typedef std::function<void(Stream&,
                                uint32_t,
-                               const payload_type&)> out_of_order_callback_type;
+                               const payload_type&)> stream_packet_callback_type;
 
     /**
      * The type used to store hardware addresses
@@ -279,7 +279,7 @@ public:
      * \sa Flow::buffering_callback
      * \param callback The callback to be set
      */
-    void client_out_of_order_callback(const out_of_order_callback_type& callback);
+    void client_out_of_order_callback(const stream_packet_callback_type& callback);
 
     /**
      * \brief Sets the callback to be executed when there's new buffered 
@@ -288,7 +288,7 @@ public:
      * \sa Flow::buffering_callback
      * \param callback The callback to be set
      */
-    void server_out_of_order_callback(const out_of_order_callback_type& callback);
+    void server_out_of_order_callback(const stream_packet_callback_type& callback);
 
     /**
      * \brief Indicates that the data packets sent by the client should be 
@@ -352,8 +352,8 @@ private:
     stream_callback_type on_stream_closed_;
     stream_callback_type on_client_data_callback_;
     stream_callback_type on_server_data_callback_;
-    out_of_order_callback_type on_client_out_of_order_callback_;
-    out_of_order_callback_type on_server_out_of_order_callback_;
+    stream_packet_callback_type on_client_out_of_order_callback_;
+    stream_packet_callback_type on_server_out_of_order_callback_;
     hwaddress_type client_hw_addr_;
     hwaddress_type server_hw_addr_;
     timestamp_type create_time_;

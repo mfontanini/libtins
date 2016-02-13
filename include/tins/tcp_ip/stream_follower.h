@@ -79,6 +79,21 @@ public:
      */
     typedef Stream::stream_callback_type stream_callback_type;
 
+    /**
+     * Enum to indicate the reason why a stream was terminated
+     */
+    enum TerminationReason {
+        TIMEOUT, ///< The stream was terminated due to a timeout
+        BUFFERED_DATA ///< The stream was terminated because it had too much buffered data
+    };
+
+    /**
+     * \brief The type used for stream termination callbacks
+     *
+     * \sa StreamFollower::stream_termination_callback
+     */
+    typedef std::function<void(Stream&, TerminationReason)> stream_termination_callback_type;
+
     /** 
      * Default constructor
      */
@@ -117,6 +132,19 @@ public:
     void new_stream_callback(const stream_callback_type& callback);
 
     /**
+     * \brief Sets the stream termination callback
+     *
+     * A stream is terminated when either:
+     *
+     * * It contains too much buffered data.
+     * * No packets have been seen for some time interval.
+     *
+     * \param callback The callback to be executed on stream termination
+     * \sa StreamFollower::stream_keep_alive
+     */
+    void stream_termination_callback(const stream_termination_callback_type& callback);
+
+    /**
      * \brief Sets the maximum time a stream will be followed without capturing
      * packets that belong to it.
      *
@@ -135,8 +163,8 @@ public:
      * \param server_addr The server's address
      * \param server_addr The server's port
      */
-    Stream& find_stream(IPv4Address client_addr, uint16_t client_port,
-                        IPv4Address server_addr, uint16_t server_port);
+    Stream& find_stream(const IPv4Address& client_addr, uint16_t client_port,
+                        const IPv4Address& server_addr, uint16_t server_port);
 
     /**
      * Finds the stream identified by the provided arguments.
@@ -146,14 +174,14 @@ public:
      * \param server_addr The server's address
      * \param server_addr The server's port
      */
-    Stream& find_stream(IPv6Address client_addr, uint16_t client_port,
-                        IPv6Address server_addr, uint16_t server_port);
+    Stream& find_stream(const IPv6Address& client_addr, uint16_t client_port,
+                        const IPv6Address& server_addr, uint16_t server_port);
 private:
     typedef std::array<uint8_t, 16> address_type;
     typedef Stream::timestamp_type timestamp_type;
 
     static const size_t DEFAULT_MAX_BUFFERED_CHUNKS;
-    static const timestamp_type DEFAULT_CLEANUP_INTERVAL;
+    static const uint32_t DEFAULT_MAX_BUFFERED_BYTES;
     static const timestamp_type DEFAULT_KEEP_ALIVE;
 
     struct stream_id {
@@ -181,7 +209,9 @@ private:
 
     streams_type streams_;
     stream_callback_type on_new_connection_;
+    stream_termination_callback_type on_stream_termination_;
     size_t max_buffered_chunks_;
+    uint32_t max_buffered_bytes_;
     timestamp_type last_cleanup_;
     timestamp_type stream_keep_alive_;
     bool attach_to_flows_;

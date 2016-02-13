@@ -106,7 +106,7 @@ public:
      */
     typedef std::function<void(Flow&,
                                uint32_t,
-                               const payload_type&)> out_of_order_callback_type;
+                               const payload_type&)> flow_packet_callback_type;
 
     /** 
      * Construct a Flow from an IPv4 address
@@ -146,7 +146,7 @@ public:
      * 
      * \param callback The callback to be executed
      */
-    void out_of_order_callback(const out_of_order_callback_type& callback);
+    void out_of_order_callback(const flow_packet_callback_type& callback);
 
     /**
      * \brief Processes a packet.
@@ -188,53 +188,58 @@ public:
     bool packet_belongs(const PDU& packet) const;
 
     /**
-     * \brief Getter for the IPv4 destination address
+     * \brief Retrieves the IPv4 destination address
      *
      * Note that it's only safe to execute this method if is_v6() == false
      */
     IPv4Address dst_addr_v4() const;
 
     /**
-     * \brief Getter for the IPv6 destination address
+     * \brief Retrieves the IPv6 destination address
      *
      * Note that it's only safe to execute this method if is_v6() == true
      */
     IPv6Address dst_addr_v6() const;
 
     /** 
-     * Getter for this flow's destination port
+     * Retrieves this flow's destination port
      */
     uint16_t dport() const;
 
     /** 
-     * Getter for this flow's payload (const)
+     * Retrieves this flow's payload (const)
      */
     const payload_type& payload() const;
 
     /** 
-     * Getter for this flow's destination port
+     * Retrieves this flow's destination port
      */
     payload_type& payload();
 
     /** 
-     * Getter for this flow's state
+     * Retrieves this flow's state
      */
     State state() const;
 
     /** 
-     * Getter for this flow's sequence number
+     * Retrieves this flow's sequence number
      */
     uint32_t sequence_number() const;
 
     /** 
-     * Getter for this flow's buffered payload (const)
+     * Retrieves this flow's buffered payload (const)
      */
     const buffered_payload_type& buffered_payload() const;
 
     /** 
-     * Getter for this flow's buffered payload
+     * Retrieves this flow's buffered payload
      */
     buffered_payload_type& buffered_payload();
+
+    /**
+     * Retrieves this flow's total buffered bytes
+     */
+    uint32_t total_buffered_bytes() const;
 
     /**
      * Sets the state of this flow
@@ -277,14 +282,16 @@ private:
     void store_payload(uint32_t seq, payload_type payload);
     buffered_payload_type::iterator erase_iterator(buffered_payload_type::iterator iter);
     void update_state(const TCP& tcp);
+    void initialize();
 
     payload_type payload_;
     buffered_payload_type buffered_payload_;
     uint32_t seq_number_;
+    uint32_t total_buffered_bytes_;
     std::array<uint8_t, 16> dest_address_;
     uint16_t dest_port_;
     data_available_callback_type on_data_callback_;
-    out_of_order_callback_type on_out_of_order_callback_;
+    flow_packet_callback_type on_out_of_order_callback_;
     State state_;
     int mss_;
     flags flags_;

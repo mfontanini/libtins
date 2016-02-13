@@ -62,10 +62,12 @@ namespace Tins {
 namespace TCPIP {
 
 const size_t StreamFollower::DEFAULT_MAX_BUFFERED_CHUNKS = 512;
+const uint32_t StreamFollower::DEFAULT_MAX_BUFFERED_BYTES = 3 * 1024 * 1024; // 3MB
 const StreamFollower::timestamp_type StreamFollower::DEFAULT_KEEP_ALIVE = minutes(5);
 
 StreamFollower::StreamFollower() 
-: max_buffered_chunks_(DEFAULT_MAX_BUFFERED_CHUNKS), last_cleanup_(0),
+: max_buffered_chunks_(DEFAULT_MAX_BUFFERED_CHUNKS),
+  max_buffered_bytes_(DEFAULT_MAX_BUFFERED_BYTES), last_cleanup_(0),
   stream_keep_alive_(DEFAULT_KEEP_ALIVE), attach_to_flows_(false) {
 
 }
@@ -118,7 +120,15 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
         stream.process_packet(packet, ts);
         size_t total_chunks = stream.client_flow().buffered_payload().size() + 
                               stream.server_flow().buffered_payload().size();
-        if (stream.is_finished() || total_chunks > max_buffered_chunks_) {
+        uint32_t total_buffered_bytes = stream.client_flow().total_buffered_bytes() +
+                                        stream.server_flow().total_buffered_bytes();
+        bool terminate_stream = total_chunks > max_buffered_chunks_ || 
+                                total_buffered_bytes > max_buffered_bytes_;
+        if (stream.is_finished() || terminate_stream) {
+            // If we're terminating the stream, execute the termination callback
+            if (terminate_stream && on_stream_termination_) {
+                on_stream_termination_(stream, BUFFERED_DATA);
+            }
             streams_.erase(iter);
         }
     }
@@ -131,15 +141,19 @@ void StreamFollower::new_stream_callback(const stream_callback_type& callback) {
     on_new_connection_ = callback;
 }
 
-Stream& StreamFollower::find_stream(IPv4Address client_addr, uint16_t client_port,
-                                    IPv4Address server_addr, uint16_t server_port) {
+void StreamFollower::stream_termination_callback(const stream_termination_callback_type& callback) {
+    on_stream_termination_ = callback;
+}
+
+Stream& StreamFollower::find_stream(const IPv4Address& client_addr, uint16_t client_port,
+                                    const IPv4Address& server_addr, uint16_t server_port) {
     stream_id identifier(serialize(client_addr), client_port,
                          serialize(server_addr), server_port);
     return find_stream(identifier);
 }
 
-Stream& StreamFollower::find_stream(IPv6Address client_addr, uint16_t client_port,
-                                    IPv6Address server_addr, uint16_t server_port) {
+Stream& StreamFollower::find_stream(const IPv6Address& client_addr, uint16_t client_port,
+                                    const IPv6Address& server_addr, uint16_t server_port) {
     stream_id identifier(serialize(client_addr), client_port,
                          serialize(server_addr), server_port);
     return find_stream(identifier);
@@ -195,7 +209,10 @@ void StreamFollower::cleanup_streams(const timestamp_type& now) {
     streams_type::iterator iter = streams_.begin();
     while (iter != streams_.end()) {
         if (iter->second.last_seen() + stream_keep_alive_ <= now) {
-            // TODO: execute some callback here
+            // If we have a termination callback, execute it
+            if (on_stream_termination_) {
+                on_stream_termination_(iter->second, TIMEOUT);
+            }
             streams_.erase(iter++);
         }
         else {
