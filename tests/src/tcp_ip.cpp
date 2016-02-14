@@ -515,6 +515,7 @@ TEST_F(FlowTest, StreamFollower_FollowStream) {
 
 #ifdef HAVE_ACK_TRACKER
 
+using namespace boost;
 using namespace boost::icl;
 
 class AckTrackerTest : public testing::Test {
@@ -550,32 +551,30 @@ TCP make_tcp_ack(uint32_t ack_number, SackEdges&&... rest) {
     return output;
 }
 
-
-ostream& operator<<(ostream& stream, const AckTrackerTest::interval_type& interval) {
-    stream << ((interval.bounds() == interval_bounds::left_open()) ? "(" : "[");
-    stream << interval.lower() << ", " << interval.upper();
-    stream << ((interval.bounds() == interval_bounds::right_open()) ? ")" : "]");
-    return stream;
-}
-
+// This section compares ranges using 
+//
+// EXPECT_TRUE(r1 == r2)
+//
+// Since otherwise gtest fails to compile when trying to print an interval
+// to a std::ostream
 TEST_F(AckTrackerTest, AckedRange_1) {
     AckedRange range(0, 100);
     EXPECT_TRUE(range.has_next());
-    EXPECT_EQ(interval_type::closed(0, 100), range.next());
+    EXPECT_TRUE(interval_type::closed(0, 100) == range.next());
     EXPECT_FALSE(range.has_next());
 }
 
 TEST_F(AckTrackerTest, AckedRange_2) {
     AckedRange range(2, 3);
     EXPECT_TRUE(range.has_next());
-    EXPECT_EQ(interval_type::closed(2, 3), range.next());
+    EXPECT_TRUE(interval_type::closed(2, 3) == range.next());
     EXPECT_FALSE(range.has_next());
 }
 
 TEST_F(AckTrackerTest, AckedRange_3) {
     AckedRange range(0, 0);
     EXPECT_TRUE(range.has_next());
-    EXPECT_EQ(interval_type::right_open(0, 1), range.next());
+    EXPECT_TRUE(interval_type::right_open(0, 1) == range.next());
     EXPECT_FALSE(range.has_next());
 }
 
@@ -583,7 +582,7 @@ TEST_F(AckTrackerTest, AckedRange_4) {
     uint32_t maximum = numeric_limits<uint32_t>::max();
     AckedRange range(maximum, maximum);
     EXPECT_TRUE(range.has_next());
-    EXPECT_EQ(interval_type::left_open(maximum - 1, maximum), range.next());
+    EXPECT_TRUE(interval_type::left_open(maximum - 1, maximum) == range.next());
     EXPECT_FALSE(range.has_next());
 }
 
@@ -591,12 +590,12 @@ TEST_F(AckTrackerTest, AckedRange_WrapAround) {
     uint32_t first = numeric_limits<uint32_t>::max() - 5;
     AckedRange range(first, 100);
     EXPECT_TRUE(range.has_next());
-    EXPECT_EQ(
-        interval_type::closed(first, numeric_limits<uint32_t>::max()),
+    EXPECT_TRUE(
+        interval_type::closed(first, numeric_limits<uint32_t>::max()) ==
         range.next()
     );
     EXPECT_TRUE(range.has_next());
-    EXPECT_EQ(interval_type::closed(0, 100), range.next());
+    EXPECT_TRUE(interval_type::closed(0, 100) == range.next());
     EXPECT_FALSE(range.has_next());
 }
 
