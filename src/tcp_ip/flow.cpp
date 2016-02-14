@@ -173,6 +173,9 @@ void Flow::process_packet(PDU& pdu) {
             }
         }
     }
+    else if (on_out_of_order_callback_) {
+        on_out_of_order_callback_(*this, tcp->seq(), raw->payload());
+    }
 }
 
 void Flow::store_payload(uint32_t seq, payload_type payload) {
