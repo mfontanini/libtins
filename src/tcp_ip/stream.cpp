@@ -256,6 +256,15 @@ void Stream::auto_cleanup_payloads(bool value) {
     auto_cleanup_ = value;
 }
 
+void Stream::enable_ack_tracking() {
+    client_flow().enable_ack_tracking();
+    server_flow().enable_ack_tracking();
+}
+
+bool Stream::ack_tracking_enabled() const {
+    return client_flow().ack_tracking_enabled() && server_flow().ack_tracking_enabled();
+}
+
 void Stream::on_client_flow_data(const Flow& /*flow*/) {
     if (on_client_data_callback_) {
         on_client_data_callback_(*this);

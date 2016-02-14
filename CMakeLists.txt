@@ -56,7 +56,6 @@ IF(WIN32)
     ADD_DEFINITIONS(-DNOMINMAX)
 ENDIF(WIN32)
 
-
 INCLUDE(ExternalProject)
 
 # *******************
@@ -96,6 +95,22 @@ IF(LIBTINS_ENABLE_DOT11)
         MESSAGE(STATUS "Disabling WPA2 decryption support.")
     ENDIF(LIBTINS_ENABLE_WPA2)
 ENDIF(LIBTINS_ENABLE_DOT11)
+
+OPTION(LIBTINS_ENABLE_ACK_TRACKER "Enable TCP ACK tracking support" ON)
+IF(LIBTINS_ENABLE_ACK_TRACKER AND HAVE_CXX11)
+    FIND_PACKAGE(Boost)
+    IF (Boost_FOUND)
+        MESSAGE(STATUS "Enabling TCP ACK tracking support.")
+        INCLUDE_DIRECTORIES(Boost_INCLUDE_DIRS)
+        SET(HAVE_ACK_TRACKER ON)
+    ELSE()
+        MESSAGE(WARNING "Disabling ACK tracking support as boost.icl was not found")
+        SET(HAVE_ACK_TRACKER OFF)
+    ENDIF()
+ELSE()
+    SET(HAVE_ACK_TRACKER OFF)
+    MESSAGE(STATUS "Disabling ACK tracking support")
+ENDIF()
 
 # Use pcap_sendpacket to send l2 packets rather than raw sockets
 IF(WIN32)

@@ -40,6 +40,7 @@
 #include "ip.h"
 #include "ipv6.h"
 #include "rawpdu.h"
+#include "internals.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 
@@ -53,25 +54,10 @@ using std::swap;
 
 using Tins::Memory::OutputMemoryStream;
 using Tins::Memory::InputMemoryStream;
+using Tins::Internals::seq_compare;
 
 namespace Tins {
 namespace TCPIP {
-
-// As defined by RFC 1982 - 2 ^ (SERIAL_BITS - 1)
-static const uint32_t seq_number_diff = 2147483648U;
-
-// Compares sequence numbers as defined by RFC 1982.
-int seq_compare(uint32_t seq1, uint32_t seq2) {
-    if (seq1 == seq2) {
-        return 0;
-    }
-    if (seq1 < seq2) {
-        return (seq2 - seq1 < seq_number_diff) ? -1 : 1;
-    }
-    else {
-        return (seq1 - seq2 > seq_number_diff) ? -1 : 1;
-    }
-}
 
 Flow::Flow(const IPv4Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
@@ -111,6 +97,11 @@ void Flow::process_packet(PDU& pdu) {
     // Update the internal state first
     if (tcp) {
         update_state(*tcp);
+        #ifdef HAVE_ACK_TRACKER
+        if (flags_.ack_tracking) {
+            ack_tracker_.process_packet(*tcp);
+        }
+        #endif // HAVE_ACK_TRACKER
     }
     if (flags_.ignore_data_packets) {
         return;
@@ -314,6 +305,18 @@ int Flow::mss() const {
 
 bool Flow::sack_permitted() const {
     return flags_.sack_permitted;
+}
+
+void Flow::enable_ack_tracking() {
+    #ifdef HAVE_ACK_TRACKER
+    flags_.ack_tracking = 1;
+    #else
+    throw feature_disabled();
+    #endif
+}
+
+bool Flow::ack_tracking_enabled() const {
+    return flags_.ack_tracking;
 }
 
 } // TCPIP

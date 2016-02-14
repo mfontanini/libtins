@@ -201,6 +201,17 @@ public:
 };
 
 /**
+ * \brief Exception thrown when a feature has been disabled
+ * at compile time.
+ */
+class feature_disabled : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Feature disabled";
+    }
+};
+
+/**
  * \brief Exception thrown when a payload is too large to fit
  * into a PDUOption.
  */

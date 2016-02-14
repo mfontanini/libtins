@@ -41,6 +41,7 @@
 #include <functional>
 #include <stdint.h>
 #include "../macros.h"
+#include "ack_tracker.h"
 #include "../hw_address.h"
 
 namespace Tins {
@@ -267,16 +268,31 @@ public:
      * \brief Indicates whether this Flow supports selective acknowledgements
      */
     bool sack_permitted() const;
+
+    /** 
+     * \brief Enables tracking of ACK numbers
+     *
+     * This requires having the boost.icl library. If the library is not installed
+     * or ACK tracking was disabled when compiling the library, then this method
+     * will throw an exception.
+     */
+    void enable_ack_tracking();
+
+    /**
+     * \brief Indicates whether ACK number tracking is enabled
+     */
+    bool ack_tracking_enabled() const;
 private:
     // Compress all flags into just one struct using bitfields 
     struct flags {
-        flags() : ignore_data_packets(0), sack_permitted(0) {
+        flags() : ignore_data_packets(0), sack_permitted(0), ack_tracking(0) {
 
         }
 
         uint32_t is_v6:1,
                  ignore_data_packets:1,
-                 sack_permitted:1;
+                 sack_permitted:1,
+                 ack_tracking:1;
     };
 
     void store_payload(uint32_t seq, payload_type payload);
@@ -295,6 +311,9 @@ private:
     State state_;
     int mss_;
     flags flags_;
+    #ifdef HAVE_ACK_TRACKER
+    AckTracker ack_tracker_;
+    #endif // HAVE_ACK_TRACKER
 };
 
 } // TCPIP

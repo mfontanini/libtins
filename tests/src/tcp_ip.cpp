@@ -18,6 +18,10 @@
 #include "rawpdu.h"
 #include "packet.h"
 #include "utils.h"
+#include "config.h"
+#ifdef HAVE_ACK_TRACKER
+    #include "tcp_ip/ack_tracker.h"
+#endif // HAVE_ACK_TRACKER
 
 using namespace std;
 using namespace std::chrono;
@@ -507,5 +511,172 @@ TEST_F(FlowTest, StreamFollower_FollowStream) {
     EXPECT_EQ(chunk_packets.size(), stream_client_payload_chunks.size());
     EXPECT_EQ(payload, merge_chunks(stream_client_payload_chunks));
 }
+
+
+#ifdef HAVE_ACK_TRACKER
+
+using namespace boost::icl;
+
+class AckTrackerTest : public testing::Test {
+public:
+    typedef AckedRange::interval_type interval_type;
+private:
+
+};
+
+vector<uint32_t> make_sack() {
+    return vector<uint32_t>();
+}
+
+template <typename... SackEdges>
+vector<uint32_t> make_sack(pair<uint32_t, uint32_t> head, SackEdges&&... tail) {
+    vector<uint32_t> output = make_sack(tail...);
+    output.push_back(head.first);
+    output.push_back(head.second);
+    return output;
+}
+
+TCP make_tcp_ack(uint32_t ack_number) {
+    TCP output;
+    output.ack_seq(ack_number);
+    return output;
+}
+
+template <typename... SackEdges>
+TCP make_tcp_ack(uint32_t ack_number, SackEdges&&... rest) {
+    TCP output = make_tcp_ack(ack_number);
+    vector<uint32_t> sack = make_sack(rest...);
+    output.sack(sack);
+    return output;
+}
+
+
+ostream& operator<<(ostream& stream, const AckTrackerTest::interval_type& interval) {
+    stream << ((interval.bounds() == interval_bounds::left_open()) ? "(" : "[");
+    stream << interval.lower() << ", " << interval.upper();
+    stream << ((interval.bounds() == interval_bounds::right_open()) ? ")" : "]");
+    return stream;
+}
+
+TEST_F(AckTrackerTest, AckedRange_1) {
+    AckedRange range(0, 100);
+    EXPECT_TRUE(range.has_next());
+    EXPECT_EQ(interval_type::closed(0, 100), range.next());
+    EXPECT_FALSE(range.has_next());
+}
+
+TEST_F(AckTrackerTest, AckedRange_2) {
+    AckedRange range(2, 3);
+    EXPECT_TRUE(range.has_next());
+    EXPECT_EQ(interval_type::closed(2, 3), range.next());
+    EXPECT_FALSE(range.has_next());
+}
+
+TEST_F(AckTrackerTest, AckedRange_3) {
+    AckedRange range(0, 0);
+    EXPECT_TRUE(range.has_next());
+    EXPECT_EQ(interval_type::right_open(0, 1), range.next());
+    EXPECT_FALSE(range.has_next());
+}
+
+TEST_F(AckTrackerTest, AckedRange_4) {
+    uint32_t maximum = numeric_limits<uint32_t>::max();
+    AckedRange range(maximum, maximum);
+    EXPECT_TRUE(range.has_next());
+    EXPECT_EQ(interval_type::left_open(maximum - 1, maximum), range.next());
+    EXPECT_FALSE(range.has_next());
+}
+
+TEST_F(AckTrackerTest, AckedRange_WrapAround) {
+    uint32_t first = numeric_limits<uint32_t>::max() - 5;
+    AckedRange range(first, 100);
+    EXPECT_TRUE(range.has_next());
+    EXPECT_EQ(
+        interval_type::closed(first, numeric_limits<uint32_t>::max()),
+        range.next()
+    );
+    EXPECT_TRUE(range.has_next());
+    EXPECT_EQ(interval_type::closed(0, 100), range.next());
+    EXPECT_FALSE(range.has_next());
+}
+
+TEST_F(AckTrackerTest, AckingTcp1) {
+    AckTracker tracker(0, false);
+    EXPECT_EQ(0, tracker.ack_number());    
+    tracker.process_packet(make_tcp_ack(100));
+    EXPECT_EQ(100, tracker.ack_number());
+    tracker.process_packet(make_tcp_ack(50));
+    EXPECT_EQ(100, tracker.ack_number());
+    tracker.process_packet(make_tcp_ack(150));
+    EXPECT_EQ(150, tracker.ack_number());
+    tracker.process_packet(make_tcp_ack(200));
+    EXPECT_EQ(200, tracker.ack_number());
+}
+
+TEST_F(AckTrackerTest, AckingTcp2) {
+    uint32_t maximum = numeric_limits<uint32_t>::max();
+    AckTracker tracker(maximum - 10, false);
+    EXPECT_EQ(maximum - 10, tracker.ack_number());   
+    tracker.process_packet(make_tcp_ack(maximum - 3));
+    EXPECT_EQ(maximum - 3, tracker.ack_number());   
+    tracker.process_packet(make_tcp_ack(maximum));
+    EXPECT_EQ(maximum, tracker.ack_number());   
+    tracker.process_packet(make_tcp_ack(5));
+    EXPECT_EQ(5, tracker.ack_number());   
+}
+
+TEST_F(AckTrackerTest, AckingTcp3) {
+    uint32_t maximum = numeric_limits<uint32_t>::max();
+    AckTracker tracker(maximum - 10, false);
+    tracker.process_packet(make_tcp_ack(5));
+    EXPECT_EQ(5, tracker.ack_number());   
+}
+
+TEST_F(AckTrackerTest, AckingTcp_Sack1) {
+    AckTracker tracker(0, true);
+    tracker.process_packet(make_tcp_ack(0, make_pair(2, 5), make_pair(9, 11)));
+    EXPECT_EQ(3 + 2, tracker.acked_intervals().size());
+
+    tracker.process_packet(make_tcp_ack(9));
+    EXPECT_EQ(1, tracker.acked_intervals().size());
+
+    tracker.process_packet(make_tcp_ack(15));
+    EXPECT_EQ(0, tracker.acked_intervals().size());
+}
+
+TEST_F(AckTrackerTest, AckingTcp_Sack2) {
+    uint32_t maximum = numeric_limits<uint32_t>::max();
+    AckTracker tracker(maximum - 10, true);
+    tracker.process_packet(make_tcp_ack(
+        maximum - 10,
+        make_pair(maximum - 3, maximum),
+        make_pair(0, 10)
+    ));
+    EXPECT_EQ(3 + 10, tracker.acked_intervals().size());
+
+    tracker.process_packet(make_tcp_ack(maximum - 2));
+    EXPECT_EQ(1 + 10, tracker.acked_intervals().size());
+
+    tracker.process_packet(make_tcp_ack(5));
+    EXPECT_EQ(4, tracker.acked_intervals().size());
+
+    tracker.process_packet(make_tcp_ack(15));
+    EXPECT_EQ(0, tracker.acked_intervals().size());
+}
+
+TEST_F(AckTrackerTest, AckingTcp_Sack3) {
+    uint32_t maximum = numeric_limits<uint32_t>::max();
+    AckTracker tracker(maximum - 10, true);
+    tracker.process_packet(make_tcp_ack(
+        maximum - 10,
+        make_pair(maximum - 3, 5)
+    ));
+    EXPECT_EQ(9, tracker.acked_intervals().size());
+
+    tracker.process_packet(make_tcp_ack(maximum));
+    EXPECT_EQ(5, tracker.acked_intervals().size());
+}
+
+#endif // HAVE_ACK_TRACKER
 
 #endif // TINS_IS_CXX11

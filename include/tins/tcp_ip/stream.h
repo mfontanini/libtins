@@ -334,6 +334,18 @@ public:
      * \param value The value to be set for this property
      */
     void auto_cleanup_payloads(bool value);
+
+    /**
+     * Enables tracking of acknowledged segments
+     *
+     * \sa Flow::enable_ack_tracking
+     */
+    void enable_ack_tracking();
+
+    /**
+     * \brief Indicates whether ACK number tracking is enabled for this stream
+     */
+    bool ack_tracking_enabled() const;
 private:
     static Flow extract_client_flow(const PDU& packet);
     static Flow extract_server_flow(const PDU& packet);

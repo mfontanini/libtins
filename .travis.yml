@@ -15,12 +15,17 @@ addons:
     packages:
     - libpcap-dev
     - libssl-dev
+    - libboost-all-dev
 
 before_script:
   - mkdir build
   - cd build
   - cmake .. -DLIBTINS_ENABLE_CXX11=1
   - make tests
+
+before_install:
+  - brew update
+  - brew install boost
 
 script:
   - ctest -V
