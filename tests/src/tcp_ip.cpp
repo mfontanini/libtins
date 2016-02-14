@@ -601,9 +601,14 @@ TEST_F(AckTrackerTest, AckedRange_WrapAround) {
 
 TEST_F(AckTrackerTest, AckingTcp1) {
     AckTracker tracker(0, false);
-    EXPECT_EQ(0, tracker.ack_number());    
+    EXPECT_EQ(0, tracker.ack_number());
     tracker.process_packet(make_tcp_ack(100));
     EXPECT_EQ(100, tracker.ack_number());
+    EXPECT_TRUE(tracker.is_segment_acked(0, 10));
+    EXPECT_TRUE(tracker.is_segment_acked(50, 10));
+    EXPECT_TRUE(tracker.is_segment_acked(99, 1));
+    EXPECT_FALSE(tracker.is_segment_acked(90, 20));
+    EXPECT_FALSE(tracker.is_segment_acked(99, 2));
     tracker.process_packet(make_tcp_ack(50));
     EXPECT_EQ(100, tracker.ack_number());
     tracker.process_packet(make_tcp_ack(150));
@@ -635,6 +640,9 @@ TEST_F(AckTrackerTest, AckingTcp_Sack1) {
     AckTracker tracker(0, true);
     tracker.process_packet(make_tcp_ack(0, make_pair(2, 5), make_pair(9, 11)));
     EXPECT_EQ(3 + 2, tracker.acked_intervals().size());
+    EXPECT_TRUE(tracker.is_segment_acked(2, 3));
+    EXPECT_TRUE(tracker.is_segment_acked(9, 2));
+    EXPECT_FALSE(tracker.is_segment_acked(2, 9));
 
     tracker.process_packet(make_tcp_ack(9));
     EXPECT_EQ(1, tracker.acked_intervals().size());
@@ -652,6 +660,10 @@ TEST_F(AckTrackerTest, AckingTcp_Sack2) {
         make_pair(0, 10)
     ));
     EXPECT_EQ(3 + 10, tracker.acked_intervals().size());
+    EXPECT_TRUE(tracker.is_segment_acked(maximum - 12, 2));
+    EXPECT_TRUE(tracker.is_segment_acked(maximum - 2, 1));
+    EXPECT_TRUE(tracker.is_segment_acked(2, 3));
+    EXPECT_FALSE(tracker.is_segment_acked(maximum - 10, 10));
 
     tracker.process_packet(make_tcp_ack(maximum - 2));
     EXPECT_EQ(1 + 10, tracker.acked_intervals().size());

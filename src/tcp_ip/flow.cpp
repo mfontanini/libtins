@@ -319,6 +319,17 @@ bool Flow::ack_tracking_enabled() const {
     return flags_.ack_tracking;
 }
 
+#ifdef HAVE_ACK_TRACKER
+const AckTracker& Flow::ack_tracker() const {
+    return ack_tracker_;
+}
+
+AckTracker& Flow::ack_tracker() {
+    return ack_tracker_;
+}
+
+#endif // HAVE_ACK_TRACKER
+
 } // TCPIP
 } // Tins
 

@@ -38,10 +38,22 @@
 using std::vector;
 using std::numeric_limits;
 
+using boost::icl::interval_bounds;
+using boost::icl::contains;
+
 using Tins::Internals::seq_compare;
 
 namespace Tins {
 namespace TCPIP {
+
+uint32_t interval_end(const AckedRange::interval_type& interval) {
+    if (interval.bounds() == interval_bounds::right_open()) {
+        return interval.upper() - 1;
+    }
+    else {
+        return interval.upper();
+    }
+}
 
 // AckedRange
 
@@ -138,6 +150,22 @@ uint32_t AckTracker::ack_number() const {
 
 const AckTracker::interval_set_type& AckTracker::acked_intervals() const {
     return acked_intervals_;
+}
+
+bool AckTracker::is_segment_acked(uint32_t sequence_number, uint32_t length) const {
+    if (length == 0) {
+        return true;
+    }
+    AckedRange range(sequence_number, sequence_number + length - 1);
+    while (range.has_next()) {
+        AckedRange::interval_type interval = range.next();
+        const int comparison = seq_compare(interval_end(interval), ack_number_);
+        // Only check for SACKed intervals if the segment finishes after our ACK number
+        if (comparison >= 0 && !contains(acked_intervals_, interval)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 } // TCPIP

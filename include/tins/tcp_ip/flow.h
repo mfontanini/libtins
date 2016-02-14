@@ -282,6 +282,18 @@ public:
      * \brief Indicates whether ACK number tracking is enabled
      */
     bool ack_tracking_enabled() const;
+
+    #ifdef HAVE_ACK_TRACKER
+    /**
+     * Retrieves the ACK tracker for this Flow (const)
+     */
+    const AckTracker& ack_tracker() const;
+
+    /**
+     * Retrieves the ACK tracker for this Flow
+     */
+    AckTracker& ack_tracker();
+    #endif // HAVE_ACK_TRACKER
 private:
     // Compress all flags into just one struct using bitfields 
     struct flags {

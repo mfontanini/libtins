@@ -129,6 +129,14 @@ public:
      * \brief Retrieves all acked intervals by Selective ACKs
      */
     const interval_set_type& acked_intervals() const; 
+
+    /**
+     * \brief Indicates whether the given segment has been already ACKed
+     *
+     * \param sequence_number The segment's sequence number
+     * \param length The segment's length
+     */
+    bool is_segment_acked(uint32_t sequence_number, uint32_t length) const;
 private:
     void process_sack(const std::vector<uint32_t>& sack);
     void cleanup_sacked_intervals(uint32_t old_ack, uint32_t new_ack);
