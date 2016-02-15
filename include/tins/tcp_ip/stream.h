@@ -336,6 +336,22 @@ public:
     void auto_cleanup_payloads(bool value);
 
     /**
+     * \brief Indicates whether the client flow's payloads should be 
+     * automatically erased.
+     *
+     * \sa auto_cleanup_payloads
+     */
+    void auto_cleanup_client_data(bool value);
+
+    /**
+     * \brief Indicates whether the server flow's payloads should be 
+     * automatically erased.
+     *
+     * \sa auto_cleanup_payloads
+     */
+    void auto_cleanup_server_data(bool value);
+
+    /**
      * Enables tracking of acknowledged segments
      *
      * \sa Flow::enable_ack_tracking
@@ -370,7 +386,8 @@ private:
     hwaddress_type server_hw_addr_;
     timestamp_type create_time_;
     timestamp_type last_seen_;
-    bool auto_cleanup_;
+    bool auto_cleanup_client_;
+    bool auto_cleanup_server_;
 };
 
 } // TCPIP

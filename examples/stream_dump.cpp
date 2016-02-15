@@ -129,13 +129,12 @@ int main(int argc, char* argv[]) {
         cout << "Usage: " << argv[0] << " <interface> <port>" << endl;
         return 1;
     }
-    using std::placeholders::_1;
 
     try {
         // Construct the sniffer configuration object
         SnifferConfiguration config;
-        // Only capture TCP traffic sent from/to port 80
-        config.set_filter("tcp port " + string(argv[2]));
+        // Only capture TCP traffic sent from/to the given port
+        config.set_filter("tcp port " + to_string(stoi(string(argv[2]))));
         // Construct the sniffer we'll use
         Sniffer sniffer(argv[1], config);
 

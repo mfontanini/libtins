@@ -61,7 +61,7 @@ namespace TCPIP {
 Stream::Stream(PDU& packet, const timestamp_type& ts) 
 : client_flow_(extract_client_flow(packet)),
   server_flow_(extract_server_flow(packet)), create_time_(ts), 
-  last_seen_(ts), auto_cleanup_(true) {
+  last_seen_(ts), auto_cleanup_client_(true), auto_cleanup_server_(true) {
     // Update client flow state
     client_flow().process_packet(packet);
     const EthernetII* eth = packet.find_pdu<EthernetII>();
@@ -249,7 +249,16 @@ void Stream::setup_flows_callbacks() {
 }
 
 void Stream::auto_cleanup_payloads(bool value) {
-    auto_cleanup_ = value;
+    auto_cleanup_client_data(value);
+    auto_cleanup_server_data(value);
+}
+
+void Stream::auto_cleanup_client_data(bool value) {
+    auto_cleanup_client_ = value;
+}
+
+void Stream::auto_cleanup_server_data(bool value) {
+    auto_cleanup_client_ = value;
 }
 
 void Stream::enable_ack_tracking() {
@@ -265,7 +274,7 @@ void Stream::on_client_flow_data(const Flow& /*flow*/) {
     if (on_client_data_callback_) {
         on_client_data_callback_(*this);
     }
-    if (auto_cleanup_) {
+    if (auto_cleanup_client_) {
         client_payload().clear();
     }
 }
@@ -274,7 +283,7 @@ void Stream::on_server_flow_data(const Flow& /*flow*/) {
     if (on_server_data_callback_) {
         on_server_data_callback_(*this);
     }
-    if (auto_cleanup_) {
+    if (auto_cleanup_server_) {
         server_payload().clear();
     }
 }
