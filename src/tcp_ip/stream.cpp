@@ -208,8 +208,7 @@ const Stream::timestamp_type& Stream::last_seen() const {
 Flow Stream::extract_client_flow(const PDU& packet) {
     const TCP* tcp = packet.find_pdu<TCP>();
     if (!tcp) {
-        // TODO: define proper exception
-        throw runtime_error("No TCP");
+        throw invalid_packet();
     }
     if (const IP* ip = packet.find_pdu<IP>()) {
         return Flow(ip->dst_addr(), tcp->dport(), tcp->seq());
@@ -218,16 +217,14 @@ Flow Stream::extract_client_flow(const PDU& packet) {
         return Flow(ip->dst_addr(), tcp->dport(), tcp->seq());
     }
     else {
-        // TODO: define proper exception
-        throw runtime_error("No valid layer 3");
+        throw invalid_packet();
     }
 }
 
 Flow Stream::extract_server_flow(const PDU& packet) {
     const TCP* tcp = packet.find_pdu<TCP>();
     if (!tcp) {
-        // TODO: define proper exception
-        throw runtime_error("No TCP");
+        throw invalid_packet();
     }
     if (const IP* ip = packet.find_pdu<IP>()) {
         return Flow(ip->src_addr(), tcp->sport(), tcp->ack_seq());
@@ -236,8 +233,7 @@ Flow Stream::extract_server_flow(const PDU& packet) {
         return Flow(ip->src_addr(), tcp->sport(), tcp->ack_seq());
     }
     else {
-        // TODO: define proper exception
-        throw runtime_error("No valid layer 3");
+        throw invalid_packet();
     }
 }
 

@@ -84,7 +84,8 @@ public:
      */
     enum TerminationReason {
         TIMEOUT, ///< The stream was terminated due to a timeout
-        BUFFERED_DATA ///< The stream was terminated because it had too much buffered data
+        BUFFERED_DATA, ///< The stream was terminated because it had too much buffered data
+        SACKED_SEGMENTS ///< The stream was terminated because it had too many SACKed segments
     };
 
     /**
@@ -93,6 +94,45 @@ public:
      * \sa StreamFollower::stream_termination_callback
      */
     typedef std::function<void(Stream&, TerminationReason)> stream_termination_callback_type;
+
+    /**
+     * \brief Unique identifies a stream. 
+     *
+     * This struct is used to track TCP streams. It keeps track of minimum and maximum
+     * addresses/ports in a stream to match packets coming from any of the 2 endpoints
+     * into the same object.
+     */
+    struct stream_id {
+        /**
+         * The type used to store each endpoint's address
+         */
+        typedef std::array<uint8_t, 16> address_type;
+
+        /**
+         * Default constructor
+         */
+        stream_id();
+
+        /**
+         * Constructs a stream_id
+         *
+         * \param client_addr Client's address
+         * \param client_port Port's port
+         * \param server_addr Server's address
+         * \param server_port Server's port
+         */
+        stream_id(const address_type& client_addr, uint16_t client_port,
+                  const address_type& server_addr, uint16_t server_port);
+
+        address_type min_address;
+        address_type max_address;
+        uint16_t min_address_port;
+        uint16_t max_address_port;
+
+        bool operator<(const stream_id& rhs) const;
+
+        static size_t hash(const stream_id& id);
+    };
 
     /** 
      * Default constructor
@@ -177,33 +217,19 @@ public:
     Stream& find_stream(const IPv6Address& client_addr, uint16_t client_port,
                         const IPv6Address& server_addr, uint16_t server_port);
 private:
-    typedef std::array<uint8_t, 16> address_type;
     typedef Stream::timestamp_type timestamp_type;
 
     static const size_t DEFAULT_MAX_BUFFERED_CHUNKS;
+    static const size_t DEFAULT_MAX_SACKED_INTERVALS;
     static const uint32_t DEFAULT_MAX_BUFFERED_BYTES;
     static const timestamp_type DEFAULT_KEEP_ALIVE;
 
-    struct stream_id {
-        stream_id(const address_type& client_addr, uint16_t client_port,
-                  const address_type& server_addr, uint16_t server_port);
-
-        address_type min_address;
-        address_type max_address;
-        uint16_t min_address_port;
-        uint16_t max_address_port;
-
-        bool operator<(const stream_id& rhs) const;
-
-        static size_t hash(const stream_id& id);
-    };
-
     typedef std::map<stream_id, Stream> streams_type;
 
-    stream_id make_stream_id(const PDU& packet);
+    static stream_id make_stream_id(const PDU& packet);
     Stream& find_stream(const stream_id& id);
-    static address_type serialize(IPv4Address address);
-    static address_type serialize(const IPv6Address& address);
+    static stream_id::address_type serialize(IPv4Address address);
+    static stream_id::address_type serialize(const IPv6Address& address);
     void process_packet(PDU& packet, const timestamp_type& ts);
     void cleanup_streams(const timestamp_type& now);
 

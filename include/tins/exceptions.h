@@ -294,6 +294,26 @@ public:
     }
 };
 
+/**
+ * \brief Exception thrown when a required callback for an object is not set
+ */
+class callback_not_set : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Callback not set";
+    }
+};
+
+/**
+ * \brief Exception thrown when an invalid packet is provided to some function
+ */
+class invalid_packet : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Invalid packet";
+    }
+};
+
 namespace Crypto {
 namespace WPA2 {
     /**

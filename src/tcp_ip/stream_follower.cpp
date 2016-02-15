@@ -62,6 +62,7 @@ namespace Tins {
 namespace TCPIP {
 
 const size_t StreamFollower::DEFAULT_MAX_BUFFERED_CHUNKS = 512;
+const size_t StreamFollower::DEFAULT_MAX_SACKED_INTERVALS = 1024;
 const uint32_t StreamFollower::DEFAULT_MAX_BUFFERED_BYTES = 3 * 1024 * 1024; // 3MB
 const StreamFollower::timestamp_type StreamFollower::DEFAULT_KEEP_ALIVE = minutes(5);
 
@@ -83,24 +84,26 @@ void StreamFollower::process_packet(Packet& packet) {
 }
 
 void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
+    const TCP* tcp = packet.find_pdu<TCP>();
+    if (!tcp) {
+        return;
+    }
     stream_id identifier = make_stream_id(packet);
     streams_type::iterator iter = streams_.find(identifier);
     bool process = true;
     if (iter == streams_.end()) {
-        const TCP& tcp = packet.rfind_pdu<TCP>();
         // Start tracking if they're either SYNs or they contain data (attach
         // to an already running flow).
-        if (tcp.flags() == TCP::SYN || (attach_to_flows_ && tcp.find_pdu<RawPDU>() != 0)) {
+        if (tcp->flags() == TCP::SYN || (attach_to_flows_ && tcp->find_pdu<RawPDU>() != 0)) {
             iter = streams_.insert(make_pair(identifier, Stream(packet, ts))).first;
             iter->second.setup_flows_callbacks();
             if (on_new_connection_) {
                 on_new_connection_(iter->second);
             }
             else {
-                // TODO: use proper exception
-                throw runtime_error("No new connection callback set");
+                throw callback_not_set();
             }
-            if (tcp.flags() == TCP::SYN) {
+            if (tcp->flags() == TCP::SYN) {
                 process = false;
             }
             else {
@@ -118,16 +121,27 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
     if (process) {
         Stream& stream = iter->second;
         stream.process_packet(packet, ts);
+        // Check for different potential termination 
         size_t total_chunks = stream.client_flow().buffered_payload().size() + 
                               stream.server_flow().buffered_payload().size();
         uint32_t total_buffered_bytes = stream.client_flow().total_buffered_bytes() +
                                         stream.server_flow().total_buffered_bytes();
         bool terminate_stream = total_chunks > max_buffered_chunks_ || 
                                 total_buffered_bytes > max_buffered_bytes_;
+        TerminationReason reason = BUFFERED_DATA;
+        #ifdef HAVE_ACK_TRACKER
+        if (!terminate_stream) {
+            uint32_t count = 0;
+            count += stream.client_flow().ack_tracker().acked_intervals().iterative_size();
+            count += stream.server_flow().ack_tracker().acked_intervals().iterative_size();
+            terminate_stream = count > DEFAULT_MAX_SACKED_INTERVALS;
+            reason = SACKED_SEGMENTS;
+        }
+        #endif // HAVE_ACK_TRACKER
         if (stream.is_finished() || terminate_stream) {
             // If we're terminating the stream, execute the termination callback
             if (terminate_stream && on_stream_termination_) {
-                on_stream_termination_(stream, BUFFERED_DATA);
+                on_stream_termination_(stream, reason);
             }
             streams_.erase(iter);
         }
@@ -162,8 +176,7 @@ Stream& StreamFollower::find_stream(const IPv6Address& client_addr, uint16_t cli
 StreamFollower::stream_id StreamFollower::make_stream_id(const PDU& packet) {
     const TCP* tcp = packet.find_pdu<TCP>();
     if (!tcp) {
-        // TODO: define proper exception
-        throw runtime_error("No TCP");
+        throw invalid_packet();
     }
     if (const IP* ip = packet.find_pdu<IP>()) {
         return stream_id(serialize(ip->src_addr()), tcp->sport(),
@@ -174,8 +187,7 @@ StreamFollower::stream_id StreamFollower::make_stream_id(const PDU& packet) {
                          serialize(ip->dst_addr()), tcp->dport());
     }
     else {
-        // TODO: define proper exception
-        throw runtime_error("No layer 3");
+        throw invalid_packet();
     }
 }
 
@@ -189,16 +201,16 @@ Stream& StreamFollower::find_stream(const stream_id& id) {
     }
 }
 
-StreamFollower::address_type StreamFollower::serialize(IPv4Address address) {
-    address_type addr;
+StreamFollower::stream_id::address_type StreamFollower::serialize(IPv4Address address) {
+    stream_id::address_type addr;
     OutputMemoryStream output(addr.data(), addr.size());
     addr.fill(0);
     output.write(address);
     return addr; 
 }
 
-StreamFollower::address_type StreamFollower::serialize(const IPv6Address& address) {
-    address_type addr;
+StreamFollower::stream_id::address_type StreamFollower::serialize(const IPv6Address& address) {
+    stream_id::address_type addr;
     OutputMemoryStream output(addr.data(), addr.size());
     addr.fill(0);
     output.write(address);
@@ -223,6 +235,12 @@ void StreamFollower::cleanup_streams(const timestamp_type& now) {
 }
 
 // stream_id
+
+StreamFollower::stream_id::stream_id() 
+: min_address_port(0), max_address_port(0) {
+    min_address.fill(0);
+    max_address.fill(0);
+}
 
 StreamFollower::stream_id::stream_id(const address_type& client_addr,
                                      uint16_t client_port,
