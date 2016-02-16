@@ -15,6 +15,7 @@ addons:
     packages:
     - libpcap-dev
     - libssl-dev
+    - libboost-all-dev
 
 before_script:
   - mkdir build

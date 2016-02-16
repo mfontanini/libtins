@@ -177,6 +177,9 @@ bool decrement(HWAddress<n>& addr) {
     return decrement_buffer(addr);
 }
 
+// Compares sequence numbers as defined by RFC 1982.
+int seq_compare(uint32_t seq1, uint32_t seq2);
+
 IPv4Address last_address_from_mask(IPv4Address addr, IPv4Address mask);
 IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask);
 template<size_t n>

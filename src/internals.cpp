@@ -349,6 +349,20 @@ bool decrement(IPv6Address& addr) {
     return decrement_buffer(addr);
 }
 
+int seq_compare(uint32_t seq1, uint32_t seq2) {
+    // As defined by RFC 1982 - 2 ^ (SERIAL_BITS - 1)
+    static const uint32_t seq_number_diff = 2147483648U;
+    if (seq1 == seq2) {
+        return 0;
+    }
+    if (seq1 < seq2) {
+        return (seq2 - seq1 < seq_number_diff) ? -1 : 1;
+    }
+    else {
+        return (seq1 - seq2 > seq_number_diff) ? -1 : 1;
+    }
+}
+
 IPv4Address last_address_from_mask(IPv4Address addr, IPv4Address mask) {
     uint32_t addr_int = Endian::be_to_host<uint32_t>(addr),
              mask_int = Endian::be_to_host<uint32_t>(mask);

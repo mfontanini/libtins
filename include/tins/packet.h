@@ -148,10 +148,18 @@ public:
     /**
      * \brief Constructs a Packet from a PDU* and a Timestamp.
      * 
-     * The PDU* is cloned using PDU::clone.
+     * The PDU is cloned using PDU::clone.
      */
     Packet(const PDU* apdu, const Timestamp& tstamp) 
     : pdu_(apdu->clone()), ts_(tstamp) { }
+
+    /**
+     * \brief Constructs a Packet from a PDU& and a Timestamp.
+     * 
+     * The PDU is cloned using PDU::clone.
+     */
+    Packet(const PDU& apdu, const Timestamp& tstamp) 
+    : pdu_(apdu.clone()), ts_(tstamp) { }
 
     /**
      * \brief Constructs a Packet from a PDU* and a Timestamp.

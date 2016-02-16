@@ -1,8 +1,6 @@
 FILE(GLOB INCLUDE_FILES "*.h")
 INSTALL(
     FILES ${INCLUDE_FILES} 
-    DESTINATION include/tins
+    DESTINATION include/tins/tcp_ip
     COMPONENT Headers
 )
-ADD_SUBDIRECTORY(dot11)
-ADD_SUBDIRECTORY(tcp_ip)

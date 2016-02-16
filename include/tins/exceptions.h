@@ -201,6 +201,17 @@ public:
 };
 
 /**
+ * \brief Exception thrown when a feature has been disabled
+ * at compile time.
+ */
+class feature_disabled : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Feature disabled";
+    }
+};
+
+/**
  * \brief Exception thrown when a payload is too large to fit
  * into a PDUOption.
  */
@@ -270,6 +281,36 @@ class invalid_domain_name : public exception_base {
 public:
     const char* what() const throw() {
         return "Invalid domain name";
+    }
+};
+
+/**
+ * \brief Exception thrown when a stream is not found
+ */
+class stream_not_found : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Stream not found";
+    }
+};
+
+/**
+ * \brief Exception thrown when a required callback for an object is not set
+ */
+class callback_not_set : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Callback not set";
+    }
+};
+
+/**
+ * \brief Exception thrown when an invalid packet is provided to some function
+ */
+class invalid_packet : public exception_base {
+public:
+    const char* what() const throw() {
+        return "Invalid packet";
     }
 };
 
