@@ -40,9 +40,10 @@ namespace Tins {
 class ICMPExtension;
 
 /**
+ * \class MPLS
  * \brief Represents an MPLS PDU
  */
-class MPLS : public PDU {
+class TINS_API MPLS : public PDU {
 public:
     /**
      * \brief This PDU's flag.

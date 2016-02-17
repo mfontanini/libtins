@@ -60,7 +60,7 @@ namespace Tins {
  *
  * \sa RawPDU
  */
-class UDP : public PDU {
+class TINS_API UDP : public PDU {
 public:
     /**
      * \brief This PDU's flag.
