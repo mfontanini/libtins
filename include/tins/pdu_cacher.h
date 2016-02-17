@@ -53,7 +53,7 @@ namespace Tins {
  * etc.
  */
 template <typename T>
-class TINS_API PDUCacher : public PDU {
+class PDUCacher : public PDU {
 public:
     /**
      * The cached PDU type.
