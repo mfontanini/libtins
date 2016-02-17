@@ -383,12 +383,7 @@ string Dot11ManagementFrame::ssid() const {
     if (!option) {
         throw option_not_found();
     }
-    if (option->data_size() == 0 && subtype() == Dot11::PROBE_REQ){
-        return "BROADCAST";
-    }
-    else {
-        return string((const char*)option->data_ptr(), option->data_size());
-    }
+    return option->to<string>();
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::supported_rates() const {

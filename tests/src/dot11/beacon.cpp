@@ -134,6 +134,12 @@ TEST_F(Dot11BeaconTest, SSID) {
     EXPECT_EQ(dot11.ssid(), "libtins");
 }
 
+TEST_F(Dot11BeaconTest, EmptySSID) {
+    Dot11Beacon dot11;
+    dot11.ssid("");
+    EXPECT_EQ(dot11.ssid(), "");
+}
+
 TEST_F(Dot11BeaconTest, SupportedRates) {
     Dot11Beacon dot11;
     Dot11Beacon::rates_type rates, found_rates;
