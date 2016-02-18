@@ -63,16 +63,19 @@ INCLUDE(ExternalProject)
 # *******************
 
 # C++11 support
-OPTION(LIBTINS_ENABLE_CXX11 "Compile libtins with c++11 features" OFF)
+OPTION(LIBTINS_ENABLE_CXX11 "Compile libtins with c++11 features" ON)
 IF(LIBTINS_ENABLE_CXX11)
-    SET(HAVE_CXX11 ON)
     INCLUDE(CheckCXX11Features)
-    IF(HAS_CXX11_NULLPTR AND HAS_CXX11_RVALUE_REFERENCES)
+    # We only use declval and decltype on gcc/clang as VC fails to build that code,
+    # at least on VC2013
+    IF(HAS_CXX11_RVALUE_REFERENCES AND ((HAS_CXX11_DECLVAL AND HAS_CXX11_DECLTYPE) OR MSVC))
+        SET(HAVE_CXX11 ON)
         MESSAGE(STATUS "Enabling C++11 features")
         SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_COMPILER_FLAGS}")
-    ELSE(HAS_CXX11_NULLPTR AND HAS_CXX11_RVALUE_REFERENCES)
-        MESSAGE(FATAL_ERROR "C++11 features requested but the compiler does not support them.")
-    ENDIF(HAS_CXX11_NULLPTR AND HAS_CXX11_RVALUE_REFERENCES)
+    ELSE()
+        MESSAGE(WARNING "The compiler doesn't support the necessary C++11 features. "
+                        "Disabling C++11 on this build")
+    ENDIF()
 ELSE(LIBTINS_ENABLE_CXX11)
     MESSAGE(
         WARNING 

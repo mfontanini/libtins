@@ -467,7 +467,7 @@ TEST_F(DNSTest, MXPreferenceField) {
     DNS::serialization_type buffer = dns1.serialize();
     DNS dns2(&buffer[0], buffer.size());
     DNS::resources_type answers = dns1.answers();
-    ASSERT_EQ(1, answers.size());
+    ASSERT_EQ(1UL, answers.size());
 
     const DNS::resource& resource = *answers.begin();
     EXPECT_EQ(42, resource.preference());
@@ -490,7 +490,7 @@ TEST_F(DNSTest, SOARecordConstructor) {
     EXPECT_EQ(0x918273aa, r.refresh());
     EXPECT_EQ(0x827361ad, r.retry());
     EXPECT_EQ(0x8ad71928, r.expire());
-    EXPECT_EQ(0x1ad92871, r.minimum_ttl());
+    EXPECT_EQ(0x1ad92871U, r.minimum_ttl());
 }
 
 TEST_F(DNSTest, SOARecordGettersAndSetters) {
@@ -508,7 +508,7 @@ TEST_F(DNSTest, SOARecordGettersAndSetters) {
     EXPECT_EQ(0x918273aa, r.refresh());
     EXPECT_EQ(0x827361ad, r.retry());
     EXPECT_EQ(0x8ad71928, r.expire());
-    EXPECT_EQ(0x1ad92871, r.minimum_ttl());
+    EXPECT_EQ(0x1ad92871U, r.minimum_ttl());
 }
 
 TEST_F(DNSTest, SOARecordFromBuffer) {
@@ -521,16 +521,16 @@ TEST_F(DNSTest, SOARecordFromBuffer) {
     };
 
     DNS dns(raw, sizeof(raw));
-    ASSERT_EQ(1, dns.answers().size());
+    ASSERT_EQ(1UL, dns.answers().size());
     DNS::resource r(dns.answers().front());
     DNS::soa_record soa(r);
     EXPECT_EQ("ns2.google.com", soa.mname());
     EXPECT_EQ("dns-admin.google.com", soa.rname());
-    EXPECT_EQ(112108372, soa.serial());
-    EXPECT_EQ(900, soa.refresh());
-    EXPECT_EQ(900, soa.retry());
-    EXPECT_EQ(1800, soa.expire());
-    EXPECT_EQ(60, soa.minimum_ttl());
+    EXPECT_EQ(112108372U, soa.serial());
+    EXPECT_EQ(900U, soa.refresh());
+    EXPECT_EQ(900U, soa.retry());
+    EXPECT_EQ(1800U, soa.expire());
+    EXPECT_EQ(60U, soa.minimum_ttl());
 }
 
 TEST_F(DNSTest, SOARecordSerialize) {
@@ -547,9 +547,9 @@ TEST_F(DNSTest, SOARecordSerialize) {
     DNS::soa_record r2(&buffer[0], buffer.size());
     EXPECT_EQ("hehehehe.example.com", r2.mname());
     EXPECT_EQ("john.example.com", r2.rname());
-    EXPECT_EQ(0x9823ade9, r2.serial());
-    EXPECT_EQ(0x918273aa, r2.refresh());
-    EXPECT_EQ(0x827361ad, r2.retry());
-    EXPECT_EQ(0x8ad71928, r2.expire());
-    EXPECT_EQ(0x1ad92871, r2.minimum_ttl());
+    EXPECT_EQ(0x9823ade9U, r2.serial());
+    EXPECT_EQ(0x918273aaU, r2.refresh());
+    EXPECT_EQ(0x827361adU, r2.retry());
+    EXPECT_EQ(0x8ad71928U, r2.expire());
+    EXPECT_EQ(0x1ad92871U, r2.minimum_ttl());
 }

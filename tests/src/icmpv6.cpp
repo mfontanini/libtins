@@ -143,7 +143,7 @@ TEST_F(ICMPv6Test, ConstructorFromBuffer_MLD2_Layer) {
     ICMPv6 icmp(mld2_icmpv6_layer, sizeof(mld2_icmpv6_layer));
 
     ICMPv6::multicast_address_records_list records = icmp.multicast_address_records();
-    ASSERT_EQ(1, records.size());
+    ASSERT_EQ(1UL, records.size());
     ICMPv6::multicast_address_record r = *records.begin();
     EXPECT_EQ(1, r.type);
     std::vector<uint8_t> aux_data;

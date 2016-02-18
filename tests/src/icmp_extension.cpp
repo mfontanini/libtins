@@ -64,7 +64,7 @@ TEST_F(ICMPExtensionTest, ExtensionStructureFromBuffer) {
     EXPECT_EQ(0, structure.reserved());
     EXPECT_EQ(0xc55f, structure.checksum());
     const ICMPExtensionsStructure::extensions_type& extensions = structure.extensions();
-    EXPECT_EQ(1, extensions.size());
+    EXPECT_EQ(1UL, extensions.size());
     const ICMPExtension& ext = *extensions.begin();
 
     const uint8_t payload[] = { 24, 150, 1, 1 };
@@ -107,7 +107,7 @@ TEST_F(ICMPExtensionTest, MPLSExtension) {
     
     PDU::serialization_type buffer = structure.serialize();
     ICMPExtensionsStructure new_structure(&buffer[0], buffer.size());
-    ASSERT_EQ(1, new_structure.extensions().size());
+    ASSERT_EQ(1UL, new_structure.extensions().size());
     MPLS mpls2(*new_structure.extensions().begin());
     EXPECT_EQ(mpls1.label(), mpls2.label());
     EXPECT_EQ(mpls1.bottom_of_stack(), mpls2.bottom_of_stack());

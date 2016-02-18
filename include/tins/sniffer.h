@@ -71,7 +71,7 @@ public:
          * This constructor is available only in C++11.
          */
         BaseSniffer(BaseSniffer &&rhs) TINS_NOEXCEPT
-        : handle_(nullptr), mask_(), extract_raw_(false) {
+        : handle_(0), mask_(), extract_raw_(false) {
             *this = std::move(rhs);
         }
 

@@ -93,6 +93,27 @@ private:
 
 /**
  * \brief Reassembles fragmented IP packets.
+ *
+ * This class is fairly simple: just feed packets into it using IPv4Reassembler::process.
+ * If the return value is IPv4Reassembler::FRAGMENTED, then the packet is fragmented
+ * and we haven't yet seen the missing fragments, hence we can't reassemble it.
+ * If the function returns either IPv4Reassembler::NOT_FRAGMENTED (meaning the
+ * packet wasn't fragmented) or IPv4Reassembler::REASSEMBLED (meaning the packet was
+ * fragmented but it's now reassembled), then you can process the packet normally.
+ *
+ * Simple example:
+ *
+ * \code
+ * IPv4Reassembler reassembler;
+ * Sniffer sniffer = ...;
+ * sniffer.sniff_loop([&](PDU& pdu) {
+ *     // Process it in any case, unless it's fragmented (and can't be reassembled yet)
+ *     if (reassembler.process(pdu) != IPv4Reassembler::FRAGMENTED) {
+ *         // Now actually process the packet
+ *         process_packet(pdu);
+ *     }
+ * });
+ * \endcode 
  */
 class TINS_API IPv4Reassembler {
 public:
@@ -100,17 +121,17 @@ public:
      * The status of each processed packet.
      */
     enum packet_status {
-        NOT_FRAGMENTED,
-        FRAGMENTED,
-        REASSEMBLED
+        NOT_FRAGMENTED, ///< The given packet is not fragmented
+        FRAGMENTED, ///< The given packet is fragmented and can't be reassembled yet
+        REASSEMBLED ///< The given packet was fragmented but is now reassembled
     };
 
     /**
-     * The type used to represent the overlapped segment 
-     * reassembly technique to be used.
+     * The type used to represent the overlapped segment reassembly 
+     * technique to be used.
      */
     enum overlapping_technique {
-        NONE
+        NONE 
     };
 
     /**
@@ -190,10 +211,12 @@ public:
      */
     bool operator()(PDU& pdu) {
         // Forward it unless it's fragmented.
-        if(reassembler_.process(pdu) != IPv4Reassembler::FRAGMENTED)
+        if (reassembler_.process(pdu) != IPv4Reassembler::FRAGMENTED) {
             return functor_(pdu);
-        else
+        }
+        else {
             return true;
+        }
     }
 private:
     IPv4Reassembler reassembler_;
@@ -210,7 +233,7 @@ template<typename Functor>
 IPv4ReassemblerProxy<Functor> make_ipv4_reassembler_proxy(Functor func) {
     return IPv4ReassemblerProxy<Functor>(func);
 }
-}
 
+} // Tins
 
 #endif // TINS_IP_REASSEMBLER_H

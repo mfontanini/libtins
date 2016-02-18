@@ -808,7 +808,7 @@ TEST_F(IPTest, SerializePacketHavingICMPExtensionsWithLengthAndLotsOfPayload) {
 
     PDU::serialization_type buffer = pkt.serialize();
     EthernetII serialized(&buffer[0], buffer.size());
-    ASSERT_EQ(1, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
+    ASSERT_EQ(1UL, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
     EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMP>().extensions().extensions().begin()->payload());
 }
 
@@ -825,7 +825,7 @@ TEST_F(IPTest, SerializePacketHavingICMPExtensionsWithLengthAndShortPayload) {
 
     PDU::serialization_type buffer = pkt.serialize();
     EthernetII serialized(&buffer[0], buffer.size());
-    ASSERT_EQ(1, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
+    ASSERT_EQ(1UL, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
     EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMP>().extensions().extensions().begin()->payload());
 }
 
@@ -842,6 +842,6 @@ TEST_F(IPTest, SerializePacketHavingICMPExtensionsWithoutLengthAndShortPayload) 
 
     PDU::serialization_type buffer = pkt.serialize();
     EthernetII serialized(&buffer[0], buffer.size());
-    ASSERT_EQ(1, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
+    ASSERT_EQ(1UL, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
     EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMP>().extensions().extensions().begin()->payload());
 }

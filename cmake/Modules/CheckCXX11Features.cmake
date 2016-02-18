@@ -10,6 +10,7 @@
 #  HAS_CXX11_CONSTEXPR          - constexpr keyword
 #  HAS_CXX11_CSTDINT_H          - cstdint header
 #  HAS_CXX11_DECLTYPE           - decltype keyword
+#  HAS_CXX11_DECLVAL            - declval feature
 #  HAS_CXX11_FUNC               - __func__ preprocessor constant
 #  HAS_CXX11_INITIALIZER_LIST   - initializer list
 #  HAS_CXX11_LAMBDA             - lambdas
@@ -131,6 +132,7 @@ cxx11_check_feature("class_override_final" HAS_CXX11_CLASS_OVERRIDE)
 cxx11_check_feature("constexpr" HAS_CXX11_CONSTEXPR)
 cxx11_check_feature("cstdint" HAS_CXX11_CSTDINT_H)
 cxx11_check_feature("decltype" HAS_CXX11_DECLTYPE)
+cxx11_check_feature("declval" HAS_CXX11_DECLVAL)
 cxx11_check_feature("initializer_list" HAS_CXX11_INITIALIZER_LIST)
 cxx11_check_feature("lambda" HAS_CXX11_LAMBDA)
 cxx11_check_feature("long_long" HAS_CXX11_LONG_LONG)
