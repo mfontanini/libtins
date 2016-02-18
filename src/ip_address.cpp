@@ -109,7 +109,7 @@ ostream& operator<<(ostream& output, const IPv4Address& addr) {
         }
         mask -= 8;
     }
-    return output;;
+    return output;
 }
 
 bool IPv4Address::is_private() const {
