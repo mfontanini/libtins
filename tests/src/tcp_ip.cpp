@@ -688,6 +688,25 @@ TEST_F(AckTrackerTest, AckingTcp_Sack3) {
     EXPECT_EQ(5, tracker.acked_intervals().size());
 }
 
+TEST_F(FlowTest, AckNumbersAreCorrect) {
+    using std::placeholders::_1;
+
+    vector<EthernetII> packets = three_way_handshake(29, 60, "1.2.3.4", 22, "4.3.2.1", 25);
+    // Server's ACK number is 9898
+    packets[1].rfind_pdu<TCP>().ack_seq(9898);
+    // Client's ACK number is 1717
+    packets[2].rfind_pdu<TCP>().ack_seq(1717);
+    StreamFollower follower;
+    follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
+    for (size_t i = 0; i < packets.size(); ++i) {
+        follower.process_packet(packets[i]);
+    }
+    Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
+                                          IPv4Address("4.3.2.1"), 25);
+    EXPECT_EQ(1717, stream.client_flow().ack_tracker().ack_number());
+    EXPECT_EQ(9898, stream.server_flow().ack_tracker().ack_number());
+}
+
 #endif // HAVE_ACK_TRACKER
 
 #endif // TINS_IS_CXX11

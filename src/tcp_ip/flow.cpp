@@ -213,10 +213,17 @@ void Flow::update_state(const TCP& tcp) {
         state_ = RST_SENT;
     }
     else if (state_ == SYN_SENT && (tcp.flags() & TCP::ACK) != 0) {
+        #ifdef HAVE_ACK_TRACKER
+            ack_tracker_ = AckTracker(tcp.ack_seq());
+        #endif // HAVE_ACK_TRACKER
         state_ = ESTABLISHED;
         seq_number_++;
     }
     else if (state_ == UNKNOWN && (tcp.flags() & TCP::SYN) != 0) {
+        // This is the server's state, sending it's first SYN|ACK
+        #ifdef HAVE_ACK_TRACKER
+            ack_tracker_ = AckTracker(tcp.ack_seq());
+        #endif // HAVE_ACK_TRACKER
         state_ = SYN_SENT;
         seq_number_ = tcp.seq();
         const TCP::option* mss_option = tcp.search_option(TCP::MSS);
