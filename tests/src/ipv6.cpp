@@ -232,7 +232,7 @@ TEST_F(IPv6Test, SerializePacketHavingICMPExtensionsWithLengthAndLotsOfPayload) 
 
     PDU::serialization_type buffer = pkt.serialize();
     EthernetII serialized(&buffer[0], buffer.size());
-    ASSERT_EQ(1, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
+    ASSERT_EQ(1UL, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
     EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMPv6>().extensions().extensions().begin()->payload());
 }
 
@@ -249,7 +249,7 @@ TEST_F(IPv6Test, SerializePacketHavingICMPExtensionsWithLengthAndShortPayload) {
 
     PDU::serialization_type buffer = pkt.serialize();
     EthernetII serialized(&buffer[0], buffer.size());
-    ASSERT_EQ(1, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
+    ASSERT_EQ(1UL, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
     EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMPv6>().extensions().extensions().begin()->payload());
 }
 
@@ -266,6 +266,6 @@ TEST_F(IPv6Test, SerializePacketHavingICMPExtensionsWithoutLengthAndShortPayload
 
     PDU::serialization_type buffer = pkt.serialize();
     EthernetII serialized(&buffer[0], buffer.size());
-    ASSERT_EQ(1, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
+    ASSERT_EQ(1UL, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
     EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMPv6>().extensions().extensions().begin()->payload());
 }

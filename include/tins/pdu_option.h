@@ -368,7 +368,7 @@ public:
         }
         real_size_ = rhs.real_size_;
         if (real_size_ > small_buffer_size) {
-            payload_.big_buffer_ptr = nullptr;
+            payload_.big_buffer_ptr = 0;
             std::swap(payload_.big_buffer_ptr, rhs.payload_.big_buffer_ptr);
             rhs.real_size_ = 0;
         }

@@ -1,8 +1,8 @@
 #include "cxxstd.h"
+#include <gtest/gtest.h>
 
 #if TINS_IS_CXX11
 
-#include <gtest/gtest.h>
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -151,7 +151,7 @@ void FlowTest::run_test(uint32_t initial_seq, const ordering_info_type& chunks,
     }
     string flow_payload = merge_chunks(flow_payload_chunks);
     EXPECT_EQ(payload, string(flow_payload.begin(), flow_payload.end()));
-    EXPECT_EQ(0, flow.total_buffered_bytes());
+    EXPECT_EQ(0U, flow.total_buffered_bytes());
     EXPECT_TRUE(flow.buffered_payload().empty());
 }
 
@@ -353,8 +353,8 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
                                           IPv4Address("4.3.2.1"), 25);
     EXPECT_EQ(Flow::ESTABLISHED, stream.client_flow().state());
     EXPECT_EQ(Flow::SYN_SENT, stream.server_flow().state());
-    EXPECT_EQ(30, stream.client_flow().sequence_number());
-    EXPECT_EQ(60, stream.server_flow().sequence_number());
+    EXPECT_EQ(30U, stream.client_flow().sequence_number());
+    EXPECT_EQ(60U, stream.server_flow().sequence_number());
     EXPECT_EQ(IPv4Address("4.3.2.1"), stream.client_flow().dst_addr_v4());
     EXPECT_EQ(25, stream.client_flow().dport());
     EXPECT_EQ(IPv4Address("1.2.3.4"), stream.server_flow().dst_addr_v4());
@@ -373,7 +373,7 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     follower.process_packet(server_packet);
 
     EXPECT_EQ(Flow::ESTABLISHED, stream.server_flow().state());
-    EXPECT_EQ(61, stream.server_flow().sequence_number());
+    EXPECT_EQ(61U, stream.server_flow().sequence_number());
 }
 
 TEST_F(FlowTest, StreamFollower_TCPOptions) {
@@ -601,20 +601,20 @@ TEST_F(AckTrackerTest, AckedRange_WrapAround) {
 
 TEST_F(AckTrackerTest, AckingTcp1) {
     AckTracker tracker(0, false);
-    EXPECT_EQ(0, tracker.ack_number());
+    EXPECT_EQ(0U, tracker.ack_number());
     tracker.process_packet(make_tcp_ack(100));
-    EXPECT_EQ(100, tracker.ack_number());
+    EXPECT_EQ(100U, tracker.ack_number());
     EXPECT_TRUE(tracker.is_segment_acked(0, 10));
     EXPECT_TRUE(tracker.is_segment_acked(50, 10));
     EXPECT_TRUE(tracker.is_segment_acked(99, 1));
     EXPECT_FALSE(tracker.is_segment_acked(90, 20));
     EXPECT_FALSE(tracker.is_segment_acked(99, 2));
     tracker.process_packet(make_tcp_ack(50));
-    EXPECT_EQ(100, tracker.ack_number());
+    EXPECT_EQ(100U, tracker.ack_number());
     tracker.process_packet(make_tcp_ack(150));
-    EXPECT_EQ(150, tracker.ack_number());
+    EXPECT_EQ(150U, tracker.ack_number());
     tracker.process_packet(make_tcp_ack(200));
-    EXPECT_EQ(200, tracker.ack_number());
+    EXPECT_EQ(200U, tracker.ack_number());
 }
 
 TEST_F(AckTrackerTest, AckingTcp2) {
@@ -626,29 +626,29 @@ TEST_F(AckTrackerTest, AckingTcp2) {
     tracker.process_packet(make_tcp_ack(maximum));
     EXPECT_EQ(maximum, tracker.ack_number());   
     tracker.process_packet(make_tcp_ack(5));
-    EXPECT_EQ(5, tracker.ack_number());   
+    EXPECT_EQ(5U, tracker.ack_number());   
 }
 
 TEST_F(AckTrackerTest, AckingTcp3) {
     uint32_t maximum = numeric_limits<uint32_t>::max();
     AckTracker tracker(maximum - 10, false);
     tracker.process_packet(make_tcp_ack(5));
-    EXPECT_EQ(5, tracker.ack_number());   
+    EXPECT_EQ(5U, tracker.ack_number());   
 }
 
 TEST_F(AckTrackerTest, AckingTcp_Sack1) {
     AckTracker tracker(0, true);
     tracker.process_packet(make_tcp_ack(0, make_pair(2, 5), make_pair(9, 11)));
-    EXPECT_EQ(3 + 2, tracker.acked_intervals().size());
+    EXPECT_EQ(3U + 2U, tracker.acked_intervals().size());
     EXPECT_TRUE(tracker.is_segment_acked(2, 3));
     EXPECT_TRUE(tracker.is_segment_acked(9, 2));
     EXPECT_FALSE(tracker.is_segment_acked(2, 9));
 
     tracker.process_packet(make_tcp_ack(9));
-    EXPECT_EQ(1, tracker.acked_intervals().size());
+    EXPECT_EQ(1UL, tracker.acked_intervals().size());
 
     tracker.process_packet(make_tcp_ack(15));
-    EXPECT_EQ(0, tracker.acked_intervals().size());
+    EXPECT_EQ(0UL, tracker.acked_intervals().size());
 }
 
 TEST_F(AckTrackerTest, AckingTcp_Sack2) {
@@ -659,20 +659,20 @@ TEST_F(AckTrackerTest, AckingTcp_Sack2) {
         make_pair(maximum - 3, maximum),
         make_pair(0, 10)
     ));
-    EXPECT_EQ(3 + 10, tracker.acked_intervals().size());
+    EXPECT_EQ(3U + 10U, tracker.acked_intervals().size());
     EXPECT_TRUE(tracker.is_segment_acked(maximum - 12, 2));
     EXPECT_TRUE(tracker.is_segment_acked(maximum - 2, 1));
     EXPECT_TRUE(tracker.is_segment_acked(2, 3));
     EXPECT_FALSE(tracker.is_segment_acked(maximum - 10, 10));
 
     tracker.process_packet(make_tcp_ack(maximum - 2));
-    EXPECT_EQ(1 + 10, tracker.acked_intervals().size());
+    EXPECT_EQ(1U + 10U, tracker.acked_intervals().size());
 
     tracker.process_packet(make_tcp_ack(5));
-    EXPECT_EQ(4, tracker.acked_intervals().size());
+    EXPECT_EQ(4U, tracker.acked_intervals().size());
 
     tracker.process_packet(make_tcp_ack(15));
-    EXPECT_EQ(0, tracker.acked_intervals().size());
+    EXPECT_EQ(0U, tracker.acked_intervals().size());
 }
 
 TEST_F(AckTrackerTest, AckingTcp_Sack3) {
@@ -682,12 +682,37 @@ TEST_F(AckTrackerTest, AckingTcp_Sack3) {
         maximum - 10,
         make_pair(maximum - 3, 5)
     ));
-    EXPECT_EQ(9, tracker.acked_intervals().size());
+    EXPECT_EQ(9U, tracker.acked_intervals().size());
 
     tracker.process_packet(make_tcp_ack(maximum));
-    EXPECT_EQ(5, tracker.acked_intervals().size());
+    EXPECT_EQ(5U, tracker.acked_intervals().size());
+}
+
+TEST_F(FlowTest, AckNumbersAreCorrect) {
+    using std::placeholders::_1;
+
+    vector<EthernetII> packets = three_way_handshake(29, 60, "1.2.3.4", 22, "4.3.2.1", 25);
+    // Server's ACK number is 9898
+    packets[1].rfind_pdu<TCP>().ack_seq(9898);
+    // Client's ACK number is 1717
+    packets[2].rfind_pdu<TCP>().ack_seq(1717);
+    StreamFollower follower;
+    follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
+    for (size_t i = 0; i < packets.size(); ++i) {
+        follower.process_packet(packets[i]);
+    }
+    Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
+                                          IPv4Address("4.3.2.1"), 25);
+    EXPECT_EQ(1717U, stream.client_flow().ack_tracker().ack_number());
+    EXPECT_EQ(9898U, stream.server_flow().ack_tracker().ack_number());
 }
 
 #endif // HAVE_ACK_TRACKER
+
+#else
+
+TEST(Foo, Dummy) {
+
+}
 
 #endif // TINS_IS_CXX11

@@ -313,9 +313,9 @@ TEST_F(ICMPTest, ExtensionsParsingWithoutALengthField) {
     const uint8_t ext[] = { 0, 8, 1, 1, 24, 150, 1, 1 };
     ICMP icmp(packet_with_extensions, sizeof(packet_with_extensions));
     ICMPExtensionsStructure extensions = icmp.extensions();
-    ASSERT_EQ(1, extensions.extensions().size());
+    ASSERT_EQ(1UL, extensions.extensions().size());
     MPLS mpls(*extensions.extensions().begin());
-    EXPECT_EQ(100704, mpls.label());
+    EXPECT_EQ(100704U, mpls.label());
     EXPECT_EQ(
         ICMPExtension::payload_type(ext, ext + sizeof(ext)), 
         extensions.extensions().begin()->serialize()
@@ -340,7 +340,7 @@ TEST_F(ICMPTest, ExtensionsParsingWithALengthField) {
     const uint8_t ext[] = { 0, 8, 1, 1, 24, 150, 1, 1 };
     ICMP icmp(packet_with_extensions_and_length, sizeof(packet_with_extensions_and_length));
     ICMPExtensionsStructure extensions = icmp.extensions();
-    ASSERT_EQ(1, extensions.extensions().size());
+    ASSERT_EQ(1UL, extensions.extensions().size());
     EXPECT_EQ(
         ICMPExtension::payload_type(ext, ext + sizeof(ext)), 
         extensions.extensions().begin()->serialize()
