@@ -338,7 +338,7 @@ public:
     /**
      * \brief Returns the header size.
      *
-     * This metod overrides PDU::header_size. This size includes the
+     * This method overrides PDU::header_size. This size includes the
      * payload and options size.
      *
      * \sa PDU::header_size
@@ -603,7 +603,7 @@ public:
     /**
      * \brief Returns the header size.
      *
-     * This metod overrides PDU::header_size. This size includes the
+     * This method overrides PDU::header_size. This size includes the
      * payload and options size.
      *
      * \sa PDU::header_size
