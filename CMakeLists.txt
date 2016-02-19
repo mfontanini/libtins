@@ -65,7 +65,7 @@ INCLUDE(ExternalProject)
 # C++11 support
 OPTION(LIBTINS_ENABLE_CXX11 "Compile libtins with c++11 features" ON)
 IF(LIBTINS_ENABLE_CXX11)
-    INCLUDE(CheckCXX11Features)
+    INCLUDE(CheckCXXFeatures)
     # We only use declval and decltype on gcc/clang as VC fails to build that code,
     # at least on VC2013
     IF(HAS_CXX11_RVALUE_REFERENCES AND ((HAS_CXX11_DECLVAL AND HAS_CXX11_DECLTYPE) OR MSVC))
