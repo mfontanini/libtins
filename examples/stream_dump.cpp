@@ -40,6 +40,7 @@ using std::cerr;
 using std::endl;
 using std::bind;
 using std::string;
+using std::to_string;
 using std::ostringstream;
 using std::exception;
 
