@@ -42,6 +42,7 @@
     #define TINS_IS_LITTLE_ENDIAN (_BYTE_ORDER == _LITTLE_ENDIAN)
     #define TINS_IS_BIG_ENDIAN (_BYTE_ORDER == _BIG_ENDIAN)
 #elif defined(_WIN32)
+    #include <cstdlib>
     // Assume windows == little endian. fixme later
     #define TINS_IS_LITTLE_ENDIAN 1
     #define TINS_IS_BIG_ENDIAN 0
@@ -49,6 +50,19 @@
     #include <endian.h>
     #define TINS_IS_LITTLE_ENDIAN (__BYTE_ORDER == __LITTLE_ENDIAN)
     #define TINS_IS_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)
+#endif
+
+// Define macros to swap bytes using compiler intrinsics when possible
+#if defined(_MSC_VER)
+    #define TINS_BYTE_SWAP_16(data) _byteswap_ushort(data)
+    #define TINS_BYTE_SWAP_32(data) _byteswap_ulong(data)
+    #define TINS_BYTE_SWAP_64(data) _byteswap_uint64(data)
+#elif defined(HAVE_GCC_BUILTIN_SWAP)
+    #define TINS_BYTE_SWAP_16(data) __builtin_bswap16(data)
+    #define TINS_BYTE_SWAP_32(data) __builtin_bswap32(data)
+    #define TINS_BYTE_SWAP_64(data) __builtin_bswap64(data)
+#else
+    #define TINS_NO_BYTE_SWAP_INTRINSICS
 #endif
 
 namespace Tins {
@@ -70,7 +84,11 @@ inline uint8_t do_change_endian(uint8_t data) {
  * \param data The data to convert.
  */
 inline uint16_t do_change_endian(uint16_t data) {
-    return ((data & 0xff00) >> 8)  | ((data & 0x00ff) << 8);
+    #ifdef TINS_NO_BYTE_SWAP_INTRINSICS
+        return ((data & 0xff00) >> 8)  | ((data & 0x00ff) << 8);
+    #else
+        return TINS_BYTE_SWAP_16(data);
+    #endif
 }
 
 /**
@@ -79,8 +97,12 @@ inline uint16_t do_change_endian(uint16_t data) {
  * \param data The data to convert.
  */
 inline uint32_t do_change_endian(uint32_t data) {
-    return (((data & 0xff000000) >> 24) | ((data & 0x00ff0000) >> 8)  |
-            ((data & 0x0000ff00) << 8)  | ((data & 0x000000ff) << 24));
+    #ifdef TINS_NO_BYTE_SWAP_INTRINSICS
+        return (((data & 0xff000000) >> 24) | ((data & 0x00ff0000) >> 8)  |
+               ((data & 0x0000ff00) << 8)  | ((data & 0x000000ff) << 24));
+    #else
+        return TINS_BYTE_SWAP_32(data);
+    #endif
 }
 
 /**
@@ -89,8 +111,12 @@ inline uint32_t do_change_endian(uint32_t data) {
  * \param data The data to convert.
  */
  inline uint64_t do_change_endian(uint64_t data) {
-    return (((uint64_t)(do_change_endian((uint32_t)(data & 0xffffffff))) << 32) |
-            (do_change_endian(((uint32_t)(data >> 32)))));
+    #ifdef TINS_NO_BYTE_SWAP_INTRINSICS
+        return (((uint64_t)(do_change_endian((uint32_t)(data & 0xffffffff))) << 32) |
+               (do_change_endian(((uint32_t)(data >> 32)))));
+    #else
+        return TINS_BYTE_SWAP_64(data);
+    #endif
  }
  
 /**

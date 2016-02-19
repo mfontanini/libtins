@@ -16,4 +16,7 @@
 /* Have TCP ACK tracking */
 #cmakedefine HAVE_ACK_TRACKER
 
+/* Have GCC builtin swap */
+#cmakedefine HAVE_GCC_BUILTIN_SWAP
+
 #endif // TINS_CONFIG_H
