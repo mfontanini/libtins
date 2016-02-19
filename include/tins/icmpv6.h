@@ -1033,7 +1033,7 @@ public:
     /**
      * \brief Returns the header size.
      *
-     * This metod overrides PDU::header_size. This size includes the
+     * This method overrides PDU::header_size. This size includes the
      * payload and options size. \sa PDU::header_size
      */
     uint32_t header_size() const;
@@ -1041,7 +1041,7 @@ public:
     /**
      * \brief Returns the trailer size.
      *
-     * This metod overrides PDU::trailer_size. This size will hold the extensions size
+     * This method overrides PDU::trailer_size. This size will hold the extensions size
      *
      * \sa PDU::header_size
      */

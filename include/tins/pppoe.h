@@ -167,7 +167,7 @@ public:
     /**
      * \brief Returns the header size.
      *
-     * This metod overrides PDU::header_size. \sa PDU::header_size
+     * This method overrides PDU::header_size. \sa PDU::header_size
      */
     uint32_t header_size() const;
 

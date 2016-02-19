@@ -152,7 +152,7 @@ public:
      * 
      * This returns the same as RawPDU::payload_size().
      *
-     * This metod overrides PDU::header_size. \sa PDU::header_size
+     * This method overrides PDU::header_size. \sa PDU::header_size
      */
     uint32_t header_size() const;
     
