@@ -65,6 +65,10 @@
 #include "radiotap.h"
 #include "ieee802_3.h"
 #include "internals.h"
+#include "cxxstd.h"
+#if TINS_IS_CXX11
+    #include <chrono>
+#endif // TINS_IS_CXX11
 
 using std::string;
 using std::ostringstream;
@@ -472,42 +476,35 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
                 }
             }
         }
-        struct timeval this_time, diff;
-        #ifdef _WIN32
-            // fixme
+        #if TINS_IS_CXX11
+            using namespace std::chrono;
+            microseconds end = seconds(end_time.tv_sec) + microseconds(end_time.tv_usec);
+            microseconds now = duration_cast<microseconds>(system_clock::now().time_since_epoch());
+            if (now > end) {
+                return 0;
+            }
+            microseconds diff = end - now;
+            timeout.tv_sec = duration_cast<seconds>(diff).count();
+            timeout.tv_usec = (diff - seconds(timeout.tv_sec)).count();
         #else
-            gettimeofday(&this_time, 0);
-        #endif // _WIN32
-        if (timeval_subtract(&diff, &end_time, &this_time)) {
-            return 0;
-        }
-        timeout.tv_sec = diff.tv_sec;
-        timeout.tv_usec = diff.tv_usec;
+            #ifdef _WIN32
+                // Can't do much
+                return 0;
+            #else
+                struct timeval now;
+                gettimeofday(&now, 0);
+                // If now > end_time
+                if (timercmp(&now, &end_time, >)) {
+                    return 0;
+                }
+                struct timeval diff;
+                timersub(&end_time, &now, &diff);
+                timeout.tv_sec = diff.tv_sec;
+                timeout.tv_usec = diff.tv_usec;
+            #endif // _WIN32
+        #endif // TINS_IS_CXX11
     }
     return 0;
-}
-
-int PacketSender::timeval_subtract (struct timeval* result, struct timeval* x, struct timeval* y) {
-    /* Perform the carry for the later subtraction by updating y. */
-    if (x->tv_usec < y->tv_usec) {
-        int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
-        y->tv_usec -= 1000000 * nsec;
-        y->tv_sec += nsec;
-    }
-    
-    if (x->tv_usec - y->tv_usec > 1000000) {
-        int nsec = (x->tv_usec - y->tv_usec) / 1000000;
-        y->tv_usec += 1000000 * nsec;
-        y->tv_sec -= nsec;
-    }
-
-    /* Compute the time remaining to wait.
-    tv_usec is certainly positive. */
-    result->tv_sec = x->tv_sec - y->tv_sec;
-    result->tv_usec = x->tv_usec - y->tv_usec;
-
-    /* Return 1 if result is negative. */
-    return x->tv_sec < y->tv_sec;
 }
 
 int PacketSender::find_type(SocketType type) {

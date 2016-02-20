@@ -384,7 +384,6 @@ private:
     PacketSender(const PacketSender&);
     PacketSender& operator=(const PacketSender&);
     int find_type(SocketType type);
-    int timeval_subtract (struct timeval* result, struct timeval* x, struct timeval* y);
     #ifndef _WIN32
         bool ether_socket_initialized(const NetworkInterface& iface = NetworkInterface()) const;
         int get_ether_socket(const NetworkInterface& iface = NetworkInterface());
