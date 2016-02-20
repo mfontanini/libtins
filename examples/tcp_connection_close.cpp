@@ -29,6 +29,7 @@
 
 #include <iostream>
 #include <string>
+#include <functional>
 #include <tins/tins.h>
 
 using std::string;

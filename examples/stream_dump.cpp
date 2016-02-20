@@ -46,7 +46,7 @@ using std::exception;
 
 using Tins::Sniffer;
 using Tins::SnifferConfiguration;
-using Tins::Packet;
+using Tins::PDU;
 using Tins::TCPIP::StreamFollower;
 using Tins::TCPIP::Stream;
 
@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
         follower.new_stream_callback(&on_new_connection);
         // Now start capturing. Every time there's a new packet, call 
         // follower.process_packet
-        sniffer.sniff_loop([&](Packet& packet) {
+        sniffer.sniff_loop([&](PDU& packet) {
             follower.process_packet(packet);
             return true;
         });
