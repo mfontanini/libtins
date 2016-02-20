@@ -177,6 +177,17 @@ INSTALL(
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
 
+# Confiugure the uninstall script
+CONFIGURE_FILE(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY
+)
+
+# Add uninstall target
+ADD_CUSTOM_TARGET(uninstall
+    COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
 # ******************
 # Add subdirectories
 # ******************
