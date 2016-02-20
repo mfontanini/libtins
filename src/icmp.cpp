@@ -265,13 +265,8 @@ void ICMP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) 
         extensions_.serialize(extensions_ptr, total_sz - (extensions_ptr - buffer));
     }
 
-    // Calculate checksum
-    uint32_t checksum = Utils::sum_range(buffer, buffer + total_sz);
-    while (checksum >> 16) {
-        checksum = (checksum & 0xffff) + (checksum >> 16);
-    }
-    // Write back only the 2 checksum bytes
-    header_.check = ~checksum;
+    // Calculate checksum and write them on the serialized header
+    header_.check = ~Utils::sum_range(buffer, buffer + total_sz);
     memcpy(buffer + 2, &header_.check, sizeof(uint16_t));
 }
 
