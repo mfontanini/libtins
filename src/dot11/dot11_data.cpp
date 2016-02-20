@@ -28,7 +28,7 @@
  */
 
 #include "dot11/dot11_data.h"
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <cstring>
 #include "rawpdu.h"
@@ -161,4 +161,4 @@ void Dot11QoSData::write_fixed_parameters(OutputMemoryStream& stream) {
 
 } // Tins
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

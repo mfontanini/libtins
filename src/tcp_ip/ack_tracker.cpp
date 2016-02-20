@@ -29,7 +29,7 @@
 
 #include "tcp_ip/ack_tracker.h"
 
-#ifdef HAVE_ACK_TRACKER
+#ifdef TINS_HAVE_ACK_TRACKER
 
 #include <limits>
 #include "tcp.h"
@@ -171,4 +171,4 @@ bool AckTracker::is_segment_acked(uint32_t sequence_number, uint32_t length) con
 } // TCPIP
 } // Tins
 
-#endif // HAVE_ACK_TRACKER
+#endif // TINS_HAVE_ACK_TRACKER

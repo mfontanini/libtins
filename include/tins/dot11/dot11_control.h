@@ -29,7 +29,7 @@
 
 #include "../config.h"
 
-#if !defined(TINS_DOT11_DOT11_CONTROL_H) && defined(HAVE_DOT11)
+#if !defined(TINS_DOT11_DOT11_CONTROL_H) && defined(TINS_HAVE_DOT11)
 
 #define TINS_DOT11_DOT11_CONTROL_H
 

@@ -28,7 +28,7 @@
  */
 
 #include "dot11/dot11_assoc.h"
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <cstring>
 #include "memory_helpers.h"
@@ -192,4 +192,4 @@ void Dot11ReAssocResponse::write_fixed_parameters(OutputMemoryStream& stream) {
 
 } // Tins
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <gtest/gtest.h>
 #include "tests/dot11_data.h"
@@ -168,4 +168,4 @@ TEST_F(Dot11DataTest, Source_Dest_BSSID_Address3) {
     EXPECT_EQ(data.bssid_addr(), "00:18:f8:f5:c2:c6");
 }
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

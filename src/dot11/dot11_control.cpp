@@ -28,7 +28,7 @@
  */
 
 #include "dot11/dot11_control.h"
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <algorithm>
 #include "memory_helpers.h"
@@ -251,4 +251,4 @@ uint32_t Dot11BlockAck::header_size() const {
 
 } // Tins
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

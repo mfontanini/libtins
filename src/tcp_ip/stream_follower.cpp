@@ -129,7 +129,7 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
         bool terminate_stream = total_chunks > max_buffered_chunks_ || 
                                 total_buffered_bytes > max_buffered_bytes_;
         TerminationReason reason = BUFFERED_DATA;
-        #ifdef HAVE_ACK_TRACKER
+        #ifdef TINS_HAVE_ACK_TRACKER
         if (!terminate_stream) {
             uint32_t count = 0;
             count += stream.client_flow().ack_tracker().acked_intervals().iterative_size();
@@ -137,7 +137,7 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
             terminate_stream = count > DEFAULT_MAX_SACKED_INTERVALS;
             reason = SACKED_SEGMENTS;
         }
-        #endif // HAVE_ACK_TRACKER
+        #endif // TINS_HAVE_ACK_TRACKER
         if (stream.is_finished() || terminate_stream) {
             // If we're terminating the stream, execute the termination callback
             if (terminate_stream && on_stream_termination_) {

@@ -29,7 +29,7 @@
 
 #include "handshake_capturer.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include "dot11/dot11_data.h"
 
@@ -106,4 +106,4 @@ bool RSNHandshakeCapturer::do_insert(const handshake_map::key_type& key,
 
 } // namespace Tins;
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

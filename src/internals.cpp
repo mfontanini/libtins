@@ -164,16 +164,16 @@ PDU* pdu_from_dlt_flag(int flag,
         case DLT_EN10MB:
             return new EthernetII(buffer, size);
 
-        #ifdef HAVE_DOT11
+        #ifdef TINS_HAVE_DOT11
         case DLT_IEEE802_11_RADIO:
             return new RadioTap(buffer, size);
         case DLT_IEEE802_11:
             return Dot11::from_bytes(buffer, size);
-        #else // HAVE_DOT11
+        #else // TINS_HAVE_DOT11
         case DLT_IEEE802_11_RADIO:
         case DLT_IEEE802_11:
             throw protocol_disabled();
-        #endif // HAVE_DOT11
+        #endif // TINS_HAVE_DOT11
 
         case DLT_NULL:
             return new Loopback(buffer, size);
@@ -200,7 +200,7 @@ Tins::PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size
             return new Tins::IEEE802_3(buffer, size);
         case Tins::PDU::PPPOE:
             return new Tins::PPPoE(buffer, size);
-        #ifdef HAVE_DOT11
+        #ifdef TINS_HAVE_DOT11
             case Tins::PDU::RADIOTAP:
                 return new Tins::RadioTap(buffer, size);
             case Tins::PDU::DOT11:
@@ -226,7 +226,7 @@ Tins::PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size
             case Tins::PDU::DOT11_RTS:
             case Tins::PDU::DOT11_QOS_DATA:
                 return Tins::Dot11::from_bytes(buffer, size);
-        #endif // HAVE_DOT11
+        #endif // TINS_HAVE_DOT11
         default:
             return 0;
     };

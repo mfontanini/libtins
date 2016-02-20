@@ -1,6 +1,6 @@
 #include "config.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <gtest/gtest.h>
 #include <cstring>
@@ -46,4 +46,4 @@ TEST_F(WEPDecryptTest, Decrypt1) {
     EXPECT_FALSE(decrypter.decrypt(dot11));
 }
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

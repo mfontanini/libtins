@@ -112,7 +112,7 @@ void EthernetII::send(PacketSender& sender, const NetworkInterface& iface) {
     if (!iface) {
         throw invalid_interface();
     }
-    #if defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET) || defined(BSD) || defined(__FreeBSD_kernel__)
+    #if defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET) || defined(BSD) || defined(__FreeBSD_kernel__)
         // Sending using pcap_sendpacket/BSD bpf packet mode is the same here
         sender.send_l2(*this, 0, 0, iface);
     #elif defined(_WIN32)

@@ -97,11 +97,11 @@ void Flow::process_packet(PDU& pdu) {
     // Update the internal state first
     if (tcp) {
         update_state(*tcp);
-        #ifdef HAVE_ACK_TRACKER
+        #ifdef TINS_HAVE_ACK_TRACKER
         if (flags_.ack_tracking) {
             ack_tracker_.process_packet(*tcp);
         }
-        #endif // HAVE_ACK_TRACKER
+        #endif // TINS_HAVE_ACK_TRACKER
     }
     if (flags_.ignore_data_packets) {
         return;
@@ -213,17 +213,17 @@ void Flow::update_state(const TCP& tcp) {
         state_ = RST_SENT;
     }
     else if (state_ == SYN_SENT && (tcp.flags() & TCP::ACK) != 0) {
-        #ifdef HAVE_ACK_TRACKER
+        #ifdef TINS_HAVE_ACK_TRACKER
             ack_tracker_ = AckTracker(tcp.ack_seq());
-        #endif // HAVE_ACK_TRACKER
+        #endif // TINS_HAVE_ACK_TRACKER
         state_ = ESTABLISHED;
         seq_number_++;
     }
     else if (state_ == UNKNOWN && (tcp.flags() & TCP::SYN) != 0) {
         // This is the server's state, sending it's first SYN|ACK
-        #ifdef HAVE_ACK_TRACKER
+        #ifdef TINS_HAVE_ACK_TRACKER
             ack_tracker_ = AckTracker(tcp.ack_seq());
-        #endif // HAVE_ACK_TRACKER
+        #endif // TINS_HAVE_ACK_TRACKER
         state_ = SYN_SENT;
         seq_number_ = tcp.seq();
         const TCP::option* mss_option = tcp.search_option(TCP::MSS);
@@ -318,7 +318,7 @@ bool Flow::sack_permitted() const {
 }
 
 void Flow::enable_ack_tracking() {
-    #ifdef HAVE_ACK_TRACKER
+    #ifdef TINS_HAVE_ACK_TRACKER
     flags_.ack_tracking = 1;
     #else
     throw feature_disabled();
@@ -329,7 +329,7 @@ bool Flow::ack_tracking_enabled() const {
     return flags_.ack_tracking;
 }
 
-#ifdef HAVE_ACK_TRACKER
+#ifdef TINS_HAVE_ACK_TRACKER
 const AckTracker& Flow::ack_tracker() const {
     return ack_tracker_;
 }
@@ -338,7 +338,7 @@ AckTracker& Flow::ack_tracker() {
     return ack_tracker_;
 }
 
-#endif // HAVE_ACK_TRACKER
+#endif // TINS_HAVE_ACK_TRACKER
 
 } // TCPIP
 } // Tins

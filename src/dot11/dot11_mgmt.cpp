@@ -28,7 +28,7 @@
  */   
 
 #include "dot11/dot11_mgmt.h"
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <cstring>
 #include "rsn_information.h"
@@ -641,4 +641,4 @@ Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim_type::from_option(const
 
 } // Tins
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

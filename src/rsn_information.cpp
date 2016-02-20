@@ -28,7 +28,7 @@
  */
 
 #include "rsn_information.h"
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <cstring>
 #include <stdexcept>
@@ -137,4 +137,4 @@ RSNInformation RSNInformation::from_option(const PDUOption<uint8_t, Dot11>& opt)
 
 } // Tins
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

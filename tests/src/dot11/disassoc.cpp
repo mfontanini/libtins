@@ -1,6 +1,6 @@
 #include "dot11/dot11_assoc.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <gtest/gtest.h>
 #include "tests/dot11_mgmt.h"
@@ -89,4 +89,4 @@ TEST_F(Dot11DisassocTest, Serialize) {
     EXPECT_TRUE(std::equal(buffer.begin(), buffer.end(), expected_packet));
 }
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

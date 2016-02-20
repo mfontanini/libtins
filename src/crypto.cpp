@@ -29,13 +29,13 @@
 
 #include "crypto.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
-#ifdef HAVE_WPA2_DECRYPTION
+#ifdef TINS_HAVE_WPA2_DECRYPTION
     #include <openssl/evp.h>
     #include <openssl/hmac.h>
     #include <openssl/aes.h>
-#endif // HAVE_WPA2_DECRYPTION
+#endif // TINS_HAVE_WPA2_DECRYPTION
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
 #include "exceptions.h"
@@ -130,7 +130,7 @@ PDU* WEPDecrypter::decrypt(RawPDU& raw, const string& password) {
     }
 }
 
-#ifdef HAVE_WPA2_DECRYPTION
+#ifdef TINS_HAVE_WPA2_DECRYPTION
 // WPA2Decrypter
 
 using WPA2::SessionKeys;
@@ -629,9 +629,9 @@ bool WPA2Decrypter::decrypt(PDU& pdu) {
     return false;
 }
 
-#endif // HAVE_WPA2_DECRYPTION
+#endif // TINS_HAVE_WPA2_DECRYPTION
 
 } // namespace Crypto
 } // namespace Tins
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

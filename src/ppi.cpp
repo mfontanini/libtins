@@ -59,7 +59,7 @@ PPI::PPI(const uint8_t* buffer, uint32_t total_sz) {
     if (stream) {
         switch (dlt()) {
             case DLT_IEEE802_11:
-                #ifdef HAVE_DOT11
+                #ifdef TINS_HAVE_DOT11
                     parse_80211(stream.pointer(), stream.size());
                 #else
                     throw protocol_disabled();
@@ -74,7 +74,7 @@ PPI::PPI(const uint8_t* buffer, uint32_t total_sz) {
                 }
                 break;
             case DLT_IEEE802_11_RADIO:
-                #ifdef HAVE_DOT11
+                #ifdef TINS_HAVE_DOT11
                     inner_pdu(new RadioTap(stream.pointer(), stream.size()));
                 #else
                     throw protocol_disabled();
@@ -99,7 +99,7 @@ void PPI::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
 }
 
 void PPI::parse_80211(const uint8_t* buffer, uint32_t total_sz) {
-    #ifdef HAVE_DOT11
+    #ifdef TINS_HAVE_DOT11
     if (data_.size() >= 13) {
         // Is FCS-at-end on?
         if ((data_[12] & 1) == 1) {
@@ -111,7 +111,7 @@ void PPI::parse_80211(const uint8_t* buffer, uint32_t total_sz) {
         }
     }
     inner_pdu(Dot11::from_bytes(buffer, total_sz));
-    #endif // HAVE_DOT11
+    #endif // TINS_HAVE_DOT11
 }
 
 } // Tins

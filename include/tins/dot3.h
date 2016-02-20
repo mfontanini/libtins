@@ -145,12 +145,12 @@ public:
      */
     uint32_t header_size() const;
     
-    #if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+    #if !defined(_WIN32) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
     /**
      * \sa PDU::send()
      */
     void send(PacketSender& sender, const NetworkInterface& iface);
-    #endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #endif // !_WIN32 || TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
     /** 
      * \brief Check whether ptr points to a valid response for this PDU.

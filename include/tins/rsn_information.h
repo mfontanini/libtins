@@ -29,7 +29,7 @@
 
 #include "config.h"
 
-#if !defined(TINS_RSN_INFORMATION) && defined(HAVE_DOT11)
+#if !defined(TINS_RSN_INFORMATION) && defined(TINS_HAVE_DOT11)
 #define TINS_RSN_INFORMATION
 
 #include <stdint.h>

@@ -29,7 +29,7 @@
 
 #include "radiotap.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <cstring>
 #include <stdexcept>
@@ -576,4 +576,4 @@ void RadioTap::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU
 
 } // Tins
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

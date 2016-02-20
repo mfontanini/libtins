@@ -1,7 +1,7 @@
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <gtest/gtest.h>
 #include <vector>
@@ -53,4 +53,4 @@ TEST_F(PPITest, ConstructorFromBufferUsingEncapsulatedDot11WithOptions) {
     EXPECT_TRUE(dot11->search_option(static_cast<Dot11::OptionTypes>(61)) != NULL);
 }
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

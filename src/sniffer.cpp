@@ -120,7 +120,7 @@ void sniff_loop_eth_handler(u_char* user, const struct pcap_pkthdr* h, const u_c
     }
 }
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 void sniff_loop_dot11_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
     sniff_data* data = (sniff_data*)user;
     data->packet_processed = true;
@@ -145,14 +145,14 @@ PtrPacket BaseSniffer::next_packet() {
         handler = sniff_loop_eth_handler;
     }
     else if (iface_type == DLT_IEEE802_11_RADIO) {
-        #ifdef HAVE_DOT11
+        #ifdef TINS_HAVE_DOT11
             handler = &sniff_loop_handler<RadioTap>;
         #else
             throw protocol_disabled();
         #endif
     }
     else if (iface_type == DLT_IEEE802_11) {
-        #ifdef HAVE_DOT11
+        #ifdef TINS_HAVE_DOT11
             handler = sniff_loop_dot11_handler;
         #else
             throw protocol_disabled();

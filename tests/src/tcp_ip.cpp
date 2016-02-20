@@ -19,9 +19,9 @@
 #include "packet.h"
 #include "utils.h"
 #include "config.h"
-#ifdef HAVE_ACK_TRACKER
+#ifdef TINS_HAVE_ACK_TRACKER
     #include "tcp_ip/ack_tracker.h"
-#endif // HAVE_ACK_TRACKER
+#endif // TINS_HAVE_ACK_TRACKER
 
 using namespace std;
 using namespace std::chrono;
@@ -513,7 +513,7 @@ TEST_F(FlowTest, StreamFollower_FollowStream) {
 }
 
 
-#ifdef HAVE_ACK_TRACKER
+#ifdef TINS_HAVE_ACK_TRACKER
 
 using namespace boost;
 using namespace boost::icl;
@@ -707,7 +707,7 @@ TEST_F(FlowTest, AckNumbersAreCorrect) {
     EXPECT_EQ(9898U, stream.server_flow().ack_tracker().ack_number());
 }
 
-#endif // HAVE_ACK_TRACKER
+#endif // TINS_HAVE_ACK_TRACKER
 
 #else
 

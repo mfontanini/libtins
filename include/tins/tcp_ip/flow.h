@@ -283,7 +283,7 @@ public:
      */
     bool ack_tracking_enabled() const;
 
-    #ifdef HAVE_ACK_TRACKER
+    #ifdef TINS_HAVE_ACK_TRACKER
     /**
      * Retrieves the ACK tracker for this Flow (const)
      */
@@ -293,7 +293,7 @@ public:
      * Retrieves the ACK tracker for this Flow
      */
     AckTracker& ack_tracker();
-    #endif // HAVE_ACK_TRACKER
+    #endif // TINS_HAVE_ACK_TRACKER
 private:
     // Compress all flags into just one struct using bitfields 
     struct flags {
@@ -323,9 +323,9 @@ private:
     State state_;
     int mss_;
     flags flags_;
-    #ifdef HAVE_ACK_TRACKER
+    #ifdef TINS_HAVE_ACK_TRACKER
     AckTracker ack_tracker_;
-    #endif // HAVE_ACK_TRACKER
+    #endif // TINS_HAVE_ACK_TRACKER
 };
 
 } // TCPIP

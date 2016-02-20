@@ -86,13 +86,13 @@ uint32_t Dot3::header_size() const {
     return sizeof(header_);
 }
 
-#if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+#if !defined(_WIN32) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 void Dot3::send(PacketSender& sender, const NetworkInterface& iface) {
     if (!iface) {
         throw invalid_interface();
     }
         
-    #if defined(BSD) || defined(__FreeBSD_kernel__) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+    #if defined(BSD) || defined(__FreeBSD_kernel__) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
         sender.send_l2(*this, 0, 0, iface);
     #else
         struct sockaddr_ll addr;
@@ -108,7 +108,7 @@ void Dot3::send(PacketSender& sender, const NetworkInterface& iface) {
         sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
     #endif
 }
-#endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#endif // !_WIN32 || TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 bool Dot3::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {

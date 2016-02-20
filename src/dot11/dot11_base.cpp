@@ -29,7 +29,7 @@
 
 #include "dot11/dot11_base.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <cstring>
 #include <stdexcept>
@@ -288,4 +288,4 @@ Dot11* Dot11::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
 
 } // Tins
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11

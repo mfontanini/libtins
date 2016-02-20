@@ -29,7 +29,7 @@
 
 #include "config.h"
 
-#if !defined(TINS_CRYPTO_H) && defined(HAVE_DOT11)
+#if !defined(TINS_CRYPTO_H) && defined(TINS_HAVE_DOT11)
 #define TINS_CRYPTO_H
 
 #include <map>
@@ -52,7 +52,7 @@ namespace Crypto {
 
 struct RC4Key;
 
-#ifdef HAVE_WPA2_DECRYPTION
+#ifdef TINS_HAVE_WPA2_DECRYPTION
 namespace WPA2 {
 
 /**
@@ -165,7 +165,7 @@ private:
 };
 
 } // WPA2
-#endif // HAVE_WPA2_DECRYPTION
+#endif // TINS_HAVE_WPA2_DECRYPTION
 
 /**
  * \brief RC4 Key abstraction.
@@ -240,7 +240,7 @@ private:
     std::vector<uint8_t> key_buffer_;
 };
 
-#ifdef HAVE_WPA2_DECRYPTION
+#ifdef TINS_HAVE_WPA2_DECRYPTION
 /**
  * \brief Decrypts WPA2-encrypted traffic.
  *
@@ -382,7 +382,7 @@ private:
     bssids_map aps_;
     keys_map keys_;
 };
-#endif // HAVE_WPA2_DECRYPTION
+#endif // TINS_HAVE_WPA2_DECRYPTION
 
 /**
  * \brief Pluggable decrypter object which can be used to decrypt
@@ -459,7 +459,7 @@ void rc4(ForwardIterator start, ForwardIterator end, RC4Key& key, OutputIterator
 template<typename Functor>
 DecrypterProxy<Functor, WEPDecrypter> make_wep_decrypter_proxy(const Functor& functor);
 
-#ifdef HAVE_WPA2_DECRYPTION
+#ifdef TINS_HAVE_WPA2_DECRYPTION
 /**
  * \brief Wrapper function to create a DecrypterProxy using a 
  * WPA2Decrypter as the Decrypter template parameter.
@@ -471,7 +471,7 @@ template<typename Functor>
 DecrypterProxy<Functor, WPA2Decrypter> make_wpa2_decrypter_proxy(const Functor& functor) {
     return DecrypterProxy<Functor, WPA2Decrypter>(functor);
 }
-#endif // HAVE_WPA2_DECRYPTION
+#endif // TINS_HAVE_WPA2_DECRYPTION
 
 // Implementation section
 

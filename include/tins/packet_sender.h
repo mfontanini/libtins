@@ -37,9 +37,9 @@
 #include <stdint.h>
 #include <map>
 #include "config.h"
-#ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
     #include <pcap.h>
-#endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#endif // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 #include "network_interface.h"
 #include "macros.h"
 #include "cxxstd.h"
@@ -184,14 +184,14 @@ public:
      */
     ~PacketSender();
 
-    #if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+    #if !defined(_WIN32) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
     /** 
      * \brief Opens a layer 2 socket.
      * 
      * If this operation fails, then a socket_open_error will be thrown.
      */
     void open_l2_socket(const NetworkInterface& iface = NetworkInterface());
-    #endif // !_WIN32 || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+    #endif // !_WIN32 || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 
     /** 
      * \brief Opens a layer 3 socket, using the corresponding protocol
@@ -324,7 +324,7 @@ public:
 
     #endif // _WIN32
 
-    #if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+    #if !defined(_WIN32) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
     /** 
      * \brief Sends a level 2 PDU.
      *
@@ -342,7 +342,7 @@ public:
      */
     void send_l2(PDU& pdu, struct sockaddr* link_addr, uint32_t len_addr, 
       const NetworkInterface& iface = NetworkInterface());
-    #endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #endif // !_WIN32 || TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
     /** 
      * \brief Receives a layer 3 PDU response to a previously sent PDU.
@@ -393,9 +393,9 @@ private:
     void send(PDU& pdu, const NetworkInterface& iface) {
         static_cast<T&>(pdu).send(*this, iface);
     }
-    #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
         pcap_t* make_pcap_handle(const NetworkInterface& iface) const;
-    #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #endif // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
     
     PDU* recv_match_loop(const std::vector<int>& sockets, 
                          PDU& pdu,
@@ -418,10 +418,10 @@ private:
     #if defined(BSD) || defined(__FreeBSD_kernel__)
     int buffer_size_;
     #endif // BSD
-    #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
         typedef std::map<NetworkInterface, pcap_t*> PcapHandleMap; 
         PcapHandleMap pcap_handles_;
-    #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #endif // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 };
 
 } // Tins

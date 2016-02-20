@@ -129,12 +129,12 @@ PacketSender::~PacketSender() {
         }
     #endif
 
-    #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
         for (PcapHandleMap::iterator it = pcap_handles_.begin(); it != pcap_handles_.end(); ++it) {
             pcap_close(it->second);
         }
         pcap_handles_.clear();
-    #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #endif // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 }
 
 void PacketSender::default_interface(const NetworkInterface& iface) {
@@ -145,7 +145,7 @@ const NetworkInterface& PacketSender::default_interface() const {
     return default_iface_;
 }
 
-#if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+#if !defined(_WIN32) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 
 #ifndef _WIN32
 bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const {
@@ -168,7 +168,7 @@ int PacketSender::get_ether_socket(const NetworkInterface& iface) {
 }
 #endif // _WIN32
 
-#ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 pcap_t* PacketSender::make_pcap_handle(const NetworkInterface& iface) const {
     // This is an ugly fix to make interface names look like what 
@@ -193,10 +193,10 @@ pcap_t* PacketSender::make_pcap_handle(const NetworkInterface& iface) const {
     return handle;
 }
 
-#endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#endif // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 void PacketSender::open_l2_socket(const NetworkInterface& iface) {
-    #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
         if (pcap_handles_.count(iface) == 0) {
             pcap_handles_.insert(make_pair(iface, make_pcap_handle(iface)));
         }
@@ -239,7 +239,7 @@ void PacketSender::open_l2_socket(const NetworkInterface& iface) {
     }
     #endif
 }
-#endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#endif // !_WIN32 || TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 void PacketSender::open_l3_socket(SocketType type) {
     int socktype = find_type(type);
@@ -309,14 +309,14 @@ void PacketSender::send(PDU& pdu, const NetworkInterface& iface) {
     if (pdu.matches_flag(PDU::ETHERNET_II)) {
         send<Tins::EthernetII>(pdu, iface);
     }
-    #ifdef HAVE_DOT11
+    #ifdef TINS_HAVE_DOT11
         else if (pdu.matches_flag(PDU::DOT11)) {
             send<Tins::Dot11>(pdu, iface);
         }
         else if (pdu.matches_flag(PDU::RADIOTAP)) {
             send<Tins::RadioTap>(pdu, iface);
         }
-    #endif // HAVE_DOT11
+    #endif // TINS_HAVE_DOT11
     else if (pdu.matches_flag(PDU::IEEE802_3)) {
         send<Tins::IEEE802_3>(pdu, iface);
     }
@@ -339,14 +339,14 @@ PDU* PacketSender::send_recv(PDU& pdu, const NetworkInterface& iface) {
     return pdu.recv_response(*this, iface);
 }
 
-#if !defined(_WIN32) || defined(HAVE_PACKET_SENDER_PCAP_SENDPACKET)
+#if !defined(_WIN32) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 void PacketSender::send_l2(PDU& pdu,
                            struct sockaddr* link_addr, 
                            uint32_t len_addr,
                            const NetworkInterface& iface) {
     PDU::serialization_type buffer = pdu.serialize();
 
-    #ifdef HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
         open_l2_socket(iface);
         pcap_t* handle = pcap_handles_[iface];
         const int buf_size = static_cast<int>(buffer.size());
@@ -354,7 +354,7 @@ void PacketSender::send_l2(PDU& pdu,
             throw runtime_error("Failed to send packet: " + 
                                 string(pcap_geterr(handle)));
         }
-    #else // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #else // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
         int sock = get_ether_socket(iface);
         if (!buffer.empty()) {
             #if defined(BSD) || defined(__FreeBSD_kernel__)
@@ -365,10 +365,10 @@ void PacketSender::send_l2(PDU& pdu,
                 throw socket_write_error(make_error_string());
             }
         }
-    #endif // HAVE_PACKET_SENDER_PCAP_SENDPACKET
+    #endif // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 }
 
-#endif // !_WIN32 || HAVE_PACKET_SENDER_PCAP_SENDPACKET
+#endif // !_WIN32 || TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
 #ifndef _WIN32
 PDU* PacketSender::recv_l2(PDU& pdu, 

@@ -32,7 +32,7 @@
 
 #include "../config.h"
 
-#ifdef HAVE_ACK_TRACKER
+#ifdef TINS_HAVE_ACK_TRACKER
 
 #include <vector>
 #include <boost/icl/interval_set.hpp>
@@ -149,7 +149,7 @@ private:
 } // TCPIP
 } // Tins
 
-#endif // HAVE_ACK_TRACKER
+#endif // TINS_HAVE_ACK_TRACKER
 
 #endif // TINS_TCP_IP_ACK_TRACKER_H
 

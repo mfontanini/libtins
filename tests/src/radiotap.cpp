@@ -1,6 +1,6 @@
 #include "radiotap.h"
 
-#ifdef HAVE_DOT11
+#ifdef TINS_HAVE_DOT11
 
 #include <gtest/gtest.h>
 #include <cstring>
@@ -400,4 +400,4 @@ TEST_F(RadioTapTest, SerializationWorksFine) {
     );
 }
 
-#endif // HAVE_DOT11
+#endif // TINS_HAVE_DOT11
