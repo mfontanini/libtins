@@ -596,7 +596,7 @@ protected:
         RFMON = 4,
         PACKET_FILTER = 8,
         IMMEDIATE_MODE = 16,
-        DIRECTION = 16
+        DIRECTION = 32
     };
 
     void configure_sniffer_pre_activation(Sniffer& sniffer) const;

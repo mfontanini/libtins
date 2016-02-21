@@ -117,6 +117,8 @@ int main(int argc, char* argv[]) {
     try {
         // Construct the sniffer configuration object
         SnifferConfiguration config;
+        // Get packets as quickly as possible
+        config.set_immediate_mode(true);
         // Only capture TCP traffic sent from/to port 80
         config.set_filter("tcp port 80");
         // Construct the sniffer we'll use
