@@ -177,7 +177,7 @@ void IP::init_ip_fields() {
 }
 
 bool IP::is_fragmented() const {
-    return flags() == IP::MORE_FRAGMENTS || fragment_offset() != 0;
+    return (flags() & IP::MORE_FRAGMENTS) != 0 || fragment_offset() != 0;
 }
 
 // Setters

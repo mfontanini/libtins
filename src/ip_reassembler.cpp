@@ -55,7 +55,8 @@ void IPv4Stream::add_fragment(IP* ip) {
     }
     fragments_.insert(it, IPv4Fragment(ip->inner_pdu(), offset));
     received_size_ += ip->inner_pdu()->size();
-    if (ip->flags() != IP::MORE_FRAGMENTS) {
+    // If the MF flag is off
+    if ((ip->flags() & IP::MORE_FRAGMENTS) == 0) {
         total_size_ = offset + ip->inner_pdu()->size();
         received_end_ = true;
     }
