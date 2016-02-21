@@ -31,6 +31,9 @@
     #define NOMINMAX
 #endif // _WIN32
 
+// Fix for gcc 4.6
+#define _GLIBCXX_USE_NANOSLEEP
+
 #include <iostream>
 #include <mutex>
 #include <chrono>
@@ -65,8 +68,8 @@ using namespace Tins;
 template<typename Duration>
 class statistics {
 public:
-    using duration_type = Duration;
-    using locker_type = lock_guard<mutex>;
+    typedef Duration duration_type;
+    typedef lock_guard<mutex> locker_type;
     
     struct information {
         duration_type average, worst;
@@ -108,18 +111,18 @@ private:
 class dns_monitor {
 public:
     // The response times are measured in milliseconds
-    using duration_type = milliseconds;
+    typedef milliseconds duration_type;
     // The statistics type used.
-    using statistics_type = statistics<duration_type>;
+    typedef statistics<duration_type> statistics_type;
     
     void run(BaseSniffer& sniffer);
     const statistics_type& stats() const {
         return m_stats;
     }
 private:
-    using packet_info = tuple<IPv4Address, IPv4Address, uint16_t>;
-    using clock_type = system_clock;
-    using time_point_type = clock_type::time_point;
+    typedef tuple<IPv4Address, IPv4Address, uint16_t> packet_info;
+    typedef system_clock clock_type;
+    typedef clock_type::time_point time_point_type;
 
     bool callback(const PDU& pdu);
     static packet_info make_packet_info(const PDU& pdu, const DNS& dns);

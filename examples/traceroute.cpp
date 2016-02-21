@@ -31,6 +31,9 @@
     #define NOMINMAX
 #endif // _WIN32
 
+// Fix for gcc 4.6
+#define _GLIBCXX_USE_NANOSLEEP
+
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -128,7 +131,7 @@ private:
             }
             
             sender.send(ip);
-            // Give him a little time
+            // Give it a little time
             sleep_for(milliseconds(100));
         }
         running = false;
