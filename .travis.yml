@@ -22,6 +22,7 @@ before_script:
   - cd build
   - cmake .. -DLIBTINS_ENABLE_CXX11=1
   - make tests
+  - make examples
 
 script:
   - ctest -V
