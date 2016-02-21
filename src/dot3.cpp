@@ -56,6 +56,13 @@ namespace Tins {
 
 const Dot3::address_type Dot3::BROADCAST("ff:ff:ff:ff:ff:ff");
 
+PDU::metadata Dot3::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(dot3_header))) {
+        throw malformed_packet();
+    }
+    return metadata(sizeof(dot3_header), pdu_flag, PDU::UNKNOWN);
+}
+
 Dot3::Dot3(const address_type& dst_hw_addr, const address_type& src_hw_addr)
 : header_() {
     this->dst_addr(dst_hw_addr);

@@ -179,6 +179,7 @@ public:
         IPSEC_ESP,
         PKTAP,
         MPLS,
+        UNKNOWN = 999,
         USER_DEFINED_PDU = 1000
     };
     
@@ -187,6 +188,37 @@ public:
      * by subclasses.
      */
     static const endian_type endianness = BE;
+
+    /**
+     * \brief Type used to store a PDU header's data.
+     */
+    struct metadata {
+        /**
+         * \brief Default constructor
+         */
+        metadata();
+        
+        /**
+         * \brief Constructs an instance of metadata using the given values
+    
+         */
+        metadata(uint32_t header_size, PDUType current_type, PDUType next_type);
+
+        /**
+         * The total header size for the current protocol
+         */
+        uint32_t header_size;
+
+        /**
+         * The current PDU type
+         */
+        PDUType current_pdu_type;
+
+        /**
+         * The next PDU type
+         */
+        PDUType next_pdu_type;
+    };
 
     /** 
      * \brief Default constructor.

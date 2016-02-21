@@ -51,6 +51,14 @@ namespace Tins {
 
 const uint16_t TCP::DEFAULT_WINDOW = 32678;
 
+PDU::metadata TCP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(tcp_header))) {
+        throw malformed_packet();
+    }
+    const tcp_header* header = (const tcp_header*)buffer;
+    return metadata(header->doff * 4, pdu_flag, PDU::UNKNOWN);
+}
+
 TCP::TCP(uint16_t dport, uint16_t sport) 
 : header_(), options_size_(0), total_options_size_(0) {
     this->dport(dport);

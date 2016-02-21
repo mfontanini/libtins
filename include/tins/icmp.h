@@ -93,6 +93,14 @@ public:
     };
 
     /**
+     * \brief Extracts metadata for this protocol based on the buffer provided
+     *
+     * \param buffer Pointer to a buffer
+     * \param total_sz Size of the buffer pointed by buffer
+     */
+    static metadata extract_metadata(const uint8_t *buffer, uint32_t total_sz);
+
+    /**
      * \brief Creates an instance of ICMP.
      *
      * If no flag is specified, then ECHO_REQUEST will be used.

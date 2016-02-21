@@ -51,6 +51,25 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
+PDU::metadata IPv6::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(ipv6_header))) {
+        throw malformed_packet();
+    }
+    InputMemoryStream stream(buffer, total_sz);
+    const ipv6_header* header = (const ipv6_header*)buffer;
+    uint32_t header_size = sizeof(ipv6_header);
+    uint8_t current_header = header->next_header;
+    stream.skip(sizeof(ipv6_header));
+    while (is_extension_header(current_header)) {
+        current_header = stream.read<uint8_t>();
+        const uint32_t ext_size = (static_cast<uint32_t>(stream.read<uint8_t>()) + 1) * 8;
+        const uint32_t payload_size = ext_size - sizeof(uint8_t) * 2;
+        header_size += ext_size;
+        stream.skip(payload_size);
+    }
+    return metadata(header_size, pdu_flag, PDU::UNKNOWN);
+}
+
 IPv6::IPv6(address_type ip_dst, address_type ip_src, PDU* child) 
 : header_(), headers_size_(0) {
     version(6);
@@ -70,7 +89,6 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz)
             // minus one, from the next_header field.
             const uint32_t ext_size = (static_cast<uint32_t>(stream.read<uint8_t>()) + 1) * 8;
             const uint32_t payload_size = ext_size - sizeof(uint8_t) * 2;
-            // -1 -> next header identifier
             if (!stream.can_read(ext_size)) { 
                 throw malformed_packet();
             }

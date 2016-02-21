@@ -413,6 +413,14 @@ public:
     typedef std::vector<uint8_t> interface_id_type;
 
     /**
+     * \brief Extracts metadata for this protocol based on the buffer provided
+     *
+     * \param buffer Pointer to a buffer
+     * \param total_sz Size of the buffer pointed by buffer
+     */
+    static metadata extract_metadata(const uint8_t *buffer, uint32_t total_sz);
+
+    /**
      * Default constructor.
      */
     DHCPv6();

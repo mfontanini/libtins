@@ -61,8 +61,18 @@ namespace Tins {
 
 const EthernetII::address_type EthernetII::BROADCAST("ff:ff:ff:ff:ff:ff");
 
+PDU::metadata EthernetII::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(ethernet_header))) {
+        throw malformed_packet();
+    }
+    const ethernet_header* header = (const ethernet_header*)buffer;
+    PDUType next_type = Internals::ether_type_to_pdu_flag(
+        static_cast<Constants::Ethernet::e>(Endian::be_to_host(header->payload_type)));
+    return metadata(sizeof(ethernet_header), pdu_flag, next_type); 
+}
+
 EthernetII::EthernetII(const address_type& dst_hw_addr, 
-const address_type& src_hw_addr) 
+                       const address_type& src_hw_addr) 
 : header_() {
     dst_addr(dst_hw_addr);
     src_addr(src_hw_addr);

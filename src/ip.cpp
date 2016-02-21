@@ -59,6 +59,16 @@ namespace Tins {
 
 const uint8_t IP::DEFAULT_TTL = 128;
 
+PDU::metadata IP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(ip_header))) {
+        throw malformed_packet();
+    }
+    const ip_header* header = (const ip_header*)buffer;
+    PDUType next_type = Internals::ip_type_to_pdu_flag(
+        static_cast<Constants::IP::e>(header->protocol));
+    return metadata(header->ihl * 4, pdu_flag, next_type);
+}
+
 IP::IP(address_type ip_dst, address_type ip_src) {
     init_ip_fields();
     this->dst_addr(ip_dst);

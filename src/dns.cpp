@@ -51,6 +51,13 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
+PDU::metadata DNS::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(sizeof(dns_header))) {
+        throw malformed_packet();
+    }
+    return metadata(total_sz, pdu_flag, PDU::UNKNOWN);
+}
+
 DNS::DNS() 
 : header_(), answers_idx_(), authority_idx_(), additional_idx_() { 
 }

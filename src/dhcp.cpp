@@ -47,6 +47,13 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
+PDU::metadata DHCP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(bootp_header))) {
+        throw malformed_packet();
+    }
+    return metadata(total_sz, pdu_flag, PDU::UNKNOWN);
+}
+
 // Magic cookie: uint32_t. 
 DHCP::DHCP() 
 : size_(sizeof(uint32_t)) {

@@ -247,6 +247,14 @@ public:
     typedef std::list<option> options_type;
 
     /**
+     * \brief Extracts metadata for this protocol based on the buffer provided
+     *
+     * \param buffer Pointer to a buffer
+     * \param total_sz Size of the buffer pointed by buffer
+     */
+    static metadata extract_metadata(const uint8_t *buffer, uint32_t total_sz);
+
+    /**
      * \brief Constructor for building the IP PDU.
      *
      * Both the destination and source IP address can be supplied.

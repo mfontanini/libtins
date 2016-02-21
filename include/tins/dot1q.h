@@ -49,6 +49,14 @@ public:
     static const PDU::PDUType pdu_flag = PDU::DOT1Q;
     
     /**
+     * \brief Extracts metadata for this protocol based on the buffer provided
+     *
+     * \param buffer Pointer to a buffer
+     * \param total_sz Size of the buffer pointed by buffer
+     */
+    static metadata extract_metadata(const uint8_t *buffer, uint32_t total_sz);
+
+    /**
      * Default constructor
      */
     Dot1Q(small_uint<12> tag_id = 0, bool append_pad = true);
@@ -192,7 +200,7 @@ private:
     void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
 
     TINS_BEGIN_PACK
-    struct dot1q_hdr {
+    struct dot1q_header {
         #if TINS_IS_BIG_ENDIAN
             uint16_t priority:3,
                     cfi:1,
@@ -207,9 +215,9 @@ private:
         #endif
     } TINS_END_PACK;
     
-    static uint16_t get_id(const dot1q_hdr* hdr);
+    static uint16_t get_id(const dot1q_header* hdr);
     
-    dot1q_hdr header_;
+    dot1q_header header_;
     bool append_padding_;
 };
 }

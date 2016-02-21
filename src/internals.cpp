@@ -259,6 +259,26 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
     }
 }
 
+PDU::PDUType ether_type_to_pdu_flag(Constants::Ethernet::e flag) {
+    switch (flag) {
+        case Constants::Ethernet::IP:
+            return PDU::IP;
+        case Constants::Ethernet::IPV6:
+            return PDU::IPv6;
+        case Constants::Ethernet::ARP:
+            return PDU::ARP;
+        case Constants::Ethernet::VLAN:
+            return PDU::DOT1Q;
+        case Constants::Ethernet::PPPOED:
+            return PDU::PPPOE;
+        //case PDU::RSNEAPOL
+        //case PDU::RC4EAPOL:
+        //    return Constants::Ethernet::EAPOL;
+        default:
+            return PDU::UNKNOWN;
+    }
+}
+
 Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag) {
     switch(flag) {
         case PDU::IP:
@@ -327,7 +347,30 @@ void try_parse_icmp_extensions(InputMemoryStream& stream,
     }
 }
 
-bool increment(IPv4Address& addr) {
+PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag) {
+    switch(flag) {
+        case Constants::IP::PROTO_IPIP:
+            return PDU::IP;
+        case Constants::IP::PROTO_IPV6:
+            return PDU::IPv6;
+        case Constants::IP::PROTO_TCP:
+            return PDU::TCP;
+        case Constants::IP::PROTO_UDP:
+            return PDU::UDP;
+        case Constants::IP::PROTO_ICMP:
+            return PDU::ICMP;
+        case Constants::IP::PROTO_ICMPV6:
+            return PDU::ICMPv6;
+        case Constants::IP::PROTO_AH:
+            return PDU::IPSEC_AH;
+        case Constants::IP::PROTO_ESP:
+            return PDU::IPSEC_ESP;
+        default:
+            return PDU::UNKNOWN;
+    };
+}
+
+bool increment(IPv4Address &addr) {
     uint32_t addr_int = Endian::be_to_host<uint32_t>(addr);
     bool reached_end = ++addr_int == 0xffffffff;
     addr = IPv4Address(Endian::be_to_host<uint32_t>(addr_int));

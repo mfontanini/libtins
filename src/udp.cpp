@@ -43,6 +43,13 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
+PDU::metadata UDP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(udp_header))) {
+        throw malformed_packet();
+    }
+    return metadata(sizeof(udp_header), pdu_flag, PDU::UNKNOWN);
+}
+
 UDP::UDP(uint16_t dport, uint16_t sport)
 : header_() {
     this->dport(dport);

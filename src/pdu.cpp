@@ -36,6 +36,18 @@ using std::vector;
 
 namespace Tins {
 
+PDU::metadata::metadata() 
+: header_size(0), current_pdu_type(PDU::UNKNOWN), next_pdu_type(PDU::UNKNOWN) {
+
+}
+        
+PDU::metadata::metadata(uint32_t header_size, PDUType current_type, PDUType next_type) 
+: header_size(header_size), current_pdu_type(current_type), next_pdu_type(next_type) {
+
+}
+
+// PDU
+
 PDU::PDU()
 : inner_pdu_() {
 

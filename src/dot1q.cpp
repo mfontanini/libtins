@@ -39,6 +39,13 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
+PDU::metadata Dot1Q::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(dot1q_header))) {
+        throw malformed_packet();
+    }
+    return metadata(sizeof(dot1q_header), pdu_flag, PDU::UNKNOWN);
+}
+
 Dot1Q::Dot1Q(small_uint<12> tag_id, bool append_pad) 
 : header_(), append_padding_(append_pad) {
     id(tag_id);
@@ -123,11 +130,11 @@ void Dot1Q::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *)
 }
 
 #if TINS_IS_LITTLE_ENDIAN
-    uint16_t Dot1Q::get_id(const dot1q_hdr* hdr) {
+    uint16_t Dot1Q::get_id(const dot1q_header* hdr) {
         return hdr->idL | (hdr->idH << 8);
     }
 #else
-    uint16_t Dot1Q::get_id(const dot1q_hdr* hdr) {
+    uint16_t Dot1Q::get_id(const dot1q_header* hdr) {
         return hdr->id;
     }
 #endif
@@ -140,7 +147,7 @@ bool Dot1Q::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const dot1q_hdr* dot1q_ptr = (const dot1q_hdr*)ptr;
+    const dot1q_header* dot1q_ptr = (const dot1q_header*)ptr;
     if (get_id(dot1q_ptr) == get_id(&header_)) {
         ptr += sizeof(header_);
         total_sz -= sizeof(header_);

@@ -43,6 +43,13 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
+PDU::metadata ARP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < sizeof(arp_header))) {
+        throw malformed_packet();
+    }
+    return metadata(sizeof(arp_header), pdu_flag, PDU::UNKNOWN);
+}
+
 ARP::ARP(ipaddress_type target_ip, 
          ipaddress_type sender_ip, 
          const hwaddress_type& target_hw, 

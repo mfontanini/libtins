@@ -74,5 +74,6 @@
 #include "ipsec.h"
 #include "ip_reassembler.h"
 #include "ppi.h"
+#include "packet_view.h"
 
 #endif // TINS_TINS_H

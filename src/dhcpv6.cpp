@@ -45,6 +45,13 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
+PDU::metadata DHCPv6::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    if (TINS_UNLIKELY(total_sz < 2)) {
+        throw malformed_packet();
+    }
+    return metadata(total_sz, pdu_flag, PDU::UNKNOWN);
+}
+
 DHCPv6::DHCPv6() 
 : header_data_(), options_size_() {
 

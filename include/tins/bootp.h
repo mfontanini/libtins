@@ -333,7 +333,7 @@ protected:
     vend_type& vend() { return vend_; }
 
     void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
-private:
+    
     /**
      * Struct that represents the Bootp datagram.
      */
@@ -355,6 +355,7 @@ private:
         uint8_t file[128];
     } TINS_END_PACK;
 
+private:
     bootp_header bootp_;
     vend_type vend_;
 };

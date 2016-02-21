@@ -61,6 +61,14 @@ public:
     static const address_type BROADCAST;
 
     /**
+     * \brief Extracts metadata for this protocol based on the buffer provided
+     *
+     * \param buffer Pointer to a buffer
+     * \param total_sz Size of the buffer pointed by buffer
+     */
+    static metadata extract_metadata(const uint8_t *buffer, uint32_t total_sz);
+
+    /**
      * \brief Constructor for creating an Dot3 PDU
      *
      * Constructor that builds an Dot3 PDU taking the interface name,
@@ -71,7 +79,7 @@ public:
      * \param child The PDU which will be set as the inner PDU.
      */
     Dot3(const address_type& dst_hw_addr = address_type(), 
-        const address_type& src_hw_addr = address_type());
+         const address_type& src_hw_addr = address_type());
 
     /**
      * \brief Constructs a Dot3 object from a buffer and adds a
