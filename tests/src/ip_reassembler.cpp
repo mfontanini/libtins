@@ -47,7 +47,7 @@ void IPv4ReassemblerTest::test_packets(const std::vector<std::pair<const uint8_t
     IPv4Reassembler reassembler;
     for(size_t i = 0; i < vt.size(); ++i) {
         EthernetII eth(vt[i].first, (uint32_t)vt[i].second);
-        IPv4Reassembler::packet_status status = reassembler.process(eth);
+        IPv4Reassembler::PacketStatus status = reassembler.process(eth);
         EXPECT_NE(IPv4Reassembler::NOT_FRAGMENTED, status);
         if(status == IPv4Reassembler::REASSEMBLED) {
             ASSERT_EQ(static_cast<size_t>(vt.size() - 1), i);

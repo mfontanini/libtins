@@ -120,26 +120,34 @@ public:
     /**
      * The status of each processed packet.
      */
-    enum packet_status {
+    enum PacketStatus {
         NOT_FRAGMENTED, ///< The given packet is not fragmented
         FRAGMENTED, ///< The given packet is fragmented and can't be reassembled yet
         REASSEMBLED ///< The given packet was fragmented but is now reassembled
     };
 
+    TINS_DEPRECATED(typedef PacketStatus packet_status);
+
     /**
      * The type used to represent the overlapped segment reassembly 
      * technique to be used.
      */
-    enum overlapping_technique {
+    enum OverlappingTechnique {
         NONE 
     };
 
     /**
+     * Default constructor
+     */
+    IPv4Reassembler();
+
+    /**
      * Constructs an IPV4Reassembler.
+     * 
      * \param technique The technique to be used for reassembling
      * overlapped fragments.
      */
-    IPv4Reassembler(overlapping_technique technique = NONE);
+    IPv4Reassembler(OverlappingTechnique technique);
 
     /**
      * \brief Processes a PDU and tries to reassemble it.
@@ -155,7 +163,7 @@ public:
      * fragmented or REASSEMBLED if the packet was fragmented 
      * but has now been reassembled.
      */
-    packet_status process(PDU& pdu);
+    PacketStatus process(PDU& pdu);
 
     /**
      * Removes all of the packets and data stored.
@@ -182,7 +190,7 @@ private:
     address_pair make_address_pair(IPv4Address addr1, IPv4Address addr2) const;
     
     streams_type streams_;
-    overlapping_technique technique_;
+    OverlappingTechnique technique_;
 };
 
 /**

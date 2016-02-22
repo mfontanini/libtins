@@ -94,12 +94,17 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
 
 } // Internals
 
-IPv4Reassembler::IPv4Reassembler(overlapping_technique technique)
+IPv4Reassembler::IPv4Reassembler()
+: technique_(NONE) {
+
+}
+
+IPv4Reassembler::IPv4Reassembler(OverlappingTechnique technique)
 : technique_(technique) {
 
 }
 
-IPv4Reassembler::packet_status IPv4Reassembler::process(PDU& pdu) {
+IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
     IP* ip = pdu.find_pdu<IP>();
     if (ip && ip->inner_pdu()) {
         // There's fragmentation
