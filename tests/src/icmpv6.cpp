@@ -581,7 +581,7 @@ TEST_F(ICMPv6Test, MLD2Fields) {
     icmp.multicast_address_records(records);
     ICMPv6::multicast_address_records_list stored_records;
     stored_records = icmp.multicast_address_records();
-    ASSERT_EQ(1, stored_records.size());
+    ASSERT_EQ(1U, stored_records.size());
 
     ICMPv6::multicast_address_record r2 = *stored_records.begin();    
     EXPECT_EQ(r.type, r2.type);

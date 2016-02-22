@@ -483,9 +483,17 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
             if (now > end) {
                 return 0;
             }
+            // VC complains if we don't statically cast here
+            #ifdef _WIN32
+                typedef long tv_sec_type;
+                typedef long tv_usec_type;
+            #else
+                typedef time_t tv_sec_type;
+                typedef long tv_usec_type;
+            #endif
             microseconds diff = end - now;
-            timeout.tv_sec = duration_cast<seconds>(diff).count();
-            timeout.tv_usec = (diff - seconds(timeout.tv_sec)).count();
+            timeout.tv_sec = static_cast<tv_sec_type>(duration_cast<seconds>(diff).count());
+            timeout.tv_usec = static_cast<tv_usec_type>((diff - seconds(timeout.tv_sec)).count());
         #else
             #ifdef _WIN32
                 // Can't do much

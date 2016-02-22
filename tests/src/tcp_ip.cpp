@@ -346,7 +346,7 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
         if (i != 0) {
             ts += milliseconds(100);
         }
-        Packet packet(packets[i], ts);
+        Packet packet(packets[i], duration_cast<microseconds>(ts));
         follower.process_packet(packet);
     }
     Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
