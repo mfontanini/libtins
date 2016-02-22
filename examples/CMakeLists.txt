@@ -37,6 +37,7 @@ ADD_CUSTOM_TARGET(
     beacon_display
     portscan
     route_table
+    defragmenter
 )
 
 # Make sure we first build libtins
@@ -44,6 +45,7 @@ ADD_DEPENDENCIES(examples tins)
 
 ADD_EXECUTABLE(arpspoofing EXCLUDE_FROM_ALL arpspoofing.cpp)
 ADD_EXECUTABLE(route_table EXCLUDE_FROM_ALL route_table.cpp)
+ADD_EXECUTABLE(defragmenter EXCLUDE_FROM_ALL defragmenter.cpp)
 IF(TINS_HAVE_CXX11)
     ADD_EXECUTABLE(arpmonitor EXCLUDE_FROM_ALL arpmonitor.cpp)
     ADD_EXECUTABLE(dns_queries EXCLUDE_FROM_ALL dns_queries.cpp)
