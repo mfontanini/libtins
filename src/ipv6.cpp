@@ -82,8 +82,12 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz)
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
     uint8_t current_header = header_.next_header;
+    bool is_payload_fragmented = false;
     while (stream) {
         if (is_extension_header(current_header)) {
+            if (current_header == FRAGMENT) {
+                is_payload_fragmented = true;
+            }
             const uint8_t ext_type = stream.read<uint8_t>();
             // every ext header is at least 8 bytes long
             // minus one, from the next_header field.
@@ -98,24 +102,29 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz)
             stream.skip(payload_size);
         }
         else {
-            inner_pdu(
-                Internals::pdu_from_flag(
-                    static_cast<Constants::IP::e>(current_header),
-                    stream.pointer(), 
-                    stream.size(),
-                    false
-                )
-            );
-            if (!inner_pdu()) {
+            if (is_payload_fragmented) {
+                inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+            }
+            else {
                 inner_pdu(
-                    Internals::allocate<IPv6>(
-                        current_header,
+                    Internals::pdu_from_flag(
+                        static_cast<Constants::IP::e>(current_header),
                         stream.pointer(), 
-                        stream.size()
+                        stream.size(),
+                        false
                     )
                 );
                 if (!inner_pdu()) {
-                    inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+                    inner_pdu(
+                        Internals::allocate<IPv6>(
+                            current_header,
+                            stream.pointer(), 
+                            stream.size()
+                        )
+                    );
+                    if (!inner_pdu()) {
+                        inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+                    }
                 }
             }
             // We got to an actual PDU, we're done
@@ -219,7 +228,9 @@ void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pa
                 Internals::pdu_type_to_id<IPv6>(inner_pdu()->pdu_type())
             );
         }
-        set_last_next_header(new_flag);
+        if (new_flag != 0xff) {
+            set_last_next_header(new_flag);
+        }
     }
     payload_length(static_cast<uint16_t>(total_sz - sizeof(header_)));
     stream.write(header_);

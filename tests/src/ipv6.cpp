@@ -24,7 +24,7 @@ using namespace Tins;
 class IPv6Test : public testing::Test {
 public:
     static const uint8_t expected_packet1[], expected_packet2[], 
-                         hop_by_hop_options[];
+                         hop_by_hop_options[], broken1[];
     
     void test_equals(IPv6& ip1, IPv6& ip2);
 };
@@ -53,6 +53,12 @@ const uint8_t IPv6Test::hop_by_hop_options[] = {
     0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 255, 0, 0, 9, 
     222, 173, 190, 239, 190, 173, 254, 237
+};
+
+const uint8_t IPv6Test::broken1[] = { 
+    51, 51, 0, 0, 0, 251, 96, 3, 8, 165, 51, 186, 134, 221, 96, 14, 233, 9, 0, 11, 44, 255,
+    254, 128, 0, 0, 0, 0, 0, 0, 98, 3, 8, 255, 254, 165, 51, 186, 255, 2, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 251, 17, 0, 11, 80, 53, 98, 2, 81, 72, 50, 10
 };
 
 void IPv6Test::test_equals(IPv6& ip1, IPv6& ip2) {
@@ -159,6 +165,14 @@ TEST_F(IPv6Test, Serialize) {
     );
     IPv6 ip2(&buffer[0], (uint32_t)buffer.size());
     test_equals(ip1, ip2);
+}
+
+TEST_F(IPv6Test, Broken1) {
+    EthernetII pkt(broken1, sizeof(broken1));
+    EXPECT_EQ(
+        PDU::serialization_type(broken1, broken1 + sizeof(broken1)),
+        pkt.serialize()
+    );
 }
 
 TEST_F(IPv6Test, Version) {
