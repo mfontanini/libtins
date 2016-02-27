@@ -21,6 +21,11 @@ ELSE()
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 ENDIF()
 
+IF(APPLE)
+    # This is set to ON as of policy CMP0042 
+    SET(CMAKE_MACOSX_RPATH ON)
+ENDIF()
+
 # Build output checks
 OPTION(LIBTINS_BUILD_SHARED "Build libtins as a shared library." ON)
 IF(LIBTINS_BUILD_SHARED)
