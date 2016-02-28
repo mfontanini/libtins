@@ -131,7 +131,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
         // since this is the case when using TCP segmentation offload
         if (tot_len() != 0) {
             const uint32_t advertised_length = (uint32_t)tot_len() - head_len() * sizeof(uint32_t);
-            total_sz = min(stream.size(), advertised_length);
+            total_sz = min(static_cast<uint32_t>(stream.size()), advertised_length);
         }
         else {
             total_sz = stream.size();

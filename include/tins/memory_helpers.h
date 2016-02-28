@@ -47,7 +47,7 @@ namespace Tins {
  */
 namespace Memory {
 
-inline void read_data(const uint8_t* buffer, uint8_t* output_buffer, uint32_t size) {
+inline void read_data(const uint8_t* buffer, uint8_t* output_buffer, size_t size) {
     std::memcpy(output_buffer, buffer, size);
 }
 
@@ -56,7 +56,7 @@ void read_value(const uint8_t* buffer, T& value) {
     std::memcpy(&value, buffer, sizeof(value));
 }
 
-inline void write_data(uint8_t* buffer, const uint8_t* ptr, uint32_t size) {
+inline void write_data(uint8_t* buffer, const uint8_t* ptr, size_t size) {
     std::memcpy(buffer, ptr, size);
 }
 
@@ -67,7 +67,7 @@ void write_value(uint8_t* buffer, const T& value) {
 
 class InputMemoryStream {
 public:
-    InputMemoryStream(const uint8_t* buffer, uint32_t total_sz)
+    InputMemoryStream(const uint8_t* buffer, size_t total_sz)
     : buffer_(buffer), size_(total_sz) {
     }
 
@@ -75,7 +75,7 @@ public:
     : buffer_(&data[0]), size_(data.size()) {
     }
 
-    void skip(uint32_t size) {
+    void skip(size_t size) {
         if (TINS_UNLIKELY(size > size_)) {
             throw malformed_packet();
         }
@@ -83,7 +83,7 @@ public:
         size_ -= size;
     }
 
-    bool can_read(uint32_t byte_count) const {
+    bool can_read(size_t byte_count) const {
         return TINS_LIKELY(size_ >= byte_count);
     }
  
@@ -142,7 +142,7 @@ public:
         skip(HWAddress<n>::address_size);
     }
 
-    void read(void* output_buffer, uint32_t output_buffer_size) {
+    void read(void* output_buffer, size_t output_buffer_size) {
         if (!can_read(output_buffer_size)) {
             throw malformed_packet();
         }
@@ -154,11 +154,11 @@ public:
         return buffer_;
     }
 
-    uint32_t size() const {
+    size_t size() const {
         return size_;
     }
 
-    void size(uint32_t new_size) {
+    void size(size_t new_size) {
         size_ = new_size;
     }
 
@@ -167,12 +167,12 @@ public:
     }
 private:
     const uint8_t* buffer_;
-    uint32_t size_;
+    size_t size_;
 };
 
 class OutputMemoryStream {
 public:
-    OutputMemoryStream(uint8_t* buffer, uint32_t total_sz)
+    OutputMemoryStream(uint8_t* buffer, size_t total_sz)
     : buffer_(buffer), size_(total_sz) {
     }
 
@@ -180,7 +180,7 @@ public:
     : buffer_(&buffer[0]), size_(buffer.size()) {
     }
 
-    void skip(uint32_t size) {
+    void skip(size_t size) {
         if (TINS_UNLIKELY(size > size_)) {
             throw malformed_packet();
         }
@@ -209,7 +209,7 @@ public:
 
     template <typename ForwardIterator>
     void write(ForwardIterator start, ForwardIterator end) {
-        const uint32_t length = std::distance(start, end); 
+        const size_t length = std::distance(start, end); 
         if (TINS_UNLIKELY(size_ < length)) {
             throw serialization_error();
         }
@@ -217,7 +217,7 @@ public:
         skip(length);
     }
 
-    void write(const uint8_t* ptr, uint32_t length) {
+    void write(const uint8_t* ptr, size_t length) {
         write(ptr, ptr + length);
     }
 
@@ -234,7 +234,7 @@ public:
         write(address.begin(), address.end());
     }
 
-    void fill(uint32_t size, uint8_t value) {
+    void fill(size_t size, uint8_t value) {
         if (TINS_UNLIKELY(size_ < size)) {
             throw serialization_error();
         }
@@ -246,12 +246,12 @@ public:
         return buffer_;
     }
 
-    uint32_t size() const {
+    size_t size() const {
         return size_;
     }
 private:
     uint8_t* buffer_;
-    uint32_t size_;
+    size_t size_;
 };
 
 /** 
