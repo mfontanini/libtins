@@ -36,6 +36,9 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#ifdef TINS_HAVE_WPA2_CALLBACKS
+    #include <functional>
+#endif // TINS_HAVE_WPA2_CALLBACKS
 #include "utils.h"
 #include "snap.h"
 #include "rawpdu.h"
@@ -160,8 +163,15 @@ public:
      * \return The generated PMK.
      */
     const pmk_type& pmk() const;
+
+    /**
+     * \brief Getter for the SSID
+     * \return The access point's SSID
+     */
+    const std::string& ssid() const;
 private:
     pmk_type pmk_;
+    std::string ssid_;
 };
 
 } // WPA2
@@ -275,6 +285,32 @@ public:
      */
     typedef std::map<addr_pair, WPA2::SessionKeys> keys_map;
 
+    #ifdef TINS_HAVE_WPA2_CALLBACKS
+
+    /**
+     * \brief The type used to store the callback type used when a new access
+     * point is found.
+     *
+     * The first argument to the function will be the access point's SSID and
+     * the second one its BSSID. 
+     */
+    typedef std::function<void(const std::string&,
+                               const address_type&)> ap_found_callback_type;
+
+    /**
+     * The type used to store the callback type used when a new handshake
+     * is captured.
+     *
+     * The first argument to the function will be the access point's SSID and
+     * the second one its BSSID. The third argument will be the client's hardware
+     * address.
+     */
+    typedef std::function<void(const std::string&,
+                               const address_type&,
+                               const address_type&)> handshake_captured_callback_type;
+    
+    #endif // TINS_HAVE_WPA2_CALLBACKS
+
     /**
      * \brief Adds an access points's information.
      *
@@ -353,6 +389,30 @@ public:
      */
     bool decrypt(PDU& pdu);
 
+    #ifdef TINS_HAVE_WPA2_CALLBACKS
+    /**
+     * \brief Sets the handshake captured callback
+     * 
+     * This callback will be executed every time a new handshake is captured.
+     *
+     * \sa handshake_captured_callback_type
+     * \param callback The new callback to be set
+     */
+    void handshake_captured_callback(const handshake_captured_callback_type& callback);
+
+    /**
+     * \brief Sets the access point found callback
+     * 
+     * This callback will be executed every time a new access point is found, that's
+     * advertising an SSID added when calling add_ap_data.
+     *
+     * \sa ap_found_callback_type
+     * \param callback The new callback to be set
+     */
+    void ap_found_callback(const ap_found_callback_type& callback);
+
+    #endif // TINS_HAVE_WPA2_CALLBACKS
+
     /**
      * \brief Getter for the keys on this decrypter
      *
@@ -381,6 +441,10 @@ private:
     pmks_map pmks_;
     bssids_map aps_;
     keys_map keys_;
+    #ifdef TINS_HAVE_WPA2_CALLBACKS
+        handshake_captured_callback_type handshake_captured_callback_;
+        ap_found_callback_type ap_found_callback_;
+    #endif // TINS_HAVE_WPA2_CALLBACKS
 };
 #endif // TINS_HAVE_WPA2_DECRYPTION
 

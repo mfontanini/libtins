@@ -131,6 +131,12 @@ ELSE()
     MESSAGE(STATUS "Disabling ACK tracking support")
 ENDIF()
 
+OPTION(LIBTINS_ENABLE_WPA2_CALLBACKS "Enable WPA2 callback interface" ON)
+IF(LIBTINS_ENABLE_WPA2_CALLBACKS AND TINS_HAVE_WPA2_DECRYPTION AND TINS_HAVE_CXX11)
+    SET(STATUS "Enabling WPA2 callback interface")
+    SET(TINS_HAVE_WPA2_CALLBACKS ON)
+ENDIF()
+
 # Use pcap_sendpacket to send l2 packets rather than raw sockets
 IF(WIN32)
     SET(USE_PCAP_SENDPACKET_DEFAULT ON)

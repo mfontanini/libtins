@@ -491,7 +491,7 @@ bool SessionKeys::uses_ccmp() const {
 // supplicant_data
 
 SupplicantData::SupplicantData(const string& psk, const string& ssid)
-: pmk_(SessionKeys::PMK_SIZE) {
+: pmk_(SessionKeys::PMK_SIZE), ssid_(ssid) {
     PKCS5_PBKDF2_HMAC_SHA1(
         psk.c_str(), 
         psk.size(), 
@@ -506,6 +506,11 @@ SupplicantData::SupplicantData(const string& psk, const string& ssid)
 const SupplicantData::pmk_type& SupplicantData::pmk() const {
     return pmk_;
 }
+
+const string& SupplicantData::ssid() const {
+    return ssid_;
+}
+
 } // namespace WPA2
 
 void WPA2Decrypter::add_ap_data(const string& psk, const string& ssid) {
@@ -525,6 +530,12 @@ void WPA2Decrypter::add_access_point(const string& ssid, const address_type& add
         throw runtime_error("Supplicant data not registered");
     }
     aps_.insert(make_pair(addr, it->second));
+    
+    #ifdef TINS_HAVE_WPA2_CALLBACKS
+        if (ap_found_callback_) {
+            ap_found_callback_(ssid, addr);
+        }
+    #endif // TINS_HAVE_WPA2_CALLBACKS
 }
 
 void WPA2Decrypter::add_decryption_keys(const addr_pair& addresses, 
@@ -540,6 +551,12 @@ void WPA2Decrypter::try_add_keys(const Dot11Data& dot11, const RSNHandshake& hs)
         try {
             SessionKeys session(hs, it->second.pmk());
             keys_[addr_p] = session;
+            #ifdef TINS_HAVE_WPA2_CALLBACKS
+                if (handshake_captured_callback_) {
+                    handshake_captured_callback_(it->second.ssid(), addr_p.first,
+                                                 addr_p.second);
+                }
+            #endif // TINS_HAVE_WPA2_CALLBACKS
         }
         catch(WPA2::invalid_handshake&) {
 
@@ -628,6 +645,18 @@ bool WPA2Decrypter::decrypt(PDU& pdu) {
     }
     return false;
 }
+
+#ifdef TINS_HAVE_WPA2_CALLBACKS
+
+void WPA2Decrypter::handshake_captured_callback(const handshake_captured_callback_type& callback) {
+    handshake_captured_callback_ = callback;    
+}
+
+void WPA2Decrypter::ap_found_callback(const ap_found_callback_type& callback) {
+    ap_found_callback_ = callback;
+}
+
+#endif // TINS_HAVE_WPA2_CALLBACKS
 
 #endif // TINS_HAVE_WPA2_DECRYPTION
 

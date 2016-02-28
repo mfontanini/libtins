@@ -8,22 +8,59 @@
 #include <stdint.h>
 #include "crypto.h"
 #include "radiotap.h"
+#include "dot11/dot11_data.h"
 #include "udp.h"
 #include "tcp.h"
 
 using namespace Tins;
 
+using std::string;
+using std::vector;
+
 class WPA2DecryptTest : public testing::Test {
 public:
+    typedef HWAddress<6> address_type;
     static const uint8_t ccmp_packets[7][652];
     static const uint8_t tkip_packets[7][211];
     static const size_t ccmp_packets_size[], tkip_packets_size[];
+
+    struct handshake {
+        handshake(const string& ssid, const address_type& bssid, const address_type& client_hw) 
+        : ssid(ssid), bssid(bssid), client_hw(client_hw) {
+
+        }
+
+        string ssid;
+        address_type bssid;
+        address_type client_hw;
+    };
+
+    struct ap_data {
+        ap_data(const string& ssid, const address_type& bssid) 
+        : ssid(ssid), bssid(bssid) {
+
+        }
+
+        string ssid;
+        address_type bssid;
+    };
     
     void check_ccmp_packet5(const PDU& pdu);
     void check_ccmp_packet6(const PDU& pdu);
     
     void check_tkip_packet5(const PDU& pdu);
     void check_tkip_packet6(const PDU& pdu);
+
+    void handshake_captured(const string& ssid, const address_type& bssid, const address_type& client_hw) {
+        handshakes_.push_back(handshake(ssid, bssid, client_hw));
+    }
+
+    void ap_found(const string& ssid, const address_type& bssid) {
+        access_points_.push_back(ap_data(ssid, bssid));
+    }
+
+    vector<handshake> handshakes_; 
+    vector<ap_data> access_points_; 
 };
 
 // packet taken from aircrack's site.
@@ -282,5 +319,64 @@ TEST_F(WPA2DecryptTest, DecryptCCMPAndTKIPWithoutUsingBeacon) {
             ASSERT_FALSE(decrypter.decrypt(radio));
     }
 }
+
+#ifdef TINS_HAVE_WPA2_CALLBACKS
+
+TEST_F(WPA2DecryptTest, HandshakeCapturedCallback) {
+    using namespace std::placeholders;
+
+    Crypto::WPA2Decrypter decrypter;
+    decrypter.add_ap_data("libtinstest", "NODO", "00:1b:11:d2:1b:eb");
+    decrypter.add_ap_data("Induction", "Coherer", "00:0c:41:82:b2:55");
+    decrypter.handshake_captured_callback(std::bind(&WPA2DecryptTest::handshake_captured,
+                                          this, _1, _2, _3));
+    for(size_t i = 1; i < 7; ++i) {
+        RadioTap radio(ccmp_packets[i], ccmp_packets_size[i]);
+        decrypter.decrypt(radio);
+    }
+    for(size_t i = 1; i < 7; ++i) {
+        RadioTap radio(tkip_packets[i], tkip_packets_size[i]);
+        decrypter.decrypt(radio);
+    }
+
+    ASSERT_EQ(2, handshakes_.size());
+    handshake hs = handshakes_[0];
+    EXPECT_EQ(hs.ssid, "Coherer");
+    EXPECT_EQ(address_type("00:0d:93:82:36:3a"), hs.client_hw);
+    EXPECT_EQ(address_type("00:0c:41:82:b2:55"), hs.bssid);
+
+    hs = handshakes_[1];
+    EXPECT_EQ(hs.ssid, "NODO");
+    EXPECT_EQ(address_type("94:0c:6d:8f:93:88"), hs.client_hw);
+    EXPECT_EQ(address_type("00:1b:11:d2:1b:eb"), hs.bssid);
+}
+
+TEST_F(WPA2DecryptTest, AccessPointFoundCallback) {
+    using namespace std::placeholders;
+
+    Crypto::WPA2Decrypter decrypter;
+    decrypter.add_ap_data("libtinstest", "NODO");
+    decrypter.add_ap_data("Induction", "Coherer");
+    decrypter.ap_found_callback(std::bind(&WPA2DecryptTest::ap_found, this, _1, _2));
+    for(size_t i = 0; i < 7; ++i) {
+        RadioTap radio(ccmp_packets[i], ccmp_packets_size[i]);
+        decrypter.decrypt(radio);
+    }
+    for(size_t i = 0; i < 7; ++i) {
+        RadioTap radio(tkip_packets[i], tkip_packets_size[i]);
+        decrypter.decrypt(radio);
+    }
+
+    ASSERT_EQ(2, access_points_.size());
+    ap_data data = access_points_[0];
+    EXPECT_EQ("Coherer", data.ssid);
+    EXPECT_EQ(address_type("00:0c:41:82:b2:55"), data.bssid);
+
+    data = access_points_[1];
+    EXPECT_EQ("NODO", data.ssid);
+    EXPECT_EQ(address_type("00:1b:11:d2:1b:eb"), data.bssid);
+}
+
+#endif // TINS_HAVE_WPA2_CALLBACKS
 
 #endif // defined(TINS_HAVE_DOT11) && defined(TINS_HAVE_WPA2_DECRYPTION)

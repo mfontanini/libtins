@@ -19,7 +19,7 @@ before_build:
 - mkdir build
 - cd build
 - if "%platform%"=="x64" ( set GENERATOR="Visual Studio 12 Win64" ) else ( set GENERATOR="Visual Studio 12" )
-- cmake .. -G %GENERATOR% -DPCAP_ROOT_DIR=c:\WpdPack -DLIBTINS_BUILD_SHARED=0
+- cmake .. -G %GENERATOR% -DPCAP_ROOT_DIR=c:\WpdPack -DLIBTINS_BUILD_SHARED=0 -DLIBTINS_ENABLE_WPA2=0
 build:
   project: C:/projects/libtins/build/libtins.sln
   verbosity: minimal

@@ -19,4 +19,7 @@
 /* Have GCC builtin swap */
 #cmakedefine TINS_HAVE_GCC_BUILTIN_SWAP
 
+/* Have WPA2Decrypter callbacks */
+#cmakedefine TINS_HAVE_WPA2_CALLBACKS
+
 #endif // TINS_CONFIG_H
