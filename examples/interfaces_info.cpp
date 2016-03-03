@@ -68,7 +68,7 @@ int main() {
         else {
             ostringstream oss;
             for (size_t i = 0; i < info.ipv6_addrs.size(); ++i) {
-                const NetworkInterface::IPv6AddressPrefix& prefix = info.ipv6_addrs[i];
+                const NetworkInterface::IPv6Prefix& prefix = info.ipv6_addrs[i];
                 if (i > 0) {
                     oss << ", ";
                 }

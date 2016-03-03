@@ -59,7 +59,7 @@ public:
     /**
      *
      */
-    struct IPv6AddressPrefix {
+    struct IPv6Prefix {
         IPv6Address address;
         uint32_t prefix_length;
     };
@@ -69,7 +69,7 @@ public:
      */
     struct Info {
         IPv4Address ip_addr, netmask, bcast_addr;
-        std::vector<IPv6AddressPrefix> ipv6_addrs;
+        std::vector<IPv6Prefix> ipv6_addrs;
         address_type hw_addr;
         bool is_up;
     };

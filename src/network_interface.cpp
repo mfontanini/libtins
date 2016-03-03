@@ -110,7 +110,7 @@ struct InterfaceInfoCollector {
                     found_ip = true;
                 }
                 else if (addr->ifa_addr->sa_family == AF_INET6) {
-                    Tins::NetworkInterface::IPv6AddressPrefix prefix;
+                    Tins::NetworkInterface::IPv6Prefix prefix;
                     prefix.address = ((struct sockaddr_in6 *)addr->ifa_addr)->sin6_addr.s6_addr;
                     Tins::IPv6Address mask = ((struct sockaddr_in6 *)addr->ifa_netmask)->sin6_addr.s6_addr;
                     prefix.prefix_length = 0;
@@ -152,7 +152,7 @@ struct InterfaceInfoCollector {
                     found_ip = true;
                 }
                 else if (family == AF_INET6) {
-                    Tins::NetworkInterface::IPv6AddressPrefix prefix;
+                    Tins::NetworkInterface::IPv6Prefix prefix;
                     prefix.address = ((const struct sockaddr_in6 *)unicast->Address.lpSockaddr)->sin6_addr.s6_addr;
                     prefix.prefix_length = unicast->OnLinkPrefixLength;
                     info->ipv6_addrs.push_back(prefix);
