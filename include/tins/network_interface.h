@@ -36,6 +36,7 @@
 #include "macros.h"
 #include "hw_address.h"
 #include "ip_address.h"
+#include "ipv6_address.h"
 
 namespace Tins {
 
@@ -56,10 +57,19 @@ public:
     typedef HWAddress<6> address_type;
     
     /**
+     *
+     */
+    struct IPv6AddressPrefix {
+        IPv6Address address;
+        uint32_t prefix_length;
+    };
+
+    /**
      * \brief Struct that holds an interface's addresses.
      */
     struct Info {
         IPv4Address ip_addr, netmask, bcast_addr;
+        std::vector<IPv6AddressPrefix> ipv6_addrs;
         address_type hw_addr;
         bool is_up;
     };

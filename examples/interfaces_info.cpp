@@ -29,12 +29,14 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <tins/network_interface.h>
 
 using std::cout;
 using std::wcout;
 using std::endl;
 using std::string;
+using std::ostringstream;
 
 using namespace Tins;
 
@@ -59,11 +61,27 @@ int main() {
         #endif // _WIN32
         cout << ": " << endl;
 
-        cout << "   HW address:  " << info.hw_addr << endl
-             << "   IP address:  " << info.ip_addr << endl
-             << "   Netmask:     " << info.netmask << endl
-             << "   Broadcast:   " << info.bcast_addr << endl 
-             << "   Iface index: " << iface.id() << endl
-             << "   Status:      " << "interface " << status << endl << endl;
+        string ipv6_string;
+        if (info.ipv6_addrs.empty()) {
+            ipv6_string = "(none)";
+        }
+        else {
+            ostringstream oss;
+            for (size_t i = 0; i < info.ipv6_addrs.size(); ++i) {
+                const NetworkInterface::IPv6AddressPrefix& prefix = info.ipv6_addrs[i];
+                if (i > 0) {
+                    oss << ", ";
+                }
+                oss << prefix.address << "/" << prefix.prefix_length;
+            }
+            ipv6_string = oss.str();
+        }
+        cout << "   HW address:     " << info.hw_addr << endl
+             << "   IP address:     " << info.ip_addr << endl
+             << "   IPv6 addresses: " << ipv6_string << endl
+             << "   Netmask:        " << info.netmask << endl
+             << "   Broadcast:      " << info.bcast_addr << endl 
+             << "   Iface index:    " << iface.id() << endl
+             << "   Status:         " << "interface " << status << endl << endl;
     }
 }

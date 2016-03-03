@@ -45,6 +45,7 @@
     #include <net/if.h>
 #else
     #include <winsock2.h>
+    #include <ws2tcpip.h>
     #include <iphlpapi.h>
     #undef interface
 #endif
@@ -75,37 +76,32 @@ struct InterfaceInfoCollector {
         using Tins::Endian::host_to_be;
         using Tins::IPv4Address;
         #if defined(BSD) || defined(__FreeBSD_kernel__)
+            #define TINS_BROADCAST_ADDR(addr) (addr->ifa_dstaddr)
             const struct sockaddr_dl* addr_ptr = ((struct sockaddr_dl*)addr->ifa_addr);
             
             if (addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id) {
                 info->hw_addr = (const uint8_t*)LLADDR(addr_ptr);
                 found_hw = true;
             }
-            else if (addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
-                info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
-                info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
-                if ((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT))) {
-                    info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_dstaddr)->sin_addr.s_addr);
-                }
-                else {
-                    info->bcast_addr = 0;
-                }
-                info->is_up = (addr->ifa_flags & IFF_UP);
-                found_ip = true;
-            }
         #else
+            #define TINS_BROADCAST_ADDR(addr) (addr->ifa_broadaddr)
             const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
             
-            if (addr->ifa_addr) {
-                if (addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id) {
-                    info->hw_addr = addr_ptr->sll_addr;
-                    found_hw = true;
-                }
-                else if (addr->ifa_addr->sa_family == AF_INET && !std::strcmp(addr->ifa_name, iface_name)) {
+            if (!addr->ifa_addr) {
+                return false;
+            }
+            if (addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id) {
+                info->hw_addr = addr_ptr->sll_addr;
+                found_hw = true;
+            }
+        #endif
+            else if (!std::strcmp(addr->ifa_name, iface_name)) {
+                if (addr->ifa_addr->sa_family == AF_INET) {
                     info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
                     info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
                     if ((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT))) {
-                        info->bcast_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_broadaddr)->sin_addr.s_addr);
+                        info->bcast_addr = IPv4Address(
+                            ((struct sockaddr_in *)TINS_BROADCAST_ADDR(addr))->sin_addr.s_addr);
                     }
                     else {
                         info->bcast_addr = 0;
@@ -113,9 +109,29 @@ struct InterfaceInfoCollector {
                     info->is_up = (addr->ifa_flags & IFF_UP);
                     found_ip = true;
                 }
+                else if (addr->ifa_addr->sa_family == AF_INET6) {
+                    Tins::NetworkInterface::IPv6AddressPrefix prefix;
+                    prefix.address = ((struct sockaddr_in6 *)addr->ifa_addr)->sin6_addr.s6_addr;
+                    Tins::IPv6Address mask = ((struct sockaddr_in6 *)addr->ifa_netmask)->sin6_addr.s6_addr;
+                    prefix.prefix_length = 0;
+                    for (Tins::IPv6Address::iterator iter = mask.begin(); iter != mask.end(); ++iter) {
+                        if (*iter == 255) {
+                            prefix.prefix_length += 8;
+                        }
+                        else {
+                            uint8_t current_value = 128;
+                            while (*iter > 0) {
+                                prefix.prefix_length += 1;
+                                *iter &= ~current_value;
+                                current_value /= 2;
+                            }
+                            break;
+                        }
+                    }
+                    info->ipv6_addrs.push_back(prefix);
+                }
             }
-        #endif
-        
+        #undef TINS_BROADCAST_ADDR
         return found_ip && found_hw;
     }
     #else // _WIN32
@@ -124,14 +140,25 @@ struct InterfaceInfoCollector {
         using Tins::Endian::host_to_be;
         if (iface_id == uint32_t(iface->IfIndex)) {
             copy(iface->PhysicalAddress, iface->PhysicalAddress + 6, info->hw_addr.begin());
-            const IP_ADAPTER_UNICAST_ADDRESS* unicast = iface->FirstUnicastAddress;
-            if (unicast) {
-                info->ip_addr = IPv4Address(((const struct sockaddr_in *)unicast->Address.lpSockaddr)->sin_addr.s_addr);
-                info->netmask = IPv4Address(host_to_be<uint32_t>(0xffffffff << (32 - unicast->OnLinkPrefixLength)));
-                info->bcast_addr = IPv4Address((info->ip_addr & info->netmask) | ~info->netmask);
-                info->is_up = (iface->Flags & IP_ADAPTER_IPV4_ENABLED) != 0;
-                found_ip = true;
-                found_hw = true;
+            found_hw = true;
+            IP_ADAPTER_UNICAST_ADDRESS* unicast = iface->FirstUnicastAddress;
+            while (unicast) {
+                int family = ((const struct sockaddr*)unicast->Address.lpSockaddr)->sa_family;
+                if (family == AF_INET) {
+                    info->ip_addr = IPv4Address(((const struct sockaddr_in *)unicast->Address.lpSockaddr)->sin_addr.s_addr);
+                    info->netmask = IPv4Address(host_to_be<uint32_t>(0xffffffff << (32 - unicast->OnLinkPrefixLength)));
+                    info->bcast_addr = IPv4Address((info->ip_addr & info->netmask) | ~info->netmask);
+                    info->is_up = (iface->Flags & IP_ADAPTER_IPV4_ENABLED) != 0;
+                    found_ip = true;
+                }
+                else if (family == AF_INET6) {
+                    Tins::NetworkInterface::IPv6AddressPrefix prefix;
+                    prefix.address = ((const struct sockaddr_in6 *)unicast->Address.lpSockaddr)->sin6_addr.s6_addr;
+                    prefix.prefix_length = unicast->OnLinkPrefixLength;
+                    info->ipv6_addrs.push_back(prefix);
+                    found_ip = true;
+                }
+                unicast = unicast->Next;
             }
         }
         return found_ip && found_hw;
