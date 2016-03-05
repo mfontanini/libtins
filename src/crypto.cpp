@@ -553,8 +553,10 @@ void WPA2Decrypter::try_add_keys(const Dot11Data& dot11, const RSNHandshake& hs)
             keys_[addr_p] = session;
             #ifdef TINS_HAVE_WPA2_CALLBACKS
                 if (handshake_captured_callback_) {
-                    handshake_captured_callback_(it->second.ssid(), addr_p.first,
-                                                 addr_p.second);
+                    address_type bssid = dot11.bssid_addr();
+                    address_type client = (bssid == addr_p.first) ? addr_p.second
+                                                                  : addr_p.first;
+                    handshake_captured_callback_(it->second.ssid(), bssid, client);
                 }
             #endif // TINS_HAVE_WPA2_CALLBACKS
         }
