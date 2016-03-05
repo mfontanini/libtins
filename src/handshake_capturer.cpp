@@ -34,6 +34,8 @@
 #include "dot11/dot11_data.h"
 
 using std::max_element;
+using std::max;
+using std::min;
 using std::pair;
 
 namespace Tins {
@@ -45,28 +47,22 @@ bool RSNHandshakeCapturer::process_packet(const PDU& pdu) {
         return false;
     }
     
-    
+    // Use this to identify each flow, regardless of the direction
     pair<address_type, address_type> addresses;
-    if (dot11->to_ds()) {
-        addresses.first = dot11->addr1();
-        addresses.second = dot11->addr2();
-    }
-    else if (dot11->from_ds()) {
-        addresses.first = dot11->addr2();
-        addresses.second = dot11->addr1();
-    }
-    else {
-        return false;
-    }
+    addresses.first  = min(dot11->src_addr(), dot11->dst_addr());
+    addresses.second = max(dot11->src_addr(), dot11->dst_addr());
         
-    // 1st    
+    // 1st packet
     if (eapol->key_t() && eapol->key_ack() && !eapol->key_mic() && !eapol->install()) {
         handshakes_[addresses].assign(eapol, eapol + 1);
     }
-    else if (eapol->key_t() && eapol->key_mic() && !eapol->install() && !eapol->key_ack()) {
-        if (*max_element(eapol->nonce(), eapol->nonce() + RSNEAPOL::nonce_size) > 0) {
+    // 2nd and 4th packets
+    else if (eapol->key_t() && !eapol->key_ack() && eapol->key_mic() && !eapol->install()) {
+        // 2nd packet won't have the secure bit set
+        if (!eapol->secure()) {
             do_insert(addresses, eapol, 1);
         }
+        // Otherwise, this should be the 4th and last packet
         else if (do_insert(addresses, eapol, 3)) {
             completed_handshakes_.push_back(
                 handshake_type(
@@ -79,7 +75,8 @@ bool RSNHandshakeCapturer::process_packet(const PDU& pdu) {
             return true;
         }
     }
-    else if (eapol->key_t() && eapol->install() && eapol->key_ack() && eapol->key_mic()) {
+    // 3nd packet
+    else if (eapol->key_t() && eapol->key_ack() && eapol->key_mic() && eapol->install()) {
         do_insert(addresses, eapol, 2);
     }
     return false;
