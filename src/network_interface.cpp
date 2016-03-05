@@ -319,11 +319,31 @@ NetworkInterface::Info NetworkInterface::info() const {
 }
 
 bool NetworkInterface::is_loopback() const {
-    return addresses().ip_addr.is_loopback();
+    return info().ip_addr.is_loopback();
 }
 
 bool NetworkInterface::is_up() const {
-    return addresses().is_up;
+    return info().is_up;
+}
+
+NetworkInterface::address_type NetworkInterface::hw_address() const {
+    return info().hw_addr;
+}
+
+IPv4Address NetworkInterface::ipv4_address() const {
+    return info().ip_addr;
+}
+
+IPv4Address NetworkInterface::ipv4_mask() const {
+    return info().netmask;
+}
+
+IPv4Address NetworkInterface::ipv4_broadcast() const {
+    return info().bcast_addr;
+}
+
+vector<NetworkInterface::IPv6Prefix> NetworkInterface::ipv6_addresses() const {
+    return info().ipv6_addrs;
 }
 
 NetworkInterface::id_type NetworkInterface::resolve_index(const char* name) {

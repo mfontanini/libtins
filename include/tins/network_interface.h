@@ -202,6 +202,31 @@ public:
     bool is_up() const;
 
     /**
+     * \brief Retrieves the hardware address for this interface.
+     */
+    address_type hw_address() const;
+
+    /**
+     * \brief Retrieves the IPv4 address for this interface.
+     */
+    IPv4Address ipv4_address() const;
+
+    /**
+     * \brief Retrieves the IPv4 netmask for this interface.
+     */
+    IPv4Address ipv4_mask() const;
+
+    /**
+     * \brief Retrieves the broadcast IPv4 address for this interface.
+     */
+    IPv4Address ipv4_broadcast() const;
+
+    /**
+     * \brief Retrieves the IPv6 addresses for this interface.
+     */
+    std::vector<IPv6Prefix> ipv6_addresses() const;
+
+    /**
      * \brief Compares this interface for equality.
      * 
      * \param rhs The interface being compared.
