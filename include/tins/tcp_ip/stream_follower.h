@@ -124,14 +124,16 @@ public:
         stream_id(const address_type& client_addr, uint16_t client_port,
                   const address_type& server_addr, uint16_t server_port);
 
+        bool operator<(const stream_id& rhs) const;
+        bool operator==(const stream_id& rhs) const;
+
         address_type min_address;
         address_type max_address;
         uint16_t min_address_port;
         uint16_t max_address_port;
 
-        bool operator<(const stream_id& rhs) const;
-
-        static size_t hash(const stream_id& id);
+        static address_type serialize(IPv4Address address);
+        static address_type serialize(const IPv6Address& address);
     };
 
     /** 
@@ -228,8 +230,6 @@ private:
 
     static stream_id make_stream_id(const PDU& packet);
     Stream& find_stream(const stream_id& id);
-    static stream_id::address_type serialize(IPv4Address address);
-    static stream_id::address_type serialize(const IPv6Address& address);
     void process_packet(PDU& packet, const timestamp_type& ts);
     void cleanup_streams(const timestamp_type& now);
 

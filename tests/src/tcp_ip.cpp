@@ -512,7 +512,6 @@ TEST_F(FlowTest, StreamFollower_FollowStream) {
     EXPECT_EQ(payload, merge_chunks(stream_client_payload_chunks));
 }
 
-
 #ifdef TINS_HAVE_ACK_TRACKER
 
 using namespace boost;

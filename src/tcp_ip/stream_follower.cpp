@@ -161,15 +161,15 @@ void StreamFollower::stream_termination_callback(const stream_termination_callba
 
 Stream& StreamFollower::find_stream(const IPv4Address& client_addr, uint16_t client_port,
                                     const IPv4Address& server_addr, uint16_t server_port) {
-    stream_id identifier(serialize(client_addr), client_port,
-                         serialize(server_addr), server_port);
+    stream_id identifier(stream_id::serialize(client_addr), client_port,
+                         stream_id::serialize(server_addr), server_port);
     return find_stream(identifier);
 }
 
 Stream& StreamFollower::find_stream(const IPv6Address& client_addr, uint16_t client_port,
                                     const IPv6Address& server_addr, uint16_t server_port) {
-    stream_id identifier(serialize(client_addr), client_port,
-                         serialize(server_addr), server_port);
+    stream_id identifier(stream_id::serialize(client_addr), client_port,
+                         stream_id::serialize(server_addr), server_port);
     return find_stream(identifier);
 }
 
@@ -179,12 +179,12 @@ StreamFollower::stream_id StreamFollower::make_stream_id(const PDU& packet) {
         throw invalid_packet();
     }
     if (const IP* ip = packet.find_pdu<IP>()) {
-        return stream_id(serialize(ip->src_addr()), tcp->sport(),
-                         serialize(ip->dst_addr()), tcp->dport());
+        return stream_id(stream_id::serialize(ip->src_addr()), tcp->sport(),
+                         stream_id::serialize(ip->dst_addr()), tcp->dport());
     }
     else if (const IPv6* ip = packet.find_pdu<IPv6>()) {
-        return stream_id(serialize(ip->src_addr()), tcp->sport(),
-                         serialize(ip->dst_addr()), tcp->dport());
+        return stream_id(stream_id::serialize(ip->src_addr()), tcp->sport(),
+                         stream_id::serialize(ip->dst_addr()), tcp->dport());
     }
     else {
         throw invalid_packet();
@@ -199,22 +199,6 @@ Stream& StreamFollower::find_stream(const stream_id& id) {
     else {
         return iter->second;
     }
-}
-
-StreamFollower::stream_id::address_type StreamFollower::serialize(IPv4Address address) {
-    stream_id::address_type addr;
-    OutputMemoryStream output(addr.data(), addr.size());
-    addr.fill(0);
-    output.write(address);
-    return addr; 
-}
-
-StreamFollower::stream_id::address_type StreamFollower::serialize(const IPv6Address& address) {
-    stream_id::address_type addr;
-    OutputMemoryStream output(addr.data(), addr.size());
-    addr.fill(0);
-    output.write(address);
-    return addr;
 }
 
 void StreamFollower::cleanup_streams(const timestamp_type& now) {
@@ -259,8 +243,29 @@ StreamFollower::stream_id::stream_id(const address_type& client_addr,
 }
 
 bool StreamFollower::stream_id::operator<(const stream_id& rhs) const {
-    return tie(min_address, min_address_port, max_address, max_address_port) <
-        tie(rhs.min_address, rhs.min_address_port, rhs.max_address, rhs.max_address_port);
+    return tie(min_address, max_address, min_address_port, max_address_port) <
+           tie(rhs.min_address, rhs.max_address, rhs.min_address_port, rhs.max_address_port);
+}
+
+bool StreamFollower::stream_id::operator==(const stream_id& rhs) const {
+    return tie(min_address, min_address_port, max_address, max_address_port) ==
+           tie(rhs.min_address, rhs.min_address_port, rhs.max_address, rhs.max_address_port);
+}
+
+StreamFollower::stream_id::address_type StreamFollower::stream_id::serialize(IPv4Address address) {
+    address_type addr;
+    OutputMemoryStream output(addr.data(), addr.size());
+    addr.fill(0);
+    output.write(address);
+    return addr; 
+}
+
+StreamFollower::stream_id::address_type StreamFollower::stream_id::serialize(const IPv6Address& address) {
+    address_type addr;
+    OutputMemoryStream output(addr.data(), addr.size());
+    addr.fill(0);
+    output.write(address);
+    return addr;
 }
 
 } // TCPIP
