@@ -108,6 +108,7 @@ private:
 
 void skip_line(std::istream& input);
 bool from_hex(const std::string& str, uint32_t& result);
+bool from_hex(const std::string& str, std::string& result);
 
 template<bool, typename T = void>
 struct enable_if {

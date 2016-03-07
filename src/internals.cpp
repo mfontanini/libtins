@@ -63,7 +63,7 @@ namespace Tins {
 namespace Internals {
 
 bool from_hex(const string& str, uint32_t& result) {
-    unsigned i(0);
+    size_t i = 0;
     result = 0;
     while (i < str.size()) {
         uint8_t tmp;
@@ -78,6 +78,29 @@ bool from_hex(const string& str, uint32_t& result) {
         }
         result = (result << 4) | tmp;
         i++;
+    }
+    return true;
+}
+
+bool from_hex(const string& str, string& result) {
+    result = "";
+    for (size_t i = 0; i < str.size(); i+= 2) {
+        uint8_t value = 0;
+        for (size_t j = i; j < i + 2 && j < str.size(); ++j) {
+            if (str[j] >= 'A' && str[j] <= 'F') {
+                value = (value << 4) | (str[j] - 'A' + 10);
+            }
+            else if (str[j] >= 'a' && str[j] <= 'f') {
+                value = (value << 4) | (str[j] - 'a' + 10);
+            }
+            else if (str[j] >= '0' && str[j] <= '9') {
+                value = (value << 4) | (str[j] - '0');
+            }
+            else {
+                return false;
+            }
+        }
+        result.push_back(value);
     }
     return true;
 }

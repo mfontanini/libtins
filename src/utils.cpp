@@ -54,8 +54,8 @@
     #endif
 #else
     #include <winsock2.h>
-    #include <iphlpapi.h>
     #include <ws2tcpip.h>
+    #include <iphlpapi.h>
     #undef interface
 #endif
 #include "utils.h"
@@ -191,6 +191,7 @@ HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender) {
 }
 
 #if defined(BSD) || defined(__FreeBSD_kernel__)
+
 vector<RouteEntry> route_entries() {
     vector<RouteEntry> output;
     vector<char> buffer = query_route_table();
@@ -219,15 +220,14 @@ vector<RouteEntry> route_entries() {
     }
     return output;
 }
+
 #elif defined(_WIN32)
+
 vector<RouteEntry> route_entries() {
     vector<RouteEntry> output;
-    MIB_IPFORWARDTABLE* table;
+    MIB_IPFORWARDTABLE table;
     ULONG size = 0;
-    GetIpForwardTable(0, &size, 0);
-    vector<uint8_t> buffer(size);
-    table = (MIB_IPFORWARDTABLE*)&buffer[0];
-    GetIpForwardTable(table, &size, 0);
+    GetIpForwardTable(AF_INET6, &table);
     
     for (DWORD i = 0; i < table->dwNumEntries; i++) {
         MIB_IPFORWARDROW* row = &table->table[i];
@@ -244,7 +244,34 @@ vector<RouteEntry> route_entries() {
     }
     return output;
 }
-#else
+
+vector<Route6Entry> route6_entries() {
+    vector<Route6Entry> output;
+    MIB_IPFORWARD_TABLE2* table;
+    GetIpForwardTable2(AF_INET6, &table);
+    for (ULONG i = 0; i < table->NumEntries; i++) {
+        MIB_IPFORWARD_ROW2* row = &table->Table[i];
+        if (true) {
+            try {
+                Route6Entry entry;
+                entry.interface = NetworkInterface::from_index(row->InterfaceIndex).name();
+                entry.destination = IPv6Address(row->DestinationPrefix.Prefix.Ipv6.sin6_addr.s6_addr);
+                entry.mask = IPv6Address::from_prefix_length(row->DestinationPrefix.PrefixLength);
+                entry.next_hop = IPv6Address(row->NextHop.Ipv6.sin6_addr.s6_addr);
+                entry.metric = row->Metric;
+                output.push_back(entry);
+            }
+            catch (invalid_interface&) {
+                
+            }
+        }
+    }
+    FreeMibTable(table);
+    return output;
+}
+
+#else // GNU/LINUX
+
 vector<RouteEntry> route_entries() {
     using namespace Tins::Internals;
     vector<RouteEntry> output;
@@ -271,6 +298,44 @@ vector<RouteEntry> route_entries() {
     }
     return output;
 }
+
+vector<Route6Entry> route6_entries() {
+    using namespace Tins::Internals;
+    vector<Route6Entry> output;
+    ifstream input("/proc/net/ipv6_route");
+    string destination, mask_length, metric, next_hop, dummy, flags;
+    Route6Entry entry;
+    while (input >> destination >> mask_length) {
+        string temporary;
+        uint32_t temporary_int;
+        for (unsigned i(0); i < 2; ++i) {
+            input >> dummy;
+        }
+        input >> next_hop;
+        input >> metric;
+        for (unsigned i(0); i < 2; ++i) {
+            input >> dummy;
+        }
+        input >> flags >> entry.interface;
+        from_hex(destination, temporary);
+        entry.destination = IPv6Address((const uint8_t*)&temporary[0]);
+        from_hex(mask_length, temporary_int);
+        entry.mask = IPv6Address::from_prefix_length(temporary_int);
+        from_hex(next_hop, temporary);
+        entry.next_hop = IPv6Address((const uint8_t*)&temporary[0]);
+        from_hex(metric, temporary_int);
+        entry.metric = temporary_int;
+        // Process flags
+        from_hex(flags, temporary_int);
+        // Skip:
+        // * 0x01000000 -> cache entries
+        if ((temporary_int & 0x01000000) == 0) {
+            output.push_back(entry);
+        }
+    }
+    return output;
+}
+
 #endif
 
 bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr) {

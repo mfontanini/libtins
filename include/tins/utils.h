@@ -36,6 +36,7 @@
 #include <vector>
 #include <stdint.h>
 #include "ip_address.h"
+#include "ipv6_address.h"
 #include "internals.h"
 
 // Fix for Windows interface define on combaseapi.h
@@ -82,6 +83,36 @@ struct RouteEntry {
      * This route entry's subnet mask.
      */
     IPv4Address mask;
+
+    /**
+     * This route entry's metric.
+     */
+    int metric;
+};
+
+/**
+ * Struct that represents an entry the IPv6 routing table
+ */
+struct Route6Entry {
+    /**
+     * This interface's name.
+     */
+    std::string interface;
+
+    /**
+     * This route entry's destination.
+     */
+    IPv6Address destination;
+
+    /**
+     * This route entry's subnet mask.
+     */
+    IPv6Address mask;
+
+    /**
+     * This route entry's next hop.
+     */
+    IPv6Address next_hop;
 
     /**
      * This route entry's metric.
@@ -175,6 +206,13 @@ void route_entries(ForwardIterator output);
  * \return a vector which contains all of the route entries.
  */
 TINS_API std::vector<RouteEntry> route_entries();
+
+/**
+ * \brief Retrieves entries in the routing table.
+ * 
+ * \return a vector which contains all of the route entries.
+ */
+TINS_API std::vector<Route6Entry> route6_entries();
 
 /** \brief Returns the 32 bit crc of the given buffer.
  *
