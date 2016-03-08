@@ -112,7 +112,7 @@ struct Route6Entry {
     /**
      * This route entry's next hop.
      */
-    IPv6Address next_hop;
+    IPv6Address gateway;
 
     /**
      * This route entry's metric.
