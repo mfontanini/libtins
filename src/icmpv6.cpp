@@ -47,13 +47,13 @@ using Tins::Memory::OutputMemoryStream;
 namespace Tins {
 
 ICMPv6::ICMPv6(Types tp)
-: options_size_(), reach_time_(0), retrans_timer_(0) {
+: options_size_(), reach_time_(0), retrans_timer_(0), mlqm_() {
     memset(&header_, 0, sizeof(header_));
     type(tp);
 }
 
 ICMPv6::ICMPv6(const uint8_t* buffer, uint32_t total_sz) 
-: options_size_(), reach_time_(0), retrans_timer_(0) {
+: options_size_(), reach_time_(0), retrans_timer_(0), mlqm_() {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
     if (has_target_addr()) {
@@ -850,7 +850,7 @@ ICMPv6::prefix_info_type ICMPv6::prefix_info_type::from_option(const option& opt
     output.A = (stream.read<uint8_t>() >> 6) & 0x1;
     output.valid_lifetime = stream.read_be<uint32_t>();
     output.preferred_lifetime = stream.read_be<uint32_t>();
-    stream.skip(sizeof(uint32_t));
+    output.reserved2 = stream.read_be<uint32_t>();
     output.prefix = stream.read<ICMPv6::ipaddress_type>();
     return output;
 }

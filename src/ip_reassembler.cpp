@@ -39,7 +39,7 @@ namespace Tins {
 namespace Internals {
 
 IPv4Stream::IPv4Stream() 
-: received_end_(false), received_size_(), total_size_() { 
+: received_end_(false), transport_proto_(0xff), received_size_(), total_size_() { 
 
 }
 

@@ -60,10 +60,10 @@ public:
         IPv4Address client_addr, server_addr;
         uint16_t client_port, server_port;
         
-        StreamInfo() {}
+        StreamInfo() : client_port(0), server_port(0) {}
         
         StreamInfo(IPv4Address client, IPv4Address server,
-            uint16_t cport, uint16_t sport);
+                   uint16_t cport, uint16_t sport);
         
         bool operator<(const StreamInfo& rhs) const;
     };

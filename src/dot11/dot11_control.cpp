@@ -196,7 +196,7 @@ uint32_t Dot11BlockAckRequest::header_size() const {
 
 Dot11BlockAck::Dot11BlockAck(const address_type& dst_addr, 
                              const address_type& target_addr)
-: Dot11ControlTA(dst_addr, target_addr), bitmap_() {
+: Dot11ControlTA(dst_addr, target_addr), bar_control_(0), start_sequence_(0), bitmap_() {
     subtype(BLOCK_ACK);
 }
 

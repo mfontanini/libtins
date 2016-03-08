@@ -297,7 +297,7 @@ public:
 private:
     // Compress all flags into just one struct using bitfields 
     struct flags {
-        flags() : ignore_data_packets(0), sack_permitted(0), ack_tracking(0) {
+        flags() : is_v6(0), ignore_data_packets(0), sack_permitted(0), ack_tracking(0) {
 
         }
 

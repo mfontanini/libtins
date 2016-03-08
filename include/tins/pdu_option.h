@@ -333,8 +333,10 @@ public:
     PDUOption(option_type opt = option_type(), 
               size_t length = 0,
               const data_type* data = 0) 
-    : option_(opt), size_(static_cast<uint16_t>(length)) {
-        set_payload_contents(data, data + (data ? length : 0));
+    : option_(opt), size_(static_cast<uint16_t>(length)), real_size_(0) {
+        if (data != 0) {
+            set_payload_contents(data, data + length);
+        }
     }
     
     /**

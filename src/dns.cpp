@@ -605,7 +605,7 @@ bool DNS::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
 // SOA record
 
 DNS::soa_record::soa_record() 
-: serial_(0), refresh_(0), retry_(0), expire_(0) {
+: serial_(0), refresh_(0), retry_(0), expire_(0), minimum_ttl_(0) {
 
 }
 

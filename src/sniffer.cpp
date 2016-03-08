@@ -87,7 +87,7 @@ struct sniff_data {
     PDU* pdu;
     bool packet_processed;
 
-    sniff_data() : pdu(0), packet_processed(true) { }
+sniff_data() : tv(), pdu(0), packet_processed(true) { }
 };
 
 template<typename T>
@@ -408,7 +408,7 @@ const unsigned SnifferConfiguration::DEFAULT_TIMEOUT = 1000;
 
 SnifferConfiguration::SnifferConfiguration()
 : flags_(0), snap_len_(DEFAULT_SNAP_LEN), buffer_size_(0), timeout_(DEFAULT_TIMEOUT),
-  promisc_(false), rfmon_(false), immediate_mode_(false) {
+  promisc_(false), rfmon_(false), immediate_mode_(false), direction_(PCAP_D_INOUT) {
 
 }
 

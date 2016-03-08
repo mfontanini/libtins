@@ -506,10 +506,21 @@ private:
     radiotap_hdr radio_;
     // present fields...
     uint64_t tsft_;
-    uint16_t channel_type_, channel_freq_, rx_flags_, signal_quality_, tx_flags_;
+    uint16_t channel_type_;
+    uint16_t channel_freq_;
+    uint16_t rx_flags_;
+    uint16_t signal_quality_;
+    uint16_t tx_flags_;
     mcs_type mcs_;
-    uint8_t antenna_, flags_, rate_, channel_, max_power_, db_signal_, data_retries_;
-    int8_t dbm_signal_, dbm_noise_;
+    uint8_t antenna_;
+    uint8_t flags_;
+    uint8_t rate_;
+    uint8_t channel_;
+    uint8_t max_power_;
+    uint8_t db_signal_;
+    uint8_t data_retries_;
+    int8_t dbm_signal_;
+    int8_t dbm_noise_;
 };
 }
 

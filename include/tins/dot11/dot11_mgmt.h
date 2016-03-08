@@ -463,7 +463,8 @@ public:
         uint16_t dwell_time;
         uint8_t hop_set, hop_pattern, hop_index;
         
-        fh_params_set() {}
+        fh_params_set()
+        : dwell_time(0), hop_set(0), hop_pattern(0), hop_index(0) {}
         
         fh_params_set(uint16_t dwell_time, 
                       uint8_t hop_set, 
@@ -482,7 +483,8 @@ public:
         uint8_t cfp_count, cfp_period;
         uint16_t cfp_max_duration, cfp_dur_remaining;
         
-        cf_params_set() {}
+        cf_params_set()
+        : cfp_count(0), cfp_period(0), cfp_max_duration(0), cfp_dur_remaining(0) {}
         
         cf_params_set(uint8_t cfp_count, 
                       uint8_t cfp_period,
@@ -505,7 +507,7 @@ public:
         uint8_t recovery_interval; 
         channel_map_type channel_map;
        
-        ibss_dfs_params() {}
+        ibss_dfs_params() : recovery_interval(0) {}
        
         ibss_dfs_params(const address_type& addr, 
                         uint8_t recovery_interval,
@@ -547,7 +549,8 @@ public:
         uint8_t flag, number_of_sets, modulus, offset;
         byte_array random_table;
         
-        fh_pattern_type() {}
+        fh_pattern_type()
+        : flag(0), number_of_sets(0), modulus(0), offset(0) {}
         
         fh_pattern_type(uint8_t flag, 
                         uint8_t sets,
@@ -566,7 +569,8 @@ public:
     struct channel_switch_type {
         uint8_t switch_mode, new_channel, switch_count;
         
-        channel_switch_type() {}
+        channel_switch_type()
+        : switch_mode(0), new_channel(0), switch_count(0) {}
         
         channel_switch_type(uint8_t mode, 
                             uint8_t channel,
@@ -583,7 +587,8 @@ public:
         uint8_t quiet_count, quiet_period;
         uint16_t quiet_duration, quiet_offset;
         
-        quiet_type() {}
+        quiet_type() 
+        : quiet_count(0), quiet_period(0), quiet_duration(0), quiet_offset(0) {}
         
         quiet_type(uint8_t count, 
                    uint8_t period,
@@ -603,7 +608,8 @@ public:
         uint16_t available_capacity;
         uint8_t channel_utilization;
         
-        bss_load_type() {}
+        bss_load_type() 
+        : station_count(0), available_capacity(0), channel_utilization(0) {}
         
         bss_load_type(uint16_t count, uint8_t utilization, uint16_t capacity) 
         : station_count(count), available_capacity(capacity),
@@ -619,7 +625,8 @@ public:
         uint8_t dtim_count, dtim_period, bitmap_control;
         byte_array partial_virtual_bitmap;
         
-        tim_type() {}
+        tim_type()
+        : dtim_count(0), dtim_period(0), bitmap_control(0) {}
         
         tim_type(uint8_t count, 
                  uint8_t period,
