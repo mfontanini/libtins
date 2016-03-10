@@ -1,3 +1,55 @@
+v3.4 - Wed Mar  9 20:24:54 PST 2016
+
+- Check the secure bit on HandshakeCapturer to detect 2nd packet
+
+- Add info members directly into NetworkInterface
+
+- Add IPv6 addresses to NetworkInterface::Info
+
+- Make *MemoryStream use size_t rather than uint32_t
+
+- Add WPA2Decrypter callback interface
+
+- Set MACOSX_RPATH to ON
+
+- Don't fail configuration if openssl is missing
+
+- Build layer 5 as RawPDU if IPv6 has fragment header
+
+- Fix examples so they build on gcc 4.6
+
+- Fix flag value for sniffer's immediate mode
+
+- Fix IP fragment reassemble when packet has flags DF+MF
+
+- Add extract_metadata to main PDU classes
+
+- Fix examples to make them work on Windows
+
+- Use timercmp/sub and std::chrono to subtract timevals on PacketSender
+
+- Build examples against local libtins build
+
+- Add uninstall target
+
+- Prefix HAVE_ config.h macros with TINS_
+
+- Use compiler intrinsics to swap bytes
+
+- Use C++11 mode by default
+
+- Add missing TINS_API to PDU classes.
+
+- Extend/fix ICMPv6 enum values and unify naming
+
+- Return an empty string for dot11 ssid, if ssid is present but empty
+
+- Implement new TCP stream follower mechanism
+
+- Use ExternalProject_Add rather than including the gtest directory
+
+- Fix invalid endian on IP fragment offset on OSX
+
 v3.3 - Sun Jan 31 21:06:04 PST 2016
 
 - Add TCP connection close example
