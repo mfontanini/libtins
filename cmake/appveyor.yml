@@ -5,6 +5,10 @@ configuration:
 platform: 
 - Win32
 - x64
+environment:
+  matrix:
+    - compiler: Visual Studio 12
+    - compiler: Visual Studio 14
 clone_depth: 1
 install:
 - git clone https://github.com/mfontanini/winpcap-installer.git
@@ -18,7 +22,7 @@ install:
 before_build:
 - mkdir build
 - cd build
-- if "%platform%"=="x64" ( set GENERATOR="Visual Studio 12 Win64" ) else ( set GENERATOR="Visual Studio 12" )
+- if "%platform%"=="x64" ( set GENERATOR="%compiler% Win64" ) else ( set GENERATOR="%compiler%" )
 - cmake .. -G %GENERATOR% -DPCAP_ROOT_DIR=c:\WpdPack -DLIBTINS_BUILD_SHARED=0 -DLIBTINS_ENABLE_WPA2=0
 build:
   project: C:/projects/libtins/build/libtins.sln
