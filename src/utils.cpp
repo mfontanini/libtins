@@ -54,8 +54,8 @@
     #endif
 #else
     #include <winsock2.h>
-    #include <iphlpapi.h>
     #include <ws2tcpip.h>
+    #include <iphlpapi.h>
     #undef interface
 #endif
 #include "utils.h"
@@ -110,7 +110,7 @@ addrinfo* resolve_domain(const string& to_resolve, int family) {
 }
 
 #if defined(BSD) || defined(__FreeBSD_kernel__)
-vector<char> query_route_table() {
+vector<char> query_route_table(int family) {
     int mib[6];
     vector<char> buf;
     size_t len;
@@ -118,7 +118,7 @@ vector<char> query_route_table() {
     mib[0] = CTL_NET;
     mib[1] = AF_ROUTE;
     mib[2] = 0;
-    mib[3] = AF_INET;
+    mib[3] = family;
     mib[4] = NET_RT_DUMP;
     mib[5] = 0; 
     if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0) {
@@ -133,20 +133,19 @@ vector<char> query_route_table() {
     return buf;
 }
 
-template<typename ForwardIterator>
-void parse_header(struct rt_msghdr* rtm, ForwardIterator iter) {
+void parse_header(struct rt_msghdr* rtm, vector<sockaddr*>& addrs) {
     char* ptr = (char *)(rtm + 1);
-    sockaddr* sa = 0;
-
-    for (int i = 0; i < RTAX_MAX; i++) {
-        if (rtm->rtm_addrs & (1 << i)) {
+    // Iterate from RTA_DST (0) to RTA_NETMASK (2)
+    for (int i = 0; i < 3; ++i) {
+        sockaddr* sa = 0;
+        if ((rtm->rtm_addrs & (1 << i)) != 0) {
             sa = (struct sockaddr *)ptr;
             ptr += sa->sa_len;
             if (sa->sa_family == 0) {
                 sa = 0;
             }
         } 
-        *iter++ = sa;
+        addrs[i] = sa;
     }
 }
 #endif
@@ -191,35 +190,105 @@ HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender) {
 }
 
 #if defined(BSD) || defined(__FreeBSD_kernel__)
+
 vector<RouteEntry> route_entries() {
     vector<RouteEntry> output;
-    vector<char> buffer = query_route_table();
+    vector<char> buffer = query_route_table(AF_INET);
     char* next = &buffer[0], *end = &buffer[buffer.size()];
     rt_msghdr* rtm;
-    vector<sockaddr*> sa(RTAX_MAX);
+    vector<sockaddr*> sa(32);
     char iface_name[IF_NAMESIZE];
     while (next < end) {
         rtm = (rt_msghdr*)next;
-        parse_header(rtm, sa.begin());
-        if (sa[RTAX_DST] && sa[RTAX_GATEWAY] && if_indextoname(rtm->rtm_index, iface_name)) {
-            RouteEntry entry;
-            entry.destination = IPv4Address(((struct sockaddr_in *)sa[RTAX_DST])->sin_addr.s_addr);
-            entry.gateway = IPv4Address(((struct sockaddr_in *)sa[RTAX_GATEWAY])->sin_addr.s_addr);
-            if (sa[RTAX_GENMASK]) {
-                entry.mask = IPv4Address(((struct sockaddr_in *)sa[RTAX_GENMASK])->sin_addr.s_addr);
+        // Filter:
+        // * RTF_STATIC (only manually added routes)
+        if ((rtm->rtm_flags & (RTF_STATIC)) != 0) {
+            parse_header(rtm, sa);
+            if (sa[RTAX_DST] && sa[RTAX_GATEWAY] && if_indextoname(rtm->rtm_index, iface_name)) {
+                RouteEntry entry;
+                entry.destination = IPv4Address(((struct sockaddr_in *)sa[RTAX_DST])->sin_addr.s_addr);
+                entry.gateway = IPv4Address(((struct sockaddr_in *)sa[RTAX_GATEWAY])->sin_addr.s_addr);
+                if (sa[RTAX_NETMASK]) {
+                    entry.mask = IPv4Address(((struct sockaddr_in *)sa[RTAX_NETMASK])->sin_addr.s_addr);
+                }
+                entry.interface = iface_name;
+                entry.metric = 0;
+                output.push_back(entry);
             }
-            else {
-                entry.mask = IPv4Address(uint32_t());
-            }
-            entry.interface = iface_name;
-            entry.metric = 0;
-            output.push_back(entry);
         }
         next += rtm->rtm_msglen;
     }
     return output;
 }
+
+vector<Route6Entry> route6_entries() {
+    vector<Route6Entry> output;
+    vector<char> buffer = query_route_table(AF_INET6);
+    char* next = &buffer[0], *end = &buffer[buffer.size()];
+    rt_msghdr* rtm;
+    vector<sockaddr*> sa(9);
+    char iface_name[IF_NAMESIZE];
+    while (next < end) {
+        rtm = (rt_msghdr*)next;
+        // Filter protocol-cloned entries
+        if ((rtm->rtm_flags & RTF_WASCLONED) == 0 || (rtm->rtm_flags & RTF_PRCLONING) == 0) {
+            parse_header(rtm, sa);
+            if (sa[RTAX_DST] && sa[RTAX_GATEWAY] && if_indextoname(rtm->rtm_index, iface_name)) {
+                Route6Entry entry;
+                entry.destination = IPv6Address(((struct sockaddr_in6 *)sa[RTAX_DST])->sin6_addr.s6_addr);
+                entry.gateway = IPv6Address(((struct sockaddr_in6 *)sa[RTAX_GATEWAY])->sin6_addr.s6_addr);
+                int prefix_length = 0;
+                if (sa[RTAX_NETMASK]) {
+                    struct sockaddr_in6  *sin = (struct sockaddr_in6 *)sa[RTAX_NETMASK];
+                    for (size_t i = 0; i < 16; ++i) {
+                        uint8_t this_byte = sin->sin6_addr.s6_addr[i];
+                        // Stop when we find a zero byte
+                        if (this_byte == 0) {
+                            break;
+                        }
+                        switch (this_byte) {
+                            case 0xff:
+                                prefix_length += 8;
+                                break;
+                            case 0xfe:
+                                prefix_length += 7;
+                                break;
+                            case 0xfc:
+                                prefix_length += 6;
+                                break;
+                            case 0xf8:
+                                prefix_length += 5;
+                                break;
+                            case 0xf0:
+                                prefix_length += 4;
+                                break;
+                            case 0xe0:
+                                prefix_length += 3;
+                                break;
+                            case 0xc0:
+                                prefix_length += 2;
+                                break;
+                            case 0x80:
+                                prefix_length += 1;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                entry.mask = IPv6Address::from_prefix_length(prefix_length);
+                entry.interface = iface_name;
+                entry.metric = 0;
+                output.push_back(entry);
+            }
+        }
+        next += rtm->rtm_msglen;
+    }
+    return output;
+}
+
 #elif defined(_WIN32)
+
 vector<RouteEntry> route_entries() {
     vector<RouteEntry> output;
     MIB_IPFORWARDTABLE* table;
@@ -244,7 +313,34 @@ vector<RouteEntry> route_entries() {
     }
     return output;
 }
-#else
+
+vector<Route6Entry> route6_entries() {
+    vector<Route6Entry> output;
+    MIB_IPFORWARD_TABLE2* table;
+    GetIpForwardTable2(AF_INET6, &table);
+    for (ULONG i = 0; i < table->NumEntries; i++) {
+        MIB_IPFORWARD_ROW2* row = &table->Table[i];
+        if (true) {
+            try {
+                Route6Entry entry;
+                entry.interface = NetworkInterface::from_index(row->InterfaceIndex).name();
+                entry.destination = IPv6Address(row->DestinationPrefix.Prefix.Ipv6.sin6_addr.s6_addr);
+                entry.mask = IPv6Address::from_prefix_length(row->DestinationPrefix.PrefixLength);
+                entry.gateway = IPv6Address(row->NextHop.Ipv6.sin6_addr.s6_addr);
+                entry.metric = row->Metric;
+                output.push_back(entry);
+            }
+            catch (invalid_interface&) {
+                
+            }
+        }
+    }
+    FreeMibTable(table);
+    return output;
+}
+
+#else // GNU/LINUX
+
 vector<RouteEntry> route_entries() {
     using namespace Tins::Internals;
     vector<RouteEntry> output;
@@ -271,6 +367,44 @@ vector<RouteEntry> route_entries() {
     }
     return output;
 }
+
+vector<Route6Entry> route6_entries() {
+    using namespace Tins::Internals;
+    vector<Route6Entry> output;
+    ifstream input("/proc/net/ipv6_route");
+    string destination, mask_length, metric, next_hop, dummy, flags;
+    Route6Entry entry;
+    while (input >> destination >> mask_length) {
+        string temporary;
+        uint32_t temporary_int;
+        for (unsigned i(0); i < 2; ++i) {
+            input >> dummy;
+        }
+        input >> next_hop;
+        input >> metric;
+        for (unsigned i(0); i < 2; ++i) {
+            input >> dummy;
+        }
+        input >> flags >> entry.interface;
+        from_hex(destination, temporary);
+        entry.destination = IPv6Address((const uint8_t*)&temporary[0]);
+        from_hex(mask_length, temporary_int);
+        entry.mask = IPv6Address::from_prefix_length(temporary_int);
+        from_hex(next_hop, temporary);
+        entry.gateway = IPv6Address((const uint8_t*)&temporary[0]);
+        from_hex(metric, temporary_int);
+        entry.metric = temporary_int;
+        // Process flags
+        from_hex(flags, temporary_int);
+        // Skip:
+        // * 0x01000000 -> cache entries
+        if ((temporary_int & 0x01000000) == 0) {
+            output.push_back(entry);
+        }
+    }
+    return output;
+}
+
 #endif
 
 bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr) {

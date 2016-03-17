@@ -59,7 +59,8 @@ ICMP::ICMP(Flags flag)
     type(flag);
 }
 
-ICMP::ICMP(const uint8_t* buffer, uint32_t total_sz) {
+ICMP::ICMP(const uint8_t* buffer, uint32_t total_sz) 
+: orig_timestamp_or_address_mask_(), recv_timestamp_(), trans_timestamp_() {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
     if (type() == TIMESTAMP_REQUEST || type() == TIMESTAMP_REPLY) {

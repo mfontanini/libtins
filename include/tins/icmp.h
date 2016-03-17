@@ -507,7 +507,9 @@ private:
     bool are_extensions_allowed() const;
 
     icmp_header header_;
-    uint32_t orig_timestamp_or_address_mask_, recv_timestamp_, trans_timestamp_;
+    uint32_t orig_timestamp_or_address_mask_;
+    uint32_t recv_timestamp_;
+    uint32_t trans_timestamp_;
     ICMPExtensionsStructure extensions_;
 };
 

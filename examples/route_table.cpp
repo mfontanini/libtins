@@ -40,13 +40,30 @@ using std::vector;
 using namespace Tins;
 
 int main() {
-    vector<Utils::RouteEntry> entries = Utils::route_entries();
-    for (size_t i = 0; i < entries.size(); ++i) {
+    vector<Utils::RouteEntry> v4_entries = Utils::route_entries();
+    cout << "IPv4 route table entries: " << endl
+         << "========================= " << endl;
+    for (size_t i = 0; i < v4_entries.size(); ++i) {
         cout << "Entry " << setw(2) << i << ": " << endl
-             << "Interface:   " << entries[i].interface << endl
-             << "Destination: " << entries[i].destination << endl
-             << "Gateway:     " << entries[i].gateway << endl
-             << "Genmask:     " << entries[i].mask << endl
-             << "Metric:      " << entries[i].metric << endl << endl;
+             << "Interface:   " << v4_entries[i].interface << endl
+             << "Destination: " << v4_entries[i].destination << endl
+             << "Gateway:     " << v4_entries[i].gateway << endl
+             << "Genmask:     " << v4_entries[i].mask << endl
+             << "Metric:      " << v4_entries[i].metric << endl << endl;
+    }
+
+    vector<Utils::Route6Entry> v6_entries = Utils::route6_entries();
+    if (!v6_entries.empty()) {
+        cout << endl
+             << "IPv6 route table entries: " << endl
+             << "========================= " << endl;
+        for (size_t i = 0; i < v6_entries.size(); ++i) {
+            cout << "Entry " << setw(2) << i << ": " << endl
+                 << "Interface:   " << v6_entries[i].interface << endl
+                 << "Destination: " << v6_entries[i].destination << endl
+                 << "Gateway:     " << v6_entries[i].gateway << endl
+                 << "Genmask:     " << v6_entries[i].mask << endl
+                 << "Metric:      " << v6_entries[i].metric << endl << endl;
+        }
     }
 }

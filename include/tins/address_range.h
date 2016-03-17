@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -125,10 +125,10 @@ private:
  * \brief Represents a range of addresses.
  *
  * This class provides a begin()/end() interface which allows
- * iterating through every address stored in it. 
+ * iterating through every address stored in it.
  *
  * Note that when iterating a range that was created using
- * operator/(IPv4Address, int) and the analog for IPv6, the 
+ * operator/(IPv4Address, int) and the analog for IPv6, the
  * network and broadcast addresses are discarded:
  *
  * \code
@@ -139,12 +139,12 @@ private:
  * }
  *
  * // That's only valid for iteration, not for AddressRange<>::contains
- * 
+ *
  * assert(range.contains("192.168.5.0")); // works
  * assert(range.contains("192.168.5.255")); // works
  * \endcode
  *
- * Ranges created using AddressRange(address_type, address_type) 
+ * Ranges created using AddressRange(address_type, address_type)
  * will allow the iteration over the entire range:
  *
  * \code
@@ -153,11 +153,11 @@ private:
  *     // process 192.168.5.0-255, no addresses are discarded
  *     process(addr);
  * }
- * 
+ *
  * assert(range.contains("192.168.5.0")); // still valid
  * assert(range.contains("192.168.5.255")); // still valid
  * \endcode
- * 
+ *
  */
 template<typename Address>
 class AddressRange {
@@ -186,10 +186,10 @@ public:
      * The range will consist of the addresses [first, last].
      *
      * If only_hosts is true, then the network and broadcast addresses
-     * will not be available when iterating the range. 
+     * will not be available when iterating the range.
      *
      * If last < first, an std::runtime_error exception is thrown.
-     * 
+     *
      * \param first The first address in the range.
      * \param last The last address(inclusive) in the range.
      * \param only_hosts Indicates whether only host addresses
@@ -211,8 +211,8 @@ public:
      */
     static AddressRange from_mask(const address_type& first, const address_type& mask) {
         return AddressRange<address_type>(
-            first, 
-            Internals::last_address_from_mask(first, mask), 
+            Internals::first_address_from_mask(first, mask),
+            Internals::last_address_from_mask(first, mask),
             true
         );
     }
@@ -253,15 +253,15 @@ public:
     /**
      * \brief Indicates whether this range is iterable.
      *
-     * Iterable ranges are those for which there is at least one 
+     * Iterable ranges are those for which there is at least one
      * address that could represent a host. For IPv4 ranges, a /31 or
      * /32 ranges does not contain any, therefore it's not iterable.
      * The same is true for /127 and /128 IPv6 ranges.
      *
      * If is_iterable returns false for a range, then iterating it
-     * through the iterators returned by begin() and end() is 
-     * undefined. 
-     * 
+     * through the iterators returned by begin() and end() is
+     * undefined.
+     *
      * \return bool indicating whether this range is iterable.
      */
     bool is_iterable() const {

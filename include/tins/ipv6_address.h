@@ -56,6 +56,13 @@ public:
     typedef const uint8_t* const_iterator;
 
     /**
+     * \brief Constructs an IPv6 address from a prefix length
+     *
+     * \param prefix_length The length of the prefix
+     */
+    static IPv6Address from_prefix_length(uint32_t prefix_length);
+
+    /**
      * \brief Default constructor.
      * Initializes this IPv6 address to "::"
      */

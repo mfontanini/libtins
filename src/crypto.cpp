@@ -270,7 +270,7 @@ SessionKeys::SessionKeys(const ptk_type& ptk, bool is_ccmp)
 }
 
 SessionKeys::SessionKeys(const RSNHandshake& hs, const pmk_type& pmk) 
-: ptk_(PTK_SIZE) {
+: ptk_(PTK_SIZE), is_ccmp_(false) {
     if (pmk.size() != PMK_SIZE) {
         throw invalid_handshake();
     }

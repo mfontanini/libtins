@@ -100,3 +100,9 @@ TEST(IPv6AddressTest, IsMulticast) {
     EXPECT_FALSE(IPv6Address("feaa::dead").is_multicast());
 }
 
+TEST(IPv6AddressTest, FromPrefixLength) {
+    EXPECT_EQ(IPv6Address("ffff:fe00::"), IPv6Address::from_prefix_length(23));
+    EXPECT_EQ(IPv6Address("ffff::"), IPv6Address::from_prefix_length(16));
+    EXPECT_EQ(IPv6Address("ffff:ffff::"), IPv6Address::from_prefix_length(32));
+}
+

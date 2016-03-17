@@ -43,7 +43,7 @@ using Tins::Memory::OutputMemoryStream;
 namespace Tins {
 
 RSNInformation::RSNInformation()
-: version_(1), capabilities_(0) {
+: version_(1), capabilities_(0), group_suite_(static_cast<CypherSuites>(0)) {
 
 }
 

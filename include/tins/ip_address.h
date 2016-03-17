@@ -176,7 +176,7 @@ public:
      * \param addr The IPv4Address to be written.
      * \return std::stream& pointing to output.
      */
-    friend std::ostream& operator<<(std::ostream& output, const IPv4Address& addr);
+    TINS_API friend std::ostream& operator<<(std::ostream& output, const IPv4Address& addr);
 private:
     uint32_t ip_to_int(const char* ip);
 

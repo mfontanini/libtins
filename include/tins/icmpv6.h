@@ -251,8 +251,8 @@ public:
         uint8_t prefix_len;
         small_uint<1> A, L;
         uint32_t valid_lifetime,
-                preferred_lifetime,
-                reserved2;
+                 preferred_lifetime,
+                 reserved2;
         ipaddress_type prefix;
         
         prefix_info_type(uint8_t prefix_len = 0, 
@@ -262,7 +262,7 @@ public:
                          uint32_t preferred_lifetime = 0,
                          const ipaddress_type& prefix = ipaddress_type())
         : prefix_len(prefix_len), A(A), L(L), valid_lifetime(valid_lifetime),
-          preferred_lifetime(preferred_lifetime), prefix(prefix) { }
+          preferred_lifetime(preferred_lifetime), reserved2(0), prefix(prefix) { }
           
         static prefix_info_type from_option(const option& opt);
     };

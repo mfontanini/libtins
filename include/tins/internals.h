@@ -108,6 +108,7 @@ private:
 
 void skip_line(std::istream& input);
 bool from_hex(const std::string& str, uint32_t& result);
+bool from_hex(const std::string& str, std::string& result);
 
 template<bool, typename T = void>
 struct enable_if {
@@ -133,7 +134,7 @@ Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag);
 PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag);
 
 uint32_t get_padded_icmp_inner_pdu_size(const PDU* inner_pdu, uint32_t pad_alignment);
-void try_parse_icmp_extensions(Memory::InputMemoryStream& stream, 
+void try_parse_icmp_extensions(Memory::InputMemoryStream& stream,
     uint32_t payload_length, ICMPExtensionsStructure& extensions);
 
 template<typename T>
@@ -182,6 +183,18 @@ bool decrement(HWAddress<n>& addr) {
 // Compares sequence numbers as defined by RFC 1982.
 int seq_compare(uint32_t seq1, uint32_t seq2);
 
+
+IPv4Address first_address_from_mask(IPv4Address addr, IPv4Address mask);
+IPv6Address first_address_from_mask(IPv6Address addr, const IPv6Address& mask);
+template<size_t n>
+HWAddress<n> first_address_from_mask(HWAddress<n> addr, const HWAddress<n>& mask) {
+    typename HWAddress<n>::iterator addr_iter = addr.begin();
+    for (typename HWAddress<n>::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
+        *addr_iter = *addr_iter & *it;
+    }
+    return addr;
+}
+
 IPv4Address last_address_from_mask(IPv4Address addr, IPv4Address mask);
 IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask);
 template<size_t n>
@@ -229,10 +242,10 @@ template <typename T, typename P, typename=void>
 struct accepts_type : std::false_type { };
 
 template <typename T, typename P>
-struct accepts_type<T, P, 
+struct accepts_type<T, P,
     typename std::enable_if<
         std::is_same< decltype(  std::declval<T>()(std::declval<P>())  ), bool>::value
-    >::type 
+    >::type
 > : std::true_type { };
 
 // use enable_if to invoke the Packet&& version of the sniff_loop handler if possible - otherwise fail to old behavior

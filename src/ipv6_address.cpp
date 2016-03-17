@@ -52,6 +52,18 @@ namespace Tins {
 const IPv6Address loopback_address = "::1";
 const AddressRange<IPv6Address> multicast_range = IPv6Address("ff00::") / 8;
 
+IPv6Address IPv6Address::from_prefix_length(uint32_t prefix_length) {
+    IPv6Address address;
+    IPv6Address::iterator it = address.begin();
+    while (prefix_length > 8) {
+        *it = 0xff;
+        ++it;
+        prefix_length -= 8;
+    }
+    *it = 0xff << (8 - prefix_length);
+    return address;
+}
+
 IPv6Address::IPv6Address() {
     fill(address_, address_ + address_size, 0);
 }
