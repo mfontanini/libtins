@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -138,7 +138,7 @@ Tins::PDU* pdu_from_flag(Constants::Ethernet::e flag,
             {
                 PDU* pdu = Internals::allocate<EthernetII>(
                     static_cast<uint16_t>(flag),
-                    buffer, 
+                    buffer,
                     size
                 );
                 if (pdu) {
@@ -149,8 +149,8 @@ Tins::PDU* pdu_from_flag(Constants::Ethernet::e flag,
     };
 }
 
-Tins::PDU* pdu_from_flag(Constants::IP::e flag, 
-                         const uint8_t* buffer, 
+Tins::PDU* pdu_from_flag(Constants::IP::e flag,
+                         const uint8_t* buffer,
                          uint32_t size,
                          bool rawpdu_on_no_match) {
     switch (flag) {
@@ -179,8 +179,8 @@ Tins::PDU* pdu_from_flag(Constants::IP::e flag,
     return 0;
 }
 
-PDU* pdu_from_dlt_flag(int flag, 
-                       const uint8_t* buffer, 
+PDU* pdu_from_dlt_flag(int flag,
+                       const uint8_t* buffer,
                        uint32_t size,
                        bool rawpdu_on_no_match) {
     switch (flag) {
@@ -338,8 +338,8 @@ uint32_t get_padded_icmp_inner_pdu_size(const PDU* inner_pdu, uint32_t pad_align
     }
 }
 
-void try_parse_icmp_extensions(InputMemoryStream& stream, 
-                               uint32_t payload_length, 
+void try_parse_icmp_extensions(InputMemoryStream& stream,
+                               uint32_t payload_length,
                                ICMPExtensionsStructure& extensions) {
     if (!stream) {
         return;
@@ -355,7 +355,7 @@ void try_parse_icmp_extensions(InputMemoryStream& stream,
         extensions_size = stream.size() - payload_length;
     }
     else if (stream.can_read(minimum_payload)) {
-        // This packet might be non-rfc compliant. In that case the length 
+        // This packet might be non-rfc compliant. In that case the length
         // field can contain garbage.
         extensions_ptr = stream.pointer() + minimum_payload;
         extensions_size = stream.size() - minimum_payload;
@@ -439,6 +439,20 @@ IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask) {
     IPv6Address::iterator addr_iter = addr.begin();
     for (IPv6Address::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
         *addr_iter = *addr_iter | ~*it;
+    }
+    return addr;
+}
+
+IPv4Address first_address_from_mask(IPv4Address addr, IPv4Address mask) {
+    uint32_t addr_int = Endian::be_to_host<uint32_t>(addr),
+             mask_int = Endian::be_to_host<uint32_t>(mask);
+    return IPv4Address(Endian::host_to_be(addr_int & mask_int));
+}
+
+IPv6Address first_address_from_mask(IPv6Address addr, const IPv6Address& mask) {
+    IPv6Address::iterator addr_iter = addr.begin();
+    for (IPv6Address::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
+        *addr_iter = *addr_iter & *it;
     }
     return addr;
 }
