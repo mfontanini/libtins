@@ -1115,6 +1115,17 @@ public:
     ICMPv6* clone() const {
         return new ICMPv6(*this);
     }
+
+    /** 
+     * \brief Indicates whether to use MLDv2
+     *
+     * If this is set to true, then MLDv2 will be used rather than MLDv1 when
+     * serializing Multicast Listener Discovery messages. By default,
+     * MLDv2 will be used.
+     *
+     * \param value The value to set
+     */
+    void use_mldv2(bool value);
     
     // ****************************************************************
     //                          Option setters
@@ -1590,6 +1601,7 @@ private:
     multicast_listener_query_message_fields mlqm_;
     sources_list sources_;
     ICMPExtensionsStructure extensions_;
+    bool use_mldv2_;
 };
 
 } // Tins

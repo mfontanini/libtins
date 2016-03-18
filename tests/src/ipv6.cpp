@@ -283,3 +283,18 @@ TEST_F(IPv6Test, SerializePacketHavingICMPExtensionsWithoutLengthAndShortPayload
     ASSERT_EQ(1UL, serialized.rfind_pdu<ICMPv6>().extensions().extensions().size());
     EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMPv6>().extensions().extensions().begin()->payload());
 }
+
+TEST_F(IPv6Test, MDLv1Request) {
+    const uint8_t mldv1[] = {
+        51, 51, 0, 0, 0, 1, 100, 112, 2, 226, 169, 250, 134, 221, 96, 0, 0, 0, 0, 32, 0, 1, 254,
+        128, 0, 0, 0, 0, 0, 0, 102, 112, 2, 255, 254, 226, 169, 250, 255, 2, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 58, 0, 5, 2, 0, 0, 0, 0, 130, 0, 70, 203, 39, 16, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+    EthernetII pkt(mldv1, sizeof(mldv1));
+    EXPECT_EQ(
+        PDU::serialization_type(mldv1, mldv1 + sizeof(mldv1)),
+        pkt.serialize()
+    );
+}
+

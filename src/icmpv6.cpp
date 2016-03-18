@@ -47,13 +47,13 @@ using Tins::Memory::OutputMemoryStream;
 namespace Tins {
 
 ICMPv6::ICMPv6(Types tp)
-: options_size_(), reach_time_(0), retrans_timer_(0), mlqm_() {
+: options_size_(), reach_time_(0), retrans_timer_(0), mlqm_(), use_mldv2_(true) {
     memset(&header_, 0, sizeof(header_));
     type(tp);
 }
 
 ICMPv6::ICMPv6(const uint8_t* buffer, uint32_t total_sz) 
-: options_size_(), reach_time_(0), retrans_timer_(0), mlqm_() {
+: options_size_(), reach_time_(0), retrans_timer_(0), mlqm_(), use_mldv2_(true) {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
     if (has_target_addr()) {
@@ -77,12 +77,16 @@ ICMPv6::ICMPv6(const uint8_t* buffer, uint32_t total_sz)
     }
     else if (type() == MGM_QUERY) {
         stream.read(multicast_address_);
-        stream.read(mlqm_);
-        int sources_count = stream.read_be<uint16_t>();
-        while (sources_count--) {
-            ipaddress_type address;
-            stream.read(address);
-            sources_.push_back(address);
+        // MLDv1 ends here
+        use_mldv2_ = stream;
+        if (stream) {
+            stream.read(mlqm_);
+            int sources_count = stream.read_be<uint16_t>();
+            while (sources_count--) {
+                ipaddress_type address;
+                stream.read(address);
+                sources_.push_back(address);
+            }
         }
     }
     // Retrieve options
@@ -232,8 +236,11 @@ uint32_t ICMPv6::header_size() const {
         }
     }
     else if (type() == MGM_QUERY) {
-        extra += ipaddress_type::address_size + sizeof(mlqm_) + sizeof(uint16_t) +
-                 ipaddress_type::address_size * sources_.size();
+        extra += ipaddress_type::address_size;
+        if (use_mldv2_) {
+            extra += sizeof(mlqm_) + sizeof(uint16_t) + 
+                     ipaddress_type::address_size * sources_.size();
+        }
     }
     return sizeof(header_) + options_size_ + extra + 
         (has_target_addr() ? ipaddress_type::address_size : 0) +
@@ -315,12 +322,15 @@ void ICMPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* 
     }
     else if (type() == MGM_QUERY) {
         stream.write(multicast_address_);
-        stream.write(mlqm_);
-        stream.write_be<uint16_t>(sources_.size());
-        typedef sources_list::const_iterator iterator;
-        for (iterator iter = sources_.begin(); iter != sources_.end(); ++iter) {
-            stream.write(*iter);
-        } 
+        // Only write this if we're using MLDv2
+        if (use_mldv2_) {
+            stream.write(mlqm_);
+            stream.write_be<uint16_t>(sources_.size());
+            typedef sources_list::const_iterator iterator;
+            for (iterator iter = sources_.begin(); iter != sources_.end(); ++iter) {
+                stream.write(*iter);
+            } 
+        }
     }
     for (options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
         write_option(*it, stream);
@@ -412,6 +422,10 @@ void ICMPv6::write_option(const option& opt, OutputMemoryStream& stream) {
     stream.write(opt.option());
     stream.write<uint8_t>((opt.length_field() + sizeof(uint8_t) * 2) / 8);
     stream.write(opt.data_ptr(), opt.data_size());
+}
+
+void ICMPv6::use_mldv2(bool value) {
+    use_mldv2_ = value;
 }
 
 const ICMPv6::option* ICMPv6::search_option(OptionTypes type) const {
