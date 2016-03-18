@@ -229,7 +229,6 @@ void RSNEAPOL::key_length(uint16_t length) {
 
 void RSNEAPOL::key(const key_type& value) {
     key_ = value;
-    header_.key_t = 0;
 }
 
 void RSNEAPOL::key_mic(small_uint<1> flag) {
