@@ -7,8 +7,8 @@ platform:
 - x64
 environment:
   matrix:
-    - compiler: Visual Studio 12
-    - compiler: Visual Studio 14
+    - compiler: vs2013
+    - compiler: vs2015
 clone_depth: 1
 install:
 - git clone https://github.com/mfontanini/winpcap-installer.git
@@ -22,7 +22,8 @@ install:
 before_build:
 - mkdir build
 - cd build
-- if "%platform%"=="x64" ( set GENERATOR="%compiler% Win64" ) else ( set GENERATOR="%compiler%" )
+- if "%compiler%"=="vs2013" (set VS=Visual Studio 12) else (set VS=Visual Studio 14)
+- if "%platform%"=="x64" ( set GENERATOR="%VS% Win64" ) else ( set GENERATOR="%VS%" )
 - cmake .. -G %GENERATOR% -DPCAP_ROOT_DIR=c:\WpdPack -DLIBTINS_BUILD_SHARED=0 -DLIBTINS_ENABLE_WPA2=0
 build:
   project: C:/projects/libtins/build/libtins.sln
@@ -38,11 +39,11 @@ after_build:
 - del include\tins\config.h.in
 - del include\tins\dot11\CMakeLists.txt
 - cd ..\
-- 7z a libtins-%platform%-%Configuration%.zip libtins
+- 7z a libtins-%compiler%-%platform%-%Configuration%.zip libtins
 test_script:
 - cd c:\projects\libtins\build
 - ctest -C %Configuration% -V
 deploy_script:
-- ps: Push-AppveyorArtifact "install\libtins-$env:Platform-$env:Configuration.zip"
+- ps: Push-AppveyorArtifact "install\libtins-$env:Compiler-$env:Platform-$env:Configuration.zip"
 skip_commits:
   message: /Update documentation.*/
