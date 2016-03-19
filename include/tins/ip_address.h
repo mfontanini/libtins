@@ -54,6 +54,13 @@ public:
     static const IPv4Address broadcast;
 
     /**
+     * \brief Constructs an IPv4 address from a prefix length
+     *
+     * \param prefix_length The length of the prefix
+     */
+    static IPv4Address from_prefix_length(uint32_t prefix_length);
+
+    /**
      * \brief Constructor taking a const char*.
      * 
      * Constructs an IPv4Address from a dotted-notation address 

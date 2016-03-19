@@ -39,15 +39,12 @@ IPv4Range operator/(const IPv4Address& addr, int mask) {
     if (mask > 32) {
         throw logic_error("Prefix length cannot exceed 32");
     }
-    return IPv4Range::from_mask(
-        addr, 
-        IPv4Address(Endian::host_to_be(0xffffffff << (32 - mask)))
-    );
+    return IPv4Range::from_mask(addr, IPv4Address::from_prefix_length(mask));
 }
 
 IPv6Range operator/(const IPv6Address& addr, int mask) {
     if (mask > 128) {
-        throw std::logic_error("Prefix length cannot exceed 128");
+        throw logic_error("Prefix length cannot exceed 128");
     }
     return IPv6Range::from_mask(addr, IPv6Address::from_prefix_length(mask));
 }
