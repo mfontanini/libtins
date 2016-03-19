@@ -139,4 +139,8 @@ bool IPv4Address::is_broadcast() const {
     return* this == broadcast;
 }
 
+IPv4Address IPv4Address::operator&(const IPv4Address& mask) const {
+    return IPv4Address(Endian::be_to_host(ip_addr_ & mask.ip_addr_));
+}
+
 } // Tins

@@ -101,3 +101,14 @@ TEST(IPAddressTest, IsUnicast) {
     EXPECT_TRUE(IPv4Address("240.0.0.0").is_unicast());
     EXPECT_TRUE(IPv4Address("127.0.0.1").is_unicast());
 }
+
+TEST(IPAddressTest, Mask) {
+    EXPECT_EQ(
+        IPv4Address("192.168.100.0"),
+        IPv4Address("192.168.100.1") & IPv4Address("255.255.255.0")
+    );
+    EXPECT_EQ(
+        IPv4Address("192.128.0.0"),
+        IPv4Address("192.255.1.2") & IPv4Address("255.128.0.0")
+    );
+}

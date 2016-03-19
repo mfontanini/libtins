@@ -159,3 +159,35 @@ TEST_F(AddressRangeTest, Slash) {
         EXPECT_TRUE(range2.is_iterable());
     }
 }
+
+TEST_F(AddressRangeTest, SlashUsingAddressGreaterThanMask) {
+    // v4
+    {
+        IPv4Range range1 = IPv4Range::from_mask("192.168.0.128", "255.255.255.0");
+        IPv4Range range2 = IPv4Address("192.168.0.0") / 24;
+        EXPECT_TRUE(std::equal(range1.begin(), range1.end(), range2.begin()));
+        EXPECT_TRUE(std::equal(range2.begin(), range2.end(), range1.begin()));
+        EXPECT_TRUE(range1.is_iterable());
+        EXPECT_TRUE(range2.is_iterable());
+    }
+    // v6
+    {
+        IPv6Range range1 = IPv6Range::from_mask("dead:beef::1200",
+                                                "ffff:ffff:ffff:ffff:ffff:ffff:ffff::");
+        IPv6Range range2 = IPv6Address("dead:beef::") / 112;
+        EXPECT_TRUE(std::equal(range1.begin(), range1.end(), range2.begin()));
+        EXPECT_TRUE(std::equal(range2.begin(), range2.end(), range1.begin()));
+        EXPECT_TRUE(range1.is_iterable());
+        EXPECT_TRUE(range2.is_iterable());
+    }
+    {
+        typedef AddressRange<HWAddress<6> > HWAddressRange;
+        HWAddressRange range1 = HWAddressRange::from_mask("de:ad:be:ef:fe:00", 
+                                                          "ff:ff:ff:ef:00:00");
+        HWAddressRange range2 = HWAddress<6>("de:ad:be:ef:00:00") / 32;
+        EXPECT_TRUE(std::equal(range1.begin(), range1.end(), range2.begin()));
+        EXPECT_TRUE(std::equal(range2.begin(), range2.end(), range1.begin()));
+        EXPECT_TRUE(range1.is_iterable());
+        EXPECT_TRUE(range2.is_iterable());
+    }
+}

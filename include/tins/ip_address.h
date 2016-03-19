@@ -123,9 +123,17 @@ public:
      * \param rhs The address to be compared.
      * \return bool indicating whether this address is less-than rhs.
      */
-    bool operator< (const IPv4Address& rhs) const {
+    bool operator<(const IPv4Address& rhs) const {
         return ip_addr_ < rhs.ip_addr_;
     }
+
+    /**
+     * \brief Apply a mask to this address
+     * 
+     * \param mask The mask to be applied
+     * \return The result of applying the mask to this address
+     */
+    IPv4Address operator&(const IPv4Address& mask) const;
     
     /**
      * \brief Returns true if this is a private IPv4 address.

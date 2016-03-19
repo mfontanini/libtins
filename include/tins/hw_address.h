@@ -249,6 +249,20 @@ public:
     bool operator<(const HWAddress& rhs) const {
         return std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
     }
+
+    /**
+     * \brief Apply a mask to this address
+     * 
+     * \param mask The mask to be applied
+     * \return The result of applying the mask to this address
+     */
+    HWAddress operator&(const HWAddress& mask) const {
+        HWAddress<n> output = *this;
+        for (size_t i = 0; i < n; ++i) {
+            output[i] = output[i] & mask[i];
+        }
+        return output;
+    }
     
     /**
      * \brief Retrieves the size of this address.
@@ -297,6 +311,15 @@ public:
      * \param i The element to retrieve.
      */
     storage_type operator[](size_t i) const {
+        return begin()[i];
+    }
+
+    /**
+     * \brief Retrieves the i-th storage_type in this address.
+     *
+     * \param i The element to retrieve.
+     */
+    storage_type& operator[](size_t i) {
         return begin()[i];
     }
     

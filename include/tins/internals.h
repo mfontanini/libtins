@@ -183,18 +183,6 @@ bool decrement(HWAddress<n>& addr) {
 // Compares sequence numbers as defined by RFC 1982.
 int seq_compare(uint32_t seq1, uint32_t seq2);
 
-
-IPv4Address first_address_from_mask(IPv4Address addr, IPv4Address mask);
-IPv6Address first_address_from_mask(IPv6Address addr, const IPv6Address& mask);
-template<size_t n>
-HWAddress<n> first_address_from_mask(HWAddress<n> addr, const HWAddress<n>& mask) {
-    typename HWAddress<n>::iterator addr_iter = addr.begin();
-    for (typename HWAddress<n>::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
-        *addr_iter = *addr_iter & *it;
-    }
-    return addr;
-}
-
 IPv4Address last_address_from_mask(IPv4Address addr, IPv4Address mask);
 IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask);
 template<size_t n>

@@ -443,19 +443,5 @@ IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask) {
     return addr;
 }
 
-IPv4Address first_address_from_mask(IPv4Address addr, IPv4Address mask) {
-    uint32_t addr_int = Endian::be_to_host<uint32_t>(addr),
-             mask_int = Endian::be_to_host<uint32_t>(mask);
-    return IPv4Address(Endian::host_to_be(addr_int & mask_int));
-}
-
-IPv6Address first_address_from_mask(IPv6Address addr, const IPv6Address& mask) {
-    IPv6Address::iterator addr_iter = addr.begin();
-    for (IPv6Address::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
-        *addr_iter = *addr_iter & *it;
-    }
-    return addr;
-}
-
 } // namespace Internals
 } // namespace Tins
