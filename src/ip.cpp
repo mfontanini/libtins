@@ -435,7 +435,7 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pare
                 Internals::pdu_type_to_id<IP>(inner_pdu()->pdu_type())
             );
         }
-        if (!is_fragmented() && new_flag != 0xff) {
+        if (new_flag != 0xff) {
             protocol(new_flag);
         }
     }
