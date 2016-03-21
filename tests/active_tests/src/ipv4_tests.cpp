@@ -48,6 +48,12 @@ using Tins::NetworkInterface;
 
 // Source address test
 
+IPv4SourceAddressTest::IPv4SourceAddressTest(const PacketSenderPtr& packet_sender,
+                                             const ConfigurationPtr& configuration) 
+: ActiveTest(packet_sender, configuration) {
+
+}
+
 string IPv4SourceAddressTest::name() const {
     return "ipv4_source_address";
 }
@@ -80,6 +86,12 @@ bool IPv4SourceAddressTest::test_matches_packet(const PDU& pdu) const {
 }
 
 // Fragmentation test
+
+IPv4FragmentationTest::IPv4FragmentationTest(const PacketSenderPtr& packet_sender,
+                                             const ConfigurationPtr& configuration) 
+: ActiveTest(packet_sender, configuration) {
+
+}
 
 string IPv4FragmentationTest::name() const {
     return "ipv4_fragmentation";

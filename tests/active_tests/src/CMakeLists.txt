@@ -1,6 +1,8 @@
 FILE(GLOB SOURCES "*.cpp")
 
 INCLUDE_DIRECTORIES(
+    ${PROJECT_SOURCE_DIR}/include/
+    ${PCAP_INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/../include
 )
 

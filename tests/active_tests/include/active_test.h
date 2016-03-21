@@ -43,7 +43,9 @@ class PDU;
 
 class TestFailed : public std::runtime_error {
 public:
-    using std::runtime_error::runtime_error;
+    TestFailed(const std::string& message) : std::runtime_error(message) {
+
+    }
 };
 
 class ActiveTest {

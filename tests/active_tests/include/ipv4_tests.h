@@ -36,7 +36,8 @@
 
 class IPv4SourceAddressTest : public ActiveTest {
 public:
-    using ActiveTest::ActiveTest;
+    IPv4SourceAddressTest(const PacketSenderPtr& packet_sender,
+                          const ConfigurationPtr& configuration);
 
     std::string name() const;
 private:
@@ -47,7 +48,8 @@ private:
 
 class IPv4FragmentationTest : public ActiveTest {
 public:
-    using ActiveTest::ActiveTest;
+    IPv4FragmentationTest(const PacketSenderPtr& packet_sender,
+                          const ConfigurationPtr& configuration);
 
     std::string name() const;
 private:
