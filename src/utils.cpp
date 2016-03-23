@@ -172,16 +172,29 @@ IPv6Address resolve_domain6(const string& to_resolve) {
 HWAddress<6> resolve_hwaddr(const NetworkInterface& iface,
                             IPv4Address ip,
                             PacketSender& sender) {
-    IPv4Address my_ip;
     NetworkInterface::Info info(iface.addresses());
-    EthernetII packet = ARP::make_arp_request(ip, info.ip_addr, info.hw_addr);
-    Internals::smart_ptr<PDU>::type response(sender.send_recv(packet, iface));
-    if (response.get()) {
-        const ARP* arp_resp = response->find_pdu<ARP>();
-        if (arp_resp) {
-            return arp_resp->sender_hw_addr();
+    #ifdef _WIN32
+        // On Windows, use SendARP
+        IPAddr source;
+        IPAddr dest;
+        ULONG hw_address[2];
+        ULONG address_length = 6;
+        source = static_cast<uint32_t>(info.ip_addr);
+        dest = static_cast<uint32_t>(ip);
+        if (SendARP(dest, source, &hw_address, &address_length) == NO_ERROR && address_length == 6) {
+            return HWAddress<6>((const uint8_t*)hw_address);
         }
-    }
+    #else
+        // On other platforms, just do the ARP resolution ourselves
+        EthernetII packet = ARP::make_arp_request(ip, info.ip_addr, info.hw_addr);
+        Internals::smart_ptr<PDU>::type response(sender.send_recv(packet, iface));
+        if (response.get()) {
+            const ARP* arp_resp = response->find_pdu<ARP>();
+            if (arp_resp) {
+                return arp_resp->sender_hw_addr();
+            }
+        }
+    #endif 
     throw runtime_error("Could not resolve hardware address");
 }
 
