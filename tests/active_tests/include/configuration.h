@@ -36,6 +36,14 @@
 
 class Configuration {
 public:
+    enum Platform {
+        WINDOWS = 1,
+        BSD     = 2,
+        LINUX   = 4
+    };
+
+    Configuration();
+
     void interface(const Tins::NetworkInterface& interface);
     void source_port(uint16_t value);
     void destination_port(uint16_t value);
@@ -43,10 +51,12 @@ public:
     const Tins::NetworkInterface& interface() const;
     uint16_t source_port() const;
     uint16_t destination_port() const;
+    Platform current_platform() const;
 private:
     Tins::NetworkInterface interface_;
     uint16_t source_port_ = 0;
     uint16_t destination_port_ = 0;
+    Platform current_platform_;
 };
 
 #endif // TINS_ACTIVE_TEST_CONFIGURATION_H

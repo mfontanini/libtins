@@ -34,6 +34,7 @@
 #include <stdexcept>
 #include "tins/packet_sender.h"
 #include "configuration.h"
+#include "packet_capturer.h"
 
 namespace Tins {
 
@@ -59,17 +60,22 @@ public:
     virtual ~ActiveTest() = default;
 
     void execute();
-    virtual std::string name() const = 0;
+    std::string log_prefix() const;
     bool matches_packet(const Tins::PDU& pdu) const;
-    virtual void validate_packet(const Tins::PDU& pdu) = 0;
+    bool is_enabled() const;
+    void validate(PacketCapturer::PacketStorage& packets);
+    virtual std::string name() const = 0;
 protected:
     const PacketSenderPtr& packet_sender() const;
     const ConfigurationPtr& configuration() const;
     virtual bool test_matches_packet(const Tins::PDU& pdu) const = 0;
     virtual void execute_test() = 0;
+    virtual void validate_packet(const Tins::PDU& pdu) = 0;
+    void disable_on_platform(Configuration::Platform platform);
 private:
     PacketSenderPtr packet_sender_;
     ConfigurationPtr configuration_;
+    unsigned disabled_platforms_ = 0;
 };
 
 #endif // TINS_ACTIVE_TEST_H

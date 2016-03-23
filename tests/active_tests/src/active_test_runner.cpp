@@ -90,23 +90,9 @@ void ActiveTestRunner::do_run() {
     auto packets = capturer_.captured_packets();
     cout << prefix << "Captured " << packets.size() << " packets" << endl;
     for (const auto& test : tests_) {
-        prefix = "[" + test->name() + "] ";
-        size_t i = 0;
-        while (i < packets.size() && !test->matches_packet(*packets[i])) {
-            ++i;
+        if (test->is_enabled()) {
+            test->validate(packets);
         }
-        if (i == packets.size()) {
-            cout << prefix << "ERROR: Packet was not captured" << endl;
-        }
-        else {
-            try {
-                test->validate_packet(*packets[i]);
-                cout << prefix << "OK" << endl;
-            }
-            catch (TestFailed& ex) {
-                cout << prefix << "ERROR: " << ex.what() << endl;
-            }
-            packets.erase(packets.begin() + i);
-        }
+        
     }
 }

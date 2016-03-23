@@ -27,42 +27,26 @@
  *
  */
 
-#include <iostream>
-#include <stdexcept>
-#include "configuration.h"
-#include "active_test_runner.h"
-#include "ipv4_tests.h"
-#include "tcp_tests.h"
-#include "utils_tests.h"
-#include "tins/network_interface.h"
+#ifndef TINS_ACTIVE_TCP_TESTS_H
+#define TINS_ACTIVE_TCP_TESTS_H
 
-using std::cerr;
-using std::endl;
-using std::exception;
-using std::runtime_error;
+#include <cstdint>
+#include "active_test.h"
+#include "tins/ip_address.h"
 
-using Tins::NetworkInterface;
+class TCPSynTest : public ActiveTest {
+public:
+    TCPSynTest(const PacketSenderPtr& packet_sender,
+               const ConfigurationPtr& configuration);
 
-int main() {
-    try {
-        Configuration config;
-        config.source_port(1234);
-        config.destination_port(4321);
-        config.interface(NetworkInterface::default_interface());
+    std::string name() const;
+private:
+    void execute_test();
+    void validate_packet(const Tins::PDU& pdu);
+    bool test_matches_packet(const Tins::PDU& pdu) const;
 
-        ActiveTestRunner runner(config);
-        runner.add_test<IPv4SourceAddressTest>();
-        runner.add_test<IPv4FragmentationTest>();
-        runner.add_test<TCPSynTest>();
-        runner.add_test<ResolveHWAddressTest>();
+    Tins::IPv4Address target_address_;
+    uint32_t sequence_number_;
+};
 
-        if (!runner.validate_tests()) {
-            throw runtime_error("Test validation failed");
-        }
-        runner.run();
-    }
-    catch (exception& ex) {
-        cerr << "Error: " << ex.what() << endl;
-        return 1;
-    }
-}
+#endif // TINS_ACTIVE_TCP_TESTS_H

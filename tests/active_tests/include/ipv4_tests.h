@@ -30,7 +30,6 @@
 #ifndef TINS_IPV4_TESTS_H
 #define TINS_IPV4_TESTS_H
 
-#include <cstdint>
 #include <string>
 #include "active_test.h"
 

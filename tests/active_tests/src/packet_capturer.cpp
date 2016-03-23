@@ -95,10 +95,11 @@ bool PacketCapturer::callback(const PDU& pdu) {
 
 string PacketCapturer::make_filter(const Configuration& configuration) const {
     ostringstream oss;
-    oss << "((tcp or udp) and src port " << configuration.source_port() 
-        << " and dst port " << configuration.destination_port() << ") or icmp"
+    oss << "((tcp or udp) and (port " << configuration.source_port() 
+        << " or port " << configuration.destination_port() << ")) or icmp"
         // Fragmentted IP packets
-        << " or (ip[6:2] & 0x1fff) > 0";
+        << " or (ip[6:2] & 0x1fff) > 0"
+        << " or arp";
     return oss.str();
 }
 

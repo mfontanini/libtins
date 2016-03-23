@@ -34,6 +34,7 @@
 
 using std::cout;
 using std::endl;
+using std::string;
 
 using Tins::PDU;
 using Tins::pdu_not_found;
@@ -46,7 +47,16 @@ ActiveTest::ActiveTest(const PacketSenderPtr& packet_sender,
 }
 
 void ActiveTest::execute() {
-    execute_test();
+    if (is_enabled()) {
+        execute_test();
+    }
+    else {
+        cout << log_prefix() << "not running as test is disabled on this platform" << endl;
+    }
+}
+
+string ActiveTest::log_prefix() const {
+    return "[" + name() + "] ";
 }
 
 bool ActiveTest::matches_packet(const PDU& pdu) const {
@@ -61,6 +71,31 @@ bool ActiveTest::matches_packet(const PDU& pdu) const {
     }
 }
 
+bool ActiveTest::is_enabled() const {
+    return (configuration_->current_platform() & disabled_platforms_) == 0;
+}
+
+void ActiveTest::validate(PacketCapturer::PacketStorage& packets) {
+    string prefix = log_prefix();
+    size_t i = 0;
+    while (i < packets.size() && !matches_packet(*packets[i])) {
+        ++i;
+    }
+    if (i == packets.size()) {
+        cout << prefix << "ERROR: Packet was not captured" << endl;
+    }
+    else {
+        try {
+            validate_packet(*packets[i]);
+            cout << prefix << "OK" << endl;
+        }
+        catch (TestFailed& ex) {
+            cout << prefix << "ERROR: " << ex.what() << endl;
+        }
+        packets.erase(packets.begin() + i);
+    }
+}
+
 const ActiveTest::PacketSenderPtr& ActiveTest::packet_sender() const {
     return packet_sender_;
 }
@@ -69,3 +104,6 @@ const ActiveTest::ConfigurationPtr& ActiveTest::configuration() const {
     return configuration_;
 }
 
+void ActiveTest::disable_on_platform(Configuration::Platform platform) {
+    disabled_platforms_ |= static_cast<unsigned>(platform);
+}

@@ -27,11 +27,25 @@
  *
  */
 
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    #include <sys/param.h>
+#endif
+
 #include "configuration.h"
 
 using std::string;
 
 using Tins::NetworkInterface;
+
+Configuration::Configuration() {
+    #ifdef _WIN32
+        current_platform_ = WINDOWS;
+    #elif defined(BSD) || defined(__FreeBSD_kernel__)
+        current_platform_ = BSD;
+    #else
+        current_platform_ = LINUX;
+    #endif
+}
 
 void Configuration::interface(const NetworkInterface& interface) {
     interface_ = interface;
@@ -57,3 +71,6 @@ uint16_t Configuration::destination_port() const {
     return destination_port_;
 }
 
+Configuration::Platform Configuration::current_platform() const {
+    return current_platform_;
+}
