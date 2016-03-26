@@ -66,8 +66,10 @@ public:
     void validate(PacketCapturer::PacketStorage& packets);
     virtual std::string name() const = 0;
 protected:
-    const PacketSenderPtr& packet_sender() const;
-    const ConfigurationPtr& configuration() const;
+    Tins::PacketSender& packet_sender();
+    const Tins::PacketSender& packet_sender() const;
+    Configuration& configuration();
+    const Configuration& configuration() const;
     virtual bool test_matches_packet(const Tins::PDU& pdu) const = 0;
     virtual void execute_test() = 0;
     virtual void validate_packet(const Tins::PDU& pdu) = 0;

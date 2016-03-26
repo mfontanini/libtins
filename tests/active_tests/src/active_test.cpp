@@ -37,6 +37,7 @@ using std::endl;
 using std::string;
 
 using Tins::PDU;
+using Tins::PacketSender;
 using Tins::pdu_not_found;
 using Tins::option_not_found;
 
@@ -96,12 +97,20 @@ void ActiveTest::validate(PacketCapturer::PacketStorage& packets) {
     }
 }
 
-const ActiveTest::PacketSenderPtr& ActiveTest::packet_sender() const {
-    return packet_sender_;
+PacketSender& ActiveTest::packet_sender() {
+    return *packet_sender_;
 }
 
-const ActiveTest::ConfigurationPtr& ActiveTest::configuration() const {
-    return configuration_;
+const PacketSender& ActiveTest::packet_sender() const {
+    return *packet_sender_;
+}
+
+Configuration& ActiveTest::configuration() {
+    return *configuration_;
+}
+
+const Configuration& ActiveTest::configuration() const {
+    return *configuration_;
 }
 
 void ActiveTest::disable_on_platform(Configuration::Platform platform) {

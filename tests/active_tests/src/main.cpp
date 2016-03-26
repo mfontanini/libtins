@@ -53,7 +53,8 @@ int main() {
         ActiveTestRunner runner(config);
         runner.add_test<IPv4SourceAddressTest>();
         runner.add_test<IPv4FragmentationTest>();
-        runner.add_test<TCPSynTest>();
+        runner.add_test<Layer3TCPSynTest>();
+        runner.add_test<Layer2TCPSynTest>();
         runner.add_test<ResolveHWAddressTest>();
 
         if (!runner.validate_tests()) {

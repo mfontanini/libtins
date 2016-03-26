@@ -27,50 +27,12 @@
  *
  */
 
-#ifndef TINS_ACTIVE_TCP_TESTS_H
-#define TINS_ACTIVE_TCP_TESTS_H
+#ifndef TINS_TEST_UTILS_H
+#define TINS_TEST_UTILS_H
 
-#include <cstdint>
-#include "active_test.h"
+#include <string>
 #include "tins/ip_address.h"
 
-class TCPSynTest : public ActiveTest {
-public:
-    TCPSynTest(const PacketSenderPtr& packet_sender,
-               const ConfigurationPtr& configuration,
-               uint16_t target_port);
-private:
-    void execute_test();
-    void validate_packet(const Tins::PDU& pdu);
-    bool test_matches_packet(const Tins::PDU& pdu) const;
-    virtual void send_packet(Tins::PDU& pdu) = 0;
+Tins::IPv4Address get_gateway_v4_address(const std::string& interface_name);
 
-    Tins::IPv4Address target_address_;
-    uint32_t sequence_number_;
-    uint16_t target_port_;
-};
-
-// Sends a SYN using IP as the lowest layer
-class Layer3TCPSynTest : public TCPSynTest {
-public:
-    Layer3TCPSynTest(const PacketSenderPtr& packet_sender,
-                     const ConfigurationPtr& configuration);
-
-    std::string name() const;
-private:
-    void send_packet(Tins::PDU& pdu);
-};
-
-// Sends a SYN using Ethernet as the lowest layer
-class Layer2TCPSynTest : public TCPSynTest {
-public:
-    Layer2TCPSynTest(const PacketSenderPtr& packet_sender,
-                     const ConfigurationPtr& configuration);
-
-    std::string name() const;
-private:
-    void send_packet(Tins::PDU& pdu);
-};
-
-
-#endif // TINS_ACTIVE_TCP_TESTS_H
+#endif // TINS_TEST_UTILS_H

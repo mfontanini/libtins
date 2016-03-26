@@ -34,6 +34,7 @@
 #include "tins/ethernetII.h"
 #include "tins/arp.h"
 #include "tins/utils.h"
+#include "test_utils.h"
 
 using std::cout;
 using std::endl;
@@ -52,16 +53,7 @@ using Tins::Utils::RouteEntry;
 ResolveHWAddressTest::ResolveHWAddressTest(const PacketSenderPtr& packet_sender,
                                            const ConfigurationPtr& configuration) 
 : ActiveTest(packet_sender, configuration) {
-    vector<RouteEntry> entries = Tins::Utils::route_entries();
-    string interface_name = configuration->interface().name();
-    int current_metric = numeric_limits<int>::max();
-    for (const auto& entry : entries) {
-        if (entry.interface == interface_name && entry.gateway != "0.0.0.0" && entry.metric < current_metric) {
-            target_address_ = entry.gateway;
-            current_metric = entry.metric;
-        }        
-    }
-    disable_on_platform(Configuration::WINDOWS);
+    target_address_ = get_gateway_v4_address(configuration->interface().name());
 }
 
 string ResolveHWAddressTest::name() const {
@@ -75,14 +67,14 @@ bool ResolveHWAddressTest::test_matches_packet(const PDU& pdu) const {
 
 void ResolveHWAddressTest::execute_test() {
     cout << log_prefix() << "trying to resolve " << target_address_ << endl;
-    resolved_address_ = Tins::Utils::resolve_hwaddr(configuration()->interface(),
+    resolved_address_ = Tins::Utils::resolve_hwaddr(configuration().interface(),
                                                     target_address_,
-                                                    *packet_sender());
+                                                    packet_sender());
     cout << log_prefix() << "address resolved to " << resolved_address_ << endl;
-    auto local_ip_address = configuration()->interface().ipv4_address();
-    auto local_hw_address = configuration()->interface().hw_address();
+    auto local_ip_address = configuration().interface().ipv4_address();
+    auto local_hw_address = configuration().interface().hw_address();
     auto packet = ARP::make_arp_request(target_address_, local_ip_address, local_hw_address);
-    packet_sender()->send(packet);
+    packet_sender().send(packet);
 }
 
 void ResolveHWAddressTest::validate_packet(const PDU& pdu) {

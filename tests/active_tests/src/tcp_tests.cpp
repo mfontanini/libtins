@@ -32,7 +32,9 @@
 #include "tcp_tests.h"
 #include "tins/tcp.h"
 #include "tins/ip.h"
+#include "tins/ethernetII.h"
 #include "tins/utils.h"
+#include "test_utils.h"
 
 using std::string;
 using std::cout;
@@ -42,16 +44,16 @@ using std::random_device;
 using Tins::PDU;
 using Tins::TCP;
 using Tins::IP;
+using Tins::IPv4Address;
+using Tins::NetworkInterface;
+using Tins::EthernetII;
 using Tins::Utils::resolve_domain;
 
 TCPSynTest::TCPSynTest(const PacketSenderPtr& packet_sender,
-                       const ConfigurationPtr& configuration) 
-: ActiveTest(packet_sender, configuration) {
-    disable_on_platform(Configuration::WINDOWS);
-}
+                       const ConfigurationPtr& configuration,
+                       uint16_t target_port) 
+: ActiveTest(packet_sender, configuration), target_port_(target_port) {
 
-string TCPSynTest::name() const {
-    return "tcp_syn_test";
 }
 
 void TCPSynTest::execute_test() {
@@ -60,11 +62,11 @@ void TCPSynTest::execute_test() {
     sequence_number_ = static_cast<uint32_t>(rnd());
     cout << log_prefix() << "Resolved target address to " << target_address_ << endl;
 
-    auto packet = IP(target_address_) / TCP(80, configuration()->source_port());
+    auto packet = IP(target_address_) / TCP(target_port_, configuration().source_port());
     TCP& tcp = packet.rfind_pdu<TCP>();
     tcp.seq(sequence_number_);
     tcp.flags(TCP::SYN);
-    packet_sender()->send(packet);
+    send_packet(packet);
 }
 
 void TCPSynTest::validate_packet(const PDU& pdu) {
@@ -79,9 +81,48 @@ bool TCPSynTest::test_matches_packet(const PDU& pdu) const {
         return false;
     }
     const TCP& tcp = pdu.rfind_pdu<TCP>();
-    if (tcp.sport() != 80) {
+    if (tcp.sport() != target_port_) {
         return false;
     }
     return tcp.ack_seq() == sequence_number_ + 1;
 
 }
+
+// Layer 3
+
+Layer3TCPSynTest::Layer3TCPSynTest(const PacketSenderPtr& packet_sender,
+                                   const ConfigurationPtr& configuration) 
+: TCPSynTest(packet_sender, configuration, 80) {
+    disable_on_platform(Configuration::WINDOWS);
+}
+
+string Layer3TCPSynTest::name() const {
+    return "tcp_layer3_syn_test";
+}
+
+void Layer3TCPSynTest::send_packet(PDU& pdu) {
+    packet_sender().send(pdu);
+}
+
+// Layer 2
+
+Layer2TCPSynTest::Layer2TCPSynTest(const PacketSenderPtr& packet_sender,
+                                   const ConfigurationPtr& configuration) 
+: TCPSynTest(packet_sender, configuration, 443) {
+
+}
+
+string Layer2TCPSynTest::name() const {
+    return "tcp_layer2_syn_test";
+}
+
+void Layer2TCPSynTest::send_packet(PDU& pdu) {
+    const NetworkInterface& iface = configuration().interface();
+    IPv4Address gateway_address = get_gateway_v4_address(iface.name());
+    auto gateway_hwaddress = Tins::Utils::resolve_hwaddr(iface, gateway_address,
+                                                         packet_sender());
+    EthernetII eth = EthernetII(gateway_hwaddress, iface.hw_address()) / pdu;
+    eth.rfind_pdu<IP>().src_addr(iface.ipv4_address());
+    packet_sender().send(eth);
+}
+

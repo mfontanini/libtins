@@ -59,8 +59,8 @@ string IPv4SourceAddressTest::name() const {
 }
 
 void IPv4SourceAddressTest::execute_test() {
-    PacketSender& sender = *packet_sender();
-    Configuration& config = *configuration();
+    PacketSender& sender = packet_sender();
+    Configuration& config = configuration();
     auto packet = IP("8.8.8.8");
     packet /= UDP(config.destination_port(), config.source_port());
     packet /= RawPDU(name());
@@ -69,7 +69,7 @@ void IPv4SourceAddressTest::execute_test() {
 
 void IPv4SourceAddressTest::validate_packet(const PDU& pdu) {
     const IP& ip = pdu.rfind_pdu<IP>();
-    const NetworkInterface& iface = configuration()->interface();
+    const NetworkInterface& iface = configuration().interface();
     // The source address should be the same as the default interface's
     if (iface.ipv4_address() != ip.src_addr()) {
         ostringstream oss;
@@ -98,8 +98,8 @@ string IPv4FragmentationTest::name() const {
 }
 
 void IPv4FragmentationTest::execute_test() {
-    PacketSender& sender = *packet_sender();
-    Configuration& config = *configuration();
+    PacketSender& sender = packet_sender();
+    Configuration& config = configuration();
     auto packet = IP("8.8.8.8");
     packet /= UDP(config.destination_port(), config.source_port());
     packet /= RawPDU(name());
