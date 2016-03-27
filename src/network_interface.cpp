@@ -82,6 +82,7 @@ struct InterfaceInfoCollector {
             if (addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id) {
                 info->hw_addr = (const uint8_t*)LLADDR(addr_ptr);
                 found_hw = true;
+                info->is_up = info->is_up || (addr->ifa_flags & IFF_UP);
             }
         #else
             #define TINS_BROADCAST_ADDR(addr) (addr->ifa_broadaddr)
@@ -93,6 +94,7 @@ struct InterfaceInfoCollector {
             if (addr->ifa_addr->sa_family == AF_PACKET && addr_ptr->sll_ifindex == iface_id) {
                 info->hw_addr = addr_ptr->sll_addr;
                 found_hw = true;
+                info->is_up = info->is_up || (addr->ifa_flags & IFF_UP);
             }
         #endif
             else if (!std::strcmp(addr->ifa_name, iface_name)) {
@@ -106,7 +108,6 @@ struct InterfaceInfoCollector {
                     else {
                         info->bcast_addr = 0;
                     }
-                    info->is_up = (addr->ifa_flags & IFF_UP);
                     found_ip = true;
                 }
                 else if (addr->ifa_addr->sa_family == AF_INET6) {
