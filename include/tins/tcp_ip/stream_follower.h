@@ -37,6 +37,7 @@
 
 #include <map>
 #include "stream.h"
+#include "stream_identifier.h"
 
 namespace Tins {
 
@@ -75,9 +76,14 @@ namespace TCPIP {
 class TINS_API StreamFollower {
 public:
     /**
-     * \brief The type used for callbacks
+     * The type used for callbacks
      */
     typedef Stream::stream_callback_type stream_callback_type;
+
+    /**
+     * The type used to identify streams 
+     */
+    typedef StreamIdentifier stream_id;
 
     /**
      * Enum to indicate the reason why a stream was terminated
@@ -94,47 +100,6 @@ public:
      * \sa StreamFollower::stream_termination_callback
      */
     typedef std::function<void(Stream&, TerminationReason)> stream_termination_callback_type;
-
-    /**
-     * \brief Unique identifies a stream. 
-     *
-     * This struct is used to track TCP streams. It keeps track of minimum and maximum
-     * addresses/ports in a stream to match packets coming from any of the 2 endpoints
-     * into the same object.
-     */
-    struct stream_id {
-        /**
-         * The type used to store each endpoint's address
-         */
-        typedef std::array<uint8_t, 16> address_type;
-
-        /**
-         * Default constructor
-         */
-        stream_id();
-
-        /**
-         * Constructs a stream_id
-         *
-         * \param client_addr Client's address
-         * \param client_port Port's port
-         * \param server_addr Server's address
-         * \param server_port Server's port
-         */
-        stream_id(const address_type& client_addr, uint16_t client_port,
-                  const address_type& server_addr, uint16_t server_port);
-
-        bool operator<(const stream_id& rhs) const;
-        bool operator==(const stream_id& rhs) const;
-
-        address_type min_address;
-        address_type max_address;
-        uint16_t min_address_port;
-        uint16_t max_address_port;
-
-        static address_type serialize(IPv4Address address);
-        static address_type serialize(const IPv6Address& address);
-    };
 
     /** 
      * Default constructor
@@ -228,7 +193,6 @@ private:
 
     typedef std::map<stream_id, Stream> streams_type;
 
-    static stream_id make_stream_id(const PDU& packet);
     Stream& find_stream(const stream_id& id);
     void process_packet(PDU& packet, const timestamp_type& ts);
     void cleanup_streams(const timestamp_type& now);
