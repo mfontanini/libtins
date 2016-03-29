@@ -38,7 +38,7 @@ class Configuration {
 public:
     enum Platform {
         WINDOWS = 1,
-        BSD     = 2,
+        BSD_OS  = 2,
         LINUX   = 4
     };
 

@@ -41,7 +41,7 @@ Configuration::Configuration() {
     #ifdef _WIN32
         current_platform_ = WINDOWS;
     #elif defined(BSD) || defined(__FreeBSD_kernel__)
-        current_platform_ = BSD;
+        current_platform_ = BSD_OS;
     #else
         current_platform_ = LINUX;
     #endif
