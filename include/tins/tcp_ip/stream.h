@@ -30,10 +30,9 @@
 #ifndef TINS_TCP_IP_STREAM_H
 #define TINS_TCP_IP_STREAM_H
 
-#include "../cxxstd.h"
+#include "../config.h"
 
-// This classes use C++11 features
-#if TINS_IS_CXX11
+#ifdef TINS_HAVE_TCPIP
 
 #include <vector>
 #include <array>
@@ -393,6 +392,6 @@ private:
 } // TCPIP
 } // Tins
 
-#endif // TINS_IS_CXX11 
+#endif // TINS_HAVE_TCPIP 
 
 #endif // TINS_TCP_IP_STREAM_H

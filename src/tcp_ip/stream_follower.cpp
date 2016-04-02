@@ -29,7 +29,7 @@
 
 #include "tcp_ip/stream_follower.h"
 
-#if TINS_IS_CXX11
+#ifdef TINS_HAVE_TCPIP
 
 #include <limits>
 #include <algorithm>
@@ -203,4 +203,4 @@ void StreamFollower::cleanup_streams(const timestamp_type& now) {
 } // TCPIP
 } // Tins
 
-#endif // TINS_IS_CXX11
+#endif // TINS_HAVE_TCPIP

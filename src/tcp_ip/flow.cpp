@@ -29,7 +29,7 @@
 
 #include "tcp_ip/flow.h"
 
-#if TINS_IS_CXX11
+#ifdef TINS_HAVE_TCPIP
 
 #include <limits>
 #include <algorithm>

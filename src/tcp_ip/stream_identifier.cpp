@@ -29,7 +29,7 @@
 
 #include "tcp_ip/stream_identifier.h"
 
-#if TINS_IS_CXX11
+#ifdef TINS_HAVE_TCPIP
 
 #include <algorithm>
 #include <tuple>
@@ -128,4 +128,4 @@ StreamIdentifier::address_type StreamIdentifier::serialize(const IPv6Address& ad
 } // TCPIP
 } // Tins
 
-#endif // TINS_IS_CXX11
+#endif // TINS_HAVE_TCPIP

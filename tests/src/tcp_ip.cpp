@@ -1,7 +1,7 @@
-#include "cxxstd.h"
+#include "config.h"
 #include <gtest/gtest.h>
 
-#if TINS_IS_CXX11
+#ifdef TINS_HAVE_TCPIP
 
 #include <iostream>
 #include <algorithm>
@@ -714,4 +714,4 @@ TEST(Foo, Dummy) {
 
 }
 
-#endif // TINS_IS_CXX11
+#endif // TINS_HAVE_TCPIP
