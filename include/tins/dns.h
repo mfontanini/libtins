@@ -40,6 +40,14 @@
 #include "pdu.h"
 #include "endianness.h"
 
+// Undefining some macros that conflict with some symbols here. 
+// Eventually, the conflicting names will be removed, but until then
+// this is the best we can do.
+// - IN is defined by winsock2.h
+// - CERT is defined by openssl
+#undef IN
+#undef CERT
+
 namespace Tins {
 namespace Memory {
 
@@ -130,7 +138,7 @@ public:
         ATMA,
         NAPTR,
         KX,
-        CERT,
+        CERTIFICATE,
         A6,
         DNAM,
         SINK,
@@ -144,13 +152,23 @@ public:
         DNSKEY,
         DHCID,
         NSEC3,
-        NSEC3PARAM
+        NSEC3PARAM,
+        CERT = CERTIFICATE
     };
     
     enum QueryClass {
-        IN = 1,
-        CH = 3,
-        HS = 4,
+        INTERNET = 1,
+        CHAOS    = 3,
+        HESIOD   = 4,
+        /**
+         * \cond
+         */
+        IN = INTERNET,
+        CH = CHAOS,
+        HS = HESIOD,
+        /**
+         * \endcond
+         */
         ANY = 255
     };
     
