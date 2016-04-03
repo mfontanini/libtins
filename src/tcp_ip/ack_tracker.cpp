@@ -46,6 +46,15 @@ using Tins::Internals::seq_compare;
 namespace Tins {
 namespace TCPIP {
 
+uint32_t interval_start(const AckedRange::interval_type& interval) {
+    if (interval.bounds() == interval_bounds::left_open()) {
+        return interval.lower() + 1;
+    }
+    else {
+        return interval.lower();
+    }
+}
+
 uint32_t interval_end(const AckedRange::interval_type& interval) {
     if (interval.bounds() == interval_bounds::right_open()) {
         return interval.upper() - 1;
@@ -123,10 +132,21 @@ void AckTracker::process_sack(const vector<uint32_t>& sack) {
         // Left edge must be lower than right edge
         if (seq_compare(sack[i - 1], sack[i]) < 0) {
             AckedRange range(sack[i - 1], sack[i] - 1);
-            // If this range starts after our current ack number
-            if (seq_compare(range.first(), ack_number_) > 0) {
+            // If this range ends after our current ack number
+            if (seq_compare(range.last(), ack_number_) > 0) {
                 while (range.has_next()) {
-                    acked_intervals_.insert(range.next());
+                    AckedRange::interval_type next = range.next();
+                    uint32_t start = interval_start(next);
+                    if (seq_compare(start, ack_number_) <= 0) {
+                        // If this interval starts before or at our ACK number
+                        // then we need to update our ACK number to the end of 
+                        // this interval
+                        ack_number_ = interval_end(next);
+                    }
+                    else {
+                        // Otherwise, push the interval into the ACK set
+                        acked_intervals_.insert(next);
+                    }
                 }
             }
         }

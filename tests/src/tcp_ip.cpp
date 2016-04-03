@@ -663,15 +663,19 @@ TEST_F(AckTrackerTest, AckingTcp_Sack2) {
     EXPECT_TRUE(tracker.is_segment_acked(maximum - 2, 1));
     EXPECT_TRUE(tracker.is_segment_acked(2, 3));
     EXPECT_FALSE(tracker.is_segment_acked(maximum - 10, 10));
+    EXPECT_EQ(maximum - 10, tracker.ack_number());
 
     tracker.process_packet(make_tcp_ack(maximum - 2));
     EXPECT_EQ(1U + 10U, tracker.acked_intervals().size());
+    EXPECT_EQ(maximum - 2, tracker.ack_number());
 
     tracker.process_packet(make_tcp_ack(5));
     EXPECT_EQ(4U, tracker.acked_intervals().size());
+    EXPECT_EQ(5, tracker.ack_number());
 
     tracker.process_packet(make_tcp_ack(15));
     EXPECT_EQ(0U, tracker.acked_intervals().size());
+    EXPECT_EQ(15, tracker.ack_number());
 }
 
 TEST_F(AckTrackerTest, AckingTcp_Sack3) {
@@ -682,9 +686,27 @@ TEST_F(AckTrackerTest, AckingTcp_Sack3) {
         make_pair(maximum - 3, 5)
     ));
     EXPECT_EQ(9U, tracker.acked_intervals().size());
+    EXPECT_EQ(maximum - 10, tracker.ack_number());
 
     tracker.process_packet(make_tcp_ack(maximum));
     EXPECT_EQ(5U, tracker.acked_intervals().size());
+    EXPECT_EQ(maximum, tracker.ack_number());
+}
+
+TEST_F(AckTrackerTest, AckingTcp_SackOutOfOrder1) {
+    AckTracker tracker(0, true);
+    tracker.process_packet(make_tcp_ack(10));
+    tracker.process_packet(make_tcp_ack(0, make_pair(9, 12)));
+    EXPECT_EQ(0, tracker.acked_intervals().size());
+    EXPECT_EQ(11, tracker.ack_number());
+}
+
+TEST_F(AckTrackerTest, AckingTcp_SackOutOfOrder2) {
+    AckTracker tracker(0, true);
+    tracker.process_packet(make_tcp_ack(10));
+    tracker.process_packet(make_tcp_ack(0, make_pair(10, 12)));
+    EXPECT_EQ(0, tracker.acked_intervals().size());
+    EXPECT_EQ(11, tracker.ack_number());
 }
 
 TEST_F(FlowTest, AckNumbersAreCorrect) {
