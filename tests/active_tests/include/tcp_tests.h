@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -27,26 +27,50 @@
  *
  */
 
-#include "address_range.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
+#ifndef TINS_ACTIVE_TCP_TESTS_H
+#define TINS_ACTIVE_TCP_TESTS_H
 
-using std::logic_error;
+#include <cstdint>
+#include "active_test.h"
+#include "tins/ip_address.h"
 
-namespace Tins {
+class TCPSynTest : public ActiveTest {
+public:
+    TCPSynTest(const PacketSenderPtr& packet_sender,
+               const ConfigurationPtr& configuration,
+               uint16_t target_port);
+private:
+    void execute_test();
+    void validate_packet(const Tins::PDU& pdu);
+    bool test_matches_packet(const Tins::PDU& pdu) const;
+    virtual void send_packet(Tins::PDU& pdu) = 0;
 
-IPv4Range operator/(const IPv4Address& addr, int mask) {
-    if (mask > 32) {
-        throw logic_error("Prefix length cannot exceed 32");
-    }
-    return IPv4Range::from_mask(addr, IPv4Address::from_prefix_length(mask));
-}
+    Tins::IPv4Address target_address_;
+    uint32_t sequence_number_;
+    uint16_t target_port_;
+};
 
-IPv6Range operator/(const IPv6Address& addr, int mask) {
-    if (mask > 128) {
-        throw logic_error("Prefix length cannot exceed 128");
-    }
-    return IPv6Range::from_mask(addr, IPv6Address::from_prefix_length(mask));
-}
+// Sends a SYN using IP as the lowest layer
+class Layer3TCPSynTest : public TCPSynTest {
+public:
+    Layer3TCPSynTest(const PacketSenderPtr& packet_sender,
+                     const ConfigurationPtr& configuration);
 
-} // Tins
+    std::string name() const;
+private:
+    void send_packet(Tins::PDU& pdu);
+};
+
+// Sends a SYN using Ethernet as the lowest layer
+class Layer2TCPSynTest : public TCPSynTest {
+public:
+    Layer2TCPSynTest(const PacketSenderPtr& packet_sender,
+                     const ConfigurationPtr& configuration);
+
+    std::string name() const;
+private:
+    void send_packet(Tins::PDU& pdu);
+};
+
+
+#endif // TINS_ACTIVE_TCP_TESTS_H

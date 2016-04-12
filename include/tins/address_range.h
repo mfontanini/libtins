@@ -211,7 +211,7 @@ public:
      */
     static AddressRange from_mask(const address_type& first, const address_type& mask) {
         return AddressRange<address_type>(
-            Internals::first_address_from_mask(first, mask),
+            first & mask,
             Internals::last_address_from_mask(first, mask),
             true
         );

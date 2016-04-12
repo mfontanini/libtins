@@ -54,7 +54,11 @@ const AddressRange<IPv4Address> private_ranges[] = {
 
 const AddressRange<IPv4Address> loopback_range = IPv4Address("127.0.0.0") / 8;
 const AddressRange<IPv4Address> multicast_range = IPv4Address("224.0.0.0") / 4;
-    
+
+IPv4Address IPv4Address::from_prefix_length(uint32_t prefix_length) {
+    return IPv4Address(Endian::host_to_be(0xffffffff << (32 - prefix_length)));
+}
+
 IPv4Address::IPv4Address(uint32_t ip) 
 : ip_addr_(Endian::be_to_host(ip)) {
     
@@ -137,6 +141,10 @@ bool IPv4Address::is_unicast() const {
 
 bool IPv4Address::is_broadcast() const {
     return* this == broadcast;
+}
+
+IPv4Address IPv4Address::operator&(const IPv4Address& mask) const {
+    return IPv4Address(Endian::be_to_host(ip_addr_ & mask.ip_addr_));
 }
 
 } // Tins

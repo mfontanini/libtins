@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -27,26 +27,50 @@
  *
  */
 
-#include "address_range.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+    #include <sys/param.h>
+#endif
 
-using std::logic_error;
+#include "configuration.h"
 
-namespace Tins {
+using std::string;
 
-IPv4Range operator/(const IPv4Address& addr, int mask) {
-    if (mask > 32) {
-        throw logic_error("Prefix length cannot exceed 32");
-    }
-    return IPv4Range::from_mask(addr, IPv4Address::from_prefix_length(mask));
+using Tins::NetworkInterface;
+
+Configuration::Configuration() {
+    #ifdef _WIN32
+        current_platform_ = WINDOWS;
+    #elif defined(BSD) || defined(__FreeBSD_kernel__)
+        current_platform_ = BSD_OS;
+    #else
+        current_platform_ = LINUX;
+    #endif
 }
 
-IPv6Range operator/(const IPv6Address& addr, int mask) {
-    if (mask > 128) {
-        throw logic_error("Prefix length cannot exceed 128");
-    }
-    return IPv6Range::from_mask(addr, IPv6Address::from_prefix_length(mask));
+void Configuration::interface(const NetworkInterface& interface) {
+    interface_ = interface;
 }
 
-} // Tins
+void Configuration::source_port(uint16_t value) {
+    source_port_ = value;
+}
+
+void Configuration::destination_port(uint16_t value) {
+    destination_port_ = value;
+}
+
+const NetworkInterface& Configuration::interface() const {
+    return interface_;
+}
+
+uint16_t Configuration::source_port() const {
+    return source_port_;
+}
+
+uint16_t Configuration::destination_port() const {
+    return destination_port_;
+}
+
+Configuration::Platform Configuration::current_platform() const {
+    return current_platform_;
+}

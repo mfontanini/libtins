@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -27,26 +27,26 @@
  *
  */
 
-#include "address_range.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
+#include <limits>
+#include "test_utils.h"
+#include "tins/utils.h"
 
-using std::logic_error;
+using std::string;
+using std::vector;
+using std::numeric_limits;
 
-namespace Tins {
+using Tins::IPv4Address;
+using Tins::Utils::RouteEntry;
 
-IPv4Range operator/(const IPv4Address& addr, int mask) {
-    if (mask > 32) {
-        throw logic_error("Prefix length cannot exceed 32");
+IPv4Address get_gateway_v4_address(const string& interface_name) {
+    vector<RouteEntry> entries = Tins::Utils::route_entries();
+    int current_metric = numeric_limits<int>::max();
+    IPv4Address address;
+    for (const auto& entry : entries) {
+        if (entry.interface == interface_name && entry.gateway != "0.0.0.0" && entry.metric < current_metric) {
+            address = entry.gateway;
+            current_metric = entry.metric;
+        }        
     }
-    return IPv4Range::from_mask(addr, IPv4Address::from_prefix_length(mask));
+    return address;
 }
-
-IPv6Range operator/(const IPv6Address& addr, int mask) {
-    if (mask > 128) {
-        throw logic_error("Prefix length cannot exceed 128");
-    }
-    return IPv6Range::from_mask(addr, IPv6Address::from_prefix_length(mask));
-}
-
-} // Tins

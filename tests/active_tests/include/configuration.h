@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -27,26 +27,36 @@
  *
  */
 
-#include "address_range.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
+#ifndef TINS_ACTIVE_TEST_CONFIGURATION_H
+#define TINS_ACTIVE_TEST_CONFIGURATION_H
 
-using std::logic_error;
+#include <cstdint>
+#include <string>
+#include "tins/network_interface.h"
 
-namespace Tins {
+class Configuration {
+public:
+    enum Platform {
+        WINDOWS = 1,
+        BSD_OS  = 2,
+        LINUX   = 4
+    };
 
-IPv4Range operator/(const IPv4Address& addr, int mask) {
-    if (mask > 32) {
-        throw logic_error("Prefix length cannot exceed 32");
-    }
-    return IPv4Range::from_mask(addr, IPv4Address::from_prefix_length(mask));
-}
+    Configuration();
 
-IPv6Range operator/(const IPv6Address& addr, int mask) {
-    if (mask > 128) {
-        throw logic_error("Prefix length cannot exceed 128");
-    }
-    return IPv6Range::from_mask(addr, IPv6Address::from_prefix_length(mask));
-}
+    void interface(const Tins::NetworkInterface& interface);
+    void source_port(uint16_t value);
+    void destination_port(uint16_t value);
 
-} // Tins
+    const Tins::NetworkInterface& interface() const;
+    uint16_t source_port() const;
+    uint16_t destination_port() const;
+    Platform current_platform() const;
+private:
+    Tins::NetworkInterface interface_;
+    uint16_t source_port_ = 0;
+    uint16_t destination_port_ = 0;
+    Platform current_platform_;
+};
+
+#endif // TINS_ACTIVE_TEST_CONFIGURATION_H

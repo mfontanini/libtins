@@ -107,3 +107,11 @@ TEST_F(HWAddressTest, OutputOperator) {
     oss << addr;
     EXPECT_EQ(oss.str(), address);
 }
+
+TEST_F(HWAddressTest, Mask) {
+    typedef HWAddress<6> address_type;
+    EXPECT_EQ(
+        address_type("de:ad:be:e0:00:00"),
+        address_type("de:ad:be:ef:00:00") & address_type("ff:ff:ff:f0:00:00")
+    );
+}

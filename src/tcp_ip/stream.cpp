@@ -29,7 +29,7 @@
 
 #include "tcp_ip/stream.h"
 
-#if TINS_IS_CXX11
+#ifdef TINS_HAVE_TCPIP
 
 #include <limits>
 #include <algorithm>
@@ -307,4 +307,4 @@ void Stream::on_server_out_of_order(const Flow& flow,
 } // TCPIP
 } // Tins
 
-#endif // TINS_IS_CXX11
+#endif // TINS_HAVE_TCPIP

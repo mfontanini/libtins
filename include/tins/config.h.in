@@ -13,6 +13,9 @@
 /* Use pcap_sendpacket to send l2 packets */
 #cmakedefine TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
+/* Have TCPIP classes */
+#cmakedefine TINS_HAVE_TCPIP
+
 /* Have TCP ACK tracking */
 #cmakedefine TINS_HAVE_ACK_TRACKER
 

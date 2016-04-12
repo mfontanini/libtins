@@ -206,6 +206,13 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const IPv6Address& addr) {
         return os << addr.to_string();
     }
+
+
+    /**
+     * Applies a mask to an address
+     */
+    TINS_API friend IPv6Address operator&(const IPv6Address& lhs, const IPv6Address& rhs);
+
 private:
     void init(const char* addr);
 

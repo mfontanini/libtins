@@ -106,3 +106,21 @@ TEST(IPv6AddressTest, FromPrefixLength) {
     EXPECT_EQ(IPv6Address("ffff:ffff::"), IPv6Address::from_prefix_length(32));
 }
 
+TEST(IPv6AddressTest, MaskAddress) {
+    EXPECT_EQ(
+        IPv6Address("deaf:beef::"),
+        IPv6Address("deaf:beef:adad:beef::") & IPv6Address("ffff:ffff::")
+    );
+    EXPECT_EQ(
+        IPv6Address("deaf:be00::"),
+        IPv6Address("deaf:beef:adad:beef::") & IPv6Address("ffff:ff00::")
+    );
+    EXPECT_EQ(
+        IPv6Address("deaf:b000::"),
+        IPv6Address("deaf:beef:adad:beef::") & IPv6Address("ffff:f000::")
+    );
+    EXPECT_EQ(
+        IPv6Address("deaf:a000::"),
+        IPv6Address("deaf:beef:adad:beef::") & IPv6Address("ffff:e000::")
+    );
+}
