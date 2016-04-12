@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -26,7 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
+
 #include <stdexcept>
 #include <cstring>
 #include "dot1q.h"
@@ -46,21 +46,21 @@ PDU::metadata Dot1Q::extract_metadata(const uint8_t *buffer, uint32_t total_sz) 
     return metadata(sizeof(dot1q_header), pdu_flag, PDU::UNKNOWN);
 }
 
-Dot1Q::Dot1Q(small_uint<12> tag_id, bool append_pad) 
+Dot1Q::Dot1Q(small_uint<12> tag_id, bool append_pad)
 : header_(), append_padding_(append_pad) {
     id(tag_id);
 }
 
-Dot1Q::Dot1Q(const uint8_t* buffer, uint32_t total_sz) 
+Dot1Q::Dot1Q(const uint8_t* buffer, uint32_t total_sz)
 : append_padding_() {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
-    
+
     if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
-                (Constants::Ethernet::e)payload_type(), 
-                stream.pointer(), 
+                (Constants::Ethernet::e)payload_type(),
+                stream.pointer(),
                 stream.size()
             )
         );
@@ -117,7 +117,9 @@ void Dot1Q::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *)
             // Set the appropriate payload type flag
             flag = Internals::pdu_flag_to_ether_type(type);
         }
-        payload_type(static_cast<uint16_t>(flag));
+        if (flag != Constants::Ethernet::UNKNOWN) {
+            payload_type(static_cast<uint16_t>(flag));
+        }
     }
     stream.write(header_);
 
@@ -154,7 +156,7 @@ bool Dot1Q::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
         return inner_pdu() ? inner_pdu()->matches_response(ptr, total_sz) : true;
     }
     return false;
-    
+
 }
 
 } // Tins
