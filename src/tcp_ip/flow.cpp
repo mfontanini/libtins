@@ -61,7 +61,7 @@ namespace TCPIP {
 
 Flow::Flow(const IPv4Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
-: seq_number_(sequence_number), dest_port_(dest_port) {
+: data_tracker_(sequence_number), dest_port_(dest_port) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
     flags_.is_v6 = false;
@@ -70,7 +70,7 @@ Flow::Flow(const IPv4Address& dest_address, uint16_t dest_port,
 
 Flow::Flow(const IPv6Address& dest_address, uint16_t dest_port,
            uint32_t sequence_number) 
-: seq_number_(sequence_number), dest_port_(dest_port) {
+: data_tracker_(sequence_number), dest_port_(dest_port) {
     OutputMemoryStream output(dest_address_.data(), dest_address_.size());
     output.write(dest_address);
     flags_.is_v6 = true;
@@ -78,7 +78,6 @@ Flow::Flow(const IPv6Address& dest_address, uint16_t dest_port,
 }
 
 void Flow::initialize() {
-    total_buffered_bytes_ = 0;
     state_ = UNKNOWN;
     mss_ = -1;
 }
@@ -110,64 +109,15 @@ void Flow::process_packet(PDU& pdu) {
         return;
     }
     const uint32_t chunk_end = tcp->seq() + raw->payload_size();
+    const uint32_t current_seq = data_tracker_.sequence_number();
     // If the end of the chunk ends after our current sequence number, process it.
-    if (seq_compare(chunk_end, seq_number_) >= 0) {
-        bool added_some = false;
+    if (seq_compare(chunk_end, current_seq) >= 0) {
         uint32_t seq = tcp->seq();
         // If we're going to buffer this and we have a buffering callback, execute it
-        if (seq > seq_number_ && on_out_of_order_callback_) {
+        if (seq > current_seq && on_out_of_order_callback_) {
             on_out_of_order_callback_(*this, seq, raw->payload());
         }
-
-        // If it starts before our sequence number, slice it
-        if (seq_compare(seq, seq_number_) < 0) {
-            const uint32_t diff = seq_number_ - seq;
-            raw->payload().erase(
-                raw->payload().begin(),
-                raw->payload().begin() + diff
-            );
-            seq = seq_number_;
-        }
-        // Store this payload
-        store_payload(seq, move(raw->payload()));
-        // Keep looping while the fragments seq is lower or equal to our seq
-        buffered_payload_type::iterator iter = buffered_payload_.find(seq_number_);
-        while (iter != buffered_payload_.end() && seq_compare(iter->first, seq_number_) <= 0) {
-            // Does this fragment start before our sequence number?
-            if (seq_compare(iter->first, seq_number_) < 0) {
-                uint32_t fragment_end = iter->first + iter->second.size();
-                int comparison = seq_compare(fragment_end, seq_number_);
-                // Does it end after our sequence number? 
-                if (comparison > 0) {
-                    // Then slice it
-                    payload_type& payload = iter->second;
-                    // First update this counter
-                    total_buffered_bytes_ -= payload.size();
-                    payload.erase(
-                        payload.begin(),
-                        payload.begin() + (seq_number_ - iter->first)
-                    );
-                    store_payload(seq_number_, move(iter->second));
-                    iter = erase_iterator(iter);
-                }
-                else {
-                    // Otherwise, we've seen this part of the payload. Erase it.
-                    iter = erase_iterator(iter);
-                }
-            }
-            else {
-                // They're equal. Add this payload.
-                payload_.insert(
-                    payload_.end(),
-                    iter->second.begin(), 
-                    iter->second.end()
-                );
-                seq_number_ += iter->second.size();
-                iter = erase_iterator(iter);
-                added_some = true;
-            }
-        }
-        if (added_some) {
+        if (data_tracker_.process_payload(seq, move(raw->payload()))) {
             if (on_data_callback_) {
                 on_data_callback_(*this);
             }
@@ -176,33 +126,6 @@ void Flow::process_packet(PDU& pdu) {
     else if (on_out_of_order_callback_) {
         on_out_of_order_callback_(*this, tcp->seq(), raw->payload());
     }
-}
-
-void Flow::store_payload(uint32_t seq, payload_type payload) {
-    buffered_payload_type::iterator iter = buffered_payload_.find(seq);
-    // New segment, store it
-    if (iter == buffered_payload_.end()) {
-        total_buffered_bytes_ += payload.size();
-        buffered_payload_.insert(make_pair(seq, move(payload)));
-    }
-    else if (iter->second.size() < payload.size()) {
-        // Increment by the diff between sizes
-        total_buffered_bytes_ += (payload.size() - iter->second.size());
-        // If we already have payload on this position but it's a shorter
-        // chunk than the new one, replace it
-        iter->second = move(payload);
-    }
-}
-
-Flow::buffered_payload_type::iterator Flow::erase_iterator(buffered_payload_type::iterator iter) {
-    buffered_payload_type::iterator output = iter;
-    total_buffered_bytes_ -= iter->second.size();
-    ++output;
-    buffered_payload_.erase(iter);
-    if (output == buffered_payload_.end()) {
-        output = buffered_payload_.begin();
-    }
-    return output;
 }
 
 void Flow::update_state(const TCP& tcp) {
@@ -217,7 +140,7 @@ void Flow::update_state(const TCP& tcp) {
             ack_tracker_ = AckTracker(tcp.ack_seq());
         #endif // TINS_HAVE_ACK_TRACKER
         state_ = ESTABLISHED;
-        seq_number_++;
+        data_tracker_.sequence_number(data_tracker_.sequence_number() + 1);
     }
     else if (state_ == UNKNOWN && (tcp.flags() & TCP::SYN) != 0) {
         // This is the server's state, sending it's first SYN|ACK
@@ -225,7 +148,7 @@ void Flow::update_state(const TCP& tcp) {
             ack_tracker_ = AckTracker(tcp.ack_seq());
         #endif // TINS_HAVE_ACK_TRACKER
         state_ = SYN_SENT;
-        seq_number_ = tcp.seq();
+        data_tracker_.sequence_number(tcp.seq());
         const TCP::option* mss_option = tcp.search_option(TCP::MSS);
         if (mss_option) {
             mss_ = mss_option->to<uint16_t>();
@@ -274,7 +197,7 @@ uint16_t Flow::dport() const {
 }
 
 const Flow::payload_type& Flow::payload() const {
-    return payload_;
+    return data_tracker_.payload();
 }
 
 Flow::State Flow::state() const {
@@ -282,23 +205,23 @@ Flow::State Flow::state() const {
 }
 
 uint32_t Flow::sequence_number() const {
-    return seq_number_;
+    return data_tracker_.sequence_number();
 }
 
 const Flow::buffered_payload_type& Flow::buffered_payload() const {
-    return buffered_payload_;
+    return data_tracker_.buffered_payload();
 }
 
 Flow::buffered_payload_type& Flow::buffered_payload() {
-    return buffered_payload_;
+    return data_tracker_.buffered_payload();
 }
 
 uint32_t Flow::total_buffered_bytes() const {
-    return total_buffered_bytes_;
+    return data_tracker_.total_buffered_bytes();
 }
 
 Flow::payload_type& Flow::payload() {
-    return payload_;
+    return data_tracker_.payload();
 }
 
 void Flow::state(State new_state) {

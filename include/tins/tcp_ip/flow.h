@@ -39,9 +39,10 @@
 #include <map>
 #include <functional>
 #include <stdint.h>
+#include "../hw_address.h"
 #include "../macros.h"
 #include "ack_tracker.h"
-#include "../hw_address.h"
+#include "data_tracker.h"
 
 namespace Tins {
 
@@ -86,12 +87,12 @@ public:
     /** 
      * The type used to store the payload
      */
-    typedef std::vector<uint8_t> payload_type;
+    typedef DataTracker::payload_type payload_type;
 
     /**
      * The type used to store the buffered payload
      */
-    typedef std::map<uint32_t, payload_type> buffered_payload_type;
+    typedef DataTracker::buffered_payload_type buffered_payload_type;
 
     /**
      * The type used to store the callback called when new data is available
@@ -212,7 +213,7 @@ public:
     const payload_type& payload() const;
 
     /** 
-     * Retrieves this flow's destination port
+     * Retrieves this flow's payload
      */
     payload_type& payload();
 
@@ -306,15 +307,10 @@ private:
                  ack_tracking:1;
     };
 
-    void store_payload(uint32_t seq, payload_type payload);
-    buffered_payload_type::iterator erase_iterator(buffered_payload_type::iterator iter);
     void update_state(const TCP& tcp);
     void initialize();
 
-    payload_type payload_;
-    buffered_payload_type buffered_payload_;
-    uint32_t seq_number_;
-    uint32_t total_buffered_bytes_;
+    DataTracker data_tracker_;
     std::array<uint8_t, 16> dest_address_;
     uint16_t dest_port_;
     data_available_callback_type on_data_callback_;

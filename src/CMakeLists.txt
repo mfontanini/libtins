@@ -55,6 +55,7 @@ ADD_LIBRARY(
     tcp.cpp
     tcp_ip/ack_tracker.cpp
     tcp_ip/flow.cpp
+    tcp_ip/data_tracker.cpp
     tcp_ip/stream.cpp
     tcp_ip/stream_follower.cpp
     tcp_ip/stream_identifier.cpp
