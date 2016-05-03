@@ -45,6 +45,9 @@ public:
 
     exception_base(const std::string& message) 
     : std::runtime_error(message) { }
+
+    exception_base(const char* message) 
+    : std::runtime_error(message) { }
 };
 
 /**
@@ -52,10 +55,7 @@ public:
  */
 class option_not_found : public exception_base {
 public:
-    // try to avoid allocations by doing this.
-    const char* what() const throw() {
-        return "Option not found";
-    }
+    option_not_found() : exception_base("Option not found") { }
 };
 
 /**
@@ -63,9 +63,7 @@ public:
  */
 class malformed_packet : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Malformed packet";
-    }
+    malformed_packet() : exception_base("Malformed packet") { }
 };
 
 /**
@@ -73,9 +71,7 @@ public:
  */
 class serialization_error : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Serialization error";
-    }
+    serialization_error() : exception_base("Serialization error") { }
 };
 
 /**
@@ -83,9 +79,7 @@ public:
  */
 class pdu_not_found : public exception_base {
 public:
-    const char* what() const throw() {
-        return "PDU not found";
-    }
+    pdu_not_found() : exception_base("PDU not found") { }
 };
 
 /**
@@ -94,9 +88,7 @@ public:
  */
 class invalid_interface : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Invalid interface";
-    }
+    invalid_interface() : exception_base("Invalid interface") { }
 };
 
 /**
@@ -105,9 +97,7 @@ public:
  */
 class invalid_address : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Invalid address";
-    }
+    invalid_address() : exception_base("Invalid address") { }
 };
 
 /**
@@ -115,9 +105,7 @@ public:
  */
 class field_not_present : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Field not present";
-    }
+    field_not_present() : exception_base("Field not present") { }
 };
 
 /**
@@ -153,9 +141,7 @@ public:
  */
 class invalid_socket_type : public exception_base {
 public:
-    const char* what() const throw() {
-        return "The provided socket type is invalid";
-    }
+    invalid_socket_type() : exception_base("The provided socket type is invalid") { }
 };
 
 /**
@@ -164,9 +150,7 @@ public:
  */
 class unknown_link_type : public exception_base {
 public:
-    const char* what() const throw() {
-        return "The sniffed link layer PDU type is unknown";
-    }
+    unknown_link_type() : exception_base("The sniffed link layer PDU type is unknown") { }
 };
 
 /**
@@ -174,9 +158,7 @@ public:
  */
 class malformed_option : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Malformed option";
-    }
+    malformed_option() : exception_base("Malformed option") { }
 };
 
 /**
@@ -184,9 +166,7 @@ public:
  */
 class bad_tins_cast : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Bad Tins cast";
-    }
+    bad_tins_cast() : exception_base("Bad Tins cast") { }
 };
 
 /**
@@ -195,9 +175,7 @@ public:
  */
 class protocol_disabled : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Protocol disabled";
-    }
+    protocol_disabled() : exception_base("Protocol disabled") { }
 };
 
 /**
@@ -206,9 +184,7 @@ public:
  */
 class feature_disabled : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Feature disabled";
-    }
+    feature_disabled() : exception_base("Feature disabled") { }
 };
 
 /**
@@ -217,9 +193,7 @@ public:
  */
 class option_payload_too_large : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Option payload too large";
-    }
+    option_payload_too_large() : exception_base("Option payload too large") { }
 };
 
 /**
@@ -248,9 +222,7 @@ public:
  */
 class pdu_not_serializable : public exception_base {
 public:
-    const char* what() const throw() {
-        return "PDU not serializable";
-    }
+    pdu_not_serializable() : exception_base("PDU not serializable") { }
 };
 
 /**
@@ -258,9 +230,7 @@ public:
  */
 class pcap_open_failed : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Failed to create pcap handle";
-    }
+    pcap_open_failed() : exception_base("Failed to create pcap handle") { }
 };
 
 /**
@@ -269,9 +239,7 @@ public:
  */
 class unsupported_function : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Function is not supported on this OS";
-    }
+    unsupported_function() : exception_base("Function is not supported on this OS") { }
 };
 
 /**
@@ -279,9 +247,7 @@ public:
  */
 class invalid_domain_name : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Invalid domain name";
-    }
+    invalid_domain_name() : exception_base("Invalid domain name") { }
 };
 
 /**
@@ -289,9 +255,7 @@ public:
  */
 class stream_not_found : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Stream not found";
-    }
+    stream_not_found() : exception_base("Stream not found") { }
 };
 
 /**
@@ -299,9 +263,7 @@ public:
  */
 class callback_not_set : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Callback not set";
-    }
+    callback_not_set() : exception_base("Callback not set") { }
 };
 
 /**
@@ -309,9 +271,7 @@ public:
  */
 class invalid_packet : public exception_base {
 public:
-    const char* what() const throw() {
-        return "Invalid packet";
-    }
+    invalid_packet() : exception_base("Invalid packet") { }
 };
 
 namespace Crypto {
@@ -321,9 +281,7 @@ namespace WPA2 {
      */
     class invalid_handshake : public exception_base {
     public:
-        const char* what() const throw() {
-            return "Invalid WPA2 handshake";
-        }
+        invalid_handshake() : exception_base("Invalid WPA2 handshake") { }
     };
 } // WPA2
 } // Crypto
