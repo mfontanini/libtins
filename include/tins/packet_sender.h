@@ -399,7 +399,8 @@ private:
     PDU* recv_match_loop(const std::vector<int>& sockets, 
                          PDU& pdu,
                          struct sockaddr* link_addr, 
-                         uint32_t addrlen);
+                         uint32_t addrlen,
+                         bool is_layer_3);
 
     std::vector<int> sockets_;
     #ifndef _WIN32

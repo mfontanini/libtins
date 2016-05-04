@@ -383,7 +383,7 @@ PDU* PacketSender::recv_l2(PDU& pdu,
                            const NetworkInterface& iface) {
     int sock = get_ether_socket(iface);
     vector<int> sockets(1, sock);
-    return recv_match_loop(sockets, pdu, link_addr, len_addr);
+    return recv_match_loop(sockets, pdu, link_addr, len_addr, false);
 }
 #endif // _WIN32
 
@@ -400,7 +400,7 @@ PDU* PacketSender::recv_l3(PDU& pdu,
         open_l3_socket(ICMP_SOCKET);
         sockets.push_back(sockets_[ICMP_SOCKET]);
     }
-    return recv_match_loop(sockets, pdu, link_addr, len_addr);
+    return recv_match_loop(sockets, pdu, link_addr, len_addr, true);
 }
 
 void PacketSender::send_l3(PDU& pdu, 
@@ -419,7 +419,8 @@ void PacketSender::send_l3(PDU& pdu,
 PDU* PacketSender::recv_match_loop(const vector<int>& sockets, 
                                    PDU& pdu,
                                    struct sockaddr* link_addr,
-                                   uint32_t addrlen) {
+                                   uint32_t addrlen,
+                                   bool is_layer_3) {
     #ifdef _WIN32
         typedef int socket_len_type;
         typedef int recvfrom_ret_type;
@@ -431,10 +432,13 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
     struct timeval timeout,  end_time;
     int read;
     #if defined(BSD) || defined(__FreeBSD_kernel__)
+        bool is_bsd = true;
         // On* BSD, we need to allocate a buffer using the given size.
-        vector<uint8_t> actual_buffer(buffer_size_);
+        const int buffer_size = is_layer_3 ? 2048 : buffer_size_;
+        vector<uint8_t> actual_buffer(buffer_size);
         uint8_t* buffer = &actual_buffer[0];
     #else
+        bool is_bsd = false;
         uint8_t buffer[2048];
         const int buffer_size = 2048;
     #endif
@@ -456,7 +460,9 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
             for (vector<int>::const_iterator it = sockets.begin(); it != sockets.end(); ++it) {
                 if (FD_ISSET(*it, &readfds)) {
                     recvfrom_ret_type size;
-                    #if defined(BSD) || defined(__FreeBSD_kernel__)
+                    // Crappy way of only conditionally running this on BSD + layer2
+                    if (is_bsd && !is_layer_3) {
+                        #if defined(BSD) || defined(__FreeBSD_kernel__)
                         size = ::read(*it, buffer, buffer_size_);
                         const uint8_t* ptr = buffer;
                         // We might see more than one packet
@@ -468,13 +474,15 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
                             }
                             ptr += BPF_WORDALIGN(bpf_header->bh_hdrlen + bpf_header->bh_caplen);
                         }
-                    #else
+                        #endif // BSD
+                    }
+                    else {
                         socket_len_type length = addrlen;
                         size = ::recvfrom(*it, (char*)buffer, buffer_size, 0, link_addr, &length);
                         if (pdu.matches_response(buffer, size)) {
                             return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
                         }
-                    #endif
+                    }
                 }
             }
         }
