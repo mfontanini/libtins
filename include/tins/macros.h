@@ -47,7 +47,7 @@
     #define TINS_LIKELY(x) (x)
     #define TINS_UNLIKELY(x) (x)
 #else
-    // Not Vistual Studio. Assume this is gcc compatible
+    // Not Visual Studio. Assume this is gcc compatible
     #define TINS_BEGIN_PACK 
     #define TINS_END_PACK __attribute__((packed))
     #define TINS_PACKED(DECLARATION) DECLARATION __attribute__((packed))
