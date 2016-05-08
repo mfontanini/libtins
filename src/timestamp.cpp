@@ -58,7 +58,6 @@ Timestamp Timestamp::current_time() {
     #endif
 }
 
-
 Timestamp::Timestamp()
 : timestamp_(0) {
 
@@ -74,7 +73,7 @@ Timestamp::Timestamp(uint64_t value)
 }
 
 Timestamp::seconds_type Timestamp::seconds() const {
-    return timestamp_ / MICROSECONDS_IN_SECOND;
+    return static_cast<seconds_type>(timestamp_ / MICROSECONDS_IN_SECOND);
 }
 
 Timestamp::microseconds_type Timestamp::microseconds() const {
