@@ -34,6 +34,7 @@
 #include <map>
 #include <stdint.h>
 #include "../config.h"
+#include "../macros.h"
 
 #ifdef TINS_HAVE_TCPIP
 
@@ -46,7 +47,7 @@ namespace TCPIP {
  * Stores and tracks data in a TCP stream, reassembling segments, handling 
  * out of order packets, etc.
  */
-class DataTracker {
+class TINS_API DataTracker {
 public:
     /** 
      * The type used to store the payload

@@ -36,6 +36,7 @@
 
 #include <vector>
 #include <boost/icl/interval_set.hpp>
+#include "../macros.h"
 
 namespace Tins {
 
@@ -48,7 +49,7 @@ namespace TCPIP {
  *
  * The interval represented by this range is a closed interval [first, last].
  */
-class AckedRange {
+class TINS_API AckedRange {
 public:
     typedef boost::icl::discrete_interval<uint32_t> interval_type;
 
@@ -90,7 +91,7 @@ private:
 /**
  * \brief Allows tracking acknowledged intervals in a TCP stream
  */
-class AckTracker {
+class TINS_API AckTracker {
 public:
     /**
      * The type used to store ACKed intervals
