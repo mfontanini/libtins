@@ -60,6 +60,7 @@ ADD_LIBRARY(
     tcp_ip/stream_follower.cpp
     tcp_ip/stream_identifier.cpp
     tcp_stream.cpp
+    timestamp.cpp
     udp.cpp
     utils.cpp
     dot11/dot11_base.cpp

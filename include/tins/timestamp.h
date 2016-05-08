@@ -30,21 +30,21 @@
 #ifndef TINS_TIMESTAMP_H
 #define TINS_TIMESTAMP_H
 
-#ifdef _WIN32
-    #include <winsock2.h>
-#else
-    #include <sys/time.h>
-#endif
+#include <stdint.h>
+#include "macros.h"
 #include "cxxstd.h"
 #if TINS_IS_CXX11
     #include <chrono>
 #endif
 
+struct timeval;
+
 namespace Tins {
+
 /**
  * \brief Represents a packet timestamp.
  */
-class Timestamp {
+class TINS_API Timestamp {
 public:
     #ifdef _WIN32
         typedef long seconds_type;
@@ -57,21 +57,12 @@ public:
     /**
      * \brief Constructs a Timestamp which will hold the current time.
      */
-    static Timestamp current_time() {
-        #ifdef _WIN32
-            //fixme
-            return Timestamp();
-        #else
-            timeval tv;
-            gettimeofday(&tv, 0);
-            return tv;
-        #endif
-    }
+    static Timestamp current_time();
     
     /**
-     * Default constructs the timestamp.
+     * Default constructs a timestamp.
      */
-    Timestamp() : tv() {}
+    Timestamp();
 
     #if TINS_IS_CXX11
         /**
@@ -79,47 +70,42 @@ public:
          */
         template<typename Rep, typename Period>
         Timestamp(const std::chrono::duration<Rep, Period>& ts) {
-            using std::chrono::duration_cast;
-            using std::chrono::microseconds;
-            using std::chrono::seconds;
-
-            tv.tv_sec = duration_cast<seconds>(ts).count();
-            tv.tv_usec = duration_cast<microseconds>(
-                ts - seconds(tv.tv_sec)).count();
+            timestamp_ = std::chrono::duration_cast<std::chrono::microseconds>(ts).count();
         }
     #endif
     
     /**
-     * Constructs a timestamp from a timeval object.
-     * \param time_val The timeval object.
+     * Constructs a timestamp from a timeval struct.
+     *
+     * \param time_val The timeval struct
      */
-    Timestamp(const timeval& time_val) : tv(time_val) {}
+    Timestamp(const timeval& time_val);
     
     /**
      * Returns the amount of seconds in this timestamp.
      */
-    seconds_type seconds() const {
-        return tv.tv_sec;
-    }
+    seconds_type seconds() const;
     
     /**
-     * Returns the amount of microseconds in this timestamp.
+     * \brief Returns the rest of the time in this timestamp in microseconds
+     *
+     * This is, after subtracting the seconds part, how many microseconds are 
+     * left in this timestamp
      */
-    microseconds_type microseconds() const {
-        return tv.tv_usec;
-    }
+    microseconds_type microseconds() const;
     
     #if TINS_IS_CXX11
         /**
          * Converts this Timestamp to a std::chrono::microseconds
          */
         operator std::chrono::microseconds() const {
-            return std::chrono::seconds(seconds()) +
-                std::chrono::microseconds(microseconds());
+            return std::chrono::microseconds(timestamp_);
         }
     #endif
 private:
-    timeval tv;
+    Timestamp(uint64_t value);
+
+    uint64_t timestamp_;
 };
 
 } // Tins
