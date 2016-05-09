@@ -201,7 +201,7 @@ void Dot11::send(PacketSender& sender, const NetworkInterface& iface) {
         addr.sll_halen = 6;
         addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), header_.addr1, 6);
-        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr), iface);
     #else
         sender.send_l2(*this, 0, 0, iface);
     #endif

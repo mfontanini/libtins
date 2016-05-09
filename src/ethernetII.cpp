@@ -140,7 +140,7 @@ void EthernetII::send(PacketSender& sender, const NetworkInterface& iface) {
         addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), header_.dst_mac, address_type::address_size);
 
-        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr), iface);
     #endif
 }
 

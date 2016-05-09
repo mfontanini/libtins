@@ -487,7 +487,7 @@ void RadioTap::send(PacketSender& sender, const NetworkInterface& iface) {
             std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);
         }
 
-        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr), iface);
     #else
         sender.send_l2(*this, 0, 0, iface);
     #endif

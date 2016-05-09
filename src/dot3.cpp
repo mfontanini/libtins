@@ -112,7 +112,7 @@ void Dot3::send(PacketSender& sender, const NetworkInterface& iface) {
         addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), header_.dst_mac, sizeof(header_.dst_mac));
 
-        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr), iface);
     #endif
 }
 #endif // !_WIN32 || TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
