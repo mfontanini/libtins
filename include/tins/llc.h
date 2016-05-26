@@ -35,7 +35,6 @@
 #include <stdint.h>
 #include "macros.h"
 #include "pdu.h"
-#include "macros.h"
 #include "endianness.h"
 
 namespace Tins {

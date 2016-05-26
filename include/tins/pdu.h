@@ -36,7 +36,6 @@
 #include "macros.h"
 #include "cxxstd.h"
 #include "exceptions.h"
-#include "macros.h"
 
 /** \brief The Tins namespace.
  */

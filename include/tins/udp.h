@@ -145,9 +145,8 @@ public:
     void sport(uint16_t new_sport);
     
     /** 
-     * \brief Getter for the length field.
+     * \brief Set the length field.
      * \param new_len The new length field.
-     * \return The length field.
      */
     void length(uint16_t new_len);
 
