@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -58,9 +58,9 @@ using Tins::Memory::InputMemoryStream;
 namespace Tins {
 namespace TCPIP {
 
-Stream::Stream(PDU& packet, const timestamp_type& ts) 
+Stream::Stream(PDU& packet, const timestamp_type& ts)
 : client_flow_(extract_client_flow(packet)),
-  server_flow_(extract_server_flow(packet)), create_time_(ts), 
+  server_flow_(extract_server_flow(packet)), create_time_(ts),
   last_seen_(ts), auto_cleanup_client_(true), auto_cleanup_server_(true) {
     // Update client flow state
     client_flow().process_packet(packet);
@@ -258,7 +258,7 @@ void Stream::auto_cleanup_client_data(bool value) {
 }
 
 void Stream::auto_cleanup_server_data(bool value) {
-    auto_cleanup_client_ = value;
+    auto_cleanup_server_ = value;
 }
 
 void Stream::enable_ack_tracking() {

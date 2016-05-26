@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -55,18 +55,18 @@ namespace TCPIP {
  * being open, it starts tracking it. This will follow all data sent by
  * each peer and make it available to the user in a simple way.
  *
- * In order to use this class, just create an instance and set the 
+ * In order to use this class, just create an instance and set the
  * new stream callback to some function that you want:
  *
  * \code
  * void on_new_stream(TCPStream& stream) {
  *     // Do something with it.
- *     // This is the perfect time to set the stream's client/server 
+ *     // This is the perfect time to set the stream's client/server
  *     // write callbacks so you are notified whenever there's new
  *     // data on the stream
  * }
  *
- * // Create it 
+ * // Create it
  * StreamFollower follower;
  * // Set the callback
  * follower.new_stream_callback(&on_new_stream);
@@ -80,7 +80,7 @@ public:
     typedef Stream::stream_callback_type stream_callback_type;
 
     /**
-     * The type used to identify streams 
+     * The type used to identify streams
      */
     typedef StreamIdentifier stream_id;
 
@@ -100,15 +100,15 @@ public:
      */
     typedef std::function<void(Stream&, TerminationReason)> stream_termination_callback_type;
 
-    /** 
+    /**
      * Default constructor
      */
     StreamFollower();
 
-    /** 
+    /**
      * \brief Processes a packet
      *
-     * This will detect if this packet belongs to an existing stream 
+     * This will detect if this packet belongs to an existing stream
      * and process it, or if it belongs to a new one, in which case it
      * starts tracking it.
      *
@@ -116,10 +116,10 @@ public:
      */
     void process_packet(PDU& packet);
 
-    /** 
+    /**
      * \brief Processes a packet
      *
-     * This will detect if this packet belongs to an existing stream 
+     * This will detect if this packet belongs to an existing stream
      * and process it, or if it belongs to a new one, in which case it
      * starts tracking it.
      *
@@ -130,7 +130,7 @@ public:
     /**
      * \brief Sets the callback to be executed when a new stream is captured.
      *
-     * Whenever a new stream is captured, the provided callback will be 
+     * Whenever a new stream is captured, the provided callback will be
      * executed.
      *
      * \param callback The callback to be set
@@ -182,6 +182,13 @@ public:
      */
     Stream& find_stream(const IPv6Address& client_addr, uint16_t client_port,
                         const IPv6Address& server_addr, uint16_t server_port);
+
+    /**
+     * Allow flow attachemnt, meaning the follower will not have to view the initial SYN packet to track a flow.
+     */
+    void set_attach_to_flows(bool attach_to_flows) { attach_to_flows_ = attach_to_flows; }
+    bool get_attach_to_flows() { return attach_to_flows_; }
+
 private:
     typedef Stream::timestamp_type timestamp_type;
 
