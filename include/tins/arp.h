@@ -298,7 +298,7 @@ public:
      * \param sender The sender's IP address.
      * \param hw_tgt The target's hardware address.
      * \param hw_snd The sender's hardware address.
-     * \return EthetnetII containing the ARP Replay.
+     * \return EthernetII object containing the ARP Reply.
      */
     static EthernetII make_arp_reply(ipaddress_type target, 
                                      ipaddress_type sender, 
