@@ -45,6 +45,8 @@ class IPv6Address;
 
 namespace TCPIP {
 
+class Stream;
+
 /**
  * \brief Uniquely identifies a stream. 
  *
@@ -92,6 +94,7 @@ struct StreamIdentifier {
     uint16_t max_address_port;
 
     static StreamIdentifier make_identifier(const PDU& packet);
+    static StreamIdentifier make_identifier(const Stream& stream);
     static address_type serialize(IPv4Address address);
     static address_type serialize(const IPv6Address& address);
 };
