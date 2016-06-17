@@ -75,6 +75,7 @@ include(CheckFunctionExists)
 set(CMAKE_REQUIRED_LIBRARIES ${PCAP_LIBRARY})
 check_function_exists(pcap_get_pfring_id HAVE_PF_RING)
 check_function_exists(pcap_set_immediate_mode HAVE_PCAP_IMMEDIATE_MODE)
+check_function_exists(pcap_set_tstamp_precision HAVE_PCAP_TIMESTAMP_PRECISION)
 set(CMAKE_REQUIRED_LIBRARIES)
 
 mark_as_advanced(

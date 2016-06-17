@@ -359,6 +359,16 @@ void Sniffer::set_immediate_mode(bool enabled) {
     #endif // HAVE_PCAP_IMMEDIATE_MODE
 }
 
+void Sniffer::set_timestamp_precision(int value) {
+    // This function exists as of libpcap version 1.5.0.
+    #ifdef HAVE_PCAP_TIMESTAMP_PRECISION
+    int result = pcap_set_tstamp_precision(get_pcap_handle(), value);
+    if (result == PCAP_ERROR_TSTAMP_PRECISION_NOTSUP) {
+        throw pcap_error("Timestamp precision not supported");
+    }
+    #endif // HAVE_PCAP_TIMESTAMP_PRECISION
+}
+
 void Sniffer::set_rfmon(bool rfmon_enabled) {
     #ifndef _WIN32
     if (pcap_can_set_rfmon(get_pcap_handle()) == 1) {
@@ -408,7 +418,8 @@ const unsigned SnifferConfiguration::DEFAULT_TIMEOUT = 1000;
 
 SnifferConfiguration::SnifferConfiguration()
 : flags_(0), snap_len_(DEFAULT_SNAP_LEN), buffer_size_(0), timeout_(DEFAULT_TIMEOUT),
-  promisc_(false), rfmon_(false), immediate_mode_(false), direction_(PCAP_D_INOUT) {
+  promisc_(false), rfmon_(false), immediate_mode_(false), direction_(PCAP_D_INOUT),
+  timestamp_precision_(0) {
 
 }
 
@@ -426,6 +437,9 @@ void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) co
     }
     if ((flags_ & IMMEDIATE_MODE) != 0) {
         sniffer.set_immediate_mode(immediate_mode_);
+    }
+    if ((flags_ & TIMESTAMP_PRECISION) != 0) {
+        sniffer.set_timestamp_precision(timestamp_precision_);
     }
 }
 
@@ -484,6 +498,11 @@ void SnifferConfiguration::set_timeout(unsigned timeout) {
 void SnifferConfiguration::set_immediate_mode(bool enabled) {
     flags_ |= IMMEDIATE_MODE;
     immediate_mode_ = enabled;
+}
+
+void SnifferConfiguration::set_timestamp_precision(int value) {
+    flags_ |= TIMESTAMP_PRECISION;
+    timestamp_precision_ = value;
 }
 
 void SnifferConfiguration::set_direction(pcap_direction_t direction) {

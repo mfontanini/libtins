@@ -350,14 +350,11 @@ private:
     friend class SnifferConfiguration;
 
     void set_snap_len(unsigned snap_len);
-
     void set_buffer_size(unsigned buffer_size);
-
     void set_promisc_mode(bool promisc_enabled);
-
     void set_rfmon(bool rfmon_enabled);
-
     void set_immediate_mode(bool enabled);
+    void set_timestamp_precision(int value);
 };
 
 /**
@@ -586,6 +583,12 @@ public:
      * \param enabled The immediate mode option value.
      */
     void set_immediate_mode(bool enabled);
+
+    /**
+     * Sets the timestamp precision value
+     * \param value The timestamp option value.
+     */
+    void set_timestamp_precision(int value);
 protected:
     friend class Sniffer;
     friend class FileSniffer;
@@ -596,7 +599,8 @@ protected:
         RFMON = 4,
         PACKET_FILTER = 8,
         IMMEDIATE_MODE = 16,
-        DIRECTION = 32
+        DIRECTION = 32,
+        TIMESTAMP_PRECISION = 64,
     };
 
     void configure_sniffer_pre_activation(Sniffer& sniffer) const;
@@ -613,6 +617,7 @@ protected:
     bool rfmon_;
     bool immediate_mode_;
     pcap_direction_t direction_;
+    int timestamp_precision_;
 };
 
 template <typename Functor>
