@@ -64,7 +64,8 @@ Timestamp::Timestamp()
 }
 
 Timestamp::Timestamp(const timeval& time_val) {
-    timestamp_ = time_val.tv_sec * MICROSECONDS_IN_SECOND + time_val.tv_usec;
+    timestamp_ = static_cast<uint64_t>(time_val.tv_sec) * MICROSECONDS_IN_SECOND
+                 + time_val.tv_usec;
 }
 
 Timestamp::Timestamp(uint64_t value)
