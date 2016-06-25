@@ -59,6 +59,22 @@ IF(WIN32)
 
     # Add the NOMINMAX macro to avoid Windows' min and max macros.
     ADD_DEFINITIONS(-DNOMINMAX)
+    
+    # MinWG need some extra definitions to compile properly (WIN32 for PCAP and WIN32_WINNT version for ws2tcpip.h)
+    IF(MINGW)
+        ADD_DEFINITIONS(-DWIN32)
+        MACRO(get_WIN32_WINNT version)
+        IF (WIN32 AND CMAKE_SYSTEM_VERSION)
+            SET(ver ${CMAKE_SYSTEM_VERSION})
+            STRING(REPLACE "." "" ver ${ver})
+            STRING(REGEX REPLACE "([0-9])" "0\\1" ver ${ver})
+            SET(${version} "0x${ver}")
+        ENDIF()
+        ENDMACRO()
+        get_WIN32_WINNT(ver)
+        ADD_DEFINITIONS(-D_WIN32_WINNT=${ver})
+    ENDIF(MINGW)
+	
 ENDIF(WIN32)
 
 INCLUDE(ExternalProject)
