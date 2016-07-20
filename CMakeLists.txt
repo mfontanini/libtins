@@ -4,7 +4,7 @@ PROJECT(libtins)
 # Compile in release mode by default
 IF(NOT CMAKE_BUILD_TYPE)
     MESSAGE(STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")
-    SET(CMAKE_BUILD_TYPE RelWithDebInfo) 
+    SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 ELSE(NOT CMAKE_BUILD_TYPE)
     MESSAGE(STATUS "Using specified '${CMAKE_BUILD_TYPE}' build type.")
 ENDIF(NOT CMAKE_BUILD_TYPE)
@@ -22,7 +22,7 @@ ELSE()
 ENDIF()
 
 IF(APPLE)
-    # This is set to ON as of policy CMP0042 
+    # This is set to ON as of policy CMP0042
     SET(CMAKE_MACOSX_RPATH ON)
 ENDIF()
 
@@ -30,7 +30,7 @@ ENDIF()
 OPTION(LIBTINS_BUILD_SHARED "Build libtins as a shared library." ON)
 IF(LIBTINS_BUILD_SHARED)
     MESSAGE(
-        STATUS 
+        STATUS
         "Build will generate a shared library. "
         "Use LIBTINS_BUILD_SHARED=0 to perform a static build"
     )
@@ -47,7 +47,7 @@ SET(LIBTINS_VERSION_MINOR 4)
 SET(LIBTINS_VERSION "${LIBTINS_VERSION_MAJOR}.${LIBTINS_VERSION_MINOR}")
 
 # Required Packages
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 # Look for libpcap
 FIND_PACKAGE(PCAP REQUIRED)
@@ -59,7 +59,7 @@ IF(WIN32)
 
     # Add the NOMINMAX macro to avoid Windows' min and max macros.
     ADD_DEFINITIONS(-DNOMINMAX)
-    
+
     # MinWG need some extra definitions to compile properly (WIN32 for PCAP and WIN32_WINNT version for ws2tcpip.h)
     IF(MINGW)
         ADD_DEFINITIONS(-DWIN32)
@@ -74,7 +74,7 @@ IF(WIN32)
         get_WIN32_WINNT(ver)
         ADD_DEFINITIONS(-D_WIN32_WINNT=${ver})
     ENDIF(MINGW)
-	
+
 ENDIF(WIN32)
 
 INCLUDE(ExternalProject)
@@ -106,7 +106,7 @@ IF(LIBTINS_ENABLE_CXX11)
     ENDIF()
 ELSE(LIBTINS_ENABLE_CXX11)
     MESSAGE(
-        WARNING 
+        WARNING
         "Disabling C++11 features. Use LIBTINS_ENABLE_CXX11=1 to enable them. "
         "Unless you are using an old compiler, you should enable this option, "
         "as it increases the library's performance")
@@ -185,8 +185,8 @@ ENDIF(LIBTINS_USE_PCAP_SENDPACKET)
 FIND_PACKAGE(Doxygen QUIET)
 IF(DOXYGEN_FOUND)
     CONFIGURE_FILE(
-        ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in 
-        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile 
+        ${CMAKE_CURRENT_SOURCE_DIR}/docs/Doxyfile.in
+        ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         @ONLY
     )
     ADD_CUSTOM_TARGET(
@@ -241,10 +241,10 @@ ADD_SUBDIRECTORY(examples)
 ADD_SUBDIRECTORY(src)
 
 # Only include googletest if the git submodule has been fetched
-IF(EXISTS "${CMAKE_SOURCE_DIR}/googletest/CMakeLists.txt")
+IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/googletest/CMakeLists.txt")
     # Enable tests and add the test directory
     MESSAGE(STATUS "Tests have been enabled")
-    SET(GOOGLETEST_ROOT ${CMAKE_SOURCE_DIR}/googletest)
+    SET(GOOGLETEST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/googletest)
     SET(GOOGLETEST_INCLUDE ${GOOGLETEST_ROOT}/googletest/include)
     SET(GOOGLETEST_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/googletest)
     SET(GOOGLETEST_LIBRARY ${GOOGLETEST_BINARY_DIR}/googletest)
