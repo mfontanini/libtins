@@ -166,6 +166,24 @@ public:
     void process_packet(PDU& pdu);
 
     /**
+     * \brief Skip forward to a sequence number
+     *
+     * This allows to recover from packet loss, if we just do not see all packets of
+     * an original stream. This recovery can only sensibly triggered from the application
+     * layer.
+     *
+     * This method is particularly useful to call from an out of order callback, if
+     * the application wants to skip forward to this out of order block. The application
+     * will then get the normal data callback!
+     *
+     * IMPORTANT: If you call this method with a sequence number that is not exactly a
+     * TCP fragment boundary, the flow will never recover from this.
+     *
+     * \param seq The sequence number to skip to.
+     */
+    void skipTo(uint32_t seq);
+
+    /**
      * Indicates whether this flow uses IPv6 addresses
      */
     bool is_v6() const;

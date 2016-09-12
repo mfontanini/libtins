@@ -87,7 +87,30 @@ public:
      */
     bool process_payload(uint32_t seq, payload_type payload);
 
-    /** 
+    /**
+     * \brief Skip forward to a sequence number
+     *
+     * This allows to recover from packetloss, if we just do not see all packets of
+     * an original stream. This recovery can only sensibly triggered from the application
+     * layer.
+     *
+     * The method does nothing, if the sequence number is smaller or equal to the
+     * current number.
+     *
+     * This method is particularly useful to call from an out of order callback, if
+     * the application wants to skip forward to this out of order block. The application
+     * will then get the normal data callback!
+     *
+     * The method cleans the buffer from all no longer needed fragments.
+     *
+     * IMPORTANT: If you call this method with a sequence number that is not exactly a
+     * TCP fragment boundary, the flow will never recover from this.
+     *
+     * \param seq The seqeunce number to skip to.
+     */
+    void skipTo(uint32_t seq);
+
+    /**
      * Retrieves the current sequence number
      */
     uint32_t sequence_number() const;
