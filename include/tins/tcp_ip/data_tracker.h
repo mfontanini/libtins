@@ -108,7 +108,7 @@ public:
      *
      * \param seq The seqeunce number to skip to.
      */
-    void skipTo(uint32_t seq);
+    void advance_sequence(uint32_t seq);
 
     /**
      * Retrieves the current sequence number

@@ -127,8 +127,8 @@ void Flow::process_packet(PDU& pdu) {
     }
 }
 
-void Flow::skipTo(uint32_t seq) {
-    data_tracker_.skipTo(seq);
+void Flow::advance_sequence(uint32_t seq) {
+    data_tracker_.advance_sequence(seq);
 }
 
 void Flow::update_state(const TCP& tcp) {

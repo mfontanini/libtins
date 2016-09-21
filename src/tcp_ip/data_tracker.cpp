@@ -108,7 +108,7 @@ bool DataTracker::process_payload(uint32_t seq, payload_type payload) {
     return added_some;
 }
 
-void DataTracker::skipTo(uint32_t seq) {
+void DataTracker::advance_sequence(uint32_t seq) {
     if (seq_compare(seq, seq_number_) <= 0) {
         return;
     }
