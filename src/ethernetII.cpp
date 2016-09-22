@@ -82,15 +82,15 @@ EthernetII::EthernetII(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
 
-    // Check for zero-padding for padded packets
-    if (total_sz == 60 && std::all_of(stream.pointer(),
-                                      stream.pointer() + stream.size(),
-                                      [](uint8_t x) { return x == 0; })) {
-        return;
-    }
-
     // If there's any size left
     if (stream) {
+        // Check for zero-padding for padded packets
+        if (total_sz == 60 && std::all_of(stream.pointer(),
+                                          stream.pointer() + stream.size(),
+                                          [](uint8_t x) { return x == 0; })) {
+            return;
+        }
+
         inner_pdu(
             Internals::pdu_from_flag(
                 (Constants::Ethernet::e)payload_type(), 
