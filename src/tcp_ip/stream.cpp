@@ -62,8 +62,6 @@ Stream::Stream(PDU& packet, const timestamp_type& ts)
 : client_flow_(extract_client_flow(packet)),
   server_flow_(extract_server_flow(packet)), create_time_(ts), 
   last_seen_(ts), auto_cleanup_client_(true), auto_cleanup_server_(true) {
-    // Update client flow state
-    client_flow().process_packet(packet);
     const EthernetII* eth = packet.find_pdu<EthernetII>();
     if (eth) {
         client_hw_addr_ = eth->src_addr();
