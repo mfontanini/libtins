@@ -287,8 +287,8 @@ void DNS::add_additional(const resource& resource){
 
 string DNS::encode_domain_name(const string& dn) {
     string output;
-    size_t last_index(0), index;
     if (!dn.empty()) {
+        size_t last_index(0), index;
         while ((index = dn.find('.', last_index+1)) != string::npos) {
             output.push_back(static_cast<char>(index - last_index));
             output.append(dn.begin() + last_index, dn.begin() + index);
