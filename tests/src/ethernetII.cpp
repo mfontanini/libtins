@@ -116,14 +116,6 @@ TEST_F(EthernetIITest, CompleteConstructor) {
     EXPECT_EQ(eth.payload_type(), 0);
 }
 
-TEST_F(EthernetIITest, Serialize) {
-    EthernetII eth(dst_addr, src_addr);
-    eth.payload_type(p_type);
-    PDU::serialization_type serialized = eth.serialize();
-    ASSERT_EQ(serialized.size(), sizeof(expected_packet));
-    EXPECT_TRUE(std::equal(serialized.begin(), serialized.end(), expected_packet));
-}
-
 TEST_F(EthernetIITest, SerializeSmallEthernetWithPadding) {
     EthernetII eth(smallip_packet, sizeof(smallip_packet));
     ASSERT_TRUE(eth.inner_pdu() != NULL);
@@ -167,4 +159,17 @@ TEST_F(EthernetIITest, SerializePreservesGivenPayloadType) {
     eth.payload_type(p_type);
     eth.serialize();
     EXPECT_EQ(p_type, eth.payload_type());
+}
+
+// Issue #168
+TEST_F(EthernetIITest, SerializeWhenInnerPDUIsGone) {
+    EthernetII eth1 = EthernetII() / IP();
+    eth1.serialize(); // sets payload type
+    eth1.inner_pdu(NULL); // make it "incomplete"
+    PDU::serialization_type buffer = eth1.serialize();
+
+    EXPECT_EQ(eth1.size(), buffer.size());
+
+    EthernetII eth2(&buffer[0], buffer.size());
+    EXPECT_EQ(eth1.size(), eth2.size());
 }

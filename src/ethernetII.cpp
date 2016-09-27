@@ -179,6 +179,9 @@ void EthernetII::write_serialization(uint8_t* buffer, uint32_t total_sz, const P
             payload_type(static_cast<uint16_t>(flag));
         }
     }
+    else {
+        payload_type(Constants::Ethernet::UNKNOWN);
+    }
     stream.write(header_);
     const uint32_t trailer = trailer_size();
     if (trailer) {
