@@ -140,7 +140,6 @@ void Flow::update_state(const TCP& tcp) {
             ack_tracker_ = AckTracker(tcp.ack_seq());
         #endif // TINS_HAVE_ACK_TRACKER
         state_ = ESTABLISHED;
-        data_tracker_.sequence_number(data_tracker_.sequence_number() + 1);
     }
     else if (state_ == UNKNOWN && (tcp.flags() & TCP::SYN) != 0) {
         // This is the server's state, sending it's first SYN|ACK
@@ -148,7 +147,7 @@ void Flow::update_state(const TCP& tcp) {
             ack_tracker_ = AckTracker(tcp.ack_seq());
         #endif // TINS_HAVE_ACK_TRACKER
         state_ = SYN_SENT;
-        data_tracker_.sequence_number(tcp.seq());
+        data_tracker_.sequence_number(tcp.seq() + 1);
         const TCP::option* mss_option = tcp.search_option(TCP::MSS);
         if (mss_option) {
             mss_ = mss_option->to<uint16_t>();

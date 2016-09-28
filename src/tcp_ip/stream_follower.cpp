@@ -90,7 +90,6 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
     }
     stream_id identifier = stream_id::make_identifier(packet);
     streams_type::iterator iter = streams_.find(identifier);
-    bool process = true;
     if (iter == streams_.end()) {
         // Start tracking if they're either SYNs or they contain data (attach
         // to an already running flow).
@@ -103,49 +102,49 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
             else {
                 throw callback_not_set();
             }
-            if (tcp->flags() == TCP::SYN) {
-                process = false;
-            }
-            else {
-                // Otherwise, assume the connection is established
+            if (tcp->flags() != TCP::SYN) {
+                // assume the connection is established
                 iter->second.client_flow().state(Flow::ESTABLISHED);
                 iter->second.server_flow().state(Flow::ESTABLISHED);
             }
         }
         else {
-            process = false;
+            // no stream found and no stream was created
+            if (last_cleanup_ + stream_keep_alive_ <= ts) {
+                cleanup_streams(ts);
+            }
+            return;
         }
     }
     // We'll process it if we had already seen this stream or if we just attached to
     // it and it contains payload
-    if (process) {
-        Stream& stream = iter->second;
-        stream.process_packet(packet, ts);
-        // Check for different potential termination 
-        size_t total_chunks = stream.client_flow().buffered_payload().size() + 
-                              stream.server_flow().buffered_payload().size();
-        uint32_t total_buffered_bytes = stream.client_flow().total_buffered_bytes() +
-                                        stream.server_flow().total_buffered_bytes();
-        bool terminate_stream = total_chunks > max_buffered_chunks_ || 
-                                total_buffered_bytes > max_buffered_bytes_;
-        TerminationReason reason = BUFFERED_DATA;
-        #ifdef TINS_HAVE_ACK_TRACKER
-        if (!terminate_stream) {
-            uint32_t count = 0;
-            count += stream.client_flow().ack_tracker().acked_intervals().iterative_size();
-            count += stream.server_flow().ack_tracker().acked_intervals().iterative_size();
-            terminate_stream = count > DEFAULT_MAX_SACKED_INTERVALS;
-            reason = SACKED_SEGMENTS;
-        }
-        #endif // TINS_HAVE_ACK_TRACKER
-        if (stream.is_finished() || terminate_stream) {
-            // If we're terminating the stream, execute the termination callback
-            if (terminate_stream && on_stream_termination_) {
-                on_stream_termination_(stream, reason);
-            }
-            streams_.erase(iter);
-        }
+    Stream& stream = iter->second;
+    stream.process_packet(packet, ts);
+    // Check for different potential termination
+    size_t total_chunks = stream.client_flow().buffered_payload().size() +
+                          stream.server_flow().buffered_payload().size();
+    uint32_t total_buffered_bytes = stream.client_flow().total_buffered_bytes() +
+                                    stream.server_flow().total_buffered_bytes();
+    bool terminate_stream = total_chunks > max_buffered_chunks_ ||
+                            total_buffered_bytes > max_buffered_bytes_;
+    TerminationReason reason = BUFFERED_DATA;
+    #ifdef TINS_HAVE_ACK_TRACKER
+    if (!terminate_stream) {
+        uint32_t count = 0;
+        count += stream.client_flow().ack_tracker().acked_intervals().iterative_size();
+        count += stream.server_flow().ack_tracker().acked_intervals().iterative_size();
+        terminate_stream = count > DEFAULT_MAX_SACKED_INTERVALS;
+        reason = SACKED_SEGMENTS;
     }
+    #endif // TINS_HAVE_ACK_TRACKER
+    if (stream.is_finished() || terminate_stream) {
+        // If we're terminating the stream, execute the termination callback
+        if (terminate_stream && on_stream_termination_) {
+            on_stream_termination_(stream, reason);
+        }
+        streams_.erase(iter);
+    }
+
     if (last_cleanup_ + stream_keep_alive_ <= ts) {
         cleanup_streams(ts);
     }

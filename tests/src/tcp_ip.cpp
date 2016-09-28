@@ -354,7 +354,7 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     EXPECT_EQ(Flow::ESTABLISHED, stream.client_flow().state());
     EXPECT_EQ(Flow::SYN_SENT, stream.server_flow().state());
     EXPECT_EQ(30U, stream.client_flow().sequence_number());
-    EXPECT_EQ(60U, stream.server_flow().sequence_number());
+    EXPECT_EQ(61U, stream.server_flow().sequence_number());
     EXPECT_EQ(IPv4Address("4.3.2.1"), stream.client_flow().dst_addr_v4());
     EXPECT_EQ(25, stream.client_flow().dport());
     EXPECT_EQ(IPv4Address("1.2.3.4"), stream.server_flow().dst_addr_v4());
