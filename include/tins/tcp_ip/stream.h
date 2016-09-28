@@ -42,8 +42,8 @@
 #include <stdint.h>
 #include "../macros.h"
 #include "../hw_address.h"
+#include "../config.h"
 #include "flow.h"
-#include "config.h"
 #ifdef TINS_HAVE_TCP_STREAM_CUSTOM_DATA
     #include <boost/any.hpp>
 #endif
