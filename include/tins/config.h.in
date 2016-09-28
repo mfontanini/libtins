@@ -19,6 +19,9 @@
 /* Have TCP ACK tracking */
 #cmakedefine TINS_HAVE_ACK_TRACKER
 
+/* Have TCP stream custom data */
+#cmakedefine TINS_HAVE_TCP_STREAM_CUSTOM_DATA
+
 /* Have GCC builtin swap */
 #cmakedefine TINS_HAVE_GCC_BUILTIN_SWAP
 

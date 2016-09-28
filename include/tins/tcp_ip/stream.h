@@ -40,10 +40,13 @@
 #include <functional>
 #include <chrono>
 #include <stdint.h>
-#include <boost/any.hpp>
 #include "../macros.h"
 #include "../hw_address.h"
 #include "flow.h"
+#include "config.h"
+#ifdef TINS_HAVE_TCP_STREAM_CUSTOM_DATA
+    #include <boost/any.hpp>
+#endif
 
 namespace Tins {
 
@@ -363,6 +366,7 @@ public:
      */
     bool ack_tracking_enabled() const;
 
+    #ifdef TINS_HAVE_TCP_STREAM_CUSTOM_DATA
     /**
      * \brief Create or retrieve an application-specific payload for this stream.
      *
@@ -381,6 +385,7 @@ public:
         };
         return boost::any_cast<T&>(user_data_);
     }
+    #endif // TINS_HAVE_TCP_STREAM_CUSTOM_DATA
 
 private:
     static Flow extract_client_flow(const PDU& packet);
@@ -409,7 +414,9 @@ private:
     bool auto_cleanup_client_;
     bool auto_cleanup_server_;
 
+    #ifdef TINS_HAVE_TCP_STREAM_CUSTOM_DATA
     boost::any user_data_;
+    #endif // TINS_HAVE_TCP_STREAM_CUSTOM_DATA
 };
 
 } // TCPIP
