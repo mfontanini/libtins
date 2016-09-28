@@ -40,6 +40,7 @@
 #include <functional>
 #include <chrono>
 #include <stdint.h>
+#include <boost/any.hpp>
 #include "../macros.h"
 #include "../hw_address.h"
 #include "flow.h"
@@ -361,6 +362,26 @@ public:
      * \brief Indicates whether ACK number tracking is enabled for this stream
      */
     bool ack_tracking_enabled() const;
+
+    /**
+     * \brief Create or retrieve an application-specific payload for this stream.
+     *
+     * The first call to this method will create user data as specified by the
+     * template parameter (using a mandatory default constructor). Subsequent calls
+     * have to be made with the same template parameter or the method will fail with
+     * boost::bad_any_cast. In any case, the method returns a reference to the user
+     * data.
+     *
+     * \return A reference to a user data block in the stream.
+     */
+    template<typename T>
+    T& user_data() {
+        if (user_data_.empty()) {
+            user_data_ = T();
+        };
+        return boost::any_cast<T&>(user_data_);
+    }
+
 private:
     static Flow extract_client_flow(const PDU& packet);
     static Flow extract_server_flow(const PDU& packet);
@@ -387,6 +408,8 @@ private:
     timestamp_type last_seen_;
     bool auto_cleanup_client_;
     bool auto_cleanup_server_;
+
+    boost::any user_data_;
 };
 
 } // TCPIP
