@@ -121,6 +121,9 @@ void Dot1Q::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *)
             payload_type(static_cast<uint16_t>(flag));
         }
     }
+    else {
+        payload_type(0);
+    }
     stream.write(header_);
 
     // Skip inner PDU size

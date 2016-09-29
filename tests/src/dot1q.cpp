@@ -93,3 +93,13 @@ TEST_F(Dot1QTest, QinQ) {
     EXPECT_EQ(10, q1.id());
     EXPECT_EQ(42, q2.id());
 }
+
+TEST_F(Dot1QTest, SerializeAfterInnerPduRemoved) {
+    EthernetII eth1 = EthernetII() / Dot1Q() / IP();
+    eth1.serialize();
+    eth1.rfind_pdu<Dot1Q>().inner_pdu(0);
+
+    PDU::serialization_type buffer = eth1.serialize();
+    EthernetII eth2(&buffer[0], buffer.size());
+    EXPECT_EQ(eth1.size(), eth2.size());
+}
