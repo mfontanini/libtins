@@ -232,6 +232,9 @@ void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pa
             set_last_next_header(new_flag);
         }
     }
+    else {
+        set_last_next_header(0);
+    }
     payload_length(static_cast<uint16_t>(total_sz - sizeof(header_)));
     stream.write(header_);
     for (headers_type::const_iterator it = ext_headers_.begin(); it != ext_headers_.end(); ++it) {
