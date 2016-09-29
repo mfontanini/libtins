@@ -845,3 +845,13 @@ TEST_F(IPTest, SerializePacketHavingICMPExtensionsWithoutLengthAndShortPayload) 
     ASSERT_EQ(1UL, serialized.rfind_pdu<ICMP>().extensions().extensions().size());
     EXPECT_EQ(ext_payload, serialized.rfind_pdu<ICMP>().extensions().extensions().begin()->payload());
 }
+
+TEST_F(IPTest, SerializeAfterInnerPduRemoved) {
+    EthernetII eth1 = EthernetII() / IP() / TCP();
+    eth1.serialize();
+    eth1.rfind_pdu<IP>().inner_pdu(0);
+
+    PDU::serialization_type buffer = eth1.serialize();
+    EthernetII eth2(&buffer[0], buffer.size());
+    EXPECT_EQ(eth1.size(), eth2.size());
+}

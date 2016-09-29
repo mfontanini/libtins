@@ -439,6 +439,9 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pare
             protocol(new_flag);
         }
     }
+    else {
+        protocol(0);
+    }
 
     uint16_t original_frag_off = header_.frag_off;
     
