@@ -136,7 +136,7 @@ Dot11QoSData::Dot11QoSData(const uint8_t* buffer, uint32_t total_sz)
     InputMemoryStream stream(buffer, total_sz);
     stream.skip(Dot11Data::header_size());
     stream.read(qos_control_);
-    if (total_sz) {
+    if (stream) {
         // If the wep bit is on, then just use a RawPDU
         if (wep()) {
             inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
