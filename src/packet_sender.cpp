@@ -263,7 +263,8 @@ void PacketSender::open_l3_socket(SocketType type) {
         #else
         typedef const char* option_ptr;
         #endif
-        if (setsockopt(sockfd, IPPROTO_IP, IP_HDRINCL, (option_ptr)&on, sizeof(on)) != 0) {
+        const int level = (type == IPV6_SOCKET) ? IPPROTO_IPV6 : IPPROTO_IP;
+        if (setsockopt(sockfd, level, IP_HDRINCL, (option_ptr)&on, sizeof(on)) != 0) {
             throw socket_open_error(make_error_string());
         }
 
