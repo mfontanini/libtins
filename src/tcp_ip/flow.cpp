@@ -110,22 +110,25 @@ void Flow::process_packet(PDU& pdu) {
     }
     const uint32_t chunk_end = tcp->seq() + raw->payload_size();
     const uint32_t current_seq = data_tracker_.sequence_number();
-    // If the end of the chunk ends after our current sequence number, process it.
-    if (seq_compare(chunk_end, current_seq) >= 0) {
-        uint32_t seq = tcp->seq();
-        // If we're going to buffer this and we have a buffering callback, execute it
-        if (seq > current_seq && on_out_of_order_callback_) {
-            on_out_of_order_callback_(*this, seq, raw->payload());
-        }
-        if (data_tracker_.process_payload(seq, move(raw->payload()))) {
-            if (on_data_callback_) {
-                on_data_callback_(*this);
-            }
+    // If the end of the chunk ends before the current sequence number or
+    // if we're going to buffer this and we have a buffering callback, execute it
+    if (seq_compare(chunk_end, current_seq) < 0 ||
+            seq_compare(tcp->seq(), current_seq) > 0){
+        if (on_out_of_order_callback_) {
+            on_out_of_order_callback_(*this, tcp->seq(), raw->payload());
         }
     }
-    else if (on_out_of_order_callback_) {
-        on_out_of_order_callback_(*this, tcp->seq(), raw->payload());
+
+    // can process either way, since it will abort immediately if not needed
+    if (data_tracker_.process_payload(tcp->seq(), move(raw->payload()))) {
+        if (on_data_callback_) {
+            on_data_callback_(*this);
+        }
     }
+}
+
+void Flow::advance_sequence(uint32_t seq) {
+    data_tracker_.advance_sequence(seq);
 }
 
 void Flow::update_state(const TCP& tcp) {

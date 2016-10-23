@@ -108,6 +108,23 @@ bool DataTracker::process_payload(uint32_t seq, payload_type payload) {
     return added_some;
 }
 
+void DataTracker::advance_sequence(uint32_t seq) {
+    if (seq_compare(seq, seq_number_) <= 0) {
+        return;
+    }
+
+    for (auto it = buffered_payload_.begin(); it != buffered_payload_.end();) {
+        if (seq_compare(it->first, seq) <= 0) {
+            total_buffered_bytes_ -= it->second.size();
+            it = buffered_payload_.erase(it);
+        } else {
+            it++;
+        }
+    }
+
+    seq_number_ = seq;
+}
+
 uint32_t DataTracker::sequence_number() const {
     return seq_number_;
 }
