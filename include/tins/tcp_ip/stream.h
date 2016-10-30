@@ -413,9 +413,6 @@ public:
      * (the client one in this case) will be set to the out of order packet's sequece number. 
      * This means that if an out of order packet is captured having a sequence number X + 5 right
      * after enabling recovery mode, then the Flow's sequence number will be set to X + 5. 
-     *
-     * Note that enabling recovery mode will override the Stream's out of order callbacks, so
-     * you if you set a callback and then call this method, your callback will be lost.
      */
     void enable_recovery_mode(uint32_t recovery_window);
 
@@ -440,10 +437,12 @@ private:
                                 const payload_type& payload);
     static void client_recovery_mode_handler(Stream& stream, uint32_t sequence_number,
                                              const payload_type& payload,
-                                             uint32_t recovery_sequence_number_end);
+                                             uint32_t recovery_sequence_number_end,
+                                             const stream_packet_callback_type& original_callback);
     static void server_recovery_mode_handler(Stream& stream, uint32_t sequence_number,
                                              const payload_type& payload,
-                                             uint32_t recovery_sequence_number_end);
+                                             uint32_t recovery_sequence_number_end,
+                                             const stream_packet_callback_type& original_callback);
     static bool recovery_mode_handler(Flow& flow, uint32_t sequence_number,
                                       uint32_t recovery_sequence_number_end);
 

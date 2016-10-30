@@ -279,9 +279,11 @@ bool Stream::is_partial_stream() const {
 void Stream::enable_recovery_mode(uint32_t recovery_window) {
     using namespace std::placeholders;
     client_out_of_order_callback(bind(&Stream::client_recovery_mode_handler, _1, _2, _3,
-                                 client_flow_.sequence_number() + recovery_window));
+                                 client_flow_.sequence_number() + recovery_window,
+                                 on_client_out_of_order_callback_));
     server_out_of_order_callback(bind(&Stream::server_recovery_mode_handler, _1, _2, _3,
-                                 server_flow_.sequence_number() + recovery_window));
+                                 server_flow_.sequence_number() + recovery_window,
+                                 on_server_out_of_order_callback_));
     directions_recovery_mode_enabled_ = 2;
 }
 
@@ -320,22 +322,30 @@ void Stream::on_server_out_of_order(const Flow& flow, uint32_t seq, const payloa
 }
 
 void Stream::client_recovery_mode_handler(Stream& stream, uint32_t sequence_number,
-                                          const payload_type& /*payload*/,
-                                          uint32_t recovery_sequence_number_end) {
+                                          const payload_type& payload,
+                                          uint32_t recovery_sequence_number_end,
+                                          const stream_packet_callback_type& original_callback) {
     if (!recovery_mode_handler(stream.client_flow(), sequence_number,
                                recovery_sequence_number_end)) {
-        stream.client_out_of_order_callback(stream_packet_callback_type());
+        stream.client_out_of_order_callback(original_callback);
         stream.directions_recovery_mode_enabled_--;
+    }
+    if (original_callback) {
+        original_callback(stream, sequence_number, payload);
     }
 }
 
 void Stream::server_recovery_mode_handler(Stream& stream, uint32_t sequence_number,
-                                          const payload_type& /*payload*/,
-                                          uint32_t recovery_sequence_number_end) {
+                                          const payload_type& payload,
+                                          uint32_t recovery_sequence_number_end,
+                                          const stream_packet_callback_type& original_callback) {
     if (!recovery_mode_handler(stream.server_flow(), sequence_number,
                                recovery_sequence_number_end)) {
-        stream.server_out_of_order_callback(stream_packet_callback_type());
+        stream.server_out_of_order_callback(original_callback);
         stream.directions_recovery_mode_enabled_--;
+    }
+    if (original_callback) {
+        original_callback(stream, sequence_number, payload);
     }
 }
 
