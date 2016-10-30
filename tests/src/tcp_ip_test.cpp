@@ -124,6 +124,8 @@ void FlowTest::on_new_stream(Stream& stream) {
     using std::placeholders::_1;
     stream.client_data_callback(bind(&FlowTest::cumulative_stream_client_data_handler,
                                      this, _1));
+    stream.server_data_callback(bind(&FlowTest::cumulative_stream_server_data_handler,
+                                     this, _1));
 }
 
 void FlowTest::cumulative_stream_client_data_handler(Stream& stream) {
@@ -510,6 +512,77 @@ TEST_F(FlowTest, StreamFollower_FollowStream) {
     }
     EXPECT_EQ(chunk_packets.size(), stream_client_payload_chunks.size());
     EXPECT_EQ(payload, merge_chunks(stream_client_payload_chunks));
+}
+
+TEST_F(FlowTest, StreamFollower_AttachToStreams) {
+    using std::placeholders::_1;
+
+    ordering_info_type chunks = split_payload(payload, 5);
+    vector<EthernetII> packets = chunks_to_packets(30 /*initial_seq*/, chunks, payload);
+    set_endpoints(packets, "1.2.3.4", 22, "4.3.2.1", 25);
+    StreamFollower follower;
+    follower.follow_partial_streams(true);
+    follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
+    for (size_t i = 0; i < packets.size(); ++i) {
+        follower.process_packet(packets[i]);
+    }
+    EXPECT_EQ(packets.size(), stream_client_payload_chunks.size());
+    EXPECT_EQ(payload, merge_chunks(stream_client_payload_chunks));
+}
+
+TEST_F(FlowTest, StreamFollower_AttachToStreams_PacketsInBothDirections) {
+    using std::placeholders::_1;
+
+    ordering_info_type client_chunks = split_payload(payload, 5);
+    ordering_info_type server_chunks = split_payload(payload, 5);
+    vector<EthernetII> client_packets = chunks_to_packets(30 /*initial_seq*/, client_chunks,
+                                                          payload);
+    vector<EthernetII> server_packets = chunks_to_packets(42 /*initial_seq*/, server_chunks,
+                                                          payload);
+    // Let's say the first packet acks the range before the first server packet
+    client_packets[0].rfind_pdu<TCP>().ack_seq(42);
+    set_endpoints(client_packets, "1.2.3.4", 22, "4.3.2.1", 25);
+    set_endpoints(server_packets, "4.3.2.1", 25, "1.2.3.4", 22);
+    StreamFollower follower;
+    follower.follow_partial_streams(true);
+    follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
+    for (size_t i = 0; i < client_packets.size(); ++i) {
+        follower.process_packet(client_packets[i]);
+    }
+    for (size_t i = 0; i < server_packets.size(); ++i) {
+        follower.process_packet(server_packets[i]);
+    }
+    EXPECT_EQ(client_packets.size(), stream_client_payload_chunks.size());
+    EXPECT_EQ(server_packets.size(), stream_server_payload_chunks.size());
+    EXPECT_EQ(payload, merge_chunks(stream_client_payload_chunks));
+    EXPECT_EQ(payload, merge_chunks(stream_server_payload_chunks));
+}
+
+TEST_F(FlowTest, StreamFollower_AttachToStreams_SecondPacketLost) {
+    using std::placeholders::_1;
+
+    ordering_info_type chunks = split_payload(payload, 5);
+    vector<EthernetII> packets = chunks_to_packets(30 /*initial_seq*/, chunks, payload);
+    string trimmed_payload = payload;
+    // Erase the second packet
+    packets.erase(packets.begin() + 1);
+    // Erase the 5-10th bytes
+    trimmed_payload.erase(5, 5);
+    set_endpoints(packets, "1.2.3.4", 22, "4.3.2.1", 25);
+    StreamFollower follower;
+    follower.follow_partial_streams(true);
+    follower.new_stream_callback([&](Stream& stream) {
+        on_new_stream(stream);
+        stream.client_out_of_order_callback([](Stream& stream, uint32_t seq,
+                                               const Stream::payload_type&) {
+            stream.client_flow().advance_sequence(seq);
+        });
+    });
+    for (size_t i = 0; i < packets.size(); ++i) {
+        follower.process_packet(packets[i]);
+    }
+    EXPECT_EQ(packets.size(), stream_client_payload_chunks.size());
+    EXPECT_EQ(trimmed_payload, merge_chunks(stream_client_payload_chunks));
 }
 
 #ifdef TINS_HAVE_ACK_TRACKER

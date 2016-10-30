@@ -182,6 +182,10 @@ Stream& StreamFollower::find_stream(const stream_id& id) {
     }
 }
 
+void StreamFollower::follow_partial_streams(bool value) {
+    attach_to_flows_ = value;
+}
+
 void StreamFollower::cleanup_streams(const timestamp_type& now) {
     streams_type::iterator iter = streams_.begin();
     while (iter != streams_.end()) {

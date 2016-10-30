@@ -182,6 +182,13 @@ public:
      */
     Stream& find_stream(const IPv6Address& client_addr, uint16_t client_port,
                         const IPv6Address& server_addr, uint16_t server_port);
+
+    /**
+     * \brief Indicates whether partial streams should be followed.
+     *
+     *
+     */
+    void follow_partial_streams(bool value);
 private:
     typedef Stream::timestamp_type timestamp_type;
 

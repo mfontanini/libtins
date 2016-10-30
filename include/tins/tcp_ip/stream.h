@@ -90,6 +90,9 @@ public:
     /**
      * The type used for packet-triggered callbacks
      *
+     * The second and third arguments are the sequence number and payload of the packet that
+     * arrived out of order.
+     *
      * /sa Flow::buffering_callback
      */
     typedef std::function<void(Stream&,
