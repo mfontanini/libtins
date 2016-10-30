@@ -390,6 +390,10 @@ public:
     }
     #endif // TINS_HAVE_TCP_STREAM_CUSTOM_DATA
 
+    /**
+     * Indicates whether this is a stream that we attached to after it had actually started
+     */
+    bool is_attached() const;
 private:
     static Flow extract_client_flow(const PDU& packet);
     static Flow extract_server_flow(const PDU& packet);
@@ -416,6 +420,7 @@ private:
     timestamp_type last_seen_;
     bool auto_cleanup_client_;
     bool auto_cleanup_server_;
+    bool is_attached_;
 
     #ifdef TINS_HAVE_TCP_STREAM_CUSTOM_DATA
     boost::any user_data_;

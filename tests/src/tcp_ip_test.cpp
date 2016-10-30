@@ -376,6 +376,7 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
 
     EXPECT_EQ(Flow::ESTABLISHED, stream.server_flow().state());
     EXPECT_EQ(61U, stream.server_flow().sequence_number());
+    EXPECT_FALSE(stream.is_attached());
 }
 
 TEST_F(FlowTest, StreamFollower_TCPOptions) {
@@ -528,6 +529,9 @@ TEST_F(FlowTest, StreamFollower_AttachToStreams) {
     }
     EXPECT_EQ(packets.size(), stream_client_payload_chunks.size());
     EXPECT_EQ(payload, merge_chunks(stream_client_payload_chunks));
+
+    Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25);
+    EXPECT_TRUE(stream.is_attached());
 }
 
 TEST_F(FlowTest, StreamFollower_AttachToStreams_PacketsInBothDirections) {

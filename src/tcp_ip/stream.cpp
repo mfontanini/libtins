@@ -61,12 +61,16 @@ namespace TCPIP {
 Stream::Stream(PDU& packet, const timestamp_type& ts) 
 : client_flow_(extract_client_flow(packet)),
   server_flow_(extract_server_flow(packet)), create_time_(ts), 
-  last_seen_(ts), auto_cleanup_client_(true), auto_cleanup_server_(true) {
+  last_seen_(ts), auto_cleanup_client_(true), auto_cleanup_server_(true),
+  is_attached_(false) {
     const EthernetII* eth = packet.find_pdu<EthernetII>();
     if (eth) {
         client_hw_addr_ = eth->src_addr();
         server_hw_addr_ = eth->dst_addr();
     }
+    const TCP& tcp = packet.rfind_pdu<TCP>();
+    // If this is not the first packet of a stream (SYN), then we've attached to it
+    is_attached_ = tcp.flags() != TCP::SYN;
 }
 
 void Stream::process_packet(PDU& packet, const timestamp_type& ts) {
@@ -266,6 +270,10 @@ void Stream::enable_ack_tracking() {
 
 bool Stream::ack_tracking_enabled() const {
     return client_flow().ack_tracking_enabled() && server_flow().ack_tracking_enabled();
+}
+
+bool Stream::is_attached() const {
+    return is_attached_;
 }
 
 void Stream::on_client_flow_data(const Flow& /*flow*/) {
