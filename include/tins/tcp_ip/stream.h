@@ -391,9 +391,41 @@ public:
     #endif // TINS_HAVE_TCP_STREAM_CUSTOM_DATA
 
     /**
-     * Indicates whether this is a stream that we attached to after it had actually started
+     * Indicates whether this is a partial stream that we attached to after it had actually started
      */
-    bool is_attached() const;
+    bool is_partial_stream() const;
+
+    /**
+     * \brief Enables recovery mode on this stream.
+     *
+     * Recovery mode can be used when either a stream is having high packet loss or on partial
+     * streams. On the latter case, if a stream starts with out of order packets, then the holes
+     * left by them might never be filled. Enabling recovery mode right after attaching to
+     * a stream allows automatic recovery so the stream will skip the out of order packets 
+     * and continue tracking the stream by ignoring those holes.
+     *
+     * The way recovery mode is, given a recovery window size, it will skip all out of order
+     * packets that arrive anywhere within the window given by the sequence number at the time of
+     * enabling recovery mode + the recovery window size. This is, given a stream for which the
+     * client sequence number is X and a recovery window of size Y, then enabling recovery mode
+     * at that point will ignore any out of order packets having sequence numbers in the range
+     * (X, X+Y]. "Ignoring" here means that the actual sequence number of the corresponding Flow
+     * (the client one in this case) will be set to the out of order packet's sequece number. 
+     * This means that if an out of order packet is captured having a sequence number X + 5 right
+     * after enabling recovery mode, then the Flow's sequence number will be set to X + 5. 
+     *
+     * Note that enabling recovery mode will override the Stream's out of order callbacks, so
+     * you if you set a callback and then call this method, your callback will be lost.
+     */
+    void enable_recovery_mode(uint32_t recovery_window);
+
+    /**
+     * \brief Returns true iff recovery mode is enabled
+     *
+     * Note that the recovery mode flag will be cleaned only after capturing an out of order
+     * packet that is outside of the recovery window.
+     */
+    bool is_recovery_mode_enabled() const;
 private:
     static Flow extract_client_flow(const PDU& packet);
     static Flow extract_server_flow(const PDU& packet);
@@ -406,6 +438,14 @@ private:
     void on_server_out_of_order(const Flow& flow,
                                 uint32_t seq,
                                 const payload_type& payload);
+    static void client_recovery_mode_handler(Stream& stream, uint32_t sequence_number,
+                                             const payload_type& payload,
+                                             uint32_t recovery_sequence_number_end);
+    static void server_recovery_mode_handler(Stream& stream, uint32_t sequence_number,
+                                             const payload_type& payload,
+                                             uint32_t recovery_sequence_number_end);
+    static bool recovery_mode_handler(Flow& flow, uint32_t sequence_number,
+                                      uint32_t recovery_sequence_number_end);
 
     Flow client_flow_;
     Flow server_flow_;
@@ -420,7 +460,8 @@ private:
     timestamp_type last_seen_;
     bool auto_cleanup_client_;
     bool auto_cleanup_server_;
-    bool is_attached_;
+    bool is_partial_stream_;
+    unsigned directions_recovery_mode_enabled_;
 
     #ifdef TINS_HAVE_TCP_STREAM_CUSTOM_DATA
     boost::any user_data_;

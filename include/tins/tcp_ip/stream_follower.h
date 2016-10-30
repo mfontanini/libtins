@@ -186,7 +186,19 @@ public:
     /**
      * \brief Indicates whether partial streams should be followed.
      *
+     * Following partial streams allows capturing packets in the middle of a stream (e.g. 
+     * not capturing the three way handshake) and still reassembling them.
      *
+     * This can cause some issues if the first packet captured is out of order, as that would 
+     * create a hole in the sequence number range that might never be filled. In order to 
+     * allow recovering successfully, there's 2 choices:
+     *
+     * - Skipping those holes manually by using Flow::advance_sequence.
+     * - Using Stream::enable_recovery_mode. This is the easiest mechanism and can be used
+     * on the new stream callback (make sure to only enable it for stream for which
+     * Stream::is_partial_stream is true).
+     *
+     * \param value Whether following partial stream is allowed.
      */
     void follow_partial_streams(bool value);
 private:

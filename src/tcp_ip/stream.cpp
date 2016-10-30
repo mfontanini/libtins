@@ -62,15 +62,15 @@ Stream::Stream(PDU& packet, const timestamp_type& ts)
 : client_flow_(extract_client_flow(packet)),
   server_flow_(extract_server_flow(packet)), create_time_(ts), 
   last_seen_(ts), auto_cleanup_client_(true), auto_cleanup_server_(true),
-  is_attached_(false) {
+  is_partial_stream_(false), directions_recovery_mode_enabled_(0) {
     const EthernetII* eth = packet.find_pdu<EthernetII>();
     if (eth) {
         client_hw_addr_ = eth->src_addr();
         server_hw_addr_ = eth->dst_addr();
     }
     const TCP& tcp = packet.rfind_pdu<TCP>();
-    // If this is not the first packet of a stream (SYN), then we've attached to it
-    is_attached_ = tcp.flags() != TCP::SYN;
+    // If this is not the first packet of a stream (SYN), then it's a partial stream
+    is_partial_stream_ = tcp.flags() != TCP::SYN;
 }
 
 void Stream::process_packet(PDU& packet, const timestamp_type& ts) {
@@ -272,8 +272,21 @@ bool Stream::ack_tracking_enabled() const {
     return client_flow().ack_tracking_enabled() && server_flow().ack_tracking_enabled();
 }
 
-bool Stream::is_attached() const {
-    return is_attached_;
+bool Stream::is_partial_stream() const {
+    return is_partial_stream_;
+}
+
+void Stream::enable_recovery_mode(uint32_t recovery_window) {
+    using namespace std::placeholders;
+    client_out_of_order_callback(bind(&Stream::client_recovery_mode_handler, _1, _2, _3,
+                                 client_flow_.sequence_number() + recovery_window));
+    server_out_of_order_callback(bind(&Stream::server_recovery_mode_handler, _1, _2, _3,
+                                 server_flow_.sequence_number() + recovery_window));
+    directions_recovery_mode_enabled_ = 2;
+}
+
+bool Stream::is_recovery_mode_enabled() const {
+    return directions_recovery_mode_enabled_ > 0;
 }
 
 void Stream::on_client_flow_data(const Flow& /*flow*/) {
@@ -294,20 +307,47 @@ void Stream::on_server_flow_data(const Flow& /*flow*/) {
     }
 }
 
-void Stream::on_client_out_of_order(const Flow& flow,
-                                 uint32_t seq,
-                                 const payload_type& payload) {
+void Stream::on_client_out_of_order(const Flow& flow, uint32_t seq, const payload_type& payload) {
     if (on_client_out_of_order_callback_) {
         on_client_out_of_order_callback_(*this, seq, payload);
     }
 }
 
-void Stream::on_server_out_of_order(const Flow& flow,
-                                 uint32_t seq,
-                                 const payload_type& payload) {
+void Stream::on_server_out_of_order(const Flow& flow, uint32_t seq, const payload_type& payload) {
     if (on_server_out_of_order_callback_) {
         on_server_out_of_order_callback_(*this, seq, payload);
     }
+}
+
+void Stream::client_recovery_mode_handler(Stream& stream, uint32_t sequence_number,
+                                          const payload_type& /*payload*/,
+                                          uint32_t recovery_sequence_number_end) {
+    if (!recovery_mode_handler(stream.client_flow(), sequence_number,
+                               recovery_sequence_number_end)) {
+        stream.client_out_of_order_callback(stream_packet_callback_type());
+        stream.directions_recovery_mode_enabled_--;
+    }
+}
+
+void Stream::server_recovery_mode_handler(Stream& stream, uint32_t sequence_number,
+                                          const payload_type& /*payload*/,
+                                          uint32_t recovery_sequence_number_end) {
+    if (!recovery_mode_handler(stream.server_flow(), sequence_number,
+                               recovery_sequence_number_end)) {
+        stream.server_out_of_order_callback(stream_packet_callback_type());
+        stream.directions_recovery_mode_enabled_--;
+    }
+}
+
+bool Stream::recovery_mode_handler(Flow& flow, uint32_t sequence_number,
+                                   uint32_t recovery_sequence_number_end) {
+    // If this packet comes after our sequence number (would create a hole), skip it
+    if (sequence_number > flow.sequence_number() &&
+        sequence_number <= recovery_sequence_number_end) {
+        flow.advance_sequence(sequence_number);
+    }
+    // Return true iff we need to keep being in recovery mode
+    return recovery_sequence_number_end > sequence_number;
 }
 
 } // TCPIP

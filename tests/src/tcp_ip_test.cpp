@@ -376,7 +376,7 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
 
     EXPECT_EQ(Flow::ESTABLISHED, stream.server_flow().state());
     EXPECT_EQ(61U, stream.server_flow().sequence_number());
-    EXPECT_FALSE(stream.is_attached());
+    EXPECT_FALSE(stream.is_partial_stream());
 }
 
 TEST_F(FlowTest, StreamFollower_TCPOptions) {
@@ -531,7 +531,7 @@ TEST_F(FlowTest, StreamFollower_AttachToStreams) {
     EXPECT_EQ(payload, merge_chunks(stream_client_payload_chunks));
 
     Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25);
-    EXPECT_TRUE(stream.is_attached());
+    EXPECT_TRUE(stream.is_partial_stream());
 }
 
 TEST_F(FlowTest, StreamFollower_AttachToStreams_PacketsInBothDirections) {
@@ -572,6 +572,7 @@ TEST_F(FlowTest, StreamFollower_AttachToStreams_SecondPacketLost) {
     packets.erase(packets.begin() + 1);
     // Erase the 5-10th bytes
     trimmed_payload.erase(5, 5);
+
     set_endpoints(packets, "1.2.3.4", 22, "4.3.2.1", 25);
     StreamFollower follower;
     follower.follow_partial_streams(true);
@@ -586,6 +587,34 @@ TEST_F(FlowTest, StreamFollower_AttachToStreams_SecondPacketLost) {
         follower.process_packet(packets[i]);
     }
     EXPECT_EQ(packets.size(), stream_client_payload_chunks.size());
+    EXPECT_EQ(trimmed_payload, merge_chunks(stream_client_payload_chunks));
+}
+
+TEST_F(FlowTest, StreamFollower_AttachToStreams_RecoveryMode) {
+    using std::placeholders::_1;
+
+    ordering_info_type chunks = split_payload(payload, 5);
+    vector<EthernetII> packets = chunks_to_packets(30 /*initial_seq*/, chunks, payload);
+    string trimmed_payload = payload;
+    // Erase the 15-20th and 5-10th bytes
+    trimmed_payload.erase(15, 5);
+    trimmed_payload.erase(5, 5);
+    // Erase the second packet
+    packets.erase(packets.begin() + 3);
+    packets.erase(packets.begin() + 1);
+
+    set_endpoints(packets, "1.2.3.4", 22, "4.3.2.1", 25);
+    StreamFollower follower;
+    follower.follow_partial_streams(true);
+    follower.new_stream_callback([&](Stream& stream) {
+        on_new_stream(stream);
+        stream.enable_recovery_mode(20 /*recovery window size*/);
+    });
+    for (size_t i = 0; i < packets.size(); ++i) {
+        follower.process_packet(packets[i]);
+    }
+    EXPECT_EQ(packets.size(), stream_client_payload_chunks.size());
+    EXPECT_EQ(trimmed_payload, merge_chunks(stream_client_payload_chunks));
     EXPECT_EQ(trimmed_payload, merge_chunks(stream_client_payload_chunks));
 }
 
