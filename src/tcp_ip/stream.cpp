@@ -325,13 +325,13 @@ void Stream::client_recovery_mode_handler(Stream& stream, uint32_t sequence_numb
                                           const payload_type& payload,
                                           uint32_t recovery_sequence_number_end,
                                           const stream_packet_callback_type& original_callback) {
-    if (!recovery_mode_handler(stream.client_flow(), sequence_number,
-                               recovery_sequence_number_end)) {
-        stream.client_out_of_order_callback(original_callback);
-        stream.directions_recovery_mode_enabled_--;
-    }
     if (original_callback) {
         original_callback(stream, sequence_number, payload);
+    }
+    if (!recovery_mode_handler(stream.client_flow(), sequence_number,
+                               recovery_sequence_number_end)) {
+        stream.directions_recovery_mode_enabled_--;
+        stream.client_out_of_order_callback(original_callback);
     }
 }
 
@@ -339,13 +339,13 @@ void Stream::server_recovery_mode_handler(Stream& stream, uint32_t sequence_numb
                                           const payload_type& payload,
                                           uint32_t recovery_sequence_number_end,
                                           const stream_packet_callback_type& original_callback) {
-    if (!recovery_mode_handler(stream.server_flow(), sequence_number,
-                               recovery_sequence_number_end)) {
-        stream.server_out_of_order_callback(original_callback);
-        stream.directions_recovery_mode_enabled_--;
-    }
     if (original_callback) {
         original_callback(stream, sequence_number, payload);
+    }
+    if (!recovery_mode_handler(stream.server_flow(), sequence_number,
+                               recovery_sequence_number_end)) {
+        stream.directions_recovery_mode_enabled_--;
+        stream.server_out_of_order_callback(original_callback);
     }
 }
 
