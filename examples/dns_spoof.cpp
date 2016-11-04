@@ -56,7 +56,7 @@ bool callback(const PDU& pdu) {
             if (query.query_type() == DNS::A) {
                 // Here's one! Let's add an answer.
                 dns.add_answer(
-                    DNS::Resource(
+                    DNS::resource(
                         query.dname(), 
                         "127.0.0.1",
                         DNS::A, 
@@ -93,6 +93,8 @@ int main(int argc, char* argv[]) {
     // Sniff on the provided interface in promiscuos mode
     SnifferConfiguration config;
     config.set_promisc_mode(true);
+    // Use immediate mode so we get the packets as fast as we can
+    config.set_immediate_mode(true);
     // Only capture udp packets sent to port 53
     config.set_filter("udp and dst port 53");
     Sniffer sniffer(argv[1], config);
