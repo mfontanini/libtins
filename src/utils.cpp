@@ -244,7 +244,13 @@ vector<Route6Entry> route6_entries() {
     while (next < end) {
         rtm = (rt_msghdr*)next;
         // Filter protocol-cloned entries
-        if ((rtm->rtm_flags & RTF_WASCLONED) == 0 || (rtm->rtm_flags & RTF_PRCLONING) == 0) {
+        bool process_entry = true;
+        // These were removed in recent versions of FreeBSD
+        #if defined(RTF_WASCLONED) && defined(RTF_PRCLONING)
+            process_entry = (rtm->rtm_flags & RTF_WASCLONED) == 0 ||
+                            (rtm->rtm_flags & RTF_PRCLONING) == 0;
+        #endif
+        if (process_entry) {
             parse_header(rtm, sa);
             if (sa[RTAX_DST] && sa[RTAX_GATEWAY] && if_indextoname(rtm->rtm_index, iface_name)) {
                 Route6Entry entry;
