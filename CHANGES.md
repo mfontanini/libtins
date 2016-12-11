@@ -1,4 +1,4 @@
-v3.4 - Wed Mar  9 20:24:54 PST 2016
+##### v3.4 - Wed Mar  9 20:24:54 PST 2016
 
 - Check the secure bit on HandshakeCapturer to detect 2nd packet
 
@@ -50,7 +50,7 @@ v3.4 - Wed Mar  9 20:24:54 PST 2016
 
 - Fix invalid endian on IP fragment offset on OSX
 
-v3.3 - Sun Jan 31 21:06:04 PST 2016
+##### v3.3 - Sun Jan 31 21:06:04 PST 2016
 
 - Add TCP connection close example
 
@@ -215,7 +215,7 @@ immutable
 
 -------------------------------------------------------------------------------
 
-v3.2 - Fri Mar 20 22:12:23 PST 2015
+##### v3.2 - Fri Mar 20 22:12:23 PST 2015
 
 - Added include guard for config.h.
 
@@ -298,7 +298,7 @@ conversion on integral constant.
 
 -------------------------------------------------------------------------------
 
-v3.1 - Sun Aug 24 21:39:43 ART 2014
+##### v3.1 - Sun Aug 24 21:39:43 ART 2014
 
 - Fixed ICMPv6 checksum error on serialization.
 
@@ -308,7 +308,7 @@ v3.1 - Sun Aug 24 21:39:43 ART 2014
 
 -------------------------------------------------------------------------------
 
-v3.0 - Thu Aug  7 21:39:09 ART 2014
+##### v3.0 - Thu Aug  7 21:39:09 ART 2014
 
 - Timestamps can now be constructed from std::chrono::duration.
 
@@ -373,7 +373,7 @@ PDU types.
 
 -------------------------------------------------------------------------------
 
-v2.0 - Thu Jan 23 11:09:38 ART 2014 
+##### v2.0 - Thu Jan 23 11:09:38 ART 2014 
 
 - DNSResourceRecord was removed. Now DNS records are added using 
 DNS::Resource.
@@ -429,7 +429,7 @@ capture size.
 
 -------------------------------------------------------------------------------
 
-v1.2 - Mon oct  7 23:33:49 ART 2013
+##### v1.2 - Mon oct  7 23:33:49 ART 2013
 
 - Added BaseSniffer::begin and BaseSniffer::end.
 
@@ -525,7 +525,7 @@ that used them.
 
 -------------------------------------------------------------------------------
 
-v0.3 - Thu Jan 31 16:47:27 ART 2013
+##### v0.3 - Thu Jan 31 16:47:27 ART 2013
 
 - Added IPv6, ICMPv6 and DHCPv6 classes.
 
@@ -546,7 +546,7 @@ pseudo protocol.
 
 -------------------------------------------------------------------------------
 
-v0.2 - Sat Oct 20 11:26:40 2012
+##### v0.2 - Sat Oct 20 11:26:40 2012
 
 - Added support for big endian architectures. 
 
