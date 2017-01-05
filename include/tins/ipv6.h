@@ -90,6 +90,15 @@ public:
     };
 
     /**
+     * The values used to identify Hop-By-Hop Options and Destination Options.
+     */
+    enum OptionType {
+        PAD_1 = 0,
+        PAD_N = 1,
+        JUMBO_PAYLOAD = 0xC2,
+    };
+
+    /**
      * \brief Extracts metadata for this protocol based on the buffer provided
      *
      * \param buffer Pointer to a buffer
