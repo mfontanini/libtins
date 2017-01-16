@@ -82,6 +82,7 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz)
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
     uint8_t current_header = header_.next_header;
+    uint32_t actual_payload_length = payload_length();
     bool is_payload_fragmented = false;
     while (stream) {
         if (is_extension_header(current_header)) {
@@ -93,24 +94,47 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz)
             // minus one, from the next_header field.
             const uint32_t ext_size = (static_cast<uint32_t>(stream.read<uint8_t>()) + 1) * 8;
             const uint32_t payload_size = ext_size - sizeof(uint8_t) * 2;
-            if (!stream.can_read(ext_size)) { 
+            if (!stream.can_read(payload_size)) {
                 throw malformed_packet();
             }
             // minus one, from the size field
             add_ext_header(ext_header(ext_type, payload_size, stream.pointer()));
+            if (actual_payload_length == 0u && current_header == HOP_BY_HOP) {
+                // could be a jumbogram, look for Jumbo Payload Option
+                InputMemoryStream options(stream.pointer(), payload_size);
+                while (options) {
+                    const uint8_t opt_type = options.read<uint8_t>();
+                    if (opt_type == PAD_1) {
+                        continue;
+                    }
+                    const uint8_t opt_size = options.read<uint8_t>();
+                    if (opt_type == JUMBO_PAYLOAD) {
+                        if (opt_size != 4) {
+                            throw malformed_packet();
+                        }
+                        actual_payload_length = stream.read_be<uint32_t>();
+                        break;
+                    }
+                    options.skip(opt_size);
+                }
+            }
             current_header = ext_type;
+            actual_payload_length -= ext_size;
             stream.skip(payload_size);
         }
         else {
+            if (!stream.can_read(actual_payload_length)) {
+                throw malformed_packet();
+            }
             if (is_payload_fragmented) {
-                inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+                inner_pdu(new Tins::RawPDU(stream.pointer(), actual_payload_length));
             }
             else {
                 inner_pdu(
                     Internals::pdu_from_flag(
                         static_cast<Constants::IP::e>(current_header),
                         stream.pointer(), 
-                        stream.size(),
+                        actual_payload_length,
                         false
                     )
                 );
@@ -119,11 +143,11 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz)
                         Internals::allocate<IPv6>(
                             current_header,
                             stream.pointer(), 
-                            stream.size()
+                            actual_payload_length
                         )
                     );
                     if (!inner_pdu()) {
-                        inner_pdu(new Tins::RawPDU(stream.pointer(), stream.size()));
+                        inner_pdu(new Tins::RawPDU(stream.pointer(), actual_payload_length));
                     }
                 }
             }
