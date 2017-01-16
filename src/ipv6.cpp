@@ -99,21 +99,20 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz)
             }
             // minus one, from the size field
             add_ext_header(ext_header(ext_type, payload_size, stream.pointer()));
-            if (actual_payload_length == 0u && current_header == HOP_BY_HOP)
-            {
+            if (actual_payload_length == 0u && current_header == HOP_BY_HOP) {
                 // could be a jumbogram, look for Jumbo Payload Option
                 InputMemoryStream options(stream.pointer(), payload_size);
                 while (options) {
                     const uint8_t opt_type = options.read<uint8_t>();
-                    if (opt_type == PAD_1)
+                    if (opt_type == PAD_1) {
                         continue;
+                    }
                     const uint8_t opt_size = options.read<uint8_t>();
-                    if (opt_type == JUMBO_PAYLOAD)
-                    {
+                    if (opt_type == JUMBO_PAYLOAD) {
                         if (opt_size != 4) {
                             throw malformed_packet();
                         }
-                        actual_payload_length = Endian::be_to_host<uint32_t>(stream.read<uint32_t>());
+                        actual_payload_length = stream.read_be<uint32_t>();
                         break;
                     }
                     options.skip(opt_size);
