@@ -358,6 +358,8 @@ void PacketSender::send_l2(PDU& pdu,
     PDU::serialization_type buffer = pdu.serialize();
 
     #ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
+        Internals::unused(len_addr);
+        Internals::unused(link_addr);
         open_l2_socket(iface);
         pcap_t* handle = pcap_handles_[iface];
         const int buf_size = static_cast<int>(buffer.size());

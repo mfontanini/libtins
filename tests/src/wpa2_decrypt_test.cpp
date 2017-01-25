@@ -339,7 +339,7 @@ TEST_F(WPA2DecryptTest, HandshakeCapturedCallback) {
         decrypter.decrypt(radio);
     }
 
-    ASSERT_EQ(2, handshakes_.size());
+    ASSERT_EQ(2U, handshakes_.size());
     handshake hs = handshakes_[0];
     EXPECT_EQ(hs.ssid, "Coherer");
     EXPECT_EQ(address_type("00:0d:93:82:36:3a"), hs.client_hw);
@@ -367,7 +367,7 @@ TEST_F(WPA2DecryptTest, AccessPointFoundCallback) {
         decrypter.decrypt(radio);
     }
 
-    ASSERT_EQ(2, access_points_.size());
+    ASSERT_EQ(2U, access_points_.size());
     ap_data data = access_points_[0];
     EXPECT_EQ("Coherer", data.ssid);
     EXPECT_EQ(address_type("00:0c:41:82:b2:55"), data.bssid);
