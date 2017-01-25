@@ -115,9 +115,7 @@ void BootP::vend(const vend_type& newvend_) {
     vend_ = newvend_;
 }
 
-void BootP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
-    Internals::unused(parent);
-
+void BootP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* /*parent*/) {
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(bootp_);
     stream.write(vend_.begin(), vend_.end());

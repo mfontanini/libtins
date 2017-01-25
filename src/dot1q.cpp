@@ -39,9 +39,7 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
-PDU::metadata Dot1Q::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
-    Internals::unused(buffer);
-
+PDU::metadata Dot1Q::extract_metadata(const uint8_t* /*buffer*/, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < sizeof(dot1q_header))) {
         throw malformed_packet();
     }

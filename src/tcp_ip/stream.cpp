@@ -309,17 +309,13 @@ void Stream::on_server_flow_data(const Flow& /*flow*/) {
     }
 }
 
-void Stream::on_client_out_of_order(const Flow& flow, uint32_t seq, const payload_type& payload) {
-    Internals::unused(flow);
-
+void Stream::on_client_out_of_order(const Flow& /*flow*/, uint32_t seq, const payload_type& payload) {
     if (on_client_out_of_order_callback_) {
         on_client_out_of_order_callback_(*this, seq, payload);
     }
 }
 
-void Stream::on_server_out_of_order(const Flow& flow, uint32_t seq, const payload_type& payload) {
-    Internals::unused(flow);
-
+void Stream::on_server_out_of_order(const Flow& /*flow*/, uint32_t seq, const payload_type& payload) {
     if (on_server_out_of_order_callback_) {
         on_server_out_of_order_callback_(*this, seq, payload);
     }

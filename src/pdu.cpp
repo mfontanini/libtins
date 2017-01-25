@@ -73,6 +73,9 @@ void PDU::copy_inner_pdu(const PDU& pdu) {
     }
 }
 
+void PDU::prepare_for_serialize(const PDU* /*parent*/) {
+}
+
 uint32_t PDU::size() const {
     uint32_t sz = header_size() + trailer_size();
     const PDU* ptr(inner_pdu_);
@@ -89,6 +92,10 @@ void PDU::send(PacketSender &, const NetworkInterface &) {
 
 PDU* PDU::recv_response(PacketSender &, const NetworkInterface &) { 
     return 0; 
+}
+
+bool PDU::matches_response(const uint8_t* /*ptr*/, uint32_t /*total_sz*/) const {
+    return false;
 }
 
 void PDU::inner_pdu(PDU* next_pdu) {
