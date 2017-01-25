@@ -190,6 +190,7 @@ private:
     address_pair make_address_pair(IPv4Address addr1, IPv4Address addr2) const;
     
     streams_type streams_;
+    OverlappingTechnique technique_;
 };
 
 /**
