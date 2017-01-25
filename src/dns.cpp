@@ -52,6 +52,8 @@ using Tins::Memory::OutputMemoryStream;
 namespace Tins {
 
 PDU::metadata DNS::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    Internals::unused(buffer);
+
     if (TINS_UNLIKELY(total_sz < sizeof(dns_header))) {
         throw malformed_packet();
     }
@@ -387,6 +389,8 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
 }
 
 void DNS::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    Internals::unused(parent);
+
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(header_);
     stream.write(records_data_.begin(), records_data_.end());

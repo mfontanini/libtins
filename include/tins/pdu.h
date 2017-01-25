@@ -353,6 +353,7 @@ public:
      */
     template<typename T> 
     const T* find_pdu(PDUType type = T::pdu_flag) const {
+        Internals::unused(type);
         return const_cast<PDU*>(this)->find_pdu<T>();
     }
 
@@ -434,6 +435,8 @@ public:
      * \param total_sz The size of the buffer.
      */
     virtual bool matches_response(const uint8_t* ptr, uint32_t total_sz) const { 
+        Internals::unused(ptr);
+        Internals::unused(total_sz);
         return false; 
     }
 
@@ -485,7 +488,7 @@ protected:
      * 
      * \param parent The parent PDU.
      */
-    virtual void prepare_for_serialize(const PDU* parent) { }
+    virtual void prepare_for_serialize(const PDU* parent) { Internals::unused(parent); }
 
     /** 
      * \brief Serializes this PDU and propagates this action to child PDUs.

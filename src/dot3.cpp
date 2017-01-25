@@ -57,6 +57,8 @@ namespace Tins {
 const Dot3::address_type Dot3::BROADCAST("ff:ff:ff:ff:ff:ff");
 
 PDU::metadata Dot3::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
+    Internals::unused(buffer);
+
     if (TINS_UNLIKELY(total_sz < sizeof(dot3_header))) {
         throw malformed_packet();
     }
@@ -135,6 +137,8 @@ bool Dot3::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
 }
 
 void Dot3::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    Internals::unused(parent);
+
     OutputMemoryStream stream(buffer, total_sz);
     header_.length = Endian::host_to_be<uint16_t>(size() - sizeof(header_));
     stream.write(header_);

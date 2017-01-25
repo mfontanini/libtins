@@ -95,6 +95,8 @@ uint32_t PPI::header_size() const {
 }
 
 void PPI::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+    Internals::unused(buffer);
+    Internals::unused(total_sz);
     throw pdu_not_serializable();
 }
 

@@ -72,6 +72,8 @@ PDU::metadata IPv6::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
 
 IPv6::IPv6(address_type ip_dst, address_type ip_src, PDU* child) 
 : header_(), headers_size_(0) {
+    Internals::unused(child);
+
     version(6);
     dst_addr(ip_dst);
     src_addr(ip_src);
@@ -220,6 +222,8 @@ bool IPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
 }
 
 void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    Internals::unused(parent);
+
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         uint8_t new_flag = Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type());

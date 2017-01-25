@@ -160,6 +160,8 @@ bool TCPStream::generic_process(uint32_t& my_seq,
                                 payload_type& pload,
                                 fragments_type& frags,
                                 TCP* tcp) {
+    Internals::unused(other_seq);
+
     bool added_some(false);
     if (tcp->get_flag(TCP::FIN) || tcp->get_flag(TCP::RST)) {
         fin_sent_ = true;

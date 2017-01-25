@@ -197,6 +197,8 @@ void LLC::clear_information_fields() {
 }
 
 void LLC::write_serialization(uint8_t* buffer, uint32_t total_sz, const Tins::PDU* parent) {
+    Internals::unused(parent);
+
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu() && inner_pdu()->pdu_type() == PDU::STP) {
         dsap(0x42);

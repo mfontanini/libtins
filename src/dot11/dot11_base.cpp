@@ -69,7 +69,7 @@ Dot11::Dot11(const address_type& dst_hw_addr)
 
 Dot11::Dot11(const dot11_header* header_ptr)
 : header_(), options_size_(0) {
-
+    Internals::unused(header_ptr);
 }
 
 Dot11::Dot11(const uint8_t* buffer, uint32_t total_sz) 
@@ -209,6 +209,8 @@ void Dot11::send(PacketSender& sender, const NetworkInterface& iface) {
 #endif // _WIN32
 
 void Dot11::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    Internals::unused(parent);
+
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(header_);
     write_ext_header(stream);

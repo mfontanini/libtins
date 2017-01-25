@@ -426,6 +426,8 @@ void IP::prepare_for_serialize(const PDU* parent) {
 }
 
 void IP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    Internals::unused(parent);
+
     OutputMemoryStream stream(buffer, total_sz);
     checksum(0);
     if (inner_pdu()) {

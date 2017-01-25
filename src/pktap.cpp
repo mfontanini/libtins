@@ -66,6 +66,9 @@ uint32_t PKTAP::header_size() const {
 }
 
 void PKTAP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    Internals::unused(buffer);
+    Internals::unused(total_sz);
+    Internals::unused(parent);
     throw pdu_not_serializable();
 }
 

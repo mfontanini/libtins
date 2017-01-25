@@ -92,6 +92,8 @@ uint32_t SNAP::header_size() const {
 }
 
 void SNAP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    Internals::unused(parent);
+
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
