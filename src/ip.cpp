@@ -450,6 +450,8 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pare
             total_sz = Endian::host_to_be<uint16_t>(total_sz);
             header_.frag_off = Endian::be_to_host(header_.frag_off);
         }
+    #else
+    Internals::unused(parent);
     #endif
     tot_len(total_sz);
     head_len(static_cast<uint8_t>(header_size() / sizeof(uint32_t)));

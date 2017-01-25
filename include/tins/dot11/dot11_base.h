@@ -508,8 +508,8 @@ public:
      */
     static Dot11* from_bytes(const uint8_t* buffer, uint32_t total_sz);
 protected:
-    virtual void write_ext_header(Memory::OutputMemoryStream& stream) { }
-    virtual void write_fixed_parameters(Memory::OutputMemoryStream& stream) { }
+    virtual void write_ext_header(Memory::OutputMemoryStream& stream);
+    virtual void write_fixed_parameters(Memory::OutputMemoryStream& stream);
     void parse_tagged_parameters(Memory::InputMemoryStream& stream);
     void add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t* val);
 protected:

@@ -56,6 +56,8 @@ struct smart_ptr {
     typedef std::auto_ptr<T> type;
 #endif
 };
+
+template<class T> void unused(const T&) { }
 }
 }
 

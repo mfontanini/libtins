@@ -31,6 +31,7 @@
     #include <sys/time.h>
 #endif
 #include <stdexcept>
+#include <string.h>
 #include "packet_writer.h"
 #include "packet.h"
 #include "pdu.h"
@@ -71,11 +72,11 @@ void PacketWriter::write(Packet& packet) {
 
 void PacketWriter::write(PDU& pdu, const struct timeval& tv) {
     PDU::serialization_type buffer = pdu.serialize();
-    struct pcap_pkthdr header = { 
-        tv,
-        static_cast<bpf_u_int32>(buffer.size()),
-        static_cast<bpf_u_int32>(buffer.size())
-    };
+    struct pcap_pkthdr header;
+    memset(&header, 0, sizeof(header));
+    header.ts = tv;
+    header.caplen = static_cast<bpf_u_int32>(buffer.size());
+    header.len = static_cast<bpf_u_int32>(buffer.size());
     pcap_dump((u_char*)dumper_, &header, &buffer[0]);
 }
 

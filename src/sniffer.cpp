@@ -356,6 +356,8 @@ void Sniffer::set_immediate_mode(bool enabled) {
     if (pcap_set_immediate_mode(get_pcap_handle(), enabled)) {
         throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
+    #else
+    Internals::unused(enabled);
     #endif // HAVE_PCAP_IMMEDIATE_MODE
 }
 
@@ -366,6 +368,8 @@ void Sniffer::set_timestamp_precision(int value) {
     if (result == PCAP_ERROR_TSTAMP_PRECISION_NOTSUP) {
         throw pcap_error("Timestamp precision not supported");
     }
+    #else
+    Internals::unused(value);
     #endif // HAVE_PCAP_TIMESTAMP_PRECISION
 }
 

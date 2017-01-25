@@ -28,6 +28,7 @@
  */
 
 #include <stdexcept>
+#include <string.h>
 #include "offline_packet_filter.h"
 #include "pdu.h"
 #include "exceptions.h"
@@ -64,7 +65,8 @@ void OfflinePacketFilter::init(const string& pcap_filter,
 }
 
 bool OfflinePacketFilter::matches_filter(const uint8_t* buffer, uint32_t total_sz) const {
-    pcap_pkthdr header = {};
+    pcap_pkthdr header;
+    memset(&header, 0, sizeof(header));
     header.len = total_sz;
     header.caplen = total_sz;
     return pcap_offline_filter(&filter_, &header, buffer) != 0;

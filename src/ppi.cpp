@@ -94,7 +94,7 @@ uint32_t PPI::header_size() const {
     return static_cast<uint32_t>(sizeof(header_) + data_.size());
 }
 
-void PPI::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void PPI::write_serialization(uint8_t* /*buffer*/, uint32_t /*total_sz*/, const PDU *) {
     throw pdu_not_serializable();
 }
 

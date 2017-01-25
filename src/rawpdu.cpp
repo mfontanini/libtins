@@ -57,7 +57,7 @@ void RawPDU::payload(const payload_type& pload) {
     payload_ = pload;
 }
 
-bool RawPDU::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
+bool RawPDU::matches_response(const uint8_t* /*ptr*/, uint32_t /*total_sz*/) const {
     return true;
 }
 
