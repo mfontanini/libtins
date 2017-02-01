@@ -269,7 +269,7 @@ public:
      * 
      * This effectively returns the address_size constant.
      */
-    const size_t size() const {
+    size_t size() const {
         return address_size;
     }
     

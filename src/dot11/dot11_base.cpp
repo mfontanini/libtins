@@ -67,15 +67,20 @@ Dot11::Dot11(const address_type& dst_hw_addr)
     addr1(dst_hw_addr);
 }
 
-Dot11::Dot11(const dot11_header* header_ptr)
+Dot11::Dot11(const dot11_header* /*header_ptr*/)
 : header_(), options_size_(0) {
-
 }
 
 Dot11::Dot11(const uint8_t* buffer, uint32_t total_sz) 
 : options_size_(0) {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
+}
+
+void Dot11::write_ext_header(Memory::OutputMemoryStream& /*stream*/) {
+}
+
+void Dot11::write_fixed_parameters(Memory::OutputMemoryStream& /*stream*/) {
 }
 
 void Dot11::parse_tagged_parameters(InputMemoryStream& stream) {
@@ -208,7 +213,7 @@ void Dot11::send(PacketSender& sender, const NetworkInterface& iface) {
 }
 #endif // _WIN32
 
-void Dot11::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void Dot11::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* /*parent*/) {
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(header_);
     write_ext_header(stream);

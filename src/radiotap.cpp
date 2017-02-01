@@ -507,7 +507,7 @@ bool RadioTap::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     return false;
 }
 
-void RadioTap::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void RadioTap::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* /*parent*/) {
     OutputMemoryStream stream(buffer, total_sz);
     uint8_t* buffer_start = buffer;
     radio_.it_len = Endian::host_to_le<uint16_t>(header_size());

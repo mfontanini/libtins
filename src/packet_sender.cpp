@@ -156,6 +156,7 @@ bool PacketSender::ether_socket_initialized(const NetworkInterface& iface) const
     #if defined(BSD) || defined(__FreeBSD_kernel__)
     return ether_socket_.count(iface.id());
     #else
+    Internals::unused(iface);
     return ether_socket_ != INVALID_RAW_SOCKET;
     #endif
 }
@@ -234,6 +235,7 @@ void PacketSender::open_l2_socket(const NetworkInterface& iface) {
         }
         ether_socket_[iface.id()] = sock;
     #else
+    Internals::unused(iface);
     if (ether_socket_ == INVALID_RAW_SOCKET) {
         ether_socket_ = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
         
@@ -284,6 +286,7 @@ void PacketSender::close_socket(SocketType type, const NetworkInterface& iface) 
         }
         ether_socket_.erase(it);
         #elif !defined(_WIN32)
+        Internals::unused(iface);
         if (ether_socket_ == INVALID_RAW_SOCKET) {
             throw invalid_socket_type();
         }
@@ -294,6 +297,7 @@ void PacketSender::close_socket(SocketType type, const NetworkInterface& iface) 
         #endif
     }
     else {
+        Internals::unused(iface);
         if (type >= SOCKETS_END || sockets_[type] == INVALID_RAW_SOCKET) {
             throw invalid_socket_type();
         }
@@ -354,6 +358,8 @@ void PacketSender::send_l2(PDU& pdu,
     PDU::serialization_type buffer = pdu.serialize();
 
     #ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
+        Internals::unused(len_addr);
+        Internals::unused(link_addr);
         open_l2_socket(iface);
         pcap_t* handle = pcap_handles_[iface];
         const int buf_size = static_cast<int>(buffer.size());

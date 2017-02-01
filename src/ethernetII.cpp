@@ -161,7 +161,7 @@ bool EthernetII::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     return false;
 }
 
-void EthernetII::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void EthernetII::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* /*parent*/) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         Constants::Ethernet::e flag;

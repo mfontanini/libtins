@@ -136,7 +136,7 @@ void FlowTest::cumulative_stream_server_data_handler(Stream& stream) {
     stream_server_payload_chunks.push_back(stream.server_flow().payload());
 }
 
-void FlowTest::out_of_order_handler(Flow& session, uint32_t seq, Flow::payload_type payload) {
+void FlowTest::out_of_order_handler(Flow& /*session*/, uint32_t seq, Flow::payload_type payload) {
     flow_out_of_order_chunks.push_back(make_pair(seq, move(payload)));
 }
 
@@ -777,11 +777,11 @@ TEST_F(AckTrackerTest, AckingTcp_Sack2) {
 
     tracker.process_packet(make_tcp_ack(5));
     EXPECT_EQ(4U, tracker.acked_intervals().size());
-    EXPECT_EQ(5, tracker.ack_number());
+    EXPECT_EQ(5U, tracker.ack_number());
 
     tracker.process_packet(make_tcp_ack(15));
     EXPECT_EQ(0U, tracker.acked_intervals().size());
-    EXPECT_EQ(15, tracker.ack_number());
+    EXPECT_EQ(15U, tracker.ack_number());
 }
 
 TEST_F(AckTrackerTest, AckingTcp_Sack3) {
@@ -803,16 +803,16 @@ TEST_F(AckTrackerTest, AckingTcp_SackOutOfOrder1) {
     AckTracker tracker(0, true);
     tracker.process_packet(make_tcp_ack(10));
     tracker.process_packet(make_tcp_ack(0, make_pair(9, 12)));
-    EXPECT_EQ(0, tracker.acked_intervals().size());
-    EXPECT_EQ(11, tracker.ack_number());
+    EXPECT_EQ(0U, tracker.acked_intervals().size());
+    EXPECT_EQ(11U, tracker.ack_number());
 }
 
 TEST_F(AckTrackerTest, AckingTcp_SackOutOfOrder2) {
     AckTracker tracker(0, true);
     tracker.process_packet(make_tcp_ack(10));
     tracker.process_packet(make_tcp_ack(0, make_pair(10, 12)));
-    EXPECT_EQ(0, tracker.acked_intervals().size());
-    EXPECT_EQ(11, tracker.ack_number());
+    EXPECT_EQ(0U, tracker.acked_intervals().size());
+    EXPECT_EQ(11U, tracker.ack_number());
 }
 
 TEST_F(FlowTest, AckNumbersAreCorrect) {
