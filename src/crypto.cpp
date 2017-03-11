@@ -355,6 +355,12 @@ SNAP* SessionKeys::ccmp_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) con
     counter[14] = (total_sz >> 8) & 0xff;
     counter[15] = total_sz & 0xff;
     
+    if (dot11.subtype() == Dot11::QOS_DATA_DATA) {
+        const uint32_t offset = (dot11.from_ds() && dot11.to_ds()) ? 30 : 24;
+        AAD[offset] = static_cast<const Dot11QoSData&>(dot11).qos_control() & 0x0f;
+        counter[1] = AAD[offset];
+    }
+
     AES_encrypt(counter, MIC, &ctx);
     xor_range(MIC, AAD, MIC, 16);
     AES_encrypt(MIC, MIC, &ctx);
