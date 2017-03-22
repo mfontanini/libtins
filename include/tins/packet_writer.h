@@ -33,10 +33,12 @@
 #include "utils.h"
 #include <string>
 #include <iterator>
-#include <pcap.h>
-#include "data_link_type.h"
 #include "macros.h"
 #include "cxxstd.h"
+
+#ifdef TINS_HAVE_PCAP
+#include <pcap.h>
+#include "data_link_type.h"
 
 struct timeval;
 
@@ -220,6 +222,9 @@ private:
     pcap_t* handle_;
     pcap_dumper_t* dumper_; 
 };
-}
+
+} // Tins
+
+#endif // TINS_HAVE_PCAP
 
 #endif // TINS_PACKET_WRITER_H

@@ -36,12 +36,15 @@
 #include <vector>
 #include <algorithm>
 #include <stdint.h>
-#include "sniffer.h"
 #include "macros.h"
 #include "tcp.h"
 #include "utils.h"
 #include "ip.h"
 #include "ip_address.h"
+
+#ifdef TINS_HAVE_PCAP
+
+#include "sniffer.h"
 
 namespace Tins {
 class Sniffer;
@@ -384,5 +387,7 @@ bool TCPStreamFollower::callback(PDU& pdu,
 }
 
 } // Tins
+
+#endif // TINS_HAVE_PCAP
 
 #endif // TINS_TCP_STREAM_H

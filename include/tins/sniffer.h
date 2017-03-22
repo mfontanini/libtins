@@ -31,8 +31,6 @@
 #ifndef TINS_SNIFFER_H
 #define TINS_SNIFFER_H
 
-
-#include <pcap.h>
 #include <string>
 #include <memory>
 #include <stdexcept>
@@ -43,6 +41,10 @@
 #include "macros.h"
 #include "exceptions.h"
 #include "internals.h"
+
+#ifdef TINS_HAVE_PCAP
+
+#include <pcap.h>
 
 namespace Tins {
 class SnifferIterator;
@@ -644,5 +646,7 @@ void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
 }
 
 } // Tins
+
+#endif // TINS_HAVE_PCAP
 
 #endif // TINS_SNIFFER_H

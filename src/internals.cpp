@@ -28,7 +28,9 @@
  */
 
 #include "internals.h"
-#include <pcap.h>
+#ifdef TINS_HAVE_PCAP
+    #include <pcap.h>
+#endif // TINS_HAVE_PCAP
 #include "ip.h"
 #include "ethernetII.h"
 #include "ieee802_3.h"
@@ -179,6 +181,7 @@ Tins::PDU* pdu_from_flag(Constants::IP::e flag,
     return 0;
 }
 
+#ifdef TINS_HAVE_PCAP
 PDU* pdu_from_dlt_flag(int flag,
                        const uint8_t* buffer,
                        uint32_t size,
@@ -208,6 +211,7 @@ PDU* pdu_from_dlt_flag(int flag,
             return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
     };
 }
+#endif // TINS_HAVE_PCAP
 
 Tins::PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size) {
     switch(type) {
