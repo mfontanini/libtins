@@ -35,6 +35,8 @@
 #include "endianness.h"
 #include "small_uint.h"
 
+#ifdef TINS_HAVE_PCAP
+
 namespace Tins {
 
 /**
@@ -135,6 +137,9 @@ private:
     ppi_header header_;
     byte_array data_;
 };
-}
+
+} // Tins
+
+#endif // TINS_HAVE_PCAP
 
 #endif // TINS_PPI_H

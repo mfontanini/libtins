@@ -33,6 +33,9 @@
 #include "pdu.h"
 #include "macros.h"
 
+// This class is only available if pcap is enabled
+#ifdef TINS_HAVE_PCAP
+
 namespace Tins {
 
 /**
@@ -110,5 +113,7 @@ private:
 };
 
 } // Tins
+
+#endif // TINS_HAVE_PCAP
 
 #endif // TINS_PKTAP_H

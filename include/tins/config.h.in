@@ -28,4 +28,7 @@
 /* Have WPA2Decrypter callbacks */
 #cmakedefine TINS_HAVE_WPA2_CALLBACKS
 
+/* Have libpcap */
+#cmakedefine TINS_HAVE_PCAP
+
 #endif // TINS_CONFIG_H

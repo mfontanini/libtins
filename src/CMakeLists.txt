@@ -14,8 +14,7 @@ INCLUDE_DIRECTORIES(
     ${PCAP_INCLUDE_DIR}
 )
 
-ADD_LIBRARY( 
-    tins ${LIBTINS_TYPE}
+set(SOURCES
     arp.cpp
     bootp.cpp
     handshake_capturer.cpp
@@ -43,19 +42,14 @@ ADD_LIBRARY(
     loopback.cpp
     mpls.cpp
     network_interface.cpp
-    offline_packet_filter.cpp
     packet_sender.cpp
-    packet_writer.cpp
-    ppi.cpp
     pdu.cpp
-    pktap.cpp
     radiotap.cpp
     address_range.cpp
     rawpdu.cpp
     rsn_information.cpp
     sll.cpp
     snap.cpp
-    sniffer.cpp
     tcp.cpp
     tcp_ip/ack_tracker.cpp
     tcp_ip/flow.cpp
@@ -63,7 +57,6 @@ ADD_LIBRARY(
     tcp_ip/stream.cpp
     tcp_ip/stream_follower.cpp
     tcp_ip/stream_identifier.cpp
-    tcp_stream.cpp
     timestamp.cpp
     udp.cpp
     utils.cpp
@@ -77,9 +70,28 @@ ADD_LIBRARY(
     dot11/dot11_control.cpp
 )
 
+SET(PCAP_DEPENDENT_SOURCES
+    sniffer.cpp
+    packet_writer.cpp
+    pktap.cpp
+    tcp_stream.cpp
+    offline_packet_filter.cpp
+    ppi.cpp
+)
+
+IF(LIBTINS_ENABLE_PCAP)
+    message(STATUS "SETTING TO ${PCAP_DEPENDENT_SOURCES}")
+    SET(SOURCES ${SOURCES} ${PCAP_DEPENDENT_SOURCES})
+ENDIF() 
+
+ADD_LIBRARY( 
+    tins ${LIBTINS_TYPE}
+    ${SOURCES}
+)
+
 TARGET_LINK_LIBRARIES(tins ${PCAP_LIBRARY} ${OPENSSL_LIBRARIES} ${LIBTINS_OS_LIBS})
 
-SET_TARGET_PROPERTIES(tins PROPERTIES OUTPUT_NAME tins )
+SET_TARGET_PROPERTIES(tins PROPERTIES OUTPUT_NAME tins)
 SET_TARGET_PROPERTIES(tins PROPERTIES VERSION ${LIBTINS_VERSION} SOVERSION ${LIBTINS_VERSION} )
 
 # Install instructions for this target

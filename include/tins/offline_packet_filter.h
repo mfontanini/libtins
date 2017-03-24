@@ -32,8 +32,11 @@
 
 #include <string>
 #include <stdint.h>
-#include "data_link_type.h"
 #include "macros.h"
+
+#ifdef TINS_HAVE_PCAP
+
+#include "data_link_type.h"
 
 namespace Tins {
 
@@ -154,6 +157,9 @@ private:
     mutable bpf_program filter_;
     std::string string_filter_;
 };
+
 } // Tins
+
+#endif // TINS_HAVE_PCAP
 
 #endif // TINS_OFFLINE_PACKET_FILTER_H

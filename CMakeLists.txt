@@ -49,8 +49,14 @@ SET(LIBTINS_VERSION "${LIBTINS_VERSION_MAJOR}.${LIBTINS_VERSION_MINOR}")
 # Required Packages
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
+# Allow disabling packet capture mechanism
+OPTION(LIBTINS_ENABLE_PCAP "Enable capturing packets via libpcap" ON)
+
 # Look for libpcap
-FIND_PACKAGE(PCAP REQUIRED)
+IF(LIBTINS_ENABLE_PCAP)
+    FIND_PACKAGE(PCAP REQUIRED)
+    SET(TINS_HAVE_PCAP ON)
+ENDIF()
 
 # Set some Windows specific flags
 IF(WIN32)
@@ -194,10 +200,10 @@ ENDIF(WIN32)
 
 OPTION(LIBTINS_USE_PCAP_SENDPACKET "Use pcap_sendpacket to send l2 packets"
         ${USE_PCAP_SENDPACKET_DEFAULT})
-IF(LIBTINS_USE_PCAP_SENDPACKET)
+IF(LIBTINS_ENABLE_PCAP AND LIBTINS_USE_PCAP_SENDPACKET)
     SET(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET ON)
     MESSAGE(STATUS "Using pcap_sendpacket to send l2 packets.")
-ENDIF(LIBTINS_USE_PCAP_SENDPACKET)
+ENDIF()
 
 # Add a target to generate API documentation using Doxygen
 FIND_PACKAGE(Doxygen QUIET)
@@ -255,8 +261,12 @@ ADD_CUSTOM_TARGET(uninstall
 # Add subdirectories
 # ******************
 ADD_SUBDIRECTORY(include)
-ADD_SUBDIRECTORY(examples)
 ADD_SUBDIRECTORY(src)
+IF(LIBTINS_ENABLE_PCAP)
+    ADD_SUBDIRECTORY(examples)
+ELSE()
+    MESSAGE(STATUS "Not building examples as pcap support is disabled")
+ENDIF()
 
 # Only include googletest if the git submodule has been fetched
 IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/googletest/CMakeLists.txt")
