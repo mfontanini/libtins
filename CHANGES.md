@@ -1,3 +1,73 @@
+##### v3.5 - Sat Apr  1 09:11:58 PDT 2017
+
+- Added Utils::route6_entries
+
+- Allow masking IPv4/6 and hardware addresses via `operator&`
+
+- Add IPv4Address::from_prefix_length
+
+- Move `stream_id` into a new file and rename it `StreamIdentifier`
+
+- Allow disabling TCPIP classes
+
+- Properly handle out of order SACKs on `AckTracker`
+
+- Move TCP data tracking into a separate class
+
+- Allow constructing `StreamIdentifier` from a `Stream`
+
+- Allow configuring pcap timestamp precision
+
+- Allow building libtins using MinGW
+
+- Allow including libtins using `add_subdirectory` via CMake
+
+- Allow setting customer user data to each TCP stream
+
+- Allow skipping data forward in TCP streams
+
+- Allow attaching to already existing TCP streams
+
+- Fix: AddressRange masks first address as well
+
+- Fix: Add TINS_API to `IPv4Address::operator<<`, `DataTracker` and `AckTracker`
+
+- Fix: Don't always set `key_t` to 0 on `RSNEAPOL`
+
+- Fix: Handle MLDv1 properly on ICMP
+
+- Fix: Make Utils::resolve_hwaddress work on Windows
+
+- Fix: Interface was sometimes considered down when it was up (BSD/Linux)
+
+- Fix: Don't set `Dot1Q`'s payload type if next protocol type is unknown
+
+- Fix: Use recvfrom on BSD/OSX when capturing layer 3 packets
+
+- Fix: Make `Timestamp::current_time` work on Windows
+
+- Fix: Forward `NetworkInterface` argument when calling `PacketSender::send_l2`
+
+- Fix: `Timestamp` overflow issue
+
+- Fix: boost's include directories variable incorrectly used on build system
+
+- Fix: Configuring auto cleanup of `Stream`'s server data not working
+
+- Fix: Set `EthernetII` payload type to `UNKNOWN` if there's no inner PDU
+
+- Fix: Set payload type to 0 if there's no inner PDU in `IP`, `Dot1Q` and `IPv6`
+
+- Fix: Buffer length check issues on `Dot11QosData`
+
+- Fix: Use AF_INET6 flag when opening L3 IPv6 socket
+
+- Fix: Check expecter size properly on `DNS::extract_metadata`
+
+- Fix: several unused parameter warnings
+
+- Fix: CCMP decryption issue when `Dot11QoSData` has a TID != 0
+
 ##### v3.4 - Wed Mar  9 20:24:54 PST 2016
 
 - Check the secure bit on HandshakeCapturer to detect 2nd packet
