@@ -113,7 +113,7 @@ uint32_t ARP::header_size() const {
     return sizeof(header_);
 }
 
-void ARP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void ARP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(header_);
 }

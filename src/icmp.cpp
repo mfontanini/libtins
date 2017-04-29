@@ -216,7 +216,7 @@ void ICMP::use_length_field(bool value) {
     header_.un.rfc4884.length = value ? 1 : 0;
 }
 
-void ICMP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void ICMP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
 
     // If extensions are allowed and we have to set the length field

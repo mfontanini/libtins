@@ -107,7 +107,7 @@ private:
         uint8_t ecommand[20];
     };
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     pktap_header header_;
 };

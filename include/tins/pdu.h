@@ -494,19 +494,16 @@ protected:
      * is calculated.
      * 
      * By default, this method does nothing
-     * 
-     * \param parent The parent PDU.
      */
-    virtual void prepare_for_serialize(const PDU* parent);
+    virtual void prepare_for_serialize();
 
     /** 
      * \brief Serializes this PDU and propagates this action to child PDUs.
      *
      * \param buffer The buffer in which to store this PDU's serialization.
      * \param total_sz The total size of the buffer.
-     * \param parent The parent PDU. Will be 0 if there's the parent does not exist.
      */
-    void serialize(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void serialize(uint8_t* buffer, uint32_t total_sz);
 
     /** 
      * \brief Serializes this TCP PDU.
@@ -515,9 +512,8 @@ protected:
      * serialization.
      * \param buffer The buffer in which the PDU will be serialized.
      * \param total_sz The size available in the buffer.
-     * \param parent The PDU that's one level below this one on the stack. Might be 0.
      */
-    virtual void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) = 0;
+    virtual void write_serialization(uint8_t* buffer, uint32_t total_sz) = 0;
 private:
     void parent_pdu(PDU* parent);
 

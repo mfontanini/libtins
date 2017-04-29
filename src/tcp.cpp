@@ -295,7 +295,7 @@ uint32_t TCP::header_size() const {
     return sizeof(header_) + total_options_size_;
 }
 
-void TCP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void TCP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     // Set checksum to 0, we'll calculate it at the end
     checksum(0);
@@ -311,6 +311,7 @@ void TCP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* par
     }
 
     uint32_t check = 0;
+    const PDU* parent = parent_pdu();
     if (const Tins::IP* ip_packet = tins_cast<const Tins::IP*>(parent)) {
         check = Utils::pseudoheader_checksum(
             ip_packet->src_addr(),  

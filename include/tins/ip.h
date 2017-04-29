@@ -756,10 +756,10 @@ private:
     void head_len(small_uint<4> new_head_len);
     void tot_len(uint16_t new_tot_len);
 
-    void prepare_for_serialize(const PDU* parent);
+    void prepare_for_serialize();
     void internal_add_option(const option& option);
     void init_ip_fields();
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void write_option(const option& opt, Memory::OutputMemoryStream& stream);
     void add_route_option(option_identifier id, const generic_route_option_type& data);
     generic_route_option_type search_route_option(option_identifier id) const;

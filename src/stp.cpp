@@ -106,7 +106,7 @@ void STP::bridge_id(const bpdu_id_type& id) {
     header_.bridge_id = convert(id);
 }
 
-void STP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void STP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(header_);
 }

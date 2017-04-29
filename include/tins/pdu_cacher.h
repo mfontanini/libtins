@@ -144,7 +144,7 @@ public:
         return cached_.pdu_type();
     }
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) {
         if (cached_serialization_.size() != total_sz) {
             cached_serialization_ = cached_.serialize();
         }

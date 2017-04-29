@@ -125,7 +125,7 @@ public:
         return new PPI(*this);
     }
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void parse_80211(const uint8_t* buffer, uint32_t total_sz);
 
     struct ppi_header {

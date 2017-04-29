@@ -208,7 +208,7 @@ private:
         uint16_t payload_type;
     } TINS_END_PACK;
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     ethernet_header header_;
 };

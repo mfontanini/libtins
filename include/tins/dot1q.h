@@ -197,7 +197,7 @@ public:
      */
     bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     TINS_BEGIN_PACK
     struct dot1q_header {

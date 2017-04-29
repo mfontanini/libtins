@@ -390,7 +390,7 @@ public:
      */
     std::string generic_error() const;
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     
     template<typename T>
     void add_tag_iterable(TagTypes id, const T& data) {

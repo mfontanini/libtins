@@ -81,7 +81,7 @@ uint32_t SLL::header_size() const {
     return sizeof(header_);
 }
 
-void SLL::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void SLL::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(

@@ -509,7 +509,7 @@ public:
 private:
     static const uint32_t MAX_DHCP_SIZE;
   
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     template <typename T> 
     T search_and_convert(OptionTypes opt) const {

@@ -48,7 +48,7 @@ uint32_t RawPDU::header_size() const {
     return static_cast<uint32_t>(payload_.size());
 }
 
-void RawPDU::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void RawPDU::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(payload_.begin(), payload_.end());
 }

@@ -320,7 +320,7 @@ public:
      */
     const ext_header* search_header(ExtensionHeader id) const;
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void set_last_next_header(uint8_t value);
     static void write_header(const ext_header& header, Memory::OutputMemoryStream& stream);
     static bool is_extension_header(uint8_t header_id);

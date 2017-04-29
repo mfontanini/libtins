@@ -401,7 +401,7 @@ private:
     typedef std::vector<uint8_t> field_type;
     typedef std::list<field_type> field_list;
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     llchdr header_;
     uint8_t control_field_length_;

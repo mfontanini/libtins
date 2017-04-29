@@ -117,7 +117,7 @@ public:
     void send(PacketSender& sender, const NetworkInterface& iface);
     #endif // BSD
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     uint32_t family_;
 };

@@ -73,7 +73,7 @@ void PDU::copy_inner_pdu(const PDU& pdu) {
     }
 }
 
-void PDU::prepare_for_serialize(const PDU* /*parent*/) {
+void PDU::prepare_for_serialize() {
 }
 
 uint32_t PDU::size() const {
@@ -121,21 +121,21 @@ PDU* PDU::release_inner_pdu() {
 
 PDU::serialization_type PDU::serialize() {
     vector<uint8_t> buffer(size());
-    serialize(&buffer[0], static_cast<uint32_t>(buffer.size()), 0);
+    serialize(&buffer[0], static_cast<uint32_t>(buffer.size()));
     return buffer;
 }
 
-void PDU::serialize(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void PDU::serialize(uint8_t* buffer, uint32_t total_sz) {
     uint32_t sz = header_size() + trailer_size();
     // Must not happen...
     #ifdef TINS_DEBUG
     assert(total_sz >= sz);
     #endif
-    prepare_for_serialize(parent);
+    prepare_for_serialize();
     if (inner_pdu_) {
-        inner_pdu_->serialize(buffer + header_size(), total_sz - sz, this);
+        inner_pdu_->serialize(buffer + header_size(), total_sz - sz);
     }
-    write_serialization(buffer, total_sz, parent);
+    write_serialization(buffer, total_sz);
 }
 
 void PDU::parent_pdu(PDU* parent) {

@@ -554,7 +554,7 @@ private:
     Dot11(const dot11_header* header_ptr);
     
     void internal_add_option(const option& opt);
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);
 

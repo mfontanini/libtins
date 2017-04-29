@@ -108,7 +108,7 @@ uint32_t PPPoE::header_size() const {
     return sizeof(header_) + tags_size_;
 }
 
-void PPPoE::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void PPPoE::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     if (tags_size_ > 0) {
         payload_length(tags_size_);

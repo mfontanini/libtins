@@ -493,15 +493,8 @@ private:
         } un;
     } TINS_END_PACK;
 
-    void checksum(uint16_t new_check);
-    
-    /** \brief Serialices this ICMP PDU.
-     * \param buffer The buffer in which the PDU will be serialized.
-     * \param total_sz The size available in the buffer.
-     * \param parent The PDU that's one level below this one on the stack.
-     */
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
-    
+    void checksum(uint16_t new_check);    
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     uint32_t get_adjusted_inner_pdu_size() const;
     void try_parse_extensions(Memory::InputMemoryStream& stream);
     bool are_extensions_allowed() const;

@@ -161,7 +161,7 @@ bool DHCPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     return false;
 }
 
-void DHCPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void DHCPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     const uint32_t required_size = is_relay_message() ? 2 : 4;
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(header_data_, required_size);

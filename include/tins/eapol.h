@@ -185,13 +185,7 @@ protected:
      */
     virtual void write_body(Memory::OutputMemoryStream& stream) = 0;
 private:
-    /** 
-     * \brief Serialices this EAPOL PDU.
-     * \param buffer The buffer in which the PDU will be serialized.
-     * \param total_sz The size available in the buffer.
-     * \param parent The PDU that's one level below this one on the stack.
-     */
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     eapol_header header_;
 };
