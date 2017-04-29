@@ -168,7 +168,7 @@ private:
         uint32_t spi, seq_number;
     };
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     
     ipsec_header header_;
     byte_array icv_;
@@ -258,7 +258,7 @@ private:
         uint32_t spi, seq_number;
     };
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     
     ipsec_header header_;
 };

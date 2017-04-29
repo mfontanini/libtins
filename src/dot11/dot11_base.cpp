@@ -213,7 +213,7 @@ void Dot11::send(PacketSender& sender, const NetworkInterface& iface) {
 }
 #endif // _WIN32
 
-void Dot11::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* /*parent*/) {
+void Dot11::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(header_);
     write_ext_header(stream);

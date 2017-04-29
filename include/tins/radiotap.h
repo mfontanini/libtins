@@ -486,7 +486,7 @@ private:
     } TINS_END_PACK;
     
     void init();
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     uint32_t find_extra_flag_fields_size(const uint8_t* buffer, uint32_t total_sz);
 
     template <size_t n>

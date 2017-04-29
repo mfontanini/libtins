@@ -610,7 +610,7 @@ private:
     }
     
     void internal_add_option(const option& option);
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void checksum(uint16_t new_check);
     void update_options_size();
     options_type::const_iterator search_option_iterator(OptionTypes type) const;

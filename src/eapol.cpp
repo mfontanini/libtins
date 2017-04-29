@@ -106,7 +106,7 @@ void EAPOL::type(uint8_t new_type) {
     header_.type = new_type;
 }
 
-void EAPOL::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void EAPOL::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     length(total_sz - 4);
     stream.write(header_);

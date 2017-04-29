@@ -386,7 +386,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
     return end_ptr - start_ptr;
 }
 
-void DNS::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* /*parent*/) {
+void DNS::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     stream.write(header_);
     stream.write(records_data_.begin(), records_data_.end());

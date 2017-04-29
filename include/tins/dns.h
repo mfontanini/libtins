@@ -1030,7 +1030,7 @@ private:
     uint8_t* update_dname(uint8_t* ptr, uint32_t threshold, uint32_t offset);
     static void inline_convert_v4(uint32_t value, char* output);
     static bool contains_dname(uint16_t type);
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void add_record(const resource& resource, const sections_type& sections);
     
     dns_header header_;

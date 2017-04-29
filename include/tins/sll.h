@@ -174,7 +174,7 @@ private:
         uint16_t protocol;
     } TINS_END_PACK;
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     
     sll_header header_;
 };

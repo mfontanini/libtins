@@ -247,7 +247,7 @@ uint32_t DHCP::header_size() const {
     return static_cast<uint32_t>(BootP::header_size() - vend().size() + size_);
 }
 
-void DHCP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void DHCP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     if (size_) {
         vend_type& result = BootP::vend();
         result.resize(size_);
@@ -261,7 +261,7 @@ void DHCP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* pa
             stream.write(it->data_ptr(), it->data_size());
         }
     }
-    BootP::write_serialization(buffer, total_sz, parent);
+    BootP::write_serialization(buffer, total_sz);
 }
 
 } // Tins

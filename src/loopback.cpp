@@ -90,7 +90,7 @@ uint32_t Loopback::header_size() const {
     return sizeof(family_);
 }
 
-void Loopback::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void Loopback::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     #ifndef _WIN32
     if (tins_cast<const Tins::IP*>(inner_pdu())) {

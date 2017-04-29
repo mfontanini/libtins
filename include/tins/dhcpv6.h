@@ -890,7 +890,7 @@ public:
         return new DHCPv6(*this);
     }
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void write_option(const option& option, Memory::OutputMemoryStream& stream) const;
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);

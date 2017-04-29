@@ -94,7 +94,7 @@ uint32_t IPSecAH::header_size() const {
     return static_cast<uint32_t>(sizeof(header_) + icv_.size());
 }
 
-void IPSecAH::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void IPSecAH::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     if (inner_pdu()) {
         next_header(Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type()));
     }
@@ -131,7 +131,7 @@ uint32_t IPSecESP::header_size() const {
     return sizeof(header_);
 }
 
-void IPSecESP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU *) {
+void IPSecESP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream output(buffer, total_sz);
     output.write(header_);
 }

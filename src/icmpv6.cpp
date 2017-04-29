@@ -281,7 +281,7 @@ bool ICMPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     return false;
 }
 
-void ICMPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void ICMPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
 
     // If extensions are allowed and we have to set the length field
@@ -361,7 +361,7 @@ void ICMPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* 
         );
     }
 
-    const Tins::IPv6* ipv6 = tins_cast<const Tins::IPv6*>(parent);
+    const Tins::IPv6* ipv6 = tins_cast<const Tins::IPv6*>(parent_pdu());
     if (ipv6) {
         uint32_t checksum = Utils::pseudoheader_checksum(
             ipv6->src_addr(),  

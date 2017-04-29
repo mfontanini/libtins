@@ -117,7 +117,7 @@ uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint3
     return checksum;
 }
 
-void UDP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void UDP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     // Set checksum to 0, we'll calculate it at the end
     header_.check = 0;
@@ -129,6 +129,7 @@ void UDP::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* par
     }
     stream.write(header_);
     uint32_t checksum = 0;
+    const PDU* parent = parent_pdu();
     if (const Tins::IP* ip_packet = tins_cast<const Tins::IP*>(parent)) {
         checksum = Utils::pseudoheader_checksum(
             ip_packet->src_addr(), 

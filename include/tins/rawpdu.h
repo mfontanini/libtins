@@ -201,7 +201,7 @@ public:
         return new RawPDU(*this);
     }
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     payload_type payload_;
 };

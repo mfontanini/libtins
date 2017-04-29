@@ -243,7 +243,7 @@ bool IPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     return false;
 }
 
-void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* /*parent*/) {
+void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
         uint8_t new_flag = Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type());

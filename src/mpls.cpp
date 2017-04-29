@@ -91,10 +91,10 @@ uint32_t MPLS::header_size() const {
     return sizeof(header_);
 }
 
-void MPLS::write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
+void MPLS::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     // If we have a parent PDU, we might set the bottom-of-stack field
-    if (parent) {
+    if (parent_pdu()) {
         // We'll set it if we either don't have a child or we have one and it's not MPLS
         if (!inner_pdu() || inner_pdu()->pdu_type() != PDU::MPLS) {
             bottom_of_stack(1);

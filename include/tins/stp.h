@@ -305,7 +305,7 @@ private:
     static bpdu_id_type convert(const pvt_bpdu_id& id);
     static pvt_bpdu_id convert(const bpdu_id_type& id);
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz);
     
     stp_header header_;
 };
