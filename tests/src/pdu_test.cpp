@@ -17,7 +17,7 @@ public:
 };
 
 TEST_F(PDUTest, FindPDU) {
-    IP ip = IP("192.168.0.1") / TCP(22, 52) / RawPDU("Test"); 
+    IP ip = IP("192.168.0.1") / TCP(22, 52) / RawPDU("Test");
     EXPECT_TRUE(ip.find_pdu<TCP>() != NULL);
     EXPECT_TRUE(ip.find_pdu<RawPDU>() != NULL);
     EXPECT_FALSE(ip.find_pdu<UDP>() != NULL);
@@ -26,6 +26,21 @@ TEST_F(PDUTest, FindPDU) {
     (void)t1;
     (void)t2;
     EXPECT_THROW(ip.rfind_pdu<UDP>(), pdu_not_found);
+}
+
+TEST_F(PDUTest, PDURelationship) {
+    IP packet = IP("192.168.0.1") / TCP(22, 52) / RawPDU("Test");
+    IP* ip = packet.find_pdu<IP>();
+    TCP* tcp = packet.find_pdu<TCP>();
+    RawPDU* raw = packet.find_pdu<RawPDU>();
+
+    ASSERT_TRUE(ip != 0);
+    ASSERT_TRUE(tcp != 0);
+    ASSERT_TRUE(raw != 0);
+
+    EXPECT_EQ(0, ip->parent_pdu());
+    EXPECT_EQ(ip, tcp->parent_pdu());
+    EXPECT_EQ(tcp, raw->parent_pdu());
 }
 
 TEST_F(PDUTest, OperatorConcat) {

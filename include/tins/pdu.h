@@ -231,8 +231,11 @@ public:
          * \param rhs The PDU to be moved.
          */
         PDU(PDU &&rhs) TINS_NOEXCEPT 
-        : inner_pdu_(0) {
+        : inner_pdu_(0), parent_pdu_(0) {
             std::swap(inner_pdu_, rhs.inner_pdu_);
+            if (inner_pdu_) {
+                inner_pdu_->parent_pdu(this);
+            }
         }
         
         /**
@@ -242,6 +245,10 @@ public:
          */
         PDU& operator=(PDU &&rhs) TINS_NOEXCEPT {
             std::swap(inner_pdu_, rhs.inner_pdu_);
+            rhs.inner_pdu_ = 0;
+            if (inner_pdu_) {
+                inner_pdu_->parent_pdu(this);
+            }
             return* this;
         }
     #endif
@@ -274,10 +281,18 @@ public:
 
     /**
      * \brief Getter for the inner PDU.
-     * \return The current inner PDU. Might be 0.
+     * \return The current inner PDU. Might be a null pointer.
      */
     PDU* inner_pdu() const {
         return inner_pdu_;
+    }
+
+    /**
+     * Getter for the parent PDU
+     * \return The current parent PDU. Might be a null pointer.
+     */
+    PDU* parent_pdu() const {
+        return parent_pdu_;
     }
     
     /**
@@ -313,7 +328,6 @@ public:
      * \param next_pdu The new child PDU.
      */
     void inner_pdu(const PDU& next_pdu);
-
 
     /** 
      * \brief Serializes the whole chain of PDU's, including this one.
@@ -505,7 +519,10 @@ protected:
      */
     virtual void write_serialization(uint8_t* buffer, uint32_t total_sz, const PDU* parent) = 0;
 private:
+    void parent_pdu(PDU* parent);
+
     PDU* inner_pdu_;
+    PDU* parent_pdu_;
 };
 
 /**

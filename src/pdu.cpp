@@ -49,12 +49,12 @@ PDU::metadata::metadata(uint32_t header_size, PDUType current_type, PDUType next
 // PDU
 
 PDU::PDU()
-: inner_pdu_() {
+: inner_pdu_(), parent_pdu_() {
 
 }
 
 PDU::PDU(const PDU& other) 
-: inner_pdu_(0) {
+: inner_pdu_(), parent_pdu_() {
     copy_inner_pdu(other);
 }
 
@@ -101,6 +101,9 @@ bool PDU::matches_response(const uint8_t* /*ptr*/, uint32_t /*total_sz*/) const 
 void PDU::inner_pdu(PDU* next_pdu) {
     delete inner_pdu_;
     inner_pdu_ = next_pdu;
+    if (inner_pdu_) {
+        inner_pdu_->parent_pdu(this);
+    }
 }
 
 void PDU::inner_pdu(const PDU& next_pdu) {
@@ -110,6 +113,9 @@ void PDU::inner_pdu(const PDU& next_pdu) {
 PDU* PDU::release_inner_pdu() {
     PDU* result = 0;
     swap(result, inner_pdu_);
+    if (result) {
+        result->parent_pdu(0);
+    }
     return result;
 }
 
@@ -130,6 +136,10 @@ void PDU::serialize(uint8_t* buffer, uint32_t total_sz, const PDU* parent) {
         inner_pdu_->serialize(buffer + header_size(), total_sz - sz, this);
     }
     write_serialization(buffer, total_sz, parent);
+}
+
+void PDU::parent_pdu(PDU* parent) {
+    parent_pdu_ = parent;
 }
 
 } // Tins
