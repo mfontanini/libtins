@@ -22,6 +22,7 @@ set(SOURCES
     pppoe.cpp
     crypto.cpp
     detail/address_helpers.cpp
+    detail/icmp_extension_helpers.cpp
     dhcp.cpp
     dhcpv6.cpp
     dns.cpp

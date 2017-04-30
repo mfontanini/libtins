@@ -279,51 +279,6 @@ Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag) {
     };
 }
 
-uint32_t get_padded_icmp_inner_pdu_size(const PDU* inner_pdu, uint32_t pad_alignment) {
-        // This gets the size of the next pdu, padded to the next 32 bit word boundary
-    if (inner_pdu) {
-        uint32_t inner_pdu_size = inner_pdu->size();
-        uint32_t padding = inner_pdu_size % pad_alignment;
-        inner_pdu_size = padding ? (inner_pdu_size - padding + pad_alignment) : inner_pdu_size;
-        return inner_pdu_size;
-    }
-    else {
-        return 0;
-    }
-}
-
-void try_parse_icmp_extensions(InputMemoryStream& stream,
-                               uint32_t payload_length,
-                               ICMPExtensionsStructure& extensions) {
-    if (!stream) {
-        return;
-    }
-    // Check if this is one of the types defined in RFC 4884
-    const uint32_t minimum_payload = ICMPExtensionsStructure::MINIMUM_ICMP_PAYLOAD;
-    // Check if we actually have this amount of data and whether it's more than
-    // the minimum encapsulated packet size
-    const uint8_t* extensions_ptr;
-    uint32_t extensions_size;
-    if (stream.can_read(payload_length) && payload_length >= minimum_payload) {
-        extensions_ptr = stream.pointer() + payload_length;
-        extensions_size = stream.size() - payload_length;
-    }
-    else if (stream.can_read(minimum_payload)) {
-        // This packet might be non-rfc compliant. In that case the length
-        // field can contain garbage.
-        extensions_ptr = stream.pointer() + minimum_payload;
-        extensions_size = stream.size() - minimum_payload;
-    }
-    else {
-        // No more special cases, this doesn't have extensions
-        return;
-    }
-    if (ICMPExtensionsStructure::validate_extensions(extensions_ptr, extensions_size)) {
-        extensions = ICMPExtensionsStructure(extensions_ptr, extensions_size);
-        stream.size(stream.size() - extensions_size);
-    }
-}
-
 PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag) {
     switch(flag) {
         case Constants::IP::PROTO_IPIP:
