@@ -52,57 +52,6 @@ class ICMPExtensionsStructure;
 
 namespace Internals {
 
-template<size_t n>
-class byte_array {
-public:
-    typedef uint8_t* iterator;
-    typedef const uint8_t* const_iterator;
-
-    byte_array() {
-        std::fill(begin(), end(), 0);
-    }
-
-    template<typename InputIterator>
-    byte_array(InputIterator start, InputIterator last) {
-        std::copy(start, last, data);
-    }
-
-    template<typename InputIterator>
-    byte_array(InputIterator start) {
-        std::copy(start, n, data);
-    }
-
-    uint8_t& operator[](size_t i) {
-        return data[i];
-    }
-
-    uint8_t operator[](size_t i) const{
-        return data[i];
-    }
-
-    iterator begin() {
-        return data;
-    }
-
-    iterator end() {
-        return data + n;
-    }
-
-    const_iterator begin() const {
-        return data;
-    }
-
-    const_iterator end() const {
-        return data + n;
-    }
-
-    size_t size() const {
-        return n;
-    }
-private:
-    uint8_t data[n];
-};
-
 void skip_line(std::istream& input);
 bool from_hex(const std::string& str, uint32_t& result);
 bool from_hex(const std::string& str, std::string& result);

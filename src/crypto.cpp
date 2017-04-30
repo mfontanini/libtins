@@ -38,8 +38,8 @@
 #endif // TINS_HAVE_WPA2_DECRYPTION
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
-#include "internals.h"
 #include "exceptions.h"
+#include "detail/type_traits.h"
 
 using std::string;
 using std::make_pair;
@@ -52,6 +52,51 @@ using std::fill;
 using std::runtime_error;
 
 namespace Tins {
+namespace Internals {
+
+template<size_t n>
+class byte_array {
+public:
+    typedef uint8_t* iterator;
+    typedef const uint8_t* const_iterator;
+
+    byte_array() {
+        std::memset(data, 0, size());
+    }
+
+    uint8_t& operator[](size_t i) {
+        return data[i];
+    }
+
+    uint8_t operator[](size_t i) const{
+        return data[i];
+    }
+
+    iterator begin() {
+        return data;
+    }
+
+    iterator end() {
+        return data + n;
+    }
+
+    const_iterator begin() const {
+        return data;
+    }
+
+    const_iterator end() const {
+        return data + n;
+    }
+
+    size_t size() const {
+        return n;
+    }
+private:
+    uint8_t data[n];
+};
+
+} // Internals
+
 namespace Crypto {
 
 WEPDecrypter::WEPDecrypter() 
