@@ -52,10 +52,6 @@ class ICMPExtensionsStructure;
 
 namespace Internals {
 
-void skip_line(std::istream& input);
-bool from_hex(const std::string& str, uint32_t& result);
-bool from_hex(const std::string& str, std::string& result);
-
 PDU* pdu_from_flag(Constants::Ethernet::e flag, const uint8_t* buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
 PDU* pdu_from_flag(Constants::IP::e flag, const uint8_t* buffer,
