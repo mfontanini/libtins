@@ -63,7 +63,6 @@ set(SOURCES
     tcp_ip/stream_identifier.cpp
     timestamp.cpp
     udp.cpp
-    utils.cpp
     dot11/dot11_base.cpp
     dot11/dot11_data.cpp
     dot11/dot11_mgmt.cpp
@@ -76,6 +75,7 @@ set(SOURCES
     utils/frequency_utils.cpp
     utils/routing_utils.cpp
     utils/resolve_utils.cpp
+    utils/pdu_utils.cpp
 )
 
 SET(PCAP_DEPENDENT_SOURCES

@@ -30,10 +30,10 @@
 #ifndef TINS_PACKET_WRITER_H
 #define TINS_PACKET_WRITER_H
 
-#include "utils.h"
 #include <string>
 #include "macros.h"
 #include "cxxstd.h"
+#include "utils/pdu_utils.h"
 
 #ifdef TINS_HAVE_PCAP
 #include <pcap.h>

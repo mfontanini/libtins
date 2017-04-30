@@ -27,58 +27,13 @@
  *
  */
 
-#include <stdexcept>
-#include <cstring>
-#include "macros.h"
-#ifndef _WIN32
-    #if defined(BSD) || defined(__FreeBSD_kernel__)
-        #include <sys/socket.h>
-        #include <sys/file.h>
-        #include <sys/sysctl.h>
-        #include <net/route.h>
-        #include <net/if_dl.h>
-        #include <net/if.h>
-        #include <netinet/in.h>
-    #else
-        #include <netpacket/packet.h>
-    #endif
-    #include <ifaddrs.h>
-    #include <netdb.h>
-    #include <net/if.h>
-    #ifdef __ANDROID_API__
-        #include <linux/in.h>
-        #include <linux/in6.h>
-    #endif
-#else
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #include <iphlpapi.h>
-    #undef interface
-#endif
-#include "utils.h"
-#include "arp.h"
-#include "ethernetII.h"
-#include "network_interface.h"
-#include "packet_sender.h"
-#include "cxxstd.h"
-#include "hw_address.h"
-#include "memory_helpers.h"
-#include "detail/smart_ptr.h"
-#include "detail/smart_ptr.h"
+#include "utils/pdu_utils.h"
 
 using std::string;
-using std::istream;
-using std::set;
-using std::vector;
-using std::back_inserter;
-using std::runtime_error;
-
-using Tins::Memory::InputMemoryStream;
-using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 namespace Utils {
-    
+
 string to_string(PDU::PDUType pduType) {
 #define ENUM_TEXT(p) case(PDU::p): return #p;
     switch (pduType){

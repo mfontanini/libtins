@@ -27,27 +27,57 @@
  *
  */
 
-#ifndef TINS_UTILS_H
-#define TINS_UTILS_H
+#ifndef TINS_PDU_UTILS_H
+#define TINS_PDU_UTILS_H
 
-#include "utils/checksum_utils.h"
-#include "utils/frequency_utils.h"
-#include "utils/routing_utils.h"
-#include "utils/resolve_utils.h"
-#include "utils/pdu_utils.h"
- 
+#include "../macros.h"
+#include "../pdu.h"
+#include "../detail/type_traits.h"
+
 namespace Tins {
-
-/** 
- * \brief Network utils namespace.
- *
- * This namespace provides utils to convert between integer IP addresses
- * and dotted notation strings, "net to host" integer conversions, 
- * interface listing, etc.
- */
 namespace Utils {
+
+/**
+ * \brief Converts a PDUType to a string.
+ * \param pduType The PDUType to be converted.
+ * \return A string representation, for example "DOT11_QOS_DATA".
+ */
+TINS_API std::string to_string(PDU::PDUType pduType);
+
+template <typename T>
+struct is_pdu {  
+    template <typename U>
+    static char test(typename U::PDUType*);
+     
+    template <typename U>
+    static long test(...);
+ 
+    static const bool value = sizeof(test<T>(0)) == 1;
+};
+
+/**
+ * Returns the argument.
+ */
+inline PDU& dereference_until_pdu(PDU& pdu) {
+    return pdu;
+}
+
+/**
+ * \brief Dereferences the parameter until a PDU is found.
+ * 
+ * This function dereferences the parameter until a PDU object
+ * is found. When it's found, it is returned. 
+ * 
+ * \param value The parameter to be dereferenced.
+ */
+template<typename T> 
+inline typename Internals::enable_if<!is_pdu<T>::value, PDU&>::type 
+dereference_until_pdu(T& value) {
+    return dereference_until_pdu(*value);
+}
 
 } // Utils
 } // Tins
 
-#endif // TINS_UTILS_H
+
+#endif // TINS_PDU_UTILS_H
