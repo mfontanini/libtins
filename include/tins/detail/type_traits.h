@@ -34,6 +34,7 @@
 #include "../cxxstd.h"
 #if TINS_IS_CXX11
     #include <type_traits>
+    #include <utility>
 #endif
 
 namespace Tins {

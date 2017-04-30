@@ -29,9 +29,9 @@
 
 #include <cstring>
 #include "ipsec.h"
-#include "internals.h"
 #include "rawpdu.h"
 #include "memory_helpers.h"
+#include "detail/pdu_helpers.h"
 
 using std::memcpy;
 using std::copy;

@@ -31,9 +31,9 @@
 #include <cstring>
 #include "exceptions.h"
 #include "pktap.h"
-#include "internals.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
+#include "detail/pdu_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
 

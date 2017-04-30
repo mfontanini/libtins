@@ -27,24 +27,40 @@
  *
  */
 
-#include "internals.h"
+#ifndef TINS_PDU_HELPERS_H
+#define TINS_PDU_HELPERS_H
+
+#include "../constants.h"
+#include "../config.h"
+#include "../pdu.h"
+
+/**
+ * \cond
+ */
 
 namespace Tins {
 namespace Internals {
 
-int seq_compare(uint32_t seq1, uint32_t seq2) {
-    // As defined by RFC 1982 - 2 ^ (SERIAL_BITS - 1)
-    static const uint32_t seq_number_diff = 2147483648U;
-    if (seq1 == seq2) {
-        return 0;
-    }
-    if (seq1 < seq2) {
-        return (seq2 - seq1 < seq_number_diff) ? -1 : 1;
-    }
-    else {
-        return (seq1 - seq2 > seq_number_diff) ? -1 : 1;
-    }
-}
+PDU* pdu_from_flag(Constants::Ethernet::e flag, const uint8_t* buffer,
+                   uint32_t size, bool rawpdu_on_no_match = true);
+PDU* pdu_from_flag(Constants::IP::e flag, const uint8_t* buffer,
+                   uint32_t size, bool rawpdu_on_no_match = true);
+#ifdef TINS_HAVE_PCAP
+PDU* pdu_from_dlt_flag(int flag, const uint8_t* buffer,
+                       uint32_t size, bool rawpdu_on_no_match = true);
+#endif // TINS_HAVE_PCAP
+PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size);
 
-} // namespace Internals
-} // namespace Tins
+Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
+PDU::PDUType ether_type_to_pdu_flag(Constants::Ethernet::e flag);
+Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag);
+PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag);
+
+} // Internals
+} // Tins
+
+/**
+ * \endcond
+ */
+
+#endif // TINS_PDU_HELPERS_H

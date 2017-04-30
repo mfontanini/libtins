@@ -30,8 +30,8 @@
 #include "ip.h"
 #include "rawpdu.h"
 #include "constants.h"
-#include "internals.h"
 #include "ip_reassembler.h"
+#include "detail/pdu_helpers.h"
 
 using std::make_pair;
 

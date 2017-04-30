@@ -39,8 +39,8 @@
     #include <netinet/in.h>
     #include <net/ethernet.h>
 #endif
-#include "config.h"
 #include "ethernetII.h"
+#include "config.h"
 #include "packet_sender.h"
 #include "rawpdu.h"
 #include "pppoe.h"
@@ -51,6 +51,7 @@
 #include "internals.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
+#include "detail/pdu_helpers.h"
 
 using std::equal;
 
