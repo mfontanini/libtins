@@ -45,7 +45,7 @@
 #include "pktap.h"
 #include "sll.h"
 #include "ppi.h"
-#include "internals.h"
+#include "detail/pdu_helpers.h"
 
 using std::string;
 using std::runtime_error;

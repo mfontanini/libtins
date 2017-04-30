@@ -48,7 +48,6 @@
 #include "ipv6.h"
 #include "arp.h"
 #include "constants.h"
-#include "internals.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 #include "detail/pdu_helpers.h"

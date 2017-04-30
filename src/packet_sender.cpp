@@ -64,8 +64,8 @@
 #include "dot11/dot11_base.h"
 #include "radiotap.h"
 #include "ieee802_3.h"
-#include "internals.h"
 #include "cxxstd.h"
+#include "detail/pdu_helpers.h"
 #if TINS_IS_CXX11
     #include <chrono>
 #endif // TINS_IS_CXX11

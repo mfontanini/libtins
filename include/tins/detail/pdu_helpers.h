@@ -56,6 +56,10 @@ PDU::PDUType ether_type_to_pdu_flag(Constants::Ethernet::e flag);
 Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag);
 PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag);
 
+inline bool is_dot3(const uint8_t* ptr, size_t sz) {
+    return (sz >= 13 && ptr[12] < 8);
+}
+
 } // Internals
 } // Tins
 
