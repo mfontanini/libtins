@@ -31,9 +31,9 @@
 #include <cstring>
 #include "icmp_extension.h"
 #include "exceptions.h"
-#include "utils.h"
 #include "memory_helpers.h"
 #include "mpls.h"
+#include "utils/checksum_utils.h"
 
 using std::runtime_error;
 
