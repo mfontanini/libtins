@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 #include "tests/dot11.h"
-
+#include "detail/smart_ptr.h"
 
 using namespace std;
 using namespace Tins;
