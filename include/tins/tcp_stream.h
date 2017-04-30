@@ -38,9 +38,9 @@
 #include <stdint.h>
 #include "macros.h"
 #include "tcp.h"
-#include "utils.h"
 #include "ip.h"
 #include "ip_address.h"
+#include "utils/pdu_utils.h"
 
 #ifdef TINS_HAVE_PCAP
 
