@@ -30,7 +30,7 @@
 #ifndef TINS_ADDRESS_HELPERS_H
 #define TINS_ADDRESS_HELPERS_H
 
-#include "hw_address.h"
+#include "../hw_address.h"
 
 /**
  * \cond

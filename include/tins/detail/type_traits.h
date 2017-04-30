@@ -31,7 +31,7 @@
 #define TINS_TYPE_TRAITS_H
 
 #include <stdint.h>
-#include "cxxstd.h"
+#include "../cxxstd.h"
 #if TINS_IS_CXX11
     #include <type_traits>
 #endif
