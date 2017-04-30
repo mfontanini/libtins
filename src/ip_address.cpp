@@ -39,6 +39,7 @@
 #include "ip_address.h"
 #include "endianness.h"
 #include "address_range.h"
+#include "exceptions.h"
 
 using std::string;
 using std::ostringstream;

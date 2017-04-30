@@ -347,28 +347,6 @@ PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag) {
     };
 }
 
-bool increment(IPv4Address &addr) {
-    uint32_t addr_int = Endian::be_to_host<uint32_t>(addr);
-    bool reached_end = ++addr_int == 0xffffffff;
-    addr = IPv4Address(Endian::be_to_host<uint32_t>(addr_int));
-    return reached_end;
-}
-
-bool increment(IPv6Address& addr) {
-    return increment_buffer(addr);
-}
-
-bool decrement(IPv4Address& addr) {
-    uint32_t addr_int = Endian::be_to_host<uint32_t>(addr);
-    bool reached_end = --addr_int == 0;
-    addr = IPv4Address(Endian::be_to_host<uint32_t>(addr_int));
-    return reached_end;
-}
-
-bool decrement(IPv6Address& addr) {
-    return decrement_buffer(addr);
-}
-
 int seq_compare(uint32_t seq1, uint32_t seq2) {
     // As defined by RFC 1982 - 2 ^ (SERIAL_BITS - 1)
     static const uint32_t seq_number_diff = 2147483648U;
@@ -381,20 +359,6 @@ int seq_compare(uint32_t seq1, uint32_t seq2) {
     else {
         return (seq1 - seq2 > seq_number_diff) ? -1 : 1;
     }
-}
-
-IPv4Address last_address_from_mask(IPv4Address addr, IPv4Address mask) {
-    uint32_t addr_int = Endian::be_to_host<uint32_t>(addr),
-             mask_int = Endian::be_to_host<uint32_t>(mask);
-    return IPv4Address(Endian::host_to_be(addr_int | ~mask_int));
-}
-
-IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask) {
-    IPv6Address::iterator addr_iter = addr.begin();
-    for (IPv6Address::const_iterator it = mask.begin(); it != mask.end(); ++it, ++addr_iter) {
-        *addr_iter = *addr_iter | ~*it;
-    }
-    return addr;
 }
 
 } // namespace Internals
