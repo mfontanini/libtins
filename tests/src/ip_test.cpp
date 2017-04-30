@@ -9,7 +9,6 @@
 #include "icmp_extension.h"
 #include "rawpdu.h"
 #include "ip_address.h"
-#include "utils.h"
 #include "ethernetII.h"
 
 using namespace std;

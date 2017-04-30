@@ -10,7 +10,6 @@
 #include "rawpdu.h"
 #include "ethernetII.h"
 #include "ipv6_address.h"
-#include "utils.h"
 
 using namespace std;
 using namespace Tins;

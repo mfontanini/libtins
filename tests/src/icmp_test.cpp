@@ -5,7 +5,6 @@
 #include "icmp.h"
 #include "ip.h"
 #include "ethernetII.h"
-#include "utils.h"
 #include "mpls.h"
 #include "rawpdu.h"
 

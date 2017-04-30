@@ -17,7 +17,6 @@
 #include "ethernetII.h"
 #include "rawpdu.h"
 #include "packet.h"
-#include "utils.h"
 #include "config.h"
 #ifdef TINS_HAVE_ACK_TRACKER
     #include "tcp_ip/ack_tracker.h"

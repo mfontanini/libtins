@@ -4,7 +4,6 @@
 
 #include <gtest/gtest.h>
 #include "tests/dot11.h"
-#include "utils.h"
 
 using namespace std;
 using namespace Tins;

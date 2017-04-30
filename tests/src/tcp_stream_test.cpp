@@ -5,7 +5,6 @@
 #include "tcp_stream.h"
 #include "tcp.h"
 #include "ethernetII.h"
-#include "utils.h"
 
 using namespace Tins;
 

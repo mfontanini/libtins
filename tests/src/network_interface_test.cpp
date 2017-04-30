@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include "network_interface.h"
-#include "utils.h"
 #include "macros.h"
 
 using namespace Tins;
