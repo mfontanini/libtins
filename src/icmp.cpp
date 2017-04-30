@@ -33,11 +33,11 @@
     #include <netinet/in.h>
 #endif
 #include "rawpdu.h"
-#include "utils.h"
 #include "exceptions.h"
 #include "icmp.h"
 #include "memory_helpers.h"
 #include "detail/icmp_extension_helpers.h"
+#include "utils/checksum_utils.h"
 
 using std::memset;
 using std::max;

@@ -48,6 +48,7 @@
 #include "packet_sender.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
+#include "utils/checksum_utils.h"
 
 using std::memcpy;
 

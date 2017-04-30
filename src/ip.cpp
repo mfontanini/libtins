@@ -39,7 +39,6 @@
 #endif
 #include "ip.h"
 #include "rawpdu.h"
-#include "utils.h"
 #include "packet_sender.h"
 #include "constants.h"
 #include "network_interface.h"
@@ -47,6 +46,7 @@
 #include "pdu_allocator.h"
 #include "memory_helpers.h"
 #include "internals.h"
+#include "utils/checksum_utils.h"
 
 using std::list;
 using std::min;

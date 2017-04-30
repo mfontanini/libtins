@@ -31,12 +31,12 @@
 #include <cstring>
 #include "udp.h"
 #include "constants.h"
-#include "utils.h"
 #include "ip.h"
 #include "ipv6.h"
 #include "rawpdu.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
+#include "utils/checksum_utils.h"
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
