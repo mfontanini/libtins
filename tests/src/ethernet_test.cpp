@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 #include "ethernetII.h"
-#include "utils.h"
 #include "macros.h"
 #include "ipv6.h"
 #include "ip.h"

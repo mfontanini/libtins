@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include "eapol.h"
 #include "snap.h"
-#include "utils.h"
 #include "ethernetII.h"
 #include "rsn_information.h"
 

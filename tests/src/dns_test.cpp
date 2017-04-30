@@ -2,7 +2,6 @@
 #include <iostream>
 #include "dns.h"
 #include "ipv6_address.h"
-#include "utils.h"
 
 using namespace Tins;
 

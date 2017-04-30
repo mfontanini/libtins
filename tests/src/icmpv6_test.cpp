@@ -6,7 +6,6 @@
 #include "ethernetII.h"
 #include "ip.h"
 #include "tcp.h"
-#include "utils.h"
 #include "rawpdu.h"
 #include "hw_address.h"
 

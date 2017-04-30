@@ -5,7 +5,6 @@
 #include <sstream>
 #include <stdint.h>
 #include "ipv6_address.h"
-#include "utils.h"
 
 using namespace Tins;
 

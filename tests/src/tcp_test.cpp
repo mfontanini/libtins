@@ -6,7 +6,6 @@
 #include "tcp.h"
 #include "ip.h"
 #include "ethernetII.h"
-#include "utils.h"
 
 using namespace std;
 using namespace Tins;

@@ -3,7 +3,6 @@
 #include <string>
 #include <stdint.h>
 #include "snap.h"
-#include "utils.h"
 
 using namespace std;
 using namespace Tins;

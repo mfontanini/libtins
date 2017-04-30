@@ -4,7 +4,6 @@
 #include <iostream>
 #include <stdint.h>
 #include "arp.h"
-#include "utils.h"
 #include "ip_address.h"
 
 
