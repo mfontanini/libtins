@@ -34,7 +34,6 @@
 #include <list>
 #include <vector>
 #include <stdint.h>
-#include <stdexcept>
 #include <utility>
 #include "pdu.h"
 #include "macros.h"

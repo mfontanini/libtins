@@ -31,7 +31,6 @@
 #define TINS_IPV6_ADDRESS
 
 #include <string>
-#include <stdexcept>
 #include <iosfwd>
 #include <stdint.h>
 #include "cxxstd.h"

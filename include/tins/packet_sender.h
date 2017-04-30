@@ -32,7 +32,6 @@
 
 
 #include <string>
-#include <stdexcept>
 #include <vector>
 #include <stdint.h>
 #include <map>
