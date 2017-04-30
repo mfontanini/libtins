@@ -23,6 +23,7 @@ set(SOURCES
     crypto.cpp
     detail/address_helpers.cpp
     detail/icmp_extension_helpers.cpp
+    detail/pdu_helpers.cpp
     dhcp.cpp
     dhcpv6.cpp
     dns.cpp

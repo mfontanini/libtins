@@ -35,7 +35,6 @@
 #include "constants.h"
 #include "rawpdu.h"
 #include "exceptions.h"
-#include "internals.h"
 #include "memory_helpers.h"
 #include "utils/checksum_utils.h"
 

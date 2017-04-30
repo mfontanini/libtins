@@ -30,42 +30,18 @@
 #ifndef TINS_INTERNALS_H
 #define TINS_INTERNALS_H
 
-#include <string>
 #include <stdint.h>
-#include "constants.h"
-#include "pdu.h"
-#include "hw_address.h"
-#include "macros.h"
 #include "detail/type_traits.h"
+#include "detail/address_helpers.h"
+#include "detail/icmp_extension_helpers.h"
+#include "detail/smart_ptr.h"
+#include "detail/pdu_helpers.h"
 
 /**
  * \cond
  */
 namespace Tins {
-namespace Memory {
-
-class InputMemoryStream;
-} // Memory
-class IPv4Address;
-class IPv6Address;
-class ICMPExtensionsStructure;
-
 namespace Internals {
-
-PDU* pdu_from_flag(Constants::Ethernet::e flag, const uint8_t* buffer,
-  uint32_t size, bool rawpdu_on_no_match = true);
-PDU* pdu_from_flag(Constants::IP::e flag, const uint8_t* buffer,
-  uint32_t size, bool rawpdu_on_no_match = true);
-#ifdef TINS_HAVE_PCAP
-PDU* pdu_from_dlt_flag(int flag, const uint8_t* buffer,
-  uint32_t size, bool rawpdu_on_no_match = true);
-#endif // TINS_HAVE_PCAP
-PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size);
-
-Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
-PDU::PDUType ether_type_to_pdu_flag(Constants::Ethernet::e flag);
-Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag);
-PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag);
 
 // Compares sequence numbers as defined by RFC 1982.
 int seq_compare(uint32_t seq1, uint32_t seq2);

@@ -33,7 +33,6 @@
 #include "endianness.h"
 #include "dhcp.h"
 #include "ethernetII.h"
-#include "internals.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 

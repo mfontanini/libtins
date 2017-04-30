@@ -30,9 +30,9 @@
 #include <stdexcept>
 #include <cstring>
 #include "dot1q.h"
-#include "internals.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
+#include "detail/pdu_helpers.h"
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
