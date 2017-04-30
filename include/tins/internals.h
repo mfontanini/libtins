@@ -33,8 +33,6 @@
 #if TINS_IS_CXX11
 #include <type_traits>
 #endif
-
-#include <sstream>
 #include <string>
 #include <stdint.h>
 #include "constants.h"

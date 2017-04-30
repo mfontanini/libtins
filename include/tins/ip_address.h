@@ -31,7 +31,7 @@
 #define TINS_IPADDRESS_H
 
 #include <string>
-#include <iostream>
+#include <iosfwd>
 #include <stdint.h>
 #include "cxxstd.h"
 #include "macros.h"

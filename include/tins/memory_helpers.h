@@ -32,7 +32,6 @@
 
 #include <stdint.h>
 #include <cstring>
-#include <algorithm>
 #include <vector>
 #include "exceptions.h"
 #include "ip_address.h"
@@ -213,7 +212,7 @@ public:
         if (TINS_UNLIKELY(size_ < length)) {
             throw serialization_error();
         }
-        std::copy(start, end, buffer_);
+        std::memcpy(buffer_, &*start, length);
         skip(length);
     }
 
@@ -238,7 +237,7 @@ public:
         if (TINS_UNLIKELY(size_ < size)) {
             throw serialization_error();
         }
-        std::fill(buffer_, buffer_ + size, value);
+        std::memset(buffer_, value, size);
         skip(size);
     }
 

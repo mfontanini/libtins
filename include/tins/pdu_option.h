@@ -33,9 +33,7 @@
 #include <vector>
 #include <iterator>
 #include <cstring>
-#include <algorithm>
 #include <string>
-#include <limits>
 #include <stdint.h>
 #include "exceptions.h"
 #include "endianness.h"
@@ -375,11 +373,7 @@ public:
             rhs.real_size_ = 0;
         }
         else {
-            std::copy(
-                rhs.data_ptr(),
-                rhs.data_ptr() + rhs.data_size(),
-                payload_.small_buffer
-            );
+            std::memcpy(payload_.small_buffer, rhs.data_ptr(), rhs.data_size());
         }
         return* this;
     }
@@ -516,16 +510,12 @@ private:
     template<typename ForwardIterator>
     void set_payload_contents(ForwardIterator start, ForwardIterator end) {
         size_t total_size = std::distance(start, end);
-        if (total_size > std::numeric_limits<uint16_t>::max()) {
+        if (total_size > 65535) {
             throw option_payload_too_large();
         }
         real_size_ = static_cast<uint16_t>(total_size);
         if (real_size_ <= small_buffer_size) {
-            std::copy(
-                start,
-                end,
-                payload_.small_buffer
-            );
+            std::memcpy(payload_.small_buffer, &*start, total_size);
         }
         else {
             payload_.big_buffer_ptr = new data_type[real_size_];

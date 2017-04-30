@@ -28,6 +28,7 @@
  */
  
 #include <cstring>
+#include <algorithm>
 #include "icmpv6.h"
 #include "ipv6.h"
 #include "rawpdu.h"

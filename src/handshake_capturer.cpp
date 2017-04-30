@@ -31,6 +31,7 @@
 
 #ifdef TINS_HAVE_DOT11
 
+#include <algorithm>
 #include "dot11/dot11_data.h"
 
 using std::max_element;

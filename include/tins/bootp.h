@@ -31,7 +31,6 @@
 #define TINS_BOOTP_H
 
 #include <stdint.h>
-#include <algorithm>
 #include <vector>
 #include "pdu.h"
 #include "macros.h"
@@ -268,15 +267,14 @@ public:
      */
     template<size_t n>
     void chaddr(const HWAddress<n>& new_chaddr) {
-        // Copy the new addr
-        uint8_t* end = std::copy(
-            new_chaddr.begin(), 
-            new_chaddr.begin() + std::min(n, sizeof(bootp_.chaddr)), 
-            bootp_.chaddr
-        );
-        // Fill what's left with zeros
-        if (end < bootp_.chaddr + chaddr_type::address_size) {
-            std::fill(end, bootp_.chaddr + chaddr_type::address_size, 0);
+        size_t copy_threshold = std::min(n, sizeof(bootp_.chaddr));
+        for (size_t i = 0; i < copy_threshold; ++i) {
+            if (i < copy_threshold) {
+                bootp_.chaddr[i] = new_chaddr[i];
+            }
+            else {
+                bootp_.chaddr[i] = 0;
+            }
         }
     }
 
