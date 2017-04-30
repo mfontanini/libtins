@@ -30,9 +30,6 @@
 #ifndef TINS_INTERNALS_H
 #define TINS_INTERNALS_H
 
-#if TINS_IS_CXX11
-#include <type_traits>
-#endif
 #include <string>
 #include <stdint.h>
 #include "constants.h"
@@ -189,36 +186,6 @@ HWAddress<n> last_address_from_mask(HWAddress<n> addr, const HWAddress<n>& mask)
 inline bool is_dot3(const uint8_t* ptr, size_t sz) {
     return (sz >= 13 && ptr[12] < 8);
 }
-
-#if TINS_IS_CXX11 && !defined(_MSC_VER)
-
-// Template metaprogramming trait to determine if a functor can accept another parameter as an argument
-template <typename T, typename P, typename=void>
-struct accepts_type : std::false_type { };
-
-template <typename T, typename P>
-struct accepts_type<T, P,
-    typename std::enable_if<
-        std::is_same< decltype(  std::declval<T>()(std::declval<P>())  ), bool>::value
-    >::type
-> : std::true_type { };
-
-// use enable_if to invoke the Packet&& version of the sniff_loop handler if possible - otherwise fail to old behavior
-template <typename Functor, typename Packet>
-bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<accepts_type<Functor, Packet>::value, bool>::type* = 0) {
-    return f(std::move(p));
-}
-
-template <typename Functor, typename Packet>
-bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<!accepts_type<Functor, Packet>::value && accepts_type<Functor, Packet&>::value, bool>::type* = 0) {
-    return f(p);
-}
-
-template <typename Functor, typename Packet>
-bool invoke_loop_cb(Functor& f, Packet& p, typename std::enable_if<!accepts_type<Functor, Packet>::value && !accepts_type<Functor, Packet&>::value, bool>::type* = 0) {
-    return f(*p.pdu());
-}
-#endif
 
 } // namespace Internals
 } // namespace Tins

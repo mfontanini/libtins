@@ -45,6 +45,7 @@
 #include "pktap.h"
 #include "sll.h"
 #include "ppi.h"
+#include "internals.h"
 
 using std::string;
 using std::runtime_error;
