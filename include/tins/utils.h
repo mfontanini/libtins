@@ -40,6 +40,7 @@
 #include "utils/checksum_utils.h"
 #include "utils/frequency_utils.h"
 #include "utils/routing_utils.h"
+#include "utils/resolve_utils.h"
 
 // Fix for Windows interface define on combaseapi.h
 #undef interface
@@ -61,56 +62,6 @@ class HWAddress;
  * interface listing, etc.
  */
 namespace Utils {
-
-/** 
- * \brief Resolves a domain name and returns its corresponding ip address.
- *
- * If an ip address is given, its integer representation is returned.
- * Otherwise, the domain name is resolved and its ip address is returned.
- *
- * \param to_resolve The domain name/ip address to resolve.
- */
-TINS_API IPv4Address resolve_domain(const std::string& to_resolve);
-
-/** 
- * \brief Resolves a domain name and returns its corresponding ip address.
- *
- * If an ip address is given, its integer representation is returned.
- * Otherwise, the domain name is resolved and its ip address is returned.
- *
- * \param to_resolve The domain name/ip address to resolve.
- */
-TINS_API IPv6Address resolve_domain6(const std::string& to_resolve);
-
-/** 
- * \brief Resolves the hardware address for a given ip.
- *
- * If the address can't be resolved, a std::runtime_error
- * exception is thrown.
- * 
- * \param iface The interface in which the packet will be sent.
- * \param ip The ip to resolve, in integer format.
- * \param sender The sender to use to send and receive the ARP requests.
- * \return HWAddress<6> containing the resolved hardware address.
- */
-TINS_API HWAddress<6> resolve_hwaddr(const NetworkInterface& iface, 
-                                     IPv4Address ip,
-                                     PacketSender& sender);
-
-/** 
- * \brief Resolves the hardware address for a given ip.
- *
- * If the address can't be resolved, a std::runtime_error
- * exception is thrown.
- * 
- * This method sends and receives the packet through
- * PacketSender::default_interface.
- * 
- * \param ip The ip to resolve, in integer format.
- * \param sender The sender to use to send and receive the ARP requests.
- * \return HWAddress<6> containing the resolved hardware address.
- */
-TINS_API HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender);
 
 /**
  * \brief Converts a PDUType to a string.

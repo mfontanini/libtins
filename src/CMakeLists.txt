@@ -75,6 +75,7 @@ set(SOURCES
     utils/checksum_utils.cpp
     utils/frequency_utils.cpp
     utils/routing_utils.cpp
+    utils/resolve_utils.cpp
 )
 
 SET(PCAP_DEPENDENT_SOURCES

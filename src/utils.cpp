@@ -76,72 +76,8 @@ using std::runtime_error;
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
 
-/** \cond */
-
-addrinfo* resolve_domain(const string& to_resolve, int family) {
-    addrinfo* result, hints = addrinfo();
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
-    hints.ai_family = family;
-    if (!getaddrinfo(to_resolve.c_str(), 0, &hints, &result)) {
-        return result;
-    }
-    else {
-        throw runtime_error("Could not resolve address");
-    }
-}
-
 namespace Tins {
-
-/** \endcond */
 namespace Utils {
-
-IPv4Address resolve_domain(const string& to_resolve) {
-    addrinfo* result = ::resolve_domain(to_resolve, AF_INET);
-    IPv4Address addr(((sockaddr_in*)result->ai_addr)->sin_addr.s_addr);
-    freeaddrinfo(result);
-    return addr;
-}
-
-IPv6Address resolve_domain6(const string& to_resolve) {
-    addrinfo* result = ::resolve_domain(to_resolve, AF_INET6);
-    IPv6Address addr((const uint8_t*)&((sockaddr_in6*)result->ai_addr)->sin6_addr);
-    freeaddrinfo(result);
-    return addr;
-}
-
-HWAddress<6> resolve_hwaddr(const NetworkInterface& iface,
-                            IPv4Address ip,
-                            PacketSender& sender) {
-    NetworkInterface::Info info(iface.addresses());
-    #ifdef _WIN32
-        // On Windows, use SendARP
-        IPAddr source;
-        IPAddr dest;
-        ULONG hw_address[2];
-        ULONG address_length = 6;
-        source = static_cast<uint32_t>(info.ip_addr);
-        dest = static_cast<uint32_t>(ip);
-        if (SendARP(dest, source, &hw_address, &address_length) == NO_ERROR && address_length == 6) {
-            return HWAddress<6>((const uint8_t*)hw_address);
-        }
-    #else
-        // On other platforms, just do the ARP resolution ourselves
-        EthernetII packet = ARP::make_arp_request(ip, info.ip_addr, info.hw_addr);
-        Internals::smart_ptr<PDU>::type response(sender.send_recv(packet, iface));
-        if (response.get()) {
-            const ARP* arp_resp = response->find_pdu<ARP>();
-            if (arp_resp) {
-                return arp_resp->sender_hw_addr();
-            }
-        }
-    #endif 
-    throw runtime_error("Could not resolve hardware address");
-}
-
-HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender) {
-    return resolve_hwaddr(sender.default_interface(), ip, sender);
-}
     
 string to_string(PDU::PDUType pduType) {
 #define ENUM_TEXT(p) case(PDU::p): return #p;
