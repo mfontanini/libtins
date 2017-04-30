@@ -37,7 +37,8 @@
 #include <stdint.h>
 #include "ip_address.h"
 #include "ipv6_address.h"
-#include "internals.h"
+#include "pdu.h"
+#include "detail/type_traits.h"
 
 // Fix for Windows interface define on combaseapi.h
 #undef interface
