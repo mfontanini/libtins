@@ -36,6 +36,7 @@
 #include "utils.h"
 #include "exceptions.h"
 #include "icmp.h"
+#include "internals.h"
 #include "memory_helpers.h"
 
 using std::memset;

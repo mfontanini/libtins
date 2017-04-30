@@ -39,6 +39,7 @@
 #include "pdu.h"
 #include "hw_address.h"
 #include "macros.h"
+#include "detail/type_traits.h"
 
 /**
  * \cond
@@ -108,16 +109,6 @@ private:
 void skip_line(std::istream& input);
 bool from_hex(const std::string& str, uint32_t& result);
 bool from_hex(const std::string& str, std::string& result);
-
-template<bool, typename T = void>
-struct enable_if {
-    typedef T type;
-};
-
-template<typename T>
-struct enable_if<false, T> {
-
-};
 
 PDU* pdu_from_flag(Constants::Ethernet::e flag, const uint8_t* buffer,
   uint32_t size, bool rawpdu_on_no_match = true);
@@ -198,31 +189,6 @@ HWAddress<n> last_address_from_mask(HWAddress<n> addr, const HWAddress<n>& mask)
 inline bool is_dot3(const uint8_t* ptr, size_t sz) {
     return (sz >= 13 && ptr[12] < 8);
 }
-
-template<typename T>
-struct is_unsigned_integral {
-    static const bool value = false;
-};
-
-template<>
-struct is_unsigned_integral<uint8_t> {
-    static const bool value = true;
-};
-
-template<>
-struct is_unsigned_integral<uint16_t> {
-    static const bool value = true;
-};
-
-template<>
-struct is_unsigned_integral<uint32_t> {
-    static const bool value = true;
-};
-
-template<>
-struct is_unsigned_integral<uint64_t> {
-    static const bool value = true;
-};
 
 #if TINS_IS_CXX11 && !defined(_MSC_VER)
 
