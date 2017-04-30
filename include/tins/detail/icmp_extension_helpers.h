@@ -27,57 +27,35 @@
  *
  */
 
-#ifndef TINS_INTERNALS_H
-#define TINS_INTERNALS_H
+#ifndef TINS_ICMP_EXTENSION_HELPERS_H
+#define TINS_ICMP_EXTENSION_HELPERS_H
 
-#include <string>
 #include <stdint.h>
-#include "constants.h"
-#include "pdu.h"
-#include "hw_address.h"
-#include "macros.h"
-#include "detail/type_traits.h"
 
 /**
  * \cond
  */
 namespace Tins {
-namespace Memory {
 
+class PDU;
+class ICMPExtensionsStructure;
+
+namespace Memory {
 class InputMemoryStream;
 } // Memory
-class IPv4Address;
-class IPv6Address;
-class ICMPExtensionsStructure;
 
 namespace Internals {
 
-PDU* pdu_from_flag(Constants::Ethernet::e flag, const uint8_t* buffer,
-  uint32_t size, bool rawpdu_on_no_match = true);
-PDU* pdu_from_flag(Constants::IP::e flag, const uint8_t* buffer,
-  uint32_t size, bool rawpdu_on_no_match = true);
-#ifdef TINS_HAVE_PCAP
-PDU* pdu_from_dlt_flag(int flag, const uint8_t* buffer,
-  uint32_t size, bool rawpdu_on_no_match = true);
-#endif // TINS_HAVE_PCAP
-PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size);
+uint32_t get_padded_icmp_inner_pdu_size(const PDU* inner_pdu, uint32_t pad_alignment);
+void try_parse_icmp_extensions(Memory::InputMemoryStream& stream, uint32_t payload_length,
+                               ICMPExtensionsStructure& extensions);
 
-Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag);
-PDU::PDUType ether_type_to_pdu_flag(Constants::Ethernet::e flag);
-Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag);
-PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag);
 
-// Compares sequence numbers as defined by RFC 1982.
-int seq_compare(uint32_t seq1, uint32_t seq2);
+} // Internals
+} // Tins
 
-inline bool is_dot3(const uint8_t* ptr, size_t sz) {
-    return (sz >= 13 && ptr[12] < 8);
-}
-
-} // namespace Internals
-} // namespace Tins
 /**
  * \endcond
  */
 
-#endif
+#endif // TINS_ICMP_EXTENSION_HELPERS_H

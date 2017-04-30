@@ -36,7 +36,7 @@
 #include "constants.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
-#include "internals.h"
+#include "detail/icmp_extension_helpers.h"
 
 using std::memset;
 using std::vector;
