@@ -29,6 +29,7 @@
 
 #include <stdexcept>
 #include <cstring>
+#include <algorithm>
 #include "endianness.h"
 #include "dhcp.h"
 #include "ethernetII.h"

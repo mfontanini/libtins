@@ -27,7 +27,6 @@
  *
  */
 
-#include <algorithm>
 #include "macros.h"
 #ifndef _WIN32
     #include <arpa/inet.h>
@@ -38,14 +37,17 @@
     #include <ws2tcpip.h>
     #include <mstcpip.h>
 #endif
+#include <algorithm>
 #include <limits>
 #include <sstream>
+#include <iostream>
 #include "ipv6_address.h"
 #include "address_range.h"
 #include "exceptions.h"
 
 using std::fill;
 using std::string;
+using std::ostream;
 
 namespace Tins {
 
@@ -130,6 +132,10 @@ bool IPv6Address::is_loopback() const {
 
 bool IPv6Address::is_multicast() const {
     return multicast_range.contains(*this);
+}
+
+ostream& operator<<(ostream& os, const IPv6Address& addr) {
+    return os << addr.to_string();
 }
 
 IPv6Address operator&(const IPv6Address& lhs, const IPv6Address& rhs) {

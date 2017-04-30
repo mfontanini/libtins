@@ -30,7 +30,7 @@
 #ifndef TINS_PDU_CACHER_H
 #define TINS_PDU_CACHER_H
 
-#include <algorithm>
+#include <cstring>
 #include "pdu.h"
 #include "macros.h"
 
@@ -148,7 +148,7 @@ private:
         if (cached_serialization_.size() != total_sz) {
             cached_serialization_ = cached_.serialize();
         }
-        std::copy(cached_serialization_.begin(), cached_serialization_.end(), buffer);
+        std::memcpy(buffer, &*cached_serialization_.begin(), cached_serialization_.size());
     }
 
     cached_type cached_;

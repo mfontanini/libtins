@@ -32,6 +32,7 @@
 
 #include <string>
 #include <stdexcept>
+#include <iosfwd>
 #include <stdint.h>
 #include "cxxstd.h"
 #include "macros.h"
@@ -203,10 +204,7 @@ public:
      * \param addr The parameter to be written.
      * \return std::ostream& pointing to the os parameter.
      */
-    friend std::ostream& operator<<(std::ostream& os, const IPv6Address& addr) {
-        return os << addr.to_string();
-    }
-
+    friend std::ostream& operator<<(std::ostream& os, const IPv6Address& addr);
 
     /**
      * Applies a mask to an address

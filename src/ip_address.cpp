@@ -35,6 +35,7 @@
 #endif // _WIN32
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 #include "ip_address.h"
 #include "endianness.h"
 #include "address_range.h"

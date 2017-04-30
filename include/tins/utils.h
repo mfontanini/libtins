@@ -48,7 +48,7 @@ class NetworkInterface;
 class PacketSender;
 class PDU;
 class IPv6Address;
-template <size_t n, typename Storage>
+template <size_t n>
 class HWAddress;
 
 /** 
