@@ -40,6 +40,7 @@
 #include "pdu.h"
 #include "detail/type_traits.h"
 #include "utils/checksum_utils.h"
+#include "utils/frequency_utils.h"
 
 // Fix for Windows interface define on combaseapi.h
 #undef interface
@@ -215,20 +216,6 @@ TINS_API std::vector<RouteEntry> route_entries();
  * \return a vector which contains all of the route entries.
  */
 TINS_API std::vector<Route6Entry> route6_entries();
-
-/**
- * \brief Converts a channel number to its mhz representation.
- * \param channel The channel number.
- * \return The channel's mhz representation.
- */
-TINS_API uint16_t channel_to_mhz(uint16_t channel);
-
-/**
- * \brief Converts mhz units to the appropriate channel number.
- * \param mhz The mhz units to be converted.
- * \return The channel number.
- */
-TINS_API uint16_t mhz_to_channel(uint16_t mhz);
 
 /**
  * \brief Converts a PDUType to a string.
