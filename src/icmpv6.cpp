@@ -32,11 +32,11 @@
 #include "icmpv6.h"
 #include "ipv6.h"
 #include "rawpdu.h"
-#include "utils.h"
 #include "constants.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 #include "detail/icmp_extension_helpers.h"
+#include "utils/checksum_utils.h"
 
 using std::memset;
 using std::vector;

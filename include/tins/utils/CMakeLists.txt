@@ -1,0 +1,6 @@
+FILE(GLOB INCLUDE_FILES "*.h")
+INSTALL(
+    FILES ${INCLUDE_FILES} 
+    DESTINATION include/tins/utils
+    COMPONENT Headers
+)

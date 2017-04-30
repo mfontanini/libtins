@@ -72,6 +72,7 @@ set(SOURCES
     dot11/dot11_auth.cpp
     dot11/dot11_probe.cpp
     dot11/dot11_control.cpp
+    utils/checksum_utils.cpp
 )
 
 SET(PCAP_DEPENDENT_SOURCES

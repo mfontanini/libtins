@@ -34,10 +34,10 @@
 #include "ipv6.h"
 #include "constants.h"
 #include "rawpdu.h"
-#include "utils.h"
 #include "exceptions.h"
 #include "internals.h"
 #include "memory_helpers.h"
+#include "utils/checksum_utils.h"
 
 using std::find_if;
 using std::min;

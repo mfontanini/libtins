@@ -39,6 +39,7 @@
 #include "ipv6_address.h"
 #include "pdu.h"
 #include "detail/type_traits.h"
+#include "utils/checksum_utils.h"
 
 // Fix for Windows interface define on combaseapi.h
 #undef interface
@@ -215,13 +216,6 @@ TINS_API std::vector<RouteEntry> route_entries();
  */
 TINS_API std::vector<Route6Entry> route6_entries();
 
-/** \brief Returns the 32 bit crc of the given buffer.
- *
- * \param data The input buffer.
- * \param data_size The size of the input buffer.
- */
-TINS_API uint32_t crc32(const uint8_t* data, uint32_t data_size);
-
 /**
  * \brief Converts a channel number to its mhz representation.
  * \param channel The channel number.
@@ -242,56 +236,6 @@ TINS_API uint16_t mhz_to_channel(uint16_t mhz);
  * \return A string representation, for example "DOT11_QOS_DATA".
  */
 TINS_API std::string to_string(PDU::PDUType pduType);
-
-/** 
- * \brief Does the 16 bits sum of all 2 bytes elements between start and end.
- *
- * This is the checksum used by IP, UDP and TCP. If there's and odd number of
- * bytes, the last one is padded and added to the checksum. 
- * \param start The pointer to the start of the buffer.
- * \param end The pointer to the end of the buffer(excluding the last element).
- * \return Returns the checksum between start and end (non inclusive) 
- * in network endian
- */
-TINS_API uint32_t do_checksum(const uint8_t* start, const uint8_t* end);
-
-/** 
- * \brief Computes the 16 bit sum of the input buffer.
- *
- * If there's and odd number of bytes in the buffer, the last one is padded and 
- * added to the checksum. 
- * \param start The pointer to the start of the buffer.
- * \param end The pointer to the end of the buffer(excluding the last element).
- * \return Returns the checksum between start and end (non inclusive) 
- * in network endian
- */
-TINS_API uint16_t sum_range(const uint8_t* start, const uint8_t* end);
-
-/** \brief Performs the pseudo header checksum used in TCP and UDP PDUs.
- *
- * \param source_ip The source ip address.
- * \param dest_ip The destination ip address.
- * \param len The length to be included in the pseudo header.
- * \param flag The flag to use in the protocol field of the pseudo header.
- * \return The pseudo header checksum.
- */
-TINS_API uint32_t pseudoheader_checksum(IPv4Address source_ip,
-                                        IPv4Address dest_ip,
-                                        uint16_t len,
-                                        uint16_t flag);
-
-/** \brief Performs the pseudo header checksum used in TCP and UDP PDUs.
- *
- * \param source_ip The source ip address.
- * \param dest_ip The destination ip address.
- * \param len The length to be included in the pseudo header.
- * \param flag The flag to use in the protocol field of the pseudo header.
- * \return The pseudo header checksum.
- */
-TINS_API uint32_t pseudoheader_checksum(IPv6Address source_ip,  
-                                        IPv6Address dest_ip,
-                                        uint16_t len,
-                                        uint16_t flag);
 
 template <typename T>
 struct is_pdu {  
