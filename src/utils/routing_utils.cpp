@@ -425,5 +425,18 @@ set<string> network_interfaces() {
 }
 #endif // _WIN32
 
+bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr) {
+    typedef vector<RouteEntry> entries_type;
+    entries_type entries = route_entries();
+    uint32_t ip_int = ip;
+    for (entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
+        if ((ip_int & it->mask) == it->destination) {
+            gw_addr = it->gateway;
+            return true;
+        }
+    }
+    return false;
+}
+
 } // Utils
 } // Tins

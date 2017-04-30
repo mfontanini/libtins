@@ -142,20 +142,6 @@ HWAddress<6> resolve_hwaddr(const NetworkInterface& iface,
 HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender) {
     return resolve_hwaddr(sender.default_interface(), ip, sender);
 }
-
-bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr) {
-    typedef vector<RouteEntry> entries_type;
-    entries_type entries;
-    uint32_t ip_int = ip;
-    route_entries(back_inserter(entries));
-    for (entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
-        if ((ip_int & it->mask) == it->destination) {
-            gw_addr = it->gateway;
-            return true;
-        }
-    }
-    return false;
-}
     
 string to_string(PDU::PDUType pduType) {
 #define ENUM_TEXT(p) case(PDU::p): return #p;
