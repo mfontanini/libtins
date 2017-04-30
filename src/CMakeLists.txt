@@ -73,6 +73,7 @@ set(SOURCES
     dot11/dot11_probe.cpp
     dot11/dot11_control.cpp
     utils/checksum_utils.cpp
+    utils/frequency_utils.cpp
 )
 
 SET(PCAP_DEPENDENT_SOURCES

@@ -44,11 +44,11 @@
     #include <net/ethernet.h>
 #endif
 #include "dot11/dot11_base.h"
-#include "utils.h"
 #include "packet_sender.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 #include "utils/checksum_utils.h"
+#include "utils/frequency_utils.h"
 
 using std::memcpy;
 

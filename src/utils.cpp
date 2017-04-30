@@ -524,14 +524,6 @@ set<string> network_interfaces() {
     return output;
 }
 #endif // _WIN32
-
-uint16_t channel_to_mhz(uint16_t channel) {
-    return 2407 + (channel * 5);
-}
-
-uint16_t mhz_to_channel(uint16_t mhz) {
-    return (mhz - 2407) / 5;
-}
     
 string to_string(PDU::PDUType pduType) {
 #define ENUM_TEXT(p) case(PDU::p): return #p;
