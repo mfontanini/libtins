@@ -32,8 +32,6 @@
 
 #include "macros.h"
 #include <string>
-#include <set>
-#include <vector>
 #include <stdint.h>
 #include "ip_address.h"
 #include "ipv6_address.h"
@@ -41,6 +39,7 @@
 #include "detail/type_traits.h"
 #include "utils/checksum_utils.h"
 #include "utils/frequency_utils.h"
+#include "utils/routing_utils.h"
 
 // Fix for Windows interface define on combaseapi.h
 #undef interface
@@ -62,66 +61,6 @@ class HWAddress;
  * interface listing, etc.
  */
 namespace Utils {
-
-/**
- * Struct that represents an entry the routing table
- */
-struct RouteEntry {
-    /**
-     * This interface's name.
-     */
-    std::string interface;
-    
-    /**
-     * This route entry's destination.
-     */
-    IPv4Address destination;
-    
-    /**
-     * This route entry's gateway.
-     */
-    IPv4Address gateway;
-    
-    /**
-     * This route entry's subnet mask.
-     */
-    IPv4Address mask;
-
-    /**
-     * This route entry's metric.
-     */
-    int metric;
-};
-
-/**
- * Struct that represents an entry the IPv6 routing table
- */
-struct Route6Entry {
-    /**
-     * This interface's name.
-     */
-    std::string interface;
-
-    /**
-     * This route entry's destination.
-     */
-    IPv6Address destination;
-
-    /**
-     * This route entry's subnet mask.
-     */
-    IPv6Address mask;
-
-    /**
-     * This route entry's next hop.
-     */
-    IPv6Address gateway;
-
-    /**
-     * This route entry's metric.
-     */
-    int metric;
-};
 
 /** 
  * \brief Resolves a domain name and returns its corresponding ip address.
@@ -173,14 +112,6 @@ TINS_API HWAddress<6> resolve_hwaddr(const NetworkInterface& iface,
  */
 TINS_API HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender);
 
-/** \brief List all network interfaces.
- *
- * Returns a set of strings, each of them representing the name
- * of a network interface. These names can be used as the input
- * interface for Utils::interface_ip, Utils::interface_hwaddr, etc.
- */
-TINS_API std::set<std::string> network_interfaces();
-
 /**
  * \brief Finds the gateway's IP address for the given IP 
  * address.
@@ -193,29 +124,6 @@ TINS_API std::set<std::string> network_interfaces();
  * \return bool indicating whether the lookup was successfull.
  */
 TINS_API bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr);
-
-
-/**
- * \brief Retrieves entries in the routing table.
- * 
- * \brief output ForwardIterator in which entries will be stored.
- */
-template<typename ForwardIterator>
-void route_entries(ForwardIterator output);
-
-/**
- * \brief Retrieves entries in the routing table.
- * 
- * \return a vector which contains all of the route entries.
- */
-TINS_API std::vector<RouteEntry> route_entries();
-
-/**
- * \brief Retrieves entries in the routing table.
- * 
- * \return a vector which contains all of the route entries.
- */
-TINS_API std::vector<Route6Entry> route6_entries();
 
 /**
  * \brief Converts a PDUType to a string.
@@ -258,14 +166,5 @@ dereference_until_pdu(T& value) {
 
 } // Utils
 } // Tins
-
-template<typename ForwardIterator>
-void Tins::Utils::route_entries(ForwardIterator output) {
-    std::vector<RouteEntry> entries = route_entries();
-    for (size_t i = 0; i < entries.size(); ++i) {
-        *output = entries[i];
-        ++output;
-    }
-}
 
 #endif // TINS_UTILS_H
