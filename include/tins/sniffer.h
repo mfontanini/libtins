@@ -40,7 +40,7 @@
 #include "cxxstd.h"
 #include "macros.h"
 #include "exceptions.h"
-#include "internals.h"
+#include "detail/type_traits.h"
 
 #ifdef TINS_HAVE_PCAP
 
