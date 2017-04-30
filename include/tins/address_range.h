@@ -33,7 +33,7 @@
 #include <stdexcept>
 #include <iterator>
 #include "endianness.h"
-#include "internals.h"
+#include "detail/address_helpers.h"
 
 namespace Tins {
 /**
