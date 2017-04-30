@@ -38,6 +38,7 @@
 #endif // TINS_HAVE_WPA2_DECRYPTION
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
+#include "internals.h"
 #include "exceptions.h"
 
 using std::string;
