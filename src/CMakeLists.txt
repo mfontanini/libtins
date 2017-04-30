@@ -24,6 +24,7 @@ set(SOURCES
     detail/address_helpers.cpp
     detail/icmp_extension_helpers.cpp
     detail/pdu_helpers.cpp
+    detail/sequence_number_helpers.cpp
     dhcp.cpp
     dhcpv6.cpp
     dns.cpp
@@ -35,7 +36,6 @@ set(SOURCES
     icmp_extension.cpp
     icmp.cpp
     icmpv6.cpp
-    internals.cpp
     ip_reassembler.cpp
     ip.cpp
     ip_address.cpp

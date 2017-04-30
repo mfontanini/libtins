@@ -27,14 +27,24 @@
  *
  */
 
-#ifndef TINS_INTERNALS_H
-#define TINS_INTERNALS_H
-
-#include "detail/type_traits.h"
-#include "detail/address_helpers.h"
-#include "detail/icmp_extension_helpers.h"
-#include "detail/smart_ptr.h"
-#include "detail/pdu_helpers.h"
 #include "detail/sequence_number_helpers.h"
 
-#endif
+namespace Tins {
+namespace Internals {
+
+int seq_compare(uint32_t seq1, uint32_t seq2) {
+    // As defined by RFC 1982 - 2 ^ (SERIAL_BITS - 1)
+    static const uint32_t seq_number_diff = 2147483648U;
+    if (seq1 == seq2) {
+        return 0;
+    }
+    if (seq1 < seq2) {
+        return (seq2 - seq1 < seq_number_diff) ? -1 : 1;
+    }
+    else {
+        return (seq1 - seq2 > seq_number_diff) ? -1 : 1;
+    }
+}
+
+} // Internals
+} // Tins

@@ -40,7 +40,7 @@
 #include "ip.h"
 #include "ipv6.h"
 #include "rawpdu.h"
-#include "internals.h"
+#include "detail/sequence_number_helpers.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 
