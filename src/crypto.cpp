@@ -42,7 +42,7 @@
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
 #include "exceptions.h"
-#include "utils.h"
+#include "utils/checksum_utils.h"
 #include "detail/type_traits.h"
 
 using std::string;
