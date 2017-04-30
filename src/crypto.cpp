@@ -31,17 +31,22 @@
 
 #ifdef TINS_HAVE_DOT11
 
+#include <algorithm>
 #ifdef TINS_HAVE_WPA2_DECRYPTION
     #include <openssl/evp.h>
     #include <openssl/hmac.h>
     #include <openssl/aes.h>
 #endif // TINS_HAVE_WPA2_DECRYPTION
+#include "snap.h"
+#include "rawpdu.h"
 #include "dot11/dot11_data.h"
 #include "dot11/dot11_beacon.h"
 #include "exceptions.h"
+#include "utils.h"
 #include "detail/type_traits.h"
 
 using std::string;
+using std::vector;
 using std::make_pair;
 using std::equal;
 using std::copy;
@@ -99,95 +104,7 @@ private:
 
 namespace Crypto {
 
-WEPDecrypter::WEPDecrypter() 
-: key_buffer_(4) {
-    
-}
-
-void WEPDecrypter::add_password(const address_type& addr, const string& password) {
-    passwords_[addr] = password;
-    key_buffer_.resize(max(3 + password.size(), key_buffer_.size()));
-}
-
-void WEPDecrypter::remove_password(const address_type& addr) {
-    passwords_.erase(addr); 
-}
-
-bool WEPDecrypter::decrypt(PDU& pdu) {
-    Dot11Data* dot11 = pdu.find_pdu<Dot11Data>();
-    if (dot11) {
-        RawPDU* raw = dot11->find_pdu<RawPDU>();
-        if (raw) {
-            address_type addr;
-            if (!dot11->from_ds() && !dot11->to_ds()) {
-                addr = dot11->addr3();
-            }
-            else if (!dot11->from_ds() && dot11->to_ds()) {
-                addr = dot11->addr1();
-            }
-            else if (dot11->from_ds() && !dot11->to_ds()) {
-                addr = dot11->addr2();
-            }
-            else {
-                // ????
-                addr = dot11->addr3();
-            }
-            passwords_type::iterator it = passwords_.find(addr);
-            if (it != passwords_.end()) {
-                dot11->inner_pdu(decrypt(*raw, it->second));
-                // If its valid, then return true
-                if (dot11->inner_pdu()) {
-                    // it's no longer encrypted.
-                    dot11->wep(0);
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-PDU* WEPDecrypter::decrypt(RawPDU& raw, const string& password) {
-    RawPDU::payload_type& pload = raw.payload();
-    // We require at least the IV, the encrypted checksum and something to decrypt
-    if (pload.size() <= 8) {
-        return 0;
-    }
-    copy(pload.begin(), pload.begin() + 3, key_buffer_.begin());
-    copy(password.begin(), password.end(), key_buffer_.begin() + 3);
-    
-    // Generate the key
-    RC4Key key(key_buffer_.begin(), key_buffer_.begin() + password.size() + 3);
-    rc4(pload.begin() + 4, pload.end(), key, pload.begin());
-    uint32_t payload_size = static_cast<uint32_t>(pload.size() - 8);
-    uint32_t crc = Utils::crc32(&pload[0], payload_size);
-    if (pload[pload.size() - 8] != (crc & 0xff) ||
-        pload[pload.size() - 7] != ((crc >> 8) & 0xff) ||
-        pload[pload.size() - 6] != ((crc >> 16) & 0xff) ||
-        pload[pload.size() - 5] != ((crc >> 24) & 0xff)) {
-        return 0;
-    }
-    
-    try {
-        return new SNAP(&pload[0], payload_size);
-    }
-    catch (exception_base&) {
-        return 0;
-    }
-}
-
-#ifdef TINS_HAVE_WPA2_DECRYPTION
-// WPA2Decrypter
-
-using WPA2::SessionKeys;
-
-const HWAddress<6>& min(const HWAddress<6>& lhs, const HWAddress<6>& rhs) {
-    return lhs < rhs ? lhs : rhs;
-}
-
-const HWAddress<6>& max(const HWAddress<6>& lhs, const HWAddress<6>& rhs) {
-    return lhs < rhs ? rhs : lhs;
-}
+// Helper stuff
 
 template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
 void xor_range(InputIterator1 src1, InputIterator2 src2, OutputIterator dst, size_t sz) {
@@ -285,6 +202,198 @@ uint16_t upper_byte(uint16_t value) {
 
 uint16_t lower_byte(uint16_t value) {
     return value & 0xff;
+}
+
+// RC4 classes/functions
+
+struct RC4Key {
+    static const size_t data_size = 256;
+
+    template<typename ForwardIterator>
+    RC4Key(ForwardIterator start, ForwardIterator end) {
+        for (size_t i = 0; i < data_size; ++i) {
+            data[i] = static_cast<uint8_t>(i);
+        }
+        size_t j = 0;
+        ForwardIterator iter = start;
+        for (size_t i = 0; i < data_size; ++i) {
+            j = (j + data[i] + *iter++) % 256;
+            if(iter == end) {
+                iter = start;
+            }
+            std::swap(data[i], data[j]);
+        }
+    }
+
+    static RC4Key from_packet(const Dot11Data& dot11, const RawPDU& raw,
+                              const vector<uint8_t>& ptk) { 
+        const RawPDU::payload_type& pload = raw.payload();
+        const uint8_t* tk = &ptk[0] + 32;
+        Internals::byte_array<16> rc4_key;
+        uint16_t ppk[6];
+        const Dot11::address_type addr = dot11.addr2();
+        // Phase 1
+        ppk[0] = join_bytes(pload[4], pload[5]);
+        ppk[1] = join_bytes(pload[6], pload[7]);
+        ppk[2] = join_bytes(addr[1], addr[0]);
+        ppk[3] = join_bytes(addr[3], addr[2]);
+        ppk[4] = join_bytes(addr[5], addr[4]);
+
+        for (size_t i = 0; i < 4; ++i) {
+            ppk[0] += sbox(ppk[4] ^ join_bytes(tk[1], tk[0]));
+            ppk[1] += sbox(ppk[0] ^ join_bytes(tk[5], tk[4]));
+            ppk[2] += sbox(ppk[1] ^ join_bytes(tk[9], tk[8]));
+            ppk[3] += sbox(ppk[2] ^ join_bytes(tk[13], tk[12]));
+            ppk[4] += sbox(ppk[3] ^ join_bytes(tk[1], tk[0])) + 2*i;
+            ppk[0] += sbox(ppk[4] ^ join_bytes(tk[3], tk[2]));
+            ppk[1] += sbox(ppk[0] ^ join_bytes(tk[7], tk[6]));
+            ppk[2] += sbox(ppk[1] ^ join_bytes(tk[11], tk[10]));
+            ppk[3] += sbox(ppk[2] ^ join_bytes(tk[15], tk[14]));
+            ppk[4] += sbox(ppk[3] ^ join_bytes(tk[3], tk[2])) + 2*i + 1;
+        }
+
+        // Phase 2, step 1
+        ppk[5] = ppk[4] + join_bytes(pload[0], pload[2]);
+
+        // Phase 2, step 2
+        ppk[0] += sbox(ppk[5] ^ join_bytes(tk[1], tk[0]));
+        ppk[1] += sbox(ppk[0] ^ join_bytes(tk[3], tk[2]));
+        ppk[2] += sbox(ppk[1] ^ join_bytes(tk[5], tk[4]));
+        ppk[3] += sbox(ppk[2] ^ join_bytes(tk[7], tk[6]));
+        ppk[4] += sbox(ppk[3] ^ join_bytes(tk[9], tk[8]));
+        ppk[5] += sbox(ppk[4] ^ join_bytes(tk[11], tk[10]));
+
+        ppk[0] += rotate(ppk[5] ^ join_bytes(tk[13], tk[12]));
+        ppk[1] += rotate(ppk[0] ^ join_bytes(tk[15], tk[14]));
+        ppk[2] += rotate(ppk[1]);
+        ppk[3] += rotate(ppk[2]);
+        ppk[4] += rotate(ppk[3]);
+        ppk[5] += rotate(ppk[4]);
+
+        // Phase 2, step 3
+        rc4_key[0] = upper_byte(join_bytes(pload[0], pload[2]));
+        rc4_key[1] = (rc4_key[0] | 0x20) & 0x7f;
+        rc4_key[2] = lower_byte(join_bytes(pload[0], pload[2]));
+        rc4_key[3] = lower_byte((ppk[5] ^ join_bytes(tk[1], tk[0])) >> 1);
+        rc4_key[4] = lower_byte(ppk[0]);
+        rc4_key[5] = upper_byte(ppk[0]);
+        rc4_key[6] = lower_byte(ppk[1]);
+        rc4_key[7] = upper_byte(ppk[1]);
+        rc4_key[8] = lower_byte(ppk[2]);
+        rc4_key[9] = upper_byte(ppk[2]);
+        rc4_key[10] = lower_byte(ppk[3]);
+        rc4_key[11] = upper_byte(ppk[3]);
+        rc4_key[12] = lower_byte(ppk[4]);
+        rc4_key[13] = upper_byte(ppk[4]);
+        rc4_key[14] = lower_byte(ppk[5]);
+        rc4_key[15] = upper_byte(ppk[5]);
+        return RC4Key(rc4_key.begin(), rc4_key.end());
+    }
+
+    uint8_t data[data_size];
+};
+
+template<typename ForwardIterator, typename OutputIterator>
+void rc4(ForwardIterator start, ForwardIterator end, RC4Key& key, OutputIterator output) {
+    size_t i = 0, j = 0;
+    while (start != end) {
+        i = (i + 1) % RC4Key::data_size;
+        j = (j + key.data[i]) % RC4Key::data_size;
+        std::swap(key.data[i], key.data[j]);
+        *output++ = *start++ ^ key.data[(key.data[i] + key.data[j]) % RC4Key::data_size];
+    }
+}
+
+// WEPDecrypter
+
+WEPDecrypter::WEPDecrypter() 
+: key_buffer_(4) {
+
+}
+
+void WEPDecrypter::add_password(const address_type& addr, const string& password) {
+    passwords_[addr] = password;
+    key_buffer_.resize(max(3 + password.size(), key_buffer_.size()));
+}
+
+void WEPDecrypter::remove_password(const address_type& addr) {
+    passwords_.erase(addr); 
+}
+
+bool WEPDecrypter::decrypt(PDU& pdu) {
+    Dot11Data* dot11 = pdu.find_pdu<Dot11Data>();
+    if (dot11) {
+        RawPDU* raw = dot11->find_pdu<RawPDU>();
+        if (raw) {
+            address_type addr;
+            if (!dot11->from_ds() && !dot11->to_ds()) {
+                addr = dot11->addr3();
+            }
+            else if (!dot11->from_ds() && dot11->to_ds()) {
+                addr = dot11->addr1();
+            }
+            else if (dot11->from_ds() && !dot11->to_ds()) {
+                addr = dot11->addr2();
+            }
+            else {
+                // ????
+                addr = dot11->addr3();
+            }
+            passwords_type::iterator it = passwords_.find(addr);
+            if (it != passwords_.end()) {
+                dot11->inner_pdu(decrypt(*raw, it->second));
+                // If its valid, then return true
+                if (dot11->inner_pdu()) {
+                    // it's no longer encrypted.
+                    dot11->wep(0);
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+PDU* WEPDecrypter::decrypt(RawPDU& raw, const string& password) {
+    RawPDU::payload_type& pload = raw.payload();
+    // We require at least the IV, the encrypted checksum and something to decrypt
+    if (pload.size() <= 8) {
+        return 0;
+    }
+    copy(pload.begin(), pload.begin() + 3, key_buffer_.begin());
+    copy(password.begin(), password.end(), key_buffer_.begin() + 3);
+
+    // Generate the key
+    RC4Key key(key_buffer_.begin(), key_buffer_.begin() + password.size() + 3);
+    rc4(pload.begin() + 4, pload.end(), key, pload.begin());
+    uint32_t payload_size = static_cast<uint32_t>(pload.size() - 8);
+    uint32_t crc = Utils::crc32(&pload[0], payload_size);
+    if (pload[pload.size() - 8] != (crc & 0xff) ||
+        pload[pload.size() - 7] != ((crc >> 8) & 0xff) ||
+        pload[pload.size() - 6] != ((crc >> 16) & 0xff) ||
+        pload[pload.size() - 5] != ((crc >> 24) & 0xff)) {
+        return 0;
+    }
+
+    try {
+        return new SNAP(&pload[0], payload_size);
+    }
+    catch (exception_base&) {
+        return 0;
+    }
+}
+
+#ifdef TINS_HAVE_WPA2_DECRYPTION
+// WPA2Decrypter
+
+using WPA2::SessionKeys;
+
+const HWAddress<6>& min(const HWAddress<6>& lhs, const HWAddress<6>& rhs) {
+    return lhs < rhs ? lhs : rhs;
+}
+
+const HWAddress<6>& max(const HWAddress<6>& lhs, const HWAddress<6>& rhs) {
+    return lhs < rhs ? rhs : lhs;
 }
 
 HWAddress<6> get_bssid(const Dot11Data& dot11) {
@@ -442,76 +551,12 @@ SNAP* SessionKeys::ccmp_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) con
     }
 }
 
-RC4Key SessionKeys::generate_rc4_key(const Dot11Data& dot11, const RawPDU& raw) const {
-    const RawPDU::payload_type& pload = raw.payload();
-    const uint8_t* tk = &ptk_[0] + 32;
-    Internals::byte_array<16> rc4_key;
-    uint16_t ppk[6];
-    const Dot11::address_type addr = dot11.addr2();
-    // Phase 1
-    ppk[0] = join_bytes(pload[4], pload[5]);
-    ppk[1] = join_bytes(pload[6], pload[7]);
-    ppk[2] = join_bytes(addr[1], addr[0]);
-    ppk[3] = join_bytes(addr[3], addr[2]);
-    ppk[4] = join_bytes(addr[5], addr[4]);
-    
-    for (size_t i = 0; i < 4; ++i) {
-        ppk[0] += sbox(ppk[4] ^ join_bytes(tk[1], tk[0]));
-        ppk[1] += sbox(ppk[0] ^ join_bytes(tk[5], tk[4]));
-        ppk[2] += sbox(ppk[1] ^ join_bytes(tk[9], tk[8]));
-        ppk[3] += sbox(ppk[2] ^ join_bytes(tk[13], tk[12]));
-        ppk[4] += sbox(ppk[3] ^ join_bytes(tk[1], tk[0])) + 2*i;
-        ppk[0] += sbox(ppk[4] ^ join_bytes(tk[3], tk[2]));
-        ppk[1] += sbox(ppk[0] ^ join_bytes(tk[7], tk[6]));
-        ppk[2] += sbox(ppk[1] ^ join_bytes(tk[11], tk[10]));
-        ppk[3] += sbox(ppk[2] ^ join_bytes(tk[15], tk[14]));
-        ppk[4] += sbox(ppk[3] ^ join_bytes(tk[3], tk[2])) + 2*i + 1;
-    }
-
-    // Phase 2, step 1
-    ppk[5] = ppk[4] + join_bytes(pload[0], pload[2]);
-    
-    // Phase 2, step 2
-    ppk[0] += sbox(ppk[5] ^ join_bytes(tk[1], tk[0]));
-    ppk[1] += sbox(ppk[0] ^ join_bytes(tk[3], tk[2]));
-    ppk[2] += sbox(ppk[1] ^ join_bytes(tk[5], tk[4]));
-    ppk[3] += sbox(ppk[2] ^ join_bytes(tk[7], tk[6]));
-    ppk[4] += sbox(ppk[3] ^ join_bytes(tk[9], tk[8]));
-    ppk[5] += sbox(ppk[4] ^ join_bytes(tk[11], tk[10]));
-    
-    ppk[0] += rotate(ppk[5] ^ join_bytes(tk[13], tk[12]));
-    ppk[1] += rotate(ppk[0] ^ join_bytes(tk[15], tk[14]));
-    ppk[2] += rotate(ppk[1]);
-    ppk[3] += rotate(ppk[2]);
-    ppk[4] += rotate(ppk[3]);
-    ppk[5] += rotate(ppk[4]);
-    
-    // Phase 2, step 3
-    rc4_key[0] = upper_byte(join_bytes(pload[0], pload[2]));
-    rc4_key[1] = (rc4_key[0] | 0x20) & 0x7f;
-    rc4_key[2] = lower_byte(join_bytes(pload[0], pload[2]));
-    rc4_key[3] = lower_byte((ppk[5] ^ join_bytes(tk[1], tk[0])) >> 1);
-    rc4_key[4] = lower_byte(ppk[0]);
-    rc4_key[5] = upper_byte(ppk[0]);
-    rc4_key[6] = lower_byte(ppk[1]);
-    rc4_key[7] = upper_byte(ppk[1]);
-    rc4_key[8] = lower_byte(ppk[2]);
-    rc4_key[9] = upper_byte(ppk[2]);
-    rc4_key[10] = lower_byte(ppk[3]);
-    rc4_key[11] = upper_byte(ppk[3]);
-    rc4_key[12] = lower_byte(ppk[4]);
-    rc4_key[13] = upper_byte(ppk[4]);
-    rc4_key[14] = lower_byte(ppk[5]);
-    rc4_key[15] = upper_byte(ppk[5]);
-    return RC4Key(rc4_key.begin(), rc4_key.end());
-}
-
 SNAP* SessionKeys::tkip_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) const {
     // at least 20 bytes for IV + crc + stuff
     if (raw.payload_size() <= 20) {
         return 0;
     }
-    Crypto::RC4Key key = generate_rc4_key(dot11, raw);
+    Crypto::RC4Key key = RC4Key::from_packet(dot11, raw, ptk_);
     RawPDU::payload_type& pload = raw.payload();
     rc4(pload.begin() + 8, pload.end(), key, pload.begin());
 

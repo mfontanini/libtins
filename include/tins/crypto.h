@@ -34,14 +34,10 @@
 
 #include <map>
 #include <string>
-#include <algorithm>
 #include <vector>
 #ifdef TINS_HAVE_WPA2_CALLBACKS
     #include <functional>
 #endif // TINS_HAVE_WPA2_CALLBACKS
-#include "utils.h"
-#include "snap.h"
-#include "rawpdu.h"
 #include "macros.h"
 #include "handshake_capturer.h"
 
@@ -50,10 +46,10 @@ namespace Tins {
 class PDU;
 class Dot11;
 class Dot11Data;
+class SNAP;
+class RawPDU;
 
 namespace Crypto {
-
-struct RC4Key;
 
 #ifdef TINS_HAVE_WPA2_DECRYPTION
 namespace WPA2 {
@@ -131,7 +127,6 @@ public:
 private:
     SNAP* ccmp_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) const;
     SNAP* tkip_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) const;
-    RC4Key generate_rc4_key(const Dot11Data& dot11, const RawPDU& raw) const;
 
     ptk_type ptk_;
     bool is_ccmp_;
@@ -176,27 +171,6 @@ private:
 
 } // WPA2
 #endif // TINS_HAVE_WPA2_DECRYPTION
-
-/**
- * \brief RC4 Key abstraction.
- */
-struct RC4Key {
-    static const size_t data_size = 256;
-
-    /**
-     * \brief Initializes the key using the provided iterator range.
-     * 
-     * \param start The start of the range.
-     * \param end The end of the range.
-     */
-    template<typename ForwardIterator>
-    RC4Key(ForwardIterator start, ForwardIterator end);
-
-    /**
-     * The actual key data.
-     */
-    uint8_t data[data_size];
-};
 
 /**
  * \brief Decrypts WEP-encrypted traffic.
@@ -500,20 +474,6 @@ private:
 };
 
 /**
- * \brief Performs RC4 encription/decryption of the given byte range,
- * using the provided key.
- * 
- * The decrypted range will be copied to the OutputIterator provided.
- * 
- * \param start The beginning of the range.
- * \param start The end of the range.
- * \param key The key to be used.
- * \param output The iterator in which to write the output.
- */
-template<typename ForwardIterator, typename OutputIterator>
-void rc4(ForwardIterator start, ForwardIterator end, RC4Key& key, OutputIterator output);
-
-/**
  * \brief Wrapper function to create a DecrypterProxy using a 
  * WEPDecrypter as the Decrypter template parameter.
  * 
@@ -568,35 +528,6 @@ bool DecrypterProxy<Functor, Decrypter>::operator() (PDU& pdu) {
 template<typename Functor>
 DecrypterProxy<Functor, WEPDecrypter> make_wep_decrypter_proxy(const Functor& functor) {
     return DecrypterProxy<Functor, WEPDecrypter>(functor);
-}
-
-// RC4 stuff
-
-template<typename ForwardIterator>
-RC4Key::RC4Key(ForwardIterator start, ForwardIterator end) {
-    for (size_t i = 0; i < data_size; ++i) {
-        data[i] = static_cast<uint8_t>(i);
-    }
-    size_t j = 0;
-    ForwardIterator iter = start;
-    for (size_t i = 0; i < data_size; ++i) {
-        j = (j + data[i] + *iter++) % 256;
-        if(iter == end) {
-            iter = start;
-        }
-        std::swap(data[i], data[j]);
-    }
-}
-
-template<typename ForwardIterator, typename OutputIterator>
-void rc4(ForwardIterator start, ForwardIterator end, RC4Key& key, OutputIterator output) {
-    size_t i = 0, j = 0;
-    while (start != end) {
-        i = (i + 1) % RC4Key::data_size;
-        j = (j + key.data[i]) % RC4Key::data_size;
-        std::swap(key.data[i], key.data[j]);
-        *output++ = *start++ ^ key.data[(key.data[i] + key.data[j]) % RC4Key::data_size];
-    }
 }
 
 } // Crypto
