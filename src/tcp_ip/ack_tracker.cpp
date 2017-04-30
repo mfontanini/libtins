@@ -33,7 +33,7 @@
 
 #include <limits>
 #include "tcp.h"
-#include "internals.h"
+#include "detail/sequence_number_helpers.h"
 
 using std::vector;
 using std::numeric_limits;

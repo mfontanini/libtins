@@ -31,7 +31,7 @@
 
 #ifdef TINS_HAVE_TCPIP
 
-#include "internals.h"
+#include "detail/sequence_number_helpers.h"
 
 using std::move;
 
