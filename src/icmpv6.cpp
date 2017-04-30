@@ -36,6 +36,7 @@
 #include "constants.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
+#include "internals.h"
 
 using std::memset;
 using std::vector;

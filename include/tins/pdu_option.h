@@ -37,10 +37,10 @@
 #include <stdint.h>
 #include "exceptions.h"
 #include "endianness.h"
-#include "internals.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
 #include "hw_address.h"
+#include "detail/type_traits.h"
 
 namespace Tins {
 /**

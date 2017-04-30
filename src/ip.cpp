@@ -46,6 +46,7 @@
 #include "exceptions.h"
 #include "pdu_allocator.h"
 #include "memory_helpers.h"
+#include "internals.h"
 
 using std::list;
 using std::min;
