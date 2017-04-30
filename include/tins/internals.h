@@ -46,10 +46,6 @@ namespace Internals {
 // Compares sequence numbers as defined by RFC 1982.
 int seq_compare(uint32_t seq1, uint32_t seq2);
 
-inline bool is_dot3(const uint8_t* ptr, size_t sz) {
-    return (sz >= 13 && ptr[12] < 8);
-}
-
 } // namespace Internals
 } // namespace Tins
 /**
