@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include "rsn_information.h"
 #include "tests/dot11_mgmt.h"
-
+#include "detail/smart_ptr.h"
 
 using namespace std;
 using namespace Tins;

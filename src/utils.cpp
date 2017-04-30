@@ -68,6 +68,7 @@
 #include "cxxstd.h"
 #include "hw_address.h"
 #include "memory_helpers.h"
+#include "detail/smart_ptr.h"
 
 using std::string;
 using std::set;
