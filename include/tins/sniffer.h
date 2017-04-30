@@ -33,7 +33,6 @@
 
 #include <string>
 #include <memory>
-#include <stdexcept>
 #include <iterator>
 #include "pdu.h"
 #include "packet.h"

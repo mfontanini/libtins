@@ -31,7 +31,6 @@
 #define TINS_IPV6_h
 
 #include <list>
-#include <stdexcept>
 #include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
