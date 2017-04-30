@@ -113,19 +113,6 @@ TINS_API HWAddress<6> resolve_hwaddr(const NetworkInterface& iface,
 TINS_API HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender);
 
 /**
- * \brief Finds the gateway's IP address for the given IP 
- * address.
- * 
- * \param ip The IP address for which the default gateway will
- * be searched.
- * \param gw_addr This parameter will contain the gateway's IP
- * address in case it is found.
- * 
- * \return bool indicating whether the lookup was successfull.
- */
-TINS_API bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr);
-
-/**
  * \brief Converts a PDUType to a string.
  * \param pduType The PDUType to be converted.
  * \return A string representation, for example "DOT11_QOS_DATA".
