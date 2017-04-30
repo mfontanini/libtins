@@ -28,6 +28,7 @@ set(SOURCES
     dot1q.cpp
     eapol.cpp
     ethernetII.cpp
+    hw_address.cpp
     icmp_extension.cpp
     icmp.cpp
     icmpv6.cpp
