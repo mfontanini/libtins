@@ -32,7 +32,6 @@
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
-#include <algorithm>
 #include "macros.h"
 #include "exceptions.h"
 
@@ -126,13 +125,11 @@ const Dot11::option* Dot11::search_option(OptionTypes type) const {
 }
 
 Dot11::options_type::const_iterator Dot11::search_option_iterator(OptionTypes type) const {
-    Internals::option_type_equality_comparator<option> comparator(static_cast<uint8_t>(type));
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option_const<option>(options_, type);
 }
 
 Dot11::options_type::iterator Dot11::search_option_iterator(OptionTypes type) {
-    Internals::option_type_equality_comparator<option> comparator(static_cast<uint8_t>(type));
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option<option>(options_, type);
 }
 
 void Dot11::protocol(small_uint<2> new_proto) {

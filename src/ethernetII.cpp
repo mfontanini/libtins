@@ -28,7 +28,6 @@
  */
 
 #include <cstring>
-#include <algorithm>
 #include "macros.h"
 #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
@@ -47,8 +46,6 @@
 #include "exceptions.h"
 #include "memory_helpers.h"
 #include "detail/pdu_helpers.h"
-
-using std::equal;
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
@@ -144,10 +141,9 @@ bool EthernetII::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const size_t addr_sz = address_type::address_size;
     const ethernet_header* eth_ptr = (const ethernet_header*)ptr;
-    if (equal(header_.src_mac, header_.src_mac + addr_sz, eth_ptr->dst_mac)) {
-        if (equal(header_.src_mac, header_.src_mac + addr_sz, eth_ptr->dst_mac) || 
+    if (address_type(header_.src_mac) == address_type(eth_ptr->dst_mac)) {
+        if (address_type(header_.src_mac) == address_type(eth_ptr->dst_mac) || 
            !dst_addr().is_unicast()) {
             return inner_pdu() ? 
                    inner_pdu()->matches_response(ptr + sizeof(header_), total_sz - sizeof(header_)) : 

@@ -30,7 +30,6 @@
 #include "dot11/dot11_control.h"
 #ifdef TINS_HAVE_DOT11
 
-#include <algorithm>
 #include "memory_helpers.h"
 
 using std::copy;
@@ -234,7 +233,7 @@ void Dot11BlockAck::fragment_number(small_uint<4> frag) {
 }
 
 void Dot11BlockAck::bitmap(const uint8_t* bit) {
-    copy(bit, bit + bitmap_size, bitmap_);
+    memcpy(bitmap_, bit, bitmap_size);
 }
 
 void Dot11BlockAck::write_ext_header(OutputMemoryStream& stream) {

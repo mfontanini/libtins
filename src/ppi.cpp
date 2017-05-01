@@ -27,7 +27,6 @@
  *
  */
 
-#include <algorithm>
 #include <cstring>
 #include <pcap.h>
 #include "dot11/dot11_base.h"

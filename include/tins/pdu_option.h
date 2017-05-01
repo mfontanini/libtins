@@ -537,22 +537,36 @@ private:
 };
 
 namespace Internals {
-    /*
-     * \cond
-     */
-    template <typename Option>
-    struct option_type_equality_comparator {
-        option_type_equality_comparator(typename Option::option_type type) : type(type) { }
+/*
+ * \cond
+ */
 
-        bool operator()(const Option& opt) const {
-            return opt.option() == type;
+template <typename Option, typename Container>
+typename Container::iterator find_option(Container& cont, typename Option::option_type type) {
+    typename Container::iterator iter;
+    for (iter = cont.begin(); iter != cont.end(); ++iter) {
+        if (iter->option() == type) {
+            break;
         }
+    }
+    return iter;
+}
 
-        typename Option::option_type type; 
-    };
-    /*
-     * \endcond
-     */
+template <typename Option, typename Container>
+typename Container::const_iterator find_option_const(const Container& cont,
+                                                     typename Option::option_type type) {
+    typename Container::const_iterator iter;
+    for (iter = cont.begin(); iter != cont.end(); ++iter) {
+        if (iter->option() == type) {
+            break;
+        }
+    }
+    return iter;
+}
+
+/*
+ * \endcond
+ */
 } // Internals
 
 } // namespace Tins

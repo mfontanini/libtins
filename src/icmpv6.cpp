@@ -28,7 +28,6 @@
  */
  
 #include <cstring>
-#include <algorithm>
 #include "icmpv6.h"
 #include "ipv6.h"
 #include "rawpdu.h"
@@ -41,7 +40,6 @@
 using std::memset;
 using std::vector;
 using std::string;
-using std::max;
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
@@ -258,7 +256,8 @@ uint32_t ICMPv6::trailer_size() const {
             // If the next pdu size is lower than 128 bytes, then padding = 128 - pdu size
             // If the next pdu size is greater than 128 bytes, 
             // then padding = pdu size padded to next 32 bit boundary - pdu size
-            const uint32_t upper_bound = max(get_adjusted_inner_pdu_size(), 128U);
+            const uint32_t upper_bound = (get_adjusted_inner_pdu_size() > 128U) ?
+                                          get_adjusted_inner_pdu_size() : 128U;
             output += upper_bound - inner_pdu()->size();
         }
     }
@@ -291,7 +290,9 @@ void ICMPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
         uint32_t length_value = get_adjusted_inner_pdu_size();
         // If the next pdu size is greater than 128, we are forced to set the length field
         if (length() != 0 || length_value > 128) {
-            length_value = length_value ? max(length_value, 128U) : 0;
+            if (length_value > 0) {
+                length_value = (length_value > 128U) ? length_value : 128U;
+            }
             // This field uses 64 bit words as the unit
             header_.rfc4884.length = length_value / sizeof(uint64_t);
         }
@@ -437,13 +438,11 @@ const ICMPv6::option* ICMPv6::search_option(OptionTypes type) const {
 }
 
 ICMPv6::options_type::const_iterator ICMPv6::search_option_iterator(OptionTypes type) const {
-    Internals::option_type_equality_comparator<option> comparator(type);
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option_const<option>(options_, type);
 }
 
 ICMPv6::options_type::iterator ICMPv6::search_option_iterator(OptionTypes type) {
-    Internals::option_type_equality_comparator<option> comparator(type);
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option<option>(options_, type);
 }
 
 // ********************************************************************

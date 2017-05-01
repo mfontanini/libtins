@@ -27,7 +27,6 @@
  *
  */
 
-#include <algorithm>
 #include "rawpdu.h"
 #include "memory_helpers.h"
 

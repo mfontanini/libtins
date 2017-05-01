@@ -28,7 +28,6 @@
  */
 
 #include <cstring>
-#include <algorithm>
 #include "arp.h"
 #include "ethernetII.h"
 #include "rawpdu.h"

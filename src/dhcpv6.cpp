@@ -28,13 +28,10 @@
  */
 
 #include <vector>
-#include <algorithm>
 #include "dhcpv6.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 
-using std::find_if;
-using std::copy;
 using std::vector;
 using std::runtime_error;
 using std::memcpy;
@@ -105,13 +102,11 @@ const DHCPv6::option* DHCPv6::search_option(OptionTypes type) const {
 }
 
 DHCPv6::options_type::const_iterator DHCPv6::search_option_iterator(OptionTypes type) const {
-    Internals::option_type_equality_comparator<option> comparator(type);
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option_const<option>(options_, type);
 }
 
 DHCPv6::options_type::iterator DHCPv6::search_option_iterator(OptionTypes type) {
-    Internals::option_type_equality_comparator<option> comparator(type);
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option<option>(options_, type);
 }
 
 void DHCPv6::write_option(const option& opt, OutputMemoryStream& stream) const {
