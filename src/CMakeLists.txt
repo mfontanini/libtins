@@ -45,6 +45,7 @@ set(SOURCES
     llc.cpp
     loopback.cpp
     mpls.cpp
+    memory_helpers.cpp
     network_interface.cpp
     packet_sender.cpp
     pdu.cpp
