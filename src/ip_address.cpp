@@ -33,6 +33,10 @@
     #include <sys/socket.h>
     #include <arpa/inet.h>
 #endif // _WIN32
+#if TINS_IS_CXX11
+    // std::hash
+    #include <memory>
+#endif // TINS_IS_CXX11
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
@@ -40,6 +44,7 @@
 #include "endianness.h"
 #include "address_range.h"
 #include "exceptions.h"
+
 
 using std::string;
 using std::ostringstream;
@@ -150,3 +155,8 @@ IPv4Address IPv4Address::operator&(const IPv4Address& mask) const {
 }
 
 } // Tins
+
+// Hash
+size_t std::hash<Tins::IPv4Address>::operator()(const Tins::IPv4Address& addr) const {
+    return std::hash<uint32_t>()(addr);
+}

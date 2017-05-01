@@ -35,6 +35,10 @@
 #include <string>
 #include <cstring>
 #include "cxxstd.h"
+#if TINS_IS_CXX11
+    // std::hash
+    #include <memory>
+#endif // TINS_IS_CXX11
 
 namespace Tins {
 namespace Internals {

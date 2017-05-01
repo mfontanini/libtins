@@ -223,9 +223,7 @@ namespace std {
 
 template<>
 struct hash<Tins::IPv6Address> {
-    size_t operator()(const Tins::IPv6Address& addr) const {
-        return std::hash<std::string>()(addr.to_string());
-    }
+    size_t operator()(const Tins::IPv6Address& addr) const;
 };
 
 } // std
