@@ -162,12 +162,12 @@ public:
     /**
      * Dereference and get the stored PDU
      */
-    value_type operator*();
+    PDU& operator*();
 
     /**
      * Dereference and get the stored PDU
      */
-    const value_type operator*() const;
+    const PDU& operator*() const;
 private:
     pointer pdu_;
 };
