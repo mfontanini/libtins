@@ -35,9 +35,6 @@
 #endif
 #include "snap.h"
 #include "constants.h"
-#include "arp.h"
-#include "ip.h"
-#include "eapol.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 #include "detail/pdu_helpers.h"

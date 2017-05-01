@@ -28,7 +28,6 @@
  */
 
 #include "ip.h"
-#include "rawpdu.h"
 #include "constants.h"
 #include "ip_reassembler.h"
 #include "detail/pdu_helpers.h"

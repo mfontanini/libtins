@@ -32,7 +32,6 @@
 #include <algorithm>
 #include "endianness.h"
 #include "dhcp.h"
-#include "ethernetII.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 
@@ -58,8 +57,8 @@ PDU::metadata DHCP::extract_metadata(const uint8_t* /*buffer*/, uint32_t total_s
 DHCP::DHCP() 
 : size_(sizeof(uint32_t)) {
     opcode(BOOTREQUEST);
-    htype(1); //ethernet
-    hlen(EthernetII::address_type::address_size);
+    htype(1); // ethernet
+    hlen(6); // MAC address length
 }
 
 DHCP::DHCP(const uint8_t* buffer, uint32_t total_sz) 

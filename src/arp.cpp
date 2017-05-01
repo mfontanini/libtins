@@ -30,11 +30,9 @@
 #include <cstring>
 #include <algorithm>
 #include "arp.h"
-#include "ip.h"
 #include "ethernetII.h"
 #include "rawpdu.h"
 #include "constants.h"
-#include "network_interface.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
 
@@ -58,7 +56,7 @@ ARP::ARP(ipaddress_type target_ip,
     hw_addr_format((uint16_t)Constants::ARP::ETHER);
     prot_addr_format((uint16_t)Constants::Ethernet::IP);
     hw_addr_length(Tins::EthernetII::address_type::address_size);
-    prot_addr_length(Tins::IP::address_type::address_size);
+    prot_addr_length(4 /* IP address size */);
     sender_ip_addr(sender_ip);
     target_ip_addr(target_ip);
     sender_hw_addr(sender_hw);

@@ -36,7 +36,6 @@
 #include "ip_address.h"
 #include "ipv6_address.h"
 #include "exceptions.h"
-#include "rawpdu.h"
 #include "endianness.h"
 #include "memory_helpers.h"
 

@@ -31,7 +31,6 @@
 #include <stdexcept>
 #include <algorithm>
 #include "eapol.h"
-#include "rsn_information.h"
 #include "exceptions.h"
 #include "rawpdu.h"
 #include "memory_helpers.h"

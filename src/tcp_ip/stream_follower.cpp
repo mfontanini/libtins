@@ -32,7 +32,6 @@
 #ifdef TINS_HAVE_TCPIP
 
 #include <limits>
-#include <algorithm>
 #include "memory.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
@@ -42,21 +41,15 @@
 #include "rawpdu.h"
 #include "packet.h"
 #include "exceptions.h"
-#include "memory_helpers.h"
 
 using std::make_pair;
 using std::bind;
 using std::pair;
 using std::runtime_error;
 using std::numeric_limits;
-using std::max;
-using std::swap;
 using std::chrono::system_clock;
 using std::chrono::minutes;
 using std::chrono::duration_cast;
-
-using Tins::Memory::OutputMemoryStream;
-using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 namespace TCPIP {

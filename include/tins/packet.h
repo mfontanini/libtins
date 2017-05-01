@@ -30,7 +30,6 @@
 #ifndef TINS_PACKET_H
 #define TINS_PACKET_H
 
-#include <algorithm>
 #include "cxxstd.h"
 #include "pdu.h"
 #include "timestamp.h"
@@ -234,7 +233,9 @@ public:
      */
     Packet& operator=(Packet &&rhs) TINS_NOEXCEPT { 
         if (this != &rhs) {
-            std::swap(pdu_, rhs.pdu_);
+            PDU* tmp = std::move(pdu_);
+            pdu_ = std::move(rhs.pdu_);
+            rhs.pdu_ = std::move(tmp);
             ts_ = rhs.timestamp();
         }
         return* this;

@@ -34,12 +34,9 @@
 
 #ifdef TINS_HAVE_TCPIP
 
-#include <vector>
 #include <array>
-#include <map>
 #include <functional>
 #include <stdint.h>
-#include "../hw_address.h"
 #include "../macros.h"
 #include "ack_tracker.h"
 #include "data_tracker.h"
