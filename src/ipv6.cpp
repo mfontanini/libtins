@@ -43,7 +43,6 @@
 #include "pdu_allocator.h"
 #include "memory_helpers.h"
 #include "detail/pdu_helpers.h"
-#include "pdu_allocator.h"
 
 using std::copy;
 

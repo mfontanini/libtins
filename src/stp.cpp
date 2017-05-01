@@ -28,12 +28,9 @@
  */
 
 #include <cstring>
-#include <algorithm>
 #include "stp.h"
 #include "exceptions.h"
 #include "memory_helpers.h"
-
-using std::copy;
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
@@ -128,7 +125,7 @@ STP::bpdu_id_type STP::convert(const pvt_bpdu_id& id) {
 STP::pvt_bpdu_id STP::convert(const bpdu_id_type& id) {
     pvt_bpdu_id result;
     result.priority = id.priority;
-    copy(id.id.begin(), id.id.end(), result.id);
+    id.id.copy(result.id);
     #if TINS_IS_LITTLE_ENDIAN
     result.ext_id = (id.ext_id >> 8) & 0xf;
     result.ext_idL = id.ext_id & 0xff;

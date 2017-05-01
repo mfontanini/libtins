@@ -28,7 +28,6 @@
  */
  
 #include "pdu.h"
-#include "rawpdu.h"
 #include "packet_sender.h"
 
 using std::swap;

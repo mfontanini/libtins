@@ -32,9 +32,7 @@
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
-#include <stdexcept>
 #include <algorithm>
-#include <utility>
 #include "macros.h"
 #include "exceptions.h"
 
@@ -49,11 +47,10 @@
     #include <netinet/in.h>
 #endif
 #include "dot11.h"
-#include "rawpdu.h"
-#include "rsn_information.h"
 #include "packet_sender.h"
-#include "snap.h"
 #include "memory_helpers.h"
+
+using std::list;
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
@@ -218,7 +215,7 @@ void Dot11::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     stream.write(header_);
     write_ext_header(stream);
     write_fixed_parameters(stream);
-    for (std::list<option>::const_iterator it = options_.begin(); it != options_.end(); ++it) {
+    for (list<option>::const_iterator it = options_.begin(); it != options_.end(); ++it) {
         stream.write<uint8_t>(it->option());
         stream.write<uint8_t>(it->length_field());
         stream.write(it->data_ptr(), it->data_size());

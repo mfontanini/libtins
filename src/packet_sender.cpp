@@ -57,7 +57,6 @@
 #include <algorithm>
 #include "pdu.h"
 #include "macros.h"
-#include "network_interface.h"
 // PDUs required by PacketSender::send(PDU&, NetworkInterface)
 #include "ethernetII.h"
 #include "radiotap.h"

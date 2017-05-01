@@ -112,11 +112,11 @@ StreamIdentifier StreamIdentifier::make_identifier(const PDU& packet) {
 
 StreamIdentifier StreamIdentifier::make_identifier(const Stream& stream) {
     if (stream.is_v6()) {
-      return StreamIdentifier(serialize(stream.client_addr_v6()), stream.client_port(),
-                              serialize(stream.server_addr_v6()), stream.server_port());
+        return StreamIdentifier(serialize(stream.client_addr_v6()), stream.client_port(),
+                                serialize(stream.server_addr_v6()), stream.server_port());
     } else {
-      return StreamIdentifier(serialize(stream.client_addr_v4()), stream.client_port(),
-                              serialize(stream.server_addr_v4()), stream.server_port());
+        return StreamIdentifier(serialize(stream.client_addr_v4()), stream.client_port(),
+                                serialize(stream.server_addr_v4()), stream.server_port());
     }
 }
 

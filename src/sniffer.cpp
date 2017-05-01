@@ -33,8 +33,6 @@
     #define TINS_PREFIX_INTERFACE(x) (x)
 #endif // _WIN32
 
-#include <algorithm>
-#include <sstream>
 #include "sniffer.h"
 #include "dot11/dot11_base.h"
 #include "ethernetII.h"
