@@ -54,6 +54,7 @@
 #endif
 #include <cstring>
 #include <ctime>
+#include <sstream>
 #include "pdu.h"
 #include "macros.h"
 // PDUs required by PacketSender::send(PDU&, NetworkInterface)
@@ -368,6 +369,8 @@ void PacketSender::send_l2(PDU& pdu,
         int sock = get_ether_socket(iface);
         if (!buffer.empty()) {
             #if defined(BSD) || defined(__FreeBSD_kernel__)
+            Internals::unused(len_addr);
+            Internals::unused(link_addr);
             if (::write(sock, &buffer[0], buffer.size()) == -1) {
             #else
             if (::sendto(sock, &buffer[0], buffer.size(), 0, link_addr, len_addr) == -1) {
