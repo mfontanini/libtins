@@ -37,6 +37,10 @@
     #include <ws2tcpip.h>
     #include <mstcpip.h>
 #endif
+#if TINS_IS_CXX11
+    // std::hash
+    #include <memory>
+#endif // TINS_IS_CXX11
 #include <limits>
 #include <sstream>
 #include <iostream>
@@ -148,3 +152,8 @@ IPv6Address operator&(const IPv6Address& lhs, const IPv6Address& rhs) {
 }
 
 } // Tins
+
+// Hash
+size_t std::hash<Tins::IPv6Address>::operator()(const Tins::IPv6Address& addr) const {
+    return std::hash<string>()(addr.to_string());
+}
