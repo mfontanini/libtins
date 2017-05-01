@@ -410,7 +410,7 @@ public:
      * \return The stored options.
      */
     const options_type& options() const {
-        return ip_options_;
+        return options_;
     }
 
     /* Setters */
@@ -525,7 +525,7 @@ public:
          */
         void add_option(option &&opt) {
             internal_add_option(opt);
-            ip_options_.push_back(std::move(opt));
+            options_.push_back(std::move(opt));
         }
 
         /**
@@ -538,8 +538,8 @@ public:
          */
         template<typename... Args>
         void add_option(Args&&... args) {
-            ip_options_.emplace_back(std::forward<Args>(args)...);
-            internal_add_option(ip_options_.back());
+            options_.emplace_back(std::forward<Args>(args)...);
+            internal_add_option(options_.back());
         }
     #endif
 
@@ -770,7 +770,7 @@ private:
 
     ip_header header_;
     uint16_t options_size_, padded_options_size_;
-    options_type ip_options_;
+    options_type options_;
 };
 
 } // Tins

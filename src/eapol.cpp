@@ -29,14 +29,11 @@
 
 #include <cstring>
 #include <stdexcept>
-#include <algorithm>
 #include "eapol.h"
 #include "exceptions.h"
 #include "rawpdu.h"
 #include "memory_helpers.h"
 
-using std::copy;
-using std::min;
 using std::memset;
 using std::memcpy;
 
@@ -51,7 +48,8 @@ PDU::metadata EAPOL::extract_metadata(const uint8_t *buffer, uint32_t total_sz) 
     }
     const eapol_header* header = (const eapol_header*)buffer;
     uint32_t advertised_size = Endian::be_to_host<uint16_t>(header->length) + 4;
-    return metadata(min(total_sz, advertised_size), pdu_flag, PDU::UNKNOWN);
+    const uint32_t actual_size = (total_sz < advertised_size) ? total_sz : advertised_size;
+    return metadata(actual_size, pdu_flag, PDU::UNKNOWN);
 }
 
 EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) 
@@ -73,10 +71,8 @@ EAPOL* EAPOL::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     const eapol_header* ptr = (const eapol_header*)buffer;
     uint32_t data_len = Endian::be_to_host<uint16_t>(ptr->length);
     // at least 4 for fields always present
-    total_sz = min(
-        total_sz, 
-        data_len + 4
-    );
+    data_len += 4;
+    total_sz = (total_sz < data_len) ? total_sz : data_len;
     switch(ptr->type) {
         case RC4:
             return new Tins::RC4EAPOL(buffer, total_sz);
@@ -142,7 +138,7 @@ void RC4EAPOL::replay_counter(uint64_t value) {
 }
 
 void RC4EAPOL::key_iv(const uint8_t* ptr) {
-    copy(ptr, ptr + sizeof(header_.key_iv), header_.key_iv);
+    memcpy(header_.key_iv, ptr, sizeof(header_.key_iv));
 }
 
 void RC4EAPOL::key_flag(small_uint<1> flag) {
@@ -195,15 +191,15 @@ RSNEAPOL::RSNEAPOL(const uint8_t* buffer, uint32_t total_sz)
 }
 
 void RSNEAPOL::nonce(const uint8_t* ptr) {
-    copy(ptr, ptr + nonce_size, header_.nonce);
+    memcpy(header_.nonce, ptr, nonce_size);
 }
 
 void RSNEAPOL::rsc(const uint8_t* ptr) {
-    copy(ptr, ptr + rsc_size, header_.rsc);
+    memcpy(header_.rsc, ptr, rsc_size);
 }
 
 void RSNEAPOL::id(const uint8_t* ptr) {
-    copy(ptr, ptr + id_size, header_.id);
+    memcpy(header_.id, ptr, id_size);
 }
 
 void RSNEAPOL::replay_counter(uint64_t new_replay_counter) {
@@ -211,7 +207,7 @@ void RSNEAPOL::replay_counter(uint64_t new_replay_counter) {
 }
 
 void RSNEAPOL::mic(const uint8_t* ptr) {
-    copy(ptr, ptr + mic_size, header_.mic);
+    memcpy(header_.mic, ptr, mic_size);
 }
 
 void RSNEAPOL::wpa_length(uint16_t length) {
@@ -219,7 +215,7 @@ void RSNEAPOL::wpa_length(uint16_t length) {
 }
 
 void RSNEAPOL::key_iv(const uint8_t* ptr) {
-    copy(ptr, ptr + sizeof(header_.key_iv), header_.key_iv);
+    memcpy(header_.key_iv, ptr, sizeof(header_.key_iv));
 }
 
 void RSNEAPOL::key_length(uint16_t length) {

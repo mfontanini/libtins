@@ -29,7 +29,6 @@
 
 #include <stdexcept>
 #include <cstring>
-#include <algorithm>
 #include "endianness.h"
 #include "dhcp.h"
 #include "exceptions.h"
@@ -39,7 +38,6 @@ using std::string;
 using std::vector;
 using std::list;
 using std::runtime_error;
-using std::find_if;
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
@@ -113,13 +111,11 @@ const DHCP::option* DHCP::search_option(OptionTypes opt) const {
 }
 
 DHCP::options_type::const_iterator DHCP::search_option_iterator(OptionTypes opt) const {
-    Internals::option_type_equality_comparator<option> comparator(opt);
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option_const<option>(options_, opt);
 }
 
 DHCP::options_type::iterator DHCP::search_option_iterator(OptionTypes opt) {
-    Internals::option_type_equality_comparator<option> comparator(opt);
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option<option>(options_, opt);
 }
 
 void DHCP::type(Flags type) {

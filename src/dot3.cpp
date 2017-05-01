@@ -29,7 +29,6 @@
 
 #include <cstring>
 #include <stdexcept>
-#include <algorithm>
 #include "macros.h"
 #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
@@ -78,11 +77,11 @@ Dot3::Dot3(const uint8_t* buffer, uint32_t total_sz) {
 }
 
 void Dot3::dst_addr(const address_type& address) {
-    copy(address.begin(), address.end(), header_.dst_mac);
+    address.copy(header_.dst_mac);
 }
 
 void Dot3::src_addr(const address_type& address) {
-    copy(address.begin(), address.end(), header_.src_mac);
+    address.copy(header_.src_mac);
 }
 
 void Dot3::length(uint16_t value) {
@@ -121,11 +120,10 @@ bool Dot3::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const size_t addr_sz = address_type::address_size;
     const dot3_header* eth_ptr = (const dot3_header*)ptr;
-    if (equal(header_.src_mac, header_.src_mac + addr_sz, eth_ptr->dst_mac)) {
-        if (equal(header_.src_mac, header_.src_mac + addr_sz, eth_ptr->dst_mac) || 
-           dst_addr() == BROADCAST) {
+    if (address_type(header_.src_mac) == address_type(eth_ptr->dst_mac)) {
+        if (address_type(header_.src_mac) == address_type(eth_ptr->dst_mac) || 
+            dst_addr() == BROADCAST) {
             ptr += sizeof(dot3_header);
             total_sz -= sizeof(dot3_header);
             return inner_pdu() ? inner_pdu()->matches_response(ptr, total_sz) : true;

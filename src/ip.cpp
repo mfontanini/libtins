@@ -29,7 +29,6 @@
 
 #include <stdexcept>
 #include <cstring>
-#include <algorithm>
 #ifndef _WIN32
     #include <netdb.h>
     #include <sys/socket.h>
@@ -50,7 +49,6 @@
 #include "pdu_allocator.h"
 
 using std::list;
-using std::min;
 using std::memcmp;
 using std::vector;
 
@@ -104,13 +102,13 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
                 if (stream.pointer() + data_size > options_end) {
                     throw malformed_packet();
                 }
-                ip_options_.push_back(
+                options_.push_back(
                     option(opt_type, stream.pointer(), stream.pointer() + data_size)
                 );
                 stream.skip(data_size);
             }
             else {
-                ip_options_.push_back(option(opt_type));
+                options_.push_back(option(opt_type));
             }
             options_size_ += option_size;
         }
@@ -123,7 +121,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
             break;
         }
         else {
-            ip_options_.push_back(option(opt_type));
+            options_.push_back(option(opt_type));
             options_size_++;
         }
     }
@@ -133,7 +131,8 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
         // since this is the case when using TCP segmentation offload
         if (tot_len() != 0) {
             const uint32_t advertised_length = (uint32_t)tot_len() - head_len() * sizeof(uint32_t);
-            total_sz = min(static_cast<uint32_t>(stream.size()), advertised_length);
+            const uint32_t stream_size = static_cast<uint32_t>(stream.size());
+            total_sz = (stream_size < advertised_length) ? stream_size : advertised_length;
         }
         else {
             total_sz = stream.size();
@@ -325,7 +324,7 @@ uint16_t IP::stream_identifier() const {
 
 void IP::add_option(const option& opt) {
     internal_add_option(opt);
-    ip_options_.push_back(opt);
+    options_.push_back(opt);
 }
 
 void IP::update_padded_options_size() {
@@ -340,28 +339,26 @@ void IP::internal_add_option(const option& opt) {
 
 bool IP::remove_option(option_identifier id) {
     options_type::iterator iter = search_option_iterator(id);
-    if (iter == ip_options_.end()) {
+    if (iter == options_.end()) {
         return false;
     }
     options_size_ -= static_cast<uint16_t>(1 + iter->data_size());
-    ip_options_.erase(iter);
+    options_.erase(iter);
     update_padded_options_size();
     return true;
 }
 
 const IP::option* IP::search_option(option_identifier id) const {
     options_type::const_iterator iter = search_option_iterator(id);
-    return (iter != ip_options_.end()) ? &*iter : 0;
+    return (iter != options_.end()) ? &*iter : 0;
 }
 
 IP::options_type::const_iterator IP::search_option_iterator(option_identifier id) const {
-    Internals::option_type_equality_comparator<option> comparator(id);
-    return find_if(ip_options_.begin(), ip_options_.end(), comparator);
+    return Internals::find_option_const<option>(options_, id);
 }
 
 IP::options_type::iterator IP::search_option_iterator(option_identifier id) {
-    Internals::option_type_equality_comparator<option> comparator(id);
-    return find_if(ip_options_.begin(), ip_options_.end(), comparator);
+    return Internals::find_option<option>(options_, id);
 }
 
 void IP::write_option(const option& opt, OutputMemoryStream& stream) {
@@ -461,7 +458,7 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     // Restore the fragment offset field in case we flipped it
     header_.frag_off = original_frag_off;
 
-    for (options_type::const_iterator it = ip_options_.begin(); it != ip_options_.end(); ++it) {
+    for (options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
         write_option(*it, stream);
     }
     // Add option padding
@@ -499,7 +496,8 @@ bool IP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if ((header_.saddr == ip_ptr->daddr && 
         (header_.daddr == ip_ptr->saddr || dst_addr().is_broadcast())) ||
         (dst_addr().is_broadcast() && header_.saddr == 0)) {
-        uint32_t sz = min<uint32_t>(header_size(), total_sz);
+
+        uint32_t sz = (header_size() < total_sz) ? header_size() : total_sz;
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
     return false;

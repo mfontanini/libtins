@@ -27,7 +27,6 @@
  *
  */
 
-#include <algorithm>
 #include <cstring>
 #include "icmp_extension.h"
 #include "exceptions.h"

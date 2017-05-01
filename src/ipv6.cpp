@@ -34,7 +34,6 @@
 #else
     #include <ws2tcpip.h>
 #endif
-#include <algorithm> 
 #include "ipv6.h"
 #include "constants.h"
 #include "packet_sender.h"
@@ -272,7 +271,7 @@ void IPv6::send(PacketSender& sender, const NetworkInterface &) {
     PacketSender::SocketType type = PacketSender::IPV6_SOCKET;
     link_addr.sin6_family = AF_INET6;
     link_addr.sin6_port = 0;
-    copy(header_.dst_addr, header_.dst_addr + address_type::address_size, (uint8_t*)&link_addr.sin6_addr);
+    memcpy((uint8_t*)&link_addr.sin6_addr, header_.dst_addr, address_type::address_size);
     if (inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMP) {
         type = PacketSender::ICMP_SOCKET;
     }

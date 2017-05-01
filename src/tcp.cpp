@@ -28,7 +28,6 @@
  */
 
 #include <cstring>
-#include <algorithm>
 #include "tcp.h"
 #include "ip.h"
 #include "ipv6.h"
@@ -38,8 +37,6 @@
 #include "memory_helpers.h"
 #include "utils/checksum_utils.h"
 
-using std::find_if;
-using std::min;
 using std::vector;
 using std::pair;
 
@@ -345,13 +342,11 @@ const TCP::option* TCP::search_option(OptionTypes type) const {
 }
 
 TCP::options_type::const_iterator TCP::search_option_iterator(OptionTypes type) const {
-    Internals::option_type_equality_comparator<option> comparator(type);
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option_const<option>(options_, type);
 }
 
 TCP::options_type::iterator TCP::search_option_iterator(OptionTypes type) {
-    Internals::option_type_equality_comparator<option> comparator(type);
-    return find_if(options_.begin(), options_.end(), comparator);
+    return Internals::find_option<option>(options_, type);
 }
 
 /* options */
@@ -408,7 +403,8 @@ bool TCP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     }
     const tcp_header* tcp_ptr = (const tcp_header*)ptr;
     if (tcp_ptr->sport == header_.dport && tcp_ptr->dport == header_.sport) {
-        uint32_t sz = min<uint32_t>(total_sz, tcp_ptr->doff * sizeof(uint32_t));
+        const uint32_t data_offset = tcp_ptr->doff * sizeof(uint32_t);
+        uint32_t sz = (total_sz < data_offset) ? total_sz : data_offset;
         return inner_pdu() ? inner_pdu()->matches_response(ptr + sz, total_sz - sz) : true;
     }
     else

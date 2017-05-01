@@ -37,7 +37,6 @@
     #include <ws2tcpip.h>
     #include <mstcpip.h>
 #endif
-#include <algorithm>
 #include <limits>
 #include <sstream>
 #include <iostream>
@@ -45,7 +44,8 @@
 #include "address_range.h"
 #include "exceptions.h"
 
-using std::fill;
+using std::memset;
+using std::memcpy;
 using std::string;
 using std::ostream;
 
@@ -67,7 +67,7 @@ IPv6Address IPv6Address::from_prefix_length(uint32_t prefix_length) {
 }
 
 IPv6Address::IPv6Address() {
-    fill(address_, address_ + address_size, 0);
+    memset(address_, 0, address_size);
 }
 
 IPv6Address::IPv6Address(const char* addr) {
@@ -75,7 +75,7 @@ IPv6Address::IPv6Address(const char* addr) {
 }
 
 IPv6Address::IPv6Address(const_iterator ptr) {
-    std::copy(ptr, ptr + address_size, address_);
+    memcpy(address_, ptr, address_size);
 }
 
 IPv6Address::IPv6Address(const std::string& addr) {

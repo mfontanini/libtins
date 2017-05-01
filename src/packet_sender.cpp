@@ -54,7 +54,6 @@
 #endif
 #include <cstring>
 #include <ctime>
-#include <algorithm>
 #include "pdu.h"
 #include "macros.h"
 // PDUs required by PacketSender::send(PDU&, NetworkInterface)
@@ -71,7 +70,6 @@
 
 using std::string;
 using std::ostringstream;
-using std::max;
 using std::make_pair;
 using std::vector;
 using std::runtime_error;
@@ -457,7 +455,7 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
         int max_fd = 0;
         for (vector<int>::const_iterator it = sockets.begin(); it != sockets.end(); ++it) {
             FD_SET(*it, &readfds);
-            max_fd = max(max_fd, *it);
+            max_fd = (max_fd > *it) ? max_fd : *it;
         }
         if ((read = select(max_fd + 1, &readfds, 0, 0, &timeout)) == -1) {
             return 0;
