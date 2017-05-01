@@ -55,6 +55,7 @@
 #endif
 #include <set>
 #include <fstream>
+#include <stdexcept>
 #include "network_interface.h"
 
 using std::vector;
@@ -62,6 +63,7 @@ using std::string;
 using std::set;
 using std::ifstream;
 using std::istream;
+using std::runtime_error;
 
 namespace Tins {
 namespace Utils {

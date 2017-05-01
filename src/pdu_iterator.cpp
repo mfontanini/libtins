@@ -51,7 +51,7 @@ PDUIterator::value_type PDUIterator::operator*() {
     return *pdu_;
 }
 
-const PDUIterator::value_type PDUIterator::operator*() const {
+const PDU& PDUIterator::operator*() const {
     return *pdu_;
 }
 
