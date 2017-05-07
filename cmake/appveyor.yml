@@ -9,7 +9,7 @@ environment:
   matrix:
     - compiler: vs2013
     - compiler: vs2015
-  BOOST_ROOT: C:\Libraries\boost
+  BOOST_ROOT: C:/Libraries/boost
 clone_depth: 1
 install:
 - git clone https://github.com/mfontanini/winpcap-installer.git
