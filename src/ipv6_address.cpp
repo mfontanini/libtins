@@ -153,7 +153,7 @@ IPv6Address operator&(const IPv6Address& lhs, const IPv6Address& rhs) {
 
 } // Tins
 
-#ifdef TINS_IS_CXX11
+#if TINS_IS_CXX11
 namespace std {
 
 size_t hash<Tins::IPv6Address>::operator()(const Tins::IPv6Address& addr) const {

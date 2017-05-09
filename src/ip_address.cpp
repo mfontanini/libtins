@@ -156,7 +156,7 @@ IPv4Address IPv4Address::operator&(const IPv4Address& mask) const {
 
 } // Tins
 
-#ifdef TINS_IS_CXX11
+#if TINS_IS_CXX11
 namespace std {
 
 size_t hash<Tins::IPv4Address>::operator()(const Tins::IPv4Address& addr) const {
