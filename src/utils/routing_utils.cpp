@@ -57,6 +57,7 @@
 #include <fstream>
 #include <stdexcept>
 #include "network_interface.h"
+#include "exceptions.h"
 
 using std::vector;
 using std::string;
@@ -319,7 +320,7 @@ vector<Route6Entry> route6_entries() {
                 entry.metric = row->Metric;
                 output.push_back(entry);
             }
-            catch (invalid_interface&) {
+            catch (const invalid_interface&) {
                 
             }
         }

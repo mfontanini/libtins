@@ -40,7 +40,6 @@
 #include "utils/checksum_utils.h"
 
 using std::memset;
-using std::max;
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
@@ -148,7 +147,8 @@ uint32_t ICMP::trailer_size() const {
             // If the next pdu size is lower than 128 bytes, then padding = 128 - pdu size
             // If the next pdu size is greater than 128 bytes, 
             // then padding = pdu size padded to next 32 bit boundary - pdu size
-            const uint32_t upper_bound = max(get_adjusted_inner_pdu_size(), 128U);
+            const uint32_t adjusted_size = get_adjusted_inner_pdu_size();
+            const uint32_t upper_bound = adjusted_size > 128U ? adjusted_size : 128U;
             output += upper_bound - inner_pdu()->size();
         }
     }
@@ -228,8 +228,9 @@ void ICMP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
             if (length_value) {
                 // If we have extensions, we'll have at least 128 bytes.
                 // Otherwise, just use the length 
-                length_value = has_extensions() ? max(length_value, 128U) 
-                                                : length_value;
+                if (has_extensions()) {
+                    length_value = length_value > 128U ? length_value : 128U;
+                }
             }
             else {
                 length_value = 0;
