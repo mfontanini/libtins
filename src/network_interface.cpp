@@ -30,6 +30,7 @@
 #include <stdexcept>
 #include <vector>
 #include <cstring>
+#include <iterator>
 #include "macros.h"
 #ifndef _WIN32
     #include <netinet/in.h>
