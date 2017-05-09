@@ -53,7 +53,9 @@ PPPoE::PPPoE(const uint8_t* buffer, uint32_t total_sz)
 : tags_size_() {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_); 
-    stream.size(std::min(stream.size(), (size_t)payload_length()));
+    const uint32_t read_size = stream.size() < payload_length() ? stream.size()
+                                                                : payload_length();
+    stream.size(read_size);
     // If this is a session data packet
     if (code() == 0) {
         if (stream) {
