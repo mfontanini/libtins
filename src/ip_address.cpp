@@ -157,8 +157,11 @@ IPv4Address IPv4Address::operator&(const IPv4Address& mask) const {
 } // Tins
 
 #ifdef TINS_IS_CXX11
-// Hash
-size_t std::hash<Tins::IPv4Address>::operator()(const Tins::IPv4Address& addr) const {
+namespace std {
+
+size_t hash<Tins::IPv4Address>::operator()(const Tins::IPv4Address& addr) const {
     return std::hash<uint32_t>()(addr);
 }
+
+} // std
 #endif // TINS_IS_CXX11
