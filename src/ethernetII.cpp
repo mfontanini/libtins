@@ -106,7 +106,7 @@ uint32_t EthernetII::trailer_size() const {
     int32_t padding = 60 - sizeof(header_); // EthernetII min size is 60, padding is sometimes needed
     if (inner_pdu()) {
         padding -= inner_pdu()->size();
-        padding = std::max(0, padding);
+        padding = padding > 0 ? padding : 0;
     }
     return padding;
 }
