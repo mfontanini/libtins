@@ -515,7 +515,9 @@ private:
         }
         real_size_ = static_cast<uint16_t>(total_size);
         if (real_size_ <= small_buffer_size) {
-            std::memcpy(payload_.small_buffer, &*start, total_size);
+            if (total_size > 0) {
+                std::memcpy(payload_.small_buffer, &*start, total_size);
+            }
         }
         else {
             payload_.big_buffer_ptr = new data_type[real_size_];
