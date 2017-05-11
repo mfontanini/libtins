@@ -143,6 +143,10 @@ public:
         if (TINS_UNLIKELY(size_ < length)) {
             throw serialization_error();
         }
+        // VC doesn't like dereferencing empty vector's iterators so check this here
+        if (TINS_UNLIKELY(length == 0)) {
+            return;
+        }
         std::memcpy(buffer_, &*start, length);
         skip(length);
     }
