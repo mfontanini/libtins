@@ -37,7 +37,6 @@
 #else
     #include <ws2tcpip.h>
 #endif
-#include <stdexcept>
 #include <cstring>
 #include "loopback.h"
 #include "packet_sender.h"

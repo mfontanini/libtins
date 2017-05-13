@@ -28,9 +28,6 @@
  */
 
 #include <utility>
-#include <stdexcept>
-#include <sstream>
-#include <memory>
 #include <cstdio>
 #include "dns.h"
 #include "ip_address.h"
@@ -40,7 +37,6 @@
 #include "memory_helpers.h"
 
 using std::string;
-using std::copy;
 using std::memcpy;
 using std::list;
 using std::make_pair;
@@ -372,7 +368,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
             if (current_out_ptr != out_ptr) {
                 *current_out_ptr++ = '.';
             }
-            copy(ptr, ptr + size, current_out_ptr);
+            memcpy(current_out_ptr, ptr, size);
             current_out_ptr += size;
             ptr += size;
         }

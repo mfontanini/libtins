@@ -55,7 +55,6 @@
 #endif
 #include <set>
 #include <fstream>
-#include <stdexcept>
 #include "network_interface.h"
 #include "exceptions.h"
 

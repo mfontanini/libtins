@@ -27,7 +27,6 @@
  *
  */
 
-#include <stdexcept>
 #include <cstring>
 #include "bootp.h"
 #include "exceptions.h"

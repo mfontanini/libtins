@@ -27,7 +27,6 @@
  *
  */
 
-#include <stdexcept>
 #include <cstring>
 #ifndef _WIN32
     #include <netdb.h>

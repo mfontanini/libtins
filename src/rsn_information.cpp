@@ -31,7 +31,6 @@
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
-#include <stdexcept>
 #include "exceptions.h"
 #include "pdu.h"
 #include "pdu_option.h"

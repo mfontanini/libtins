@@ -28,7 +28,6 @@
  */
 
 #include <cstring>
-#include <stdexcept>
 #include "eapol.h"
 #include "exceptions.h"
 #include "rawpdu.h"

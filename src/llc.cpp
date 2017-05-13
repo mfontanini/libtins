@@ -27,7 +27,6 @@
  *
  */
 
-#include <stdexcept>
 #include <cstring>
 #include "llc.h"
 #include "stp.h"

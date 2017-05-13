@@ -30,7 +30,6 @@
 #ifndef _WIN32
     #include <sys/time.h>
 #endif
-#include <stdexcept>
 #include <string.h>
 #include "packet_writer.h"
 #include "packet.h"

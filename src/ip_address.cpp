@@ -37,7 +37,6 @@
     // std::hash
     #include <memory>
 #endif // TINS_IS_CXX11
-#include <stdexcept>
 #include <sstream>
 #include <iostream>
 #include "ip_address.h"

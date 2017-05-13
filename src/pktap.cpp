@@ -27,7 +27,6 @@
  *
  */
 
-#include <stdexcept>
 #include <cstring>
 #include "exceptions.h"
 #include "pktap.h"

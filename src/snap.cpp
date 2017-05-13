@@ -28,7 +28,6 @@
  */
 
 #include <cstring>
-#include <stdexcept>
 #ifndef _WIN32
     #include <sys/types.h>
     #include <net/ethernet.h>

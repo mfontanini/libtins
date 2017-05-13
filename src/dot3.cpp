@@ -28,7 +28,6 @@
  */
 
 #include <cstring>
-#include <stdexcept>
 #include "macros.h"
 #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
