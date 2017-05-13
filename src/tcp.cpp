@@ -56,15 +56,14 @@ PDU::metadata TCP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 TCP::TCP(uint16_t dport, uint16_t sport) 
-: header_(), options_size_(0), total_options_size_(0) {
+: header_() {
     this->dport(dport);
     this->sport(sport);
     data_offset(sizeof(tcp_header) / sizeof(uint32_t));
     window(DEFAULT_WINDOW);
 }
 
-TCP::TCP(const uint8_t* buffer, uint32_t total_sz) 
-: options_size_(0), total_options_size_(0) {
+TCP::TCP(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
     // Check that we have at least the amount of bytes we need and not less
@@ -73,6 +72,12 @@ TCP::TCP(const uint8_t* buffer, uint32_t total_sz)
         throw malformed_packet();
     }
     const uint8_t* header_end = buffer + (data_offset() * sizeof(uint32_t));
+
+    if (stream.pointer() < header_end) {
+        // Estimate about 4 bytes per option and reserver that so we avoid doing 
+        // multiple reallocations on the vector
+        options_.reserve((header_end - stream.pointer()) / sizeof(uint32_t));
+    }
 
     while (stream.pointer() < header_end) {
         const OptionTypes option_type = (OptionTypes)stream.read<uint8_t>();
@@ -284,25 +289,26 @@ void TCP::flags(small_uint<12> value) {
 
 void TCP::add_option(const option& opt) {
     options_.push_back(opt);
-    internal_add_option(opt);
 }
 
 uint32_t TCP::header_size() const {
-    return sizeof(header_) + total_options_size_;
+    return sizeof(header_) + pad_options_size(calculate_options_size());
 }
 
 void TCP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
+    const uint32_t options_size = calculate_options_size();
+    const uint32_t total_options_size = pad_options_size(options_size);
     // Set checksum to 0, we'll calculate it at the end
     checksum(0);
-    header_.doff = (sizeof(tcp_header) + total_options_size_) / sizeof(uint32_t);
+    header_.doff = (sizeof(tcp_header) + total_options_size) / sizeof(uint32_t);
     stream.write(header_);
     for (options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
         write_option(*it, stream);
     }
 
-    if (options_size_ < total_options_size_) {
-        const uint16_t padding = total_options_size_ - options_size_;
+    if (options_size < total_options_size) {
+        const uint16_t padding = total_options_size - options_size;
         stream.fill(padding, 1);
     }
 
@@ -366,19 +372,23 @@ void TCP::write_option(const option& opt, OutputMemoryStream& stream) {
     }
 }
 
-void TCP::update_options_size() {
-    uint8_t padding = options_size_ & 3;
-    total_options_size_ = (padding) ? (options_size_ - padding + 4) : options_size_;
+uint32_t TCP::calculate_options_size() const {
+    uint32_t options_size = 0;
+    for (options_type::const_iterator iter = options_.begin(); iter != options_.end(); ++iter) {
+        const option& opt = *iter;
+        options_size += sizeof(uint8_t);
+        // SACK_OK contains length but not data
+        if (opt.data_size() || opt.option() == SACK_OK) {
+            options_size += sizeof(uint8_t);    
+            options_size += static_cast<uint16_t>(opt.data_size());
+        }
+    }
+    return options_size;    
 }
 
-void TCP::internal_add_option(const option& opt) {
-    options_size_ += sizeof(uint8_t);
-    // SACK_OK contains length but not data....
-    if (opt.data_size() || opt.option() == SACK_OK) {
-        options_size_ += sizeof(uint8_t);    
-        options_size_ += static_cast<uint16_t>(opt.data_size());
-    }
-    update_options_size();
+uint32_t TCP::pad_options_size(uint32_t size) const {
+    uint8_t padding = size & 3;
+    return padding ? (size - padding + 4) : size;
 }
 
 bool TCP::remove_option(OptionTypes type) {
@@ -386,14 +396,7 @@ bool TCP::remove_option(OptionTypes type) {
     if (iter == options_.end()) {
         return false;
     }
-    options_size_ -= sizeof(uint8_t);
-    // SACK_OK contains length but not data....
-    if (iter->data_size() || iter->option() == SACK_OK) {
-        options_size_ -= sizeof(uint8_t);
-        options_size_ -= static_cast<uint16_t>(iter->data_size());
-    }
     options_.erase(iter);
-    update_options_size();
     return true;
 }
 

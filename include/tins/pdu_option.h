@@ -226,7 +226,7 @@ public:
      * \brief Move constructor.
      * \param rhs The PDUOption to be moved.
      */
-    PDUOption(PDUOption&& rhs) {
+    PDUOption(PDUOption&& rhs) TINS_NOEXCEPT {
         real_size_ = 0;
         *this = std::move(rhs);
     }
@@ -235,7 +235,7 @@ public:
      * \brief Move assignment operator.
      * \param rhs The PDUOption to be moved.
      */
-    PDUOption& operator=(PDUOption&& rhs) {
+    PDUOption& operator=(PDUOption&& rhs) TINS_NOEXCEPT {
         option_ = rhs.option_;
         size_ = rhs.size_;
         if (real_size_ > small_buffer_size) {
@@ -250,7 +250,7 @@ public:
         else {
             std::memcpy(payload_.small_buffer, rhs.data_ptr(), rhs.data_size());
         }
-        return* this;
+        return *this;
     }
     
     #endif // TINS_IS_CXX11

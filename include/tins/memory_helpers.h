@@ -68,8 +68,12 @@ void write_value(uint8_t* buffer, const T& value) {
 
 class InputMemoryStream {
 public:
-    InputMemoryStream(const uint8_t* buffer, size_t total_sz);
-    InputMemoryStream(const std::vector<uint8_t>& data);
+    InputMemoryStream(const uint8_t* buffer, size_t total_sz)
+    : buffer_(buffer), size_(total_sz) {
+    }
+
+    InputMemoryStream(const std::vector<uint8_t>& data) : buffer_(&data[0]), size_(data.size()) {
+    }
  
     template <typename T>
     T read() {
@@ -97,17 +101,46 @@ public:
         skip(sizeof(value));
     }
 
-    void skip(size_t size);
-    bool can_read(size_t byte_count) const;
+    void skip(size_t size) {
+        if (TINS_UNLIKELY(size > size_)) {
+            throw malformed_packet();
+        }
+        buffer_ += size;
+        size_ -= size;
+    }
+
+    bool can_read(size_t byte_count) const {
+        return TINS_LIKELY(size_ >= byte_count);
+    }
+
+    void read(void* output_buffer, size_t output_buffer_size) {
+        if (!can_read(output_buffer_size)) {
+            throw malformed_packet();
+        }
+        read_data(buffer_, (uint8_t*)output_buffer, output_buffer_size);
+        skip(output_buffer_size);
+    }
+
+    const uint8_t* pointer() const {
+        return buffer_;
+    }
+
+    size_t size() const {
+        return size_;
+    }
+
+    void size(size_t new_size) {
+        size_ = new_size;
+    }
+
+    operator bool() const {
+        return size_ > 0;
+    }
+
     void read(std::vector<uint8_t>& value, size_t count);
     void read(HWAddress<6>& address);
     void read(IPv4Address& address);
     void read(IPv6Address& address);
-    void read(void* output_buffer, size_t output_buffer_size);
-    const uint8_t* pointer() const;
-    size_t size() const;
-    void size(size_t new_size);
-    operator bool() const;
 private:
     const uint8_t* buffer_;
     size_t size_;
@@ -115,8 +148,13 @@ private:
 
 class OutputMemoryStream {
 public:
-    OutputMemoryStream(uint8_t* buffer, size_t total_sz);
-    OutputMemoryStream(std::vector<uint8_t>& buffer);
+    OutputMemoryStream(uint8_t* buffer, size_t total_sz)
+    : buffer_(buffer), size_(total_sz) {
+    }
+
+    OutputMemoryStream(std::vector<uint8_t>& buffer)
+    : buffer_(&buffer[0]), size_(buffer.size()) {
+    }
 
     template <typename T>
     void write(const T& value) {
@@ -151,14 +189,37 @@ public:
         skip(length);
     }
 
-    void skip(size_t size);
-    void write(const uint8_t* ptr, size_t length);
+    void skip(size_t size) {
+        if (TINS_UNLIKELY(size > size_)) {
+            throw malformed_packet();
+        }
+        buffer_ += size;
+        size_ -= size;
+    }
+
+    void write(const uint8_t* ptr, size_t length) {
+        write(ptr, ptr + length);
+    }
+
+    void fill(size_t size, uint8_t value) {
+        if (TINS_UNLIKELY(size_ < size)) {
+            throw serialization_error();
+        }
+        std::memset(buffer_, value, size);
+        skip(size);
+    }
+
+    uint8_t* pointer() {
+        return buffer_;
+    }
+
+    size_t size() const {
+        return size_;
+    }
+
     void write(const HWAddress<6>& address);
     void write(const IPv4Address& address);
     void write(const IPv6Address& address);
-    void fill(size_t size, uint8_t value);
-    uint8_t* pointer();
-    size_t size() const;
 private:
     uint8_t* buffer_;
     size_t size_;
