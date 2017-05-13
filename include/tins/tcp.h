@@ -30,8 +30,6 @@
 #ifndef TINS_TCP_H
 #define TINS_TCP_H
 
-
-#include <list>
 #include <vector>
 #include <stdint.h>
 #include <utility>
@@ -131,7 +129,7 @@ public:
     /**
      * The type used to store the options.
      */
-    typedef std::list<option> options_type;
+    typedef std::vector<option> options_type;
     
     /**
      * The type used to store the sack option.

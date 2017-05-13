@@ -31,7 +31,6 @@
 #define TINS_DNS_H
 
 #include <stdint.h>
-#include <list>
 #include <vector>
 #include <cstring>
 #include <string>
@@ -602,8 +601,8 @@ public:
     TINS_DEPRECATED(typedef query Query);
     TINS_DEPRECATED(typedef resource Resource);
     
-    typedef std::list<query> queries_type;
-    typedef std::list<resource> resources_type;
+    typedef std::vector<query> queries_type;
+    typedef std::vector<resource> resources_type;
     typedef IPv4Address address_type;
     typedef IPv6Address address_v6_type;
     

@@ -30,7 +30,6 @@
 #ifndef TINS_ICMPV6_H
 #define TINS_ICMPV6_H
 
-#include <list>
 #include <vector>
 #include "macros.h"
 #include "pdu.h"
@@ -155,7 +154,7 @@ public:
     /**
      * The type used to store options.
      */
-    typedef std::list<option> options_type;
+    typedef std::vector<option> options_type;
     
     /**
      * \brief The type used to store the new home agent information 
@@ -548,13 +547,13 @@ public:
     /*
      * The type used to store all multicast address records in a packet
      */
-    typedef std::list<multicast_address_record> multicast_address_records_list;
+    typedef std::vector<multicast_address_record> multicast_address_records_list;
 
     /*
      * The type used to store all source address (from Multicast 
      * Listener Query messages) in a packet 
      */
-    typedef std::list<ipaddress_type> sources_list;
+    typedef std::vector<ipaddress_type> sources_list;
 
     /**
      * \brief Constructs an ICMPv6 object.

@@ -47,7 +47,6 @@
 #include "detail/pdu_helpers.h"
 #include "pdu_allocator.h"
 
-using std::list;
 using std::memcmp;
 using std::vector;
 

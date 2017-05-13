@@ -30,7 +30,6 @@
 #ifndef TINS_IP_H
 #define TINS_IP_H
 
-#include <list>
 #include "pdu.h"
 #include "small_uint.h"
 #include "endianness.h"
@@ -244,7 +243,7 @@ public:
     /**
      * The type used to store IP options.
      */
-    typedef std::list<option> options_type;
+    typedef std::vector<option> options_type;
 
     /**
      * \brief Extracts metadata for this protocol based on the buffer provided

@@ -30,7 +30,6 @@
 #ifndef TINS_IPV6_h
 #define TINS_IPV6_h
 
-#include <list>
 #include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
@@ -71,7 +70,7 @@ public:
     /**
      * The type used to store the extension headers.
      */
-    typedef std::list<ext_header> headers_type;
+    typedef std::vector<ext_header> headers_type;
 
     /**
      * The values used to identify extension headers.

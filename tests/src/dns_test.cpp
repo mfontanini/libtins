@@ -91,11 +91,11 @@ TEST_F(DNSTest, ConstructorFromBuffer) {
     EXPECT_EQ(dns.questions_count(), 1);
     EXPECT_EQ(dns.answers_count(), 1);
     
-    std::list<DNS::query> queries = dns.queries();
+    std::vector<DNS::query> queries = dns.queries();
     ASSERT_EQ(queries.size(), 1U);
     test_equals(queries.front(), DNS::query("www.example.com", DNS::A, DNS::INTERNET));
     
-    std::list<DNS::resource> answers = dns.answers();
+    std::vector<DNS::resource> answers = dns.answers();
     ASSERT_EQ(answers.size(), 1U);
     test_equals(answers.front(), DNS::resource("www.example.com", "192.168.0.1", DNS::A,
                                                DNS::INTERNET, 0x1234));
