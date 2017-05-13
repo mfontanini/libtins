@@ -30,7 +30,6 @@
 #ifndef TINS_PPPoE_H
 #define TINS_PPPoE_H
 
-#include <list>
 #include <string>
 #include <vector>
 #include "pdu.h"
@@ -82,7 +81,7 @@ public:
     /**
      * The type used to store the options.
      */
-    typedef std::list<tag> tags_type;
+    typedef std::vector<tag> tags_type;
     
     /**
      * The type used to store the Vendor-Specific tag's value.

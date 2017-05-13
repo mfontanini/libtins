@@ -30,7 +30,6 @@
 #ifndef TINS_DHCP_H
 #define TINS_DHCP_H
 
-#include <list>
 #include <vector>
 #include <string>
 #include "bootp.h"
@@ -170,7 +169,7 @@ public:
     /**
      * The type used to store the DHCP options.
      */
-    typedef std::list<option> options_type;
+    typedef std::vector<option> options_type;
     
     /**
      * \brief Extracts metadata for this protocol based on the buffer provided
@@ -436,8 +435,7 @@ public:
      * If the option is not found, an option_not_found exception
      * is thrown.
      * 
-     * \return std::list<ipaddress_type> Contanining the DNS servers
-     * provided.
+     * \return The list of DNS servers provided.
      */
     std::vector<ipaddress_type> domain_name_servers() const; 
     

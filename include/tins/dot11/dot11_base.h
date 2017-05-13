@@ -32,7 +32,6 @@
 #if !defined(TINS_DOT11_DOT11_H) && defined(TINS_HAVE_DOT11)
 #define TINS_DOT11_DOT11_H
 
-#include <list>
 #include "../pdu.h"
 #include "../pdu_option.h"
 #include "../small_uint.h"
@@ -67,7 +66,7 @@ public:
     /**
      * The type used to store tagged options.
      */
-    typedef std::list<option> options_type;
+    typedef std::vector<option> options_type;
 
     /**
      * \brief This PDU's flag.

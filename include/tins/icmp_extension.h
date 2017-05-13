@@ -31,7 +31,6 @@
 #define TINS_ICMP_EXTENSION_H
 
 #include <vector>
-#include <list>
 #include <stdint.h>
 #include "macros.h"
 #include "small_uint.h"
@@ -176,7 +175,7 @@ public:
     /**
      * The type used to store the list of ICMP extensions in this structure
      */
-    typedef std::list<ICMPExtension> extensions_type;
+    typedef std::vector<ICMPExtension> extensions_type;
 
     /**
      * \brief Default constructor

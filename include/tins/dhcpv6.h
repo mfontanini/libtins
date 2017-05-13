@@ -31,7 +31,6 @@
 #define TINS_DHCPV6_H
 
 #include <cstring>
-#include <list>
 #include "pdu.h"
 #include "macros.h"
 #include "endianness.h"
@@ -163,7 +162,7 @@ public:
     /**
      * The type used to store the DHCPv6 options.
      */
-    typedef std::list<option> options_type;
+    typedef std::vector<option> options_type;
 
     /**
      * The type used to store IP addresses.

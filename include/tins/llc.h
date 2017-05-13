@@ -30,7 +30,6 @@
 #ifndef TINS_IEEE8022_H
 #define TINS_IEEE8022_H
 
-#include <list>
 #include <vector>
 #include <stdint.h>
 #include "macros.h"
@@ -399,7 +398,7 @@ private:
     #endif
     
     typedef std::vector<uint8_t> field_type;
-    typedef std::list<field_type> field_list;
+    typedef std::vector<field_type> field_list;
 
     void write_serialization(uint8_t* buffer, uint32_t total_sz);
 

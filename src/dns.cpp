@@ -38,7 +38,6 @@
 
 using std::string;
 using std::memcpy;
-using std::list;
 using std::make_pair;
 
 using Tins::Memory::InputMemoryStream;

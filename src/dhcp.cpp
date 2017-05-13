@@ -35,7 +35,6 @@
 
 using std::string;
 using std::vector;
-using std::list;
 using std::runtime_error;
 
 using Tins::Memory::InputMemoryStream;
