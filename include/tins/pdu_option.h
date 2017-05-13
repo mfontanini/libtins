@@ -31,18 +31,19 @@
 #define TINS_PDU_OPTION_H
 
 #include <vector>
-#include <iterator>
-#include <cstring>
 #include <string>
+#include <cstring>
 #include <stdint.h>
 #include "exceptions.h"
-#include "endianness.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "hw_address.h"
 #include "detail/type_traits.h"
 
 namespace Tins {
+
+class IPv4Address;
+class IPv6Address;
+template <size_t n>
+class HWAddress;
+
 /**
  * \cond
  */
@@ -50,251 +51,125 @@ template <typename OptionType, typename PDUType>
 class PDUOption;
 
 namespace Internals {
-    template <typename T, typename X, typename PDUType>
-    T convert_to_integral(const PDUOption<X, PDUType> & opt) {
-        if (opt.data_size() != sizeof(T)) {
-            throw malformed_option();
-        }
-        T data = *(T*)opt.data_ptr();
-        if (PDUType::endianness == PDUType::BE) {
-            data = Endian::be_to_host(data);
-        }
-        else {
-            data = Endian::le_to_host(data);
-        }
-        return data;
-    }
+    namespace Converters {
+        uint8_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
+                        type_to_type<uint8_t>);
+        uint16_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
+                         type_to_type<uint16_t>);
+        uint32_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
+                         type_to_type<uint32_t>);
+        uint64_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
+                         type_to_type<uint64_t>);
+        HWAddress<6> convert(const uint8_t* ptr, uint32_t data_size,
+                             PDU::endian_type endian, type_to_type<HWAddress<6> >);
+        IPv4Address convert(const uint8_t* ptr, uint32_t data_size,
+                            PDU::endian_type endian, type_to_type<IPv4Address>);
+        IPv6Address convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
+                            type_to_type<IPv6Address>);
+        std::string convert(const uint8_t* ptr, uint32_t data_size,
+                            PDU::endian_type endian, type_to_type<std::string>);
+        std::vector<float> convert(const uint8_t* ptr, uint32_t data_size,
+                                   PDU::endian_type endian, type_to_type<std::vector<float> >);
+        std::vector<uint8_t> convert(const uint8_t* ptr, uint32_t data_size,
+                                     PDU::endian_type endian, type_to_type<std::vector<uint8_t> >);
+        std::vector<uint16_t> convert(const uint8_t* ptr, uint32_t data_size,
+                                      PDU::endian_type endian,
+                                      type_to_type<std::vector<uint16_t> >);
+        std::vector<uint32_t> convert(const uint8_t* ptr, uint32_t data_size,
+                                      PDU::endian_type endian,
+                                      type_to_type<std::vector<uint32_t> >);
+        std::vector<IPv4Address> convert(const uint8_t* ptr, uint32_t data_size,
+                                         PDU::endian_type endian,
+                                         type_to_type<std::vector<IPv4Address> >);
+        std::vector<IPv6Address> convert(const uint8_t* ptr, uint32_t data_size,
+                                         PDU::endian_type endian,
+                                         type_to_type<std::vector<IPv6Address> >);
+        std::vector<std::pair<uint8_t, uint8_t> > convert(const uint8_t* ptr, uint32_t data_size,
+                                                          PDU::endian_type endian,
+                                        type_to_type<std::vector<std::pair<uint8_t, uint8_t> > >);
+        std::pair<uint8_t, uint8_t> convert(const uint8_t* ptr, uint32_t data_size,
+                                            PDU::endian_type endian,
+                                            type_to_type<std::pair<uint8_t, uint8_t> >);
+        std::pair<uint16_t, uint32_t> convert(const uint8_t* ptr, uint32_t data_size,
+                                              PDU::endian_type endian,
+                                              type_to_type<std::pair<uint16_t, uint32_t> >);
+        std::pair<uint32_t, uint32_t> convert(const uint8_t* ptr, uint32_t data_size,
+                                              PDU::endian_type endian,
+                                              type_to_type<std::pair<uint32_t, uint32_t> >);
+    } // Converters
     
-    template <typename T, typename = void>
     struct converter {
-        template <typename X, typename PDUType>
-        static T convert(const PDUOption<X, PDUType>& opt) {
+        template <typename T, typename X, typename PDUType>
+        static T do_convert(const PDUOption<X, PDUType>& opt, type_to_type<T>) {
             return T::from_option(opt);
         }
-    };
-    
-    template <>
-    struct converter<uint8_t> {
-        template <typename X, typename PDUType>
-        static uint8_t convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() != 1) {
-                throw malformed_option();
-            }
-            return* opt.data_ptr();
-        }
-    };
-    
-    template<>
-    struct converter<uint16_t> {
-        template<typename X, typename PDUType>
-        static uint16_t convert(const PDUOption<X, PDUType>& opt) {
-            return convert_to_integral<uint16_t>(opt);
-        }
-    };
-    
-    template<>
-    struct converter<uint32_t> {
-        template<typename X, typename PDUType>
-        static uint32_t convert(const PDUOption<X, PDUType>& opt) {
-            return convert_to_integral<uint32_t>(opt);
-        }
-    };
-    
-    template<>
-    struct converter<uint64_t> {
-        template<typename X, typename PDUType>
-        static uint64_t convert(const PDUOption<X, PDUType>& opt) {
-            return convert_to_integral<uint64_t>(opt);
-        }
-    };
 
-    template<size_t n>
-    struct converter<HWAddress<n> > {
-        template<typename X, typename PDUType>
-        static HWAddress<n> convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() != n) {
-                throw malformed_option();
-            }
-            return HWAddress<n>(opt.data_ptr());
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<uint8_t> type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
 
-    template<>
-    struct converter<IPv4Address> {
-        template<typename X, typename PDUType>
-        static IPv4Address convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() != sizeof(uint32_t)) {
-                throw malformed_option();
-            }
-            const uint32_t* ptr = (const uint32_t*)opt.data_ptr();
-            if (PDUType::endianness == PDUType::BE) {
-                return IPv4Address(*ptr);
-            }
-            else {
-                return IPv4Address(Endian::change_endian(*ptr));
-            }
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<uint16_t> type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
 
-    template<>
-    struct converter<IPv6Address> {
-        template<typename X, typename PDUType>
-        static IPv6Address convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() != IPv6Address::address_size) {
-                throw malformed_option();
-            }
-            return IPv6Address(opt.data_ptr());
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<uint32_t> type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
-    
-    template<>
-    struct converter<std::string> {
-        template<typename X, typename PDUType>
-        static std::string convert(const PDUOption<X, PDUType>& opt) {
-            return std::string(
-                opt.data_ptr(),
-                opt.data_ptr() + opt.data_size()
-            );
+
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<uint64_t> type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
-    
-    template<>
-    struct converter<std::vector<float> > {
-        template<typename X, typename PDUType>
-        static std::vector<float> convert(const PDUOption<X, PDUType>& opt) {
-            std::vector<float> output;
-            const uint8_t* ptr = opt.data_ptr(), *end = ptr + opt.data_size();
-            while (ptr != end) {
-                output.push_back(float(*(ptr++) & 0x7f) / 2);
-            }
-            return output;
+
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<HWAddress<6> > type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
-    
-    template<typename T>
-    struct converter<std::vector<T>, typename enable_if<is_unsigned_integral<T>::value>::type> {
-        template<typename X, typename PDUType>
-        static std::vector<T> convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() % sizeof(T) != 0) {
-                throw malformed_option();
-            }
-            const T* ptr = (const T*)opt.data_ptr();
-            const T* end = (const T*)(opt.data_ptr() + opt.data_size());
-            
-            std::vector<T> output(std::distance(ptr, end));
-            typename std::vector<T>::iterator it = output.begin();
-            while (ptr < end) {
-                if (PDUType::endianness == PDUType::BE) {
-                    *it++ = Endian::be_to_host(*ptr++);
-                }
-                else {
-                    *it++ = Endian::le_to_host(*ptr++);
-                }
-            }
-            return output;
+
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<IPv4Address> type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
-    
-    template<typename T, typename U>
-    struct converter<
-            std::vector<std::pair<T, U> >, 
-            typename enable_if<
-                is_unsigned_integral<T>::value && is_unsigned_integral<U>::value
-            >::type
-    > {
-        template<typename X, typename PDUType>
-        static std::vector<std::pair<T, U> > convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() % (sizeof(T) + sizeof(U)) != 0) {
-                throw malformed_option();
-            }
-            const uint8_t* ptr = opt.data_ptr(), *end = ptr + opt.data_size();
-            
-            std::vector<std::pair<T, U> > output;
-            while (ptr < end) {
-                std::pair<T, U> data;
-                data.first = *(const T*)ptr;
-                ptr += sizeof(T);
-                data.second = *(const U*)ptr;
-                ptr += sizeof(U);
-                if (PDUType::endianness == PDUType::BE) {
-                    data.first = Endian::be_to_host(data.first);
-                    data.second = Endian::be_to_host(data.second);
-                }
-                else {
-                    data.first = Endian::le_to_host(data.first);
-                    data.second = Endian::le_to_host(data.second);
-                }
-                output.push_back(data);
-            }
-            return output;
+
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<IPv6Address> type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
-    
-    template<>
-    struct converter<std::vector<IPv4Address> > {
-        template<typename X, typename PDUType>
-        static std::vector<IPv4Address> convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() % 4 != 0) {
-                throw malformed_option();
-            }
-            const uint32_t* ptr = (const uint32_t*)opt.data_ptr();
-            const uint32_t* end = (const uint32_t*)(opt.data_ptr() + opt.data_size());
-            
-            std::vector<IPv4Address> output(std::distance(ptr, end));
-            std::vector<IPv4Address>::iterator it = output.begin();
-            while (ptr < end) {
-                if (PDUType::endianness == PDUType::BE) {
-                    *it++ = IPv4Address(*ptr++);
-                }
-                else {
-                    *it++ = IPv4Address(Endian::change_endian(*ptr++));
-                }
-            }
-            return output;
+
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt,
+                            type_to_type<std::string> type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
-    
-    template<>
-    struct converter<std::vector<IPv6Address> > {
-        template<typename X, typename PDUType>
-        static std::vector<IPv6Address> convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() % IPv6Address::address_size != 0) {
-                throw malformed_option();
-            }
-            const uint8_t* ptr = opt.data_ptr(), *end = opt.data_ptr() + opt.data_size();
-            std::vector<IPv6Address> output;
-            while (ptr < end) {
-                output.push_back(IPv6Address(ptr));
-                ptr += IPv6Address::address_size;
-            }
-            return output;
+
+        template <typename U, typename X, typename PDUType, typename Z>
+        static U do_convert(const PDUOption<X, PDUType>& opt,
+                            type_to_type<std::vector<Z> > type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
         }
-    };
-    
-    template<typename T, typename U>
-    struct converter<
-            std::pair<T, U>, 
-            typename enable_if<
-                is_unsigned_integral<T>::value && is_unsigned_integral<U>::value
-            >::type
-    > {
-        template<typename X, typename PDUType>
-        static std::pair<T, U> convert(const PDUOption<X, PDUType>& opt) {
-            if (opt.data_size() != sizeof(T) + sizeof(U)) {
-                throw malformed_option();
-            }
-            std::pair<T, U> output;
-            std::memcpy(&output.first, opt.data_ptr(), sizeof(T));
-            std::memcpy(&output.second, opt.data_ptr() + sizeof(T), sizeof(U));
-            if (PDUType::endianness == PDUType::BE) {
-                output.first = Endian::be_to_host(output.first);
-                output.second = Endian::be_to_host(output.second);
-            }
-            else {
-                output.first = Endian::le_to_host(output.first);
-                output.second = Endian::le_to_host(output.second);
-            }
-            return output;
+
+        template <typename U, typename X, typename PDUType, typename Z, typename W>
+        static U do_convert(const PDUOption<X, PDUType>& opt,
+                            type_to_type<std::pair<Z, W> > type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
+        }
+
+        template <typename T, typename X, typename PDUType>
+        static T convert(const PDUOption<X, PDUType>& opt) {
+            return do_convert<T>(opt, type_to_type<T>());
         }
     };
 }
@@ -504,7 +379,7 @@ public:
      */
     template<typename T>
     T to() const {
-        return Internals::converter<T>::convert(*this);
+        return Internals::converter::convert<T>(*this);
     }
 private:
     template<typename ForwardIterator>

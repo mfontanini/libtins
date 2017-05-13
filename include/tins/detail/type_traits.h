@@ -53,6 +53,11 @@ struct enable_if<false, T> {
 
 };
 
+template <typename T>
+struct type_to_type {
+    typedef T type;
+};
+
 template<typename T>
 struct is_unsigned_integral {
     static const bool value = false;
