@@ -917,54 +917,8 @@ private:
     uint32_t options_size_;
     ipaddress_type link_addr_, peer_addr_;
     options_type options_;
-};   
+};
 
-namespace Internals {
-
-template<typename InputIterator>
-void class_option_data2option(InputIterator start,
-                              InputIterator end, 
-                              std::vector<uint8_t>& buffer,
-                              size_t start_index = 0) {
-    size_t index = start_index;
-    uint16_t uint16_t_buffer;
-    while (start != end) {
-        buffer.resize(buffer.size() + sizeof(uint16_t) + start->size());
-        uint16_t_buffer = Endian::host_to_be(static_cast<uint16_t>(start->size()));
-        std::memcpy(&buffer[index], &uint16_t_buffer, sizeof(uint16_t));
-        index += sizeof(uint16_t);
-        std::copy(start->begin(), start->end(), buffer.begin() + index);
-        index += start->size();
-        
-        start++;
-    }
-}
-
-template<typename OutputType>
-OutputType option2class_option_data(const uint8_t* ptr, uint32_t total_sz) {
-    typedef typename OutputType::value_type value_type;
-    OutputType output;
-    size_t index = 0;
-    while (index + 2 < total_sz) {
-        uint16_t size;
-        std::memcpy(&size, ptr + index, sizeof(uint16_t));
-        size = Endian::be_to_host(size);
-        index += sizeof(uint16_t);
-        if (index + size > total_sz) {
-            throw option_not_found();
-        }
-        output.push_back(
-            value_type(ptr + index, ptr + index + size)
-        );
-        index += size;
-    }
-    if (index != total_sz) {
-        throw malformed_option();
-    }
-    return output;
-}
-
-} // Internals 
 } // Tins
 
 #endif // TINS_DHCPV6_H

@@ -29,9 +29,9 @@
 
 #include <sstream>
 #include <iomanip>
-#include <stdexcept>
 #include <algorithm>
 #include "hw_address.h"
+#include "exceptions.h"
 
 using std::string;
 using std::ostream;

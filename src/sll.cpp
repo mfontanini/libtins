@@ -27,7 +27,6 @@
  *
  */
 
-#include <stdexcept>
 #include <cstring>
 #include "sll.h"
 #include "exceptions.h"

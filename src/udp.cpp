@@ -27,7 +27,6 @@
  *
  */
 
-#include <stdexcept>
 #include <cstring>
 #include "udp.h"
 #include "constants.h"

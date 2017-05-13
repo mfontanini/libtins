@@ -27,7 +27,6 @@
  *
  */
 
-#include <stdexcept>
 #include <string.h>
 #include "offline_packet_filter.h"
 #include "pdu.h"

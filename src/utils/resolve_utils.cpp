@@ -48,7 +48,7 @@
     #include <iphlpapi.h>
     #undef interface
 #endif
-#include <stdexcept>
+#include "exceptions.h"
 #include "ip_address.h"
 #include "ipv6_address.h"
 #include "hw_address.h"

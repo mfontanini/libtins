@@ -30,7 +30,6 @@
 #ifndef TINS_SNAP_H
 #define TINS_SNAP_H
 
-
 #include <stdint.h>
 #include "pdu.h"
 #include "macros.h"
