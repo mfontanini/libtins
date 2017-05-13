@@ -33,6 +33,7 @@
 #include <cstring>
 #include <stdexcept>
 #include "exceptions.h"
+#include "pdu.h"
 #include "pdu_option.h"
 #include "memory_helpers.h"
 #include "dot11/dot11_base.h"

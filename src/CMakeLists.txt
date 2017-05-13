@@ -52,6 +52,7 @@ set(SOURCES
     radiotap.cpp
     address_range.cpp
     pdu_iterator.cpp
+    pdu_option.cpp
     rawpdu.cpp
     rsn_information.cpp
     sll.cpp
