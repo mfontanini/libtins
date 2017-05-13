@@ -39,26 +39,6 @@ namespace Memory {
 
 // InputMemoryStream
 
-InputMemoryStream::InputMemoryStream(const uint8_t* buffer, size_t total_sz)
-: buffer_(buffer), size_(total_sz) {
-}
-
-InputMemoryStream::InputMemoryStream(const vector<uint8_t>& data)
-: buffer_(&data[0]), size_(data.size()) {
-}
-
-void InputMemoryStream::skip(size_t size) {
-    if (TINS_UNLIKELY(size > size_)) {
-        throw malformed_packet();
-    }
-    buffer_ += size;
-    size_ -= size;
-}
-
-bool InputMemoryStream::can_read(size_t byte_count) const {
-    return TINS_LIKELY(size_ >= byte_count);
-}
-
 void InputMemoryStream::read(vector<uint8_t>& value, size_t count) {
     if (!can_read(count)) {
         throw malformed_packet();
@@ -87,51 +67,7 @@ void InputMemoryStream::read(IPv6Address& address) {
     skip(IPv6Address::address_size);
 }
 
-void InputMemoryStream::read(void* output_buffer, size_t output_buffer_size) {
-    if (!can_read(output_buffer_size)) {
-        throw malformed_packet();
-    }
-    read_data(buffer_, (uint8_t*)output_buffer, output_buffer_size);
-    skip(output_buffer_size);
-}
-
-const uint8_t* InputMemoryStream::pointer() const {
-    return buffer_;
-}
-
-size_t InputMemoryStream::size() const {
-    return size_;
-}
-
-void InputMemoryStream::size(size_t new_size) {
-    size_ = new_size;
-}
-
-InputMemoryStream::operator bool() const {
-    return size_ > 0;
-}
-
 // OutputMemoryStream
-
-OutputMemoryStream::OutputMemoryStream(uint8_t* buffer, size_t total_sz)
-: buffer_(buffer), size_(total_sz) {
-}
-
-OutputMemoryStream::OutputMemoryStream(vector<uint8_t>& buffer)
-: buffer_(&buffer[0]), size_(buffer.size()) {
-}
-
-void OutputMemoryStream::skip(size_t size) {
-    if (TINS_UNLIKELY(size > size_)) {
-        throw malformed_packet();
-    }
-    buffer_ += size;
-    size_ -= size;
-}
-
-void OutputMemoryStream::write(const uint8_t* ptr, size_t length) {
-    write(ptr, ptr + length);
-}
 
 void OutputMemoryStream::write(const HWAddress<6>& address) {
     write(address.begin(), address.end());
@@ -143,22 +79,6 @@ void OutputMemoryStream::write(const IPv4Address& address) {
 
 void OutputMemoryStream::write(const IPv6Address& address) {
     write(address.begin(), address.end());
-}
-
-void OutputMemoryStream::fill(size_t size, uint8_t value) {
-    if (TINS_UNLIKELY(size_ < size)) {
-        throw serialization_error();
-    }
-    std::memset(buffer_, value, size);
-    skip(size);
-}
-
-uint8_t* OutputMemoryStream::pointer() {
-    return buffer_;
-}
-
-size_t OutputMemoryStream::size() const {
-    return size_;
 }
 
 } // Memory

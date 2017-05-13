@@ -475,7 +475,6 @@ public:
          * \param option The option to be added.
          */
         void add_option(option &&opt) {
-            internal_add_option(opt);
             options_.push_back(std::move(opt));
         }
 
@@ -490,7 +489,6 @@ public:
         template <typename... Args>
         void add_option(Args&&... args) {
             options_.emplace_back(std::forward<Args>(args)...);
-            internal_add_option(options_.back());
         }
     #endif
 
@@ -606,18 +604,17 @@ private:
         return opt->to<T>();
     }
     
-    void internal_add_option(const option& option);
     void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void checksum(uint16_t new_check);
-    void update_options_size();
+    uint32_t calculate_options_size() const;
+    uint32_t pad_options_size(uint32_t size) const;
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);
     
     void write_option(const option& opt, Memory::OutputMemoryStream& stream);
 
-    tcp_header header_;
-    uint16_t options_size_, total_options_size_;
     options_type options_;
+    tcp_header header_;
 };
 
 } // Tins

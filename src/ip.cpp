@@ -73,14 +73,13 @@ IP::IP(address_type ip_dst, address_type ip_src) {
     this->src_addr(ip_src); 
 }
 
-IP::IP(const uint8_t* buffer, uint32_t total_sz)
-: options_size_(0) {
+IP::IP(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
 
     // Make sure we have enough size for options and not less than we should
-    if (head_len() * sizeof(uint32_t) > total_sz || 
-        head_len() * sizeof(uint32_t) < sizeof(header_)) {
+    if (TINS_UNLIKELY(head_len() * sizeof(uint32_t) > total_sz || 
+                      head_len() * sizeof(uint32_t) < sizeof(header_))) {
         throw malformed_packet();
     }
     const uint8_t* options_end = buffer + head_len() * sizeof(uint32_t);
@@ -108,7 +107,6 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
             else {
                 options_.push_back(option(opt_type));
             }
-            options_size_ += option_size;
         }
         else if (opt_type == END) {
             // If the end option found, we're done
@@ -120,10 +118,8 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz)
         }
         else {
             options_.push_back(option(opt_type));
-            options_size_++;
         }
     }
-    update_padded_options_size();
     if (stream) {
         // Don't avoid consuming more than we should if tot_len is 0,
         // since this is the case when using TCP segmentation offload
@@ -171,8 +167,6 @@ void IP::init_ip_fields() {
     header_.version = 4;
     ttl(DEFAULT_TTL);
     id(1);
-    options_size_ = 0;
-    padded_options_size_ = 0;
 }
 
 bool IP::is_fragmented() const {
@@ -321,18 +315,20 @@ uint16_t IP::stream_identifier() const {
 }
 
 void IP::add_option(const option& opt) {
-    internal_add_option(opt);
     options_.push_back(opt);
 }
 
-void IP::update_padded_options_size() {
-    uint8_t padding = options_size_ % 4;
-    padded_options_size_ = padding ? (options_size_ - padding + 4) : options_size_;
+uint32_t IP::calculate_options_size() const {
+    uint32_t options_size = 0;
+    for (options_type::const_iterator iter = options_.begin(); iter != options_.end(); ++iter) {
+        options_size += 1 + iter->data_size();
+    }
+    return options_size;    
 }
 
-void IP::internal_add_option(const option& opt) {
-    options_size_ += static_cast<uint16_t>(1 + opt.data_size());
-    update_padded_options_size();
+uint32_t IP::pad_options_size(uint32_t size) const {
+    uint8_t padding = size % 4;
+    return padding ? (size - padding + 4) : size;
 }
 
 bool IP::remove_option(option_identifier id) {
@@ -340,9 +336,7 @@ bool IP::remove_option(option_identifier id) {
     if (iter == options_.end()) {
         return false;
     }
-    options_size_ -= static_cast<uint16_t>(1 + iter->data_size());
     options_.erase(iter);
-    update_padded_options_size();
     return true;
 }
 
@@ -375,7 +369,7 @@ void IP::write_option(const option& opt, OutputMemoryStream& stream) {
 // Virtual method overriding
 
 uint32_t IP::header_size() const {
-    return sizeof(header_) + padded_options_size_;
+    return sizeof(header_) + pad_options_size(calculate_options_size());
 }
 
 PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
@@ -459,8 +453,10 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     for (options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {
         write_option(*it, stream);
     }
+    const uint32_t options_size = calculate_options_size();
+    const uint32_t padded_options_size = pad_options_size(options_size);
     // Add option padding
-    stream.fill(padded_options_size_ - options_size_, 0);
+    stream.fill(padded_options_size - options_size, 0);
 
     uint32_t check = Utils::do_checksum(buffer, stream.pointer());
     while (check >> 16) {
