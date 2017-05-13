@@ -46,7 +46,6 @@
 #include "detail/pdu_helpers.h"
 
 using std::string;
-using std::runtime_error;
 
 namespace Tins {
 
@@ -237,7 +236,7 @@ Sniffer::Sniffer(const string& device, const SnifferConfiguration& configuration
     char error[PCAP_ERRBUF_SIZE];
     pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
     if (!phandle) {
-        throw runtime_error(error);
+        throw pcap_error(error);
     }
     set_pcap_handle(phandle);
 
@@ -250,7 +249,7 @@ Sniffer::Sniffer(const string& device, const SnifferConfiguration& configuration
     // Configure the sniffer's attributes prior to activation.
     configuration.configure_sniffer_pre_activation(*this);
 
-    // Finally, activate the pcap. In case of error throw runtime_error
+    // Finally, activate the pcap. In case of error, throw
     if (pcap_activate(get_pcap_handle()) < 0) {
         throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
@@ -273,7 +272,7 @@ Sniffer::Sniffer(const string& device,
     char error[PCAP_ERRBUF_SIZE];
     pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
     if (!phandle) {
-        throw runtime_error(error);
+        throw pcap_error(error);
     }
     set_pcap_handle(phandle);
 
@@ -286,7 +285,7 @@ Sniffer::Sniffer(const string& device,
     // Configure the sniffer's attributes prior to activation.
     configuration.configure_sniffer_pre_activation(*this);
 
-    // Finally, activate the pcap. In case of error throw runtime_error
+    // Finally, activate the pcap. In case of error, throw
     if (pcap_activate(get_pcap_handle()) < 0) {
         throw pcap_error(pcap_geterr(get_pcap_handle()));
     }
@@ -307,7 +306,7 @@ Sniffer::Sniffer(const string& device,
     char error[PCAP_ERRBUF_SIZE];
     pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
     if (!phandle) {
-        throw runtime_error(error);
+        throw pcap_error(error);
     }
     set_pcap_handle(phandle);
 
@@ -320,7 +319,7 @@ Sniffer::Sniffer(const string& device,
     // Configure the sniffer's attributes prior to activation.
     configuration.configure_sniffer_pre_activation(*this);
 
-    // Finally, activate the pcap. In case of error throw runtime_error
+    // Finally, activate the pcap. In case of error, throw
     if (pcap_activate(get_pcap_handle()) < 0) {
         throw pcap_error(pcap_geterr(get_pcap_handle()));
     }

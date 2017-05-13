@@ -101,6 +101,14 @@ public:
 };
 
 /**
+ * \brief Exception thrown when a PDU option is set using an incorrect value
+ */
+class invalid_option_value : public exception_base {
+public:
+    invalid_option_value() : exception_base("Invalid option value") { }
+};
+
+/**
  * \brief Exception thrown when a field is not present in frame.
  */
 class field_not_present : public exception_base {
@@ -202,6 +210,10 @@ public:
 class pcap_error : public exception_base {
 public:
     pcap_error(const char* message) : exception_base(message) {
+
+    }
+
+    pcap_error(const std::string& message) : exception_base(message) {
 
     }
 };

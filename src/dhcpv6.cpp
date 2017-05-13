@@ -33,7 +33,6 @@
 #include "memory_helpers.h"
 
 using std::vector;
-using std::runtime_error;
 using std::memcpy;
 using std::equal;
 
@@ -448,7 +447,7 @@ void DHCPv6::server_id(const duid_type& value) {
 DHCPv6::duid_llt DHCPv6::duid_llt::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     // at least one byte for lladdress
     if (total_sz < sizeof(uint16_t) + sizeof(uint32_t) + 1) {
-        throw runtime_error("Not enough size for a DUID_LLT identifier");
+        throw malformed_option();
     }
     InputMemoryStream stream(buffer, total_sz);
     duid_llt output;
@@ -470,7 +469,7 @@ PDU::serialization_type DHCPv6::duid_llt::serialize() const {
 DHCPv6::duid_en DHCPv6::duid_en::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     // at least one byte for identifier
     if (total_sz < sizeof(uint32_t) + 1) {
-        throw runtime_error("Not enough size for a DUID_en identifier");
+        throw malformed_option();
     }
     InputMemoryStream stream(buffer, total_sz);
     duid_en output;
@@ -490,7 +489,7 @@ PDU::serialization_type DHCPv6::duid_en::serialize() const {
 DHCPv6::duid_ll DHCPv6::duid_ll::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     // at least one byte for lladdress
     if (total_sz < sizeof(uint16_t) + 1) { 
-        throw runtime_error("Not enough size for a DUID_en identifier");
+        throw malformed_option();
     }
     InputMemoryStream stream(buffer, total_sz);
     duid_ll output;

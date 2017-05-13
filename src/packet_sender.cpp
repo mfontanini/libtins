@@ -185,13 +185,13 @@ pcap_t* PacketSender::make_pcap_handle(const NetworkInterface& iface) const {
     char error[PCAP_ERRBUF_SIZE];
     pcap_t* handle = pcap_create(TINS_PREFIX_INTERFACE(iface.name()).c_str(), error);
     if (!handle) {
-        throw runtime_error("Error opening pcap handle: " + string(error));
+        throw pcap_error("Error opening pcap handle: " + string(error));
     }
     if (pcap_set_promisc(handle, 1) < 0) {
-        throw runtime_error("Failed to set pcap handle promisc mode: " + string(pcap_geterr(handle)));
+        throw pcap_error("Failed to set pcap handle promisc mode: " + string(pcap_geterr(handle)));
     }
     if (pcap_activate(handle) < 0) {
-        throw runtime_error("Failed to activate pcap handle: " + string(pcap_geterr(handle)));
+        throw pcap_error("Failed to activate pcap handle: " + string(pcap_geterr(handle)));
     }
     return handle;
 }
@@ -362,8 +362,7 @@ void PacketSender::send_l2(PDU& pdu,
         pcap_t* handle = pcap_handles_[iface];
         const int buf_size = static_cast<int>(buffer.size());
         if (pcap_sendpacket(handle, (u_char*)&buffer[0], buf_size) != 0) {
-            throw runtime_error("Failed to send packet: " + 
-                                string(pcap_geterr(handle)));
+            throw pcap_error("Failed to send packet: " + string(pcap_geterr(handle)));
         }
     #else // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
         int sock = get_ether_socket(iface);
@@ -402,7 +401,7 @@ PDU* PacketSender::recv_l3(PDU& pdu,
     vector<int> sockets(1, sockets_[type]);
     if (type == IP_TCP_SOCKET || type == IP_UDP_SOCKET) {
         #ifdef BSD
-            throw runtime_error("Receiving L3 packets not supported on this platform");
+            throw feature_disabled();
         #endif
         open_l3_socket(ICMP_SOCKET);
         sockets.push_back(sockets_[ICMP_SOCKET]);

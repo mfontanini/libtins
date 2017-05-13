@@ -45,9 +45,7 @@
 using std::make_pair;
 using std::bind;
 using std::pair;
-using std::runtime_error;
 using std::numeric_limits;
-
 
 namespace Tins {
 namespace TCPIP {

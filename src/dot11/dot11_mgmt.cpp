@@ -38,7 +38,6 @@ using std::string;
 using std::copy;
 using std::vector;
 using std::back_inserter;
-using std::runtime_error;
 using std::pair;
 using std::make_pair;
 
@@ -239,10 +238,10 @@ void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params& params) {
 void Dot11ManagementFrame::country(const country_params& params) {
     if ((params.first_channel.size() != params.number_channels.size()) ||
         (params.number_channels.size() != params.max_transmit_power.size())) {
-        throw runtime_error("The length of the lists are distinct");
+        throw invalid_option_value();
     }
     if (params.country.size() != 3) {
-        throw runtime_error("Invalid country identifier length");
+        throw invalid_option_value();
     }
     size_t sz = sizeof(uint8_t) * 3 * params.first_channel.size() + params.country.size();
     // Use 1 byte padding at the end if the length is odd.
