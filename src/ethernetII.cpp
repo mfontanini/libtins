@@ -120,7 +120,7 @@ void EthernetII::send(PacketSender& sender, const NetworkInterface& iface) {
         sender.send_l2(*this, 0, 0, iface);
     #elif defined(_WIN32)
         // On Windows we can only send l2 PDUs using pcap_sendpacket
-        throw std::runtime_error("LIBTINS_USE_PCAP_SENDPACKET is not enabled");
+        throw feature_disabled();
     #else
         // Default GNU/Linux behaviour
         struct sockaddr_ll addr;

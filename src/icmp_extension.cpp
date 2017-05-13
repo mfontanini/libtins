@@ -34,8 +34,6 @@
 #include "mpls.h"
 #include "utils/checksum_utils.h"
 
-using std::runtime_error;
-
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
 

@@ -63,7 +63,6 @@ using std::string;
 using std::set;
 using std::ifstream;
 using std::istream;
-using std::runtime_error;
 
 namespace Tins {
 namespace Utils {
@@ -147,12 +146,12 @@ vector<char> query_route_table(int family) {
     mib[4] = NET_RT_DUMP;
     mib[5] = 0; 
     if (sysctl(mib, 6, NULL, &len, NULL, 0) < 0) {
-        throw runtime_error("sysctl failed");
+        throw exception_base("sysctl failed");
     }
 
     buf.resize(len);
     if (sysctl(mib, 6, &buf[0], &len, NULL, 0) < 0) {
-        throw runtime_error("sysctl failed");
+        throw exception_base("sysctl failed");
     }
 
     return buf;

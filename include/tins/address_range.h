@@ -30,9 +30,9 @@
 #ifndef TINS_ADDRESS_RANGE
 #define TINS_ADDRESS_RANGE
 
-#include <stdexcept>
 #include <iterator>
 #include "endianness.h"
+#include "exceptions.h"
 #include "detail/address_helpers.h"
 
 namespace Tins {
@@ -198,7 +198,7 @@ public:
     AddressRange(const address_type& first, const address_type& last, bool only_hosts = false)
     : first_(first), last_(last), only_hosts_(only_hosts){
         if (last_ < first_) {
-            throw std::runtime_error("Invalid address range");
+            throw exception_base("Invalid address range");
         }
     }
 

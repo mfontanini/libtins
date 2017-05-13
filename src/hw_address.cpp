@@ -83,7 +83,7 @@ void string_to_hw_address(const string& hw_addr, uint8_t* output, size_t output_
                 break;
             }
             else {
-                throw std::runtime_error("Invalid byte found");
+                throw invalid_address();
             }
             i++;
         }
@@ -94,7 +94,7 @@ void string_to_hw_address(const string& hw_addr, uint8_t* output, size_t output_
                 i++;
             }
             else {
-                throw std::runtime_error("Invalid separator");
+                throw invalid_address();
             }
         }
     }

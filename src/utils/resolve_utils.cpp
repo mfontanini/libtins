@@ -59,7 +59,6 @@
 #include "detail/smart_ptr.h"
 
 using std::string;
-using std::runtime_error;
 
 /** \cond */
 
@@ -72,7 +71,7 @@ addrinfo* resolve_domain(const string& to_resolve, int family) {
         return result;
     }
     else {
-        throw runtime_error("Could not resolve address");
+        throw Tins::exception_base("Could not resolve address");
     }
 }
 
@@ -121,7 +120,7 @@ HWAddress<6> resolve_hwaddr(const NetworkInterface& iface,
             }
         }
     #endif 
-    throw runtime_error("Could not resolve hardware address");
+    throw exception_base("Could not resolve hardware address");
 }
 
 HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender) {

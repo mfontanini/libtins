@@ -45,7 +45,6 @@
 using std::make_pair;
 using std::bind;
 using std::pair;
-using std::runtime_error;
 using std::numeric_limits;
 using std::chrono::system_clock;
 using std::chrono::minutes;
