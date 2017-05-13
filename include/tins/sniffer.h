@@ -328,8 +328,8 @@ public:
      * \param filter A capture filter to be used on the sniffing session.(optional);
      * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
      */
-    Sniffer(const std::string& device, unsigned max_packet_size,
-      bool promisc = false, const std::string& filter = "", bool rfmon = false);
+    TINS_DEPRECATED(Sniffer(const std::string& device, unsigned max_packet_size,
+                    bool promisc = false, const std::string& filter = "", bool rfmon = false));
 
     /**
      * \brief Constructs an instance of Sniffer.
@@ -344,8 +344,8 @@ public:
      * \param filter A capture filter to be used on the sniffing session.(optional);
      * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
      */
-    Sniffer(const std::string& device, promisc_type promisc = NON_PROMISC,
-      const std::string& filter = "", bool rfmon = false);
+    TINS_DEPRECATED(Sniffer(const std::string& device, promisc_type promisc = NON_PROMISC,
+                    const std::string& filter = "", bool rfmon = false));
 
 private:
     friend class SnifferConfiguration;
