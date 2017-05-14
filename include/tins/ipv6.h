@@ -31,6 +31,7 @@
 #define TINS_IPV6_h
 
 #include "macros.h"
+#include "cxxstd.h"
 #include "pdu.h"
 #include "endianness.h"
 #include "small_uint.h"
@@ -302,10 +303,42 @@ public:
     /**
      * Adds an extension header.
      * 
+     * \deprecated Use IPv6::add_header
      * \param header The extension header to be added.
      */
-    void add_ext_header(const ext_header& header);
+    TINS_DEPRECATED(void add_ext_header(const ext_header& header));
     
+    /**
+     * Adds an extension header
+     * 
+     * \deprecated Use IPv6::add_header
+     * \param header The extension header to be added.
+     */
+    void add_header(const ext_header& header);
+
+    #if TINS_IS_CXX11
+
+    /**
+     * Adds an extension header by moving it
+     * 
+     * \param header The extension header to be added.
+     */
+    void add_header(ext_header&& header) {
+        ext_headers_.emplace_back(std::move(header));
+    }
+
+    /**
+     * Adds an extension header by using the provided parameters
+     * 
+     * \param header The extension header to be added.
+     */
+    template <typename... Args>
+    void add_header(Args&&... args) {
+        ext_headers_.emplace_back(std::forward<Args>(args)...);
+    }
+
+    #endif // TINS_IS_CXX11
+
     /**
      * \brief Searchs for an extension header that matchs the given 
      * flag.

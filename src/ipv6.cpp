@@ -97,7 +97,7 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) {
             }
             // Add a header using the current header type (e.g. what we saw as the next
             // header type in the previous)
-            add_ext_header(ext_header(current_header, payload_size, stream.pointer()));
+            add_header(ext_header(current_header, payload_size, stream.pointer()));
             if (actual_payload_length == 0u && current_header == HOP_BY_HOP) {
                 // could be a jumbogram, look for Jumbo Payload Option
                 InputMemoryStream options(stream.pointer(), payload_size);
@@ -305,6 +305,10 @@ void IPv6::send(PacketSender& sender, const NetworkInterface &) {
 #endif
 
 void IPv6::add_ext_header(const ext_header& header) {
+    add_header(header);
+}
+
+void IPv6::add_header(const ext_header& header) {
     ext_headers_.push_back(header);
 }
 
