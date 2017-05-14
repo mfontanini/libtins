@@ -43,7 +43,7 @@
 #include "memory_helpers.h"
 #include "detail/pdu_helpers.h"
 
-using std::copy;
+using std::vector;
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;
@@ -70,7 +70,7 @@ PDU::metadata IPv6::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 IPv6::IPv6(address_type ip_dst, address_type ip_src, PDU* /*child*/)
-: header_() {
+: header_(), next_header_() {
     version(6);
     dst_addr(ip_dst);
     src_addr(ip_src);
@@ -95,8 +95,9 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) {
             if (!stream.can_read(payload_size)) {
                 throw malformed_packet();
             }
-            // minus one, from the size field
-            add_ext_header(ext_header(ext_type, payload_size, stream.pointer()));
+            // Add a header using the current header type (e.g. what we saw as the next
+            // header type in the previous)
+            add_ext_header(ext_header(current_header, payload_size, stream.pointer()));
             if (actual_payload_length == 0u && current_header == HOP_BY_HOP) {
                 // could be a jumbogram, look for Jumbo Payload Option
                 InputMemoryStream options(stream.pointer(), payload_size);
@@ -153,6 +154,7 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) {
             break;
         }
     }
+    next_header_ = current_header;
 }
 
 bool IPv6::is_extension_header(uint8_t header_id) {
@@ -191,7 +193,7 @@ void IPv6::payload_length(uint16_t new_payload_length) {
 }
 
 void IPv6::next_header(uint8_t new_next_header) {
-    header_.next_header = new_next_header;
+    next_header_ = header_.next_header = new_next_header;
 }
 
 void IPv6::hop_limit(uint8_t new_hop_limit) {
@@ -243,6 +245,20 @@ bool IPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
 
 void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
+    vector<uint8_t> header_types;
+    // Iterate the headers and store their current values. At the same time, update header X
+    // so it has the option type of header X + 1
+    for (size_t i = 0; i < ext_headers_.size(); ++i) {
+        const uint8_t option = ext_headers_[i].option();
+        header_types.push_back(option);
+        if (i > 0) {
+            ext_headers_[i - 1].option(option);
+        }
+    }
+    // If we have at least one, then update our IPv6 header's next header type
+    if (!header_types.empty()) {
+        header_.next_header = header_types[0];
+    }
     if (inner_pdu()) {
         uint8_t new_flag = Internals::pdu_flag_to_ip_type(inner_pdu()->pdu_type());
         if (new_flag == 0xff && Internals::pdu_type_registered<IPv6>(inner_pdu()->pdu_type())) {
@@ -250,8 +266,13 @@ void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
                 Internals::pdu_type_to_id<IPv6>(inner_pdu()->pdu_type())
             );
         }
+        // If we managed to find the next flag, then set it. Otherwise, fall back to the 
+        // original (or user set) next header
         if (new_flag != 0xff) {
             set_last_next_header(new_flag);
+        }
+        else {
+            set_last_next_header(next_header_);
         }
     }
     else {
@@ -261,6 +282,10 @@ void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     stream.write(header_);
     for (headers_type::const_iterator it = ext_headers_.begin(); it != ext_headers_.end(); ++it) {
         write_header(*it, stream);
+    }
+    // Restore our original header types
+    for (size_t i = 0; i < ext_headers_.size(); ++i) {
+        ext_headers_[i].option(header_types[i]);
     }
 }
 
@@ -284,16 +309,14 @@ void IPv6::add_ext_header(const ext_header& header) {
 }
 
 const IPv6::ext_header* IPv6::search_header(ExtensionHeader id) const {
-    uint8_t current_header = header_.next_header;
     headers_type::const_iterator it = ext_headers_.begin();
-    while (it != ext_headers_.end() && current_header != id) {
-        current_header = it->option();
+    while (it != ext_headers_.end()) {
+        if (it->option() == id) {
+            return &*it;
+        }
         ++it;
     }
-    if (it == ext_headers_.end()) {
-        return 0;
-    }
-    return &*it;
+    return 0;
 }
 
 void IPv6::set_last_next_header(uint8_t value) {

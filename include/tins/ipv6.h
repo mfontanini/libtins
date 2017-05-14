@@ -346,6 +346,7 @@ private:
 
     ipv6_header header_;
     headers_type ext_headers_;
+    uint8_t next_header_;
 };
 }
 
