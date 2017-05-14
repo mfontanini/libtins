@@ -70,14 +70,13 @@ PDU::metadata IPv6::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
 }
 
 IPv6::IPv6(address_type ip_dst, address_type ip_src, PDU* /*child*/)
-: header_(), headers_size_(0) {
+: header_() {
     version(6);
     dst_addr(ip_dst);
     src_addr(ip_src);
 }
 
-IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) 
-: headers_size_(0) {
+IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     stream.read(header_);
     uint8_t current_header = header_.next_header;
@@ -208,7 +207,7 @@ void IPv6::dst_addr(const address_type& new_dst_addr) {
 }
 
 uint32_t IPv6::header_size() const {
-    return sizeof(header_) + headers_size_;
+    return sizeof(header_) + calculate_headers_size();
 }
 
 bool IPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
@@ -282,7 +281,6 @@ void IPv6::send(PacketSender& sender, const NetworkInterface &) {
 
 void IPv6::add_ext_header(const ext_header& header) {
     ext_headers_.push_back(header);
-    headers_size_ += static_cast<uint32_t>(header.data_size() + sizeof(uint8_t) * 2);
 }
 
 const IPv6::ext_header* IPv6::search_header(ExtensionHeader id) const {
@@ -305,6 +303,15 @@ void IPv6::set_last_next_header(uint8_t value) {
     else {
         ext_headers_.back().option(value);
     }
+}
+
+uint32_t IPv6::calculate_headers_size() const {
+    typedef headers_type::const_iterator const_iterator;
+    uint32_t output = 0;
+    for (const_iterator iter = ext_headers_.begin(); iter != ext_headers_.end(); ++iter) {
+        output += static_cast<uint32_t>(iter->data_size() + sizeof(uint8_t) * 2);
+    }
+    return output;
 }
 
 void IPv6::write_header(const ext_header& header, OutputMemoryStream& stream) {

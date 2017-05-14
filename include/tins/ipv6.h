@@ -320,6 +320,7 @@ public:
 private:
     void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void set_last_next_header(uint8_t value);
+    uint32_t calculate_headers_size() const;
     static void write_header(const ext_header& header, Memory::OutputMemoryStream& stream);
     static bool is_extension_header(uint8_t header_id);
 
@@ -345,7 +346,6 @@ private:
 
     ipv6_header header_;
     headers_type ext_headers_;
-    uint32_t headers_size_;
 };
 }
 
