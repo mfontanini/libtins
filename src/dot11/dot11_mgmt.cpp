@@ -31,6 +31,7 @@
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
+#include <iterator>
 #include "rsn_information.h"
 #include "memory_helpers.h"
 
