@@ -349,7 +349,7 @@ TEST_F(IPv6Test, OptionAddition) {
     EthernetII pkt(routing_header, sizeof(routing_header));
     IPv6& ipv6 = pkt.rfind_pdu<IPv6>();
     // Add a dummy header
-    ipv6.add_ext_header(IPv6::ext_header(IPv6::AUTHENTICATION));
+    ipv6.add_header(IPv6::ext_header(IPv6::AUTHENTICATION));
 
     const IPv6::headers_type& headers = ipv6.headers();
 
