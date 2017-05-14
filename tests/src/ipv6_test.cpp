@@ -24,7 +24,7 @@ class IPv6Test : public testing::Test {
 public:
     static const uint8_t expected_packet1[], expected_packet2[], 
                          hop_by_hop_options[], broken1[],
-                         fcs_suffix[];
+                         fcs_suffix[], routing_header[];
     
     void test_equals(IPv6& ip1, IPv6& ip2);
 };
@@ -68,6 +68,20 @@ const uint8_t IPv6Test::fcs_suffix[] = {
     0x00, 0x01, 0xff, 0x01, 0x31, 0x3e, 0x87, 0x00, 0x55, 0x69, 0x00, 0x00, 0x00, 0x00, 0xfe, 0x80,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x66, 0x3f, 0x5f, 0xff, 0xfe, 0x01, 0x31, 0x3e, 0x23, 0x0c,
     0x57, 0xb7
+};
+
+const uint8_t IPv6Test::routing_header[] = {
+    134, 147, 35, 211, 55, 142, 34, 26, 149, 214, 122, 35, 134, 221, 
+    96, 15, 187, 116, 0, 136, 43, 63, 252, 0, 0, 66, 0, 0, 0, 1, 0, 0
+    , 0, 0, 0, 0, 0, 2, 252, 0, 0, 2, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0
+    , 1, 41, 6, 4, 2, 2, 0, 0, 0, 252, 0, 0, 2, 0, 0, 0, 6, 0, 0, 0, 
+    0, 0, 0, 0, 1, 252, 0, 0, 2, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 1, 
+    252, 0, 0, 2, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 96, 15, 187, 
+    116, 0, 40, 6, 64, 252, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+    1, 252, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 31, 144, 
+    169, 160, 186, 49, 30, 141, 2, 27, 99, 141, 160, 18, 112, 248, 
+    138, 245, 0, 0, 2, 4, 7, 148, 4, 2, 8, 10, 128, 29, 165, 34, 128,
+    29, 165, 34, 1, 3, 3, 7
 };
 
 void IPv6Test::test_equals(IPv6& ip1, IPv6& ip2) {
@@ -178,6 +192,10 @@ TEST_F(IPv6Test, Serialize) {
 
 TEST_F(IPv6Test, Broken1) {
     EthernetII pkt(broken1, sizeof(broken1));
+    for (auto c : pkt.serialize()) {
+        printf("%2d, ", (int)c);
+    }
+    printf("\n");
     EXPECT_EQ(
         PDU::serialization_type(broken1, broken1 + sizeof(broken1)),
         pkt.serialize()
@@ -317,3 +335,32 @@ TEST_F(IPv6Test, MDLv1Request) {
     );
 }
 
+TEST_F(IPv6Test, OptionIteration) {
+    EthernetII pkt(routing_header, sizeof(routing_header));
+    IPv6& ipv6 = pkt.rfind_pdu<IPv6>();
+    const IPv6::headers_type& headers = ipv6.headers();
+
+    ASSERT_EQ(1, headers.size());
+    const IPv6::ext_header& header = headers[0];
+    EXPECT_EQ(IPv6::ROUTING, header.option());
+}
+
+TEST_F(IPv6Test, OptionAddition) {
+    EthernetII pkt(routing_header, sizeof(routing_header));
+    IPv6& ipv6 = pkt.rfind_pdu<IPv6>();
+    // Add a dummy header
+    ipv6.add_ext_header(IPv6::ext_header(IPv6::AUTHENTICATION));
+
+    const IPv6::headers_type& headers = ipv6.headers();
+
+    ASSERT_EQ(2, headers.size());
+    EXPECT_EQ(IPv6::ROUTING, headers[0].option());
+    EXPECT_EQ(IPv6::AUTHENTICATION, headers[1].option());
+
+    ipv6.serialize();
+    EXPECT_EQ(IPv6::ROUTING, headers[0].option());
+    EXPECT_EQ(IPv6::AUTHENTICATION, headers[1].option());
+
+    EXPECT_TRUE(ipv6.search_header(IPv6::ROUTING) != 0);
+    EXPECT_TRUE(ipv6.search_header(IPv6::AUTHENTICATION) != 0);
+}
