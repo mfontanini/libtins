@@ -143,6 +143,7 @@ struct InterfaceInfoCollector {
         if (iface_id == uint32_t(iface->IfIndex)) {
             copy(iface->PhysicalAddress, iface->PhysicalAddress + 6, info->hw_addr.begin());
             found_hw = true;
+            info->is_up = (iface->OperStatus == IfOperStatusUp);
             IP_ADAPTER_UNICAST_ADDRESS* unicast = iface->FirstUnicastAddress;
             while (unicast) {
                 int family = ((const struct sockaddr*)unicast->Address.lpSockaddr)->sa_family;
@@ -150,7 +151,6 @@ struct InterfaceInfoCollector {
                     info->ip_addr = IPv4Address(((const struct sockaddr_in *)unicast->Address.lpSockaddr)->sin_addr.s_addr);
                     info->netmask = IPv4Address(host_to_be<uint32_t>(0xffffffff << (32 - unicast->OnLinkPrefixLength)));
                     info->bcast_addr = IPv4Address((info->ip_addr & info->netmask) | ~info->netmask);
-                    info->is_up = (iface->Flags & IP_ADAPTER_IPV4_ENABLED) != 0;
                     found_ip = true;
                 }
                 else if (family == AF_INET6) {
