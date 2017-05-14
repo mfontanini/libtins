@@ -105,7 +105,7 @@ void DNS::skip_to_section_end(InputMemoryStream& stream,
         skip_to_dname_end(stream);
         stream.skip(sizeof(uint16_t) * 2 + sizeof(uint32_t));
         uint16_t data_size = stream.read_be<uint16_t>();
-        if (!stream.can_read(data_size)) {
+        if (TINS_UNLIKELY(!stream.can_read(data_size))) {
             throw malformed_packet();
         }
         stream.skip(data_size);
@@ -339,7 +339,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
     while (*ptr) {
         // It's an offset
         if ((*ptr & 0xc0)) {
-            if (ptr + sizeof(uint16_t) > end) {
+            if (TINS_UNLIKELY(ptr + sizeof(uint16_t) > end)) {
                 throw malformed_packet();
             }
             uint16_t index;
@@ -360,7 +360,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
             // It's a label, grab its size.
             uint8_t size = *ptr;
             ptr++;
-            if (ptr + size > end || current_out_ptr - out_ptr + size + 1 > 255) {
+            if (TINS_UNLIKELY(ptr + size > end || current_out_ptr - out_ptr + size + 1 > 255)) {
                 throw malformed_packet();
             }
             // Append a dot if it's not the first one.
@@ -430,7 +430,7 @@ void DNS::convert_records(const uint8_t* ptr,
             preference = stream.read_be<uint16_t>();
             data_size -= sizeof(uint16_t);
         }
-        if (!stream.can_read(data_size)) {
+        if (TINS_UNLIKELY(!stream.can_read(data_size))) {
             throw malformed_packet();
         }
 
@@ -470,16 +470,27 @@ void DNS::convert_records(const uint8_t* ptr,
                 stream.skip(data_size);
                 break;
         }
-        res.push_back(
-            resource(
+        #if TINS_IS_CXX11
+            res.emplace_back(
                 dname, 
-                (used_small_buffer) ? small_addr_buf : data, 
+                (used_small_buffer) ? small_addr_buf : std::move(data), 
                 type, 
                 qclass, 
                 ttl,
                 preference
-            )
-        );
+            );
+        #else
+            res.push_back(
+                resource(
+                    dname, 
+                    (used_small_buffer) ? small_addr_buf : data, 
+                    type, 
+                    qclass, 
+                    ttl,
+                    preference
+                )
+            );
+        #endif
     }
 }
 
@@ -544,9 +555,13 @@ DNS::queries_type DNS::queries() const {
             stream.skip(compose_name(stream.pointer(), buffer));
             uint16_t query_type = stream.read_be<uint16_t>();
             uint16_t query_class = stream.read_be<uint16_t>();
-            output.push_back(
-                query(buffer, (QueryType)query_type, (QueryClass)query_class)
-            );
+            #if TINS_IS_CXX11
+                output.emplace_back(buffer, (QueryType)query_type, (QueryClass)query_class);
+            #else
+                output.push_back(
+                    query(buffer, (QueryType)query_type, (QueryClass)query_class)
+                );
+            #endif
         }
     }
     return output;
