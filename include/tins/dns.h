@@ -183,8 +183,13 @@ public:
          * \param tp The query type.
          * \param cl The query class.
          */
+        #if TINS_IS_CXX11
+        query(std::string nm, QueryType tp, QueryClass cl) 
+        : name_(std::move(nm)), type_(tp), qclass_(cl) {}
+        #else
         query(const std::string& nm, QueryType tp, QueryClass cl) 
         : name_(nm), type_(tp), qclass_(cl) {}
+        #endif
         
         /**
          * \brief Default constructs this Query.
@@ -448,6 +453,16 @@ public:
          * \param rclass The class of this record.
          * \param ttl The time-to-live of this record.
          */
+        #if TINS_IS_CXX11
+        resource(std::string dname, 
+                 std::string data, 
+                 uint16_t type,
+                 uint16_t rclass,
+                 uint32_t ttl,
+                 uint16_t preference = 0) 
+        : dname_(std::move(dname)), data_(std::move(data)), type_(type),
+          qclass_(rclass), ttl_(ttl), preference_(preference) {}
+        #else
         resource(const std::string& dname, 
                  const std::string& data, 
                  uint16_t type,
@@ -456,6 +471,7 @@ public:
                  uint16_t preference = 0) 
         : dname_(dname), data_(data), type_(type), qclass_(rclass), 
           ttl_(ttl), preference_(preference) {}
+        #endif 
         
         resource() : type_(), qclass_(), ttl_(), preference_() {}
         
