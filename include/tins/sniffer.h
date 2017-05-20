@@ -300,12 +300,17 @@ public:
     };
 
     /**
+     * \brief Constructs an instance of Sniffer
+     *
+     * \param device The device from which to capture packets
+     */
+    Sniffer(const std::string& device);
+
+    /**
      * \brief Constructs an instance of Sniffer using the provided configuration.
      *
-     * This constructor was added as a way to improve the parameter bloat
-     * introduced by the other ones available. You should create an instance
-     * of SnifferConfiguration, set the desired parameters, and then use it
-     * when constructing a Sniffer object.
+     * Use the SnifferConfiguration object to specify how you want to configure
+     * the properties of this sniffer
      *
      * \sa SnifferConfiguration
      *
@@ -344,12 +349,13 @@ public:
      * \param filter A capture filter to be used on the sniffing session.(optional);
      * \param rfmon Indicates if the interface should be put in monitor mode.(optional);
      */
-    TINS_DEPRECATED(Sniffer(const std::string& device, promisc_type promisc = NON_PROMISC,
+    TINS_DEPRECATED(Sniffer(const std::string& device, promisc_type promisc,
                     const std::string& filter = "", bool rfmon = false));
 
 private:
     friend class SnifferConfiguration;
 
+    void init(const std::string& device, const SnifferConfiguration& configuration);
     void set_snap_len(unsigned snap_len);
     void set_buffer_size(unsigned buffer_size);
     void set_promisc_mode(bool promisc_enabled);

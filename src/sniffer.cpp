@@ -232,30 +232,12 @@ bool BaseSniffer::set_direction(pcap_direction_t d) {
 
 // ****************************** Sniffer ******************************
 
+Sniffer::Sniffer(const string& device) {
+    init(device, SnifferConfiguration());
+}
+
 Sniffer::Sniffer(const string& device, const SnifferConfiguration& configuration) {
-    char error[PCAP_ERRBUF_SIZE];
-    pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
-    if (!phandle) {
-        throw pcap_error(error);
-    }
-    set_pcap_handle(phandle);
-
-    // Set the netmask if we are able to find it.
-    bpf_u_int32 ip, if_mask;
-    if (pcap_lookupnet(TINS_PREFIX_INTERFACE(device).c_str(), &ip, &if_mask, error) == 0) {
-        set_if_mask(if_mask);
-    }
-
-    // Configure the sniffer's attributes prior to activation.
-    configuration.configure_sniffer_pre_activation(*this);
-
-    // Finally, activate the pcap. In case of error, throw
-    if (pcap_activate(get_pcap_handle()) < 0) {
-        throw pcap_error(pcap_geterr(get_pcap_handle()));
-    }
-
-    // Configure the sniffer's attributes after activation.
-    configuration.configure_sniffer_post_activation(*this);
+    init(device, configuration);
 }
 
 Sniffer::Sniffer(const string& device,
@@ -269,29 +251,7 @@ Sniffer::Sniffer(const string& device,
     configuration.set_filter(filter);
     configuration.set_rfmon(rfmon);
 
-    char error[PCAP_ERRBUF_SIZE];
-    pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
-    if (!phandle) {
-        throw pcap_error(error);
-    }
-    set_pcap_handle(phandle);
-
-    // Set the netmask if we are able to find it.
-    bpf_u_int32 ip, if_mask;
-    if (pcap_lookupnet(TINS_PREFIX_INTERFACE(device).c_str(), &ip, &if_mask, error) == 0) {
-        set_if_mask(if_mask);
-    }
-
-    // Configure the sniffer's attributes prior to activation.
-    configuration.configure_sniffer_pre_activation(*this);
-
-    // Finally, activate the pcap. In case of error, throw
-    if (pcap_activate(get_pcap_handle()) < 0) {
-        throw pcap_error(pcap_geterr(get_pcap_handle()));
-    }
-
-    // Configure the sniffer's attributes after activation.
-    configuration.configure_sniffer_post_activation(*this);
+    init(device, configuration);
 }
 
 Sniffer::Sniffer(const string& device, 
@@ -303,6 +263,10 @@ Sniffer::Sniffer(const string& device,
     configuration.set_filter(filter);
     configuration.set_rfmon(rfmon);
 
+    init(device, configuration);
+}
+
+void Sniffer::init(const string& device, const SnifferConfiguration& configuration) {
     char error[PCAP_ERRBUF_SIZE];
     pcap_t* phandle = pcap_create(TINS_PREFIX_INTERFACE(device).c_str(), error);
     if (!phandle) {
