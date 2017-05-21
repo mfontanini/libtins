@@ -61,22 +61,6 @@ public:
     typedef PDUOption<uint8_t, RadioTap> option;
 
     /**
-     * The RadioTap header
-     */
-    TINS_BEGIN_PACK
-    struct RadiotapHeader {
-    #if TINS_IS_LITTLE_ENDIAN
-        uint8_t version; 
-        uint8_t padding;
-    #else
-        uint8_t padding;
-        uint8_t version;
-    #endif // TINS_IS_LITTLE_ENDIAN 
-        uint16_t length;
-        uint32_t flags;
-    } TINS_END_PACK;
-
-    /**
      * \brief Constructs a RadioTap parser around a payload
      *
      * Note that the payload is not copied, hence it must be kept in 
@@ -118,6 +102,11 @@ public:
      * the end of the header)
      */
     bool advance_field();
+
+    /**
+     * Indicates whether this RadioTap options buffer contains any fields set
+     */
+    bool has_fields() const;
 private:
     const uint8_t* find_options_start() const;
     bool advance_to_next_field(bool start_from_zero);

@@ -446,6 +446,7 @@ TEST_F(RadioTapTest, RadioTapParsingMultipleNamespaces) {
     }
     // MCS is the last option in this namespace. After this, we should jump to the next one
     EXPECT_TRUE(parser.advance_field());
+    EXPECT_TRUE(parser.has_fields());
 
     // These are on the second namespace
     EXPECT_EQ(RadioTap::DBM_SIGNAL, parser.current_field());
@@ -460,6 +461,15 @@ TEST_F(RadioTapTest, RadioTapParsingMultipleNamespaces) {
     EXPECT_FALSE(parser.advance_field());
     EXPECT_FALSE(parser.advance_field());
     EXPECT_EQ(RadioTapParser::RADIOTAP_NS, parser.current_namespace());
+    EXPECT_FALSE(parser.has_fields());
+}
+
+TEST_F(RadioTapTest, RadioTapParsingUsingEmptyBuffer) {
+    vector<uint8_t> buffer;
+    RadioTapParser parser(buffer);
+    EXPECT_FALSE(parser.has_fields());
+    EXPECT_FALSE(parser.advance_field());
+    EXPECT_FALSE(parser.has_fields());
 }
 
 #endif // TINS_HAVE_DOT11
