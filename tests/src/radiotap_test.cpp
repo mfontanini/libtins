@@ -405,7 +405,7 @@ TEST_F(RadioTapTest, SerializationWorksFine) {
 // RadioTapParser
 
 TEST_F(RadioTapTest, RadioTapParsing) {
-    vector<uint8_t> buffer(expected_packet, expected_packet + sizeof(expected_packet));
+    vector<uint8_t> buffer(expected_packet+4, expected_packet + sizeof(expected_packet)-4);
     RadioTapParser parser(buffer);
     EXPECT_EQ(RadioTap::TSTF, parser.current_field());
     EXPECT_EQ(616089172U, parser.current_option().to<uint64_t>());
@@ -438,7 +438,7 @@ TEST_F(RadioTapTest, RadioTapParsing) {
 }
 
 TEST_F(RadioTapTest, RadioTapParsingMultipleNamespaces) {
-    vector<uint8_t> buffer(expected_packet4, expected_packet4 + sizeof(expected_packet4));
+    vector<uint8_t> buffer(expected_packet4+4, expected_packet4 + sizeof(expected_packet4)-4);
     RadioTapParser parser(buffer);
     EXPECT_EQ(RadioTapParser::RADIOTAP_NS, parser.current_namespace());
     while (parser.current_field() != RadioTap::MCS) {
