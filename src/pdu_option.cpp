@@ -81,11 +81,10 @@ vector<T> convert_vector(const uint8_t* u8_ptr, uint32_t data_size, PDU::endian_
     return output;
 }
 
-template<typename T, typename U,
-         typename = typename enable_if<is_unsigned_integral<T>::value &&
-                                       is_unsigned_integral<U>::value>::type>
-vector<std::pair<T, U> > convert_vector(const uint8_t* ptr, uint32_t data_size,
-                                        PDU::endian_type endian) {
+template<typename T, typename U>
+typename enable_if<is_unsigned_integral<T>::value && is_unsigned_integral<U>::value,
+                   vector<std::pair<T, U> > >::type
+convert_vector(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian) {
     if (data_size % (sizeof(T) + sizeof(U)) != 0) {
         throw malformed_option();
     }
@@ -111,10 +110,10 @@ vector<std::pair<T, U> > convert_vector(const uint8_t* ptr, uint32_t data_size,
     return output;
 }
 
-template<typename T, typename U,
-         typename = typename enable_if<is_unsigned_integral<T>::value &&
-                                       is_unsigned_integral<U>::value>::type>
-std::pair<T, U> convert_pair(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian) {
+template<typename T, typename U>
+typename enable_if<is_unsigned_integral<T>::value && is_unsigned_integral<U>::value,
+                   std::pair<T, U> >::type
+convert_pair(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian) {
     if (data_size != sizeof(T) + sizeof(U)) {
         throw malformed_option();
     }
@@ -133,6 +132,13 @@ std::pair<T, U> convert_pair(const uint8_t* ptr, uint32_t data_size, PDU::endian
 }
 
 uint8_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type, type_to_type<uint8_t>) {
+    if (data_size != 1) {
+        throw malformed_option();
+    }
+    return *ptr;
+}
+
+int8_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type, type_to_type<int8_t>) {
     if (data_size != 1) {
         throw malformed_option();
     }
@@ -250,7 +256,7 @@ vector<IPv6Address> convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_
     return output;
 }
 
-vector<pair<uint8_t, uint8_t>> convert(const uint8_t* ptr, uint32_t data_size,
+vector<pair<uint8_t, uint8_t> > convert(const uint8_t* ptr, uint32_t data_size,
                                        PDU::endian_type endian,
                                        type_to_type<vector<pair<uint8_t, uint8_t> > >) {
     return convert_vector<uint8_t, uint8_t>(ptr, data_size, endian);
