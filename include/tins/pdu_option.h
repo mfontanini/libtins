@@ -54,6 +54,8 @@ namespace Internals {
     namespace Converters {
         uint8_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
                         type_to_type<uint8_t>);
+        int8_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
+                        type_to_type<int8_t>);
         uint16_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
                          type_to_type<uint16_t>);
         uint32_t convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
@@ -106,6 +108,12 @@ namespace Internals {
 
         template <typename U, typename X, typename PDUType>
         static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<uint8_t> type) {
+            return Converters::convert(opt.data_ptr(), opt.data_size(),
+                                       PDUType::endianness, type);
+        }
+
+        template <typename U, typename X, typename PDUType>
+        static U do_convert(const PDUOption<X, PDUType>& opt, type_to_type<int8_t> type) {
             return Converters::convert(opt.data_ptr(), opt.data_size(),
                                        PDUType::endianness, type);
         }
