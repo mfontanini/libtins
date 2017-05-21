@@ -31,9 +31,9 @@
 #define TINS_RADIOTAP_PARSER_H
 
 #include <stdint.h>
-#include "macros.h"
-#include "radiotap.h"
-#include "pdu_option.h"
+#include "../macros.h"
+#include "../radiotap.h"
+#include "../pdu_option.h"
 
 namespace Tins {
 namespace Utils {
@@ -103,6 +103,11 @@ public:
      * Gets the option the parsed is currently pointing at
      */
     option current_option();
+
+    /**
+     * Gets the pointer at which the current option is located
+     */
+    const uint8_t* current_option_ptr() const;
 
     /**
      * \brief Advances to the next option

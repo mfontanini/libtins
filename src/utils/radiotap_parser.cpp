@@ -142,20 +142,18 @@ void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t 
 
 RadioTapParser::RadioTapParser(const vector<uint8_t>& buffer)
 : current_namespace_(RADIOTAP_NS), current_bit_(0), namespace_index_(0) {
-    if (TINS_UNLIKELY(buffer.empty())) {
-        throw malformed_packet();
+    if (buffer.empty()) {
+        start_ = 0;
+        end_ = 0;
+        current_ptr_ = start_;
     }
-    start_ = &*buffer.begin();
-    end_ = start_ + buffer.size();
-    const size_t max_size = end_ - start_;
-    if (TINS_UNLIKELY(max_size < sizeof(RadiotapHeader))) {
-        throw malformed_packet();
+    else {
+        start_ = &*buffer.begin();
+        end_ = start_ + buffer.size();
+        current_ptr_ = find_options_start();
+        // Skip all fields and make this point to the first flags one
+        advance_to_next_field(true /* start from bit zero */);
     }
-    const RadiotapHeader* radio = (const RadiotapHeader*)start_;
-    end_ = start_ + Endian::le_to_host(radio->length);
-    current_ptr_ = find_options_start();
-    // Skip all fields and make this point to the first flags one
-    advance_to_next_field(true /* start from bit zero */);
 }
 
 RadioTapParser::NamespaceType RadioTapParser::current_namespace() const {
@@ -174,6 +172,10 @@ RadioTapParser::option RadioTapParser::current_option() {
     return option(current_field(), size, current_ptr_);
 }
 
+const uint8_t* RadioTapParser::current_option_ptr() const {
+    return current_ptr_;
+}
+
 bool RadioTapParser::advance_field() {
     // If we manage to advance the field, return true
     if (advance_to_next_field(false /* keep going from current */)) {
@@ -190,7 +192,7 @@ bool RadioTapParser::advance_field() {
 
 const uint8_t* RadioTapParser::find_options_start() const {
     uint32_t total_sz = end_ - start_;
-    if (TINS_UNLIKELY(total_sz < sizeof(RadiotapHeader))) {
+    if (TINS_UNLIKELY(total_sz < sizeof(RadioTapFlags))) {
         throw malformed_packet();
     }
     // Skip fields before the flags one
@@ -220,8 +222,10 @@ bool RadioTapParser::advance_to_next_field(bool start_from_zero) {
         bit++; 
     }
     if (bit < BIT_LIMIT) {
+        const uint8_t* radiotap_start = start_ - sizeof(uint32_t);
         // Skip and align the buffer
-        align_buffer(start_, current_ptr_, end_ - start_, RADIOTAP_METADATA[bit].alignment);
+        align_buffer(radiotap_start, current_ptr_, end_ - radiotap_start,
+                     RADIOTAP_METADATA[bit].alignment);
         current_bit_ = bit;
         return true;
     }
@@ -257,7 +261,7 @@ bool RadioTapParser::is_field_set(uint32_t bit, const RadioTapFlags* flags) cons
 }
 
 const RadioTapFlags* RadioTapParser::get_flags_ptr() const {
-    return (const RadioTapFlags*)(start_ + sizeof(uint32_t) * (namespace_index_ + 1));
+    return (const RadioTapFlags*)(start_ + sizeof(uint32_t) * namespace_index_);
 }
 
 } // Utils
