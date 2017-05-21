@@ -63,7 +63,7 @@ static const FieldMetadata RADIOTAP_METADATA[] = {
     { 3, 1 }, // MCS
 };
 
-static const uint64_t BIT_LIMIT = sizeof(RADIOTAP_METADATA) / sizeof(FieldMetadata) + 1;
+static const uint32_t BIT_LIMIT = sizeof(RADIOTAP_METADATA) / sizeof(FieldMetadata) + 1;
 
 #if TINS_IS_LITTLE_ENDIAN
 TINS_BEGIN_PACK
@@ -141,7 +141,7 @@ void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t 
 }
 
 RadioTapParser::RadioTapParser(const vector<uint8_t>& buffer)
-: current_namespace_(RADIOTAP_NS), current_bit_(0), namespace_index_(0) {
+: current_namespace_(RADIOTAP_NS), current_bit_(BIT_LIMIT), namespace_index_(0) {
     if (buffer.empty()) {
         start_ = 0;
         end_ = 0;
@@ -177,17 +177,26 @@ const uint8_t* RadioTapParser::current_option_ptr() const {
 }
 
 bool RadioTapParser::advance_field() {
+    // If we have no buffer to parse, then we can't advance
+    if (start_ == 0 || current_bit_ == BIT_LIMIT) {
+        return false;
+    }
     // If we manage to advance the field, return true
     if (advance_to_next_field(false /* keep going from current */)) {
         return true;
     }
+    // We finished iterating the current namespace (if any). Reset our bit
+    current_bit_ = BIT_LIMIT;
     // Otherwise, let's try advancing the namespace. If we fail, then we failed
     if (!advance_to_next_namespace()) {
         return false;
     }
-    // Otherwise restart bit and try to find the first field in this namespace
-    current_bit_ = 0;
+    // Try to find the first field in this new namespace
     return advance_to_next_field(true /* start from 0*/);
+}
+
+bool RadioTapParser::has_fields() const {
+    return current_bit_ != BIT_LIMIT;
 }
 
 const uint8_t* RadioTapParser::find_options_start() const {
@@ -209,7 +218,7 @@ const uint8_t* RadioTapParser::find_options_start() const {
 
 bool RadioTapParser::advance_to_next_field(bool start_from_zero) {
     const RadioTapFlags* flags = get_flags_ptr();
-    uint64_t bit;
+    uint32_t bit;
     if (start_from_zero) {
         bit = 0;
     }
