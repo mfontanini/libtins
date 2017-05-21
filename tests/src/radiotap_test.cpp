@@ -12,9 +12,11 @@
 #include "snap.h"
 #include "eapol.h"
 #include "utils.h"
+#include "utils/radiotap_parser.h"
 
 using namespace std;
 using namespace Tins;
+using Tins::Utils::RadioTapParser;
 
 class RadioTapTest : public testing::Test {
 public:
@@ -398,6 +400,66 @@ TEST_F(RadioTapTest, SerializationWorksFine) {
         RadioTap::serialization_type(expected, expected + sizeof(expected)),
         buffer
     );
+}
+
+// RadioTapParser
+
+TEST_F(RadioTapTest, RadioTapParsing) {
+    vector<uint8_t> buffer(expected_packet, expected_packet + sizeof(expected_packet));
+    RadioTapParser parser(buffer);
+    EXPECT_EQ(RadioTap::TSTF, parser.current_field());
+    EXPECT_EQ(616089172U, parser.current_option().to<uint64_t>());
+    EXPECT_TRUE(parser.advance_field());
+    
+    EXPECT_EQ(RadioTap::FLAGS, parser.current_field());
+    EXPECT_EQ((uint32_t)RadioTap::FCS, parser.current_option().to<uint8_t>());
+    EXPECT_TRUE(parser.advance_field());
+
+    EXPECT_EQ(RadioTap::RATE, parser.current_field());
+    EXPECT_EQ(12, parser.current_option().to<uint8_t>());
+    EXPECT_TRUE(parser.advance_field());
+    
+    EXPECT_EQ(RadioTap::DBM_SIGNAL, parser.current_field());
+    EXPECT_EQ(-38, parser.current_option().to<int8_t>());
+    EXPECT_TRUE(parser.advance_field());
+    
+    EXPECT_EQ(RadioTap::DBM_NOISE, parser.current_field());
+    EXPECT_EQ(-96, parser.current_option().to<int8_t>());
+    EXPECT_TRUE(parser.advance_field());
+    
+    EXPECT_EQ(RadioTap::ANTENNA, parser.current_field());
+    EXPECT_EQ(2, parser.current_option().to<uint8_t>());
+    EXPECT_TRUE(parser.advance_field());
+    
+    EXPECT_EQ(RadioTap::CHANNEL_PLUS,parser.current_field());
+    EXPECT_EQ(0x140U, parser.current_option().to<uint32_t>());
+
+    EXPECT_FALSE(parser.advance_field());
+}
+
+TEST_F(RadioTapTest, RadioTapParsingMultipleNamespaces) {
+    vector<uint8_t> buffer(expected_packet4, expected_packet4 + sizeof(expected_packet4));
+    RadioTapParser parser(buffer);
+    EXPECT_EQ(RadioTapParser::RADIOTAP_NS, parser.current_namespace());
+    while (parser.current_field() != RadioTap::MCS) {
+        ASSERT_TRUE(parser.advance_field());
+    }
+    // MCS is the last option in this namespace. After this, we should jump to the next one
+    EXPECT_TRUE(parser.advance_field());
+
+    // These are on the second namespace
+    EXPECT_EQ(RadioTap::DBM_SIGNAL, parser.current_field());
+    EXPECT_EQ(-70, parser.current_option().to<int8_t>());
+    EXPECT_TRUE(parser.advance_field());
+
+    EXPECT_EQ(RadioTap::ANTENNA, parser.current_field());
+    EXPECT_EQ(0, parser.current_option().to<uint8_t>());
+    EXPECT_FALSE(parser.advance_field());
+
+    // Subsequent calls shouldn't change anything
+    EXPECT_FALSE(parser.advance_field());
+    EXPECT_FALSE(parser.advance_field());
+    EXPECT_EQ(RadioTapParser::RADIOTAP_NS, parser.current_namespace());
 }
 
 #endif // TINS_HAVE_DOT11

@@ -55,6 +55,11 @@ public:
     static const PDU::PDUType pdu_flag = PDU::RADIOTAP;
 
     /**
+     * RadioTap is little endian
+     */
+    static const endian_type endianness = LE;
+
+    /**
      * \brief Enumeration of the different channel type flags.
      * 
      * These channel type flags can be OR'd and set using the

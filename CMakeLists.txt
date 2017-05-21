@@ -291,6 +291,7 @@ IF(LIBTINS_BUILD_TESTS)
             BINARY_DIR ${GOOGLETEST_BINARY_DIR}
             CMAKE_CACHE_ARGS "-DBUILD_GTEST:bool=ON" "-DBUILD_GMOCK:bool=OFF"
                             "-Dgtest_force_shared_crt:bool=ON"
+                            "-DCMAKE_CXX_COMPILER:path=${CMAKE_CXX_COMPILER}"
             INSTALL_COMMAND ""
         )
         # Make sure we build googletest before anything else
