@@ -77,6 +77,7 @@ set(SOURCES
     utils/checksum_utils.cpp
     utils/frequency_utils.cpp
     utils/radiotap_parser.cpp
+    utils/radiotap_writer.cpp
     utils/routing_utils.cpp
     utils/resolve_utils.cpp
     utils/pdu_utils.cpp

@@ -13,10 +13,12 @@
 #include "eapol.h"
 #include "utils.h"
 #include "utils/radiotap_parser.h"
+#include "utils/radiotap_writer.h"
 
 using namespace std;
 using namespace Tins;
 using Tins::Utils::RadioTapParser;
+using Tins::Utils::RadioTapWriter;
 
 class RadioTapTest : public testing::Test {
 public:
@@ -412,7 +414,7 @@ TEST_F(RadioTapTest, RadioTapParsing) {
     EXPECT_TRUE(parser.advance_field());
     
     EXPECT_EQ(RadioTap::FLAGS, parser.current_field());
-    EXPECT_EQ((uint32_t)RadioTap::FCS, parser.current_option().to<uint8_t>());
+    EXPECT_EQ((uint8_t)RadioTap::FCS, parser.current_option().to<uint8_t>());
     EXPECT_TRUE(parser.advance_field());
 
     EXPECT_EQ(RadioTap::RATE, parser.current_field());
@@ -441,9 +443,13 @@ TEST_F(RadioTapTest, RadioTapParsingMultipleNamespaces) {
     vector<uint8_t> buffer(expected_packet4+4, expected_packet4 + sizeof(expected_packet4)-4);
     RadioTapParser parser(buffer);
     EXPECT_EQ(RadioTapParser::RADIOTAP_NS, parser.current_namespace());
-    while (parser.current_field() != RadioTap::MCS) {
-        ASSERT_TRUE(parser.advance_field());
-    }
+    // Skip to MCS, which is teh last one on the first set of flags
+    parser.skip_to_field(RadioTap::MCS);
+    // Check if a specific option is set
+    EXPECT_TRUE(parser.has_field(RadioTap::MCS));
+    // Check if we can find this one which is in the second namespace
+    EXPECT_TRUE(parser.has_field(RadioTap::ANTENNA));
+
     // MCS is the last option in this namespace. After this, we should jump to the next one
     EXPECT_TRUE(parser.advance_field());
     EXPECT_TRUE(parser.has_fields());
@@ -470,6 +476,80 @@ TEST_F(RadioTapTest, RadioTapParsingUsingEmptyBuffer) {
     EXPECT_FALSE(parser.has_fields());
     EXPECT_FALSE(parser.advance_field());
     EXPECT_FALSE(parser.has_fields());
+    EXPECT_FALSE(parser.has_field(RadioTap::ANTENNA));
+}
+
+TEST_F(RadioTapTest, RadioTapWritingEmptyBuffer) {
+    vector<uint8_t> buffer;
+    RadioTapWriter writer(buffer);
+    {
+        const uint8_t value = 0xca;
+        writer.write_option(RadioTapParser::option(RadioTap::ANTENNA, sizeof(value), &value));
+    }
+    {
+        const uint8_t value = (uint8_t)RadioTap::FCS;
+        writer.write_option(RadioTapParser::option(RadioTap::FLAGS, sizeof(value), &value));
+    }
+    {
+        const uint64_t value = Endian::host_to_le<uint64_t>(616089172U);
+        uint8_t buffer[sizeof(value)];
+        memcpy(buffer, &value, sizeof(value));
+        writer.write_option(RadioTapParser::option(RadioTap::TSTF, sizeof(buffer), buffer));
+    }
+    {
+        const uint16_t value = Endian::host_to_le<uint16_t>(0x1234);
+        uint8_t buffer[sizeof(value)];
+        memcpy(buffer, &value, sizeof(value));
+        writer.write_option(RadioTapParser::option(RadioTap::FHSS, sizeof(buffer), buffer));
+    }
+    {
+        const uint8_t value = 0xab;
+        writer.write_option(RadioTapParser::option(RadioTap::RATE, sizeof(value), &value));
+        // We can't add the same option twice
+        EXPECT_FALSE(writer.write_option(RadioTapParser::option(RadioTap::RATE, sizeof(value),
+                                                                &value)));
+    }
+    {
+        const uint8_t value = 0xf7;
+        writer.write_option(RadioTapParser::option(RadioTap::DBM_SIGNAL, sizeof(value), &value));
+    }
+    {
+        const uint16_t value = Endian::host_to_le<uint16_t>(0x4321);
+        uint8_t buffer[sizeof(value)];
+        memcpy(buffer, &value, sizeof(value));
+        writer.write_option(RadioTapParser::option(RadioTap::RX_FLAGS, sizeof(buffer), buffer));
+    }
+
+    RadioTapParser parser(buffer);
+    EXPECT_EQ(RadioTap::TSTF, parser.current_field());
+    EXPECT_EQ(616089172U, parser.current_option().to<uint64_t>());
+    EXPECT_TRUE(parser.advance_field());
+
+    EXPECT_EQ(RadioTap::FLAGS, parser.current_field());
+    EXPECT_EQ((uint8_t)RadioTap::FCS, parser.current_option().to<uint8_t>());
+    EXPECT_TRUE(parser.advance_field());
+
+    EXPECT_EQ(RadioTap::RATE, parser.current_field());
+    EXPECT_EQ(0xab, parser.current_option().to<uint8_t>());
+    EXPECT_TRUE(parser.advance_field());
+
+    EXPECT_EQ(RadioTap::FHSS, parser.current_field());
+    EXPECT_EQ(0x1234, parser.current_option().to<uint16_t>());
+    EXPECT_TRUE(parser.advance_field());
+
+    EXPECT_EQ(RadioTap::DBM_SIGNAL, parser.current_field());
+    EXPECT_EQ(0xf7, parser.current_option().to<uint8_t>());
+    EXPECT_TRUE(parser.advance_field());
+
+    EXPECT_EQ(RadioTap::ANTENNA, parser.current_field());
+    EXPECT_EQ(0xca, parser.current_option().to<uint8_t>());
+    EXPECT_TRUE(parser.advance_field());
+
+    EXPECT_EQ(RadioTap::RX_FLAGS, parser.current_field());
+    EXPECT_EQ(0x4321, parser.current_option().to<uint16_t>());
+
+    EXPECT_FALSE(parser.advance_field());
+
 }
 
 #endif // TINS_HAVE_DOT11
