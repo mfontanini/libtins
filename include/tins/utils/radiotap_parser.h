@@ -58,7 +58,25 @@ public:
         UNKNOWN_NS
     };
 
-    typedef PDUOption<uint8_t, RadioTap> option;
+    typedef PDUOption<RadioTap::PresentFlags, RadioTap> option;
+
+    /**
+     * Represents the size and alignment of each RadioTap field
+     */
+    struct FieldMetadata {
+        uint32_t size;
+        uint32_t alignment;
+    };
+
+    /**
+     * Contains metadata for each data field in RadioTap
+     */
+    static const FieldMetadata RADIOTAP_METADATA[];
+
+    /**
+     * Represents the maximum bit we have information for
+     */
+    static const uint32_t MAX_RADIOTAP_FIELD;
 
     /**
      * \brief Constructs a RadioTap parser around a payload
@@ -77,6 +95,13 @@ public:
      * Gets the current namespace being parsed
      */
     NamespaceType current_namespace() const;
+
+    /**
+     * \brief Gets a 0 index based namespace index.
+     *
+     * This index will be incremented every time a new namespace is found
+     */
+    uint32_t current_namespace_index() const;
 
     /**
      * Gets the current field being parsed
@@ -104,9 +129,26 @@ public:
     bool advance_field();
 
     /**
+     * \brief Skips all fields until the provided one is found
+     *
+     * This will effectively move the current option pointer until the field is 
+     * found or the end of the options list is reached
+     *
+     * \return true iff the field was foudn
+     */
+    bool skip_to_field(RadioTap::PresentFlags flag);
+
+    /**
      * Indicates whether this RadioTap options buffer contains any fields set
      */
     bool has_fields() const;
+
+    /**
+     * \brief Indicates whether the provided field is set.
+     *
+     * This will look the field up in all flag sets and not just the current one
+     */
+    bool has_field(RadioTap::PresentFlags flag) const;
 private:
     const uint8_t* find_options_start() const;
     bool advance_to_next_field(bool start_from_zero);
