@@ -35,6 +35,7 @@
 #include "macros.h"
 #include "pdu.h"
 #include "endianness.h"
+#include "pdu_option.h"
 
 namespace Tins {
 class PacketSender;
@@ -82,7 +83,7 @@ public:
      * \sa RadioTap::present()
      */
     enum PresentFlags {
-        TSTF                = 1 << 0,
+        TSFT                = 1 << 0,
         FLAGS               = 1 << 1,
         RATE                = 1 << 2,
         CHANNEL             = 1 << 3,
@@ -127,6 +128,11 @@ public:
         uint8_t mcs;
     } TINS_END_PACK;
     
+    /**
+     * The type used to store RadioTap options
+     */
+    typedef PDUOption<RadioTap::PresentFlags, RadioTap> option;
+
     /**
      * \brief Default constructor.
      */
@@ -369,10 +375,7 @@ public:
      * will be undefined. It is only safe to use the getter of a field 
      * if its corresponding bit flag is set in the present field.
      */
-    PresentFlags present() const { 
-        //return (PresentFlags)*(uint32_t*)(&radio_.it_len + 1); 
-        return (PresentFlags)Endian::le_to_host(radio_.flags_32);
-    }
+    PresentFlags present() const;
     
     /** \brief Check whether ptr points to a valid response for this PDU.
      *
@@ -397,6 +400,13 @@ public:
     uint32_t trailer_size() const;
     
     /**
+     * Adds the given option
+     *
+     * \param option The option to be added.
+     */
+    void add_option(const option& opt);
+
+    /**
      * \sa PDU::clone
      */
     RadioTap* clone() const {
@@ -412,70 +422,7 @@ public:
     }
 private:
     TINS_BEGIN_PACK
-    #if TINS_IS_LITTLE_ENDIAN
-        struct flags_type {
-            uint32_t
-                tsft:1,
-                flags:1,
-                rate:1,
-                channel:1,
-                fhss:1,
-                dbm_signal:1,
-                dbm_noise:1,
-                lock_quality:1,
-
-                tx_attenuation:1,
-                db_tx_attenuation:1,
-                dbm_tx_power:1,
-                antenna:1,
-                db_signal:1,
-                db_noise:1,
-                rx_flags:1,
-                tx_flags:1,
-
-                reserved1:1,
-                data_retries:1,
-                channel_plus:1,
-                mcs:1,
-                reserved2:4,
-
-                reserved3:7,
-                ext:1;
-        } TINS_END_PACK;
-    #else
-        struct flags_type {
-            uint32_t
-                lock_quality:1,
-                dbm_noise:1,
-                dbm_signal:1,
-                fhss:1,
-                channel:1,
-                rate:1,
-                flags:1,
-                tsft:1,
-
-                tx_flags:1,
-                rx_flags:1,
-                db_noise:1,
-                db_signal:1,
-                antenna:1,
-                dbm_tx_power:1,
-                db_tx_attenuation:1,
-                tx_attenuation:1,
-
-                reserved2:4,
-                mcs:1,
-                channel_plus:1,
-                data_retries:1,
-                reserved1:1,
-
-                ext:1,
-                reserved3:7;
-        } TINS_END_PACK;
-    #endif
-
-    TINS_BEGIN_PACK
-    struct radiotap_hdr {
+    struct radiotap_header {
     #if TINS_IS_LITTLE_ENDIAN
         uint8_t it_version;	
         uint8_t it_pad;
@@ -484,48 +431,13 @@ private:
         uint8_t it_version;
     #endif // TINS_IS_LITTLE_ENDIAN 
         uint16_t it_len;
-        union {
-            flags_type flags;
-            uint32_t flags_32;
-        };
     } TINS_END_PACK;
     
-    void init();
     void write_serialization(uint8_t* buffer, uint32_t total_sz);
-    uint32_t find_extra_flag_fields_size(const uint8_t* buffer, uint32_t total_sz);
+    option do_find_option(PresentFlags type) const;
 
-    template <size_t n>
-    void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t& size) {
-        uint32_t offset = ((buffer - buffer_start) % n);
-        if (offset) {
-            offset = n - offset;
-            if (offset > size) {
-                throw malformed_packet();
-            }
-            buffer += offset;
-            size -= offset;
-        }
-    }
-    
-    
-    radiotap_hdr radio_;
-    // present fields...
-    uint64_t tsft_;
-    uint16_t channel_type_;
-    uint16_t channel_freq_;
-    uint16_t rx_flags_;
-    uint16_t signal_quality_;
-    uint16_t tx_flags_;
-    mcs_type mcs_;
-    uint8_t antenna_;
-    uint8_t flags_;
-    uint8_t rate_;
-    uint8_t channel_;
-    uint8_t max_power_;
-    uint8_t db_signal_;
-    uint8_t data_retries_;
-    int8_t dbm_signal_;
-    int8_t dbm_noise_;
+    radiotap_header header_;
+    std::vector<uint8_t> options_payload_;
 };
 }
 

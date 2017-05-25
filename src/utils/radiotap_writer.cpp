@@ -29,6 +29,7 @@
 
 #include <cmath>
 #include "utils/radiotap_writer.h"
+#include "utils/radiotap_parser.h"
 #include "exceptions.h"
 
 using std::vector;
@@ -48,7 +49,7 @@ RadioTapWriter::RadioTapWriter(vector<uint8_t>& buffer)
 : buffer_(buffer) {
 }
 
-bool RadioTapWriter::write_option(const RadioTapParser::option& option) {
+void RadioTapWriter::write_option(const RadioTap::option& option) {
     const uint32_t bit = get_bit(option.option());
     if (bit > RadioTapParser::MAX_RADIOTAP_FIELD) {
         throw malformed_option();
@@ -62,8 +63,9 @@ bool RadioTapWriter::write_option(const RadioTapParser::option& option) {
             break;
         }
         else if (parser.current_field() == option.option()) {
-            // We can't add the same option twice
-            return false;
+            memcpy(const_cast<uint8_t*>(parser.current_option_ptr()),
+                   option.data_ptr(), option.data_size());
+            return;
         }
         else {
             const uint32_t bit = get_bit(parser.current_field());
@@ -97,7 +99,6 @@ bool RadioTapWriter::write_option(const RadioTapParser::option& option) {
     }
     flags |= Endian::host_to_le<uint32_t>(option.option());
     memcpy(&*buffer_.begin(), &flags, sizeof(flags));
-    return true;
 }
 
 // Builds a vector that will contain the padding required for every position.
