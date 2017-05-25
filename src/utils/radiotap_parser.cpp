@@ -54,7 +54,7 @@ const RadioTapParser::FieldMetadata RadioTapParser::RADIOTAP_METADATA[] = {
     { 2, 2 }, // TX_FLAGS
     { 1, 1 }, // RTS_RETRIES
     { 1, 1 }, // DATA_RETRIES
-    { 4, 4 }, // CHANNEL_PLUS
+    { 8, 4 }, // CHANNEL_PLUS
     { 3, 1 }, // MCS
 };
 
@@ -129,7 +129,7 @@ void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t 
     uint32_t offset = ((buffer - buffer_start) % n);
     if (offset) {
         offset = n - offset;
-        if (offset > size) {
+        if (TINS_UNLIKELY(offset > size)) {
             throw malformed_packet();
         }
         buffer += offset;
@@ -164,12 +164,12 @@ RadioTap::PresentFlags RadioTapParser::current_field() const {
     return static_cast<RadioTap::PresentFlags>(1 << current_bit_);
 }
 
-RadioTapParser::option RadioTapParser::current_option() {
+RadioTap::option RadioTapParser::current_option() {
     const uint32_t size = RADIOTAP_METADATA[current_bit_].size;
     if (TINS_UNLIKELY(current_ptr_ + size > end_)) {
         throw malformed_packet();
     }
-    return option(current_field(), size, current_ptr_);
+    return RadioTap::option(current_field(), size, current_ptr_);
 }
 
 const uint8_t* RadioTapParser::current_option_ptr() const {
@@ -193,6 +193,19 @@ bool RadioTapParser::advance_field() {
     }
     // Try to find the first field in this new namespace
     return advance_to_next_field(true /* start from 0*/);
+}
+
+bool RadioTapParser::advance_namespace() {
+    if (static_cast<size_t>(end_ - start_) < sizeof(uint32_t)) {
+        return false;
+    }
+    return advance_to_next_namespace();
+}
+
+RadioTap::PresentFlags RadioTapParser::namespace_flags() const {
+    uint32_t output = 0;
+    memcpy(&output, get_flags_ptr(), sizeof(output));
+    return static_cast<RadioTap::PresentFlags>(Endian::le_to_host(output));
 }
 
 bool RadioTapParser::skip_to_field(RadioTap::PresentFlags flag) {

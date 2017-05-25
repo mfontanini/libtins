@@ -58,8 +58,6 @@ public:
         UNKNOWN_NS
     };
 
-    typedef PDUOption<RadioTap::PresentFlags, RadioTap> option;
-
     /**
      * Represents the size and alignment of each RadioTap field
      */
@@ -111,7 +109,7 @@ public:
     /**
      * Gets the option the parsed is currently pointing at
      */
-    option current_option();
+    RadioTap::option current_option();
 
     /**
      * Gets the pointer at which the current option is located
@@ -123,10 +121,23 @@ public:
      *
      * If there's a namespace change, this will handle that as well.
      *
-     * \returns true iff advancing was successfull (e.g. false if we reached
+     * \return true iff advancing was successfull (e.g. false if we reached
      * the end of the header)
      */
     bool advance_field();
+
+    /**
+     * \brief Advances to the next namespace
+     *
+     * \return true iff advancing was successfull (e.g. false if we're currently
+     * in the last namespace)
+     */
+    bool advance_namespace();
+
+    /**
+     * Gets the current namespace's flags
+     */
+    RadioTap::PresentFlags namespace_flags() const;
 
     /**
      * \brief Skips all fields until the provided one is found

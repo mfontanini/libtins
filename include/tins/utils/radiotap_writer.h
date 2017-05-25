@@ -32,10 +32,12 @@
 
 #include <vector>
 #include <stdint.h>
-#include "radiotap_parser.h"
+#include "radiotap.h"
 
 namespace Tins {
 namespace Utils {
+
+class RadioTapParser;
 
 /**
  * \brief Writes RadioTap options into a buffer
@@ -65,7 +67,7 @@ public:
      *
      * \param option The option to be written
      */
-    bool write_option(const RadioTapParser::option& option);
+    void write_option(const RadioTap::option& option);
 private:
     std::vector<uint8_t> build_padding_vector(const uint8_t* last_ptr, RadioTapParser& parser);
     void update_paddings(const std::vector<uint8_t>& paddings, uint32_t offset);

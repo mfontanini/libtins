@@ -199,7 +199,14 @@ const uint8_t RadioTapTest::expected_packet4[] = {
 };
 
 const uint8_t RadioTapTest::expected_packet5[] = {
-    0, 0, 14, 0, 0, 128, 10, 0, 0, 0, 0, 7, 0, 5, 136, 65, 0, 0, 76, 158, 255, 127, 13, 247, 144, 162, 218, 245, 28, 56, 84, 4, 166, 180, 209, 35, 208, 207, 0, 0, 105, 29, 0, 32, 1, 0, 0, 0, 170, 170, 3, 0, 0, 0, 8, 0, 69, 16, 0, 100, 217, 93, 64, 0, 64, 6, 220, 39, 192, 168, 1, 245, 192, 168, 1, 185, 0, 22, 132, 209, 139, 84, 229, 243, 73, 225, 122, 44, 128, 24, 14, 36, 163, 203, 0, 0, 1, 1, 8, 10, 0, 95, 217, 190, 0, 30, 133, 52, 220, 143, 231, 158, 151, 126, 243, 67, 163, 172, 214, 109, 192, 190, 238, 160, 95, 63, 206, 71, 230, 59, 143, 105, 105, 172, 142, 15, 17, 139, 55, 70, 232, 71, 84, 12, 235, 224, 159, 132, 178, 117, 5, 43, 177, 190, 152, 170
+    0, 0, 14, 0, 0, 128, 10, 0, 0, 0, 0, 7, 0, 5, 136, 65, 0, 0, 76, 158, 255, 127, 13,
+    247, 144, 162, 218, 245, 28, 56, 84, 4, 166, 180, 209, 35, 208, 207, 0, 0, 105, 29,
+    0, 32, 1, 0, 0, 0, 170, 170, 3, 0, 0, 0, 8, 0, 69, 16, 0, 100, 217, 93, 64, 0, 64,
+    6, 220, 39, 192, 168, 1, 245, 192, 168, 1, 185, 0, 22, 132, 209, 139, 84, 229, 243,
+    73, 225, 122, 44, 128, 24, 14, 36, 163, 203, 0, 0, 1, 1, 8, 10, 0, 95, 217, 190, 0,
+    30, 133, 52, 220, 143, 231, 158, 151, 126, 243, 67, 163, 172, 214, 109, 192, 190,
+    238, 160, 95, 63, 206, 71, 230, 59, 143, 105, 105, 172, 142, 15, 17, 139, 55, 70,
+    232, 71, 84, 12, 235, 224, 159, 132, 178, 117, 5, 43, 177, 190, 152, 170
 };
 
 TEST_F(RadioTapTest, DefaultConstructor) {
@@ -220,7 +227,7 @@ TEST_F(RadioTapTest, ConstructorFromBuffer) {
     EXPECT_EQ(radio.rate(), 0xc);
     EXPECT_EQ(radio.flags(), 0x10);
     
-    EXPECT_TRUE((radio.present() & RadioTap::TSTF) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::TSFT) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::RATE) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::DBM_SIGNAL) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::ANTENNA) != 0);
@@ -282,7 +289,7 @@ TEST_F(RadioTapTest, ConstructorFromBuffer3) {
 
 TEST_F(RadioTapTest, ConstructorFromBuffer4) {
     RadioTap radio(expected_packet4, sizeof(expected_packet4));
-    EXPECT_TRUE((radio.present() & RadioTap::TSTF) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::TSFT) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::DBM_SIGNAL) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::CHANNEL) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::ANTENNA) != 0);
@@ -409,7 +416,7 @@ TEST_F(RadioTapTest, SerializationWorksFine) {
 TEST_F(RadioTapTest, RadioTapParsing) {
     vector<uint8_t> buffer(expected_packet+4, expected_packet + sizeof(expected_packet)-4);
     RadioTapParser parser(buffer);
-    EXPECT_EQ(RadioTap::TSTF, parser.current_field());
+    EXPECT_EQ(RadioTap::TSFT, parser.current_field());
     EXPECT_EQ(616089172U, parser.current_option().to<uint64_t>());
     EXPECT_TRUE(parser.advance_field());
     
@@ -434,7 +441,7 @@ TEST_F(RadioTapTest, RadioTapParsing) {
     EXPECT_TRUE(parser.advance_field());
     
     EXPECT_EQ(RadioTap::CHANNEL_PLUS,parser.current_field());
-    EXPECT_EQ(0x140U, parser.current_option().to<uint32_t>());
+    EXPECT_EQ(0x1124143c00000140ULL, parser.current_option().to<uint64_t>());
 
     EXPECT_FALSE(parser.advance_field());
 }
@@ -484,44 +491,41 @@ TEST_F(RadioTapTest, RadioTapWritingEmptyBuffer) {
     RadioTapWriter writer(buffer);
     {
         const uint8_t value = 0xca;
-        writer.write_option(RadioTapParser::option(RadioTap::ANTENNA, sizeof(value), &value));
+        writer.write_option(RadioTap::option(RadioTap::ANTENNA, sizeof(value), &value));
     }
     {
         const uint8_t value = (uint8_t)RadioTap::FCS;
-        writer.write_option(RadioTapParser::option(RadioTap::FLAGS, sizeof(value), &value));
+        writer.write_option(RadioTap::option(RadioTap::FLAGS, sizeof(value), &value));
     }
     {
         const uint64_t value = Endian::host_to_le<uint64_t>(616089172U);
         uint8_t buffer[sizeof(value)];
         memcpy(buffer, &value, sizeof(value));
-        writer.write_option(RadioTapParser::option(RadioTap::TSTF, sizeof(buffer), buffer));
+        writer.write_option(RadioTap::option(RadioTap::TSFT, sizeof(buffer), buffer));
     }
     {
         const uint16_t value = Endian::host_to_le<uint16_t>(0x1234);
         uint8_t buffer[sizeof(value)];
         memcpy(buffer, &value, sizeof(value));
-        writer.write_option(RadioTapParser::option(RadioTap::FHSS, sizeof(buffer), buffer));
+        writer.write_option(RadioTap::option(RadioTap::FHSS, sizeof(buffer), buffer));
     }
     {
         const uint8_t value = 0xab;
-        writer.write_option(RadioTapParser::option(RadioTap::RATE, sizeof(value), &value));
-        // We can't add the same option twice
-        EXPECT_FALSE(writer.write_option(RadioTapParser::option(RadioTap::RATE, sizeof(value),
-                                                                &value)));
+        writer.write_option(RadioTap::option(RadioTap::RATE, sizeof(value), &value));
     }
     {
         const uint8_t value = 0xf7;
-        writer.write_option(RadioTapParser::option(RadioTap::DBM_SIGNAL, sizeof(value), &value));
+        writer.write_option(RadioTap::option(RadioTap::DBM_SIGNAL, sizeof(value), &value));
     }
     {
         const uint16_t value = Endian::host_to_le<uint16_t>(0x4321);
         uint8_t buffer[sizeof(value)];
         memcpy(buffer, &value, sizeof(value));
-        writer.write_option(RadioTapParser::option(RadioTap::RX_FLAGS, sizeof(buffer), buffer));
+        writer.write_option(RadioTap::option(RadioTap::RX_FLAGS, sizeof(buffer), buffer));
     }
 
     RadioTapParser parser(buffer);
-    EXPECT_EQ(RadioTap::TSTF, parser.current_field());
+    EXPECT_EQ(RadioTap::TSFT, parser.current_field());
     EXPECT_EQ(616089172U, parser.current_option().to<uint64_t>());
     EXPECT_TRUE(parser.advance_field());
 
