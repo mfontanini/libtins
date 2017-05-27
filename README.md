@@ -49,7 +49,7 @@ _build/lib_ directory.
 
 ### C++11 support
 
-libtins is noticeable faster if you enable _C++11_ support. Therefore, 
+libtins is noticeably faster if you enable _C++11_ support. Therefore, 
 if your compiler supports this standard, then you should enable it. 
 In order to do so, use the _LIBTINS_ENABLE_CXX11_ switch:
 
