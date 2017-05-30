@@ -162,17 +162,21 @@ public:
     bool has_field(RadioTap::PresentFlags flag) const;
 private:
     const uint8_t* find_options_start() const;
-    bool advance_to_next_field(bool start_from_zero);
+    bool advance_to_first_field();
+    bool advance_to_next_field();
+    bool skip_current_field();
     bool advance_to_next_namespace();
     const RadioTapFlags* get_flags_ptr() const;
+    void load_current_flags();
     bool is_field_set(uint32_t bit, const RadioTapFlags* flags) const;
 
     const uint8_t* start_;
     const uint8_t* end_; 
     const uint8_t* current_ptr_;
-    NamespaceType current_namespace_;
-    uint32_t current_bit_;
+    uint64_t current_bit_;
+    uint32_t current_flags_;
     uint32_t namespace_index_;
+    NamespaceType current_namespace_;
 };
 
 } // Utils

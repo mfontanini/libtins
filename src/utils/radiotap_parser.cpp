@@ -27,6 +27,7 @@
  *
  */
 
+#include <iostream>
 #include "utils/radiotap_parser.h"
 #include "exceptions.h"
 
@@ -126,7 +127,7 @@ struct RadioTapFlags {
 #endif
 
 void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t size, size_t n) {
-    uint32_t offset = ((buffer - buffer_start) % n);
+    uint32_t offset = (buffer - buffer_start) & (n - 1);
     if (offset) {
         offset = n - offset;
         if (TINS_UNLIKELY(offset > size)) {
@@ -137,18 +138,22 @@ void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t 
 }
 
 RadioTapParser::RadioTapParser(const vector<uint8_t>& buffer)
-: current_namespace_(RADIOTAP_NS), current_bit_(MAX_RADIOTAP_FIELD), namespace_index_(0) {
+: current_bit_(MAX_RADIOTAP_FIELD), current_flags_(0), namespace_index_(0),
+  current_namespace_(RADIOTAP_NS) {
     if (buffer.empty()) {
         start_ = 0;
         end_ = 0;
         current_ptr_ = start_;
+        current_flags_ = 0;
     }
     else {
         start_ = &*buffer.begin();
         end_ = start_ + buffer.size();
+        load_current_flags();
+        current_bit_ = 0;
         current_ptr_ = find_options_start();
         // Skip all fields and make this point to the first flags one
-        advance_to_next_field(true /* start from bit zero */);
+        advance_to_first_field();
     }
 }
 
@@ -182,17 +187,21 @@ bool RadioTapParser::advance_field() {
         return false;
     }
     // If we manage to advance the field, return true
-    if (advance_to_next_field(false /* keep going from current */)) {
+    if (skip_current_field()) {
         return true;
     }
-    // We finished iterating the current namespace (if any). Reset our bit
-    current_bit_ = MAX_RADIOTAP_FIELD;
-    // Otherwise, let's try advancing the namespace. If we fail, then we failed
+    // Try to find the next namespace, as we've exhausted the current one
     if (!advance_to_next_namespace()) {
+        current_bit_ = MAX_RADIOTAP_FIELD;
         return false;
     }
+    current_bit_ = 0;
     // Try to find the first field in this new namespace
-    return advance_to_next_field(true /* start from 0*/);
+    if (!advance_to_first_field()) {
+        current_bit_ = MAX_RADIOTAP_FIELD;
+        return false;
+    }
+    return true;
 }
 
 bool RadioTapParser::advance_namespace() {
@@ -203,7 +212,7 @@ bool RadioTapParser::advance_namespace() {
 }
 
 RadioTap::PresentFlags RadioTapParser::namespace_flags() const {
-    uint32_t output = 0;
+    uint32_t output;
     memcpy(&output, get_flags_ptr(), sizeof(output));
     return static_cast<RadioTap::PresentFlags>(Endian::le_to_host(output));
 }
@@ -252,35 +261,38 @@ const uint8_t* RadioTapParser::find_options_start() const {
     return reinterpret_cast<const uint8_t*>(flags) + sizeof(RadioTapFlags);
 }
 
-bool RadioTapParser::advance_to_next_field(bool start_from_zero) {
-    const RadioTapFlags* flags = get_flags_ptr();
-    uint32_t bit;
-    if (start_from_zero) {
-        bit = 0;
+bool RadioTapParser::advance_to_first_field() {
+    return advance_to_next_field();
+}
+
+bool RadioTapParser::advance_to_next_field() {
+    while ((current_flags_ & 1) == 0 && current_bit_ < MAX_RADIOTAP_FIELD) {
+        current_bit_++;
+        current_flags_ >>= 1;
     }
-    else {
-        // Skip the payload
-        current_ptr_ += RADIOTAP_METADATA[current_bit_].size;
-        bit = current_bit_ + 1;
-    }
-    while (!is_field_set(1 << bit, flags) && bit < MAX_RADIOTAP_FIELD) {
-        bit++; 
-    }
-    if (bit < MAX_RADIOTAP_FIELD) {
+    if (current_bit_ < MAX_RADIOTAP_FIELD) {
         const uint8_t* radiotap_start = start_ - sizeof(uint32_t);
         // Skip and align the buffer
         align_buffer(radiotap_start, current_ptr_, end_ - radiotap_start,
-                     RADIOTAP_METADATA[bit].alignment);
-        current_bit_ = bit;
+                     RADIOTAP_METADATA[current_bit_].alignment);
         return true;
     }
     return false;
 }
 
+bool RadioTapParser::skip_current_field() {
+    // Skip the payload
+    current_ptr_ += RADIOTAP_METADATA[current_bit_].size;
+    current_flags_ >>= 1;
+    current_bit_++;
+    return advance_to_next_field();
+}
+
 bool RadioTapParser::advance_to_next_namespace() {
     const uint32_t initial_index = namespace_index_;
-    while (get_flags_ptr()->ext == 1) {
-        const RadioTapFlags* flags = get_flags_ptr();
+    load_current_flags();
+    const RadioTapFlags* flags = (const RadioTapFlags*)&current_flags_;
+    while (flags->ext == 1) {
         if (is_field_set(29, flags)) {
             current_namespace_ = RADIOTAP_NS;
         }
@@ -291,6 +303,8 @@ bool RadioTapParser::advance_to_next_namespace() {
             current_namespace_ = UNKNOWN_NS;
         }
         namespace_index_++;
+        load_current_flags();
+        flags = (const RadioTapFlags*)&current_flags_;
     }
     return initial_index != namespace_index_;
 }
@@ -307,6 +321,10 @@ bool RadioTapParser::is_field_set(uint32_t bit, const RadioTapFlags* flags) cons
 
 const RadioTapFlags* RadioTapParser::get_flags_ptr() const {
     return (const RadioTapFlags*)(start_ + sizeof(uint32_t) * namespace_index_);
+}
+
+void RadioTapParser::load_current_flags() {
+    memcpy(&current_flags_, get_flags_ptr(), sizeof(current_flags_));
 }
 
 } // Utils
