@@ -98,19 +98,19 @@ RadioTap::RadioTap(const uint8_t* buffer, uint32_t total_sz) {
     total_sz = input.size();
     RadioTapParser parser(options_payload_);
     if (parser.skip_to_field(FLAGS)) {
-        const uint8_t flags_value = parser.current_option().to<uint8_t>();
+        const uint8_t flags_value = *parser.current_option_ptr();
         if ((flags_value & FCS) != 0) {
-            if (total_sz < sizeof(uint32_t)) {
+            if (TINS_UNLIKELY(total_sz < sizeof(uint32_t))) {
                 throw malformed_packet();
             }
             total_sz -= sizeof(uint32_t);
-            if ((flags_value & FAILED_FCS) !=0) {
+            if (TINS_UNLIKELY((flags_value & FAILED_FCS) != 0)) {
                 throw malformed_packet();
             }
         }
     }
 
-    if (total_sz) {
+    if (TINS_LIKELY(total_sz)) {
         inner_pdu(Dot11::from_bytes(input.pointer(), total_sz));
     }
 }
