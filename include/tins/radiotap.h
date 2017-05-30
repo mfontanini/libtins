@@ -84,6 +84,7 @@ public:
      */
     enum PresentFlags {
         TSFT                = 1 << 0,
+        TSTF                = 1 << 0, // Deprecated (typo in the name...)
         FLAGS               = 1 << 1,
         RATE                = 1 << 2,
         CHANNEL             = 1 << 3,
