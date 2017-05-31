@@ -43,6 +43,8 @@
 #include "pktap.h"
 #include "sll.h"
 #include "ppi.h"
+#include "ip.h"
+#include "ipv6.h"
 #include "detail/pdu_helpers.h"
 
 using std::string;
@@ -118,6 +120,32 @@ void sniff_loop_eth_handler(u_char* user, const struct pcap_pkthdr* h, const u_c
     }
 }
 
+void sniff_loop_raw_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
+    TINS_BEGIN_PACK
+    struct base_ip_header {
+    #if TINS_IS_LITTLE_ENDIAN
+        uint8_t ihl:4,
+                version:4;
+    #else
+        uint8_t version:4,
+                ihl:4;
+    #endif
+    } TINS_END_PACK;
+
+    sniff_data* data = (sniff_data*)user;
+    const base_ip_header* header = (const base_ip_header*)bytes;
+    data->packet_processed = true;
+    data->tv = h->ts;
+    switch (header->version) {
+        case 4:
+            data->pdu = safe_alloc<IP>((const uint8_t*)bytes, h->caplen);
+            break;
+        case 6:
+            data->pdu = safe_alloc<IPv6>((const uint8_t*)bytes, h->caplen);
+            break;
+    };
+}
+
 #ifdef TINS_HAVE_DOT11
 void sniff_loop_dot11_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
     sniff_data* data = (sniff_data*)user;
@@ -139,39 +167,47 @@ PtrPacket BaseSniffer::next_packet() {
     if (extract_raw_) {
         handler = &sniff_loop_handler<RawPDU>;
     }
-    else if (iface_type == DLT_EN10MB) {
-        handler = sniff_loop_eth_handler;
-    }
-    else if (iface_type == DLT_IEEE802_11_RADIO) {
-        #ifdef TINS_HAVE_DOT11
-            handler = &sniff_loop_handler<RadioTap>;
-        #else
-            throw protocol_disabled();
-        #endif
-    }
-    else if (iface_type == DLT_IEEE802_11) {
-        #ifdef TINS_HAVE_DOT11
-            handler = sniff_loop_dot11_handler;
-        #else
-            throw protocol_disabled();
-        #endif
-    }
-    #ifdef DLT_PKTAP
-    else if (iface_type == DLT_PKTAP) {
-        handler = &sniff_loop_handler<PKTAP>;
-    }
-    #endif // DLT_PKTAP
-    else if (iface_type == DLT_NULL) {
-        handler = &sniff_loop_handler<Tins::Loopback>;
-    }
-    else if (iface_type == DLT_LINUX_SLL) {
-        handler = &sniff_loop_handler<SLL>;
-    }
-    else if (iface_type == DLT_PPI) {
-        handler = &sniff_loop_handler<PPI>;
-    }
     else {
-        throw unknown_link_type();
+        switch (iface_type) {
+            case DLT_EN10MB:
+                handler = &sniff_loop_eth_handler;
+                break;
+            case DLT_NULL:
+                handler = &sniff_loop_handler<Tins::Loopback>;
+                break;
+            case DLT_LINUX_SLL:
+                handler = &sniff_loop_handler<SLL>;
+                break; 
+            case DLT_PPI:
+                handler = &sniff_loop_handler<PPI>;
+                break;
+            case DLT_RAW:
+                handler = &sniff_loop_raw_handler;
+                break;
+
+            // Dot11 related protocols
+            #ifdef TINS_HAVE_DOT11
+            case DLT_IEEE802_11_RADIO:
+                handler = &sniff_loop_handler<RadioTap>;
+                break;
+            case DLT_IEEE802_11:
+                handler = &sniff_loop_dot11_handler;
+                break;
+            #else
+            case DLT_IEEE802_11_RADIO:
+            case DLT_IEEE802_11:
+                throw protocol_disabled();
+            #endif // TINS_HAVE_DOT11
+
+            #ifdef DLT_PKTAP
+            case DLT_PKTAP:
+                handler = &sniff_loop_handler<PKTAP>;
+                break;
+            #endif // DLT_PKTAP
+
+            default:
+                throw unknown_link_type();
+        }
     }
     // keep calling pcap_loop until a well-formed packet is found.
     while (data.pdu == 0 && data.packet_processed) {
