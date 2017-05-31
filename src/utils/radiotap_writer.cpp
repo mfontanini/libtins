@@ -74,7 +74,7 @@ void RadioTapWriter::write_option(const RadioTap::option& option) {
         }
         parser.advance_field();
     }
-    size_t offset = candidate_ptr - &*buffer_.begin();
+    size_t offset = is_empty ? 0 : candidate_ptr - &*buffer_.begin();
     const RadioTapParser::FieldMetadata& meta = RadioTapParser::RADIOTAP_METADATA[bit];
 
     vector<uint8_t> paddings = build_padding_vector(candidate_ptr, parser);
