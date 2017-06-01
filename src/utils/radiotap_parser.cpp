@@ -290,8 +290,7 @@ bool RadioTapParser::skip_current_field() {
 
 bool RadioTapParser::advance_to_next_namespace() {
     const uint32_t initial_index = namespace_index_;
-    load_current_flags();
-    const RadioTapFlags* flags = (const RadioTapFlags*)&current_flags_;
+    const RadioTapFlags* flags = get_flags_ptr();
     while (flags->ext == 1) {
         if (is_field_set(29, flags)) {
             current_namespace_ = RADIOTAP_NS;
@@ -303,9 +302,9 @@ bool RadioTapParser::advance_to_next_namespace() {
             current_namespace_ = UNKNOWN_NS;
         }
         namespace_index_++;
-        load_current_flags();
-        flags = (const RadioTapFlags*)&current_flags_;
+        flags++;
     }
+    load_current_flags();
     return initial_index != namespace_index_;
 }
 
@@ -325,6 +324,7 @@ const RadioTapFlags* RadioTapParser::get_flags_ptr() const {
 
 void RadioTapParser::load_current_flags() {
     memcpy(&current_flags_, get_flags_ptr(), sizeof(current_flags_));
+    current_flags_ = Endian::le_to_host(current_flags_);
 }
 
 } // Utils
