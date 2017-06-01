@@ -192,10 +192,6 @@ TEST_F(IPv6Test, Serialize) {
 
 TEST_F(IPv6Test, Broken1) {
     EthernetII pkt(broken1, sizeof(broken1));
-    for (auto c : pkt.serialize()) {
-        printf("%2d, ", (int)c);
-    }
-    printf("\n");
     EXPECT_EQ(
         PDU::serialization_type(broken1, broken1 + sizeof(broken1)),
         pkt.serialize()
