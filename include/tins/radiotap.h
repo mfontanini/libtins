@@ -84,7 +84,7 @@ public:
      */
     enum PresentFlags {
         TSFT                = 1 << 0,
-        TSTF                = 1 << 0, // Deprecated (typo in the name...)
+        TSTF                = 1 << 0, ///< Deprecated (typo), use TSFT
         FLAGS               = 1 << 1,
         RATE                = 1 << 2,
         CHANNEL             = 1 << 3,
@@ -101,6 +101,7 @@ public:
         RX_FLAGS            = 1 << 14,
         TX_FLAGS            = 1 << 15,
         DATA_RETRIES        = 1 << 17,
+        XCHANNEL            = 1 << 18,
         CHANNEL_PLUS        = 1 << 18,
         MCS                 = 1 << 19
     };
@@ -127,6 +128,17 @@ public:
         uint8_t known;
         uint8_t flags;
         uint8_t mcs;
+    } TINS_END_PACK;
+
+    /**
+     * \brief The type used to represent the XChannel field
+     */
+    TINS_BEGIN_PACK
+    struct xchannel_type {
+        uint32_t flags;
+        uint16_t frequency;
+        uint8_t channel;
+        uint8_t max_power;
     } TINS_END_PACK;
     
     /**
@@ -251,6 +263,12 @@ public:
     void tx_flags(uint16_t new_tx_flag);
 
     /**
+     * \brief Setter for the xchannel field.
+     * \param new_xchannel The xchannel field
+     */
+    void xchannel(xchannel_type new_xchannel);
+
+    /**
      * \brief Setter for the data retries field.
      * \param new_rx_flag The data retries.
      */
@@ -343,10 +361,10 @@ public:
     uint8_t db_signal() const;
     
     /**
-     * \brief Getter for the channel+ field.
-     * \return The channel+ field.
+     * \brief Getter for the XChannel field.
+     * \return The XChannel field.
      */
-    uint32_t channel_plus() const;
+    xchannel_type xchannel() const;
     
     /**
      * \brief Getter for the data retries field

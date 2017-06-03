@@ -180,6 +180,14 @@ void RadioTap::tx_flags(uint16_t new_tx_flags) {
     add_integral_option(*this, TX_FLAGS, new_tx_flags);
 }
 
+void RadioTap::xchannel(xchannel_type new_xchannel) {
+    uint8_t buffer[sizeof(new_xchannel)];
+    new_xchannel.flags = Endian::host_to_le(new_xchannel.flags);
+    new_xchannel.frequency = Endian::host_to_le(new_xchannel.frequency);
+    memcpy(buffer, &new_xchannel, sizeof(new_xchannel));
+    add_option(RadioTap::option(XCHANNEL, sizeof(buffer), buffer));
+}
+
 void RadioTap::mcs(const mcs_type& new_mcs) {
     uint8_t buffer[sizeof(new_mcs)];
     memcpy(buffer, &new_mcs, sizeof(new_mcs));
@@ -279,7 +287,7 @@ uint8_t RadioTap::antenna() const {
 RadioTap::mcs_type RadioTap::mcs() const {
     const option opt = do_find_option(MCS);
     mcs_type output;
-    memcpy(&output, opt.data_ptr(), sizeof(mcs_type));
+    memcpy(&output, opt.data_ptr(), sizeof(output));
     return output;
 }
 
@@ -287,13 +295,13 @@ uint8_t RadioTap::db_signal() const {
     return do_find_option(DB_SIGNAL).to<uint8_t>();
 }
 
-uint32_t RadioTap::channel_plus() const {
-    /*if (!header_.flags.channel_plus) {
-        throw field_not_present();
-    }
-    return Endian::le_to_host<uint32_t>(channel_type_);*/
-    // TODO: wat
-    return 0xdadedade;
+RadioTap::xchannel_type RadioTap::xchannel() const {
+    const option opt = do_find_option(XCHANNEL);
+    xchannel_type output;
+    memcpy(&output, opt.data_ptr(), sizeof(output));
+    output.flags = Endian::le_to_host(output.flags);
+    output.frequency = Endian::le_to_host(output.frequency);
+    return output;
 }
 
 uint16_t RadioTap::rx_flags() const {
@@ -355,19 +363,6 @@ void RadioTap::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     header_.it_len = Endian::host_to_le<uint16_t>(header_size());
     stream.write(header_);
     stream.write(options_payload_.begin(), options_payload_.end());
-    /*if (header_.flags.channel_plus) {
-        const uint32_t padding = ((stream.pointer() - buffer_start) % 4);
-        if (padding != 0) {
-            stream.fill(4 - padding, 0);
-        }
-        uint32_t dummy = channel_type_;
-        // nasty Big Endian fix
-        dummy = Endian::le_to_host<uint32_t>(Endian::host_to_le<uint16_t>(dummy));
-        stream.write(dummy);
-        stream.write(channel_freq_);
-        stream.write(channel_);
-        stream.write(max_power_);
-    }*/
 
     // If we have a trailer size, then we have the FCS flag on
     if (trailer_size() > 0 && inner_pdu()) {
