@@ -346,7 +346,7 @@ TEST_F(RadioTapTest, ConstructorFromBuffer) {
     EXPECT_TRUE((radio.present() & RadioTap::RATE) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::DBM_SIGNAL) != 0);
     EXPECT_TRUE((radio.present() & RadioTap::ANTENNA) != 0);
-    EXPECT_TRUE((radio.present() & RadioTap::CHANNEL_PLUS) != 0);
+    EXPECT_TRUE((radio.present() & RadioTap::XCHANNEL) != 0);
     
     EXPECT_TRUE((radio.flags() & RadioTap::FCS) != 0);
     EXPECT_THROW(radio.channel_type(), field_not_present);
@@ -507,6 +507,22 @@ TEST_F(RadioTapTest, TSFT) {
     EXPECT_EQ(radio.tsft(), 0x7afb9a8dU);
 }
 
+TEST_F(RadioTapTest, XChannel) {
+    RadioTap radio;
+    RadioTap::xchannel_type xchannel;
+    xchannel.flags = 0xabcd1234;
+    xchannel.frequency = 0xda21;
+    xchannel.max_power = 0x19;
+    xchannel.channel = 0x99;
+    radio.xchannel(xchannel);
+
+    RadioTap::xchannel_type found_xchannel = radio.xchannel();
+    EXPECT_EQ(xchannel.flags, found_xchannel.flags);
+    EXPECT_EQ(xchannel.frequency, found_xchannel.frequency);
+    EXPECT_EQ(xchannel.max_power, found_xchannel.max_power);
+    EXPECT_EQ(xchannel.channel, found_xchannel.channel);
+}
+
 TEST_F(RadioTapTest, SerializationWorksFine) {
     const uint8_t expected[] = {
         0, 0, 26, 0, 43, 72, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 108,
@@ -555,7 +571,7 @@ TEST_F(RadioTapTest, RadioTapParsing) {
     EXPECT_EQ(2, parser.current_option().to<uint8_t>());
     EXPECT_TRUE(parser.advance_field());
     
-    EXPECT_EQ(RadioTap::CHANNEL_PLUS,parser.current_field());
+    EXPECT_EQ(RadioTap::XCHANNEL,parser.current_field());
     EXPECT_EQ(0x1124143c00000140ULL, parser.current_option().to<uint64_t>());
 
     EXPECT_FALSE(parser.advance_field());
