@@ -217,6 +217,10 @@ void RadioTap::add_option(const option& opt) {
     writer.write_option(opt);
 }
 
+const RadioTap::options_payload_type& RadioTap::options_payload() const {
+    return options_payload_;
+}
+
 // Getter for RadioTap fields
 uint8_t RadioTap::version() const {
     return header_.it_version;

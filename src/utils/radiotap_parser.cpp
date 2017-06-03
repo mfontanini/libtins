@@ -57,6 +57,8 @@ const RadioTapParser::FieldMetadata RadioTapParser::RADIOTAP_METADATA[] = {
     { 1, 1 }, // DATA_RETRIES
     { 8, 4 }, // CHANNEL_PLUS
     { 3, 1 }, // MCS
+    { 8, 4 }, // A-MPDU status
+    { 12, 2 } // VHT
 };
 
 const uint32_t RadioTapParser::MAX_RADIOTAP_FIELD = sizeof(RADIOTAP_METADATA) /

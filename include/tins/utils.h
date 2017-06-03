@@ -35,6 +35,8 @@
 #include "utils/routing_utils.h"
 #include "utils/resolve_utils.h"
 #include "utils/pdu_utils.h"
+#include "utils/radiotap_parser.h"
+#include "utils/radiotap_writer.h"
  
 namespace Tins {
 

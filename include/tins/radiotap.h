@@ -135,6 +135,11 @@ public:
     typedef PDUOption<RadioTap::PresentFlags, RadioTap> option;
 
     /**
+     * The type used to store the options payload
+     */
+    typedef std::vector<uint8_t> options_payload_type;
+
+    /**
      * \brief Default constructor.
      */
     RadioTap();
@@ -408,6 +413,15 @@ public:
     void add_option(const option& opt);
 
     /**
+     * \brief Gets the options payload
+     *
+     * Use Utils::RadioTapParser to iterate these options and extract fields manually,
+     * in case you want to have deeper access into the option types/values stored in 
+     * a RadioTap frame.
+     */
+    const options_payload_type& options_payload() const;
+
+    /**
      * \sa PDU::clone
      */
     RadioTap* clone() const {
@@ -438,7 +452,7 @@ private:
     option do_find_option(PresentFlags type) const;
 
     radiotap_header header_;
-    std::vector<uint8_t> options_payload_;
+    options_payload_type options_payload_;
 };
 }
 
