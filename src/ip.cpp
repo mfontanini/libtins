@@ -121,6 +121,13 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz) {
         }
     }
     if (stream) {
+        // Check for zero-padding for padded packets
+        if (total_sz < 60 && std::all_of(stream.pointer(),
+                                         stream.pointer() + stream.size(),
+                                         [](uint8_t x) { return x == 0; })) {
+            return;
+        }
+
         // Don't avoid consuming more than we should if tot_len is 0,
         // since this is the case when using TCP segmentation offload
         if (tot_len() != 0) {
