@@ -34,12 +34,15 @@
 #include "hw_address.h"
 #include "endianness.h"
 #include "pdu_option.h"
+#include "memory_helpers.h"
 
 using std::vector;
 using std::pair;
 using std::string;
 using std::memcpy;
 using std::distance;
+
+using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
 namespace Internals {
@@ -61,21 +64,21 @@ T convert_to_integral(const uint8_t* ptr, uint32_t data_size, PDU::endian_type e
 }
 
 template<typename T>
-vector<T> convert_vector(const uint8_t* u8_ptr, uint32_t data_size, PDU::endian_type endian) {
+vector<T> convert_vector(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian) {
     if (data_size % sizeof(T) != 0) {
         throw malformed_option();
     }
-    const T* ptr = (const T*)u8_ptr;
-    const T* end = (const T*)(ptr + data_size / sizeof(T));
+    InputMemoryStream input(ptr, data_size);
 
-    vector<T> output(distance(ptr, end));
+    vector<T> output(data_size / sizeof(T));
     typename vector<T>::iterator it = output.begin();
-    while (ptr < end) {
+    while (input) {
+        const T value = input.read<T>();
         if (endian == PDU::BE) {
-            *it++ = Endian::be_to_host(*ptr++);
+            *it++ = Endian::be_to_host(value);
         }
         else {
-            *it++ = Endian::le_to_host(*ptr++);
+            *it++ = Endian::le_to_host(value);
         }
     }
     return output;
@@ -88,14 +91,14 @@ convert_vector(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian) 
     if (data_size % (sizeof(T) + sizeof(U)) != 0) {
         throw malformed_option();
     }
-    const uint8_t* end = ptr + data_size;
+    InputMemoryStream input(ptr, data_size);
 
     std::vector<std::pair<T, U> > output;
-    while (ptr < end) {
+    while (input) {
         pair<T, U> data;
-        data.first = *(const T*)ptr;
+        data.first = input.read<T>();
         ptr += sizeof(T);
-        data.second = *(const U*)ptr;
+        data.second = input.read<U>();
         ptr += sizeof(U);
         if (endian == PDU::BE) {
             data.first = Endian::be_to_host(data.first);
@@ -117,9 +120,10 @@ convert_pair(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian) {
     if (data_size != sizeof(T) + sizeof(U)) {
         throw malformed_option();
     }
+    InputMemoryStream input(ptr, data_size);
     pair<T, U> output;
-    memcpy(&output.first, ptr, sizeof(T));
-    memcpy(&output.second, ptr + sizeof(T), sizeof(U));
+    output.first = input.read<T>();
+    output.second = input.read<U>();
     if (endian == PDU::BE) {
         output.first = Endian::be_to_host(output.first);
         output.second = Endian::be_to_host(output.second);
@@ -169,17 +173,18 @@ HWAddress<6> convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type,
     return HWAddress<6>(ptr);
 }
 
-IPv4Address convert(const uint8_t* u8_ptr, uint32_t data_size, PDU::endian_type endian,
+IPv4Address convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
                     type_to_type<IPv4Address>) {
     if (data_size != sizeof(uint32_t)) {
         throw malformed_option();
     }
-    const uint32_t* ptr = (const uint32_t*)u8_ptr;
+    InputMemoryStream input(ptr, data_size);
+    const uint32_t ip_int = input.read<uint32_t>();
     if (endian == PDU::BE) {
-        return IPv4Address(*ptr);
+        return IPv4Address(ip_int);
     }
     else {
-        return IPv4Address(Endian::change_endian(*ptr));
+        return IPv4Address(Endian::change_endian(ip_int));
     }
 }
 
@@ -221,22 +226,22 @@ vector<uint32_t> convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_typ
     return convert_vector<uint32_t>(ptr, data_size, endian);
 }
 
-vector<IPv4Address> convert(const uint8_t* u8_ptr, uint32_t data_size, PDU::endian_type endian,
+vector<IPv4Address> convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian,
                             type_to_type<vector<IPv4Address> >) {
     if (data_size % 4 != 0) {
         throw malformed_option();
     }
-    const uint32_t* ptr = (const uint32_t*)u8_ptr;
-    const uint32_t* end = (const uint32_t*)(ptr + data_size / sizeof(uint32_t));
 
-    vector<IPv4Address> output(distance(ptr, end));
+    InputMemoryStream input(ptr, data_size);
+    vector<IPv4Address> output(data_size / sizeof(uint32_t));
     vector<IPv4Address>::iterator it = output.begin();
-    while (ptr < end) {
+    while (input) {
+        const uint32_t ip_int = input.read<uint32_t>();
         if (endian == PDU::BE) {
-            *it++ = IPv4Address(*ptr++);
+            *it++ = IPv4Address(ip_int);
         }
         else {
-            *it++ = IPv4Address(Endian::change_endian(*ptr++));
+            *it++ = IPv4Address(Endian::change_endian(ip_int));
         }
     }
     return output;
