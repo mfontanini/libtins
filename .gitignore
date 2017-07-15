@@ -1,2 +1,4 @@
 build/**
 include/tins/config.h
+__pycache__
+*.pyc
