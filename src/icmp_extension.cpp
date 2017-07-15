@@ -53,7 +53,6 @@ ICMPExtension::ICMPExtension(uint8_t ext_class, uint8_t ext_type)
 
 }
 
-
 ICMPExtension::ICMPExtension(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
 
@@ -138,10 +137,11 @@ bool ICMPExtensionsStructure::validate_extensions(const uint8_t* buffer, uint32_
     if (total_sz < BASE_HEADER_SIZE) {
         return false;
     }
-    uint16_t checksum = *(const uint16_t*)(buffer + sizeof(uint16_t));
+    InputMemoryStream input(buffer, total_sz);
     // The buffer is read only, so we can't set the initial checksum to 0. Therefore, 
     // we sum the first 2 bytes and then the payload
-    uint32_t actual_checksum = *(const uint16_t*)buffer;
+    uint32_t actual_checksum = input.read<uint16_t>();
+    uint16_t checksum = input.read<uint16_t>();
     buffer += BASE_HEADER_SIZE;
     total_sz -= BASE_HEADER_SIZE;
     // Now do the checksum over the payload

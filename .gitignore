@@ -1,3 +1,8 @@
 build/**
 include/tins/config.h
+<<<<<<< HEAD
 __pycache__
+=======
+__pycache__
+*.pyc
+>>>>>>> develop
