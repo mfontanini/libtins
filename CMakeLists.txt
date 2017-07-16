@@ -1,6 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.1)
 PROJECT(libtins)
 
+<<<<<<< HEAD
+=======
+# Load Conan setup after Conan install
+IF(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    INCLUDE(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    CONAN_BASIC_SETUP()
+ENDIF(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+
+>>>>>>> develop
 OPTION(LIBTINS_BUILD_EXAMPLES "Build examples" ON)
 OPTION(LIBTINS_BUILD_TESTS "Build tests" ON)
 

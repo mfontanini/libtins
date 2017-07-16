@@ -41,7 +41,6 @@ using std::pair;
 using std::string;
 using std::memcpy;
 using std::distance;
-
 using Tins::Memory::InputMemoryStream;
 
 namespace Tins {
@@ -231,7 +230,6 @@ vector<IPv4Address> convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_
     if (data_size % 4 != 0) {
         throw malformed_option();
     }
-
     InputMemoryStream input(ptr, data_size);
     vector<IPv4Address> output(data_size / sizeof(uint32_t));
     vector<IPv4Address>::iterator it = output.begin();
