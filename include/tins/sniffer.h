@@ -45,6 +45,7 @@
 
 #include <pcap.h>
 
+
 namespace Tins {
 class SnifferIterator;
 class SnifferConfiguration;
@@ -72,7 +73,8 @@ public:
          * This constructor is available only in C++11.
          */
         BaseSniffer(BaseSniffer &&rhs) TINS_NOEXCEPT
-        : handle_(0), mask_(), extract_raw_(false) {
+        : handle_(0), mask_(), extract_raw_(false),
+          pcap_sniffing_method_(pcap_loop) {
             *this = std::move(rhs);
         }
 
@@ -85,6 +87,7 @@ public:
             swap(handle_, rhs.handle_);
             swap(mask_, rhs.mask_);
             swap(extract_raw_, rhs.extract_raw_);
+            swap(pcap_sniffing_method_, rhs.pcap_sniffing_method_);
             return* this;
         }
     #endif
@@ -238,6 +241,35 @@ public:
     void set_extract_raw_pdus(bool value);
 
     /**
+     * \brief function pointer for the sniffing method
+     *
+     * By default, libtins uses `pcap_loop` to sniff packets. With
+     * `set_pcap_sniffing_method` it is possible to specify an alternative
+     * sniffing method, for example `pcap_dispatch`, or a custom function.
+     * This function pointer has the same interface as `pcap_loop` and
+     * `pcap_dispatch`.
+     *
+     * \sa set_pcap_sniffing_method
+     */
+    typedef int(*PcapSniffingMethod)(pcap_t*, int, pcap_handler, u_char*);
+
+    /**
+     * \brief set sniffing method to either pcap_loop or pcap_dispatch.
+     *
+     * By default, packets are sniffed with `pcap_loop`, which only returns if
+     * a packet is received, thus ignoring timeout expiration, if any is set.
+     * With this method it is possible to pass an alternative sniffer function,
+     * e.g. `pcap_dispatch`, that honors timeouts, or a custom function with
+     * the same signature.
+     *
+     * See the relevant manual pages for pcap_loop and pcap_dispatch for more
+     * information on their behavior
+     *
+     * \sa PcapSniffingMethod
+     */
+    void set_pcap_sniffing_method(PcapSniffingMethod method);
+
+    /**
      * \brief Retrieves this sniffer's link type.
      *
      * This calls pcap_datalink on the stored pcap handle and
@@ -282,6 +314,7 @@ private:
     pcap_t* handle_;
     bpf_u_int32 mask_;
     bool extract_raw_;
+    PcapSniffingMethod pcap_sniffing_method_;
 };
 
 /**
@@ -568,6 +601,12 @@ public:
     void set_filter(const std::string& filter);
 
     /**
+     * Sets the pcap sniffing method to use.
+     * \param method The sniffing method to be used.
+     */
+    void set_pcap_sniffing_method(BaseSniffer::PcapSniffingMethod method);
+
+    /**
      * Sets the rfmon option.
      * \param enabled The rfmon option value.
      */
@@ -608,6 +647,7 @@ protected:
         IMMEDIATE_MODE = 16,
         DIRECTION = 32,
         TIMESTAMP_PRECISION = 64,
+        PCAP_SNIFFING_METHOD = 128,
     };
 
     void configure_sniffer_pre_activation(Sniffer& sniffer) const;
@@ -619,6 +659,7 @@ protected:
     unsigned snap_len_;
     unsigned buffer_size_;
     std::string filter_;
+    BaseSniffer::PcapSniffingMethod pcap_sniffing_method_;
     unsigned timeout_;
     bool promisc_;
     bool rfmon_;
