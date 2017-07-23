@@ -97,9 +97,7 @@ convert_vector(const uint8_t* ptr, uint32_t data_size, PDU::endian_type endian) 
     while (input) {
         pair<T, U> data;
         data.first = input.read<T>();
-        ptr += sizeof(T);
         data.second = input.read<U>();
-        ptr += sizeof(U);
         if (endian == PDU::BE) {
             data.first = Endian::be_to_host(data.first);
             data.second = Endian::be_to_host(data.second);
@@ -231,7 +229,6 @@ vector<IPv4Address> convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_
     if (data_size % 4 != 0) {
         throw malformed_option();
     }
-
     InputMemoryStream input(ptr, data_size);
     vector<IPv4Address> output(data_size / sizeof(uint32_t));
     vector<IPv4Address>::iterator it = output.begin();

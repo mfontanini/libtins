@@ -212,7 +212,7 @@ PtrPacket BaseSniffer::next_packet() {
     // keep calling pcap_loop until a well-formed packet is found.
     while (data.pdu == 0 && data.packet_processed) {
         data.packet_processed = false;
-        if (pcap_loop(handle_, 1, handler, (u_char*)&data) < 0) {
+        if (pcap_sniffing_method_(handle_, 1, handler, (u_char*)&data) < 0) {
             return PtrPacket(0, Timestamp());
         }
     }
@@ -221,6 +221,13 @@ PtrPacket BaseSniffer::next_packet() {
 
 void BaseSniffer::set_extract_raw_pdus(bool value) {
     extract_raw_ = value;
+}
+
+void BaseSniffer::set_pcap_sniffing_method(PcapSniffingMethod method) {
+    if (method == nullptr) {
+        throw std::runtime_error("Sniffing method cannot be null");
+    }
+    pcap_sniffing_method_ = method;
 }
 
 void BaseSniffer::stop_sniff() {
@@ -419,8 +426,9 @@ const unsigned SnifferConfiguration::DEFAULT_SNAP_LEN = 65535;
 const unsigned SnifferConfiguration::DEFAULT_TIMEOUT = 1000;
 
 SnifferConfiguration::SnifferConfiguration()
-: flags_(0), snap_len_(DEFAULT_SNAP_LEN), buffer_size_(0), timeout_(DEFAULT_TIMEOUT),
-  promisc_(false), rfmon_(false), immediate_mode_(false), direction_(PCAP_D_INOUT),
+: flags_(0), snap_len_(DEFAULT_SNAP_LEN), buffer_size_(0),
+  pcap_sniffing_method_(pcap_loop), timeout_(DEFAULT_TIMEOUT), promisc_(false),
+  rfmon_(false), immediate_mode_(false), direction_(PCAP_D_INOUT),
   timestamp_precision_(0) {
 
 }
@@ -428,6 +436,7 @@ SnifferConfiguration::SnifferConfiguration()
 void SnifferConfiguration::configure_sniffer_pre_activation(Sniffer& sniffer) const {
     sniffer.set_snap_len(snap_len_);
     sniffer.set_timeout(timeout_);
+    sniffer.set_pcap_sniffing_method(pcap_sniffing_method_);
     if ((flags_ & BUFFER_SIZE) != 0) {
         sniffer.set_buffer_size(buffer_size_);
     }
@@ -486,6 +495,11 @@ void SnifferConfiguration::set_promisc_mode(bool enabled) {
 void SnifferConfiguration::set_filter(const string& filter) {
     flags_ |= PACKET_FILTER;
     filter_ = filter;
+}
+
+void SnifferConfiguration::set_pcap_sniffing_method(BaseSniffer::PcapSniffingMethod method) {
+    flags_ |= PCAP_SNIFFING_METHOD;
+    pcap_sniffing_method_ = method;
 }
 
 void SnifferConfiguration::set_rfmon(bool enabled) {
