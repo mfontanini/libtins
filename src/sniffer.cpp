@@ -460,6 +460,7 @@ void SnifferConfiguration::configure_sniffer_pre_activation(FileSniffer& sniffer
             throw invalid_pcap_filter(pcap_geterr(sniffer.get_pcap_handle()));
         }
     }
+    sniffer.set_pcap_sniffing_method(pcap_sniffing_method_);
 }
 
 void SnifferConfiguration::configure_sniffer_post_activation(Sniffer& sniffer) const {
