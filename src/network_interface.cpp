@@ -78,6 +78,7 @@ struct InterfaceInfoCollector {
         using Tins::IPv4Address;
         #if defined(BSD) || defined(__FreeBSD_kernel__)
             #define TINS_BROADCAST_ADDR(addr) (addr->ifa_dstaddr)
+            #define TINS_BROADCAST_FLAGS (IFF_BROADCAST | IFF_POINTOPOINT)
             const struct sockaddr_dl* addr_ptr = ((struct sockaddr_dl*)addr->ifa_addr);
             
             if (addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id) {
@@ -87,6 +88,7 @@ struct InterfaceInfoCollector {
             }
         #else
             #define TINS_BROADCAST_ADDR(addr) (addr->ifa_broadaddr)
+            #define TINS_BROADCAST_FLAGS (IFF_BROADCAST)
             const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
             
             if (!addr->ifa_addr) {
@@ -102,7 +104,7 @@ struct InterfaceInfoCollector {
                 if (addr->ifa_addr->sa_family == AF_INET) {
                     info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
                     info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
-                    if ((addr->ifa_flags & (IFF_BROADCAST | IFF_POINTOPOINT))) {
+                    if ((addr->ifa_flags & (TINS_BROADCAST_FLAGS))) {
                         info->bcast_addr = IPv4Address(
                             ((struct sockaddr_in *)TINS_BROADCAST_ADDR(addr))->sin_addr.s_addr);
                     }
@@ -134,6 +136,7 @@ struct InterfaceInfoCollector {
                 }
             }
         #undef TINS_BROADCAST_ADDR
+        #undef TINS_BROADCAST_FLAGS
         return found_ip && found_hw;
     }
     #else // _WIN32
