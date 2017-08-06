@@ -203,7 +203,7 @@ public:
      * \param addr The parameter to be written.
      * \return std::ostream& pointing to the os parameter.
      */
-    friend std::ostream& operator<<(std::ostream& os, const IPv6Address& addr);
+    TINS_API friend std::ostream& operator<<(std::ostream& os, const IPv6Address& addr);
 
     /**
      * Applies a mask to an address
@@ -222,7 +222,7 @@ private:
 namespace std {
 
 template<>
-struct hash<Tins::IPv6Address> {
+TINS_API struct hash<Tins::IPv6Address> {
     size_t operator()(const Tins::IPv6Address& addr) const;
 };
 

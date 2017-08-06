@@ -35,6 +35,7 @@
 #include <string>
 #include <cstring>
 #include "cxxstd.h"
+#include "macros.h"
 #if TINS_IS_CXX11
     // std::hash
     #include <memory>
@@ -47,15 +48,16 @@ namespace Internals {
 /**
  * \cond
  */
-std::string hw_address_to_string(const uint8_t* ptr, size_t count);
+TINS_API std::string hw_address_to_string(const uint8_t* ptr, size_t count);
 
-void string_to_hw_address(const std::string& hw_addr, uint8_t* output, size_t output_size);
+TINS_API void string_to_hw_address(const std::string& hw_addr, uint8_t* output,
+                                   size_t output_size);
 
-bool hw_address_equal_compare(const uint8_t* start1, const uint8_t* end1,
-                              const uint8_t* start2);
+TINS_API bool hw_address_equal_compare(const uint8_t* start1, const uint8_t* end1,
+                                      const uint8_t* start2);
 
-bool hw_address_lt_compare(const uint8_t* start1, const uint8_t* end1,
-                           const uint8_t* start2, const uint8_t* end2);
+TINS_API bool hw_address_lt_compare(const uint8_t* start1, const uint8_t* end1,
+                                    const uint8_t* start2, const uint8_t* end2);
 
 /**
  * \endcond

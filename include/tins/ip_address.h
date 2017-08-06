@@ -204,7 +204,7 @@ private:
 namespace std {
 
 template<>
-struct hash<Tins::IPv4Address> {
+TINS_API struct hash<Tins::IPv4Address> {
     size_t operator()(const Tins::IPv4Address& addr) const;
 };
 
