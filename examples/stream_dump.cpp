@@ -94,6 +94,7 @@ string stream_identifier(const Stream& stream) {
 void on_client_data(Stream& stream) {
     // Construct a string out of the contents of the client's payload
     string data(stream.client_payload().begin(), stream.client_payload().end());
+
     // Now print it, prepending some information about the stream
     cout << client_endpoint(stream) << " >> " 
          << server_endpoint(stream) << ": " << endl << data << endl;
@@ -114,13 +115,34 @@ void on_connection_closed(Stream& stream) {
 
 // When a new connection is captured, this callback will be executed.
 void on_new_connection(Stream& stream) {
-    // Print some information about the new connection
-    cout << "[+] New connection " << stream_identifier(stream) << endl;
+    if (stream.is_partial_stream()) {
+        // We found a partial stream. This means this connection/stream had
+        // been established before we started capturing traffic.
+        //
+        // In this case, we need to allow for the stream to catch up, as we
+        // may have just captured an out of order packet and if we keep waiting
+        // for the holes to be filled, we may end up waiting forever.
+        //
+        // Calling enable_recovery_mode will skip out of order packets that
+        // fall withing the range of the given window size.
+        // See Stream::enable_recover_mode for more information
+        cout << "[+] New connection " << stream_identifier(stream) << endl;
+
+        // Enable recovery mode using a window of 10kb
+        stream.enable_recovery_mode(10 * 1024);
+    }
+    else {
+        // Print some information about the new connection
+        cout << "[+] New connection " << stream_identifier(stream) << endl;
+    }
+
     // Now configure the callbacks on it.
     // First, we want on_client_data to be called every time there's new client data
     stream.client_data_callback(&on_client_data);
+
     // Same thing for server data, but calling on_server_data
     stream.server_data_callback(&on_server_data);
+
     // When the connection is closed, call on_connection_closed
     stream.stream_closed_callback(&on_connection_closed);
 }
@@ -134,8 +156,10 @@ int main(int argc, char* argv[]) {
     try {
         // Construct the sniffer configuration object
         SnifferConfiguration config;
+
         // Only capture TCP traffic sent from/to the given port
         config.set_filter("tcp port " + to_string(stoi(string(argv[2]))));
+
         // Construct the sniffer we'll use
         Sniffer sniffer(argv[1], config);
 
@@ -143,11 +167,17 @@ int main(int argc, char* argv[]) {
 
         // Now construct the stream follower
         StreamFollower follower;
+
         // We just need to specify the callback to be executed when a new 
         // stream is captured. In this stream, you should define which callbacks
         // will be executed whenever new data is sent on that stream 
         // (see on_new_connection)
         follower.new_stream_callback(&on_new_connection);
+
+        // Allow following partial TCP streams (e.g. streams that were
+        // open before the sniffer started running)
+        follower.follow_partial_streams(true);
+
         // Now start capturing. Every time there's a new packet, call 
         // follower.process_packet
         sniffer.sniff_loop([&](PDU& packet) {

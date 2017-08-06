@@ -55,6 +55,9 @@ namespace TCPIP {
  * being open, it starts tracking it. This will follow all data sent by
  * each peer and make it available to the user in a simple way.
  *
+ * It is also possible to allow following already open connections by
+ * calling StreamFollower::follow_partial_streams.
+ *
  * In order to use this class, just create an instance and set the 
  * new stream callback to some function that you want:
  *
@@ -199,6 +202,7 @@ public:
      * Stream::is_partial_stream is true).
      *
      * \param value Whether following partial stream is allowed.
+     * \sa Stream::enable_recovery_mode
      */
     void follow_partial_streams(bool value);
 private:
