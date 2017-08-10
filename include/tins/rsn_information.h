@@ -50,18 +50,36 @@ public:
      * \brief Enum that represents the different cypher suites.
      */
     enum CypherSuites {
-        WEP_40  = 0x01ac0f00,
-        TKIP    = 0x02ac0f00,
-        CCMP    = 0x04ac0f00,
-        WEP_104 = 0x05ac0f00
+        WEP_40          = 0x01ac0f00,
+        TKIP            = 0x02ac0f00,
+        CCMP            = 0x04ac0f00,
+        WEP_104         = 0x05ac0f00,
+        BIP_CMAC_128    = 0x06ac0f00,
+        GCMP_128        = 0x08ac0f00,
+        GCMP_256        = 0x09ac0f00,
+        CCMP_256        = 0x10ac0f00,
+        BIP_GMAC_128    = 0x11ac0f00,
+        BIP_GMAC_256    = 0x12ac0f00,
+        BIP_CMAC_256    = 0x13ac0f00
     };
 
     /**
      * \brief Enum that represents the different akm suites.
      */
     enum AKMSuites {
-        PMKSA = 0x01ac0f00,
-        PSK   = 0x02ac0f00
+        EAP                 = 0x01ac0f00,
+        PSK                 = 0x02ac0f00,
+        EAP_FT              = 0x03ac0f00,
+        PSK_FT              = 0x04ac0f00,
+        EAP_SHA256          = 0x05ac0f00,
+        PSK_SHA256          = 0x06ac0f00,
+        TDLS                = 0x07ac0f00,
+        SAE_SHA256          = 0x08ac0f00,
+        SAE_FT              = 0x09ac0f00,
+        APPEERKEY           = 0x10ac0f00,
+        EAP_SHA256_FIPSB    = 0x11ac0f00,
+        EAP_SHA384_FIPSB    = 0x12ac0f00,
+        EAP_SHA384          = 0x13ac0f00
     };
 
     /**
