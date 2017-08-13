@@ -94,15 +94,16 @@ uint32_t Loopback::header_size() const {
 
 void Loopback::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
-    #ifndef _WIN32
     if (tins_cast<const Tins::IP*>(inner_pdu())) {
         family_ = PF_INET;
+    }
+    else if (tins_cast<const Tins::IPv6*>(inner_pdu())) {
+        family_ = PF_INET6;
     }
     else if (tins_cast<const Tins::LLC*>(inner_pdu())) {
         family_ = PF_LLC;
     }
     stream.write(family_);
-    #endif // _WIN32
 }
 
 bool Loopback::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
