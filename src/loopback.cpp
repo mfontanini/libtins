@@ -41,6 +41,7 @@
 #include "loopback.h"
 #include "packet_sender.h"
 #include "ip.h"
+#include "ipv6.h"
 #include "llc.h"
 #include "rawpdu.h"
 #include "exceptions.h"
@@ -69,6 +70,9 @@ Loopback::Loopback(const uint8_t* buffer, uint32_t total_sz) {
         switch (family_) {
             case PF_INET:
                 inner_pdu(new Tins::IP(stream.pointer(), stream.size()));
+                break;
+            case PF_INET6:
+                inner_pdu(new Tins::IPv6(stream.pointer(), stream.size()));
                 break;
             case PF_LLC:
                 inner_pdu(new Tins::LLC(stream.pointer(), stream.size()));
