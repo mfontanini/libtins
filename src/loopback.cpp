@@ -64,7 +64,7 @@ Loopback::Loopback()
 Loopback::Loopback(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     family_ = stream.read<uint32_t>();
-    #ifndef _WIN32
+
     if (total_sz) {
         switch (family_) {
             case PF_INET:
@@ -78,7 +78,6 @@ Loopback::Loopback(const uint8_t* buffer, uint32_t total_sz) {
                 break;
         };
     }
-    #endif // _WIN32
 }
     
 void Loopback::family(uint32_t family_id) {
