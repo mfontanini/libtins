@@ -38,11 +38,17 @@ namespace Tins {
 namespace Internals {
 
 IPv4Stream::IPv4Stream() 
-: received_end_(false), transport_proto_(0xff), received_size_(), total_size_() { 
+: received_size_(), total_size_(), received_end_(false), transport_proto_(0xff) {
 
 }
 
 void IPv4Stream::add_fragment(IP* ip) {
+    if (fragments_.empty()) {
+        // Release the inner PDU, store this first fragment and restore the inner PDU
+        PDU* inner_pdu = ip->release_inner_pdu();
+        first_fragment_ = *ip;
+        ip->inner_pdu(inner_pdu);
+    }
     fragments_type::iterator it = fragments_.begin();
     uint16_t offset = extract_offset(ip);
     while (it != fragments_.end() && offset > it->offset()) {
@@ -87,6 +93,10 @@ PDU* IPv4Stream::allocate_pdu() const {
     );
 }
 
+const IP& IPv4Stream::first_fragment() const {
+    return first_fragment_;
+}
+
 uint16_t IPv4Stream::extract_offset(const IP* ip) {
     return ip->fragment_offset() * 8;
 }
@@ -114,6 +124,9 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
             stream.add_fragment(ip);
             if (stream.is_complete()) {
                 PDU* pdu = stream.allocate_pdu();
+                // Use all field values from the first fragment
+                *ip = stream.first_fragment();
+
                 // Erase this stream, since it's already assembled
                 streams_.erase(key);
                 // The packet is corrupt

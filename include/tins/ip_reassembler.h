@@ -35,13 +35,13 @@
 #include "pdu.h"
 #include "macros.h"
 #include "ip_address.h"
+#include "ip.h"
 
 namespace Tins {
 
 /** 
  * \cond
  */
-class IP;
 namespace Internals {
 class IPv4Fragment {
 public:
@@ -74,6 +74,7 @@ public:
     void add_fragment(IP* ip);
     bool is_complete() const;
     PDU* allocate_pdu() const;
+    const IP& first_fragment() const;
 private:
     typedef std::vector<IPv4Fragment> fragments_type;
     
@@ -81,9 +82,11 @@ private:
     bool extract_more_frag(const IP* ip);
 
     fragments_type fragments_;
+    size_t received_size_;
+    size_t total_size_;
+    IP first_fragment_;
     bool received_end_;
     uint8_t transport_proto_;
-    size_t received_size_, total_size_;
 };
 } // namespace Internals
 

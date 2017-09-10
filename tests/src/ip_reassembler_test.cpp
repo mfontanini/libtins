@@ -8,6 +8,10 @@
 #include "ip.h"
 #include "rawpdu.h"
 
+using std::vector;
+using std::pair;
+using std::make_pair;
+
 using namespace Tins;
 
 class IPv4ReassemblerTest : public testing::Test {
@@ -15,7 +19,7 @@ public:
     static const uint8_t packets[][1514];
     static const size_t packet_sizes[], orderings[][11];
     
-    void test_packets(const std::vector<std::pair<const uint8_t*, size_t> >& vt);
+    void test_packets(const vector<pair<const uint8_t*, size_t> >& vt);
 };
 
 const uint8_t IPv4ReassemblerTest::packets[][1514] = {
@@ -43,30 +47,37 @@ const size_t IPv4ReassemblerTest::orderings[][11] = {
     { 1, 9, 8, 5, 4, 2, 0, 7, 6, 3, 10 }
 };
 
-void IPv4ReassemblerTest::test_packets(const std::vector<std::pair<const uint8_t*, size_t> >& vt) {
+void IPv4ReassemblerTest::test_packets(const vector<pair<const uint8_t*, size_t> >& vt) {
     IPv4Reassembler reassembler;
     for(size_t i = 0; i < vt.size(); ++i) {
         EthernetII eth(vt[i].first, (uint32_t)vt[i].second);
+        if (i != 0) {
+            eth.rfind_pdu<IP>().ttl(32);
+        }
         IPv4Reassembler::PacketStatus status = reassembler.process(eth);
         EXPECT_NE(IPv4Reassembler::NOT_FRAGMENTED, status);
-        if(status == IPv4Reassembler::REASSEMBLED) {
+        if (status == IPv4Reassembler::REASSEMBLED) {
             ASSERT_EQ(static_cast<size_t>(vt.size() - 1), i);
             ASSERT_TRUE(eth.find_pdu<UDP>() != NULL);
+            const IP& ip = eth.rfind_pdu<IP>();
+            EXPECT_EQ(64, ip.ttl());
+
             RawPDU* raw = eth.find_pdu<RawPDU>();
             ASSERT_TRUE(raw != NULL);
             ASSERT_EQ(15000ULL, raw->payload().size());
         }
-        else if(status == IPv4Reassembler::FRAGMENTED)
+        else if (status == IPv4Reassembler::FRAGMENTED) {
             EXPECT_NE(vt.size() - 1, i);
+        }
     }
 }
 
 TEST_F(IPv4ReassemblerTest, Reassemble) {
     for(size_t i = 0; i < 3; ++i) {
-        std::vector<std::pair<const uint8_t*, size_t> > vt;
+        vector<pair<const uint8_t*, size_t> > vt;
         for(size_t j = 0; j < 11; ++j) {
             vt.push_back(
-                std::make_pair(
+                make_pair(
                     packets[orderings[i][j]],
                     packet_sizes[orderings[i][j]]
                 )
