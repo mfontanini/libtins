@@ -344,11 +344,10 @@ INSTALL(
 )
 
 #Recursively list of all headers, with paths relative to include/tins
-FILE(GLOB_RECURSE INCLUDE_FILES RELATIVE include/tins "*.h")
-
+FILE(GLOB_RECURSE INCLUDE_FILES "include/tins/*.h")
 
 INSTALL(
     FILES ${INCLUDE_FILES} 
-    DESTINATION include/tins
+    DESTINATION .
     COMPONENT Headers
 )
