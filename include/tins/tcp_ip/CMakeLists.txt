@@ -1,6 +1,0 @@
-FILE(GLOB INCLUDE_FILES "*.h")
-INSTALL(
-    FILES ${INCLUDE_FILES} 
-    DESTINATION include/tins/tcp_ip
-    COMPONENT Headers
-)
