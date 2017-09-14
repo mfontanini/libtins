@@ -31,6 +31,7 @@
 #define TINS_CXXSTD_H
 
 #include "config.h"
+#include <functional>
 
 #ifdef __GXX_EXPERIMENTAL_CXX0X__
     #define TINS_CXXSTD_GCC_FIX 1
