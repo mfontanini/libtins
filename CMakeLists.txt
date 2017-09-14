@@ -263,7 +263,6 @@ ADD_CUSTOM_TARGET(uninstall
 # ******************
 # Add subdirectories
 # ******************
-ADD_SUBDIRECTORY(include)
 ADD_SUBDIRECTORY(src)
 
 IF(LIBTINS_BUILD_EXAMPLES)
@@ -342,4 +341,13 @@ INSTALL(
     EXPORT libtinsTargets
     DESTINATION CMake
     COMPONENT dev
+)
+
+#Recursively list of all headers, with paths relative to include/tins
+FILE(GLOB_RECURSE INCLUDE_FILES "include/tins/*.h")
+
+INSTALL(
+    FILES ${INCLUDE_FILES} 
+    DESTINATION .
+    COMPONENT Headers
 )
