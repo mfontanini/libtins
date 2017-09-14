@@ -202,9 +202,9 @@ private:
 
 #if TINS_IS_CXX11
 namespace std {
-
+template<typename T> struct hash; 
 template<>
-TINS_API struct hash<Tins::IPv4Address> {
+struct hash<Tins::IPv4Address> {
     size_t operator()(const Tins::IPv4Address& addr) const;
 };
 
