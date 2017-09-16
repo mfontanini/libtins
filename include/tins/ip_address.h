@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include "cxxstd.h"
 #include "macros.h"
+#include <functional>
 
 namespace Tins {
 /**
@@ -202,7 +203,7 @@ private:
 
 #if TINS_IS_CXX11
 namespace std {
-template<typename T> struct hash; 
+
 template<>
 struct hash<Tins::IPv4Address> {
     size_t operator()(const Tins::IPv4Address& addr) const;
