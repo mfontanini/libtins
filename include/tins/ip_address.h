@@ -208,7 +208,7 @@ template<>
 struct hash<Tins::IPv4Address> {
     size_t operator()(const Tins::IPv4Address& addr) const
     {
-        return std::hash<string>()(addr.to_string());
+        return std::hash<std::uint32_t>()(addr);
     }
 };
 
