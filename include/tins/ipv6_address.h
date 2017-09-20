@@ -35,6 +35,7 @@
 #include <stdint.h>
 #include "cxxstd.h"
 #include "macros.h"
+#include <functional>
 
 namespace Tins {
 
@@ -222,8 +223,11 @@ private:
 namespace std {
 
 template<>
-TINS_API struct hash<Tins::IPv6Address> {
-    size_t operator()(const Tins::IPv6Address& addr) const;
+struct hash<Tins::IPv6Address> {
+    size_t operator()(const Tins::IPv6Address& addr) const
+    {
+        return std::hash<string>()(addr.to_string());
+    }
 };
 
 } // std
