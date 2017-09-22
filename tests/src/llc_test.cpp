@@ -3,7 +3,7 @@
 #include <string>
 #include <stdint.h>
 
-#include "llc.h"
+#include <tins/llc.h>
 
 using namespace Tins;
 using namespace std;

@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <sstream>
 #include <stdint.h>
-#include "ipv6_address.h"
+#include <tins/ipv6_address.h>
 
 using namespace Tins;
 

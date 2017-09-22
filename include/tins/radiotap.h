@@ -27,15 +27,15 @@
  *
  */
 
-#include "config.h"
+#include <tins/config.h>
 
 #if !defined(TINS_RADIOTAP_H) && defined(TINS_HAVE_DOT11)
 #define TINS_RADIOTAP_H
 
-#include "macros.h"
-#include "pdu.h"
-#include "endianness.h"
-#include "pdu_option.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/endianness.h>
+#include <tins/pdu_option.h>
 
 namespace Tins {
 class PacketSender;

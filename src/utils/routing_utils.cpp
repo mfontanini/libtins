@@ -27,7 +27,7 @@
  *
  */
 
-#include "utils/routing_utils.h"
+#include <tins/utils/routing_utils.h>
 #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <sys/socket.h>
@@ -55,8 +55,8 @@
 #endif
 #include <set>
 #include <fstream>
-#include "network_interface.h"
-#include "exceptions.h"
+#include <tins/network_interface.h>
+#include <tins/exceptions.h>
 
 using std::vector;
 using std::string;

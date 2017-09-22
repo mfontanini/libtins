@@ -29,16 +29,16 @@
 
 #include <cstring>
 #include <pcap.h>
-#include "dot11/dot11_base.h"
-#include "dot3.h"
-#include "ethernetII.h"
-#include "radiotap.h"
-#include "loopback.h"
-#include "sll.h"
-#include "ppi.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "detail/pdu_helpers.h"
+#include <tins/dot11/dot11_base.h>
+#include <tins/dot3.h>
+#include <tins/ethernetII.h>
+#include <tins/radiotap.h>
+#include <tins/loopback.h>
+#include <tins/sll.h>
+#include <tins/ppi.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/detail/pdu_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 

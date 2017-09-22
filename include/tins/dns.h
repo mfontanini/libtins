@@ -35,9 +35,9 @@
 #include <cstring>
 #include <string>
 #include <map>
-#include "macros.h"
-#include "pdu.h"
-#include "endianness.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/endianness.h>
 
 // Undefining some macros that conflict with some symbols here. 
 // Eventually, the conflicting names will be removed, but until then

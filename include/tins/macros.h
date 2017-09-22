@@ -34,7 +34,7 @@
     #include <sys/param.h>
 #endif
 
-#include "config.h"
+#include <tins/config.h>
 
 // Check if this is Visual Studio
 #ifdef _MSC_VER

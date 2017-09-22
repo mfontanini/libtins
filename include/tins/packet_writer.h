@@ -31,13 +31,13 @@
 #define TINS_PACKET_WRITER_H
 
 #include <string>
-#include "macros.h"
-#include "cxxstd.h"
-#include "utils/pdu_utils.h"
+#include <tins/macros.h>
+#include <tins/cxxstd.h>
+#include <tins/utils/pdu_utils.h>
 
 #ifdef TINS_HAVE_PCAP
 #include <pcap.h>
-#include "data_link_type.h"
+#include <tins/data_link_type.h>
 
 struct timeval;
 

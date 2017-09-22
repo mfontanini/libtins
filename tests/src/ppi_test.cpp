@@ -1,5 +1,5 @@
-#include "dot11/dot11_data.h"
-#include "dot11/dot11_beacon.h"
+#include <tins/dot11/dot11_data.h>
+#include <tins/dot11/dot11_beacon.h>
 
 #ifdef TINS_HAVE_DOT11
 
@@ -7,8 +7,8 @@
 #include <vector>
 #include <algorithm>
 #include <stdint.h>
-#include "ppi.h"
-#include "udp.h"
+#include <tins/ppi.h>
+#include <tins/udp.h>
 
 using namespace Tins;
 

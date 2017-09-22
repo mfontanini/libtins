@@ -27,10 +27,10 @@
  *
  */
 
-#include "memory_helpers.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "hw_address.h"
+#include <tins/memory_helpers.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/hw_address.h>
 
 using std::vector;
 

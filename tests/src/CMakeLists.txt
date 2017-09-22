@@ -1,6 +1,6 @@
 # Use libtins' include directories + test include directories
 INCLUDE_DIRECTORIES(
-    ${PROJECT_SOURCE_DIR}/include/tins/ 
+    ${PROJECT_SOURCE_DIR}/include/
     ../include/
     ${GOOGLETEST_INCLUDE}
     ${PCAP_INCLUDE_DIR}

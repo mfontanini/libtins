@@ -2,10 +2,10 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "eapol.h"
-#include "snap.h"
-#include "ethernetII.h"
-#include "rsn_information.h"
+#include <tins/eapol.h>
+#include <tins/snap.h>
+#include <tins/ethernetII.h>
+#include <tins/rsn_information.h>
 
 using namespace std;
 using namespace Tins;

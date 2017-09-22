@@ -30,8 +30,8 @@
 #ifndef TINS_LOOPBACK_H
 #define TINS_LOOPBACK_H
 
-#include "pdu.h"
-#include "macros.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
 
 namespace Tins {
 

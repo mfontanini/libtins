@@ -28,8 +28,8 @@
  */
 
 #include <limits>
-#include "rawpdu.h"
-#include "tcp_stream.h"
+#include <tins/rawpdu.h>
+#include <tins/tcp_stream.h>
 
 using std::numeric_limits;
 using std::make_pair;

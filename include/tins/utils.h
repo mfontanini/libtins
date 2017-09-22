@@ -30,13 +30,13 @@
 #ifndef TINS_UTILS_H
 #define TINS_UTILS_H
 
-#include "utils/checksum_utils.h"
-#include "utils/frequency_utils.h"
-#include "utils/routing_utils.h"
-#include "utils/resolve_utils.h"
-#include "utils/pdu_utils.h"
-#include "utils/radiotap_parser.h"
-#include "utils/radiotap_writer.h"
+#include <tins/utils/checksum_utils.h>
+#include <tins/utils/frequency_utils.h>
+#include <tins/utils/routing_utils.h>
+#include <tins/utils/resolve_utils.h>
+#include <tins/utils/pdu_utils.h>
+#include <tins/utils/radiotap_parser.h>
+#include <tins/utils/radiotap_writer.h>
  
 namespace Tins {
 

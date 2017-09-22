@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 #include <stdint.h>
-#include "ip_address.h"
+#include <tins/ip_address.h>
 
 using namespace Tins;
 

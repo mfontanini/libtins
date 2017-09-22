@@ -30,11 +30,11 @@
 #ifndef TINS_STP_H
 #define TINS_STP_H
 
-#include "pdu.h"
-#include "macros.h"
-#include "endianness.h"
-#include "hw_address.h"
-#include "small_uint.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/endianness.h>
+#include <tins/hw_address.h>
+#include <tins/small_uint.h>
 
 namespace Tins {
 /**

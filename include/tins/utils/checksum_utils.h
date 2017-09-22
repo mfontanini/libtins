@@ -31,7 +31,7 @@
 #define TINS_CHECKSUM_UTILS_H
 
 #include <stdint.h>
-#include "../macros.h"
+#include <tins/macros.h>
 
 namespace Tins {
 

@@ -27,7 +27,7 @@
  *
  */
 
-#include "crypto.h"
+#include <tins/crypto.h>
 
 #ifdef TINS_HAVE_DOT11
 
@@ -37,13 +37,13 @@
     #include <openssl/hmac.h>
     #include <openssl/aes.h>
 #endif // TINS_HAVE_WPA2_DECRYPTION
-#include "snap.h"
-#include "rawpdu.h"
-#include "dot11/dot11_data.h"
-#include "dot11/dot11_beacon.h"
-#include "exceptions.h"
-#include "utils/checksum_utils.h"
-#include "detail/type_traits.h"
+#include <tins/snap.h>
+#include <tins/rawpdu.h>
+#include <tins/dot11/dot11_data.h>
+#include <tins/dot11/dot11_beacon.h>
+#include <tins/exceptions.h>
+#include <tins/utils/checksum_utils.h>
+#include <tins/detail/type_traits.h>
 
 using std::string;
 using std::vector;

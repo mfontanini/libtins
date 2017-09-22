@@ -27,10 +27,10 @@
  *
  */
 
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "endianness.h"
-#include "detail/address_helpers.h"
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/endianness.h>
+#include <tins/detail/address_helpers.h>
 
 using Tins::IPv4Address;
 using Tins::IPv6Address;

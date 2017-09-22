@@ -31,9 +31,9 @@
 #define TINS_RADIOTAP_PARSER_H
 
 #include <stdint.h>
-#include "../macros.h"
-#include "../radiotap.h"
-#include "../pdu_option.h"
+#include <tins/macros.h>
+#include <tins/radiotap.h>
+#include <tins/pdu_option.h>
 
 namespace Tins {
 namespace Utils {

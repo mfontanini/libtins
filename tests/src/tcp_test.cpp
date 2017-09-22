@@ -3,9 +3,9 @@
 #include <string>
 #include <algorithm>
 #include <stdint.h>
-#include "tcp.h"
-#include "ip.h"
-#include "ethernetII.h"
+#include <tins/tcp.h>
+#include <tins/ip.h>
+#include <tins/ethernetII.h>
 
 using namespace std;
 using namespace Tins;

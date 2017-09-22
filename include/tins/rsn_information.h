@@ -27,15 +27,15 @@
  *
  */
 
-#include "config.h"
+#include <tins/config.h>
 
 #if !defined(TINS_RSN_INFORMATION) && defined(TINS_HAVE_DOT11)
 #define TINS_RSN_INFORMATION
 
 #include <stdint.h>
 #include <vector>
-#include "macros.h"
-#include "endianness.h"
+#include <tins/macros.h>
+#include <tins/endianness.h>
 
 namespace Tins{
 class Dot11;

@@ -1,8 +1,8 @@
 #ifndef TINS_DOT11_MGMT_TEST_H
 #define TINS_DOT11_MGMT_TEST_H
 
+#include <tins/dot11/dot11_mgmt.h>
 #include "tests/dot11.h"
-#include "dot11/dot11_mgmt.h"
 
 using Tins::Dot11ManagementFrame;
 

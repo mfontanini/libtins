@@ -27,18 +27,18 @@
  *
  */ 
 
-#include "../config.h"
+#include <tins/config.h>
 
 #if !defined(TINS_DOT11_DOT11_H) && defined(TINS_HAVE_DOT11)
 #define TINS_DOT11_DOT11_H
 
-#include "../pdu.h"
-#include "../pdu_option.h"
-#include "../small_uint.h"
-#include "../hw_address.h"
-#include "../endianness.h"
-#include "../cxxstd.h"
-#include "../macros.h"
+#include <tins/pdu.h>
+#include <tins/pdu_option.h>
+#include <tins/small_uint.h>
+#include <tins/hw_address.h>
+#include <tins/endianness.h>
+#include <tins/cxxstd.h>
+#include <tins/macros.h>
 
 namespace Tins {
 namespace Memory {

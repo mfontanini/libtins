@@ -2,7 +2,7 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "macros.h"
+#include <tins/macros.h>
 #ifndef _WIN32
     #include <sys/socket.h>
     #ifdef BSD
@@ -11,9 +11,9 @@
         #include <net/ethernet.h>
     #endif
 #endif
-#include "loopback.h"
-#include "ip.h"
-#include "tcp.h"
+#include <tins/loopback.h>
+#include <tins/ip.h>
+#include <tins/tcp.h>
 
 using namespace std;
 using namespace Tins;

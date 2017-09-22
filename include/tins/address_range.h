@@ -31,9 +31,9 @@
 #define TINS_ADDRESS_RANGE
 
 #include <iterator>
-#include "endianness.h"
-#include "exceptions.h"
-#include "detail/address_helpers.h"
+#include <tins/endianness.h>
+#include <tins/exceptions.h>
+#include <tins/detail/address_helpers.h>
 
 namespace Tins {
 /**

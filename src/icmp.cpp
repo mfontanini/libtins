@@ -31,12 +31,12 @@
 #ifndef _WIN32
     #include <netinet/in.h>
 #endif
-#include "rawpdu.h"
-#include "exceptions.h"
-#include "icmp.h"
-#include "memory_helpers.h"
-#include "detail/icmp_extension_helpers.h"
-#include "utils/checksum_utils.h"
+#include <tins/rawpdu.h>
+#include <tins/exceptions.h>
+#include <tins/icmp.h>
+#include <tins/memory_helpers.h>
+#include <tins/detail/icmp_extension_helpers.h>
+#include <tins/utils/checksum_utils.h>
 
 using std::memset;
 

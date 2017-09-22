@@ -27,7 +27,7 @@
  *
  */
 
-#include "config.h"
+#include <tins/config.h>
 
 #if !defined(TINS_CRYPTO_H) && defined(TINS_HAVE_DOT11)
 #define TINS_CRYPTO_H
@@ -38,8 +38,8 @@
 #ifdef TINS_HAVE_WPA2_CALLBACKS
     #include <functional>
 #endif // TINS_HAVE_WPA2_CALLBACKS
-#include "macros.h"
-#include "handshake_capturer.h"
+#include <tins/macros.h>
+#include <tins/handshake_capturer.h>
 
 namespace Tins {
 

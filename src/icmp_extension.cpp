@@ -28,11 +28,11 @@
  */
 
 #include <cstring>
-#include "icmp_extension.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "mpls.h"
-#include "utils/checksum_utils.h"
+#include <tins/icmp_extension.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/mpls.h>
+#include <tins/utils/checksum_utils.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

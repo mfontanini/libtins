@@ -28,10 +28,10 @@
  */
 
 #include <cstring>
-#include "eapol.h"
-#include "exceptions.h"
-#include "rawpdu.h"
-#include "memory_helpers.h"
+#include <tins/eapol.h>
+#include <tins/exceptions.h>
+#include <tins/rawpdu.h>
+#include <tins/memory_helpers.h>
 
 using std::memset;
 using std::memcpy;

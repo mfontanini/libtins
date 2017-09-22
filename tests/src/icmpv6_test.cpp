@@ -2,12 +2,12 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "icmpv6.h"
-#include "ethernetII.h"
-#include "ip.h"
-#include "tcp.h"
-#include "rawpdu.h"
-#include "hw_address.h"
+#include <tins/icmpv6.h>
+#include <tins/ethernetII.h>
+#include <tins/ip.h>
+#include <tins/tcp.h>
+#include <tins/rawpdu.h>
+#include <tins/hw_address.h>
 
 using namespace Tins;
 

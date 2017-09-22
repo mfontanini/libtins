@@ -27,12 +27,12 @@
  *
  */
 
-#include "dot11/dot11_probe.h"
+#include <tins/dot11/dot11_probe.h>
 
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
-#include "memory_helpers.h"
+#include <tins/memory_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

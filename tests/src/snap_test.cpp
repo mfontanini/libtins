@@ -2,7 +2,7 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "snap.h"
+#include <tins/snap.h>
 
 using namespace std;
 using namespace Tins;

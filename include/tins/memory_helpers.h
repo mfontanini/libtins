@@ -33,8 +33,8 @@
 #include <stdint.h>
 #include <cstring>
 #include <vector>
-#include "exceptions.h"
-#include "endianness.h"
+#include <tins/exceptions.h>
+#include <tins/endianness.h>
 
 namespace Tins {
 

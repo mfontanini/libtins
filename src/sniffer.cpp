@@ -33,19 +33,19 @@
     #define TINS_PREFIX_INTERFACE(x) (x)
 #endif // _WIN32
 
-#include "sniffer.h"
-#include "dot11/dot11_base.h"
-#include "ethernetII.h"
-#include "radiotap.h"
-#include "loopback.h"
-#include "rawpdu.h"
-#include "dot3.h"
-#include "pktap.h"
-#include "sll.h"
-#include "ppi.h"
-#include "ip.h"
-#include "ipv6.h"
-#include "detail/pdu_helpers.h"
+#include <tins/sniffer.h>
+#include <tins/dot11/dot11_base.h>
+#include <tins/ethernetII.h>
+#include <tins/radiotap.h>
+#include <tins/loopback.h>
+#include <tins/rawpdu.h>
+#include <tins/dot3.h>
+#include <tins/pktap.h>
+#include <tins/sll.h>
+#include <tins/ppi.h>
+#include <tins/ip.h>
+#include <tins/ipv6.h>
+#include <tins/detail/pdu_helpers.h>
 
 using std::string;
 

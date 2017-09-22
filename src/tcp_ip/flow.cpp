@@ -27,20 +27,20 @@
  *
  */
 
-#include "tcp_ip/flow.h"
+#include <tins/tcp_ip/flow.h>
 
 #ifdef TINS_HAVE_TCPIP
 
 #include <limits>
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "tcp.h"
-#include "ip.h"
-#include "ipv6.h"
-#include "rawpdu.h"
-#include "detail/sequence_number_helpers.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/tcp.h>
+#include <tins/ip.h>
+#include <tins/ipv6.h>
+#include <tins/rawpdu.h>
+#include <tins/detail/sequence_number_helpers.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using std::make_pair;
 using std::bind;

@@ -31,8 +31,8 @@
 #define TINS_PDU_CACHER_H
 
 #include <cstring>
-#include "pdu.h"
-#include "macros.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
 
 namespace Tins {
 /**

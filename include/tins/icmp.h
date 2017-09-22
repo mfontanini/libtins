@@ -42,11 +42,11 @@
     #endif // TIMESTAMP_REPLY
 #endif // _WIN32
 
-#include "macros.h"
-#include "pdu.h"
-#include "endianness.h"
-#include "ip_address.h"
-#include "icmp_extension.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/endianness.h>
+#include <tins/ip_address.h>
+#include <tins/icmp_extension.h>
 
 namespace Tins {
 namespace Memory {

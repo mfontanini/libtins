@@ -34,14 +34,14 @@
 #else
     #include <ws2tcpip.h>
 #endif
-#include "ipv6.h"
-#include "constants.h"
-#include "packet_sender.h"
-#include "rawpdu.h"
-#include "exceptions.h"
-#include "pdu_allocator.h"
-#include "memory_helpers.h"
-#include "detail/pdu_helpers.h"
+#include <tins/ipv6.h>
+#include <tins/constants.h>
+#include <tins/packet_sender.h>
+#include <tins/rawpdu.h>
+#include <tins/exceptions.h>
+#include <tins/pdu_allocator.h>
+#include <tins/memory_helpers.h>
+#include <tins/detail/pdu_helpers.h>
 
 using std::vector;
 

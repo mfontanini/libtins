@@ -2,14 +2,14 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "ipv6.h"
-#include "tcp.h"
-#include "udp.h"
-#include "icmp.h"
-#include "icmpv6.h"
-#include "rawpdu.h"
-#include "ethernetII.h"
-#include "ipv6_address.h"
+#include <tins/ipv6.h>
+#include <tins/tcp.h>
+#include <tins/udp.h>
+#include <tins/icmp.h>
+#include <tins/icmpv6.h>
+#include <tins/rawpdu.h>
+#include <tins/ethernetII.h>
+#include <tins/ipv6_address.h>
 
 using namespace std;
 using namespace Tins;

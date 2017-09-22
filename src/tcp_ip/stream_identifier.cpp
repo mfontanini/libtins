@@ -27,19 +27,19 @@
  *
  */
 
-#include "tcp_ip/stream_identifier.h"
+#include <tins/tcp_ip/stream_identifier.h>
 
 #ifdef TINS_HAVE_TCPIP
 
 #include <algorithm>
 #include <tuple>
-#include "memory_helpers.h"
-#include "tcp.h"
-#include "udp.h"
-#include "ip.h"
-#include "ipv6.h"
-#include "exceptions.h"
-#include "tcp_ip/stream.h"
+#include <tins/memory_helpers.h>
+#include <tins/tcp.h>
+#include <tins/udp.h>
+#include <tins/ip.h>
+#include <tins/ipv6.h>
+#include <tins/exceptions.h>
+#include <tins/tcp_ip/stream.h>
 
 using std::swap;
 using std::tie;

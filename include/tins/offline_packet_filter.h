@@ -32,11 +32,11 @@
 
 #include <string>
 #include <stdint.h>
-#include "macros.h"
+#include <tins/macros.h>
 
 #ifdef TINS_HAVE_PCAP
 
-#include "data_link_type.h"
+#include <tins/data_link_type.h>
 
 namespace Tins {
 

@@ -32,7 +32,7 @@
 
 #include <vector>
 #include <stdint.h>
-#include "../radiotap.h"
+#include <tins/radiotap.h>
 
 namespace Tins {
 namespace Utils {

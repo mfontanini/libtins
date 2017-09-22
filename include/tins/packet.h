@@ -30,9 +30,9 @@
 #ifndef TINS_PACKET_H
 #define TINS_PACKET_H
 
-#include "cxxstd.h"
-#include "pdu.h"
-#include "timestamp.h"
+#include <tins/cxxstd.h>
+#include <tins/pdu.h>
+#include <tins/timestamp.h>
 
 /**
  * \namespace Tins

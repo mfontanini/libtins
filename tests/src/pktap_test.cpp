@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 #include <stdint.h>
-#include "pktap.h"
+#include <tins/pktap.h>
 
 using namespace std;
 using namespace Tins;

@@ -32,11 +32,11 @@
 
 #include <stdint.h>
 #include <vector>
-#include "pdu.h"
-#include "macros.h"
-#include "endianness.h"
-#include "ip_address.h"
-#include "hw_address.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/endianness.h>
+#include <tins/ip_address.h>
+#include <tins/hw_address.h>
 
 namespace Tins {
 

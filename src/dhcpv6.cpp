@@ -28,9 +28,9 @@
  */
 
 #include <vector>
-#include "dhcpv6.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/dhcpv6.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using std::vector;
 using std::memcpy;

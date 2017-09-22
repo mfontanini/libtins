@@ -31,11 +31,11 @@
 #define TINS_ETHERNET_II_H
 
 #include <stdint.h>
-#include "macros.h"
-#include "pdu.h"
-#include "config.h"
-#include "endianness.h"
-#include "hw_address.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/config.h>
+#include <tins/endianness.h>
+#include <tins/hw_address.h>
 
 namespace Tins {
 

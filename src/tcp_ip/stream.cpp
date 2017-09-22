@@ -27,20 +27,19 @@
  *
  */
 
-#include "tcp_ip/stream.h"
+#include <tins/tcp_ip/stream.h>
 
 #ifdef TINS_HAVE_TCPIP
 
 #include <limits>
-#include "memory.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "tcp.h"
-#include "ip.h"
-#include "ipv6.h"
-#include "ethernetII.h"
-#include "rawpdu.h"
-#include "exceptions.h"
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/tcp.h>
+#include <tins/ip.h>
+#include <tins/ipv6.h>
+#include <tins/ethernetII.h>
+#include <tins/rawpdu.h>
+#include <tins/exceptions.h>
 
 using std::make_pair;
 using std::bind;

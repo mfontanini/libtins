@@ -31,16 +31,16 @@
 #define TINS_ICMPV6_H
 
 #include <vector>
-#include "macros.h"
-#include "pdu.h"
-#include "ipv6_address.h"
-#include "pdu_option.h"
-#include "endianness.h"
-#include "small_uint.h"
-#include "hw_address.h"
-#include "small_uint.h"
-#include "icmp_extension.h"
-#include "cxxstd.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/ipv6_address.h>
+#include <tins/pdu_option.h>
+#include <tins/endianness.h>
+#include <tins/small_uint.h>
+#include <tins/hw_address.h>
+#include <tins/small_uint.h>
+#include <tins/icmp_extension.h>
+#include <tins/cxxstd.h>
 
 namespace Tins {
 namespace Memory {

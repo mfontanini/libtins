@@ -27,7 +27,7 @@
  *
  */
 
-#include "config.h"
+#include <tins/config.h>
 
 #if !defined(TINS_HANDSHAKE_CAPTURER_H) && defined(TINS_HAVE_DOT11)
 #define TINS_HANDSHAKE_CAPTURER_H
@@ -35,9 +35,9 @@
 #include <vector>
 #include <map>
 #include <utility>
-#include "hw_address.h"
-#include "macros.h"
-#include "eapol.h"
+#include <tins/hw_address.h>
+#include <tins/macros.h>
+#include <tins/eapol.h>
 
 namespace Tins {
 

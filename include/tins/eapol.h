@@ -31,10 +31,10 @@
 #define TINS_EAPOL_H
 
 #include <stdint.h>
-#include "pdu.h"
-#include "macros.h"
-#include "small_uint.h"
-#include "endianness.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/small_uint.h>
+#include <tins/endianness.h>
 
 namespace Tins {
 namespace Memory {

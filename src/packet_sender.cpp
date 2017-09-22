@@ -27,7 +27,7 @@
  *
  */
 
-#include "packet_sender.h"
+#include <tins/packet_sender.h>
 #ifndef _WIN32
     #include <sys/socket.h>
     #include <sys/select.h>
@@ -55,16 +55,16 @@
 #include <cstring>
 #include <ctime>
 #include <sstream>
-#include "pdu.h"
-#include "macros.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
 // PDUs required by PacketSender::send(PDU&, NetworkInterface)
-#include "ethernetII.h"
-#include "radiotap.h"
-#include "dot11/dot11_base.h"
-#include "radiotap.h"
-#include "ieee802_3.h"
-#include "cxxstd.h"
-#include "detail/pdu_helpers.h"
+#include <tins/ethernetII.h>
+#include <tins/radiotap.h>
+#include <tins/dot11/dot11_base.h>
+#include <tins/radiotap.h>
+#include <tins/ieee802_3.h>
+#include <tins/cxxstd.h>
+#include <tins/detail/pdu_helpers.h>
 #if TINS_IS_CXX11
     #include <chrono>
 #endif // TINS_IS_CXX11

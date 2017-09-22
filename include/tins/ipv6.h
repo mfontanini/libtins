@@ -30,13 +30,13 @@
 #ifndef TINS_IPV6_h
 #define TINS_IPV6_h
 
-#include "macros.h"
-#include "cxxstd.h"
-#include "pdu.h"
-#include "endianness.h"
-#include "small_uint.h"
-#include "pdu_option.h"
-#include "ipv6_address.h"
+#include <tins/macros.h>
+#include <tins/cxxstd.h>
+#include <tins/pdu.h>
+#include <tins/endianness.h>
+#include <tins/small_uint.h>
+#include <tins/pdu_option.h>
+#include <tins/ipv6_address.h>
 
 namespace Tins {
 namespace Memory {

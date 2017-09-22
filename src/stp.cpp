@@ -28,9 +28,9 @@
  */
 
 #include <cstring>
-#include "stp.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/stp.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

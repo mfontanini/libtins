@@ -34,12 +34,12 @@
 #include <string>
 #include <memory>
 #include <iterator>
-#include "pdu.h"
-#include "packet.h"
-#include "cxxstd.h"
-#include "macros.h"
-#include "exceptions.h"
-#include "detail/type_traits.h"
+#include <tins/pdu.h>
+#include <tins/packet.h>
+#include <tins/cxxstd.h>
+#include <tins/macros.h>
+#include <tins/exceptions.h>
+#include <tins/detail/type_traits.h>
 
 #ifdef TINS_HAVE_PCAP
 

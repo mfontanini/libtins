@@ -3,11 +3,11 @@
 #include <string>
 #include <algorithm>
 #include <stdint.h>
-#include "mpls.h"
-#include "ip.h"
-#include "udp.h"
-#include "rawpdu.h"
-#include "ethernetII.h"
+#include <tins/mpls.h>
+#include <tins/ip.h>
+#include <tins/udp.h>
+#include <tins/rawpdu.h>
+#include <tins/ethernetII.h>
 
 using namespace std;
 using namespace Tins;

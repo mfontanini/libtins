@@ -28,11 +28,11 @@
  */
 
 #include <cstring>
-#include "llc.h"
-#include "stp.h"
-#include "rawpdu.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/llc.h>
+#include <tins/stp.h>
+#include <tins/rawpdu.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

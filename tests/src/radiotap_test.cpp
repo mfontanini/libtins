@@ -1,4 +1,4 @@
-#include "radiotap.h"
+#include <tins/radiotap.h>
 
 #ifdef TINS_HAVE_DOT11
 
@@ -6,14 +6,14 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "dot11/dot11_data.h"
-#include "dot11/dot11_beacon.h"
-#include "arp.h"
-#include "snap.h"
-#include "eapol.h"
-#include "utils.h"
-#include "utils/radiotap_parser.h"
-#include "utils/radiotap_writer.h"
+#include <tins/dot11/dot11_data.h>
+#include <tins/dot11/dot11_beacon.h>
+#include <tins/arp.h>
+#include <tins/snap.h>
+#include <tins/eapol.h>
+#include <tins/utils.h>
+#include <tins/utils/radiotap_parser.h>
+#include <tins/utils/radiotap_writer.h>
 
 using namespace std;
 using namespace Tins;

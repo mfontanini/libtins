@@ -28,9 +28,9 @@
  */
 
 #include <cstring>
-#include "bootp.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/bootp.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using std::copy;
 

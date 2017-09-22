@@ -1,8 +1,8 @@
 #ifndef TINS_TEST_DOT11_DATA_H
 #define TINS_TEST_DOT11_DATA_H
 
+#include <tins/dot11/dot11_data.h>
 #include "tests/dot11.h"
-#include "dot11/dot11_data.h"
 
 using Tins::Dot11Data;
 

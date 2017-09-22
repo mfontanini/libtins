@@ -27,13 +27,13 @@
  *
  */
 
-#include "dot11/dot11_base.h"
+#include <tins/dot11/dot11_base.h>
 
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
-#include "macros.h"
-#include "exceptions.h"
+#include <tins/macros.h>
+#include <tins/exceptions.h>
 
 #ifndef _WIN32
     #if defined(__FreeBSD_kernel__) || defined(BSD) || defined(__APPLE__)
@@ -45,9 +45,9 @@
     #include <net/ethernet.h>
     #include <netinet/in.h>
 #endif
-#include "dot11.h"
-#include "packet_sender.h"
-#include "memory_helpers.h"
+#include <tins/dot11.h>
+#include <tins/packet_sender.h>
+#include <tins/memory_helpers.h>
 
 using std::vector;
 

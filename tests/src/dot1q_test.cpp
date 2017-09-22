@@ -2,12 +2,12 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "dot1q.h"
-#include "arp.h"
-#include "ip.h"
-#include "tcp.h"
-#include "rawpdu.h"
-#include "ethernetII.h"
+#include <tins/dot1q.h>
+#include <tins/arp.h>
+#include <tins/ip.h>
+#include <tins/tcp.h>
+#include <tins/rawpdu.h>
+#include <tins/ethernetII.h>
 
 using namespace std;
 using namespace Tins;

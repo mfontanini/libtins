@@ -32,11 +32,11 @@
     #include <sys/types.h>
     #include <net/ethernet.h>
 #endif
-#include "snap.h"
-#include "constants.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "detail/pdu_helpers.h"
+#include <tins/snap.h>
+#include <tins/constants.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/detail/pdu_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

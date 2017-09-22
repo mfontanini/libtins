@@ -27,31 +27,31 @@
  *
  */
 
-#include "detail/pdu_helpers.h"
+#include <tins/detail/pdu_helpers.h>
 #ifdef TINS_HAVE_PCAP
     #include <pcap.h>
 #endif // TINS_HAVE_PCAP
-#include "ip.h"
-#include "ethernetII.h"
-#include "ieee802_3.h"
-#include "radiotap.h"
-#include "dot11/dot11_base.h"
-#include "ipv6.h"
-#include "tcp.h"
-#include "udp.h"
-#include "ipsec.h"
-#include "icmp.h"
-#include "loopback.h"
-#include "sll.h"
-#include "ppi.h"
-#include "icmpv6.h"
-#include "mpls.h"
-#include "arp.h"
-#include "eapol.h"
-#include "rawpdu.h"
-#include "dot1q.h"
-#include "pppoe.h"
-#include "pdu_allocator.h"
+#include <tins/ip.h>
+#include <tins/ethernetII.h>
+#include <tins/ieee802_3.h>
+#include <tins/radiotap.h>
+#include <tins/dot11/dot11_base.h>
+#include <tins/ipv6.h>
+#include <tins/tcp.h>
+#include <tins/udp.h>
+#include <tins/ipsec.h>
+#include <tins/icmp.h>
+#include <tins/loopback.h>
+#include <tins/sll.h>
+#include <tins/ppi.h>
+#include <tins/icmpv6.h>
+#include <tins/mpls.h>
+#include <tins/arp.h>
+#include <tins/eapol.h>
+#include <tins/rawpdu.h>
+#include <tins/dot1q.h>
+#include <tins/pppoe.h>
+#include <tins/pdu_allocator.h>
 
 namespace Tins {
 namespace Internals {

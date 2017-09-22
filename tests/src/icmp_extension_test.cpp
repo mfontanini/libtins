@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "icmp_extension.h"
-#include "mpls.h"
+#include <tins/icmp_extension.h>
+#include <tins/mpls.h>
 
 using Tins::ICMPExtension;
 using Tins::ICMPExtensionsStructure;

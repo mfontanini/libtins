@@ -2,9 +2,9 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
-#include "tcp_stream.h"
-#include "tcp.h"
-#include "ethernetII.h"
+#include <tins/tcp_stream.h>
+#include <tins/tcp.h>
+#include <tins/ethernetII.h>
 
 using namespace Tins;
 

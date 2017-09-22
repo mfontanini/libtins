@@ -38,14 +38,14 @@
     #include <ws2tcpip.h>
 #endif
 #include <cstring>
-#include "loopback.h"
-#include "packet_sender.h"
-#include "ip.h"
-#include "ipv6.h"
-#include "llc.h"
-#include "rawpdu.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/loopback.h>
+#include <tins/packet_sender.h>
+#include <tins/ip.h>
+#include <tins/ipv6.h>
+#include <tins/llc.h>
+#include <tins/rawpdu.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 #if !defined(PF_LLC)
     // compilation fix, nasty but at least works on BSD

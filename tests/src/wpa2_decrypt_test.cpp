@@ -1,4 +1,4 @@
-#include "config.h"
+#include <tins/config.h>
 
 #if defined(TINS_HAVE_DOT11) && defined(TINS_HAVE_WPA2_DECRYPTION)
 
@@ -6,12 +6,12 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "crypto.h"
-#include "radiotap.h"
-#include "dot11/dot11_data.h"
-#include "udp.h"
-#include "tcp.h"
-#include "arp.h"
+#include <tins/crypto.h>
+#include <tins/radiotap.h>
+#include <tins/dot11/dot11_data.h>
+#include <tins/udp.h>
+#include <tins/tcp.h>
+#include <tins/arp.h>
 
 using namespace Tins;
 

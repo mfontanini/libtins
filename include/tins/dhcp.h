@@ -32,10 +32,10 @@
 
 #include <vector>
 #include <string>
-#include "bootp.h"
-#include "macros.h"
-#include "pdu_option.h"
-#include "cxxstd.h"
+#include <tins/bootp.h>
+#include <tins/macros.h>
+#include <tins/pdu_option.h>
+#include <tins/cxxstd.h>
 
 namespace Tins {
 

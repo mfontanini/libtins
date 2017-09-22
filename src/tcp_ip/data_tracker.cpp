@@ -27,11 +27,11 @@
  *
  */
 
-#include "tcp_ip/data_tracker.h"
+#include <tins/tcp_ip/data_tracker.h>
 
 #ifdef TINS_HAVE_TCPIP
 
-#include "detail/sequence_number_helpers.h"
+#include <tins/detail/sequence_number_helpers.h>
 
 using std::move;
 

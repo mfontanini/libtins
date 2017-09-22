@@ -27,7 +27,7 @@
  *
  */
 
-#include "utils/pdu_utils.h"
+#include <tins/utils/pdu_utils.h>
 
 using std::string;
 

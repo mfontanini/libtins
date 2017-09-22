@@ -30,9 +30,9 @@
 #ifndef TINS_PDU_HELPERS_H
 #define TINS_PDU_HELPERS_H
 
-#include "../constants.h"
-#include "../config.h"
-#include "../pdu.h"
+#include <tins/constants.h>
+#include <tins/config.h>
+#include <tins/pdu.h>
 
 /**
  * \cond

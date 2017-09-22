@@ -1,4 +1,4 @@
-#include "config.h"
+#include <tins/config.h>
 
 #ifdef TINS_HAVE_DOT11
 

@@ -1,7 +1,7 @@
 #ifndef TINS_DOT11_TEST
 #define TINS_DOT11_TEST
 
-#include "dot11/dot11_base.h"
+#include <tins/dot11/dot11_base.h>
 
 using Tins::Dot11;
 

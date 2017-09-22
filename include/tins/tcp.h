@@ -33,12 +33,12 @@
 #include <vector>
 #include <stdint.h>
 #include <utility>
-#include "pdu.h"
-#include "macros.h"
-#include "endianness.h"
-#include "small_uint.h"
-#include "pdu_option.h"
-#include "cxxstd.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/endianness.h>
+#include <tins/small_uint.h>
+#include <tins/pdu_option.h>
+#include <tins/cxxstd.h>
 
 namespace Tins {
 namespace Memory {

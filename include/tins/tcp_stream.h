@@ -35,15 +35,15 @@
 #include <vector>
 #include <algorithm>
 #include <stdint.h>
-#include "macros.h"
-#include "tcp.h"
-#include "ip.h"
-#include "ip_address.h"
-#include "utils/pdu_utils.h"
+#include <tins/macros.h>
+#include <tins/tcp.h>
+#include <tins/ip.h>
+#include <tins/ip_address.h>
+#include <tins/utils/pdu_utils.h>
 
 #ifdef TINS_HAVE_PCAP
 
-#include "sniffer.h"
+#include <tins/sniffer.h>
 
 namespace Tins {
 class Sniffer;

@@ -31,7 +31,7 @@
 #define TINS_RESOLVE_UTILS_H
 
 #include <string>
-#include "../macros.h"
+#include <tins/macros.h>
 
 namespace Tins {
 

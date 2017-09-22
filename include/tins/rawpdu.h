@@ -32,9 +32,9 @@
 
 #include <vector>
 #include <string>
-#include "pdu.h"
-#include "macros.h"
-#include "cxxstd.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/cxxstd.h>
 
 namespace Tins {
 

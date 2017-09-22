@@ -30,16 +30,16 @@
 #ifndef TINS_TCP_IP_FLOW_H
 #define TINS_TCP_IP_FLOW_H
 
-#include "../config.h"
+#include <tins/config.h>
 
 #ifdef TINS_HAVE_TCPIP
 
 #include <array>
 #include <functional>
 #include <stdint.h>
-#include "../macros.h"
-#include "ack_tracker.h"
-#include "data_tracker.h"
+#include <tins/macros.h>
+#include <tins/tcp_ip/ack_tracker.h>
+#include <tins/tcp_ip/data_tracker.h>
 
 namespace Tins {
 

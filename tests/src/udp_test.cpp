@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <cstring>
 #include <stdint.h>
-#include "udp.h"
-#include "ip.h"
-#include "ethernetII.h"
+#include <tins/udp.h>
+#include <tins/ip.h>
+#include <tins/ethernetII.h>
 
 using namespace std;
 using namespace Tins;

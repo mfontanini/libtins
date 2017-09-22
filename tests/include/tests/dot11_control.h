@@ -1,8 +1,8 @@
 #ifndef TINS_TEST_DOT11_CONTROL_H
 #define TINS_TEST_DOT11_CONTROL_H
 
+#include <tins/dot11/dot11_control.h>
 #include "tests/dot11.h"
-#include "dot11/dot11_control.h"
 
 using Tins::Dot11ControlTA;
 

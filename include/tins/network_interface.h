@@ -33,10 +33,10 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
-#include "macros.h"
-#include "hw_address.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
+#include <tins/macros.h>
+#include <tins/hw_address.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
 
 namespace Tins {
 

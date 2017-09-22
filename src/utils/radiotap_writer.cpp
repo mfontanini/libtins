@@ -28,9 +28,9 @@
  */
 
 #include <cmath>
-#include "utils/radiotap_writer.h"
-#include "utils/radiotap_parser.h"
-#include "exceptions.h"
+#include <tins/utils/radiotap_writer.h>
+#include <tins/utils/radiotap_parser.h>
+#include <tins/exceptions.h>
 
 using std::vector;
 

@@ -30,10 +30,10 @@
 #ifndef TINS_PPI_H
 #define TINS_PPI_H
 
-#include "pdu.h"
-#include "macros.h"
-#include "endianness.h"
-#include "small_uint.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/endianness.h>
+#include <tins/small_uint.h>
 
 #ifdef TINS_HAVE_PCAP
 

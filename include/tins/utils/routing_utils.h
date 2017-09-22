@@ -32,9 +32,9 @@
 
 #include <vector>
 #include <set>
-#include "../macros.h"
-#include "../ip_address.h"
-#include "../ipv6_address.h"
+#include <tins/macros.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
 
 // Fix for Windows interface define on combaseapi.h
 #undef interface

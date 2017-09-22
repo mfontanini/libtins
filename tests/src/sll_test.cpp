@@ -2,10 +2,10 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "sll.h"
-#include "hw_address.h"
-#include "constants.h"
-#include "ip.h"
+#include <tins/sll.h>
+#include <tins/hw_address.h>
+#include <tins/constants.h>
+#include <tins/ip.h>
 
 using namespace std;
 using namespace Tins;

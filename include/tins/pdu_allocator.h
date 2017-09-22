@@ -31,7 +31,7 @@
 #define TINS_PDU_ALLOCATOR_H
 
 #include <map>
-#include "pdu.h"
+#include <tins/pdu.h>
 
 namespace Tins {
 /**

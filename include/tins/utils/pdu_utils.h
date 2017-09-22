@@ -30,9 +30,9 @@
 #ifndef TINS_PDU_UTILS_H
 #define TINS_PDU_UTILS_H
 
-#include "../macros.h"
-#include "../pdu.h"
-#include "../detail/type_traits.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/detail/type_traits.h>
 
 namespace Tins {
 namespace Utils {

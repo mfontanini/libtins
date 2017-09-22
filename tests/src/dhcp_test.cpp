@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <list>
 #include <string>
-#include "dhcp.h"
-#include "utils.h"
-#include "ethernetII.h"
-#include "hw_address.h"
-#include "ip_address.h"
+#include <tins/dhcp.h>
+#include <tins/utils.h>
+#include <tins/ethernetII.h>
+#include <tins/hw_address.h>
+#include <tins/ip_address.h>
 
 using namespace std;
 using namespace Tins;

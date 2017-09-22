@@ -27,12 +27,12 @@
  *
  */
 
-#include "handshake_capturer.h"
+#include <tins/handshake_capturer.h>
 
 #ifdef TINS_HAVE_DOT11
 
 #include <algorithm>
-#include "dot11/dot11_data.h"
+#include <tins/dot11/dot11_data.h>
 
 using std::max_element;
 using std::max;

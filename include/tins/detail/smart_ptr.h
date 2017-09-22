@@ -31,7 +31,7 @@
 #define TINS_SMART_PTR_H
 
 #include <memory>
-#include "../cxxstd.h"
+#include <tins/cxxstd.h>
 
 namespace Tins {
 namespace Internals {

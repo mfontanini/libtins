@@ -27,8 +27,8 @@
  *
  */
  
-#include "pdu.h"
-#include "packet_sender.h"
+#include <tins/pdu.h>
+#include <tins/packet_sender.h>
 
 using std::swap;
 using std::vector;

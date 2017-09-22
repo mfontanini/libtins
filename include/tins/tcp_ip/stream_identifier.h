@@ -30,7 +30,7 @@
 #ifndef TINS_TCP_IP_STREAM_ID_H
 #define TINS_TCP_IP_STREAM_ID_H
 
-#include "../config.h"
+#include <tins/config.h>
 
 #ifdef TINS_HAVE_TCPIP
 

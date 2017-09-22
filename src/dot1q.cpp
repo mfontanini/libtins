@@ -28,10 +28,10 @@
  */
 
 #include <cstring>
-#include "dot1q.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "detail/pdu_helpers.h"
+#include <tins/dot1q.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/detail/pdu_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

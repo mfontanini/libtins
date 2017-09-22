@@ -27,18 +27,18 @@
  *
  */
 
-#include "config.h"
+#include <tins/config.h>
 
 #if !defined(TINS_DOT_11) && defined(TINS_HAVE_DOT11)
 #define TINS_DOT_11
 
-#include "dot11/dot11_base.h"
-#include "dot11/dot11_data.h"
-#include "dot11/dot11_mgmt.h"
-#include "dot11/dot11_beacon.h"
-#include "dot11/dot11_assoc.h"
-#include "dot11/dot11_auth.h"
-#include "dot11/dot11_probe.h"
-#include "dot11/dot11_control.h"
+#include <tins/dot11/dot11_base.h>
+#include <tins/dot11/dot11_data.h>
+#include <tins/dot11/dot11_mgmt.h>
+#include <tins/dot11/dot11_beacon.h>
+#include <tins/dot11/dot11_assoc.h>
+#include <tins/dot11/dot11_auth.h>
+#include <tins/dot11/dot11_probe.h>
+#include <tins/dot11/dot11_control.h>
 
 #endif // TINS_DOT_11

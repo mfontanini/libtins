@@ -3,8 +3,8 @@
 #include <string>
 #include <iostream>
 #include <stdint.h>
-#include "arp.h"
-#include "ip_address.h"
+#include <tins/arp.h>
+#include <tins/ip_address.h>
 
 
 using namespace std;

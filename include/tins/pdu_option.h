@@ -34,8 +34,8 @@
 #include <string>
 #include <cstring>
 #include <stdint.h>
-#include "exceptions.h"
-#include "detail/type_traits.h"
+#include <tins/exceptions.h>
+#include <tins/detail/type_traits.h>
 
 namespace Tins {
 

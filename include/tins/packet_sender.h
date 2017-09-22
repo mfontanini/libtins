@@ -35,13 +35,13 @@
 #include <vector>
 #include <stdint.h>
 #include <map>
-#include "config.h"
+#include <tins/config.h>
 #ifdef TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
     #include <pcap.h>
 #endif // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
-#include "network_interface.h"
-#include "macros.h"
-#include "cxxstd.h"
+#include <tins/network_interface.h>
+#include <tins/macros.h>
+#include <tins/cxxstd.h>
 
 struct timeval;
 struct sockaddr;

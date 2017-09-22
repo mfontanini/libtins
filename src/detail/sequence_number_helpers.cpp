@@ -27,7 +27,7 @@
  *
  */
 
-#include "detail/sequence_number_helpers.h"
+#include <tins/detail/sequence_number_helpers.h>
 
 namespace Tins {
 namespace Internals {

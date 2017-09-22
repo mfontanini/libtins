@@ -1,11 +1,11 @@
 #include <algorithm>
 #include <gtest/gtest.h>
-#include "ethernetII.h"
-#include "rawpdu.h"
-#include "udp.h"
-#include "dhcp.h"
-#include "dhcpv6.h"
-#include "ip.h"
+#include <tins/ethernetII.h>
+#include <tins/rawpdu.h>
+#include <tins/udp.h>
+#include <tins/dhcp.h>
+#include <tins/dhcpv6.h>
+#include <tins/ip.h>
 
 using namespace Tins;
 

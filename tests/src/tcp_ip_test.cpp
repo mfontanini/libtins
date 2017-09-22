@@ -1,4 +1,4 @@
-#include "config.h"
+#include <tins/config.h>
 #include <gtest/gtest.h>
 
 #ifdef TINS_HAVE_TCPIP
@@ -8,18 +8,18 @@
 #include <string>
 #include <limits>
 #include <cassert>
-#include "tcp_ip/stream_follower.h"
-#include "tcp.h"
-#include "ip.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "exceptions.h"
-#include "ethernetII.h"
-#include "rawpdu.h"
-#include "packet.h"
-#include "config.h"
+#include <tins/tcp_ip/stream_follower.h>
+#include <tins/tcp.h>
+#include <tins/ip.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/exceptions.h>
+#include <tins/ethernetII.h>
+#include <tins/rawpdu.h>
+#include <tins/packet.h>
+#include <tins/config.h>
 #ifdef TINS_HAVE_ACK_TRACKER
-    #include "tcp_ip/ack_tracker.h"
+    #include <tins/tcp_ip/ack_tracker.h>
 #endif // TINS_HAVE_ACK_TRACKER
 
 using namespace std;

@@ -33,9 +33,9 @@
 
 #include <stdint.h>
 #include <vector>
-#include "macros.h"
-#include "cxxstd.h"
-#include "exceptions.h"
+#include <tins/macros.h>
+#include <tins/cxxstd.h>
+#include <tins/exceptions.h>
 
 /** \brief The Tins namespace.
  */

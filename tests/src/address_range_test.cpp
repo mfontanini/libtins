@@ -3,9 +3,9 @@
 #include <string>
 #include <algorithm>
 #include <stdint.h>
-#include "address_range.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
+#include <tins/address_range.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
 
 using namespace std;
 using namespace Tins;

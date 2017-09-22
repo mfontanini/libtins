@@ -27,7 +27,7 @@
  *
  */
 
-#include "macros.h"
+#include <tins/macros.h>
 #ifndef _WIN32
     #include <arpa/inet.h>
     #ifdef BSD
@@ -44,9 +44,9 @@
 #include <limits>
 #include <sstream>
 #include <iostream>
-#include "ipv6_address.h"
-#include "address_range.h"
-#include "exceptions.h"
+#include <tins/ipv6_address.h>
+#include <tins/address_range.h>
+#include <tins/exceptions.h>
 
 using std::memset;
 using std::memcpy;

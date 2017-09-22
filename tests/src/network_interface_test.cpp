@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
-#include "network_interface.h"
-#include "macros.h"
+#include <tins/network_interface.h>
+#include <tins/macros.h>
 
 using namespace Tins;
 using namespace std;

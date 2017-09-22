@@ -28,12 +28,12 @@
  */
 
 #include <cstring>
-#include "arp.h"
-#include "ethernetII.h"
-#include "rawpdu.h"
-#include "constants.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/arp.h>
+#include <tins/ethernetII.h>
+#include <tins/rawpdu.h>
+#include <tins/constants.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

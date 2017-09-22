@@ -31,12 +31,12 @@
 #define TINS_DHCPV6_H
 
 #include <cstring>
-#include "pdu.h"
-#include "macros.h"
-#include "endianness.h"
-#include "small_uint.h"
-#include "ipv6_address.h"
-#include "pdu_option.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/endianness.h>
+#include <tins/small_uint.h>
+#include <tins/ipv6_address.h>
+#include <tins/pdu_option.h>
 
 namespace Tins {
 namespace Memory  {

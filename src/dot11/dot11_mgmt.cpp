@@ -27,13 +27,13 @@
  *
  */   
 
-#include "dot11/dot11_mgmt.h"
+#include <tins/dot11/dot11_mgmt.h>
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
 #include <iterator>
-#include "rsn_information.h"
-#include "memory_helpers.h"
+#include <tins/rsn_information.h>
+#include <tins/memory_helpers.h>
 
 using std::string;
 using std::copy;

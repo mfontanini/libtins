@@ -39,10 +39,10 @@
 #endif // TINS_IS_CXX11
 #include <sstream>
 #include <iostream>
-#include "ip_address.h"
-#include "endianness.h"
-#include "address_range.h"
-#include "exceptions.h"
+#include <tins/ip_address.h>
+#include <tins/endianness.h>
+#include <tins/address_range.h>
+#include <tins/exceptions.h>
 
 
 using std::string;

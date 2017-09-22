@@ -28,11 +28,11 @@
  */
 
 #include <cstring>
-#include "exceptions.h"
-#include "pktap.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "detail/pdu_helpers.h"
+#include <tins/exceptions.h>
+#include <tins/pktap.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/detail/pdu_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 

@@ -31,10 +31,10 @@
     #include <sys/time.h>
 #endif
 #include <string.h>
-#include "packet_writer.h"
-#include "packet.h"
-#include "pdu.h"
-#include "exceptions.h"
+#include <tins/packet_writer.h>
+#include <tins/packet.h>
+#include <tins/pdu.h>
+#include <tins/exceptions.h>
 
 using std::string;
 

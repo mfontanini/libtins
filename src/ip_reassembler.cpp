@@ -27,10 +27,10 @@
  *
  */
 
-#include "ip.h"
-#include "constants.h"
-#include "ip_reassembler.h"
-#include "detail/pdu_helpers.h"
+#include <tins/ip.h>
+#include <tins/constants.h>
+#include <tins/ip_reassembler.h>
+#include <tins/detail/pdu_helpers.h>
 
 using std::make_pair;
 

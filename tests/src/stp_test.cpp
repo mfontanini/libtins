@@ -2,9 +2,9 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "stp.h"
-#include "dot3.h"
-#include "llc.h"
+#include <tins/stp.h>
+#include <tins/dot3.h>
+#include <tins/llc.h>
 
 using namespace std;
 using namespace Tins;

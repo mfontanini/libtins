@@ -1,10 +1,10 @@
 #include <iostream>
 #include <stdexcept>
 #include <gtest/gtest.h>
-#include "utils.h"
-#include "endianness.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
+#include <tins/utils.h>
+#include <tins/endianness.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
 
 using namespace Tins;
 

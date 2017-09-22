@@ -2,13 +2,13 @@
 #include <vector>
 #include <algorithm>
 #include <stdint.h>
-#include "pdu_allocator.h"
-#include "ethernetII.h"
-#include "snap.h"
-#include "sll.h"
-#include "dot1q.h"
-#include "ip.h"
-#include "ipv6.h"
+#include <tins/pdu_allocator.h>
+#include <tins/ethernetII.h>
+#include <tins/snap.h>
+#include <tins/sll.h>
+#include <tins/dot1q.h>
+#include <tins/ip.h>
+#include <tins/ipv6.h>
 
 
 using namespace Tins;

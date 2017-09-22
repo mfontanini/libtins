@@ -27,10 +27,10 @@
  *
  */
 
-#include "detail/icmp_extension_helpers.h"
-#include "memory_helpers.h"
-#include "pdu.h"
-#include "icmp_extension.h"
+#include <tins/detail/icmp_extension_helpers.h>
+#include <tins/memory_helpers.h>
+#include <tins/pdu.h>
+#include <tins/icmp_extension.h>
 
 using Tins::Memory::InputMemoryStream;
 

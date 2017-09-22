@@ -32,9 +32,9 @@
 
 #include <vector>
 #include <stdint.h>
-#include "macros.h"
-#include "pdu.h"
-#include "endianness.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/endianness.h>
 
 namespace Tins {
 

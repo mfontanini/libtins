@@ -31,7 +31,7 @@
 #include <vector>
 #include <cstring>
 #include <iterator>
-#include "macros.h"
+#include <tins/macros.h>
 #ifndef _WIN32
     #include <netinet/in.h>
     #if defined(BSD) || defined(__FreeBSD_kernel__)
@@ -49,10 +49,10 @@
     #include <iphlpapi.h>
     #undef interface
 #endif
-#include "network_interface.h"
-#include "endianness.h"
-#include "exceptions.h"
-#include "utils/routing_utils.h"
+#include <tins/network_interface.h>
+#include <tins/endianness.h>
+#include <tins/exceptions.h>
+#include <tins/utils/routing_utils.h>
 
 using std::string;
 using std::wstring;

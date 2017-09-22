@@ -28,10 +28,10 @@
  */
 
 #include <cstring>
-#include "endianness.h"
-#include "dhcp.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/endianness.h>
+#include <tins/dhcp.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using std::string;
 using std::vector;

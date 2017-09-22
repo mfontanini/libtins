@@ -27,12 +27,12 @@
  *
  */
 
-#include "utils/checksum_utils.h"
+#include <tins/utils/checksum_utils.h>
 #include <cstring>
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "endianness.h"
-#include "memory_helpers.h"
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/endianness.h>
+#include <tins/memory_helpers.h>
 
 using std::memcpy;
 

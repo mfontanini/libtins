@@ -29,12 +29,12 @@
 
 #include <utility>
 #include <cstdio>
-#include "dns.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "exceptions.h"
-#include "endianness.h"
-#include "memory_helpers.h"
+#include <tins/dns.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/exceptions.h>
+#include <tins/endianness.h>
+#include <tins/memory_helpers.h>
 
 using std::string;
 using std::memcpy;

@@ -30,7 +30,7 @@
 #ifndef TINS_TCP_IP_STREAM_H
 #define TINS_TCP_IP_STREAM_H
 
-#include "../config.h"
+#include <tins/config.h>
 
 #ifdef TINS_HAVE_TCPIP
 
@@ -40,10 +40,10 @@
 #include <functional>
 #include <chrono>
 #include <stdint.h>
-#include "../macros.h"
-#include "../hw_address.h"
-#include "../config.h"
-#include "flow.h"
+#include <tins/macros.h>
+#include <tins/hw_address.h>
+#include <tins/config.h>
+#include <tins/tcp_ip/flow.h>
 #ifdef TINS_HAVE_TCP_STREAM_CUSTOM_DATA
     #include <boost/any.hpp>
 #endif

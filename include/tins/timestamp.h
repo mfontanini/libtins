@@ -31,8 +31,8 @@
 #define TINS_TIMESTAMP_H
 
 #include <stdint.h>
-#include "macros.h"
-#include "cxxstd.h"
+#include <tins/macros.h>
+#include <tins/cxxstd.h>
 #if TINS_IS_CXX11
     #include <chrono>
 #endif

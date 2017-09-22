@@ -1,4 +1,4 @@
-#include "config.h"
+#include <tins/config.h>
 
 #ifdef TINS_HAVE_DOT11
 
@@ -6,9 +6,9 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "crypto.h"
-#include "arp.h"
-#include "dot11/dot11_data.h"
+#include <tins/crypto.h>
+#include <tins/arp.h>
+#include <tins/dot11/dot11_data.h>
 
 using namespace Tins;
 

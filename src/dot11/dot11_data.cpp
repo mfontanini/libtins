@@ -27,13 +27,13 @@
  *
  */
 
-#include "dot11/dot11_data.h"
+#include <tins/dot11/dot11_data.h>
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
-#include "rawpdu.h"
-#include "snap.h"
-#include "memory_helpers.h"
+#include <tins/rawpdu.h>
+#include <tins/snap.h>
+#include <tins/memory_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

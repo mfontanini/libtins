@@ -1,10 +1,10 @@
-#include "config.h"
+#include <tins/config.h>
 
 #ifdef TINS_HAVE_DOT11
 
 #include <gtest/gtest.h>
+#include <tins/detail/smart_ptr.h>
 #include "tests/dot11_control.h"
-#include "detail/smart_ptr.h"
 
 using namespace std;
 using namespace Tins;

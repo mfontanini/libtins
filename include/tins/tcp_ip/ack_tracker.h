@@ -30,13 +30,13 @@
 #ifndef TINS_TCP_IP_ACK_TRACKER_H
 #define TINS_TCP_IP_ACK_TRACKER_H
 
-#include "../config.h"
+#include <tins/config.h>
 
 #ifdef TINS_HAVE_ACK_TRACKER
 
 #include <vector>
 #include <boost/icl/interval_set.hpp>
-#include "../macros.h"
+#include <tins/macros.h>
 
 namespace Tins {
 

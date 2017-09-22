@@ -27,7 +27,7 @@
  *
  */
 
-#include "../config.h"
+#include <tins/config.h>
 
 #if !defined(TINS_DOT11_DOT11_MGMT_H) && defined(TINS_HAVE_DOT11)
 
@@ -35,8 +35,8 @@
 
 #include <vector>
 #include <utility>
-#include "../dot11/dot11_base.h"
-#include "../macros.h"
+#include <tins/dot11/dot11_base.h>
+#include <tins/macros.h>
 
 namespace Tins {
 /**

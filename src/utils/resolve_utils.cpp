@@ -27,7 +27,7 @@
  *
  */
 
-#include "utils/resolve_utils.h"
+#include <tins/utils/resolve_utils.h>
  #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <sys/socket.h>
@@ -48,15 +48,15 @@
     #include <iphlpapi.h>
     #undef interface
 #endif
-#include "exceptions.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "hw_address.h"
-#include "ethernetII.h"
-#include "arp.h"
-#include "packet_sender.h"
-#include "network_interface.h"
-#include "detail/smart_ptr.h"
+#include <tins/exceptions.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/hw_address.h>
+#include <tins/ethernetII.h>
+#include <tins/arp.h>
+#include <tins/packet_sender.h>
+#include <tins/network_interface.h>
+#include <tins/detail/smart_ptr.h>
 
 using std::string;
 

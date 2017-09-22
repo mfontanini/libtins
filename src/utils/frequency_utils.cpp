@@ -27,7 +27,7 @@
  *
  */
 
-#include "utils/frequency_utils.h"
+#include <tins/utils/frequency_utils.h>
 
 namespace Tins {
 namespace Utils {

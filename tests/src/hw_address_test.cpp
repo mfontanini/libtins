@@ -4,7 +4,7 @@
 #include <map>
 #include <sstream>
 #include <stdint.h>
-#include "hw_address.h"
+#include <tins/hw_address.h>
 
 using namespace Tins;
 

@@ -30,8 +30,8 @@
 #ifndef TINS_PKTAP_H
 #define TINS_PKTAP_H
 
-#include "pdu.h"
-#include "macros.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
 
 // This class is only available if pcap is enabled
 #ifdef TINS_HAVE_PCAP

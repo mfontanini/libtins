@@ -2,9 +2,9 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "pppoe.h"
-#include "ethernetII.h"
-#include "rawpdu.h"
+#include <tins/pppoe.h>
+#include <tins/ethernetII.h>
+#include <tins/rawpdu.h>
 
 using namespace std;
 using namespace Tins;

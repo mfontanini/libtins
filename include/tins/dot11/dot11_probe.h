@@ -27,14 +27,14 @@
  *
  */
 
-#include "../config.h"
+#include <tins/config.h>
 
 #if !defined(TINS_DOT11_DOT11_PROBE_H) && defined(TINS_HAVE_DOT11)
 
 #define TINS_DOT11_DOT11_PROBE_H
 
-#include "../dot11/dot11_mgmt.h"
-#include "../macros.h"
+#include <tins/dot11/dot11_mgmt.h>
+#include <tins/macros.h>
 
 namespace Tins {
 /**

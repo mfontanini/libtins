@@ -28,14 +28,14 @@
  */
 
 #include <cstring>
-#include "tcp.h"
-#include "ip.h"
-#include "ipv6.h"
-#include "constants.h"
-#include "rawpdu.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "utils/checksum_utils.h"
+#include <tins/tcp.h>
+#include <tins/ip.h>
+#include <tins/ipv6.h>
+#include <tins/constants.h>
+#include <tins/rawpdu.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/utils/checksum_utils.h>
 
 using std::vector;
 using std::pair;

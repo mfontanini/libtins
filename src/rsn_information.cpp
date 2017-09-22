@@ -27,15 +27,15 @@
  *
  */
 
-#include "rsn_information.h"
+#include <tins/rsn_information.h>
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
-#include "exceptions.h"
-#include "pdu.h"
-#include "pdu_option.h"
-#include "memory_helpers.h"
-#include "dot11/dot11_base.h"
+#include <tins/exceptions.h>
+#include <tins/pdu.h>
+#include <tins/pdu_option.h>
+#include <tins/memory_helpers.h>
+#include <tins/dot11/dot11_base.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

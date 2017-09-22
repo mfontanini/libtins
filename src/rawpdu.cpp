@@ -27,8 +27,8 @@
  *
  */
 
-#include "rawpdu.h"
-#include "memory_helpers.h"
+#include <tins/rawpdu.h>
+#include <tins/memory_helpers.h>
 
 using Tins::Memory::OutputMemoryStream;
 

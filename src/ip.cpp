@@ -35,17 +35,17 @@
 #else
     #include <winsock2.h>
 #endif
-#include "ip.h"
-#include "rawpdu.h"
-#include "packet_sender.h"
-#include "constants.h"
-#include "network_interface.h"
-#include "exceptions.h"
-#include "pdu_allocator.h"
-#include "memory_helpers.h"
-#include "utils/checksum_utils.h"
-#include "detail/pdu_helpers.h"
-#include "pdu_allocator.h"
+#include <tins/ip.h>
+#include <tins/rawpdu.h>
+#include <tins/packet_sender.h>
+#include <tins/constants.h>
+#include <tins/network_interface.h>
+#include <tins/exceptions.h>
+#include <tins/pdu_allocator.h>
+#include <tins/memory_helpers.h>
+#include <tins/utils/checksum_utils.h>
+#include <tins/detail/pdu_helpers.h>
+#include <tins/pdu_allocator.h>
 
 using std::memcmp;
 using std::vector;

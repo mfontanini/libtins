@@ -2,11 +2,11 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "icmp.h"
-#include "ip.h"
-#include "ethernetII.h"
-#include "mpls.h"
-#include "rawpdu.h"
+#include <tins/icmp.h>
+#include <tins/ip.h>
+#include <tins/ethernetII.h>
+#include <tins/mpls.h>
+#include <tins/rawpdu.h>
 
 using namespace std;
 using namespace Tins;

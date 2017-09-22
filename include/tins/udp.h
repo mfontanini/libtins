@@ -30,9 +30,9 @@
 #ifndef TINS_UDP_H
 #define TINS_UDP_H
 
-#include "macros.h"
-#include "pdu.h"
-#include "endianness.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/endianness.h>
 
 namespace Tins {
 

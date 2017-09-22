@@ -27,12 +27,12 @@
  *
  */
 
-#include "radiotap.h"
+#include <tins/radiotap.h>
 
 #ifdef TINS_HAVE_DOT11
 
 #include <cstring>
-#include "macros.h"
+#include <tins/macros.h>
 #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <net/if_dl.h>
@@ -42,14 +42,14 @@
     #endif
     #include <net/ethernet.h>
 #endif
-#include "dot11/dot11_base.h"
-#include "packet_sender.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "utils/checksum_utils.h"
-#include "utils/frequency_utils.h"
-#include "utils/radiotap_parser.h"
-#include "utils/radiotap_writer.h"
+#include <tins/dot11/dot11_base.h>
+#include <tins/packet_sender.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/utils/checksum_utils.h>
+#include <tins/utils/frequency_utils.h>
+#include <tins/utils/radiotap_parser.h>
+#include <tins/utils/radiotap_writer.h>
 
 using std::memcpy;
 

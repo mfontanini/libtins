@@ -2,12 +2,12 @@
 #include <algorithm>
 #include <string>
 #include <stdint.h>
-#include "ip.h"
-#include "tcp.h"
-#include "udp.h"
-#include "rawpdu.h"
-#include "pdu.h"
-#include "packet.h"
+#include <tins/ip.h>
+#include <tins/tcp.h>
+#include <tins/udp.h>
+#include <tins/rawpdu.h>
+#include <tins/pdu.h>
+#include <tins/packet.h>
 
 using namespace std;
 using namespace Tins;

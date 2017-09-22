@@ -30,13 +30,13 @@
 #ifndef TINS_IP_H
 #define TINS_IP_H
 
-#include "pdu.h"
-#include "small_uint.h"
-#include "endianness.h"
-#include "ip_address.h"
-#include "pdu_option.h"
-#include "macros.h"
-#include "cxxstd.h"
+#include <tins/pdu.h>
+#include <tins/small_uint.h>
+#include <tins/endianness.h>
+#include <tins/ip_address.h>
+#include <tins/pdu_option.h>
+#include <tins/macros.h>
+#include <tins/cxxstd.h>
 
 namespace Tins {
 namespace Memory {

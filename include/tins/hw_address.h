@@ -34,8 +34,8 @@
 #include <iosfwd>
 #include <string>
 #include <cstring>
-#include "cxxstd.h"
-#include "macros.h"
+#include <tins/cxxstd.h>
+#include <tins/macros.h>
 #if TINS_IS_CXX11
     // std::hash
     #include <memory>

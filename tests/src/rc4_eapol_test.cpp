@@ -2,7 +2,7 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "eapol.h"
+#include <tins/eapol.h>
 
 using namespace std;
 using namespace Tins;

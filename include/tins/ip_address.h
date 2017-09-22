@@ -33,8 +33,8 @@
 #include <string>
 #include <iosfwd>
 #include <stdint.h>
-#include "cxxstd.h"
-#include "macros.h"
+#include <tins/cxxstd.h>
+#include <tins/macros.h>
 #include <functional>
 
 namespace Tins {

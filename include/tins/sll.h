@@ -31,10 +31,10 @@
 #define TINS_SLL_H
 
 #include <vector>
-#include "pdu.h"
-#include "macros.h"
-#include "endianness.h"
-#include "hw_address.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/endianness.h>
+#include <tins/hw_address.h>
 
 namespace Tins {
 

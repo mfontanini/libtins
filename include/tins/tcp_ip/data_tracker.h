@@ -33,8 +33,8 @@
 #include <vector>
 #include <map>
 #include <stdint.h>
-#include "../config.h"
-#include "../macros.h"
+#include <tins/config.h>
+#include <tins/macros.h>
 
 #ifdef TINS_HAVE_TCPIP
 

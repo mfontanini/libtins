@@ -28,7 +28,7 @@
  */
 
 #include <cstring>
-#include "macros.h"
+#include <tins/macros.h>
 #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <net/if_dl.h>
@@ -38,14 +38,14 @@
     #include <netinet/in.h>
     #include <net/ethernet.h>
 #endif
-#include "ethernetII.h"
-#include "config.h"
-#include "packet_sender.h"
-#include "pppoe.h"
-#include "constants.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "detail/pdu_helpers.h"
+#include <tins/ethernetII.h>
+#include <tins/config.h>
+#include <tins/packet_sender.h>
+#include <tins/pppoe.h>
+#include <tins/constants.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/detail/pdu_helpers.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

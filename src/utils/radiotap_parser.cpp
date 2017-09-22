@@ -28,8 +28,8 @@
  */
 
 #include <iostream>
-#include "utils/radiotap_parser.h"
-#include "exceptions.h"
+#include <tins/utils/radiotap_parser.h>
+#include <tins/exceptions.h>
 
 using std::vector;
 

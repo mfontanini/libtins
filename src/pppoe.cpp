@@ -28,10 +28,10 @@
  */
 
 #include <cstring>
-#include "pppoe.h"
-#include "rawpdu.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/pppoe.h>
+#include <tins/rawpdu.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using std::string;
 using std::vector;

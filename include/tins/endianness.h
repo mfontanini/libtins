@@ -31,7 +31,7 @@
 #define TINS_ENDIANNESS_H
 
 #include <stdint.h>
-#include "macros.h"
+#include <tins/macros.h>
 
 #if defined(__APPLE__)
     #include <sys/types.h>

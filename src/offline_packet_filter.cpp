@@ -28,9 +28,9 @@
  */
 
 #include <string.h>
-#include "offline_packet_filter.h"
-#include "pdu.h"
-#include "exceptions.h"
+#include <tins/offline_packet_filter.h>
+#include <tins/pdu.h>
+#include <tins/exceptions.h>
 
 using std::string;
 

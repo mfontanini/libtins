@@ -27,9 +27,9 @@
  *
  */
 
-#include "pdu_iterator.h"
-#include "pdu.h"
-#include "packet.h"
+#include <tins/pdu_iterator.h>
+#include <tins/pdu.h>
+#include <tins/packet.h>
 
 namespace Tins {
 

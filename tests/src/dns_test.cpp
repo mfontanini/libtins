@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
-#include "dns.h"
-#include "ipv6_address.h"
+#include <tins/dns.h>
+#include <tins/ipv6_address.h>
 
 using namespace Tins;
 

@@ -32,10 +32,10 @@
 
 #include <vector>
 #include <map>
-#include "pdu.h"
-#include "macros.h"
-#include "ip_address.h"
-#include "ip.h"
+#include <tins/pdu.h>
+#include <tins/macros.h>
+#include <tins/ip_address.h>
+#include <tins/ip.h>
 
 namespace Tins {
 

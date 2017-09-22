@@ -28,7 +28,7 @@
  */
 
 #include <cstring>
-#include "macros.h"
+#include <tins/macros.h>
 #ifndef _WIN32
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         #include <net/if_dl.h>
@@ -38,11 +38,11 @@
     #include <net/ethernet.h>
     #include <netinet/in.h>
 #endif
-#include "dot3.h"
-#include "packet_sender.h"
-#include "llc.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
+#include <tins/dot3.h>
+#include <tins/packet_sender.h>
+#include <tins/llc.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
 
 using std::copy;
 using std::equal;

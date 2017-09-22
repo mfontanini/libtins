@@ -32,9 +32,9 @@
 
 #include <vector>
 #include <stdint.h>
-#include "macros.h"
-#include "small_uint.h"
-#include "endianness.h"
+#include <tins/macros.h>
+#include <tins/small_uint.h>
+#include <tins/endianness.h>
 
 namespace Tins {
 

@@ -27,10 +27,10 @@
  *
  */
 
-#include "dot11/dot11_control.h"
+#include <tins/dot11/dot11_control.h>
 #ifdef TINS_HAVE_DOT11
 
-#include "memory_helpers.h"
+#include <tins/memory_helpers.h>
 
 using std::copy;
 

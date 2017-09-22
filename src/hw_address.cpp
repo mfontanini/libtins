@@ -30,8 +30,8 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
-#include "hw_address.h"
-#include "exceptions.h"
+#include <tins/hw_address.h>
+#include <tins/exceptions.h>
 
 using std::string;
 using std::ostream;

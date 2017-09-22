@@ -33,7 +33,7 @@
 #else
     #include <sys/time.h>
 #endif
-#include "timestamp.h"
+#include <tins/timestamp.h>
 
 namespace Tins {
 

@@ -2,7 +2,7 @@
 #include <cstring>
 #include <string>
 #include <stdint.h>
-#include "dhcpv6.h"
+#include <tins/dhcpv6.h>
 
 using namespace Tins;
 

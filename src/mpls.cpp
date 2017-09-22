@@ -27,12 +27,12 @@
  *
  */
 
-#include "mpls.h"
-#include "ip.h"
-#include "ipv6.h"
-#include "rawpdu.h"
-#include "memory_helpers.h"
-#include "icmp_extension.h"
+#include <tins/mpls.h>
+#include <tins/ip.h>
+#include <tins/ipv6.h>
+#include <tins/rawpdu.h>
+#include <tins/memory_helpers.h>
+#include <tins/icmp_extension.h>
 
 using Tins::Memory::InputMemoryStream;
 using Tins::Memory::OutputMemoryStream;

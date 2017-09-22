@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <algorithm>
-#include "ipsec.h"
-#include "ethernetII.h"
-#include "rawpdu.h"
+#include <tins/ipsec.h>
+#include <tins/ethernetII.h>
+#include <tins/rawpdu.h>
 
 using namespace Tins;
 

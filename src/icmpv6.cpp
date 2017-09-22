@@ -28,14 +28,14 @@
  */
  
 #include <cstring>
-#include "icmpv6.h"
-#include "ipv6.h"
-#include "rawpdu.h"
-#include "constants.h"
-#include "exceptions.h"
-#include "memory_helpers.h"
-#include "detail/icmp_extension_helpers.h"
-#include "utils/checksum_utils.h"
+#include <tins/icmpv6.h>
+#include <tins/ipv6.h>
+#include <tins/rawpdu.h>
+#include <tins/constants.h>
+#include <tins/exceptions.h>
+#include <tins/memory_helpers.h>
+#include <tins/detail/icmp_extension_helpers.h>
+#include <tins/utils/checksum_utils.h>
 
 using std::memset;
 using std::vector;

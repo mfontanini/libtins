@@ -31,11 +31,11 @@
 #ifndef TINS_ARP_H
 #define TINS_ARP_H
 
-#include "macros.h"
-#include "pdu.h"
-#include "endianness.h"
-#include "hw_address.h"
-#include "ip_address.h"
+#include <tins/macros.h>
+#include <tins/pdu.h>
+#include <tins/endianness.h>
+#include <tins/hw_address.h>
+#include <tins/ip_address.h>
 
 namespace Tins {
 

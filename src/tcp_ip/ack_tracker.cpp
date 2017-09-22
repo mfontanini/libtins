@@ -27,13 +27,13 @@
  *
  */
 
-#include "tcp_ip/ack_tracker.h"
+#include <tins/tcp_ip/ack_tracker.h>
 
 #ifdef TINS_HAVE_ACK_TRACKER
 
 #include <limits>
-#include "tcp.h"
-#include "detail/sequence_number_helpers.h"
+#include <tins/tcp.h>
+#include <tins/detail/sequence_number_helpers.h>
 
 using std::vector;
 using std::numeric_limits;

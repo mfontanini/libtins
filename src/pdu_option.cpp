@@ -28,13 +28,13 @@
  */
 
 #include <algorithm>
-#include "pdu.h"
-#include "ip_address.h"
-#include "ipv6_address.h"
-#include "hw_address.h"
-#include "endianness.h"
-#include "pdu_option.h"
-#include "memory_helpers.h"
+#include <tins/pdu.h>
+#include <tins/ip_address.h>
+#include <tins/ipv6_address.h>
+#include <tins/hw_address.h>
+#include <tins/endianness.h>
+#include <tins/pdu_option.h>
+#include <tins/memory_helpers.h>
 
 using std::vector;
 using std::pair;
