@@ -32,10 +32,10 @@
 
 #include <string>
 #include <iosfwd>
+#include <functional>
 #include <stdint.h>
 #include <tins/cxxstd.h>
 #include <tins/macros.h>
-#include <functional>
 
 namespace Tins {
 /**
@@ -181,6 +181,15 @@ public:
      * \brief Returns true if this is a broadcast IPv4 address.
      */
     bool is_broadcast() const;
+
+    /**
+     * \brief Returns the size of an IPv4 Address.
+     *
+     * This returns the value of IPv4Address::address_size
+     */
+    size_t size() const {
+        return address_size;
+    }
     
     /**
      * \brief Writes this address to a std::ostream.

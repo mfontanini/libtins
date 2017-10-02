@@ -196,6 +196,15 @@ public:
      * ff00::/8, false otherwise.
      */
     bool is_multicast() const;
+
+    /**
+     * \brief Returns the size of an IPv6 Address.
+     *
+     * This returns the value of IPv6Address::address_size
+     */
+    size_t size() const {
+        return address_size;
+    }
     
     /**
      * \brief Writes this address in hex-notation to a std::ostream.
