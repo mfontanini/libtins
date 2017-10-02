@@ -113,6 +113,6 @@ TEST(IPAddressTest, Mask) {
 }
 
 TEST(IPv4AddressTest, Size) {
-    EXPECT_EQ(4, IPv4Address("127.0.0.1").size());
-    EXPECT_EQ(4, IPv4Address().size());
+    EXPECT_EQ(4UL, IPv4Address("127.0.0.1").size());
+    EXPECT_EQ(4UL, IPv4Address().size());
 }

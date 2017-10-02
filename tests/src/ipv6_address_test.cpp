@@ -125,8 +125,8 @@ TEST(IPv6AddressTest, MaskAddress) {
 }
 
 TEST(IPv6AddressTest, Size) {
-    EXPECT_EQ(16, IPv6Address("dead:beef::1").size());
-    EXPECT_EQ(16, IPv6Address().size());
+    EXPECT_EQ(16UL, IPv6Address("dead:beef::1").size());
+    EXPECT_EQ(16UL, IPv6Address().size());
 }
 
 #if TINS_IS_CXX11

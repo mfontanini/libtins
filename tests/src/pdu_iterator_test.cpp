@@ -42,7 +42,7 @@ public:
 
         const PDU& pdu = *iterate_pdus(ip).begin();
         EXPECT_EQ(PDU::IP, pdu.pdu_type());
-        EXPECT_GT(const_cast<PDU&>(pdu).serialize().size(), 0);
+        EXPECT_GT(const_cast<PDU&>(pdu).serialize().size(), 0UL);
     }
 };
 
