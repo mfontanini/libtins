@@ -5,9 +5,9 @@
 #include <sstream>
 #include <stdint.h>
 #include <tins/ipv6_address.h>
+#include <tins/macros.h>
 
 using namespace Tins;
-
 
 const uint8_t empty_addr[IPv6Address::address_size] = { 0 };
 
@@ -123,3 +123,17 @@ TEST(IPv6AddressTest, MaskAddress) {
         IPv6Address("deaf:beef:adad:beef::") & IPv6Address("ffff:e000::")
     );
 }
+
+#if TINS_IS_CXX11
+
+TEST(IPv6AddressTest, HashTest) {
+    using std::hash;
+    const auto hasher = [](const IPv6Address& address) {
+        return hash<IPv6Address>()(address);
+    };
+    EXPECT_NE(hasher("dead:beef::"), hasher("dead:beef::1"));
+    EXPECT_NE(hasher("dead:beef::"), hasher("feed:dead::1"));
+    EXPECT_EQ(hasher("dead:beef::"), hasher("dead:beef::"));
+}
+
+#endif
