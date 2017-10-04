@@ -32,10 +32,10 @@
 
 #include <string>
 #include <iosfwd>
+#include <functional>
 #include <stdint.h>
 #include <tins/cxxstd.h>
 #include <tins/macros.h>
-#include <functional>
 
 namespace Tins {
 
@@ -196,6 +196,15 @@ public:
      * ff00::/8, false otherwise.
      */
     bool is_multicast() const;
+
+    /**
+     * \brief Returns the size of an IPv6 Address.
+     *
+     * This returns the value of IPv6Address::address_size
+     */
+    size_t size() const {
+        return address_size;
+    }
     
     /**
      * \brief Writes this address in hex-notation to a std::ostream.
@@ -224,9 +233,14 @@ namespace std {
 
 template<>
 struct hash<Tins::IPv6Address> {
-    size_t operator()(const Tins::IPv6Address& addr) const
-    {
-        return std::hash<string>()(addr.to_string());
+    // Implementation taken from boost.functional
+    size_t operator()(const Tins::IPv6Address& addr) const {
+        std::size_t output = Tins::IPv6Address::address_size;
+        Tins::IPv6Address::const_iterator iter = addr.begin();
+        for (; iter != addr.end(); ++iter) {
+            output ^= *iter + 0x9e3779b9 + (output << 6) + (output >> 2);
+        }
+        return output;
     }
 };
 

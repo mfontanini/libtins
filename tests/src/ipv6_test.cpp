@@ -336,7 +336,7 @@ TEST_F(IPv6Test, OptionIteration) {
     IPv6& ipv6 = pkt.rfind_pdu<IPv6>();
     const IPv6::headers_type& headers = ipv6.headers();
 
-    ASSERT_EQ(1, headers.size());
+    ASSERT_EQ(1UL, headers.size());
     const IPv6::ext_header& header = headers[0];
     EXPECT_EQ(IPv6::ROUTING, header.option());
 }
@@ -349,7 +349,7 @@ TEST_F(IPv6Test, OptionAddition) {
 
     const IPv6::headers_type& headers = ipv6.headers();
 
-    ASSERT_EQ(2, headers.size());
+    ASSERT_EQ(2UL, headers.size());
     EXPECT_EQ(IPv6::ROUTING, headers[0].option());
     EXPECT_EQ(IPv6::AUTHENTICATION, headers[1].option());
 

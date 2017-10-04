@@ -111,3 +111,8 @@ TEST(IPAddressTest, Mask) {
         IPv4Address("192.255.1.2") & IPv4Address("255.128.0.0")
     );
 }
+
+TEST(IPv4AddressTest, Size) {
+    EXPECT_EQ(4UL, IPv4Address("127.0.0.1").size());
+    EXPECT_EQ(4UL, IPv4Address().size());
+}
