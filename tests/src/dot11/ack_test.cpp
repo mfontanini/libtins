@@ -38,6 +38,7 @@ void test_equals_expected(const Dot11Ack& dot11) {
     EXPECT_EQ(dot11.more_frag(), 0);
     EXPECT_EQ(dot11.retry(), 0);
     EXPECT_EQ(dot11.power_mgmt(), 0);
+    EXPECT_EQ(dot11.more_data(), 0);
     EXPECT_EQ(dot11.wep(), 0);
     EXPECT_EQ(dot11.order(), 0);
     EXPECT_EQ(dot11.duration_id(), 0x234f);
@@ -56,6 +57,7 @@ TEST_F(Dot11AckTest, Constructor) {
     EXPECT_EQ(dot11.more_frag(), 0);
     EXPECT_EQ(dot11.retry(), 0);
     EXPECT_EQ(dot11.power_mgmt(), 0);
+    EXPECT_EQ(dot11.more_data(), 0);
     EXPECT_EQ(dot11.wep(), 0);
     EXPECT_EQ(dot11.order(), 0);
     EXPECT_EQ(dot11.duration_id(), 0);

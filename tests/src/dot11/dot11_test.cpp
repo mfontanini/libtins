@@ -34,6 +34,7 @@ TEST_F(Dot11Test, DefaultConstructor) {
     EXPECT_EQ(dot11.more_frag(), 0);
     EXPECT_EQ(dot11.retry(), 0);
     EXPECT_EQ(dot11.power_mgmt(), 0);
+    EXPECT_EQ(dot11.more_data(), 0);
     EXPECT_EQ(dot11.wep(), 0);
     EXPECT_EQ(dot11.order(), 0);
     EXPECT_EQ(dot11.duration_id(), 0);
@@ -64,6 +65,7 @@ TEST_F(Dot11Test, ConstructorFromBuffer) {
     EXPECT_EQ(dot11.more_frag(), 0);
     EXPECT_EQ(dot11.retry(), 0);
     EXPECT_EQ(dot11.power_mgmt(), 0);
+    EXPECT_EQ(dot11.more_data(), 0);
     EXPECT_EQ(dot11.wep(), 0);
     EXPECT_EQ(dot11.order(), 0);
     EXPECT_EQ(dot11.duration_id(), 0x234f);
@@ -121,6 +123,12 @@ TEST_F(Dot11Test, PowerMGMT) {
     Dot11 dot11;
     dot11.power_mgmt(1);
     EXPECT_EQ(dot11.power_mgmt(), 1);
+}
+
+TEST_F(Dot11Test, MoreData) {
+    Dot11 dot11;
+    dot11.more_data(1);
+    EXPECT_EQ(dot11.more_data(), 1);
 }
 
 TEST_F(Dot11Test, WEP) {
