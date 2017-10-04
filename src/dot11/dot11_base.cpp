@@ -164,6 +164,10 @@ void Dot11::power_mgmt(small_uint<1> new_value) {
     header_.control.power_mgmt = (new_value)? 1 : 0;
 }
 
+void Dot11::more_data(small_uint<1> new_value) {
+    header_.control.more_data = (new_value)? 1 : 0;
+}
+
 void Dot11::wep(small_uint<1> new_value) {
     header_.control.wep = (new_value)? 1 : 0;
 }

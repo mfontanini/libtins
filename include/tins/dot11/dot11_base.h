@@ -280,6 +280,15 @@ public:
     }
 
     /**
+     * \brief Getter for the More Data field.
+     *
+     * \return The stored More Data field.
+     */
+    small_uint<1> more_data() const {
+        return header_.control.more_data;
+    }
+
+    /**
      * \brief Getter for the WEP field.
      *
      * \return The stored WEP field.
@@ -372,6 +381,13 @@ public:
      * \param new_value The new Power-Management field value.
      */
     void power_mgmt(small_uint<1> new_value);
+
+    /**
+     * \brief Setter for the More Data field.
+     *
+     * \param new_value The new More Data field value.
+     */
+    void more_data(small_uint<1> new_value);
 
     /**
      * \brief Setter for the WEP field.
