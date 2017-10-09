@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
         cout << "Usage: " <<* argv << " <interface>" << endl;
         return 1;
     }
-    // Sniff on the provided interface in promiscuos mode
+    // Sniff on the provided interface in promiscuous mode
     SnifferConfiguration config;
     config.set_promisc_mode(true);
     // Use immediate mode so we get the packets as fast as we can
