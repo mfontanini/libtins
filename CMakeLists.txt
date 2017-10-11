@@ -343,11 +343,10 @@ INSTALL(
     COMPONENT dev
 )
 
-#Recursively list of all headers, with paths relative to include/tins
-FILE(GLOB_RECURSE INCLUDE_FILES "include/tins/*.h")
-
+# Install all headers in include/
 INSTALL(
-    FILES ${INCLUDE_FILES} 
-    DESTINATION .
+    DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+    DESTINATION include
     COMPONENT Headers
+    FILES_MATCHING PATTERN "*.h*"
 )
