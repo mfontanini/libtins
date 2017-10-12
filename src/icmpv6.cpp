@@ -279,6 +279,10 @@ bool ICMPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
         return hdr_ptr->u_echo.identifier == header_.u_echo.identifier &&
                hdr_ptr->u_echo.sequence == header_.u_echo.sequence;
     }
+    else if ( (type() == ROUTER_SOLICIT && hdr_ptr->type == ROUTER_ADVERT) ||
+        (type() == NEIGHBOUR_SOLICIT && hdr_ptr->type == NEIGHBOUR_ADVERT) ) {
+	return hdr_ptr->code == 0;
+    }
     return false;
 }
 
