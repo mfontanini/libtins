@@ -96,6 +96,16 @@ public:
     RawPDU(ForwardIterator start, ForwardIterator end) 
     : payload_(start, end) { }
 
+    /**
+     * \brief Creates an instance of RawPDU from a payload_type.
+     *
+     * The payload is copied into the RawPDU's internal buffer.
+     *
+     * \param data The payload to use.
+     */
+    RawPDU(const payload_type & data)
+            : payload_(data) { }
+
     #if TINS_IS_CXX11
         /** 
          * \brief Creates an instance of RawPDU from a payload_type.
