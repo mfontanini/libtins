@@ -27,8 +27,11 @@
  *
  */
 
-#include <cmath>
 #include <tins/utils/radiotap_writer.h>
+
+#ifdef TINS_HAVE_DOT11
+
+#include <cmath>
 #include <tins/utils/radiotap_parser.h>
 #include <tins/exceptions.h>
 
@@ -167,3 +170,5 @@ void RadioTapWriter::update_paddings(const vector<uint8_t>& paddings, uint32_t o
 
 } // Utils
 } // Tins
+
+#endif // TINS_HAVE_DOT11

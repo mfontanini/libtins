@@ -27,7 +27,10 @@
  *
  */
 
-#ifndef TINS_RADIOTAP_WRITER_H
+#include <tins/config.h>
+
+#if !defined(TINS_RADIOTAP_WRITER_H) && defined(TINS_HAVE_DOT11)
+
 #define TINS_RADIOTAP_WRITER_H
 
 #include <vector>

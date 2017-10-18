@@ -27,7 +27,9 @@
  *
  */
 
-#ifndef TINS_RADIOTAP_PARSER_H
+#include <tins/config.h>
+
+#if !defined(TINS_RADIOTAP_PARSER_H) && defined(TINS_HAVE_DOT11)
 #define TINS_RADIOTAP_PARSER_H
 
 #include <stdint.h>

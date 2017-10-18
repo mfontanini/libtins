@@ -27,8 +27,11 @@
  *
  */
 
-#include <iostream>
 #include <tins/utils/radiotap_parser.h>
+
+#ifdef TINS_HAVE_DOT11
+
+#include <iostream>
 #include <tins/exceptions.h>
 
 using std::vector;
@@ -331,3 +334,5 @@ void RadioTapParser::load_current_flags() {
 
 } // Utils
 } // Tins
+
+#endif // TINS_HAVE_DOT11
