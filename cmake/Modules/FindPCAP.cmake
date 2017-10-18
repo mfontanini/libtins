@@ -33,7 +33,7 @@ set (HINT_DIR ${PCAP_ROOT_DIR}/lib)
 
 # On x64 windows, we should look also for the .lib at /lib/x64/
 # as this is the default path for the WinPcap developer's pack
-if (${CMAKE_SIZEOF_VOID_P} EQUAL 8 AND WIN32)
+if (WIN32 AND ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
     set (HINT_DIR ${PCAP_ROOT_DIR}/lib/x64/ ${HINT_DIR})
 endif ()
 
@@ -83,3 +83,10 @@ mark_as_advanced(
     PCAP_INCLUDE_DIR
     PCAP_LIBRARY
 )
+
+# create imported target for libpcap dependency
+if (PCAP_FOUND AND NOT TARGET PCAP)
+   add_library(PCAP IMPORTED SHARED)
+   set_target_properties(PCAP PROPERTIES IMPORTED_LOCATION ${PCAP_LIBRARY})
+   set(PCAP_LIBRARIES PCAP)
+endif()

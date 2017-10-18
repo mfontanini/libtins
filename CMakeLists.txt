@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.1)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
 PROJECT(libtins)
 
 OPTION(LIBTINS_BUILD_EXAMPLES "Build examples" ON)
@@ -235,10 +235,11 @@ CONFIGURE_FILE(
 )
 
 # Support for pkg-config
+# use 'pcfiledir' pkg-config variable to avoid absolute paths
 SET(CMAKE_INSTALL_LIBDIR lib)
-SET(pkgconfig_prefix      ${CMAKE_INSTALL_PREFIX})
-SET(pkgconfig_exec_prefix ${CMAKE_INSTALL_PREFIX})
-SET(pkgconfig_libdir      ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
+SET(pkgconfig_prefix      "\${pcfiledir}/../..")
+SET(pkgconfig_libdir      "\${prefix}/lib")
+SET(pkgconfig_includedir  "\${prefix}/include")
 SET(pkgconfig_version     ${LIBTINS_VERSION})
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/libtins.pc.in
                 ${CMAKE_CURRENT_BINARY_DIR}/libtins.pc @ONLY)
@@ -306,6 +307,8 @@ ENDIF()
 # CMake project configuration export
 # **********************************
 
+INCLUDE(CMakePackageConfigHelpers)
+
 # Add all targets to the build-tree export set
 EXPORT(
     TARGETS tins
@@ -318,10 +321,12 @@ EXPORT(PACKAGE libtins)
 
 # Create the libtinsConfig.cmake and libtinsConfigVersion.cmake files
 # for the build tree
-SET(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
-CONFIGURE_FILE(
+SET(CONF_INCLUDE_DIRS "include")
+CONFIGURE_PACKAGE_CONFIG_FILE(
     cmake/libtinsConfig.cmake.in
-    "${PROJECT_BINARY_DIR}/libtinsConfig.cmake" @ONLY
+    "${PROJECT_BINARY_DIR}/libtinsConfig.cmake"
+    INSTALL_DESTINATION CMake
+    PATH_VARS CONF_INCLUDE_DIRS
 )
 CONFIGURE_FILE(
     cmake/libtinsConfigVersion.cmake.in
