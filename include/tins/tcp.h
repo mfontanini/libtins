@@ -109,7 +109,9 @@ public:
         SACK_OK = 4,
         SACK    = 5,
         TSOPT   = 8,
-        ALTCHK  = 14
+        ALTCHK  = 14,
+        RFC_EXPERIMENT_1 = 253,
+        RFC_EXPERIMENT_2 = 254
     };
     
     /**
