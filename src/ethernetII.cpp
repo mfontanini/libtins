@@ -158,7 +158,7 @@ void EthernetII::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     if (inner_pdu()) {
         Constants::Ethernet::e flag;
         const PDUType type = inner_pdu()->pdu_type();
-        // Dirty trick to sucessfully tag PPPoE session/discovery packets
+        // Dirty trick to successfully tag PPPoE session/discovery packets
         if (type == PDU::PPPOE) {
             const PPPoE* pppoe = static_cast<const PPPoE*>(inner_pdu());
             flag = (pppoe->code() == 0) ? Constants::Ethernet::PPPOES 
