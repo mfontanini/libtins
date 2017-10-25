@@ -66,14 +66,6 @@ set(SOURCES
     tcp_ip/stream_identifier.cpp
     timestamp.cpp
     udp.cpp
-    dot11/dot11_base.cpp
-    dot11/dot11_data.cpp
-    dot11/dot11_mgmt.cpp
-    dot11/dot11_beacon.cpp
-    dot11/dot11_assoc.cpp
-    dot11/dot11_auth.cpp
-    dot11/dot11_probe.cpp
-    dot11/dot11_control.cpp
     utils/checksum_utils.cpp
     utils/frequency_utils.cpp
     utils/radiotap_parser.cpp
@@ -106,15 +98,6 @@ set(HEADERS
     ${LIBTINS_INCLUDE_DIR}/tins/dns.h
     ${LIBTINS_INCLUDE_DIR}/tins/dot3.h
     ${LIBTINS_INCLUDE_DIR}/tins/dot1q.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_base.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_data.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_mgmt.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_beacon.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_assoc.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_auth.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_probe.h
-    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_control.h
     ${LIBTINS_INCLUDE_DIR}/tins/eapol.h
     ${LIBTINS_INCLUDE_DIR}/tins/endianness.h
     ${LIBTINS_INCLUDE_DIR}/tins/ethernetII.h
@@ -169,6 +152,34 @@ set(HEADERS
     ${LIBTINS_INCLUDE_DIR}/tins/utils/resolve_utils.h
     ${LIBTINS_INCLUDE_DIR}/tins/utils/pdu_utils.h
 )
+
+SET(DOT11_DEPENDENT_SOURCES
+    dot11/dot11_base.cpp
+    dot11/dot11_data.cpp
+    dot11/dot11_mgmt.cpp
+    dot11/dot11_beacon.cpp
+    dot11/dot11_assoc.cpp
+    dot11/dot11_auth.cpp
+    dot11/dot11_probe.cpp
+    dot11/dot11_control.cpp
+)
+
+SET(DOT11_DEPENDENT_HEADERS
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_base.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_data.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_mgmt.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_beacon.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_assoc.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_auth.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_probe.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_control.h
+)
+
+IF(LIBTINS_ENABLE_DOT11)
+    SET(SOURCES ${SOURCES} ${DOT11_DEPENDENT_SOURCES})
+    SET(HEADERS ${HEADERS} ${DOT11_DEPENDENT_HEADERS})
+ENDIF()
 
 SET(PCAP_DEPENDENT_SOURCES
     sniffer.cpp
