@@ -18,9 +18,6 @@ set(SOURCES
     address_range.cpp
     arp.cpp
     bootp.cpp
-    handshake_capturer.cpp
-    stp.cpp
-    pppoe.cpp
     crypto.cpp
     detail/address_helpers.cpp
     detail/icmp_extension_helpers.cpp
@@ -33,6 +30,7 @@ set(SOURCES
     dot1q.cpp
     eapol.cpp
     ethernetII.cpp
+    handshake_capturer.cpp
     hw_address.cpp
     icmp_extension.cpp
     icmp.cpp
@@ -52,11 +50,13 @@ set(SOURCES
     pdu.cpp
     pdu_iterator.cpp
     pdu_option.cpp
+    pppoe.cpp
     radiotap.cpp
     rawpdu.cpp
     rsn_information.cpp
     sll.cpp
     snap.cpp
+    stp.cpp
     tcp.cpp
     tcp_ip/ack_tracker.cpp
     tcp_ip/flow.cpp
