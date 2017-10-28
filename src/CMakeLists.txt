@@ -223,3 +223,14 @@ INSTALL(
     ARCHIVE DESTINATION lib
     COMPONENT dev
 )
+
+MACRO(INSTALL_HEADERS_WITH_DIRECTORY HEADER_LIST)
+    FOREACH(HEADER ${HEADERS})
+        # Extract directory name and remove leading '../'
+        get_filename_component(DIR ${HEADER} PATH)
+        STRING(REGEX REPLACE "^\\.\\.\\/" "" DIR ${DIR})
+        INSTALL(FILES ${HEADER} DESTINATION ${DIR})
+    ENDFOREACH(HEADER)
+ENDMACRO()
+
+INSTALL_HEADERS_WITH_DIRECTORY(${HEADERS})
