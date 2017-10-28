@@ -341,12 +341,4 @@ INSTALL(
     EXPORT libtinsTargets
     DESTINATION CMake
     COMPONENT dev
-)
-
-# Install all headers in include/
-INSTALL(
-    DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-    DESTINATION include
-    COMPONENT Headers
-    FILES_MATCHING PATTERN "*.h*"
-)
+)x
