@@ -341,4 +341,4 @@ INSTALL(
     EXPORT libtinsTargets
     DESTINATION CMake
     COMPONENT dev
-)x
+)
