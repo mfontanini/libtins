@@ -73,15 +73,22 @@ public:
      * \brief Getter for the label field.
      */
     small_uint<20> label() const {
-        return (Endian::be_to_host(header_.label_high) << 4) | 
-               ((header_.label_low_and_bottom >> 4) & 0xf);
+        return (Endian::be_to_host(header_.label_high) << 4) |
+               ((header_.label_low_exp_and_bottom >> 4) & 0xf);
+    }
+
+    /**
+     * \brief Getter for the experimental field.
+     */
+    small_uint<3> experimental() const {
+        return (header_.label_low_exp_and_bottom >> 1) & 0x7;
     }
 
     /**
      * \brief Getter for the bottom of the stack field.
      */
     small_uint<1> bottom_of_stack() const {
-        return header_.label_low_and_bottom & 0x1;
+        return header_.label_low_exp_and_bottom & 0x1;
     }
 
     /**
@@ -99,10 +106,17 @@ public:
     void label(small_uint<20> value);
 
     /**
+     * \brief Setter for the experimental field
+     *
+     * \param value The new experimental field value
+     */
+    void experimental(small_uint<3> value);
+
+    /**
      * \brief Setter for the bottom of the stack field
      *
      * Note that if this MPLS layer is somewhere between an Ethernet and IP
-     * layers, the bottom of the stack field will be overriden and set 
+     * layers, the bottom of the stack field will be overriden and set
      * automatically. You should only set this field when constructing ICMP
      * extensions.
      *
@@ -143,7 +157,7 @@ private:
     TINS_BEGIN_PACK
     struct mpls_header {
         uint16_t label_high;
-        uint8_t label_low_and_bottom;
+        uint8_t label_low_exp_and_bottom;
         uint8_t ttl;
     } TINS_END_PACK;
 
