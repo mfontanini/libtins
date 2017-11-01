@@ -26,7 +26,7 @@ const uint8_t MPLSTest::eth_and_mpls[] = {
 };
 
 const uint8_t MPLSTest::mpls_layer[] = {
-    24, 150, 1, 1
+    24, 150, 3, 1
 };
 
 TEST_F(MPLSTest, ConstructWholePacket) {
@@ -63,6 +63,7 @@ TEST_F(MPLSTest, ConstructWholePacket) {
 TEST_F(MPLSTest, ConstructorFromBuffer) {
     MPLS mpls(mpls_layer, sizeof(mpls_layer));
     EXPECT_EQ(100704U, mpls.label());
+    EXPECT_EQ(1, mpls.experimental());
     EXPECT_EQ(1, mpls.bottom_of_stack());
     EXPECT_EQ(1, mpls.ttl());
 }
@@ -100,15 +101,23 @@ TEST_F(MPLSTest, SetAllFields) {
     mpls.ttl(0xde);
     mpls.bottom_of_stack(1);
     mpls.label(0xdead8);
+    mpls.experimental(6);
     EXPECT_EQ(0xdead8U, mpls.label());
     EXPECT_EQ(1, mpls.bottom_of_stack());
     EXPECT_EQ(0xde, mpls.ttl());
+    EXPECT_EQ(6, mpls.experimental());
 }
 
 TEST_F(MPLSTest, Label) {
     MPLS mpls;
     mpls.label(0xdead8);
     EXPECT_EQ(0xdead8U, mpls.label());
+}
+
+TEST_F(MPLSTest, Experimental) {
+    MPLS mpls;
+    mpls.experimental(4);
+    EXPECT_EQ(4, mpls.experimental());
 }
 
 TEST_F(MPLSTest, BottomOfStack) {
