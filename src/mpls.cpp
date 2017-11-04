@@ -76,11 +76,15 @@ void MPLS::label(small_uint<20> value) {
     const uint16_t label_high = Endian::host_to_be<uint16_t>(label_value >> 4);
     const uint8_t label_low = (label_value << 4) & 0xf0;
     header_.label_high = label_high & 0xffff;
-    header_.label_low_and_bottom = (header_.label_low_and_bottom & 0x0f) | label_low;
+    header_.label_low_exp_and_bottom = (header_.label_low_exp_and_bottom & 0x0f) | label_low;
+}
+
+void MPLS::experimental(small_uint<3> value) {
+    header_.label_low_exp_and_bottom = (header_.label_low_exp_and_bottom & 0xf1) | (value << 1);
 }
 
 void MPLS::bottom_of_stack(small_uint<1> value) {
-    header_.label_low_and_bottom = (header_.label_low_and_bottom & 0xfe) | value;
+    header_.label_low_exp_and_bottom = (header_.label_low_exp_and_bottom & 0xfe) | value;
 }
 
 void MPLS::ttl(uint8_t value) {
