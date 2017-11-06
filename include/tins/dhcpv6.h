@@ -391,7 +391,7 @@ public:
         : id(duid_en::duid_id), data(identifier.serialize()) {}
         
         duid_type(const duid_ll& identifier)
-        : id(duid_en::duid_id), data(identifier.serialize()) {}
+        : id(duid_ll::duid_id), data(identifier.serialize()) {}
 
         static duid_type from_option(const option& opt);
     };
