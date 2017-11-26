@@ -152,6 +152,9 @@ RadioTapParser::RadioTapParser(const vector<uint8_t>& buffer)
         current_flags_ = 0;
     }
     else {
+        if (TINS_UNLIKELY(buffer.size() < sizeof(RadioTapFlags))) {
+            throw malformed_packet();
+        }
         start_ = &*buffer.begin();
         end_ = start_ + buffer.size();
         load_current_flags();
@@ -257,11 +260,11 @@ const uint8_t* RadioTapParser::find_options_start() const {
     // Skip fields before the flags one
     const RadioTapFlags* flags = get_flags_ptr();
     while (flags->ext == 1) {
+        total_sz -= sizeof(RadioTapFlags);
         if (TINS_UNLIKELY(total_sz < sizeof(RadioTapFlags))) {
             throw malformed_packet();
         }
         ++flags;
-        total_sz -= sizeof(RadioTapFlags);
     }
     return reinterpret_cast<const uint8_t*>(flags) + sizeof(RadioTapFlags);
 }

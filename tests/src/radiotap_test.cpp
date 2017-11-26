@@ -626,6 +626,14 @@ TEST_F(RadioTapTest, RadioTapParsingUsingEmptyBuffer) {
     EXPECT_FALSE(parser.has_field(RadioTap::ANTENNA));
 }
 
+TEST_F(RadioTapTest, RadioTapParsingUsingBogusBuffer) {
+    vector<uint8_t> buffer;
+    for (int i = 0; i < 4; ++i) {
+        buffer.push_back(0xff);
+    }
+    EXPECT_THROW(RadioTapParser parser(buffer), malformed_packet);
+}
+
 TEST_F(RadioTapTest, RadioTapWritingEmptyBuffer) {
     vector<uint8_t> buffer;
     RadioTapWriter writer(buffer);
