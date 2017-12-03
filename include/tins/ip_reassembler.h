@@ -86,7 +86,6 @@ private:
     size_t total_size_;
     IP first_fragment_;
     bool received_end_;
-    uint8_t transport_proto_;
 };
 } // namespace Internals
 

@@ -51,7 +51,9 @@ void IPv4ReassemblerTest::test_packets(const vector<pair<const uint8_t*, size_t>
     IPv4Reassembler reassembler;
     for(size_t i = 0; i < vt.size(); ++i) {
         EthernetII eth(vt[i].first, (uint32_t)vt[i].second);
-        if (i != 0) {
+        // Set the TTL for the first fragment to 32 so we can make sure the right "base"
+        // packet was used to build the reassembled one
+        if (eth.rfind_pdu<IP>().fragment_offset() == 0) {
             eth.rfind_pdu<IP>().ttl(32);
         }
         IPv4Reassembler::PacketStatus status = reassembler.process(eth);
@@ -60,7 +62,7 @@ void IPv4ReassemblerTest::test_packets(const vector<pair<const uint8_t*, size_t>
             ASSERT_EQ(static_cast<size_t>(vt.size() - 1), i);
             ASSERT_TRUE(eth.find_pdu<UDP>() != NULL);
             const IP& ip = eth.rfind_pdu<IP>();
-            EXPECT_EQ(64, ip.ttl());
+            EXPECT_EQ(32, ip.ttl());
 
             RawPDU* raw = eth.find_pdu<RawPDU>();
             ASSERT_TRUE(raw != NULL);

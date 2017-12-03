@@ -38,19 +38,13 @@ namespace Tins {
 namespace Internals {
 
 IPv4Stream::IPv4Stream() 
-: received_size_(), total_size_(), received_end_(false), transport_proto_(0xff) {
+: received_size_(), total_size_(), received_end_(false) {
 
 }
 
 void IPv4Stream::add_fragment(IP* ip) {
-    if (fragments_.empty()) {
-        // Release the inner PDU, store this first fragment and restore the inner PDU
-        PDU* inner_pdu = ip->release_inner_pdu();
-        first_fragment_ = *ip;
-        ip->inner_pdu(inner_pdu);
-    }
+    const uint16_t offset = extract_offset(ip);
     fragments_type::iterator it = fragments_.begin();
-    uint16_t offset = extract_offset(ip);
     while (it != fragments_.end() && offset > it->offset()) {
         ++it;
     }
@@ -66,28 +60,37 @@ void IPv4Stream::add_fragment(IP* ip) {
         received_end_ = true;
     }
     if (offset == 0) {
-        transport_proto_ = ip->protocol();
+        // Release the inner PDU, store this first fragment and restore the inner PDU
+        PDU* inner_pdu = ip->release_inner_pdu();
+        first_fragment_ = *ip;
+        ip->inner_pdu(inner_pdu);
     }
 }
 
 bool IPv4Stream::is_complete() const {
-    return received_end_ && received_size_ == total_size_;
+    // If we haven't received the last chunk of we haven't received all the data,
+    // then we're not complete
+    if (!received_end_ || received_size_ != total_size_) {
+        return false;
+    }
+    // Make sure the first fragment has offset 0
+    return fragments_.begin()->offset() == 0;
 }
 
 PDU* IPv4Stream::allocate_pdu() const {
     PDU::serialization_type buffer;
     buffer.reserve(total_size_);
     // Check if we actually have all the data we need. Otherwise return nullptr;
-    uint16_t expected = 0;
+    size_t expected = 0;
     for (fragments_type::const_iterator it = fragments_.begin(); it != fragments_.end(); ++it) {
         if (expected != it->offset()) {
             return 0;
         }
-        expected = static_cast<uint16_t>(it->offset() + it->payload().size());
+        expected = it->offset() + it->payload().size();
         buffer.insert(buffer.end(), it->payload().begin(), it->payload().end());
     }
     return Internals::pdu_from_flag(
-        static_cast<Constants::IP::e>(transport_proto_),
+        static_cast<Constants::IP::e>(first_fragment_.protocol()),
         buffer.empty() ? 0 :& buffer[0],
         static_cast<uint32_t>(buffer.size())
     );
