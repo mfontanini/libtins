@@ -1,3 +1,55 @@
+##### v4.0 - Mon Dec  4 00:04:30 UTC 2017
+
+- Add parent PDU to each PDU.
+
+- Removed parent PDU parameter on `PDU::write_serialization`.
+
+- Split `utils.h` into multiple files under the `utils` directory.
+
+- Split `internals.h` into multiple files under the `detail` directory.
+
+- Improve compilation times by removing useless include directives.
+
+- Refactor `PDUOption` conversions so that heavy headers are not included in source file.
+
+- Use `std::vector` instead of `std::list` in `TCP`, `IP`, `IPv6`, `DHCP`, `DHCPv6`, `DNS`, `LLC`, `Dot11` and `PPPoE`.
+
+- Improve performance on `IP`, `IPv6` and `TCP` by compiting option sizes during serialization.
+
+- Minor performance improvements in `DNS`.
+
+- Fix `IPv6` next header handling. Now each one contains its own type and the next type is only set during serialization for ease of use.
+
+- Refactor `RadioTap` parsing and serialization using a generic parser/writer.
+
+- Add `BaseSniffer::set_pcap_sniffing_method` to specify whether `pcap_loop` or `pcap_dispatch` should be used when sniffing.
+
+- Use `IFF_POINTOPOINT` on BSD when getting broadcast address for an interface.
+
+- Added cipher and akm suites from 802.11-2016.
+
+- Add IPv6 layer parsing on `Loopback` packets.
+
+- Allow serializing `Loopback` on Windows.
+
+- Use the right flag on `Loopback` for `IPv6`.
+
+- Use the first fragment as a base when reassembling `IP` packets in `IPv4Reassembler`.
+
+- Restructure CMake files removing useless `CMakeLists.txt` in `include` paths.
+
+- Add getter/setter for "more data" field in `Dot11Base`.
+
+- Implemented matching for ND protocol related ICMPv6 messages.
+
+- Ensure TCP::OptionTypes has 8-bit range.
+
+- Add header files into CMake sources so IDE can pick them up.
+
+- Add MPLS "experimental" field.
+
+- Fix dhcpv6::duid_type constructor from duid_ll.
+
 ##### v3.5 - Sat Apr  1 09:11:58 PDT 2017
 
 - Added Utils::route6_entries
