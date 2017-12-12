@@ -356,6 +356,7 @@ private:
     uint32_t calculate_headers_size() const;
     static void write_header(const ext_header& header, Memory::OutputMemoryStream& stream);
     static bool is_extension_header(uint8_t header_id);
+    static uint32_t get_padding_size(const ext_header& header);
 
     TINS_BEGIN_PACK
     struct ipv6_header {
