@@ -83,6 +83,14 @@ TEST_F(PDUTest, OperatorConcatOnPacket) {
     EXPECT_TRUE(std::equal(raw->payload().begin(), raw->payload().end(), raw_payload.begin()));
 }
 
+#if TINS_IS_CXX11
+TEST_F(PDUTest, MoveAssignment) {
+    IP packet = IP("192.168.0.1") / TCP(22, 52);
+    packet = IP("1.2.3.4");
+    EXPECT_TRUE(packet.inner_pdu() == 0);
+}
+#endif // TINS_IS_CXX11
+
 TEST_F(PDUTest, TinsCast) {
     PDU* null_pdu = 0;
     TCP tcp;
