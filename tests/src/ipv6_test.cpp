@@ -360,3 +360,9 @@ TEST_F(IPv6Test, OptionAddition) {
     EXPECT_TRUE(ipv6.search_header(IPv6::ROUTING) != 0);
     EXPECT_TRUE(ipv6.search_header(IPv6::AUTHENTICATION) != 0);
 }
+
+TEST_F(IPv6Test, HopByHopPadding) {
+    IPv6 ipv6_header;
+    ipv6_header.add_header(IPv6::ExtensionHeader::HOP_BY_HOP);
+    EXPECT_EQ(48UL, ipv6_header.serialize().size());
+}

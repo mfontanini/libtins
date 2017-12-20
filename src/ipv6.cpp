@@ -164,6 +164,11 @@ bool IPv6::is_extension_header(uint8_t header_id) {
         || header_id == MOBILITY || header_id == NO_NEXT_HEADER;
 }
 
+uint32_t IPv6::get_padding_size(const ext_header& header) {
+    const uint32_t padding = (header.data_size() + sizeof(uint8_t) * 2) % 8;
+    return padding == 0 ? 0 : (8 - padding);
+}
+
 void IPv6::version(small_uint<4> new_version) {
     header_.version = new_version;
 }
@@ -337,6 +342,8 @@ uint32_t IPv6::calculate_headers_size() const {
     uint32_t output = 0;
     for (const_iterator iter = ext_headers_.begin(); iter != ext_headers_.end(); ++iter) {
         output += static_cast<uint32_t>(iter->data_size() + sizeof(uint8_t) * 2);
+        output += get_padding_size(*iter);
+
     }
     return output;
 }
@@ -346,6 +353,8 @@ void IPv6::write_header(const ext_header& header, OutputMemoryStream& stream) {
     stream.write(header.option());
     stream.write(length);
     stream.write(header.data_ptr(), header.data_size());
+    // Append padding
+    stream.fill(get_padding_size(header), 0);
 }
 
 } // Tins
