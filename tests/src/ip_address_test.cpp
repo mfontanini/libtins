@@ -112,6 +112,26 @@ TEST(IPAddressTest, Mask) {
     );
 }
 
+TEST(IPAddressTest, OrMask) {
+    EXPECT_EQ(
+        IPv4Address("255.255.255.1"),
+        IPv4Address("192.168.100.1") | IPv4Address("255.255.255.0")
+    );
+    EXPECT_EQ(
+        IPv4Address("255.255.1.2"),
+        IPv4Address("192.255.1.2") | IPv4Address("255.128.0.0")
+    );
+}
+
+TEST(IPAddressTest, NotMask) {
+    EXPECT_EQ(
+        IPv4Address("0.0.0.255"), ~IPv4Address("255.255.255.0")
+    );
+    EXPECT_EQ(
+        IPv4Address("0.127.255.255"),~IPv4Address("255.128.0.0")
+    );
+}
+
 TEST(IPv4AddressTest, Size) {
     EXPECT_EQ(4UL, IPv4Address("127.0.0.1").size());
     EXPECT_EQ(4UL, IPv4Address().size());

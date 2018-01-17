@@ -439,5 +439,17 @@ bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr) {
     return false;
 }
 
+bool gateway_from_ip(IPv6Address ip, IPv6Address& gw_addr) {
+    typedef vector<Route6Entry> entries_type;
+    entries_type entries =route6_entries();
+    for (entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
+        if ((ip & it->mask) == it->destination) {
+            gw_addr = it->gateway;
+            return true;
+        }
+    }
+    return false;
+}
+
 } // Utils
 } // Tins

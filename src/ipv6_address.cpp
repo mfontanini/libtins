@@ -151,4 +151,22 @@ IPv6Address operator&(const IPv6Address& lhs, const IPv6Address& rhs) {
     return output;
 }
 
+IPv6Address operator|(const IPv6Address& lhs, const IPv6Address& rhs) {
+    IPv6Address output = lhs;
+    IPv6Address::iterator addr_iter = output.begin();
+    for (IPv6Address::const_iterator it = rhs.begin(); it != rhs.end(); ++it, ++addr_iter) {
+        *addr_iter = *addr_iter | *it;
+    }
+    return output;
+}
+
+IPv6Address operator~(const IPv6Address& lhs) {
+    IPv6Address output = lhs;
+    IPv6Address::iterator addr_iter = output.begin();
+    for (IPv6Address::const_iterator it = lhs.begin(); it != lhs.end(); ++it, ++addr_iter) {
+        *addr_iter = ~*it;
+    }
+    return output;
+}
+
 } // Tins

@@ -153,4 +153,12 @@ IPv4Address IPv4Address::operator&(const IPv4Address& mask) const {
     return IPv4Address(Endian::be_to_host(ip_addr_ & mask.ip_addr_));
 }
 
+IPv4Address IPv4Address::operator|(const IPv4Address& mask) const {
+    return IPv4Address(Endian::be_to_host(ip_addr_ | mask.ip_addr_));
+}
+
+IPv4Address IPv4Address::operator~() const {
+    return IPv4Address(Endian::be_to_host(~ip_addr_));
+}
+
 } // Tins

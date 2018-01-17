@@ -115,3 +115,18 @@ TEST_F(HWAddressTest, Mask) {
         address_type("de:ad:be:ef:00:00") & address_type("ff:ff:ff:f0:00:00")
     );
 }
+
+TEST_F(HWAddressTest, OrMask) {
+    typedef HWAddress<6> address_type;
+    EXPECT_EQ(
+        address_type("ff:ff:ff:ff:fe:be"),
+        address_type("de:ad:be:ef:fe:be") | address_type("ff:ff:ff:f0:00:00")
+    );
+}
+
+TEST_F(HWAddressTest, NotMask) {
+    typedef HWAddress<6> address_type;
+    EXPECT_EQ(
+        address_type("00:00:00:0f:ff:ff"), ~address_type("ff:ff:ff:f0:00:00")
+    );
+}

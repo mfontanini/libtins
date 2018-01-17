@@ -281,7 +281,33 @@ public:
         }
         return output;
     }
-    
+
+    /**
+    * \brief Apply a mask to this address
+    *
+    * \param mask The mask to be applied
+    * \return The result of applying the mask to this address
+    */
+   HWAddress operator|(const HWAddress& mask) const {
+       HWAddress<n> output = *this;
+       for (size_t i = 0; i < n; ++i) {
+           output[i] = output[i] | mask[i];
+       }
+       return output;
+   }
+
+   /**
+    * \brief not operator
+    * \return The result of applying the mask to this address
+    */
+   HWAddress operator~() const {
+       HWAddress<n> output = *this;
+       for (size_t i = 0; i < n; ++i) {
+           output[i] = ~output[i];
+       }
+       return output;
+   }
+
     /**
      * \brief Retrieves the size of this address.
      * 
