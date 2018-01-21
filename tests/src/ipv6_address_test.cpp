@@ -152,9 +152,9 @@ TEST(IPv6AddressTest, OrMaskAddress) {
 
 TEST(IPv6AddressTest, NotMaskAddress) {
     EXPECT_EQ(IPv6Address("::ffff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ffff::"));
-    EXPECT_EQ(IPv6Address("::ff:ffff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ff00::"));
-    EXPECT_EQ(IPv6Address("::fff:ffff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:f000::"));
-    EXPECT_EQ(IPv6Address("::1fff:ffff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:e000::"));
+    EXPECT_EQ(IPv6Address("::ff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ffff:ff00::"));
+    EXPECT_EQ(IPv6Address("::fff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ffff:f000::"));
+    EXPECT_EQ(IPv6Address("::1fff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ffff:e000::"));
 }
 
 TEST(IPv6AddressTest, Size) {
