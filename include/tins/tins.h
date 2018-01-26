@@ -40,7 +40,9 @@
 #include <tins/llc.h>
 #include <tins/icmp.h>
 #include <tins/icmpv6.h>
+#if defined(TINS_HAVE_DOT11)
 #include <tins/dot11.h>
+#endif
 #include <tins/dot1q.h>
 #include <tins/dot3.h>
 #include <tins/ip.h>
