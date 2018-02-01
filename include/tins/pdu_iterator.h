@@ -106,8 +106,8 @@ private:
  */
 template <typename Concrete>
 bool operator==(const PDUIteratorBase<Concrete>& lhs, const PDUIteratorBase<Concrete>& rhs) {
-    const PDU* lhs_pdu = &*static_cast<const Concrete&>(lhs);
-    const PDU* rhs_pdu = &*static_cast<const Concrete&>(rhs);
+    const PDU* lhs_pdu = static_cast<const Concrete&>(lhs).operator->();
+    const PDU* rhs_pdu = static_cast<const Concrete&>(rhs).operator->();
     return lhs_pdu == rhs_pdu;
 }
 
@@ -241,7 +241,7 @@ public:
 
     template <typename OtherIterator>
     PDUIteratorRange(const PDUIteratorRange<OtherIterator>& other)
-    : start_(&*other.begin()), end_(&*other.end()) {
+    : start_(other.begin().operator->()), end_(other.end().operator->()) {
 
     } 
 
