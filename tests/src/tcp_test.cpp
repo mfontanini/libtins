@@ -13,7 +13,8 @@ using namespace Tins;
 class TCPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[], checksum_packet[],
-                            partial_packet[];
+                            partial_packet[],
+                            malformed_option_after_eol_packet[];
     
     void test_equals(const TCP& tcp1, const TCP& tcp2);
 };
@@ -34,6 +35,11 @@ const uint8_t TCPTest::checksum_packet[] = {
 
 const uint8_t TCPTest::partial_packet[] = {
     142, 210, 0, 80, 60, 158, 102, 111, 10, 2, 46, 161, 80, 24, 0, 229, 247, 192, 0, 0
+};
+
+const uint8_t TCPTest::malformed_option_after_eol_packet[] = {
+    127, 77, 79, 29, 241, 218, 229, 70, 95, 174, 209, 35, 96, 2, 113,
+    218, 0, 0, 31, 174, 0, 1, 2, 4
 };
 
 
@@ -269,6 +275,11 @@ TEST_F(TCPTest, SpoofedOptions) {
     // probably we'd expect it to crash if it's not working, valgrind plx
     EXPECT_EQ(3U, pdu.options().size());
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
+}
+
+TEST_F(TCPTest, MalformedOptionAfterEOL) {
+    TCP tcp(malformed_option_after_eol_packet, sizeof(malformed_option_after_eol_packet));
+    EXPECT_EQ(0U, tcp.options().size());
 }
 
 TEST_F(TCPTest, RemoveOption) {

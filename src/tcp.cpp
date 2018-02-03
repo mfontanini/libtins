@@ -81,7 +81,11 @@ TCP::TCP(const uint8_t* buffer, uint32_t total_sz) {
 
     while (stream.pointer() < header_end) {
         const OptionTypes option_type = (OptionTypes)stream.read<uint8_t>();
-        if (option_type <= NOP) {
+        if (option_type == EOL) {
+            stream.skip(header_end - stream.pointer());
+            break;
+        }
+        else if (option_type == NOP) {
             #if TINS_IS_CXX11
             add_option(option_type, 0);
             #else
@@ -309,7 +313,7 @@ void TCP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
 
     if (options_size < total_options_size) {
         const uint16_t padding = total_options_size - options_size;
-        stream.fill(padding, 1);
+        stream.fill(padding, 0);
     }
 
     uint32_t check = 0;
