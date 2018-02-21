@@ -224,7 +224,7 @@ void BaseSniffer::set_extract_raw_pdus(bool value) {
 }
 
 void BaseSniffer::set_pcap_sniffing_method(PcapSniffingMethod method) {
-    if (method == nullptr) {
+    if (method == 0) {
         throw std::runtime_error("Sniffing method cannot be null");
     }
     pcap_sniffing_method_ = method;
