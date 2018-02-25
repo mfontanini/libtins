@@ -108,6 +108,7 @@ PacketSender::PacketSender(const NetworkInterface& iface,
     types_[IP_RAW_SOCKET] = IPPROTO_RAW;
     types_[IPV6_SOCKET] = IPPROTO_RAW;
     types_[ICMP_SOCKET] = IPPROTO_ICMP;
+    types_[ICMPV6_SOCKET] = IPPROTO_ICMPV6;
 }
 
 PacketSender::~PacketSender() {

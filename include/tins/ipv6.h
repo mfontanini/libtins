@@ -298,6 +298,14 @@ public:
      * \sa PDU::send()
      */
     void send(PacketSender& sender, const NetworkInterface &);
+
+    /**
+     * \brief Receives a matching response for this packet.
+     *
+     * \sa PDU::recv_response
+     * \param sender The packet sender which will receive the packet.
+     */
+    PDU* recv_response(PacketSender& sender, const NetworkInterface &);
     #endif
     
     /**

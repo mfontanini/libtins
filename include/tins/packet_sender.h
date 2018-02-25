@@ -131,6 +131,7 @@ public:
         ARP_SOCKET,
         ICMP_SOCKET,
         IPV6_SOCKET,
+        ICMPV6_SOCKET,
         SOCKETS_END
     };
 

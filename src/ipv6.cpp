@@ -296,16 +296,17 @@ void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
 
 #ifndef BSD
 void IPv6::send(PacketSender& sender, const NetworkInterface &) {
-    struct sockaddr_in6 link_addr;
-    PacketSender::SocketType type = PacketSender::IPV6_SOCKET;
+    sockaddr_in6 link_addr;
+    const PacketSender::SocketType type = PacketSender::IPV6_SOCKET;
     link_addr.sin6_family = AF_INET6;
     link_addr.sin6_port = 0;
     memcpy((uint8_t*)&link_addr.sin6_addr, header_.dst_addr, address_type::address_size);
-    if (inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMP) {
-        type = PacketSender::ICMP_SOCKET;
-    }
-
     sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+}
+
+PDU* IPv6::recv_response(PacketSender& sender, const NetworkInterface &) {
+    const PacketSender::SocketType type = PacketSender::ICMPV6_SOCKET;
+    return sender.recv_l3(*this, 0, sizeof(sockaddr_in6), type);
 }
 #endif
 
