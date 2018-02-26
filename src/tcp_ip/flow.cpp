@@ -133,7 +133,7 @@ void Flow::update_state(const TCP& tcp) {
     else if ((tcp.flags() & TCP::RST) != 0) {
         state_ = RST_SENT;
     }
-    else if (state_ == SYN_SENT && (tcp.flags() & TCP::ACK) != 0) {
+    else if (state_ == SYN_SENT && (tcp.flags() & TCP::SYN) == 0 && (tcp.flags() & TCP::ACK) != 0) {
         #ifdef TINS_HAVE_ACK_TRACKER
             ack_tracker_ = AckTracker(tcp.ack_seq());
         #endif // TINS_HAVE_ACK_TRACKER

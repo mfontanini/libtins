@@ -93,7 +93,8 @@ public:
     enum TerminationReason {
         TIMEOUT, ///< The stream was terminated due to a timeout
         BUFFERED_DATA, ///< The stream was terminated because it had too much buffered data
-        SACKED_SEGMENTS ///< The stream was terminated because it had too many SACKed segments
+        SACKED_SEGMENTS, ///< The stream was terminated because it had too many SACKed segments
+        FORCE_DISCARD ///< The stream was discarded by user request
     };
 
     /**
@@ -107,6 +108,9 @@ public:
      * Default constructor
      */
     StreamFollower();
+
+    // max=0 means no limitation
+    void max_streams(const size_t new_max);
 
     /** 
      * \brief Processes a packet
@@ -164,6 +168,10 @@ public:
         stream_keep_alive_ = keep_alive;
     }
 
+
+    size_t n_streams();
+
+
     /**
      * Finds the stream identified by the provided arguments.
      *
@@ -185,6 +193,19 @@ public:
      */
     Stream& find_stream(const IPv6Address& client_addr, uint16_t client_port,
                         const IPv6Address& server_addr, uint16_t server_port);
+
+
+    // finds and discards the stream identified by the provided arguments.
+    // throws stream_not_found if the stream is not found.
+    // otherwise calls the termination callback.
+    // to be used *outside* of stream callbacks.
+    void discard_stream(const IPv4Address& client_addr, uint16_t client_port,
+                        const IPv4Address& server_addr, uint16_t server_port);
+    void discard_stream(const IPv6Address& client_addr, uint16_t client_port,
+                        const IPv6Address& server_addr, uint16_t server_port);
+    void discard_stream(const Stream& stream);
+    void discard_stream(const stream_id& id);
+
 
     /**
      * \brief Indicates whether partial streams should be followed.
@@ -222,6 +243,7 @@ private:
     streams_type streams_;
     stream_callback_type on_new_connection_;
     stream_termination_callback_type on_stream_termination_;
+    size_t max_streams_; // max=0 means no limitation
     size_t max_buffered_chunks_;
     uint32_t max_buffered_bytes_;
     timestamp_type last_cleanup_;
