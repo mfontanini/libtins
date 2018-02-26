@@ -55,10 +55,16 @@ public:
         
     }
     
+    uint16_t trim(uint16_t amount);
+    
     const payload_type& payload() const {
         return payload_;
     }
     
+    size_t size() const {
+        return payload_.size();
+    }
+
     uint16_t offset() const {
         return offset_;
     }
@@ -71,10 +77,11 @@ class TINS_API IPv4Stream {
 public:
     IPv4Stream();
     
-    void add_fragment(IP* ip);
+    size_t add_fragment(IP* ip);
     bool is_complete() const;
     PDU* allocate_pdu() const;
     const IP& first_fragment() const;
+    size_t size() const { return received_size_; }
 private:
     typedef std::vector<IPv4Fragment> fragments_type;
     
@@ -135,7 +142,8 @@ public:
      * technique to be used.
      */
     enum OverlappingTechnique {
-        NONE 
+        NONE,
+        BSD
     };
 
     /**
@@ -184,15 +192,24 @@ public:
      */
     void remove_stream(uint16_t id, IPv4Address addr1, IPv4Address addr2);
 private:
+    static const size_t MAX_BUFFERED_BYTES;
+    static const size_t BUFFERED_BYTES_LOW_THRESHOLD;
+
     typedef std::pair<IPv4Address, IPv4Address> address_pair;
     typedef std::pair<uint16_t, address_pair> key_type;
     typedef std::map<key_type, Internals::IPv4Stream> streams_type;
+    typedef std::vector<key_type> order_type;
 
+    Internals::IPv4Stream& get_stream(key_type key);
+    void remove_stream(key_type key);
+    void prune_streams();
     key_type make_key(const IP* ip) const;
     address_pair make_address_pair(IPv4Address addr1, IPv4Address addr2) const;
     
     streams_type streams_;
+    order_type stream_order;
     OverlappingTechnique technique_;
+    size_t buffered_bytes_;
 };
 
 /**

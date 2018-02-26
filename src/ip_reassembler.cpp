@@ -27,44 +27,90 @@
  *
  */
 
+#include <algorithm>
 #include <tins/ip.h>
+#include <tins/rawpdu.h>
 #include <tins/constants.h>
 #include <tins/ip_reassembler.h>
 #include <tins/detail/pdu_helpers.h>
 
 using std::make_pair;
+using std::out_of_range;
+using std::find;
 
 namespace Tins {
 namespace Internals {
+
+uint16_t IPv4Fragment::trim(uint16_t amount) {
+    if (amount > payload_.size()) {
+        amount = payload_.size();
+    }
+    offset_ += amount;
+    payload_.erase(
+        payload_.begin(),
+        payload_.begin() + amount);
+    return amount; // report deleted bytes
+}
 
 IPv4Stream::IPv4Stream() 
 : received_size_(), total_size_(), received_end_(false) {
 
 }
 
-void IPv4Stream::add_fragment(IP* ip) {
+size_t IPv4Stream::add_fragment(IP* ip) {
+    const size_t before_size = received_size_;
     const uint16_t offset = extract_offset(ip);
+    uint16_t expected_offset = 0;
     fragments_type::iterator it = fragments_.begin();
     while (it != fragments_.end() && offset > it->offset()) {
+        expected_offset = static_cast<uint16_t>(it->offset() + it->size());
         ++it;
     }
+
     // No duplicates plx
-    if (it != fragments_.end() && it->offset() == offset) {
+    /*if (it != fragments_.end() && it->offset() == offset) {
         return;
+    }*/
+
+    // overlap handling
+    /*fragments_.insert(it, IPv4Fragment(ip->inner_pdu(), offset));*/
+    IPv4Fragment frag(ip->inner_pdu(), offset);
+    if (expected_offset > offset) {
+        frag.trim(expected_offset - offset);
     }
-    fragments_.insert(it, IPv4Fragment(ip->inner_pdu(), offset));
-    received_size_ += ip->inner_pdu()->size();
+    size_t frag_size = frag.size();
+    if(frag_size == 0) {
+        return 0;
+    }
+    if(static_cast<size_t>(frag.offset()) + frag_size > 65535) {
+        return 0;
+    }
+    expected_offset = static_cast<uint16_t>(frag.offset() + frag_size);
+    while (it != fragments_.end() && it->offset() < expected_offset) {
+        received_size_ -= it->trim(expected_offset - it->offset());
+        if (it->size() == 0) {
+            it = fragments_.erase(it);
+        }
+        else {
+            break;
+        }
+    }
+
+    // I wonder whether the copying of the payload is/can be optimized away
+    fragments_.insert(it, frag);
+    received_size_ += frag_size;
     // If the MF flag is off
     if ((ip->flags() & IP::MORE_FRAGMENTS) == 0) {
-        total_size_ = offset + ip->inner_pdu()->size();
+        total_size_ = expected_offset;
         received_end_ = true;
     }
-    if (offset == 0) {
+    if (frag.offset() == 0) {
         // Release the inner PDU, store this first fragment and restore the inner PDU
         PDU* inner_pdu = ip->release_inner_pdu();
         first_fragment_ = *ip;
         ip->inner_pdu(inner_pdu);
     }
+    return received_size_ - before_size;
 }
 
 bool IPv4Stream::is_complete() const {
@@ -106,13 +152,16 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
 
 } // Internals
 
+const size_t IPv4Reassembler::MAX_BUFFERED_BYTES = 256*1024;
+const size_t IPv4Reassembler::BUFFERED_BYTES_LOW_THRESHOLD = 192*1024;
+
 IPv4Reassembler::IPv4Reassembler()
-: technique_(NONE) {
+: technique_(BSD), buffered_bytes_() {
 
 }
 
 IPv4Reassembler::IPv4Reassembler(OverlappingTechnique technique)
-: technique_(technique) {
+: technique_(technique), buffered_bytes_()  {
 
 }
 
@@ -123,15 +172,15 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
         if (ip->is_fragmented()) {
             key_type key = make_key(ip);
             // Create it or look it up, it's the same
-            Internals::IPv4Stream& stream = streams_[key];
-            stream.add_fragment(ip);
+            Internals::IPv4Stream& stream = get_stream(key);
+            buffered_bytes_ += stream.add_fragment(ip);
             if (stream.is_complete()) {
                 PDU* pdu = stream.allocate_pdu();
                 // Use all field values from the first fragment
                 *ip = stream.first_fragment();
 
                 // Erase this stream, since it's already assembled
-                streams_.erase(key);
+                remove_stream(key);
                 // The packet is corrupt
                 if (!pdu) {
                     return FRAGMENTED;
@@ -142,6 +191,9 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
                 return REASSEMBLED;
             }
             else {
+                if (buffered_bytes_ > MAX_BUFFERED_BYTES) {
+                    prune_streams();
+                }
                 return FRAGMENTED;
             }
         }
@@ -165,17 +217,59 @@ IPv4Reassembler::address_pair IPv4Reassembler::make_address_pair(IPv4Address add
     }
 }
 
+Internals::IPv4Stream& IPv4Reassembler::get_stream(key_type key) {
+    // going through the stream_order vector each time makes the streams map sort of useless.
+    // this may or may not be relevant in reality depending on actual traffic. a posssible
+    // solution is to avoid updating the order on each new fragment but it may incur data
+    // loss in extreme situations (as order of arrival is only an estimation of staleness).
+    // (correction: only if the stream is new the order vector is not traversed and the map is not useless)
+    try {
+        Internals::IPv4Stream& stream = streams_.at(key); // may throw out_of_range
+        order_type::iterator it = find(stream_order.begin(), stream_order.end(), key);
+        if (it != stream_order.end())
+            stream_order.erase(it, it+1);
+        stream_order.push_back(key);
+        return stream;
+    }
+    catch (out_of_range&) {
+        // this is an optimization to avoid searching stream_order if the stream is new
+        stream_order.push_back(key);
+        return streams_[key];
+    }
+}
+
+void IPv4Reassembler::prune_streams() {
+    order_type::iterator it = stream_order.begin();
+    while (buffered_bytes_ > BUFFERED_BYTES_LOW_THRESHOLD) {
+        buffered_bytes_ -= streams_.at(*it).size();
+        streams_.erase(*it);
+        ++it;
+    }
+    stream_order.erase(stream_order.begin(), it);
+}
+
 void IPv4Reassembler::clear_streams() {
     streams_.clear();
+    stream_order.clear();
+    buffered_bytes_ = 0;
+}
+
+void IPv4Reassembler::remove_stream(key_type key) {
+    try {
+        buffered_bytes_ -= streams_.at(key).size();
+        streams_.erase(key);
+        order_type::iterator it = find(stream_order.begin(), stream_order.end(), key);
+        stream_order.erase(it, it+1);
+    }
+    catch (out_of_range&) { }
 }
 
 void IPv4Reassembler::remove_stream(uint16_t id, IPv4Address addr1, IPv4Address addr2) {
-    streams_.erase(
-        make_pair(
-            id, 
-            make_address_pair(addr1, addr2)
-        )
+    key_type key = make_pair(
+        id, 
+        make_address_pair(addr1, addr2)
     );
+    remove_stream(key);
 }
 
 } // Tins
