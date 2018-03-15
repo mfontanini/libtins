@@ -88,7 +88,7 @@ void do_arp_spoofing(NetworkInterface iface,
         sender.send(to_gw, iface);
         sender.send(to_victim, iface);
         #ifdef _WIN32
-            Sleep(5);
+            Sleep(5000);
         #else
             sleep(5);
         #endif
