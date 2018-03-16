@@ -47,7 +47,18 @@ TEST(IPAddressTest, LessThanOperator) {
     EXPECT_LT(addr1, "192.168.1.2");
     EXPECT_LT(addr1, "192.168.0.226");
     EXPECT_LT(addr1, "193.0.0.0");
+    EXPECT_LE(addr1, addr2);
 }
+
+TEST(IPAddressTest, GreaterThanOperator) {
+    IPv4Address addr1(ip_string), addr2(ip_string);
+    EXPECT_FALSE(addr1 < addr2);
+    EXPECT_GT(addr1, "192.167.1.2");
+    EXPECT_GT(addr1, "192.167.0.226");
+    EXPECT_GT(addr1, "191.0.0.0");
+    EXPECT_GE(addr1, addr2);
+}
+
 
 TEST(IPAddressTest, IsPrivate) {
     EXPECT_TRUE(IPv4Address("192.168.0.1").is_private());

@@ -52,12 +52,27 @@ TEST_F(HWAddressTest, LessThanOperator) {
     HWAddress<6> bcast = "ff:ff:ff:ff:ff:ff";
     EXPECT_LT(addr2, addr1);
     EXPECT_LT(addr2, bcast);
+    EXPECT_LE(addr1, addr1);
     std::map<HWAddress<6>, int> dict;
     dict[addr1] = 12;
     dict[addr2] = 15;
     EXPECT_EQ(dict[addr1], 12);
     EXPECT_EQ(dict[addr2], 15);
 }
+
+TEST_F(HWAddressTest, GreaterThanOperator) {
+    HWAddress<6> addr1(byte_address), addr2(empty_addr);
+    HWAddress<6> bcast = "ff:ff:ff:ff:ff:ff";
+    EXPECT_GT(addr1, addr2);
+    EXPECT_GT(bcast, addr2);
+    EXPECT_GE(addr1, addr1);
+    std::map<HWAddress<6>, int> dict;
+    dict[addr1] = 12;
+    dict[addr2] = 15;
+    EXPECT_EQ(dict[addr1], 12);
+    EXPECT_EQ(dict[addr2], 15);
+}
+
 
 
 TEST_F(HWAddressTest, CopyConstructor) {

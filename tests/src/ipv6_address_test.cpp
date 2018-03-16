@@ -70,12 +70,14 @@ TEST(IPv6AddressTest, LessThanOperator) {
     EXPECT_LT(IPv6Address("17f8::1"), IPv6Address("17f8:0::0:5"));
     EXPECT_LT(IPv6Address("::1"), IPv6Address("::5"));
     EXPECT_LT(IPv6Address("1::"), IPv6Address("2::"));
+    EXPECT_LE(IPv6Address("1::"), IPv6Address("1::"));
 }
 
 TEST(IPv6AddressTest, GreaterThanOperator) {
     EXPECT_GT(IPv6Address("17f8:0::0:5"), IPv6Address("17f8::1"));
     EXPECT_GT(IPv6Address("::5"), IPv6Address("::1"));
     EXPECT_GT(IPv6Address("2::"), IPv6Address("1::"));
+    EXPECT_GE(IPv6Address("2::"), IPv6Address("2::"));
 }
 
 TEST(IPv6AddressTest, OutputOperator) {

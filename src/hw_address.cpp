@@ -113,5 +113,10 @@ bool hw_address_lt_compare(const uint8_t* start1, const uint8_t* end1,
     return lexicographical_compare(start1, end1, start2, end2);
 }
 
+bool hw_address_gt_compare(const uint8_t* start1, const uint8_t* end1,
+                           const uint8_t* start2, const uint8_t* end2) {
+    return lexicographical_compare(start2, end2, start1, end1);
+}
+
 } // Internals
 } // Tins

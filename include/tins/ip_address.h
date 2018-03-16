@@ -136,6 +136,38 @@ public:
     }
 
     /**
+     * \brief Compares this address for less-than equality.
+     *
+     * \param rhs The address to be compared to.
+     *
+     * \return bool indicating whether this address is equal or less-than rhs.
+     */
+    bool operator<=(const IPv4Address& rhs) const {
+        return !operator>(rhs);
+    }
+
+    /**
+     * \brief Compare this IPv4Address for greater-than inequality.
+     *
+     * \param rhs The address to be compared.
+     * \return bool indicating whether this address is greater-than rhs.
+     */
+    bool operator>(const IPv4Address& rhs) const {
+        return ip_addr_ > rhs.ip_addr_;
+    }
+
+    /**
+     * \brief Compares this address for greater-than equality.
+     *
+     * \param rhs The address to be compared to.
+     *
+     * \return bool indicating whether this address is equal or greater-than rhs.
+     */
+    bool operator>=(const IPv4Address& rhs) const {
+        return !operator<(rhs);
+    }
+
+    /**
      * \brief Apply a mask to this address
      * 
      * \param mask The mask to be applied

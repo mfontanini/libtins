@@ -162,14 +162,36 @@ public:
     }
 
     /**
+     * \brief Compares this address for less-than equality.
+     *
+     * \param rhs The address to be compared to.
+     *
+     * \return bool indicating whether this address is equal or less-than rhs.
+     */
+    bool operator<=(const IPv6Address& rhs) const {
+        return !operator>(rhs);
+    }
+
+    /**
      * \brief Compares this address for greater-than inequality.
      *
      * \param rhs The address to be compared to.
      *
-     * \return bool indicating whether this address is less-than rhs.
+     * \return bool indicating whether this address is greater-than rhs.
      */
     bool operator>(const IPv6Address& rhs) const {
         return std::lexicographical_compare(rhs.begin(), rhs.end(), begin(), end());
+    }
+
+    /**
+     * \brief Compares this address for greater-than equality.
+     *
+     * \param rhs The address to be compared to.
+     *
+     * \return bool indicating whether this address is equal or greater-than rhs.
+     */
+    bool operator>=(const IPv6Address& rhs) const {
+        return !operator<(rhs);
     }
 
     /**

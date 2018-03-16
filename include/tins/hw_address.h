@@ -59,6 +59,9 @@ TINS_API bool hw_address_equal_compare(const uint8_t* start1, const uint8_t* end
 TINS_API bool hw_address_lt_compare(const uint8_t* start1, const uint8_t* end1,
                                     const uint8_t* start2, const uint8_t* end2);
 
+TINS_API bool hw_address_gt_compare(const uint8_t* start1, const uint8_t* end1,
+                                    const uint8_t* start2, const uint8_t* end2);
+
 /**
  * \endcond
  */
@@ -266,6 +269,39 @@ public:
      */
     bool operator<(const HWAddress& rhs) const {
         return Internals::hw_address_lt_compare(begin(), end(), rhs.begin(), rhs.end());
+    }
+
+    /**
+     * \brief Compares this HWAddress for less-than equality.
+     *
+     * \param rhs The HWAddress to be compared to.
+     *
+     * \return bool indicating whether this address is equal or less-than rhs.
+     */
+    bool operator<=(const HWAddress& rhs) const {
+        return !operator>(rhs);
+    }
+
+    /**
+     * \brief Compares this HWAddress for greater-than inequality.
+     *
+     * \param rhs The HWAddress to be compared to.
+     *
+     * \return bool indicating whether this address is greater-than rhs.
+     */
+    bool operator>(const HWAddress& rhs) const {
+        return Internals::hw_address_gt_compare(begin(), end(), rhs.begin(), rhs.end());
+    }
+
+    /**
+     * \brief Compares this HWAddress for greater-than equality.
+     *
+     * \param rhs The HWAddress to be compared to.
+     *
+     * \return bool indicating whether this address is equal or greater-than rhs.
+     */
+    bool operator>=(const HWAddress& rhs) const {
+        return !operator<(rhs);
     }
 
     /**
