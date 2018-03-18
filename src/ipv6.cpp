@@ -305,7 +305,10 @@ void IPv6::send(PacketSender& sender, const NetworkInterface &) {
 }
 
 PDU* IPv6::recv_response(PacketSender& sender, const NetworkInterface &) {
-    const PacketSender::SocketType type = PacketSender::ICMPV6_SOCKET;
+    PacketSender::SocketType type = PacketSender::IPV6_SOCKET;
+    if (inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMPv6) {
+        type = PacketSender::ICMPV6_SOCKET;
+    }
     return sender.recv_l3(*this, 0, sizeof(sockaddr_in6), type);
 }
 #endif

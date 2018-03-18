@@ -252,8 +252,9 @@ void PacketSender::open_l3_socket(SocketType type) {
         throw invalid_socket_type();
     }
     if (sockets_[type] == INVALID_RAW_SOCKET) {
+        const bool is_v6 = (type == IPV6_SOCKET || type == ICMPV6_SOCKET);
         socket_type sockfd;
-        sockfd = socket((type == IPV6_SOCKET) ? AF_INET6 : AF_INET, SOCK_RAW, socktype);
+        sockfd = socket(is_v6 ? AF_INET6 : AF_INET, SOCK_RAW, socktype);
         if (sockfd < 0) {
             throw socket_open_error(make_error_string());
         }
@@ -264,7 +265,7 @@ void PacketSender::open_l3_socket(SocketType type) {
         #else
         typedef const char* option_ptr;
         #endif
-        const int level = (type == IPV6_SOCKET) ? IPPROTO_IPV6 : IPPROTO_IP;
+        const int level = (is_v6) ? IPPROTO_IPV6 : IPPROTO_IP;
         if (setsockopt(sockfd, level, IP_HDRINCL, (option_ptr)&on, sizeof(on)) != 0) {
             throw socket_open_error(make_error_string());
         }
