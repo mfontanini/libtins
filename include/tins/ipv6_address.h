@@ -251,17 +251,17 @@ public:
     /**
      * Applies a mask to an address
      */
-    TINS_API friend IPv6Address operator&(const IPv6Address& lhs, const IPv6Address& rhs);    
+    IPv6Address operator&(const IPv6Address& rhs) const;
 
     /**
      * or a mask to an address
      */
-    TINS_API friend IPv6Address operator|(const IPv6Address& lhs, const IPv6Address& rhs);
+    IPv6Address operator|(const IPv6Address& rhs) const;
 
     /**
      * not operator (invert)
      */
-    TINS_API friend IPv6Address operator~(const IPv6Address& lhs);
+    IPv6Address operator~() const ;
 
 private:
     void init(const char* addr);
