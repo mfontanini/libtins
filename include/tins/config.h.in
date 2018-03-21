@@ -31,4 +31,9 @@
 /* Have libpcap */
 #cmakedefine TINS_HAVE_PCAP
 
+/* Version macros */
+#define TINS_VERSION_MAJOR ${TINS_VERSION_MAJOR}
+#define TINS_VERSION_MINOR ${TINS_VERSION_MINOR}
+#define TINS_VERSION_PATCH ${TINS_VERSION_PATCH}
+
 #endif // TINS_CONFIG_H
