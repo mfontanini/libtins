@@ -366,3 +366,57 @@ TEST_F(IPv6Test, HopByHopPadding) {
     ipv6_header.add_header(IPv6::ExtensionHeader::HOP_BY_HOP);
     EXPECT_EQ(48UL, ipv6_header.serialize().size());
 }
+
+TEST_F(IPv6Test, HopByHopParsing) {
+    EthernetII pkt(hop_by_hop_options, sizeof(hop_by_hop_options));
+    IPv6& ipv6 = pkt.rfind_pdu<IPv6>();
+
+    const IPv6::headers_type& headers = ipv6.headers();
+    EXPECT_EQ(1UL, headers.size());
+
+    const IPv6::ext_header* ext_header = ipv6.search_header(IPv6::ExtensionHeader::HOP_BY_HOP);
+    EXPECT_TRUE(ext_header != NULL);
+
+    const IPv6::hop_by_hop_header hbh_header = IPv6::hop_by_hop_header::from_extension_header(*ext_header);
+    EXPECT_EQ(1UL, hbh_header.options.size());
+    EXPECT_EQ(5, hbh_header.options[0].first);
+}
+
+TEST_F(IPv6Test, HopByHopExtensionHeader) {
+    const uint8_t options[] = {42, 3, 0, 0, 0, 86, 0, 17, 2, 0, 0, 1, 2, 0, 0};
+    IPv6::ext_header hdr(IPv6::HOP_BY_HOP, options, options + sizeof(options));
+
+    IPv6::hop_by_hop_header header = IPv6::hop_by_hop_header::from_extension_header(hdr);
+    EXPECT_EQ(3UL, header.options.size());
+    EXPECT_EQ(42, header.options[0].first);
+    EXPECT_EQ(86, header.options[1].first);
+    EXPECT_EQ(17, header.options[2].first);
+}
+
+TEST_F(IPv6Test, DestinationRoutingExtensionHeader) {
+    EXPECT_THROW(IPv6::destination_routing_header::from_extension_header(IPv6::HOP_BY_HOP),
+                 invalid_ipv6_extension_header);
+
+    IPv6::destination_routing_header header = IPv6::destination_routing_header::from_extension_header(IPv6::DESTINATION_ROUTING_OPTIONS);
+    EXPECT_EQ(0UL, header.options.size());
+}
+
+TEST_F(IPv6Test, RoutingExtensionHeader) {
+    const uint8_t header_data[] = {42, 17, 0, 0, 0, 0, 0};
+    IPv6::ext_header hdr(IPv6::ROUTING, header_data, header_data + sizeof(header_data));
+
+    IPv6::routing_header header = IPv6::routing_header::from_extension_header(hdr);
+    EXPECT_EQ(42, header.routing_type);
+    EXPECT_EQ(17, header.segments_left);
+    EXPECT_EQ(5UL, header.data.size());
+}
+
+TEST_F(IPv6Test, FragmentExtensionHeader) {
+    const uint8_t header_data[] = {128, 1, 0, 0, 0, 42};
+    IPv6::ext_header hdr(IPv6::FRAGMENT, header_data, header_data + sizeof(header_data));
+
+    IPv6::fragment_header header = IPv6::fragment_header::from_extension_header(hdr);
+    EXPECT_EQ(4096, header.fragment_offset);
+    EXPECT_TRUE(header.more_fragments);
+    EXPECT_EQ(42UL, header.identification);
+}
