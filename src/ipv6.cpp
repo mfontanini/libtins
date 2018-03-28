@@ -43,6 +43,7 @@
 #include <tins/memory_helpers.h>
 #include <tins/detail/pdu_helpers.h>
 
+using std::make_pair;
 using std::vector;
 
 using Tins::Memory::InputMemoryStream;
@@ -95,7 +96,7 @@ IPv6::routing_header IPv6::routing_header::from_extension_header(const ext_heade
     routing_header header;
     header.routing_type = stream.read<uint8_t>();
     header.segments_left = stream.read<uint8_t>();
-    header.data = std::vector<uint8_t>(stream.pointer(), stream.pointer() + stream.size());
+    header.data.assign(stream.pointer(), stream.pointer() + stream.size());
     return header;
 }
 
@@ -212,15 +213,14 @@ uint32_t IPv6::get_padding_size(const ext_header& header) {
     return padding == 0 ? 0 : (8 - padding);
 }
 
-std::vector<IPv6::header_option_type> IPv6::parse_header_options(const uint8_t* data, size_t size)
-{
+vector<IPv6::header_option_type> IPv6::parse_header_options(const uint8_t* data, size_t size) {
     Memory::InputMemoryStream stream(data, size);
-    std::vector<header_option_type> options;
+    vector<header_option_type> options;
 
     while (stream.size() > 0) {
         try {
             uint8_t option = stream.read<uint8_t>();
-            if (option == OptionType::PAD_1) {
+            if (option == PAD_1) {
                 continue;
             }
             uint8_t size = stream.read<uint8_t>();
@@ -228,8 +228,9 @@ std::vector<IPv6::header_option_type> IPv6::parse_header_options(const uint8_t* 
                 throw invalid_ipv6_extension_header();
             }
             if (option != PAD_N) {
-                std::vector<uint8_t> value(stream.pointer(), stream.pointer() + size);
-                options.push_back(std::make_pair(option, value));
+                options.push_back(make_pair(option, vector<uint8_t>(stream.pointer(),
+                                                                    stream.pointer() +
+                                                                    size)));
             }
             stream.skip(size);
         } catch (const malformed_packet&) {
