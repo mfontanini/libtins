@@ -74,6 +74,11 @@ public:
     typedef std::vector<ext_header> headers_type;
 
     /**
+     * The type used to store an extension header option.
+     */
+    typedef std::pair<uint8_t, std::vector<uint8_t> > header_option_type;
+
+    /**
      * The values used to identify extension headers.
      */
     enum ExtensionHeader {
@@ -104,6 +109,46 @@ public:
      * \param total_sz Size of the buffer pointed by buffer
      */
     static metadata extract_metadata(const uint8_t *buffer, uint32_t total_sz);
+
+    /*
+     * \brief The type used to store Hop-By-Hop Extension Headers
+     */
+    struct hop_by_hop_header {
+        std::vector<header_option_type> options;
+
+        static hop_by_hop_header from_extension_header(const ext_header& hdr);
+    };
+
+    /*
+     * \brief The type used to store Destination Routing Extension Headers
+     */
+    struct destination_routing_header {
+        std::vector<header_option_type> options;
+
+        static destination_routing_header from_extension_header(const ext_header& hdr);
+    };
+
+    /**
+     * \brief The type used to store Routing Extension headers
+     */
+    struct routing_header {
+        uint8_t routing_type;
+        uint8_t segments_left;
+        std::vector<uint8_t> data;
+
+        static routing_header from_extension_header(const ext_header& hdr);
+    };
+
+    /**
+     * \brief The type used to store Fragment Extension headers
+     */
+    struct fragment_header {
+        uint16_t fragment_offset;
+        bool more_fragments;
+        uint32_t identification;
+
+        static fragment_header from_extension_header(const ext_header& hdr);
+    };
 
     /**
      * \brief Constructs an IPv6 object.
@@ -365,6 +410,7 @@ private:
     static void write_header(const ext_header& header, Memory::OutputMemoryStream& stream);
     static bool is_extension_header(uint8_t header_id);
     static uint32_t get_padding_size(const ext_header& header);
+    static std::vector<header_option_type> parse_header_options(const uint8_t* data, size_t size);
 
     TINS_BEGIN_PACK
     struct ipv6_header {

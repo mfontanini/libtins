@@ -205,6 +205,15 @@ public:
 };
 
 /**
+ * \brief Exception thrown when an IPv6 extension header is being
+ * created from invalid data
+ */
+class invalid_ipv6_extension_header : public exception_base {
+public:
+    invalid_ipv6_extension_header() : exception_base("Invalid IPv6 extension header") { }
+};
+
+/**
  * \brief Generic pcap error
  */
 class pcap_error : public exception_base {
