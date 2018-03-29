@@ -118,6 +118,17 @@ public:
      * \param ip The ip address being looked up.
      */
     NetworkInterface(IPv4Address ip);
+
+
+    /**
+     * \brief Constructs a NetworkInterface from an ipv6 address.
+     *
+     * This abstracted interface will be the one that would be the gateway
+     * when sending a packet to the given ip.
+     *
+     * \param ip The ipv6 address being looked up.
+     */
+    NetworkInterface(IPv6Address ipv6);
     
     /**
      * \brief Getter for this interface's identifier.

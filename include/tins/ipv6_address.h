@@ -160,7 +160,40 @@ public:
     bool operator<(const IPv6Address& rhs) const {
         return std::lexicographical_compare(begin(), end(), rhs.begin(), rhs.end());
     }
-    
+
+    /**
+     * \brief Compares this address for less-than equality.
+     *
+     * \param rhs The address to be compared to.
+     *
+     * \return bool indicating whether this address is equal or less-than rhs.
+     */
+    bool operator<=(const IPv6Address& rhs) const {
+        return !operator>(rhs);
+    }
+
+    /**
+     * \brief Compares this address for greater-than inequality.
+     *
+     * \param rhs The address to be compared to.
+     *
+     * \return bool indicating whether this address is greater-than rhs.
+     */
+    bool operator>(const IPv6Address& rhs) const {
+        return std::lexicographical_compare(rhs.begin(), rhs.end(), begin(), end());
+    }
+
+    /**
+     * \brief Compares this address for greater-than equality.
+     *
+     * \param rhs The address to be compared to.
+     *
+     * \return bool indicating whether this address is equal or greater-than rhs.
+     */
+    bool operator>=(const IPv6Address& rhs) const {
+        return !operator<(rhs);
+    }
+
     /**
      * \brief Helper function which copies the address into an output
      * iterator.
@@ -218,7 +251,17 @@ public:
     /**
      * Applies a mask to an address
      */
-    TINS_API friend IPv6Address operator&(const IPv6Address& lhs, const IPv6Address& rhs);
+    IPv6Address operator&(const IPv6Address& rhs) const;
+
+    /**
+     * or a mask to an address
+     */
+    IPv6Address operator|(const IPv6Address& rhs) const;
+
+    /**
+     * not operator (invert)
+     */
+    IPv6Address operator~() const ;
 
 private:
     void init(const char* addr);

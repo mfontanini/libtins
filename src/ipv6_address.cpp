@@ -142,13 +142,33 @@ ostream& operator<<(ostream& os, const IPv6Address& addr) {
     return os << addr.to_string();
 }
 
-IPv6Address operator&(const IPv6Address& lhs, const IPv6Address& rhs) {
-    IPv6Address output = lhs;
-    IPv6Address::iterator addr_iter = output.begin();
+IPv6Address IPv6Address::operator&(const IPv6Address& rhs) const {
+    IPv6Address result = *this;
+    IPv6Address::iterator addr_iter = result.begin();
     for (IPv6Address::const_iterator it = rhs.begin(); it != rhs.end(); ++it, ++addr_iter) {
         *addr_iter = *addr_iter & *it;
     }
-    return output;
+
+    return result;
+}
+
+IPv6Address IPv6Address::operator|(const IPv6Address& rhs) const {
+     IPv6Address result = *this;
+    IPv6Address::iterator addr_iter = result.begin();
+    for (IPv6Address::const_iterator it = rhs.begin(); it != rhs.end(); ++it, ++addr_iter) {
+        *addr_iter = *addr_iter | *it;
+    }
+
+    return result;
+}
+
+IPv6Address IPv6Address::operator~() const {
+    IPv6Address result  = *this;
+    for (IPv6Address::iterator addr_iter = result.begin(); addr_iter != result.end(); ++addr_iter) {
+        *addr_iter = ~*addr_iter;
+    }
+
+   return result;
 }
 
 } // Tins

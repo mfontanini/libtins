@@ -37,6 +37,8 @@ TEST_F(NetworkInterfaceTest, ConstructorFromString) {
 TEST_F(NetworkInterfaceTest, ConstructorFromIp) {
     NetworkInterface iface(IPv4Address("127.0.0.1"));
     EXPECT_EQ(iface.name(), iface_name);
+    NetworkInterface i6face(IPv6Address("::1"));
+    EXPECT_EQ(i6face.name(), iface_name);
 }
 
 TEST_F(NetworkInterfaceTest, Id) {

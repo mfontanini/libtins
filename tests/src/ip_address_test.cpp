@@ -47,7 +47,18 @@ TEST(IPAddressTest, LessThanOperator) {
     EXPECT_LT(addr1, "192.168.1.2");
     EXPECT_LT(addr1, "192.168.0.226");
     EXPECT_LT(addr1, "193.0.0.0");
+    EXPECT_LE(addr1, addr2);
 }
+
+TEST(IPAddressTest, GreaterThanOperator) {
+    IPv4Address addr1(ip_string), addr2(ip_string);
+    EXPECT_FALSE(addr1 < addr2);
+    EXPECT_GT(addr1, "192.167.1.2");
+    EXPECT_GT(addr1, "192.167.0.226");
+    EXPECT_GT(addr1, "191.0.0.0");
+    EXPECT_GE(addr1, addr2);
+}
+
 
 TEST(IPAddressTest, IsPrivate) {
     EXPECT_TRUE(IPv4Address("192.168.0.1").is_private());
@@ -109,6 +120,26 @@ TEST(IPAddressTest, Mask) {
     EXPECT_EQ(
         IPv4Address("192.128.0.0"),
         IPv4Address("192.255.1.2") & IPv4Address("255.128.0.0")
+    );
+}
+
+TEST(IPAddressTest, OrMask) {
+    EXPECT_EQ(
+        IPv4Address("255.255.255.1"),
+        IPv4Address("192.168.100.1") | IPv4Address("255.255.255.0")
+    );
+    EXPECT_EQ(
+        IPv4Address("255.255.1.2"),
+        IPv4Address("192.255.1.2") | IPv4Address("255.128.0.0")
+    );
+}
+
+TEST(IPAddressTest, NotMask) {
+    EXPECT_EQ(
+        IPv4Address("0.0.0.255"), ~IPv4Address("255.255.255.0")
+    );
+    EXPECT_EQ(
+        IPv4Address("0.127.255.255"),~IPv4Address("255.128.0.0")
     );
 }
 

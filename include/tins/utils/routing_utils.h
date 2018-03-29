@@ -112,10 +112,19 @@ void route_entries(ForwardIterator output);
 
 /**
  * \brief Retrieves entries in the routing table.
+ *
+ * \brief output ForwardIterator in which entries will be stored.
+ */
+template<typename ForwardIterator>
+void route6_entries(ForwardIterator output);
+
+/**
+ * \brief Retrieves entries in the routing table.
  * 
  * \return a vector which contains all of the route entries.
  */
 TINS_API std::vector<RouteEntry> route_entries();
+
 
 /**
  * \brief Retrieves entries in the routing table.
@@ -146,12 +155,34 @@ TINS_API std::set<std::string> network_interfaces();
  */
 TINS_API bool gateway_from_ip(IPv4Address ip, IPv4Address& gw_addr);
 
+/**
+ * \brief Finds the gateway's IP address for the given IP
+ * address.
+ *
+ * \param ip The IP address for which the default gateway will
+ * be searched.
+ * \param gw_addr This parameter will contain the gateway's IP
+ * address in case it is found.
+ *
+ * \return bool indicating whether the lookup was successfull.
+ */
+TINS_API bool gateway_from_ip(IPv6Address ip, IPv6Address& gw_addr);
+
 } // Utils
 } // Tins
 
 template<typename ForwardIterator>
 void Tins::Utils::route_entries(ForwardIterator output) {
     std::vector<RouteEntry> entries = route_entries();
+    for (size_t i = 0; i < entries.size(); ++i) {
+        *output = entries[i];
+        ++output;
+    }
+}
+
+template<typename ForwardIterator>
+void Tins::Utils::route6_entries(ForwardIterator output) {
+    std::vector<Route6Entry> entries = route6_entries();
     for (size_t i = 0; i < entries.size(); ++i) {
         *output = entries[i];
         ++output;

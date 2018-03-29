@@ -70,6 +70,14 @@ TEST(IPv6AddressTest, LessThanOperator) {
     EXPECT_LT(IPv6Address("17f8::1"), IPv6Address("17f8:0::0:5"));
     EXPECT_LT(IPv6Address("::1"), IPv6Address("::5"));
     EXPECT_LT(IPv6Address("1::"), IPv6Address("2::"));
+    EXPECT_LE(IPv6Address("1::"), IPv6Address("1::"));
+}
+
+TEST(IPv6AddressTest, GreaterThanOperator) {
+    EXPECT_GT(IPv6Address("17f8:0::0:5"), IPv6Address("17f8::1"));
+    EXPECT_GT(IPv6Address("::5"), IPv6Address("::1"));
+    EXPECT_GT(IPv6Address("2::"), IPv6Address("1::"));
+    EXPECT_GE(IPv6Address("2::"), IPv6Address("2::"));
 }
 
 TEST(IPv6AddressTest, OutputOperator) {
@@ -122,6 +130,33 @@ TEST(IPv6AddressTest, MaskAddress) {
         IPv6Address("deaf:a000::"),
         IPv6Address("deaf:beef:adad:beef::") & IPv6Address("ffff:e000::")
     );
+}
+
+
+TEST(IPv6AddressTest, OrMaskAddress) {
+    EXPECT_EQ(
+        IPv6Address("ffff:ffff:adad:beef::"),
+        IPv6Address("deaf:beef:adad:beef::") | IPv6Address("ffff:ffff::")
+    );
+    EXPECT_EQ(
+        IPv6Address("ffff:ffef:adad:beef::"),
+        IPv6Address("deaf:beef:adad:beef::") | IPv6Address("ffff:ff00::")
+    );
+    EXPECT_EQ(
+        IPv6Address("ffff:feef:adad:beef::"),
+        IPv6Address("deaf:beef:adad:beef::") | IPv6Address("ffff:f000::")
+    );
+    EXPECT_EQ(
+        IPv6Address("ffff:feef:adad:beef::"),
+        IPv6Address("deaf:beef:adad:beef::") | IPv6Address("ffff:e000::")
+    );
+}
+
+TEST(IPv6AddressTest, NotMaskAddress) {
+    EXPECT_EQ(IPv6Address("::ffff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ffff::"));
+    EXPECT_EQ(IPv6Address("::ff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ffff:ff00::"));
+    EXPECT_EQ(IPv6Address("::fff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ffff:f000::"));
+    EXPECT_EQ(IPv6Address("::1fff:ffff:ffff:ffff:ffff:ffff"),~IPv6Address("ffff:ffff:e000::"));
 }
 
 TEST(IPv6AddressTest, Size) {

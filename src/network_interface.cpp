@@ -257,6 +257,35 @@ NetworkInterface::NetworkInterface(IPv4Address ip)
     }
 }
 
+NetworkInterface::NetworkInterface(IPv6Address ipv6)
+: iface_id_(0) {
+    typedef vector<Utils::Route6Entry> entries_type;
+
+    if (ipv6 == "::1") {
+        #if defined(BSD) || defined(__FreeBSD_kernel__)
+        iface_id_ = resolve_index("lo0");
+        #else
+        iface_id_ = resolve_index("lo");
+        #endif
+    }
+    else {
+        const Utils::Route6Entry* best_match = 0;
+        entries_type entries;
+        Utils::route6_entries(std::back_inserter(entries));
+        for (entries_type::const_iterator it(entries.begin()); it != entries.end(); ++it) {
+            if ((ipv6 & it->mask) == it->destination) {
+                if (!best_match || it->mask > best_match->mask || it->metric < best_match->metric) {
+                    best_match = &*it;
+                }
+            }
+        }
+        if (!best_match) {
+            throw invalid_interface();
+        }
+        iface_id_ = resolve_index(best_match->interface.c_str());
+    }
+}
+
 string NetworkInterface::name() const {
     #ifndef _WIN32
     char iface_name[IF_NAMESIZE];
