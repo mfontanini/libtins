@@ -23,7 +23,8 @@ using namespace Tins;
 class IPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[], fragmented_packet[], 
-        fragmented_ether_ip_packet[], tot_len_zero_packet[];
+        fragmented_ether_ip_packet[], tot_len_zero_packet[],
+        options_packet[];
     
     void test_equals(const IP& ip1, const IP& ip2);
     void test_overwrite_source_address(IP& ip);
@@ -450,6 +451,26 @@ const uint8_t IPTest::tot_len_zero_packet[] = {
     , 0, 0, 0, 0, 0
 };
 
+const uint8_t IPTest::options_packet[] = {
+    0, 160, 204, 59, 191, 250, 16, 54, 233, 241, 145, 224, 8, 0, 72, 0, 
+    0, 242, 0, 1, 0, 0, 128, 17, 233, 177, 192, 168, 0, 4, 220, 113, 
+    61, 150, 130, 11, 0, 16, 0, 0, 0, 0, 120, 120, 120, 0, 143, 243, 
+    26, 48, 0, 210, 82, 251, 92, 3, 98, 243, 14, 149, 245, 46, 106, 
+    244, 99, 187, 143, 32, 82, 21, 116, 83, 205, 114, 68, 236, 121, 23, 
+    98, 220, 15, 75, 139, 145, 57, 154, 24, 92, 35, 84, 179, 123, 191, 
+    141, 122, 43, 42, 172, 212, 85, 117, 54, 227, 157, 155, 192, 52, 
+    206, 57, 242, 150, 236, 164, 202, 143, 4, 3, 200, 56, 106, 36, 202, 
+    38, 4, 12, 29, 108, 72, 89, 23, 180, 94, 81, 238, 41, 84, 146, 126, 
+    185, 84, 104, 249, 166, 43, 188, 14, 141, 89, 245, 254, 222, 236, 
+    173, 140, 121, 146, 77, 14, 132, 36, 8, 113, 162, 92, 174, 188, 
+    214, 148, 64, 227, 220, 34, 193, 139, 234, 144, 213, 89, 74, 95, 
+    177, 180, 145, 26, 248, 29, 238, 146, 249, 247, 75, 26, 155, 36, 8, 
+    188, 34, 176, 73, 92, 242, 194, 185, 67, 67, 214, 235, 137, 67, 
+    158, 144, 27, 235, 221, 252, 44, 227, 25, 229, 172, 166, 214, 6, 6, 
+    136, 21, 173, 84, 20, 109, 140, 182, 114, 179, 167, 196, 250, 56, 
+    169, 152, 160, 18, 136, 245, 138, 101, 177, 107, 121, 74, 204, 180, 
+    193, 228, 135, 37
+};
 
 TEST_F(IPTest, DefaultConstructor) {
     IP ip;
@@ -853,4 +874,12 @@ TEST_F(IPTest, SerializeAfterInnerPduRemoved) {
     PDU::serialization_type buffer = eth1.serialize();
     EthernetII eth2(&buffer[0], buffer.size());
     EXPECT_EQ(eth1.size(), eth2.size());
+}
+
+TEST_F(IPTest, ParseSerializeOptions) {
+    EthernetII packet(options_packet, sizeof(options_packet));
+    PDU::serialization_type serialized = packet.serialize();
+
+    const vector<uint8_t> buffer(options_packet, options_packet + sizeof(options_packet));
+    EXPECT_EQ(buffer, serialized);
 }

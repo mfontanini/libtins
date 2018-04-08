@@ -321,7 +321,12 @@ void IP::add_option(const option& opt) {
 uint32_t IP::calculate_options_size() const {
     uint32_t options_size = 0;
     for (options_type::const_iterator iter = options_.begin(); iter != options_.end(); ++iter) {
-        options_size += 1 + iter->data_size();
+        options_size += sizeof(uint8_t);
+        const option_identifier option_id = iter->option();
+        // Only add length field and data size for non [NOOP, EOL] options
+        if (option_id.op_class != CONTROL || option_id.number > NOOP) {
+            options_size += sizeof(uint8_t) + iter->data_size();
+        }
     }
     return options_size;    
 }
