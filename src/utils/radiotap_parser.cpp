@@ -233,7 +233,7 @@ bool RadioTapParser::skip_to_field(RadioTap::PresentFlags flag) {
 }
 
 bool RadioTapParser::has_fields() const {
-    return current_bit_ != MAX_RADIOTAP_FIELD;
+    return current_bit_ != MAX_RADIOTAP_FIELD && current_ptr_ < end_;
 }
 
 bool RadioTapParser::has_field(RadioTap::PresentFlags flag) const {
