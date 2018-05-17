@@ -639,6 +639,65 @@ public:
     };
 
     /**
+     * The type used to store the HT capabilities data.
+     */
+    struct ht_capability_type {
+        uint8_t ampdu_param, asel_capabilities;
+        uint16_t capabilities, ext_capabilities;
+        uint32_t transmit_beamforing_capabilities;
+        uint32_t mcs_rx;
+        uint32_t mcs_tx;
+        
+        ht_capability_type()
+        : ampdu_param(0), asel_capabilities(0), capabilities(0), ext_capabilities(0), transmit_beamforing_capabilities(0),
+        mcs_rx(0), mcs_tx(0) {}
+        
+        ht_capability_type(uint16_t capabilities, 
+                 uint8_t ampdu_param,
+                 uint32_t mcs_rx, uint32_t mcs_tx,
+                 uint16_t ext_capabilities,
+                 uint32_t transmit_beamforing_capabilities,
+                 uint8_t asel_capabilities) 
+        : ampdu_param(ampdu_param), asel_capabilities(asel_capabilities), capabilities(capabilities), 
+        ext_capabilities(ext_capabilities), transmit_beamforing_capabilities(transmit_beamforing_capabilities),
+        mcs_rx(mcs_rx), mcs_tx(mcs_tx) {}
+
+        static ht_capability_type from_option(const option& opt);
+    };
+    
+    /**
+     * The type used to store the extended capabilities option data.
+     */
+    struct ext_capability_type {
+        byte_array capabilities;
+        
+        ext_capability_type()
+        {}
+        
+        ext_capability_type(const byte_array& capabilities) 
+        : capabilities(capabilities) {}
+
+        static ext_capability_type from_option(const option& opt);
+    };
+    
+    /**
+     * The type used to store the VHT capabilities option data.
+     */
+    struct vht_capability_type {
+        uint32_t capabilities, mcs_rx, mcs_tx;
+        
+        vht_capability_type()
+        : capabilities(0), mcs_rx(0), mcs_tx(0) {}
+        
+        vht_capability_type(uint32_t capabilities, 
+                 uint32_t mcs_rx,
+                 uint32_t mcs_tx) 
+        : capabilities(capabilities), mcs_rx(mcs_rx), mcs_tx(mcs_tx) {}
+
+        static vht_capability_type from_option(const option& opt);
+    };
+    
+    /**
      * The type used to store the Vendor Specific option data.
      */
     struct vendor_specific_type {
@@ -928,6 +987,27 @@ public:
     void tim(const tim_type& data);
 
     /**
+     * \brief Helper method to set the HT capabilities tagged option.
+     *
+     * \brief data The value to set in this ht capabilities option.
+     */
+    void ht_capability(const ht_capability_type& data);
+
+    /**
+     * \brief Helper method to set the extended capabilities tagged option.
+     *
+     * \brief data The value to set in this extended capabilities option.
+     */
+    void ext_capability(const ext_capability_type& data);
+    
+    /**
+     * \brief Helper method to set the VHT capabilities tagged option.
+     *
+     * \brief data The value to set in this vht capabilities option.
+     */
+    void vht_capability(const vht_capability_type& data);
+    
+    /**
      * \brief Helper method to set the Challenge Text tagged option.
      *
      * \brief text The challenge text to be added.
@@ -1178,6 +1258,36 @@ public:
      * \return tim_type containing the tim option value.
      */
     tim_type tim() const;
+
+    /**
+     * \brief Helper method to get the HT capabilities option.
+     *
+     * An option_not_found exception is thrown if the option has not 
+     * been set.
+     * 
+     * \return ht_capability_type containing the HT capabilities option value.
+     */
+    ht_capability_type ht_capability() const;
+
+    /**
+     * \brief Helper method to get the extended capabilities option.
+     *
+     * An option_not_found exception is thrown if the option has not 
+     * been set.
+     * 
+     * \return ht_capability_type containing the extended capabilities option value.
+     */
+    ext_capability_type ext_capability() const;
+    
+    /**
+     * \brief Helper method to get the VHT capabilities option.
+     *
+     * An option_not_found exception is thrown if the option has not 
+     * been set.
+     * 
+     * \return ht_capability_type containing the VHT capabilities option value.
+     */
+    vht_capability_type vht_capability() const;
     
     /**
      * \brief Helper method to get the challenge text option.

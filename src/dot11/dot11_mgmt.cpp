@@ -354,6 +354,41 @@ void Dot11ManagementFrame::tim(const tim_type& data) {
     add_tagged_option(TIM, static_cast<uint8_t>(buffer.size()), &buffer[0]);
 }
 
+void Dot11ManagementFrame::ht_capability(const ht_capability_type& data) {
+    uint8_t buffer[26];
+    OutputMemoryStream stream(buffer, sizeof(buffer));
+    
+    stream.write(data.capabilities);
+    stream.write(data.ampdu_param);
+    stream.write(data.mcs_rx);
+    stream.write(data.mcs_tx);
+    stream.write(data.ext_capabilities);
+    stream.write(data.transmit_beamforing_capabilities);
+    stream.write(data.asel_capabilities);
+    add_tagged_option(HT_CAPABILITY, sizeof(buffer), buffer);
+}
+
+void Dot11ManagementFrame::ext_capability(const ext_capability_type& data) {
+    vector<uint8_t> buffer(data.capabilities.size());
+    OutputMemoryStream stream(buffer);
+
+    stream.write(
+        data.capabilities.begin(), 
+        data.capabilities.end()
+    );
+    add_tagged_option(EXT_CAPABILITY, static_cast<uint8_t>(buffer.size()), &buffer[0]);
+}
+
+void Dot11ManagementFrame::vht_capability(const vht_capability_type& data) {
+    uint8_t buffer[12];
+    OutputMemoryStream stream(buffer, sizeof(buffer));
+    
+    stream.write(data.capabilities);
+    stream.write(data.mcs_rx);
+    stream.write(data.mcs_tx);
+    add_tagged_option(VHT_CAPABILITY, sizeof(buffer), buffer);
+}
+
 void Dot11ManagementFrame::challenge_text(const string& text) {
     add_tagged_option(
         CHALLENGE_TEXT, 
@@ -468,6 +503,18 @@ Dot11ManagementFrame::bss_load_type Dot11ManagementFrame::bss_load() const {
 
 Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim() const {
     return search_and_convert<tim_type>(TIM);
+}
+
+Dot11ManagementFrame::ht_capability_type Dot11ManagementFrame::ht_capability() const {
+    return search_and_convert<ht_capability_type>(HT_CAPABILITY);
+}
+
+Dot11ManagementFrame::ext_capability_type Dot11ManagementFrame::ext_capability() const {
+    return search_and_convert<ext_capability_type>(EXT_CAPABILITY);
+}
+
+Dot11ManagementFrame::vht_capability_type Dot11ManagementFrame::vht_capability() const {
+    return search_and_convert<vht_capability_type>(VHT_CAPABILITY);
 }
 
 string Dot11ManagementFrame::challenge_text() const {
@@ -636,6 +683,42 @@ Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim_type::from_option(const
     output.bitmap_control = *(ptr++);
     
     output.partial_virtual_bitmap.assign(ptr, end);
+    return output;
+}
+
+Dot11ManagementFrame::ht_capability_type Dot11ManagementFrame::ht_capability_type::from_option(const option& opt) {
+    if (opt.data_size() < 26 * sizeof(uint8_t)) {
+        throw malformed_option();
+    }
+    ht_capability_type output;
+    InputMemoryStream stream(opt.data_ptr(), opt.data_size());
+    output.capabilities = stream.read_le<uint16_t>();
+    output.ampdu_param = stream.read<uint8_t>();
+    output.mcs_rx = stream.read<uint32_t>();
+    output.mcs_tx = stream.read<uint32_t>();
+    output.ext_capabilities = stream.read<uint16_t>();
+    output.transmit_beamforing_capabilities = stream.read<uint32_t>();
+    output.asel_capabilities = stream.read<uint8_t>();
+    return output;
+}
+
+Dot11ManagementFrame::ext_capability_type Dot11ManagementFrame::ext_capability_type::from_option(const option& opt) {
+    const uint8_t* ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    ext_capability_type output;
+    
+    output.capabilities.assign(ptr, end);
+    return output;
+}
+
+Dot11ManagementFrame::vht_capability_type Dot11ManagementFrame::vht_capability_type::from_option(const option& opt) {
+    if (opt.data_size() < 12 * sizeof(uint8_t)) {
+        throw malformed_option();
+    }
+    vht_capability_type output;
+    InputMemoryStream stream(opt.data_ptr(), opt.data_size());
+    output.capabilities = stream.read_le<uint16_t>();
+    output.mcs_rx = stream.read<uint32_t>();
+    output.mcs_tx = stream.read<uint32_t>();
     return output;
 }
 
