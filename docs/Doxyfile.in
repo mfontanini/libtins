@@ -1366,7 +1366,8 @@ INCLUDE_FILE_PATTERNS  =
 # instead of the = operator.
 
 PREDEFINED             = "TINS_IS_CXX11=1" \
-                         "TINS_HAVE_WPA2_CALLBACKS=1"
+                         "TINS_HAVE_WPA2_CALLBACKS=1" \
+                         "TINS_HAVE_DOT11=1"
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then
 # this tag can be used to specify a list of macro names that should be expanded.
