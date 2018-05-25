@@ -673,7 +673,7 @@ void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
     for(iterator it = begin(); it != end(); ++it) {
         try {
             // If the functor returns false, we're done
-            #if TINS_IS_CXX11 && !defined(_MSC_VER)
+			#if TINS_IS_CXX11 && defined(TINS_IS_CXX11_MSVCCOMPAT)
             if (!Tins::Internals::invoke_loop_cb(function, *it)) {
                 return;
             }
