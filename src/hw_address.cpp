@@ -34,32 +34,35 @@
 #include <tins/exceptions.h>
 
 using std::string;
-using std::ostream;
-using std::hex;
-using std::ostringstream;
 using std::lexicographical_compare;
 using std::equal;
 
 namespace Tins {
 namespace Internals {
 
-void storage_to_string(ostream& output, uint8_t value) {
-    output << hex;
-    if (value < 0x10) {
-        output << '0';
-    }
-    output << (unsigned)value;
-}
-
 string hw_address_to_string(const uint8_t* ptr, size_t count) {
-    ostringstream output;
+    string output;
+    output.reserve(count*3);
     for (size_t i = 0; i < count; ++i) {
         if (i != 0) {
-            output << ":";
+            output += ":";
         }
-        storage_to_string(output, ptr[i]);
+
+        char j = ptr[i];
+        char upper = (j >> 4) & 0x0F;
+        if (upper > 9)
+            upper += 'a'-10;
+        else
+            upper += '0';
+        char lower = j & 0x0F;
+        if (lower > 9)
+            lower += 'a'-10;
+        else
+            lower += '0';
+        output += upper;
+        output += lower;
     }
-    return output.str();
+    return output;
 }
 
 void string_to_hw_address(const string& hw_addr, uint8_t* output, size_t output_size)  {
