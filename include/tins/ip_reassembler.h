@@ -32,6 +32,9 @@
 
 #include <vector>
 #include <map>
+#include <list>
+#include <chrono>
+#include <functional>
 #include <tins/pdu.h>
 #include <tins/macros.h>
 #include <tins/ip_address.h>
@@ -70,11 +73,15 @@ private:
 class TINS_API IPv4Stream {
 public:
     IPv4Stream();
+
+    typedef std::chrono::system_clock::time_point time_point;
     
     void add_fragment(IP* ip);
     bool is_complete() const;
     PDU* allocate_pdu() const;
     const IP& first_fragment() const;
+    size_t number_fragments() const;
+    time_point start_time_point() const;
 private:
     typedef std::vector<IPv4Fragment> fragments_type;
     
@@ -86,6 +93,7 @@ private:
     size_t total_size_;
     IP first_fragment_;
     bool received_end_;
+    time_point start_time_point_;
 };
 } // namespace Internals
 
@@ -129,6 +137,8 @@ public:
     };
 
     TINS_DEPRECATED(typedef PacketStatus packet_status);
+
+    typedef std::function<void(PDU& pdu)> StreamCallback;
 
     /**
      * The type used to represent the overlapped segment reassembly 
@@ -183,16 +193,43 @@ public:
      * \sa IP::id
      */
     void remove_stream(uint16_t id, IPv4Address addr1, IPv4Address addr2);
+
+    /**
+     * \brief 
+     * 
+     * \param max_number
+     * \param callback
+     */
+    void set_max_number_packets_to_stream(size_t max_number, StreamCallback callback = 0);
+
+    /**
+     * \brief
+     * 
+     * \param stream_timeout_ms
+     * \param time_to_check_s
+     * \param callback
+     */
+    void set_timeout_to_stream(size_t stream_timeout_ms, size_t time_to_check_s = 60, StreamCallback callback = 0);
 private:
     typedef std::pair<IPv4Address, IPv4Address> address_pair;
     typedef std::pair<uint16_t, address_pair> key_type;
     typedef std::map<key_type, Internals::IPv4Stream> streams_type;
+    typedef std::list<std::pair<key_type, Internals::IPv4Stream::time_point>> streams_history;
 
     key_type make_key(const IP* ip) const;
     address_pair make_address_pair(IPv4Address addr1, IPv4Address addr2) const;
+    void removal_expired_streams();
     
     streams_type streams_;
     OverlappingTechnique technique_;
+    size_t max_number_packets_to_stream_;
+    size_t stream_timeout_ms_;
+    size_t time_to_check_s_;
+    Internals::IPv4Stream::time_point origin_cycle_time_;
+    streams_history streams_history_;
+
+    StreamCallback stream_overflow_callback_;
+    StreamCallback stream_timeout_callback_;
 };
 
 /**

@@ -38,7 +38,8 @@ namespace Tins {
 namespace Internals {
 
 IPv4Stream::IPv4Stream() 
-: received_size_(), total_size_(), received_end_(false) {
+: received_size_(), total_size_(), received_end_(false), 
+    start_time_point_(std::chrono::system_clock::now()) {
 
 }
 
@@ -100,6 +101,14 @@ const IP& IPv4Stream::first_fragment() const {
     return first_fragment_;
 }
 
+size_t IPv4Stream::number_fragments() const {
+    return fragments_.size();
+}
+
+IPv4Stream::time_point IPv4Stream::start_time_point() const {
+    return start_time_point_;
+}
+
 uint16_t IPv4Stream::extract_offset(const IP* ip) {
     return ip->fragment_offset() * 8;
 }
@@ -107,23 +116,36 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
 } // Internals
 
 IPv4Reassembler::IPv4Reassembler()
-: technique_(NONE) {
+: technique_(NONE), max_number_packets_to_stream_(0), 
+    stream_timeout_ms_(0), origin_cycle_time_(std::chrono::system_clock::now()),
+        stream_overflow_callback_(0), stream_timeout_callback_(0) {
 
 }
 
 IPv4Reassembler::IPv4Reassembler(OverlappingTechnique technique)
-: technique_(technique) {
+: technique_(technique), max_number_packets_to_stream_(0), 
+    stream_timeout_ms_(0), origin_cycle_time_(std::chrono::system_clock::now()),
+        stream_overflow_callback_(0), stream_timeout_callback_(0) {
 
 }
 
 IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
+    // Removal of expired streams
+    removal_expired_streams();
+
     IP* ip = pdu.find_pdu<IP>();
     if (ip && ip->inner_pdu()) {
         // There's fragmentation
         if (ip->is_fragmented()) {
             key_type key = make_key(ip);
+            //
+            streams_type::iterator stream_it = streams_.find(key); 
             // Create it or look it up, it's the same
-            Internals::IPv4Stream& stream = streams_[key];
+            Internals::IPv4Stream& stream = (stream_it != streams_.end() ? stream_it->second : streams_[key]);
+            if (stream_timeout_ms_ && stream_it == streams_.end()) {
+                streams_history_.emplace_back(key, stream.start_time_point());
+            }
+
             stream.add_fragment(ip);
             if (stream.is_complete()) {
                 PDU* pdu = stream.allocate_pdu();
@@ -132,6 +154,7 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
 
                 // Erase this stream, since it's already assembled
                 streams_.erase(key);
+
                 // The packet is corrupt
                 if (!pdu) {
                     return FRAGMENTED;
@@ -139,11 +162,30 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
                 ip->inner_pdu(pdu);
                 ip->fragment_offset(0);
                 ip->flags(static_cast<IP::Flags>(0));
+
                 return REASSEMBLED;
             }
-            else {
-                return FRAGMENTED;
+
+            // Tracking overflow stream
+            if (max_number_packets_to_stream_
+                && stream.number_fragments() >= max_number_packets_to_stream_)
+            {
+                if (stream_overflow_callback_)
+                {
+                    PDU* pdu = stream.allocate_pdu();
+
+                    // The packet is not corrupt
+                    if (pdu) {
+                        stream_overflow_callback_(*pdu);
+                        delete pdu;
+                    }
+                }
+
+                // Erase this stream
+                streams_.erase(key);
             }
+
+            return FRAGMENTED;
         }
     }
     return NOT_FRAGMENTED;
@@ -165,6 +207,47 @@ IPv4Reassembler::address_pair IPv4Reassembler::make_address_pair(IPv4Address add
     }
 }
 
+void IPv4Reassembler::removal_expired_streams()
+{
+    if (!stream_timeout_ms_) return;
+
+    Internals::IPv4Stream::time_point now = std::chrono::system_clock::now();
+    auto step = std::chrono::duration_cast<std::chrono::seconds>(now - origin_cycle_time_);
+    if (std::chrono::seconds(time_to_check_s_) < step) {
+        return;
+    }
+
+    while (!streams_history_.empty()) {
+        streams_history::value_type & history_front = streams_history_.front();
+        streams_type::iterator stream_it = streams_.find(history_front.first);
+        if (stream_it == streams_.end()) {
+            streams_history_.pop_front();
+            continue;
+        } 
+        Internals::IPv4Stream& stream_tmp = stream_it->second; 
+        if (stream_tmp.start_time_point() != history_front.second) {
+            streams_history_.pop_front();
+            continue;
+        }
+
+        auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - history_front.second);
+        if ((size_t)diff.count() > stream_timeout_ms_) {
+            if (stream_timeout_callback_) {
+                PDU* pdu = stream_tmp.allocate_pdu();
+
+                // The packet is not corrupt
+                if (pdu) {
+                    stream_timeout_callback_(*pdu);
+                    delete pdu;
+                }
+            }
+            // Erase this stream
+            streams_.erase(history_front.first);
+            streams_history_.pop_front();
+        } else break;
+    }
+}
+
 void IPv4Reassembler::clear_streams() {
     streams_.clear();
 }
@@ -176,6 +259,17 @@ void IPv4Reassembler::remove_stream(uint16_t id, IPv4Address addr1, IPv4Address 
             make_address_pair(addr1, addr2)
         )
     );
+}
+
+void IPv4Reassembler::set_max_number_packets_to_stream(size_t max_number, StreamCallback callback) {
+    max_number_packets_to_stream_ = max_number;
+    stream_overflow_callback_ = callback;
+}
+
+void IPv4Reassembler::set_timeout_to_stream(size_t stream_timeout_ms, size_t time_to_check_s, StreamCallback callback) {
+    stream_timeout_ms_ = stream_timeout_ms;
+    time_to_check_s_ = time_to_check_s;
+    stream_timeout_callback_ = callback;
 }
 
 } // Tins
