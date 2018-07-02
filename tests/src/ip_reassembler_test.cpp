@@ -116,6 +116,14 @@ TEST_F(IPv4ReassemblerTest, PacketHasMFAndDF) {
     IPv4Reassembler reassembler;
     reassembler.set_max_number_packets_to_stream(500);
     reassembler.set_timeout_to_stream(1000);
+
     EXPECT_EQ(IPv4Reassembler::FRAGMENTED, reassembler.process(packet1));
+    EXPECT_EQ(0, reassembler.total_number_complete_packages());
+    EXPECT_EQ(1, reassembler.current_number_incomplete_packages());
+    EXPECT_EQ(0, reassembler.total_number_damaged_packages());
+
     EXPECT_EQ(IPv4Reassembler::REASSEMBLED, reassembler.process(packet2));
+    EXPECT_EQ(1, reassembler.total_number_complete_packages());
+    EXPECT_EQ(0, reassembler.current_number_incomplete_packages());
+    EXPECT_EQ(0, reassembler.total_number_damaged_packages());
 }

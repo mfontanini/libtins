@@ -118,14 +118,16 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
 IPv4Reassembler::IPv4Reassembler()
 : technique_(NONE), max_number_packets_to_stream_(0), 
     stream_timeout_ms_(0), origin_cycle_time_(std::chrono::system_clock::now()),
-        stream_overflow_callback_(0), stream_timeout_callback_(0) {
+        stream_overflow_callback_(0), stream_timeout_callback_(0),
+            total_number_complete_packages_(0), total_number_damaged_packages_(0) {
 
 }
 
 IPv4Reassembler::IPv4Reassembler(OverlappingTechnique technique)
 : technique_(technique), max_number_packets_to_stream_(0), 
     stream_timeout_ms_(0), origin_cycle_time_(std::chrono::system_clock::now()),
-        stream_overflow_callback_(0), stream_timeout_callback_(0) {
+        stream_overflow_callback_(0), stream_timeout_callback_(0),
+            total_number_complete_packages_(0), total_number_damaged_packages_(0) {
 
 }
 
@@ -138,16 +140,14 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
         // There's fragmentation
         if (ip->is_fragmented()) {
             key_type key = make_key(ip);
-            //
-            streams_type::iterator stream_it = streams_.find(key); 
             // Create it or look it up, it's the same
+            streams_type::iterator stream_it = streams_.find(key); 
             Internals::IPv4Stream& stream = (stream_it != streams_.end() ? stream_it->second : streams_[key]);
-            if (stream_timeout_ms_ && stream_it == streams_.end()) {
-                streams_history_.emplace_back(key, stream.start_time_point());
-            }
 
             stream.add_fragment(ip);
             if (stream.is_complete()) {
+                ++total_number_complete_packages_;
+
                 PDU* pdu = stream.allocate_pdu();
                 // Use all field values from the first fragment
                 *ip = stream.first_fragment();
@@ -157,6 +157,7 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
 
                 // The packet is corrupt
                 if (!pdu) {
+                    ++total_number_damaged_packages_;
                     return FRAGMENTED;
                 }
                 ip->inner_pdu(pdu);
@@ -164,6 +165,11 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
                 ip->flags(static_cast<IP::Flags>(0));
 
                 return REASSEMBLED;
+            }
+            
+            // Only non-complete packages fall into the list
+            if (stream_timeout_ms_ && stream_it == streams_.end()) {
+                streams_history_.emplace_back(key, stream.start_time_point());
             }
 
             // Tracking overflow stream
@@ -178,6 +184,8 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
                     if (pdu) {
                         stream_overflow_callback_(*pdu);
                         delete pdu;
+                    } else {
+                        ++total_number_damaged_packages_;
                     }
                 }
 
@@ -209,7 +217,7 @@ IPv4Reassembler::address_pair IPv4Reassembler::make_address_pair(IPv4Address add
 
 void IPv4Reassembler::removal_expired_streams()
 {
-    if (!stream_timeout_ms_) return;
+    if (!stream_timeout_ms_ || streams_history_.empty()) return;
 
     Internals::IPv4Stream::time_point now = std::chrono::system_clock::now();
     auto step = std::chrono::duration_cast<std::chrono::seconds>(now - origin_cycle_time_);
@@ -239,6 +247,8 @@ void IPv4Reassembler::removal_expired_streams()
                 if (pdu) {
                     stream_timeout_callback_(*pdu);
                     delete pdu;
+                } else {
+                    ++total_number_damaged_packages_;
                 }
             }
             // Erase this stream
@@ -270,6 +280,18 @@ void IPv4Reassembler::set_timeout_to_stream(size_t stream_timeout_ms, size_t tim
     stream_timeout_ms_ = stream_timeout_ms;
     time_to_check_s_ = time_to_check_s;
     stream_timeout_callback_ = callback;
+}
+
+size_t IPv4Reassembler::total_number_complete_packages() const {
+    return total_number_complete_packages_;
+}
+
+size_t IPv4Reassembler::total_number_damaged_packages() const {
+    return total_number_damaged_packages_;
+}
+
+size_t IPv4Reassembler::current_number_incomplete_packages() const {
+    return streams_.size();
 }
 
 } // Tins

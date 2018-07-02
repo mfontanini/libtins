@@ -195,21 +195,40 @@ public:
     void remove_stream(uint16_t id, IPv4Address addr1, IPv4Address addr2);
 
     /**
-     * \brief 
+     * \brief A limit is set for each streams. 
+     * If max_number == 0, then there are no restrictions.
      * 
-     * \param max_number
-     * \param callback
+     * \param max_number Maximum number of packets per stream
+     * \param callback If set, it is called for each overflow stream
      */
     void set_max_number_packets_to_stream(size_t max_number, StreamCallback callback = 0);
 
     /**
-     * \brief
+     * \brief Set the lifetime for each streams. 
+     * The list of existing streams is checked with a specified time step. 
+     * Attention, the check does not occur in a separate thread, 
+     * but on each incoming package.
      * 
-     * \param stream_timeout_ms
-     * \param time_to_check_s
-     * \param callback
+     * \param stream_timeout_ms The lifetime of a single stream (milliseconds)
+     * \param time_to_check_s Time step for verification (seconds)
+     * \param callback If set, it is called for each expired valid stream
      */
     void set_timeout_to_stream(size_t stream_timeout_ms, size_t time_to_check_s = 60, StreamCallback callback = 0);
+
+    /**
+     * \brief Return the total number of complete packets
+     */
+    size_t total_number_complete_packages() const;
+
+    /**
+     * \brief Return the total number of damaged packages
+     */
+    size_t total_number_damaged_packages() const;
+
+    /**
+     * \brief Return the current number of incomplete packets
+     */
+    size_t current_number_incomplete_packages() const;
 private:
     typedef std::pair<IPv4Address, IPv4Address> address_pair;
     typedef std::pair<uint16_t, address_pair> key_type;
@@ -230,6 +249,10 @@ private:
 
     StreamCallback stream_overflow_callback_;
     StreamCallback stream_timeout_callback_;
+
+    // Statistic
+    size_t total_number_complete_packages_;
+    size_t total_number_damaged_packages_;
 };
 
 /**
