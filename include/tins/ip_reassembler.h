@@ -229,6 +229,11 @@ public:
      * \brief Return the current number of incomplete packets
      */
     size_t current_number_incomplete_packages() const;
+
+    /**
+     * \brief Returns the current size of the partial-packet buffer
+     */
+    size_t current_buffer_size_incomplete_packages() const;
 private:
     typedef std::pair<IPv4Address, IPv4Address> address_pair;
     typedef std::pair<uint16_t, address_pair> key_type;
@@ -250,7 +255,7 @@ private:
     StreamCallback stream_overflow_callback_;
     StreamCallback stream_timeout_callback_;
 
-    // Statistic
+    // Statistics
     size_t total_number_complete_packages_;
     size_t total_number_damaged_packages_;
 };

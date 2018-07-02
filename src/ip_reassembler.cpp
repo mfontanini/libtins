@@ -294,4 +294,8 @@ size_t IPv4Reassembler::current_number_incomplete_packages() const {
     return streams_.size();
 }
 
+size_t IPv4Reassembler::current_buffer_size_incomplete_packages() const {
+    return streams_history_.size();
+}
+
 } // Tins
