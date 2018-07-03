@@ -33,8 +33,13 @@
 #include <vector>
 #include <map>
 #include <list>
+#if TINS_IS_CXX11
 #include <chrono>
 #include <functional>
+#else
+#include <ctime>
+#include <time.h>
+#endif
 #include <tins/pdu.h>
 #include <tins/macros.h>
 #include <tins/ip_address.h>
@@ -74,7 +79,12 @@ class TINS_API IPv4Stream {
 public:
     IPv4Stream();
 
+#if TINS_IS_CXX11
     typedef std::chrono::system_clock::time_point time_point;
+#else
+    typedef uint64_t time_point;
+    static uint64_t current_time();
+#endif
     
     void add_fragment(IP* ip);
     bool is_complete() const;
@@ -138,7 +148,11 @@ public:
 
     TINS_DEPRECATED(typedef PacketStatus packet_status);
 
+#if TINS_IS_CXX11
     typedef std::function<void(PDU& pdu)> StreamCallback;
+#else
+    typedef void (*StreamCallback)(PDU& pdu);
+#endif
 
     /**
      * The type used to represent the overlapped segment reassembly 
@@ -201,7 +215,7 @@ public:
      * \param max_number Maximum number of packets per stream
      * \param callback If set, it is called for each overflow stream
      */
-    void set_max_number_packets_to_stream(size_t max_number, StreamCallback callback = 0);
+    void set_max_number_packets_to_stream(uint64_t max_number, StreamCallback callback = 0);
 
     /**
      * \brief Set the lifetime for each streams. 
@@ -213,7 +227,7 @@ public:
      * \param time_to_check_s Time step for verification (seconds)
      * \param callback If set, it is called for each expired valid stream
      */
-    void set_timeout_to_stream(size_t stream_timeout_ms, size_t time_to_check_s = 60, StreamCallback callback = 0);
+    void set_timeout_to_stream(uint64_t stream_timeout_ms, uint64_t time_to_check_s = 60, StreamCallback callback = 0);
 
     /**
      * \brief Return the total number of complete packets
@@ -238,7 +252,7 @@ private:
     typedef std::pair<IPv4Address, IPv4Address> address_pair;
     typedef std::pair<uint16_t, address_pair> key_type;
     typedef std::map<key_type, Internals::IPv4Stream> streams_type;
-    typedef std::list<std::pair<key_type, Internals::IPv4Stream::time_point>> streams_history;
+    typedef std::list< std::pair<key_type, Internals::IPv4Stream::time_point> > streams_history;
 
     key_type make_key(const IP* ip) const;
     address_pair make_address_pair(IPv4Address addr1, IPv4Address addr2) const;
@@ -246,14 +260,15 @@ private:
     
     streams_type streams_;
     OverlappingTechnique technique_;
-    size_t max_number_packets_to_stream_;
-    size_t stream_timeout_ms_;
-    size_t time_to_check_s_;
-    Internals::IPv4Stream::time_point origin_cycle_time_;
+    uint64_t max_number_packets_to_stream_;
+    uint64_t stream_timeout_ms_;
+    uint64_t time_to_check_s_;
     streams_history streams_history_;
 
     StreamCallback stream_overflow_callback_;
     StreamCallback stream_timeout_callback_;
+
+    Internals::IPv4Stream::time_point origin_cycle_time_;
 
     // Statistics
     size_t total_number_complete_packages_;

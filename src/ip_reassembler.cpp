@@ -38,10 +38,31 @@ namespace Tins {
 namespace Internals {
 
 IPv4Stream::IPv4Stream() 
-: received_size_(), total_size_(), received_end_(false), 
-    start_time_point_(std::chrono::system_clock::now()) {
-
+: received_size_(), total_size_(), received_end_(false) {
+#if TINS_IS_CXX11
+    start_time_point_ = std::chrono::system_clock::now();
+#else
+    start_time_point_ = current_time();
+#endif
 }
+
+#if TINS_IS_CXX11 == 0
+uint64_t IPv4Stream::current_time() {
+    #ifdef _WIN32
+        FILETIME file_time;
+        GetSystemTimeAsFileTime(&file_time);
+        ULARGE_INTEGER ul;
+        ul.LowPart = ft.dwLowDateTime;
+        ul.HighPart = ft.dwHighDateTime;
+        uint64_t file_time_64 = ul.QuadPart;
+        return file_time_64;
+    #else
+        timespec ts = { 0 };
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        return ((uint64_t)ts.tv_sec) * 1000 + ((uint64_t)ts.tv_nsec) / 1000000;
+    #endif
+}
+#endif
 
 void IPv4Stream::add_fragment(IP* ip) {
     const uint16_t offset = extract_offset(ip);
@@ -117,18 +138,24 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
 
 IPv4Reassembler::IPv4Reassembler()
 : technique_(NONE), max_number_packets_to_stream_(0), 
-    stream_timeout_ms_(0), origin_cycle_time_(std::chrono::system_clock::now()),
-        stream_overflow_callback_(0), stream_timeout_callback_(0),
-            total_number_complete_packages_(0), total_number_damaged_packages_(0) {
-
+    stream_timeout_ms_(0), stream_overflow_callback_(0), stream_timeout_callback_(0),
+        total_number_complete_packages_(0), total_number_damaged_packages_(0) {
+#if TINS_IS_CXX11
+    origin_cycle_time_ = std::chrono::system_clock::now();
+#else
+    origin_cycle_time_ = Internals::IPv4Stream::current_time();
+#endif
 }
 
 IPv4Reassembler::IPv4Reassembler(OverlappingTechnique technique)
 : technique_(technique), max_number_packets_to_stream_(0), 
-    stream_timeout_ms_(0), origin_cycle_time_(std::chrono::system_clock::now()),
-        stream_overflow_callback_(0), stream_timeout_callback_(0),
-            total_number_complete_packages_(0), total_number_damaged_packages_(0) {
-
+    stream_timeout_ms_(0), stream_overflow_callback_(0), stream_timeout_callback_(0),
+        total_number_complete_packages_(0), total_number_damaged_packages_(0) {
+#if TINS_IS_CXX11
+    origin_cycle_time_ = std::chrono::system_clock::now();
+#else
+    origin_cycle_time_ = Internals::IPv4Stream::current_time();
+#endif
 }
 
 IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
@@ -169,7 +196,11 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
             
             // Only non-complete packages fall into the list
             if (stream_timeout_ms_ && stream_it == streams_.end()) {
+#if TINS_IS_CXX11
                 streams_history_.emplace_back(key, stream.start_time_point());
+#else
+                streams_history_.push_back(std::make_pair(key, stream.start_time_point()));
+#endif
             }
 
             // Tracking overflow stream
@@ -219,11 +250,19 @@ void IPv4Reassembler::removal_expired_streams()
 {
     if (!stream_timeout_ms_ || streams_history_.empty()) return;
 
+#if TINS_IS_CXX11
     Internals::IPv4Stream::time_point now = std::chrono::system_clock::now();
     auto step = std::chrono::duration_cast<std::chrono::seconds>(now - origin_cycle_time_);
     if (std::chrono::seconds(time_to_check_s_) < step) {
         return;
     }
+#else
+    uint64_t now = Internals::IPv4Stream::current_time();
+    uint64_t step = now - origin_cycle_time_;
+    if (time_to_check_s_ * 1000 < step) {
+        return;
+    }
+#endif
 
     while (!streams_history_.empty()) {
         streams_history::value_type & history_front = streams_history_.front();
@@ -231,15 +270,19 @@ void IPv4Reassembler::removal_expired_streams()
         if (stream_it == streams_.end()) {
             streams_history_.pop_front();
             continue;
-        } 
+        }
         Internals::IPv4Stream& stream_tmp = stream_it->second; 
         if (stream_tmp.start_time_point() != history_front.second) {
             streams_history_.pop_front();
             continue;
         }
-
+#if TINS_IS_CXX11
         auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - history_front.second);
-        if ((size_t)diff.count() > stream_timeout_ms_) {
+        if ((uint64_t)diff.count() > stream_timeout_ms_) {
+#else
+        uint64_t diff = now - history_front.second;
+        if (diff > stream_timeout_ms_) {
+#endif
             if (stream_timeout_callback_) {
                 PDU* pdu = stream_tmp.allocate_pdu();
 
@@ -271,12 +314,12 @@ void IPv4Reassembler::remove_stream(uint16_t id, IPv4Address addr1, IPv4Address 
     );
 }
 
-void IPv4Reassembler::set_max_number_packets_to_stream(size_t max_number, StreamCallback callback) {
+void IPv4Reassembler::set_max_number_packets_to_stream(uint64_t max_number, StreamCallback callback) {
     max_number_packets_to_stream_ = max_number;
     stream_overflow_callback_ = callback;
 }
 
-void IPv4Reassembler::set_timeout_to_stream(size_t stream_timeout_ms, size_t time_to_check_s, StreamCallback callback) {
+void IPv4Reassembler::set_timeout_to_stream(uint64_t stream_timeout_ms, uint64_t time_to_check_s, StreamCallback callback) {
     stream_timeout_ms_ = stream_timeout_ms;
     time_to_check_s_ = time_to_check_s;
     stream_timeout_callback_ = callback;

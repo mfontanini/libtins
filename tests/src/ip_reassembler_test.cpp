@@ -2,6 +2,7 @@
 #include <cstring>
 #include <string>
 #include <utility>
+#include <tins/cxxstd.h>
 #include <tins/ip_reassembler.h>
 #include <tins/ethernetII.h>
 #include <tins/udp.h>
