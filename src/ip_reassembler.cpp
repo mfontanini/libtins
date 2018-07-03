@@ -252,14 +252,14 @@ void IPv4Reassembler::removal_expired_streams()
 
 #if TINS_WITH_MONOTONIC_CHRONO
     Internals::IPv4Stream::time_point now = std::chrono::system_clock::now();
-    auto step = std::chrono::duration_cast<std::chrono::seconds>(now - origin_cycle_time_);
-    if (std::chrono::seconds(time_to_check_s_) < step) {
+    auto step = std::chrono::duration_cast<std::chrono::milliseconds>(now - origin_cycle_time_);
+    if (step < std::chrono::milliseconds(time_to_check_ms_)) {
         return;
     }
 #else
     uint64_t now = Internals::IPv4Stream::current_time();
     uint64_t step = now - origin_cycle_time_;
-    if (time_to_check_s_ * 1000 < step) {
+    if (step < time_to_check_ms_) {
         return;
     }
 #endif
@@ -319,9 +319,9 @@ void IPv4Reassembler::set_max_number_packets_to_stream(uint64_t max_number, Stre
     stream_overflow_callback_ = callback;
 }
 
-void IPv4Reassembler::set_timeout_to_stream(uint64_t stream_timeout_ms, uint64_t time_to_check_s, StreamCallback callback) {
+void IPv4Reassembler::set_timeout_to_stream(uint64_t stream_timeout_ms, uint64_t time_to_check_ms, StreamCallback callback) {
     stream_timeout_ms_ = stream_timeout_ms;
-    time_to_check_s_ = time_to_check_s;
+    time_to_check_ms_ = time_to_check_ms;
     stream_timeout_callback_ = callback;
 }
 

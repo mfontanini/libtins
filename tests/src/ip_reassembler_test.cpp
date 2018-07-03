@@ -65,7 +65,7 @@ const size_t IPv4ReassemblerTest::orderings[][11] = {
 void IPv4ReassemblerTest::test_packets(const vector<pair<const uint8_t*, size_t> >& vt) {
     IPv4Reassembler reassembler;
     reassembler.set_max_number_packets_to_stream(500);
-    reassembler.set_timeout_to_stream(100);
+    reassembler.set_timeout_to_stream(500, 100);
     for(size_t i = 0; i < vt.size(); ++i) {
         EthernetII eth(vt[i].first, (uint32_t)vt[i].second);
         // Set the TTL for the first fragment to 32 so we can make sure the right "base"
@@ -130,7 +130,7 @@ TEST_F(IPv4ReassemblerTest, PacketHasMFAndDF) {
     EXPECT_TRUE(packet2.rfind_pdu<IP>().is_fragmented());
     IPv4Reassembler reassembler;
     reassembler.set_max_number_packets_to_stream(500);
-    reassembler.set_timeout_to_stream(100);
+    reassembler.set_timeout_to_stream(500, 100);
 
     EXPECT_EQ(IPv4Reassembler::FRAGMENTED, reassembler.process(packet1));
     EXPECT_EQ(IPv4Reassembler::REASSEMBLED, reassembler.process(packet2));
@@ -161,7 +161,7 @@ TEST_F(IPv4ReassemblerTest, PackageWasDeletedByTimeout) {
     EXPECT_TRUE(packet2.rfind_pdu<IP>().is_fragmented());
     IPv4Reassembler reassembler;
     reassembler.set_max_number_packets_to_stream(500);
-    reassembler.set_timeout_to_stream(100);
+    reassembler.set_timeout_to_stream(500, 100);
 
     EXPECT_EQ(IPv4Reassembler::FRAGMENTED, reassembler.process(packet1));
     EXPECT_EQ(0, reassembler.total_number_complete_packages());

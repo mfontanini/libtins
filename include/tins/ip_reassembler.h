@@ -227,10 +227,12 @@ public:
      * but on each incoming package.
      * 
      * \param stream_timeout_ms The lifetime of a single stream (milliseconds)
-     * \param time_to_check_s Time step for verification (seconds)
+     * If stream_timeout_ms == 0, then there will be no verification
+     * \param time_to_check_ms Time step for verification (milliseconds)
+     * If time_to_check_ms == 0 and stream_timeout_ms != 0, then the check will be with each new package
      * \param callback If set, it is called for each expired valid stream
      */
-    void set_timeout_to_stream(uint64_t stream_timeout_ms, uint64_t time_to_check_s = 60, StreamCallback callback = 0);
+    void set_timeout_to_stream(uint64_t stream_timeout_ms, uint64_t time_to_check_ms = 1000, StreamCallback callback = 0);
 
     /**
      * \brief Return the total number of complete packets
@@ -265,7 +267,7 @@ private:
     OverlappingTechnique technique_;
     uint64_t max_number_packets_to_stream_;
     uint64_t stream_timeout_ms_;
-    uint64_t time_to_check_s_;
+    uint64_t time_to_check_ms_;
     streams_history streams_history_;
 
     StreamCallback stream_overflow_callback_;
