@@ -30,7 +30,7 @@
 #ifndef TINS_IP_REASSEMBLER_H
 #define TINS_IP_REASSEMBLER_H
 
-#if TINS_IS_CXX11
+#if TINS_WITH_MONOTONIC_CHRONO
     #include <chrono>
     #include <functional>
 #elif defined(_WIN32)
@@ -82,7 +82,7 @@ class TINS_API IPv4Stream {
 public:
     IPv4Stream();
 
-#if TINS_IS_CXX11
+#if TINS_WITH_MONOTONIC_CHRONO
     typedef std::chrono::system_clock::time_point time_point;
 #else
     typedef uint64_t time_point;
@@ -151,7 +151,7 @@ public:
 
     TINS_DEPRECATED(typedef PacketStatus packet_status);
 
-#if TINS_IS_CXX11
+#if TINS_WITH_MONOTONIC_CHRONO
     typedef std::function<void(PDU& pdu)> StreamCallback;
 #else
     typedef void (*StreamCallback)(PDU& pdu);
