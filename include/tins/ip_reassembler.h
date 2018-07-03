@@ -30,16 +30,19 @@
 #ifndef TINS_IP_REASSEMBLER_H
 #define TINS_IP_REASSEMBLER_H
 
+#if TINS_IS_CXX11
+    #include <chrono>
+    #include <functional>
+#elif defined(_WIN32)
+    #include <winsock2.h>
+    #include <windows.h>
+#else
+    #include <sys/time.h>
+#endif
+
 #include <vector>
 #include <map>
 #include <list>
-#if TINS_IS_CXX11
-#include <chrono>
-#include <functional>
-#else
-#include <ctime>
-#include <time.h>
-#endif
 #include <tins/pdu.h>
 #include <tins/macros.h>
 #include <tins/ip_address.h>
