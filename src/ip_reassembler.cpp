@@ -52,8 +52,8 @@ uint64_t IPv4Stream::current_time() {
         FILETIME file_time;
         GetSystemTimeAsFileTime(&file_time);
         ULARGE_INTEGER ul;
-        ul.LowPart = ft.dwLowDateTime;
-        ul.HighPart = ft.dwHighDateTime;
+        ul.LowPart = file_time.dwLowDateTime;
+        ul.HighPart = file_time.dwHighDateTime;
         uint64_t file_time_64 = ul.QuadPart;
         return file_time_64;
     #else
