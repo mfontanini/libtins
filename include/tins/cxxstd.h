@@ -44,12 +44,6 @@
 #define TINS_IS_CXX11 0
 #endif  // TINS_IS_CXX11
 
-#if !(TINS_IS_CXX11 == 0) && defined(_MSC_VER)
-#define TINS_WITH_MONOTONIC_CHRONO (_MSC_VER > 1800)
-#else
-#define TINS_WITH_MONOTONIC_CHRONO TINS_IS_CXX11
-#endif  // TINS_WITH_MONOTONIC_CHRONO
-
 namespace Tins{
 namespace Internals {
 template<class T> void unused(const T&) { }

@@ -39,14 +39,14 @@ namespace Internals {
 
 IPv4Stream::IPv4Stream() 
 : received_size_(), total_size_(), received_end_(false) {
-#if TINS_WITH_MONOTONIC_CHRONO
+#if TINS_IS_CXX11
     start_time_point_ = std::chrono::system_clock::now();
 #else
     start_time_point_ = current_time();
 #endif
 }
 
-#if TINS_WITH_MONOTONIC_CHRONO == 0
+#if TINS_IS_CXX11 == 0
 uint64_t IPv4Stream::current_time() {
     #ifdef _WIN32
         FILETIME file_time;
@@ -140,7 +140,7 @@ IPv4Reassembler::IPv4Reassembler()
 : technique_(NONE), max_number_packets_to_stream_(0), 
     stream_timeout_ms_(0), stream_overflow_callback_(0), stream_timeout_callback_(0),
         total_number_complete_packages_(0), total_number_damaged_packages_(0) {
-#if TINS_WITH_MONOTONIC_CHRONO
+#if TINS_IS_CXX11
     origin_cycle_time_ = std::chrono::system_clock::now();
 #else
     origin_cycle_time_ = Internals::IPv4Stream::current_time();
@@ -151,7 +151,7 @@ IPv4Reassembler::IPv4Reassembler(OverlappingTechnique technique)
 : technique_(technique), max_number_packets_to_stream_(0), 
     stream_timeout_ms_(0), stream_overflow_callback_(0), stream_timeout_callback_(0),
         total_number_complete_packages_(0), total_number_damaged_packages_(0) {
-#if TINS_WITH_MONOTONIC_CHRONO
+#if TINS_IS_CXX11
     origin_cycle_time_ = std::chrono::system_clock::now();
 #else
     origin_cycle_time_ = Internals::IPv4Stream::current_time();
@@ -196,7 +196,7 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
             
             // Only non-complete packages fall into the list
             if (stream_timeout_ms_ && stream_it == streams_.end()) {
-#if TINS_WITH_MONOTONIC_CHRONO
+#if TINS_IS_CXX11
                 streams_history_.emplace_back(key, stream.start_time_point());
 #else
                 streams_history_.push_back(std::make_pair(key, stream.start_time_point()));
@@ -250,7 +250,7 @@ void IPv4Reassembler::removal_expired_streams()
 {
     if (!stream_timeout_ms_ || streams_history_.empty()) return;
 
-#if TINS_WITH_MONOTONIC_CHRONO
+#if TINS_IS_CXX11
     Internals::IPv4Stream::time_point now = std::chrono::system_clock::now();
     auto step = std::chrono::duration_cast<std::chrono::milliseconds>(now - origin_cycle_time_);
     if (step < std::chrono::milliseconds(time_to_check_ms_)) {
@@ -276,7 +276,7 @@ void IPv4Reassembler::removal_expired_streams()
             streams_history_.pop_front();
             continue;
         }
-#if TINS_WITH_MONOTONIC_CHRONO
+#if TINS_IS_CXX11
         auto diff = std::chrono::duration_cast<std::chrono::milliseconds>(now - history_front.second);
         if ((uint64_t)diff.count() > stream_timeout_ms_) {
 #else
