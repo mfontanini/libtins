@@ -263,6 +263,7 @@ void IPv4Reassembler::removal_expired_streams()
         return;
     }
 #endif
+    origin_cycle_time_ = now;
 
     while (!streams_history_.empty()) {
         streams_history::value_type & history_front = streams_history_.front();
