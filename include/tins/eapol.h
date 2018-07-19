@@ -60,15 +60,27 @@ public:
      */
     static const PDU::PDUType pdu_flag = PDU::EAPOL;
 
+
     /**
-     * The EAPOL type enum.
+     * the EAPOL packet types enum.
      */
-    enum EAPOLTYPE {
+    enum PacketTypes
+    {
+        EAP_TYPE = 0,
+        START,
+        LOGOFF,
+        KEY
+    };
+
+    /**
+     * EAPOL key types enum.
+     */
+    enum KeyTypes {
         RC4 = 1,
         RSN,
         EAPOL_WPA = 254
     };
-    
+
     /**
      * \brief Extracts metadata for this protocol based on the buffer provided
      *
@@ -77,6 +89,19 @@ public:
      */
     static metadata extract_metadata(const uint8_t *buffer, uint32_t total_sz);
     
+
+    /**
+     * \brief constructor that sets the packet_type field.
+     */
+    EAPOL(PacketTypes packet_type);
+
+    /**
+     * \brief Constructor which creates an EAPOL object from a buffer.
+     * \param buffer The buffer from which this PDU will be constructed.
+     * \param total_sz The total size of the buffer.
+     */
+    EAPOL(const uint8_t* buffer, uint32_t total_sz);
+
     /**
      * \brief Static method to instantiate the correct EAPOL subclass 
      * based on a raw buffer.
@@ -117,14 +142,6 @@ public:
         return Endian::be_to_host(header_.length);
     }
     
-    /**
-     * \brief Getter for the type field.
-     * \return The type field.
-     */
-    uint8_t type() const {
-        return header_.type;
-    }
-    
     /* Setters */
     
     /**
@@ -143,39 +160,49 @@ public:
      * \brief Sets the length field.
      * \param value The new length to be set.
      */
-    void length(uint16_t value);
+    virtual void length(uint16_t value);
     
     /**
-     * \brief Sets the type field.
-     * \param value The new type to be set.
+     * \brief Returns the header size.
+     *
+     * This method overrides PDU::header_size. This size includes the
+     * payload and options size.
+     *
+     * \sa PDU::header_size
      */
-    void type(uint8_t value);
-    
+    uint32_t header_size() const;
+
     /**
      * \brief Getter for the PDU's type.
      * \return Returns the PDUType corresponding to the PDU.
      */
     PDUType pdu_type() const { return PDU::EAPOL; }
+
+    
+    /**
+     * \brief Clones this PDU.
+     *
+     * \sa PDU::clone
+     */
+    EAPOL* clone() const {
+        return new EAPOL(*this);
+    }
 protected:
-    /**
-     * \brief Protected constructor that sets the packet_type and type fields.
-     */
-    EAPOL(uint8_t packet_type, EAPOLTYPE type);
-    
-    /**
-     * \brief Constructor which creates an EAPOL object from a buffer.
-     * \param buffer The buffer from which this PDU will be constructed.
-     * \param total_sz The total size of the buffer.
-     */
-    EAPOL(const uint8_t* buffer, uint32_t total_sz);
-    
     TINS_BEGIN_PACK
     struct eapol_header {
         uint8_t version, packet_type;
         uint16_t length;
-        uint8_t type;
     } TINS_END_PACK;
     
+    TINS_BEGIN_PACK
+    struct overlapping_eapol_header {
+        uint8_t version, packet_type;
+        uint16_t length;
+        uint8_t subtype_code;
+    } TINS_END_PACK;
+
+private:
+
     /**
      * \brief Virtual method which should serialize the subclass specific
      * body and save it in a byte array.
@@ -183,14 +210,191 @@ protected:
      * \param buffer The pointer in which to save the serialization.
      * \param total_sz The total size of the buffer.
      */
-    virtual void write_body(Memory::OutputMemoryStream& stream) = 0;
-private:
+    virtual void write_body(Memory::OutputMemoryStream&);
+
     void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     eapol_header header_;
 };
 
+class TINS_API Eap : public EAPOL {
+public:
+    static const PDU::PDUType pdu_flag = PDU::EAP;
 
+    /**
+     * A number to signify 'no value' for type
+     */
+    static const uint8_t invalid_type = 255;
+
+    /**
+     * EAP types enum.
+     */
+    enum Codes {
+        REQUEST = 1,
+        RESPONSE,
+        SUCCESS,
+        FAILURE
+    };
+
+    /**
+     * \brief Default constructor.
+     */
+    Eap();
+
+    /**
+     * \brief constructor that sets the code field (id is 0, type is Eap::invalid_type)
+     */
+    Eap(Codes eap_code);
+
+    /**
+     * \brief constructor that sets the code and id fields. (type is Eap::invalid_type)
+     */
+    Eap(Codes eap_code, uint8_t id);
+
+    /**
+     * \brief constructor that sets the code,id and and type fields.
+     */
+    Eap(Codes eap_code, uint8_t id, uint8_t eap_type);
+
+    /**
+     * \brief Constructs an Eap object from a buffer.
+     *
+     * If there is not enough size for a EAP header in the
+     * buffer, a malformed_packet exception is thrown.
+     *
+     * \param buffer The buffer from which this PDU will be constructed.
+     * \param total_sz The total size of the buffer.
+     */
+    Eap(const uint8_t* buffer, uint32_t total_sz);
+
+    /* Getters */
+
+    /**
+     * \brief Getter for the length field.
+     * \return The length field.
+     */
+    uint16_t length() const {
+        return Endian::be_to_host(eap_header_.length);
+    }
+
+    /**
+     * \brief Getter for the code field.
+     * \return The code field.
+     */
+    Codes code() const {
+        return static_cast<Codes>(eap_header_.code);
+    }
+
+    /**
+     * \brief Getter for the id field.
+     * \return The id field.
+     */
+    uint8_t id() const {
+        return eap_header_.id;
+    }
+
+    /**
+     * \brief Getter for the code field.
+     * \return The code field.
+     */
+    uint8_t type() const {
+        if(eap_header_.type == invalid_type) {
+            throw option_not_found();
+        }
+        return eap_header_.type;
+    }
+    /* Setters */
+
+    /**
+     * \brief Sets the key length field.
+     * \param value The new key length to be set.
+     */
+    virtual void length(uint16_t new_length);
+
+    /**
+     * \brief Sets the code field.
+     * \param value The new code to be set.
+     */
+    void code(Codes new_code);
+
+    /**
+     * \brief Sets the id field.
+     * \param value The new id to be set.
+     */
+    void id(uint8_t new_id);
+
+    /**
+     * \brief Sets the type field.
+     * \param value The new type to be set.
+     */
+    void type(uint8_t new_type);
+
+    /* Virtual method override. */
+
+    /**
+     * \brief Returns the header size.
+     *
+     * This method overrides PDU::header_size. This size includes the
+     * payload and options size.
+     *
+     * \sa PDU::header_size
+     */
+    uint32_t header_size() const;
+
+    /**
+     * \brief Getter for the PDU's type.
+     * \return Returns the PDUType corresponding to the PDU.
+     */
+    PDUType pdu_type() const {
+        return pdu_flag;
+    }
+
+    /**
+     * \brief Check whether this PDU matches the specified flag.
+     * \param flag The flag to match
+     * \sa PDU::matches_flag
+     */
+    bool matches_flag(PDUType flag) const {
+       return flag == pdu_flag || EAPOL::matches_flag(flag);
+    }
+
+    /**
+     * \brief Clones this PDU.
+     *
+     * \sa PDU::clone
+     */
+    Eap* clone() const {
+        return new Eap(*this);
+    }
+
+private:
+
+    /*
+     * \brief common header in all eap types
+     */
+    TINS_BEGIN_PACK
+    struct eap_header {
+        uint8_t code, id;
+        uint16_t length;
+    } TINS_END_PACK;
+
+    /*
+     * \brief header when code is Codes::REQUEST, Codes::RESPONSE, otherwise type is Eap::invalid_type
+     */
+    TINS_BEGIN_PACK
+    struct extended_eap_header {
+        uint8_t code, id;
+        uint16_t length;
+        uint8_t type;
+    } TINS_END_PACK;
+
+    void write_body(Memory::OutputMemoryStream& stream);
+
+    void init(Codes eap_code, uint8_t id, uint8_t eap_type);
+
+    extended_eap_header eap_header_;
+
+};
 
 /**
  * \brief Class that represents the RC4 EAPOL PDU.
@@ -375,6 +579,7 @@ public:
 private:
     TINS_BEGIN_PACK
     struct rc4_eapol_header {
+        uint8_t type;
         uint16_t key_length;
         uint64_t replay_counter;
         uint8_t key_iv[key_iv_size];
@@ -389,7 +594,6 @@ private:
     key_type key_;
     rc4_eapol_header header_;
 };
-
 
 /**
  * \brief Class that represents the RSN EAPOL PDU.
@@ -776,6 +980,7 @@ public:
 private:
     TINS_BEGIN_PACK
     struct rsn_eapol_header {
+        uint8_t type;
     #if TINS_IS_LITTLE_ENDIAN
         uint16_t key_mic:1,
             secure:1,

@@ -51,11 +51,10 @@ PDU::metadata EAPOL::extract_metadata(const uint8_t *buffer, uint32_t total_sz) 
     return metadata(actual_size, pdu_flag, PDU::UNKNOWN);
 }
 
-EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type) 
+EAPOL::EAPOL(PacketTypes packet_type)
 : header_() {
     header_.version = 1;
     header_.packet_type = packet_type;
-    header_.type = (uint8_t)type;
 }
 
 EAPOL::EAPOL(const uint8_t* buffer, uint32_t total_sz) {
@@ -67,19 +66,32 @@ EAPOL* EAPOL::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < sizeof(eapol_header))) {
         throw malformed_packet();
     }
-    const eapol_header* ptr = (const eapol_header*)buffer;
-    uint32_t data_len = Endian::be_to_host<uint16_t>(ptr->length);
+    const eapol_header* eapol_ptr = (const eapol_header*)buffer;
+
+    uint32_t data_len = Endian::be_to_host<uint16_t>(eapol_ptr->length);
     // at least 4 for fields always present
     data_len += 4;
     total_sz = (total_sz < data_len) ? total_sz : data_len;
-    switch(ptr->type) {
-        case RC4:
-            return new Tins::RC4EAPOL(buffer, total_sz);
-            break;
-        case RSN:
-        case EAPOL_WPA:
-            return new Tins::RSNEAPOL(buffer, total_sz);
-            break;
+
+    switch(eapol_ptr->packet_type) {
+    case START:
+    case LOGOFF:
+        return new Tins::EAPOL(buffer, total_sz);
+        break;
+    case EAP_TYPE:
+        return new Tins::Eap(buffer, total_sz);
+        break;
+    case KEY:
+        const overlapping_eapol_header* ov_eapol_ptr = (const overlapping_eapol_header*)buffer;
+        switch(ov_eapol_ptr->subtype_code) {
+            case RC4:
+                return new Tins::RC4EAPOL(buffer, total_sz);
+                break;
+            case RSN:
+            case EAPOL_WPA:
+                return new Tins::RSNEAPOL(buffer, total_sz);
+                break;
+        }
     }
     return 0;
 }
@@ -96,23 +108,126 @@ void EAPOL::length(uint16_t new_length) {
     header_.length = Endian::host_to_be(new_length);
 }
 
-void EAPOL::type(uint8_t new_type) {
-    header_.type = new_type;
+uint32_t EAPOL::header_size() const {
+    return static_cast<uint32_t>(sizeof(eapol_header));
 }
 
 void EAPOL::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
-    length(total_sz - 4);
+    length(size() - 4);
     stream.write(header_);
     memcpy(buffer, &header_, sizeof(header_));
     write_body(stream);
 }
 
+void EAPOL::write_body(Memory::OutputMemoryStream& ) {
+    //write nothing
+}
+
+/* EAP */
+
+Eap::Eap()
+: EAPOL(EAP_TYPE) {
+    memset(&eap_header_, 0, sizeof(eap_header_));
+    eap_header_.code = SUCCESS;
+    length(size() - 4);
+}
+
+Eap::Eap(Codes eap_code)
+: EAPOL(EAP_TYPE) {
+    init(eap_code, 0 , invalid_type);
+}
+Eap::Eap(Codes eap_code, uint8_t id)
+: EAPOL(EAP_TYPE) {
+    init(eap_code, id , invalid_type);
+}
+
+Eap::Eap(Codes eap_code, uint8_t id, uint8_t eap_type)
+: EAPOL(EAP_TYPE) {
+    init(eap_code, id , eap_type);
+}
+
+Eap::Eap(const uint8_t* buffer, uint32_t total_sz)
+: EAPOL(buffer, total_sz) {
+    InputMemoryStream stream(buffer, total_sz);
+    stream.skip(sizeof(eapol_header));
+    eap_header eap_header_tmp;
+    stream.read(eap_header_tmp);
+    eap_header_.code = eap_header_tmp.code;
+    eap_header_.id = eap_header_tmp.id;
+    eap_header_.length = eap_header_tmp.length;
+    switch(eap_header_tmp.code) {
+    case SUCCESS:
+    case FAILURE:
+        eap_header_.type = invalid_type;
+        break;
+    case REQUEST:
+    case RESPONSE:
+        stream.read(eap_header_.type);
+        if (stream) {
+            inner_pdu(new RawPDU(stream.pointer(), stream.size()));
+        }
+        break;
+    }
+}
+
+void Eap::length(uint16_t new_length) {
+    eap_header_.length = Endian::host_to_be(new_length);
+    this->EAPOL::length(new_length);
+}
+
+void Eap::code(Codes new_code) {
+    eap_header_.code = static_cast<uint8_t>(new_code);
+    switch(new_code) {
+        case SUCCESS:
+        case FAILURE:
+            type(invalid_type);
+            break;
+        case REQUEST:
+        case RESPONSE:
+            break;
+        }
+}
+
+void Eap::id(uint8_t new_id) {
+    eap_header_.id = new_id;
+}
+
+void Eap::type(uint8_t new_type) {
+    eap_header_.type = new_type;
+}
+
+uint32_t Eap::header_size() const {
+    if(eap_header_.type == invalid_type) {
+        return  static_cast<uint32_t>(sizeof(eapol_header)) + sizeof(eap_header_) - 1;
+    }
+    else {
+        return  static_cast<uint32_t>(sizeof(eapol_header)) + sizeof(eap_header_);
+    }
+}
+
+void Eap::write_body(OutputMemoryStream& stream) {
+    stream.write(eap_header_.code);
+    stream.write(eap_header_.id);
+    stream.write(eap_header_.length);
+    if(eap_header_.type != invalid_type) {
+        stream.write(eap_header_.type);
+    }
+}
+
+void Eap::init(Codes eap_code, uint8_t id, uint8_t eap_type) {
+    eap_header_.code = eap_code;
+    eap_header_.type = eap_type;
+    eap_header_.id = id;
+    length(size() - 4);
+}
+
 /* RC4EAPOL */
 
 RC4EAPOL::RC4EAPOL() 
-: EAPOL(0x03, RC4) {
+: EAPOL(KEY) {
     memset(&header_, 0, sizeof(header_));
+    header_.type = RC4;
 }
 
 RC4EAPOL::RC4EAPOL(const uint8_t* buffer, uint32_t total_sz) 
@@ -172,8 +287,9 @@ void RC4EAPOL::write_body(OutputMemoryStream& stream) {
 
 
 RSNEAPOL::RSNEAPOL() 
-: EAPOL(0x03, RSN) {
+: EAPOL(KEY) {
     memset(&header_, 0, sizeof(header_));
+    header_.type = RSN;
 }
 
 RSNEAPOL::RSNEAPOL(const uint8_t* buffer, uint32_t total_sz) 

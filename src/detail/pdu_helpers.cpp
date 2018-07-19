@@ -194,6 +194,7 @@ Tins::PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size
             case Tins::PDU::DOT11_REASSOC_RESP:
             case Tins::PDU::DOT11_RTS:
             case Tins::PDU::DOT11_QOS_DATA:
+            case Tins::PDU::DOT11_ACTION:
                 return Tins::Dot11::from_bytes(buffer, size);
         #endif // TINS_HAVE_DOT11
         default:
@@ -215,6 +216,8 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
             return Constants::Ethernet::PPPOED;
         case PDU::MPLS:
             return Constants::Ethernet::MPLS;
+        case PDU::EAPOL:
+        case PDU::EAP:
         case PDU::RSNEAPOL:
         case PDU::RC4EAPOL:
             return Constants::Ethernet::EAPOL;
