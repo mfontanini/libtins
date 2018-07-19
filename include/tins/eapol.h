@@ -92,6 +92,8 @@ public:
 
     /**
      * \brief constructor that sets the packet_type field.
+     * 
+     * \param packet_type the eapol packet type
      */
     EAPOL(PacketTypes packet_type);
 
@@ -243,16 +245,25 @@ public:
 
     /**
      * \brief constructor that sets the code field (id is 0, type is Eap::invalid_type)
+     * 
+     * \param eap_code the eap type code
      */
     Eap(Codes eap_code);
 
     /**
      * \brief constructor that sets the code and id fields. (type is Eap::invalid_type)
+     * 
+     * \param eap_code the eap type code 
+     * \param id the packet id
      */
     Eap(Codes eap_code, uint8_t id);
 
     /**
      * \brief constructor that sets the code,id and and type fields.
+     * 
+     * \param eap_code the eap type code 
+     * \param id the packet id
+     * \param eap_type the type of the eap payload (if there is any)
      */
     Eap(Codes eap_code, uint8_t id, uint8_t eap_type);
 
@@ -294,8 +305,8 @@ public:
     }
 
     /**
-     * \brief Getter for the code field.
-     * \return The code field.
+     * \brief Getter for the type field.
+     * \return The type field.
      */
     uint8_t type() const {
         if(eap_header_.type == invalid_type) {
@@ -307,25 +318,25 @@ public:
 
     /**
      * \brief Sets the key length field.
-     * \param value The new key length to be set.
+     * \param new_length The new key length to be set.
      */
     virtual void length(uint16_t new_length);
 
     /**
      * \brief Sets the code field.
-     * \param value The new code to be set.
+     * \param new_code The new code to be set.
      */
     void code(Codes new_code);
 
     /**
      * \brief Sets the id field.
-     * \param value The new id to be set.
+     * \param new_id The new id to be set.
      */
     void id(uint8_t new_id);
 
     /**
      * \brief Sets the type field.
-     * \param value The new type to be set.
+     * \param new_type The new type to be set.
      */
     void type(uint8_t new_type);
 
@@ -440,6 +451,14 @@ public:
     /* Getters */
     
     /**
+     * \brief Getter for the type field.
+     * \return The type field.
+     */
+    uint8_t type() const {
+        return header_.type;
+    }
+
+    /**
      * \brief Getter for the key length field.
      * \return The key length field.
      */
@@ -497,6 +516,12 @@ public:
     
     /* Setters */
     
+    /**
+     * \brief Sets the type field.
+     * \param value The new type to be set.
+     */
+    void type(uint8_t value);
+
     /**
      * \brief Sets the key length field.
      * \param value The new key length to be set.
@@ -652,7 +677,15 @@ public:
     RSNEAPOL(const uint8_t* buffer, uint32_t total_sz);
     
     /* Getters */
-    
+        
+    /**
+     * \brief Getter for the type field.
+     * \return The type field.
+     */
+    uint8_t type() const {
+        return header_.type;
+    }
+
     /**
      * \brief Getter for the key length field.
      * \return The key length field.
@@ -817,7 +850,13 @@ public:
     uint32_t header_size() const;
     
     /* Setters */
-    
+        
+    /**
+     * \brief Sets the type field.
+     * \param value The new type to be set.
+     */
+    void type(uint8_t value);
+
     /**
      * \brief Sets the key length field.
      * \param value The new key length to be set.

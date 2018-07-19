@@ -243,6 +243,10 @@ RC4EAPOL::RC4EAPOL(const uint8_t* buffer, uint32_t total_sz)
     }
 }
 
+void RC4EAPOL::type(const uint8_t value) {
+    header_.type = value;
+}
+
 void RC4EAPOL::key_length(uint16_t length) {
     header_.key_length = Endian::host_to_be(length);
 }
@@ -303,6 +307,10 @@ RSNEAPOL::RSNEAPOL(const uint8_t* buffer, uint32_t total_sz)
             inner_pdu(new RawPDU(stream.pointer(), stream.size()));
         }
     }
+}
+
+void RSNEAPOL::type(const uint8_t value) {
+    header_.type = value;
 }
 
 void RSNEAPOL::nonce(const uint8_t* ptr) {
