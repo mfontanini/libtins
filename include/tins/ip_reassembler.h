@@ -31,6 +31,7 @@
 #define TINS_IP_REASSEMBLER_H
 
 #include <vector>
+#include <list>
 #include <map>
 #include <tins/pdu.h>
 #include <tins/macros.h>
@@ -197,8 +198,9 @@ private:
 
     typedef std::pair<IPv4Address, IPv4Address> address_pair;
     typedef std::pair<uint16_t, address_pair> key_type;
-    typedef std::map<key_type, Internals::IPv4Stream> streams_type;
-    typedef std::vector<key_type> order_type;
+    typedef std::pair<key_type, Internals::IPv4Stream*> key_stream_type;
+    typedef std::list<key_stream_type> ordered_streams_type;
+    typedef std::map<key_type, ordered_streams_type::iterator> streams_type;
 
     Internals::IPv4Stream& get_stream(key_type key);
     void remove_stream(key_type key);
@@ -207,7 +209,7 @@ private:
     address_pair make_address_pair(IPv4Address addr1, IPv4Address addr2) const;
     
     streams_type streams_;
-    order_type stream_order;
+    ordered_streams_type ordered_streams_;
     OverlappingTechnique technique_;
     size_t buffered_bytes_;
 };

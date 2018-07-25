@@ -36,7 +36,6 @@
 
 using std::make_pair;
 using std::out_of_range;
-using std::find;
 
 namespace Tins {
 namespace Internals {
@@ -218,48 +217,40 @@ IPv4Reassembler::address_pair IPv4Reassembler::make_address_pair(IPv4Address add
 }
 
 Internals::IPv4Stream& IPv4Reassembler::get_stream(key_type key) {
-    // going through the stream_order vector each time makes the streams map sort of useless.
-    // this may or may not be relevant in reality depending on actual traffic. a posssible
-    // solution is to avoid updating the order on each new fragment but it may incur data
-    // loss in extreme situations (as order of arrival is only an estimation of staleness).
-    // (correction: only if the stream is new the order vector is not traversed and the map is not useless)
+    Internals::IPv4Stream *stream_ptr;
     try {
-        Internals::IPv4Stream& stream = streams_.at(key); // may throw out_of_range
-        order_type::iterator it = find(stream_order.begin(), stream_order.end(), key);
-        if (it != stream_order.end())
-            stream_order.erase(it, it+1);
-        stream_order.push_back(key);
-        return stream;
+        ordered_streams_type::iterator& it = streams_.at(key); // may throw out_of_range
+        stream_ptr = it->second;
+        ordered_streams_.erase(it);
     }
     catch (out_of_range&) {
-        // this is an optimization to avoid searching stream_order if the stream is new
-        stream_order.push_back(key);
-        return streams_[key];
+        stream_ptr = new Internals::IPv4Stream();
     }
+    ordered_streams_type::iterator it2 = ordered_streams_.insert(ordered_streams_.end(), make_pair(key,stream_ptr));
+    streams_[key] = it2;
+    return *stream_ptr;
 }
 
 void IPv4Reassembler::prune_streams() {
-    order_type::iterator it = stream_order.begin();
     while (buffered_bytes_ > BUFFERED_BYTES_LOW_THRESHOLD) {
-        buffered_bytes_ -= streams_.at(*it).size();
-        streams_.erase(*it);
-        ++it;
+        remove_stream(ordered_streams_.begin()->first);
     }
-    stream_order.erase(stream_order.begin(), it);
 }
 
 void IPv4Reassembler::clear_streams() {
     streams_.clear();
-    stream_order.clear();
+    ordered_streams_.clear();
     buffered_bytes_ = 0;
 }
 
 void IPv4Reassembler::remove_stream(key_type key) {
     try {
-        buffered_bytes_ -= streams_.at(key).size();
+        ordered_streams_type::iterator& it = streams_.at(key); // may throw out_of_range
+        Internals::IPv4Stream *stream_ptr = it->second;
+        buffered_bytes_ -= stream_ptr->size();
+        ordered_streams_.erase(it);
         streams_.erase(key);
-        order_type::iterator it = find(stream_order.begin(), stream_order.end(), key);
-        stream_order.erase(it, it+1);
+        delete stream_ptr;
     }
     catch (out_of_range&) { }
 }
