@@ -128,7 +128,7 @@ public:
 /**
  * \brief Exception thrown when PacketSender fails to close a socket.
  */
-class socket_close_error : exception_base {
+class socket_close_error : public exception_base {
 public:
     socket_close_error(const std::string& msg)
     : exception_base(msg) { }
