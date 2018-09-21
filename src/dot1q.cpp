@@ -109,13 +109,8 @@ void Dot1Q::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     if (inner_pdu()) {
         Constants::Ethernet::e flag;
         PDUType type = inner_pdu()->pdu_type();
-        if (type == PDU::DOT1Q) {
-            flag = Constants::Ethernet::QINQ;
-        }
-        else {
-            // Set the appropriate payload type flag
-            flag = Internals::pdu_flag_to_ether_type(type);
-        }
+        // Set the appropriate payload type flag
+        flag = Internals::pdu_flag_to_ether_type(type);
         if (flag != Constants::Ethernet::UNKNOWN) {
             payload_type(static_cast<uint16_t>(flag));
         }

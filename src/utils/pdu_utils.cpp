@@ -41,6 +41,7 @@ string to_string(PDU::PDUType pduType) {
         ENUM_TEXT(ETHERNET_II);
         ENUM_TEXT(IEEE802_3);
         ENUM_TEXT(RADIOTAP);
+        ENUM_TEXT(DOT1AD);
         ENUM_TEXT(DOT11);
         ENUM_TEXT(DOT11_ACK);
         ENUM_TEXT(DOT11_ASSOC_REQ);

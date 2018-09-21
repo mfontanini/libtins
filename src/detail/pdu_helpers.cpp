@@ -49,6 +49,7 @@
 #include <tins/arp.h>
 #include <tins/eapol.h>
 #include <tins/rawpdu.h>
+#include <tins/dot1ad.h>
 #include <tins/dot1q.h>
 #include <tins/pppoe.h>
 #include <tins/pdu_allocator.h>
@@ -73,9 +74,10 @@ Tins::PDU* pdu_from_flag(Constants::Ethernet::e flag,
         case Tins::Constants::Ethernet::EAPOL:
             return EAPOL::from_bytes(buffer, size);
         case Tins::Constants::Ethernet::VLAN:
+            return new Dot1Q(buffer, size);
         case Tins::Constants::Ethernet::QINQ:
         case Tins::Constants::Ethernet::OLD_QINQ:
-            return new Dot1Q(buffer, size);
+            return new Dot1AD(buffer, size);
         case Tins::Constants::Ethernet::MPLS:
             return new MPLS(buffer, size);
         default:
@@ -211,6 +213,8 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
             return Constants::Ethernet::ARP;
         case PDU::DOT1Q:
             return Constants::Ethernet::VLAN;
+        case PDU::DOT1AD:
+            return Constants::Ethernet::QINQ;
         case PDU::PPPOE:
             return Constants::Ethernet::PPPOED;
         case PDU::MPLS:
@@ -238,6 +242,9 @@ PDU::PDUType ether_type_to_pdu_flag(Constants::Ethernet::e flag) {
             return PDU::ARP;
         case Constants::Ethernet::VLAN:
             return PDU::DOT1Q;
+        case Constants::Ethernet::QINQ:
+        case Constants::Ethernet::OLD_QINQ:
+            return PDU::DOT1AD;
         case Constants::Ethernet::PPPOED:
             return PDU::PPPOE;
         //case PDU::RSNEAPOL
