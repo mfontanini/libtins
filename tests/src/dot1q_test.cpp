@@ -82,6 +82,18 @@ TEST_F(Dot1QTest, Id) {
     EXPECT_EQ(3543, dot1.id());
 }
 
+TEST_F(Dot1QTest, QinQ) {
+    EthernetII pkt = EthernetII() / Dot1Q(10) / Dot1Q(42) / IP("192.168.1.2") / 
+                     TCP(23, 45) / RawPDU("asdasdasd");
+    PDU::serialization_type buffer = pkt.serialize();
+    EthernetII pkt2(&buffer[0], buffer.size());
+    const Dot1Q& q1 = pkt2.rfind_pdu<Dot1Q>();
+    ASSERT_TRUE(q1.inner_pdu() != NULL);
+    const Dot1Q& q2 = q1.inner_pdu()->rfind_pdu<Dot1Q>();
+    EXPECT_EQ(10, q1.id());
+    EXPECT_EQ(42, q2.id());
+}
+
 TEST_F(Dot1QTest, SerializeAfterInnerPduRemoved) {
     EthernetII eth1 = EthernetII() / Dot1Q() / IP();
     eth1.serialize();

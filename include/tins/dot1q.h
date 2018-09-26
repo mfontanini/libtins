@@ -196,7 +196,7 @@ public:
      * \param total_sz The size of the buffer.
      */
     bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
-protected:
+private:
     void write_serialization(uint8_t* buffer, uint32_t total_sz);
 
     TINS_BEGIN_PACK
