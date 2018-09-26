@@ -49,7 +49,6 @@
 #include <tins/arp.h>
 #include <tins/eapol.h>
 #include <tins/rawpdu.h>
-#include <tins/dot1ad.h>
 #include <tins/dot1q.h>
 #include <tins/pppoe.h>
 #include <tins/pdu_allocator.h>
@@ -74,10 +73,9 @@ Tins::PDU* pdu_from_flag(Constants::Ethernet::e flag,
         case Tins::Constants::Ethernet::EAPOL:
             return EAPOL::from_bytes(buffer, size);
         case Tins::Constants::Ethernet::VLAN:
-            return new Dot1Q(buffer, size);
         case Tins::Constants::Ethernet::QINQ:
         case Tins::Constants::Ethernet::OLD_QINQ:
-            return new Dot1AD(buffer, size);
+            return new Dot1Q(buffer, size);
         case Tins::Constants::Ethernet::MPLS:
             return new MPLS(buffer, size);
         default:
