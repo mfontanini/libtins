@@ -81,6 +81,7 @@ string to_string(PDU::PDUType pduType) {
         ENUM_TEXT(ICMPv6);
         ENUM_TEXT(SLL);
         ENUM_TEXT(DHCPv6);
+        ENUM_TEXT(DOT1AD);
         ENUM_TEXT(DOT1Q);
         ENUM_TEXT(PPPOE);
         ENUM_TEXT(STP);
