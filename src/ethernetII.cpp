@@ -156,13 +156,22 @@ bool EthernetII::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
 void EthernetII::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
     if (inner_pdu()) {
-        Constants::Ethernet::e flag;
+        Constants::Ethernet::e flag = Constants::Ethernet::UNKNOWN;
         const PDUType type = inner_pdu()->pdu_type();
         // Dirty trick to successfully tag PPPoE session/discovery packets
         if (type == PDU::PPPOE) {
             const PPPoE* pppoe = static_cast<const PPPoE*>(inner_pdu());
             flag = (pppoe->code() == 0) ? Constants::Ethernet::PPPOES 
                                         : Constants::Ethernet::PPPOED;
+        }
+        // Dirty trick: Double Dot1Q is interpreted as Dot1AD
+        else if (type == PDU::DOT1Q) {
+            if (inner_pdu()->inner_pdu()) {
+                const PDUType inner_type = inner_pdu()->inner_pdu()->pdu_type();
+                if (inner_type == PDU::DOT1Q) {
+                    flag = Constants::Ethernet::QINQ;
+                }
+            }
         }
         else {
             flag = Internals::pdu_flag_to_ether_type(type);

@@ -211,6 +211,8 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
             return Constants::Ethernet::ARP;
         case PDU::DOT1Q:
             return Constants::Ethernet::VLAN;
+        case PDU::DOT1AD:
+            return Constants::Ethernet::QINQ;
         case PDU::PPPOE:
             return Constants::Ethernet::PPPOED;
         case PDU::MPLS:
@@ -238,6 +240,9 @@ PDU::PDUType ether_type_to_pdu_flag(Constants::Ethernet::e flag) {
             return PDU::ARP;
         case Constants::Ethernet::VLAN:
             return PDU::DOT1Q;
+        case Constants::Ethernet::QINQ:
+        case Constants::Ethernet::OLD_QINQ:
+            return PDU::DOT1AD;
         case Constants::Ethernet::PPPOED:
             return PDU::PPPOE;
         //case PDU::RSNEAPOL

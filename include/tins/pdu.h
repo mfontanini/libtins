@@ -170,6 +170,7 @@ public:
         ICMPv6,
         SLL,
         DHCPv6,
+        DOT1AD,
         DOT1Q,
         PPPOE,
         STP,
