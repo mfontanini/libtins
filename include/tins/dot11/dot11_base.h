@@ -127,9 +127,12 @@ public:
         ERP_INFORMATION,
         TS_DELAY,
         TCLAS_PROCESSING,
-        QOS_CAPABILITY = 46,
+        HT_CAPABILITY = 45,
+        QOS_CAPABILITY,
         RSN = 48,
         EXT_SUPPORTED_RATES = 50,
+        EXT_CAPABILITY = 127,
+        VHT_CAPABILITY = 191,
         VENDOR_SPECIFIC = 221
     };
 

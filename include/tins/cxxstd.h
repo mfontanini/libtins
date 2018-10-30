@@ -44,6 +44,11 @@
 #define TINS_IS_CXX11 0
 #endif  // TINS_IS_CXX11
 
+// Visual Studio 2017 is more C++11 compliant
+#if defined(TINS_IS_CXX11) && (!defined(_MSC_VER) || _MSC_VER >= 1910)
+#define TINS_IS_CXX11_MSVCCOMPAT
+#endif
+
 namespace Tins{
 namespace Internals {
 template<class T> void unused(const T&) { }
