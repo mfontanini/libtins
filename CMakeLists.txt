@@ -16,6 +16,8 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 IF(MSVC)
     # Don't always use Wall, since VC's /Wall is ridiculously verbose.
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+    # Disable VC integer conversion warnings
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4267 /wd4244")
     # Disable VC secure checks, since these are not really issues.
     ADD_DEFINITIONS("-D_CRT_SECURE_NO_WARNINGS=1")
     ADD_DEFINITIONS("-D_SCL_SECURE_NO_WARNINGS=1")
