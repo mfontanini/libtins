@@ -58,6 +58,17 @@ TEST_F(Dot1QTest, Serialize) {
     );
 }
 
+TEST_F(Dot1QTest, SerializeCraftedPacket)
+{
+    EthernetII pkt = EthernetII() / Dot1Q(10) / IP("192.168.1.2") / TCP(23, 45) / RawPDU("asdasdasd");
+    PDU::serialization_type buffer = pkt.serialize();
+    EXPECT_EQ(buffer[12], 0x81);
+    EXPECT_EQ(buffer[13], 0x00);
+    EthernetII pkt2(&buffer[0], buffer.size());
+    const Dot1Q &q1 = pkt2.rfind_pdu<Dot1Q>();
+    EXPECT_EQ(10, q1.id());
+}
+
 TEST_F(Dot1QTest, PayloadType) {
     Dot1Q dot1;
     dot1.payload_type(0x9283);
