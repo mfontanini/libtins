@@ -166,6 +166,8 @@ void EthernetII::write_serialization(uint8_t* buffer, uint32_t total_sz) {
         }
         // Dirty trick: Double Dot1Q is interpreted as Dot1AD
         else if (type == PDU::DOT1Q) {
+            flag = Internals::pdu_flag_to_ether_type(type);
+
             if (inner_pdu()->inner_pdu()) {
                 const PDUType inner_type = inner_pdu()->inner_pdu()->pdu_type();
                 if (inner_type == PDU::DOT1Q) {
