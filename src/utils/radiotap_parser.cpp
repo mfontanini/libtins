@@ -65,7 +65,7 @@ const RadioTapParser::FieldMetadata RadioTapParser::RADIOTAP_METADATA[] = {
 };
 
 const uint32_t RadioTapParser::MAX_RADIOTAP_FIELD = sizeof(RADIOTAP_METADATA) /
-                                                    sizeof(FieldMetadata) + 1;
+                                                    sizeof(FieldMetadata);
 
 #if TINS_IS_LITTLE_ENDIAN
 TINS_BEGIN_PACK
