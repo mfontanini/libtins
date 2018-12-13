@@ -186,9 +186,9 @@ RadioTap::option RadioTapParser::current_option() {
 }
 
 const uint8_t* RadioTapParser::current_option_ptr() const {
-	if (TINS_UNLIKELY(current_ptr_ > end_)) {
-		throw malformed_packet();
-	}
+    if (TINS_UNLIKELY(current_ptr_ > end_)) {
+        throw malformed_packet();
+    }
     return current_ptr_;
 }
 
