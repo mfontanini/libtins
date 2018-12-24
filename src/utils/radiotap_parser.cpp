@@ -135,9 +135,6 @@ void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t 
     uint32_t offset = (buffer - buffer_start) & (n - 1);
     if (offset) {
         offset = n - offset;
-        if (TINS_UNLIKELY(offset > size)) {
-            throw malformed_packet();
-        }
         buffer += offset;
     }
 }
