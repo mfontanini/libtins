@@ -114,7 +114,11 @@ public:
     RadioTap::option current_option();
 
     /**
-     * Gets the pointer at which the current option is located
+     * \brief Gets the pointer at which the current option is located
+     *
+     * A past-the-end pointer may be returned in case of malformed input or
+     * end of data. Its validity must be checked (e.g. using
+     * \ref RadioTapParser.has_fields) before dereference.
      */
     const uint8_t* current_option_ptr() const;
 
