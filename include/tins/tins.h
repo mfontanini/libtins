@@ -30,6 +30,7 @@
 #ifndef TINS_TINS_H
 #define TINS_TINS_H
 
+#include <tins/sniffer.h>
 #include <tins/dns.h>
 #include <tins/arp.h>
 #include <tins/bootp.h>
@@ -54,7 +55,6 @@
 #include <tins/radiotap.h>
 #include <tins/rawpdu.h>
 #include <tins/snap.h>
-#include <tins/sniffer.h>
 #include <tins/tcp.h>
 #include <tins/udp.h>
 #include <tins/utils.h>
