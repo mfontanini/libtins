@@ -65,7 +65,7 @@ const RadioTapParser::FieldMetadata RadioTapParser::RADIOTAP_METADATA[] = {
 };
 
 const uint32_t RadioTapParser::MAX_RADIOTAP_FIELD = sizeof(RADIOTAP_METADATA) /
-                                                    sizeof(FieldMetadata) + 1;
+                                                    sizeof(FieldMetadata);
 
 #if TINS_IS_LITTLE_ENDIAN
 TINS_BEGIN_PACK
@@ -135,9 +135,6 @@ void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t 
     uint32_t offset = (buffer - buffer_start) & (n - 1);
     if (offset) {
         offset = n - offset;
-        if (TINS_UNLIKELY(offset > size)) {
-            throw malformed_packet();
-        }
         buffer += offset;
     }
 }
