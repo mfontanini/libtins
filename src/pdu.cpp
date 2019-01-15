@@ -85,6 +85,14 @@ uint32_t PDU::size() const {
     return sz;
 }
 
+uint32_t PDU::advertised_size() const {
+    uint32_t result = header_size() + trailer_size();
+    if (inner_pdu_) {
+        result += inner_pdu()->advertised_size();
+    }
+    return result;
+}
+
 void PDU::send(PacketSender &, const NetworkInterface &) { 
     
 }
