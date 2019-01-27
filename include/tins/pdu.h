@@ -281,6 +281,12 @@ public:
      */
     uint32_t size() const;
 
+    /** \brief The whole chain of PDU's advertised size, including this one.
+     *
+     * Returns the sum of this and all children PDU's advertised size.
+     */
+    virtual uint32_t advertised_size() const;
+
     /**
      * \brief Getter for the inner PDU.
      * \return The current inner PDU. Might be a null pointer.

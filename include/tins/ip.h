@@ -281,6 +281,10 @@ public:
 
     /* Getters */
 
+    uint32_t advertised_size() const {
+        return static_cast<uint32_t>(tot_len());
+    }
+
     /**
      * \brief Getter for the header length field.
      *
