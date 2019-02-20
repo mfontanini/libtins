@@ -311,6 +311,12 @@ ENDIF()
 # CMake project configuration export
 # **********************************
 
+if(UNIX)
+    set(CONF_CMAKE_INSTALL_DIR lib/cmake/libtins)
+else()
+    set(CONF_CMAKE_INSTALL_DIR CMake)
+endif()
+
 # Add all targets to the build-tree export set
 EXPORT(
     TARGETS tins
@@ -337,13 +343,13 @@ INSTALL(
     FILES
     "${PROJECT_BINARY_DIR}/libtinsConfig.cmake"
     "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake"
-    DESTINATION CMake
+    DESTINATION ${CONF_CMAKE_INSTALL_DIR}
     COMPONENT dev
 )
 
 # Install the export set for use with the install-tree
 INSTALL(
     EXPORT libtinsTargets
-    DESTINATION CMake
+    DESTINATION ${CONF_CMAKE_INSTALL_DIR}
     COMPONENT dev
 )
