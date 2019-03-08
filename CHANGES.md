@@ -1,3 +1,19 @@
+##### v4.2 - Fri Mar  8 04:15:13 UTC 2019
+
+- Updated location of installed CMake files in unix systems (#331)
+
+- Fix check to detect cross compilation (#330)
+
+- Allow getting a PDU's advertised size and use it in `PacketWriter` (#324)
+
+- Install DLLs in right directory (#326)
+
+- Add missing Dot11 tagged option types (#305)
+
+- Add support for DLT_RAW (#313)
+
+- Fix potential invalid memory accesses when parsing RadioTap (#322)
+
 ##### v4.1 - Tue Dec 11 02:08:48 UTC 2018
 
 - Fix serialization for QinQ (#316)
