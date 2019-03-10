@@ -41,7 +41,8 @@ namespace Tins {
 namespace Utils {
 
 uint32_t calculate_padding(uint32_t alignment, uint32_t offset) {
-    return offset % alignment;
+    uint32_t extra = offset % alignment;
+    return extra == 0 ? 0 : alignment - extra;
 }
 
 uint32_t get_bit(uint32_t value) {
