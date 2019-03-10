@@ -45,7 +45,7 @@ uint32_t calculate_padding(uint32_t alignment, uint32_t offset) {
 }
 
 uint32_t get_bit(uint32_t value) {
-    return log(value) / log(2);
+    return round(log2(value));
 }
 
 RadioTapWriter::RadioTapWriter(vector<uint8_t>& buffer)
