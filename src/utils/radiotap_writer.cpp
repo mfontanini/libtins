@@ -54,7 +54,7 @@ RadioTapWriter::RadioTapWriter(vector<uint8_t>& buffer)
 
 void RadioTapWriter::write_option(const RadioTap::option& option) {
     const uint32_t bit = get_bit(option.option());
-    if (bit > RadioTapParser::MAX_RADIOTAP_FIELD) {
+    if (bit >= RadioTapParser::MAX_RADIOTAP_FIELD) {
         throw malformed_option();
     }
     const bool is_empty = buffer_.empty();
