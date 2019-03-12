@@ -759,4 +759,27 @@ TEST_F(RadioTapTest, RadioTapWritingEmptyBuffer) {
 
 }
 
+TEST_F(RadioTapTest, RadioTapWritingInvalidOption) {
+    vector<uint8_t> buffer(4, 0);
+    RadioTapWriter writer(buffer);
+    uint8_t foo = 0;
+    RadioTap::option option((RadioTap::PresentFlags)(1 << RadioTapParser::MAX_RADIOTAP_FIELD), sizeof(foo), &foo);
+    EXPECT_THROW(writer.write_option(option), malformed_option);
+}
+
+TEST_F(RadioTapTest, RadioTapWriterAlignment) {
+    vector<uint8_t> buffer(4, 0);
+    RadioTapWriter writer(buffer);
+    uint8_t flags = 10;
+    uint8_t xchannel[sizeof(RadioTap::xchannel_type)] = {
+        1, 2, 3, 4, 5, 6, 7, 8
+    };
+    writer.write_option(RadioTap::option(RadioTap::FLAGS, sizeof(flags), &flags));
+    writer.write_option(RadioTap::option(RadioTap::XCHANNEL, sizeof(xchannel), xchannel));
+    vector<uint8_t> expected = {
+        2, 0, 4, 0, 10, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8
+    };
+    EXPECT_EQ(buffer, expected);
+}
+
 #endif // TINS_HAVE_DOT11
