@@ -134,6 +134,17 @@ public:
      */
     void process_packet(PDU& packet);
 
+
+    // calls the connection_closed callback
+    // to be used *outside* of stream callbacks, just before deletion.
+    void force_close();
+
+    // prevents further callbacks
+    // to be used *inside* of stream callbacks.
+    // the stream will be deleted when the current callbacks exits.
+    void ignore();
+
+
     /**
      * Getter for the client flow
      */
@@ -153,6 +164,9 @@ public:
      * Getter for the server flow (const)
      */
     const Flow& server_flow() const;
+
+
+    bool is_established() const;
 
     /**
      * \brief Indicates whether this stream is finished.
@@ -254,6 +268,8 @@ public:
      * Getter for the last seen time of this stream
      */
     const timestamp_type& last_seen() const;
+
+    void stream_est_callback(const stream_callback_type& callback);
 
     /**
      * \brief Sets the callback to be executed when the stream is closed
@@ -448,6 +464,7 @@ private:
 
     Flow client_flow_;
     Flow server_flow_;
+    stream_callback_type on_stream_est_;
     stream_callback_type on_stream_closed_;
     stream_callback_type on_client_data_callback_;
     stream_callback_type on_server_data_callback_;
@@ -461,6 +478,7 @@ private:
     bool auto_cleanup_server_;
     bool is_partial_stream_;
     unsigned directions_recovery_mode_enabled_;
+    bool is_ignored_;
 
     #ifdef TINS_HAVE_TCP_STREAM_CUSTOM_DATA
     boost::any user_data_;

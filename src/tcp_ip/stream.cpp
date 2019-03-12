@@ -53,7 +53,7 @@ Stream::Stream(PDU& packet, const timestamp_type& ts)
 : client_flow_(extract_client_flow(packet)),
   server_flow_(extract_server_flow(packet)), create_time_(ts), 
   last_seen_(ts), auto_cleanup_client_(true), auto_cleanup_server_(true),
-  is_partial_stream_(false), directions_recovery_mode_enabled_(0) {
+  is_partial_stream_(false), directions_recovery_mode_enabled_(0), is_ignored_(false) {
     const EthernetII* eth = packet.find_pdu<EthernetII>();
     if (eth) {
         client_hw_addr_ = eth->src_addr();
@@ -72,13 +72,47 @@ void Stream::process_packet(PDU& packet, const timestamp_type& ts) {
     else if (server_flow_.packet_belongs(packet)) {
         server_flow_.process_packet(packet);
     }
-    if (is_finished() && on_stream_closed_) {
-        on_stream_closed_(*this);
+
+    if (is_established()) {
+        if (on_stream_est_) {
+            on_stream_est_(*this);
+            on_stream_est_ = NULL;
+        }
+    }
+    if (is_finished()) {
+        if (on_stream_closed_) {
+            on_stream_closed_(*this);
+            on_stream_closed_ = NULL;
+        }
     }
 }
 
 void Stream::process_packet(PDU& packet) {
     return process_packet(packet, timestamp_type(0));
+}
+
+
+// calls the connection_closed callback
+// to be used *outside* of stream callbacks, just before deletion.
+void Stream::force_close() {
+    if (on_stream_closed_)
+        on_stream_closed_(*this);
+    ignore();
+}
+
+// prevents further callbacks
+// to be used *inside* of stream callbacks.
+// the stream will be deleted when the current callbacks exits.
+void Stream::ignore() {
+    is_ignored_ = true;
+    ignore_client_data();
+    ignore_server_data();
+    stream_est_callback(NULL);
+    client_data_callback(NULL);
+    server_data_callback(NULL);
+    client_out_of_order_callback(NULL);
+    server_out_of_order_callback(NULL);
+    stream_closed_callback(NULL);
 }
 
 Flow& Stream::client_flow() {
@@ -95,6 +129,10 @@ Flow& Stream::server_flow() {
 
 const Flow& Stream::server_flow() const {
     return server_flow_;
+}
+
+void Stream::stream_est_callback(const stream_callback_type& callback) {
+    on_stream_est_ = callback;
 }
 
 void Stream::stream_closed_callback(const stream_callback_type& callback) {
@@ -125,7 +163,18 @@ void Stream::ignore_server_data() {
     server_flow().ignore_data_packets();
 }
 
+bool Stream::is_established() const {
+    const Flow::State client_state = client_flow_.state();
+    const Flow::State server_state = server_flow_.state();
+    if (client_state == Flow::ESTABLISHED && server_state == Flow::SYN_SENT) {
+        return true;
+    }
+    return false;
+}
+
 bool Stream::is_finished() const {
+    if (is_ignored_)
+        return true;
     const Flow::State client_state = client_flow_.state();
     const Flow::State server_state = server_flow_.state();
     // If either peer sent a RST then the stream is done

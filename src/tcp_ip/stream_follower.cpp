@@ -58,10 +58,14 @@ const uint32_t StreamFollower::DEFAULT_MAX_BUFFERED_BYTES = 3 * 1024 * 1024; // 
 const StreamFollower::timestamp_type StreamFollower::DEFAULT_KEEP_ALIVE = minutes(5);
 
 StreamFollower::StreamFollower() 
-: max_buffered_chunks_(DEFAULT_MAX_BUFFERED_CHUNKS),
+: max_streams_(0), max_buffered_chunks_(DEFAULT_MAX_BUFFERED_CHUNKS),
   max_buffered_bytes_(DEFAULT_MAX_BUFFERED_BYTES), last_cleanup_(0),
   stream_keep_alive_(DEFAULT_KEEP_ALIVE), attach_to_flows_(false) {
 
+}
+
+void StreamFollower::max_streams(const size_t new_max) {
+    max_streams_ = new_max;
 }
 
 void StreamFollower::process_packet(PDU& packet) {
@@ -84,7 +88,8 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
     if (iter == streams_.end()) {
         // Start tracking if they're either SYNs or they contain data (attach
         // to an already running flow).
-        if (tcp->flags() == TCP::SYN || (attach_to_flows_ && tcp->find_pdu<RawPDU>() != 0)) {
+        if ((tcp->flags() == TCP::SYN || (attach_to_flows_ && tcp->find_pdu<RawPDU>() != 0)) &&
+            (max_streams_ == 0 || (streams_.size() < max_streams_))) {
             iter = streams_.insert(make_pair(identifier, Stream(packet, ts))).first;
             iter->second.setup_flows_callbacks();
             if (on_new_connection_) {
@@ -149,6 +154,10 @@ void StreamFollower::stream_termination_callback(const stream_termination_callba
     on_stream_termination_ = callback;
 }
 
+size_t StreamFollower::n_streams() {
+    return streams_.size();
+}
+
 Stream& StreamFollower::find_stream(const IPv4Address& client_addr, uint16_t client_port,
                                     const IPv4Address& server_addr, uint16_t server_port) {
     stream_id identifier(stream_id::serialize(client_addr), client_port,
@@ -170,6 +179,39 @@ Stream& StreamFollower::find_stream(const stream_id& id) {
     }
     else {
         return iter->second;
+    }
+}
+
+void StreamFollower::discard_stream(const IPv4Address& client_addr, uint16_t client_port,
+                                    const IPv4Address& server_addr, uint16_t server_port) {
+    stream_id identifier(stream_id::serialize(client_addr), client_port,
+                         stream_id::serialize(server_addr), server_port);
+    discard_stream(identifier);
+}
+
+void StreamFollower::discard_stream(const IPv6Address& client_addr, uint16_t client_port,
+                                    const IPv6Address& server_addr, uint16_t server_port) {
+    stream_id identifier(stream_id::serialize(client_addr), client_port,
+                         stream_id::serialize(server_addr), server_port);
+    discard_stream(identifier);
+}
+
+void StreamFollower::discard_stream(const Stream& stream) {
+    stream_id identifier = stream_id::make_identifier(stream);
+    discard_stream(identifier);
+}
+
+void StreamFollower::discard_stream(const stream_id& id) {
+    streams_type::iterator iter = streams_.find(id);
+    if (iter == streams_.end()) {
+        throw stream_not_found();
+    }
+    else {
+        // If we have a termination callback, execute it
+        if (on_stream_termination_) {
+            on_stream_termination_(iter->second, FORCE_DISCARD);
+        }
+        streams_.erase(iter);
     }
 }
 
