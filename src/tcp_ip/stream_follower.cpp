@@ -84,7 +84,7 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
     if (iter == streams_.end()) {
         // Start tracking if they're either SYNs or they contain data (attach
         // to an already running flow).
-        if (tcp->flags() == TCP::SYN || (attach_to_flows_ && tcp->find_pdu<RawPDU>() != 0)) {
+        if (tcp->has_flags(TCP::SYN) || (attach_to_flows_ && tcp->find_pdu<RawPDU>() != 0)) {
             iter = streams_.insert(make_pair(identifier, Stream(packet, ts))).first;
             iter->second.setup_flows_callbacks();
             if (on_new_connection_) {
@@ -93,7 +93,7 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
             else {
                 throw callback_not_set();
             }
-            if (tcp->flags() != TCP::SYN) {
+            if (!tcp->has_flags(TCP::SYN)) {
                 // assume the connection is established
                 iter->second.client_flow().state(Flow::ESTABLISHED);
                 iter->second.server_flow().state(Flow::ESTABLISHED);

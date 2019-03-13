@@ -288,13 +288,29 @@ public:
      * \code
      * TCP tcp = ...;
      * if(tcp.flags() == (TCP::SYN | TCP::ACK)) {
-     *     // It's a SYN+ACK!
+     *     // It's a SYN+ACK, but not SYN+ACK+ECN!
      * }
      * \endcode
      * 
      * \return The value of the flags field.
      */
     small_uint<12> flags() const;
+
+    /**
+     * \brief Check if the given flags are set.
+     *
+     * \code
+     * TCP tcp = ...;
+     * if(tcp.has_flags(TCP::SYN | TCP::ACK)) {
+     *     // It's a SYN+ACK, but it also possible that other flags are set!
+     *     // it is equivalent to: (tpc.flags() & (TCP::SYN | TCP::ACK)) == (TCP::SYN | TCP::ACK)
+     * }
+     * \endcode
+     *
+     * \param check_flags
+     * \return true if all check_flags are set
+     */
+    bool has_flags(small_uint<12> check_flags) const;
     
     /* Setters */
 
