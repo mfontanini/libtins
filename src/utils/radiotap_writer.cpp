@@ -41,11 +41,12 @@ namespace Tins {
 namespace Utils {
 
 uint32_t calculate_padding(uint32_t alignment, uint32_t offset) {
-    return offset % alignment;
+    uint32_t extra = offset % alignment;
+    return extra == 0 ? 0 : alignment - extra;
 }
 
 uint32_t get_bit(uint32_t value) {
-    return log(value) / log(2);
+    return round(log2(value));
 }
 
 RadioTapWriter::RadioTapWriter(vector<uint8_t>& buffer)
@@ -54,7 +55,7 @@ RadioTapWriter::RadioTapWriter(vector<uint8_t>& buffer)
 
 void RadioTapWriter::write_option(const RadioTap::option& option) {
     const uint32_t bit = get_bit(option.option());
-    if (bit > RadioTapParser::MAX_RADIOTAP_FIELD) {
+    if (bit >= RadioTapParser::MAX_RADIOTAP_FIELD) {
         throw malformed_option();
     }
     const bool is_empty = buffer_.empty();
