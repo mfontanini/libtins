@@ -230,7 +230,7 @@ bool TCPStream::generic_process(uint32_t& my_seq,
 
 bool TCPStream::update(IP* ip, TCP* tcp) {
     if (!syn_ack_sent_) {
-        if (tcp->flags() == (TCP::SYN | TCP::ACK)) {
+        if (tcp->has_flags(TCP::SYN | TCP::ACK)) {
             server_seq_ = tcp->seq() + 1;
             client_seq_ = tcp->ack_seq();
             syn_ack_sent_ = true;

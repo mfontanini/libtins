@@ -116,7 +116,7 @@ bool Scanner::callback(PDU& pdu) {
             cout << "Port: " << setw(5) << tcp.sport() << " closed\n";
         }
         // Is SYN flag on? Then port is open!
-        else if(tcp.flags() == (TCP::SYN | TCP::ACK)) {
+        else if(tcp.has_flags(TCP::SYN | TCP::ACK)) {
             cout << "Port: " << setw(5) << tcp.sport() << " open\n";
         }
     }

@@ -127,19 +127,19 @@ void Flow::advance_sequence(uint32_t seq) {
 }
 
 void Flow::update_state(const TCP& tcp) {
-    if ((tcp.flags() & TCP::FIN) != 0) {
+    if (tcp.has_flags(TCP::FIN)) {
         state_ = FIN_SENT;
     }
-    else if ((tcp.flags() & TCP::RST) != 0) {
+    else if (tcp.has_flags(TCP::RST)) {
         state_ = RST_SENT;
     }
-    else if (state_ == SYN_SENT && (tcp.flags() & TCP::ACK) != 0) {
+    else if (state_ == SYN_SENT && tcp.has_flags(TCP::ACK)) {
         #ifdef TINS_HAVE_ACK_TRACKER
             ack_tracker_ = AckTracker(tcp.ack_seq());
         #endif // TINS_HAVE_ACK_TRACKER
         state_ = ESTABLISHED;
     }
-    else if (state_ == UNKNOWN && (tcp.flags() & TCP::SYN) != 0) {
+    else if (state_ == UNKNOWN && tcp.has_flags(TCP::SYN)) {
         // This is the server's state, sending it's first SYN|ACK
         #ifdef TINS_HAVE_ACK_TRACKER
             ack_tracker_ = AckTracker(tcp.ack_seq());

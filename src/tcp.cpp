@@ -257,6 +257,10 @@ small_uint<12> TCP::flags() const {
     return (header_.res1 << 8) | header_.flags_8;
 }
 
+bool TCP::has_flags(small_uint<12> check_flags) const {
+    return (flags() & check_flags) == check_flags;
+}
+
 void TCP::set_flag(Flags tcp_flag, small_uint<1> value) {
     switch (tcp_flag) {
         case FIN:

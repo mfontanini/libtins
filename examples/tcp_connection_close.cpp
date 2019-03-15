@@ -68,7 +68,7 @@ private:
         const IP& ip = pdu.rfind_pdu<IP>();
         const TCP& tcp = pdu.rfind_pdu<TCP>();
         // We'll only close a connection when seeing a SYN|ACK
-        if (tcp.flags() == (TCP::SYN | TCP::ACK)) {
+        if (tcp.has_flags(TCP::SYN | TCP::ACK)) {
             // Create an ethernet header flipping the addresses
             EthernetII packet(eth.src_addr(), eth.dst_addr());
             // Do the same for IP
