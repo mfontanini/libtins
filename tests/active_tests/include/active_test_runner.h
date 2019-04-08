@@ -62,7 +62,7 @@ private:
 
 template <typename T>
 void ActiveTestRunner::add_test() {
-    tests_.emplace_back(new T(packet_sender_, configuration_));
+    tests_.emplace_back(std::unique_ptr<T>(new T(packet_sender_, configuration_)));
 }
 
 #endif // TINS_ACTIVE_TEST_RUNNER_H
