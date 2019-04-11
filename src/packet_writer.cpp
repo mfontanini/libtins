@@ -86,8 +86,9 @@ void PacketWriter::init(const string& file_name, int link_type) {
     }
     dumper_ = pcap_dump_open(handle_, file_name.c_str());
     if (!dumper_) {
+        string error(pcap_geterr(handle_));
         pcap_close(handle_);
-        throw pcap_error(pcap_geterr(handle_));
+        throw pcap_error(error);
     }
 }
 
