@@ -37,11 +37,14 @@ using std::string;
 namespace Tins {
 
 OfflinePacketFilter::OfflinePacketFilter(const OfflinePacketFilter& other) {
-    *this = other;
+    string_filter_ = other.string_filter_;
+    init(string_filter_, pcap_datalink(other.handle_), pcap_snapshot(other.handle_));
 }
 
 OfflinePacketFilter& OfflinePacketFilter::operator=(const OfflinePacketFilter& other) {
     string_filter_ = other.string_filter_;
+    pcap_freecode(&filter_);
+    pcap_close(handle_);
     init(string_filter_, pcap_datalink(other.handle_), pcap_snapshot(other.handle_));
     return* this;
 }
