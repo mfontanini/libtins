@@ -58,7 +58,7 @@ const uint8_t DHCPTest::expected_packet[] = {
 TEST_F(DHCPTest, DefaultConstructor) {
     DHCP dhcp;
     EXPECT_EQ(dhcp.htype(), 1);
-    EXPECT_EQ(dhcp.hlen(), (const size_t)EthernetII::address_type::address_size);
+    EXPECT_EQ(dhcp.hlen(), (size_t)EthernetII::address_type::address_size);
 }
 
 TEST_F(DHCPTest, CopyConstructor) {
@@ -280,7 +280,7 @@ TEST_F(DHCPTest, ConstructorFromBuffer) {
 
     EXPECT_EQ(dhcp1.opcode(), DHCP::DISCOVER);
     EXPECT_EQ(dhcp1.htype(), 1);
-    ASSERT_EQ(dhcp1.hlen(), (const size_t)EthernetII::address_type::address_size);
+    ASSERT_EQ(dhcp1.hlen(), (size_t)EthernetII::address_type::address_size);
     EXPECT_EQ(dhcp1.hops(), 0x1f);
     EXPECT_EQ(dhcp1.xid(), 0x3fab23deU);
     EXPECT_EQ(dhcp1.secs(), 0x9f1a);
