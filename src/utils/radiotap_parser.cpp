@@ -131,7 +131,7 @@ struct RadioTapFlags {
 } TINS_END_PACK;
 #endif
 
-void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, uint32_t size, size_t n) {
+void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, size_t n) {
     uint32_t offset = (buffer - buffer_start) & (n - 1);
     if (offset) {
         offset = n - offset;
@@ -278,7 +278,7 @@ bool RadioTapParser::advance_to_next_field() {
     if (current_bit_ < MAX_RADIOTAP_FIELD) {
         const uint8_t* radiotap_start = start_ - sizeof(uint32_t);
         // Skip and align the buffer
-        align_buffer(radiotap_start, current_ptr_, end_ - radiotap_start,
+        align_buffer(radiotap_start, current_ptr_,
                      RADIOTAP_METADATA[current_bit_].alignment);
         return true;
     }
