@@ -290,13 +290,18 @@ vector<RouteEntry> route_entries() {
         MIB_IPFORWARDROW* row = &table->table[i];
         if (row->dwForwardType == MIB_IPROUTE_TYPE_INDIRECT || 
             row->dwForwardType == MIB_IPROUTE_TYPE_DIRECT) {
-            RouteEntry entry;
-            entry.interface = NetworkInterface::from_index(row->dwForwardIfIndex).name();
-            entry.destination = IPv4Address(row->dwForwardDest);
-            entry.mask = IPv4Address(row->dwForwardMask);
-            entry.gateway = IPv4Address(row->dwForwardNextHop);
-            entry.metric = row->dwForwardMetric1;
-            output.push_back(entry);
+            try {
+                RouteEntry entry;
+                entry.interface = NetworkInterface::from_index(row->dwForwardIfIndex).name();
+                entry.destination = IPv4Address(row->dwForwardDest);
+                entry.mask = IPv4Address(row->dwForwardMask);
+                entry.gateway = IPv4Address(row->dwForwardNextHop);
+                entry.metric = row->dwForwardMetric1;
+                output.push_back(entry);
+            }
+            catch(const invalid_interface&) {
+
+            }
         }
     }
     return output;
