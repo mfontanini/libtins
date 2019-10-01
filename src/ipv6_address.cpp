@@ -57,6 +57,7 @@ namespace Tins {
 
 const IPv6Address loopback_address = "::1";
 const AddressRange<IPv6Address> multicast_range = IPv6Address("ff00::") / 8;
+const AddressRange<IPv6Address> local_unicast_range = IPv6Address("fe80::") / 10;
 
 IPv6Address IPv6Address::from_prefix_length(uint32_t prefix_length) {
     IPv6Address address;
@@ -136,6 +137,10 @@ bool IPv6Address::is_loopback() const {
 
 bool IPv6Address::is_multicast() const {
     return multicast_range.contains(*this);
+}
+
+bool IPv6Address::is_local_unicast() const {
+    return local_unicast_range.contains(*this);
 }
 
 ostream& operator<<(ostream& os, const IPv6Address& addr) {
