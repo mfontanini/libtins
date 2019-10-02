@@ -231,9 +231,9 @@ public:
     bool is_multicast() const;
 
     /**
-     * \brief Return true fi this is a Link-Local unicast IPv6 address.
+     * \brief Return true if this is a Link-Local unicast IPv6 address.
      *
-     * This method returns true fi this address is in the address range
+     * This method returns true if this address is in the address range
      * fe80::/10, false otherwise
      */
     bool is_local_unicast() const;
