@@ -231,6 +231,14 @@ public:
     bool is_multicast() const;
 
     /**
+     * \brief Return true if this is a Link-Local unicast IPv6 address.
+     *
+     * This method returns true if this address is in the address range
+     * fe80::/10, false otherwise
+     */
+    bool is_local_unicast() const;
+
+    /**
      * \brief Returns the size of an IPv6 Address.
      *
      * This returns the value of IPv6Address::address_size
