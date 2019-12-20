@@ -173,7 +173,7 @@ public:
         
         addr_list_type(const addresses_type& addresses = addresses_type())
         : addresses(addresses) {
-            std::fill(reserved, reserved + sizeof(reserved), 0);
+            std::fill(reserved, reserved + sizeof(reserved), static_cast<uint8_t>(0));
         }
         
         static addr_list_type from_option(const option& opt);
@@ -199,7 +199,7 @@ public:
         
         naack_type(uint8_t code = 0, uint8_t status = 0)
         : code(code), status(status) {
-            std::fill(reserved, reserved + 4, 0);
+            std::fill(reserved, reserved + 4, static_cast<uint8_t>(0));
         }
         
         static naack_type from_option(const option& opt);
@@ -323,7 +323,7 @@ public:
          * The key_hash member will be 0-initialized.
          */
         rsa_sign_type() {
-            std::fill(key_hash, key_hash + sizeof(key_hash), 0);
+            std::fill(key_hash, key_hash + sizeof(key_hash), static_cast<uint8_t>(0));
         }
 
         static rsa_sign_type from_option(const option& opt);
@@ -489,7 +489,7 @@ public:
 
         timestamp_type(uint64_t timestamp = 0)
         : timestamp(timestamp) {
-            std::fill(reserved, reserved + sizeof(reserved), 0);
+            std::fill(reserved, reserved + sizeof(reserved), static_cast<uint8_t>(0));
         }
 
         static timestamp_type from_option(const option& opt);

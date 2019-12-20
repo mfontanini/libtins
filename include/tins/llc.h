@@ -236,7 +236,7 @@ public:
 	 * \return The LLC frame format.
 	 */
 	uint8_t type() {
-        return type_;
+        return static_cast<uint8_t>(type_);
     }
 
 	/**
@@ -245,7 +245,7 @@ public:
 	 * \return The sender send sequence number if format is INFORMATION else 0.
 	 */
 	uint8_t send_seq_number() {
-		return (type() == INFORMATION) ? (control_field.info.send_seq_num) : 0;
+		return static_cast<uint8_t>((type() == INFORMATION) ? (control_field.info.send_seq_num) : 0);
 	}
 
 	/**

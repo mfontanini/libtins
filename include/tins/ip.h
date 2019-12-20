@@ -174,9 +174,9 @@ public:
         option_identifier(OptionNumber number, OptionClass op_class,
           small_uint<1> copied) 
         #if TINS_IS_LITTLE_ENDIAN
-        : number(number), op_class(op_class), copied(copied) {}
+        : number(static_cast<uint8_t>(number)), op_class(static_cast<uint8_t>(op_class)), copied(copied) {}
         #else
-        : copied(copied), op_class(op_class), number(number) {}
+        : copied(copied), op_class(static_cast<uint8_t>(op_class)), number(static_cast<uint8_t>(number)) {}
         #endif
         
         /**
