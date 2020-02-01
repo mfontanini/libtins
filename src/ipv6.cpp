@@ -204,8 +204,8 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) {
 bool IPv6::is_extension_header(uint8_t header_id) {
     return header_id == HOP_BY_HOP || header_id == DESTINATION_ROUTING_OPTIONS
         || header_id == ROUTING || header_id == FRAGMENT || header_id == AUTHENTICATION
-        || header_id == SECURITY_ENCAPSULATION || header_id == DESTINATION_OPTIONS
-        || header_id == MOBILITY || header_id == NO_NEXT_HEADER;
+        || header_id == DESTINATION_OPTIONS || header_id == MOBILITY
+        || header_id == NO_NEXT_HEADER;
 }
 
 uint32_t IPv6::get_padding_size(const ext_header& header) {
