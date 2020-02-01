@@ -49,16 +49,19 @@
 #include <tins/ipv6.h>
 #include <tins/mpls.h>
 #include <tins/packet_sender.h>
-#include <tins/packet_writer.h>
 #include <tins/pdu.h>
 #include <tins/radiotap.h>
 #include <tins/rawpdu.h>
 #include <tins/snap.h>
-#include <tins/sniffer.h>
 #include <tins/tcp.h>
 #include <tins/udp.h>
 #include <tins/utils.h>
+#if defined(TINS_HAVE_PCAP)
+#include <tins/packet_writer.h>
+#include <tins/sniffer.h>
+#include <tins/ppi.h>
 #include <tins/tcp_stream.h>
+#endif
 #include <tins/crypto.h>
 #include <tins/pdu_cacher.h>
 #include <tins/rsn_information.h>
@@ -75,7 +78,7 @@
 #include <tins/pdu_allocator.h>
 #include <tins/ipsec.h>
 #include <tins/ip_reassembler.h>
-#include <tins/ppi.h>
+
 #include <tins/pdu_iterator.h>
 
 #endif // TINS_TINS_H
