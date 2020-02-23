@@ -375,6 +375,20 @@ public:
     }
 
     /**
+     * \brief Indicates whether this is a globally unique address.
+     */
+    bool is_globally_unique() const {
+        return !is_locally_assigned();
+    }
+
+    /**
+     * \brief Indicates whether this is a locally assigned address.
+     */
+    bool is_locally_assigned() const {
+        return (*begin() & 0x02);
+    }
+
+    /**
      * \brief Convert this address to a hex-notation std::string address.
      * 
      * \return std::string containing the hex-notation address.
