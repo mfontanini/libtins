@@ -141,7 +141,14 @@ IF(LIBTINS_ENABLE_DOT11)
         ENDIF()
     ELSE(LIBTINS_ENABLE_WPA2)
         MESSAGE(STATUS "Disabling WPA2 decryption support.")
+        # Default this to empty strings
+        SET(OPENSSL_INCLUDE_DIR "")
+        SET(OPENSSL_LIBRARIES "")
     ENDIF(LIBTINS_ENABLE_WPA2)
+ELSE(LIBTINS_ENABLE_DOT11)
+    # Default this to empty strings
+    SET(OPENSSL_INCLUDE_DIR "")
+    SET(OPENSSL_LIBRARIES "")
 ENDIF(LIBTINS_ENABLE_DOT11)
 
 # Optionally enable TCPIP classes (on by default)
