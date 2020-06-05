@@ -82,7 +82,11 @@ struct InterfaceInfoCollector {
             const struct sockaddr_dl* addr_ptr = ((struct sockaddr_dl*)addr->ifa_addr);
             
             if (addr->ifa_addr->sa_family == AF_LINK && addr_ptr->sdl_index == iface_id) {
+                #ifdef __APPLE__
+                info->hw_addr = (const uint8_t*)addr_ptr->sdl_data + addr_ptr->sdl_nlen;
+                #else
                 info->hw_addr = (const uint8_t*)LLADDR(addr_ptr);
+                #endif
                 found_hw = true;
                 info->is_up = info->is_up || (addr->ifa_flags & IFF_UP);
             }
