@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -26,7 +26,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
+
 #ifndef TINS_PDU_H
 #define TINS_PDU_H
 
@@ -49,22 +49,22 @@ class NetworkInterface;
  */
 typedef std::vector<uint8_t> byte_array;
 
-/** 
+/**
  * \class PDU
  * \brief Base class for protocol data units.
  *
- * Every PDU implementation inherits from this class. 
+ * Every PDU implementation inherits from this class.
  *
  * PDUs can contain 0 or 1 inner PDU. By stacking several PDUs together,
- * you can construct packets. These are created upwards: upper layers 
- * will be children of the lower ones. 
+ * you can construct packets. These are created upwards: upper layers
+ * will be children of the lower ones.
  *
  * If you want to find a specific protocol within a PDU chain, you can use
  * PDU::find_pdu and PDU::rfind_pdu. Both of them take a template parameter
- * that indicates the PDU type you are looking for. The first one returns a 
- * pointer to the first object of that type, and the second one returns a 
- * reference (and throws if it is not found). 
- * 
+ * that indicates the PDU type you are looking for. The first one returns a
+ * pointer to the first object of that type, and the second one returns a
+ * reference (and throws if it is not found).
+ *
  * For example:
  *
  * \code
@@ -86,7 +86,7 @@ typedef std::vector<uint8_t> byte_array;
  * stack into a vector of bytes. This process might modify some parameters
  * on packets depending on which protocols are used in it. For example:
  *
- * - If the lowest protocol layer is IP (this means that there is no 
+ * - If the lowest protocol layer is IP (this means that there is no
  * link layer protocol in the packet), then it calculates the source address
  * that should be used in that IP PDU. \sa IP
  * - If a protocol contains a checksum field, its value will be calculated
@@ -179,10 +179,11 @@ public:
         IPSEC_ESP,
         PKTAP,
         MPLS,
+        DOT11_CONTROL_TA,
         UNKNOWN = 999,
         USER_DEFINED_PDU = 1000
     };
-    
+
     /**
      * The endianness used by this PDU. This can be overriden
      * by subclasses.
@@ -197,10 +198,10 @@ public:
          * \brief Default constructor
          */
         metadata();
-        
+
         /**
          * \brief Constructs an instance of metadata using the given values
-    
+
          */
         metadata(uint32_t header_size, PDUType current_type, PDUType next_type);
 
@@ -220,28 +221,28 @@ public:
         PDUType next_pdu_type;
     };
 
-    /** 
+    /**
      * \brief Default constructor.
      */
     PDU();
-    
+
     #if TINS_IS_CXX11
         /**
          * \brief Move constructor.
-         * 
+         *
          * \param rhs The PDU to be moved.
          */
-        PDU(PDU &&rhs) TINS_NOEXCEPT 
+        PDU(PDU &&rhs) TINS_NOEXCEPT
         : inner_pdu_(0), parent_pdu_(0) {
             std::swap(inner_pdu_, rhs.inner_pdu_);
             if (inner_pdu_) {
                 inner_pdu_->parent_pdu(this);
             }
         }
-        
+
         /**
          * \brief Move assignment operator.
-         * 
+         *
          * \param rhs The PDU to be moved.
          */
         PDU& operator=(PDU &&rhs) TINS_NOEXCEPT {
@@ -255,7 +256,7 @@ public:
         }
     #endif
 
-    /** 
+    /**
      * \brief PDU destructor.
      *
      * Deletes the inner pdu, as a consequence every child pdu is
@@ -302,18 +303,18 @@ public:
     PDU* parent_pdu() const {
         return parent_pdu_;
     }
-    
+
     /**
      * \brief Releases the inner PDU.
-     * 
+     *
      * This method makes this PDU to <b>no longer own</b> the inner
      * PDU. The current inner PDU is returned, and is <b>not</b>
-     * destroyed. That means after calling this function, you are 
+     * destroyed. That means after calling this function, you are
      * responsible for using operator delete on the returned pointer.
-     * 
+     *
      * Use this method if you want to somehow re-use a PDU that
      * is already owned by another PDU.
-     * 
+     *
      * \return The current inner PDU. Might be 0.
      */
     PDU* release_inner_pdu();
@@ -323,26 +324,26 @@ public:
      *
      * When setting a new inner_pdu, the instance takesownership of
      * the object, therefore deleting it when it's no longer required.
-     * 
+     *
      * \param next_pdu The new child PDU.
      */
     void inner_pdu(PDU* next_pdu);
-    
+
     /**
      * \brief Sets the child PDU.
      *
      * The PDU parameter is cloned using PDU::clone.
-     * 
+     *
      * \param next_pdu The new child PDU.
      */
     void inner_pdu(const PDU& next_pdu);
 
-    /** 
+    /**
      * \brief Serializes the whole chain of PDU's, including this one.
      *
      * This allocates a std::vector of size size(), and fills it
      * with the serialization this PDU, and all of the inner ones'.
-     * 
+     *
      * \return serialization_type containing the serialization
      * of the whole stack of PDUs.
      */
@@ -356,7 +357,7 @@ public:
      * If no PDU matches, 0 is returned.
      * \param flag The flag which being searched.
      */
-    template<typename T> 
+    template<typename T>
     T* find_pdu(PDUType type = T::pdu_flag) {
         PDU* pdu = this;
         while (pdu) {
@@ -367,24 +368,24 @@ public:
         }
         return 0;
     }
-    
+
     /**
      * \brief Finds and returns the first PDU that matches the given flag.
      *
      * \param flag The flag which being searched.
      */
-    template<typename T> 
+    template<typename T>
     const T* find_pdu(PDUType type = T::pdu_flag) const {
         return const_cast<PDU*>(this)->find_pdu<T>(type);
     }
 
     /**
      * \brief Finds and returns the first PDU that matches the given flag.
-     * 
+     *
      * If the PDU is not found, a pdu_not_found exception is thrown.
-     * 
+     *
      * \sa PDU::find_pdu
-     * 
+     *
      * \param flag The flag which being searched.
      */
     template<typename T>
@@ -401,7 +402,7 @@ public:
      *
      * \param flag The flag which being searched.
      */
-    template<typename T> 
+    template<typename T>
     const T& rfind_pdu(PDUType type = T::pdu_flag) const {
         return const_cast<PDU*>(this)->rfind_pdu<T>(type);
     }
@@ -416,36 +417,36 @@ public:
      */
     virtual PDU* clone() const = 0;
 
-    /** 
+    /**
      * \brief Send the stack of PDUs through a PacketSender.
      *
      * This method will be called only for the PDU on the bottom of the stack,
      * therefore it should only implement this method if it can be sent.
-     * 
+     *
      * PacketSender implements specific methods to send packets which start
      * on every valid TCP/IP stack layer; this should only be a proxy for
      * those methods.
-     * 
+     *
      * If this PDU does not represent a link layer protocol, then
      * the interface argument will be ignored.
-     * 
+     *
      * \param sender The PacketSender which will send the packet.
-     * \param iface The network interface in which this packet will 
+     * \param iface The network interface in which this packet will
      * be sent.
      */
     virtual void send(PacketSender& sender, const NetworkInterface& iface);
 
-    /** 
+    /**
      * \brief Receives a matching response for this packet.
      *
      * This method should act as a proxy for PacketSender::recv_lX methods.
-     * 
+     *
      * \param sender The packet sender which will receive the packet.
      * \param iface The interface in which to expect the response.
      */
     virtual PDU* recv_response(PacketSender& sender, const NetworkInterface& iface);
 
-    /** 
+    /**
      * \brief Check whether ptr points to a valid response for this PDU.
      *
      * This method must check whether the buffer pointed by ptr is a valid
@@ -494,18 +495,18 @@ protected:
 
     /**
      * \brief Prepares this PDU for serialization.
-     * 
+     *
      * This method is called before the inner PDUs are serialized.
      * It's useful in situations such as when serializing IP PDUs,
      * which don't contain any link layer encapsulation, and therefore
      * require to set the source IP address before the TCP/UDP checksum
      * is calculated.
-     * 
+     *
      * By default, this method does nothing
      */
     virtual void prepare_for_serialize();
 
-    /** 
+    /**
      * \brief Serializes this PDU and propagates this action to child PDUs.
      *
      * \param buffer The buffer in which to store this PDU's serialization.
@@ -513,7 +514,7 @@ protected:
      */
     void serialize(uint8_t* buffer, uint32_t total_sz);
 
-    /** 
+    /**
      * \brief Serializes this TCP PDU.
      *
      * Each PDU must override this method and implement it's own
@@ -531,18 +532,18 @@ private:
 
 /**
  * \brief Concatenation operator.
- * 
- * This operator concatenates several PDUs. A copy of the right 
+ *
+ * This operator concatenates several PDUs. A copy of the right
  * operand is set at the end of the left one's inner PDU chain.
  * This means that:
- * 
+ *
  * IP some_ip = IP("127.0.0.1") / TCP(12, 13) / RawPDU("bleh");
- * 
- * Works as expected, meaning the output PDU will look like the 
+ *
+ * Works as expected, meaning the output PDU will look like the
  * following:
- * 
+ *
  * IP - TCP - RawPDU
- * 
+ *
  * \param lop The left operand, which will be the one modified.
  * \param rop The right operand, the one which will be appended
  * to lop.
@@ -559,7 +560,7 @@ T& operator/= (T& lop, const PDU& rop) {
 
 /**
  * \brief Concatenation operator.
- * 
+ *
  * \sa operator/=
  */
 template<typename T>
@@ -570,7 +571,7 @@ T operator/ (T lop, const PDU& rop) {
 
 /**
  * \brief Concatenation operator on PDU pointers.
- * 
+ *
  * \sa operator/=
  */
 template<typename T>
