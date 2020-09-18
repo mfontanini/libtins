@@ -1,3 +1,23 @@
+##### v4.3 - Fri Sep 18 03:08:33 UTC 2020
+
+- Assign a PDUType to `Dot11ControlTA` (#420)
+
+- Don't consider IPv6 ESP header a normal extension header (#374)
+
+- Don't include non-existing headers when installed without libpcap (#382)
+
+- Add `IPv6Address::is_local_unicast` (#369)
+
+- Fix memory leak in `PacketWriter` (#343)
+
+- Fix memory leaks in `OfflinePacketFilter` (#343)
+
+- Fix detection of new TCP stream (#335)
+
+- Introduce `TCP::has_flags` (#334)
+
+- Fix padding calculations in RadioTapWriter (#333)
+
 ##### v4.2 - Fri Mar  8 04:15:13 UTC 2019
 
 - Updated location of installed CMake files in unix systems (#331)
@@ -232,7 +252,7 @@
 
 - Move implementations on utils.h to utils.cpp
 
-- Add ICMPv6 Multicast Listener Query Messages support 
+- Add ICMPv6 Multicast Listener Query Messages support
 
 - Add ICMPv6 Multicast Listener Report Message support
 
@@ -376,7 +396,7 @@
 
 - Added RadioTap channel map type
 
-- Made rsn_information() a const member function to make Dot11ManagementFrame 
+- Made rsn_information() a const member function to make Dot11ManagementFrame
 immutable
 
 - Ensure HAVE_CXX11 is checked when defining TINS_IS_CXX11
@@ -426,7 +446,7 @@ its value.
 
 - Removed obsolete autotools files.
 
-- Fixed exception thrown when an interface didn't have an IP address 
+- Fixed exception thrown when an interface didn't have an IP address
 on NetworkInterface.
 
 - Added NetworkInterface::is_loopback.
@@ -470,7 +490,7 @@ conversion on integral constant.
 
 - Added DataLinkType class.
 
-- IPv4Address now uses inet_pton when constructing from string. 
+- IPv4Address now uses inet_pton when constructing from string.
 
 -------------------------------------------------------------------------------
 
@@ -491,8 +511,8 @@ conversion on integral constant.
 - Packets can now be constructed from a PDU pointer and take ownership
 of it.
 
-- All protocols now set the next layer protocol flag, regardless if 
-it was already set. This was not done in some protocols, 
+- All protocols now set the next layer protocol flag, regardless if
+it was already set. This was not done in some protocols,
 like EthernetII, and as a consequence if the network layer protocol
 was replaced by other, the packet would be serialized incorrectly.
 
@@ -533,7 +553,7 @@ TCPStreamFollower::follow_streams.
 
 - Added DHCP::hostname to extract the hostname options.
 
-- Removed extra qualifier on SessionKeys::decrypt_unicast which 
+- Removed extra qualifier on SessionKeys::decrypt_unicast which
 produced compilation errors on some platforms.
 
 - PacketSender::send now uses PDU::matches_flag to match specific
@@ -549,9 +569,9 @@ PDU types.
 
 -------------------------------------------------------------------------------
 
-##### v2.0 - Thu Jan 23 11:09:38 ART 2014 
+##### v2.0 - Thu Jan 23 11:09:38 ART 2014
 
-- DNSResourceRecord was removed. Now DNS records are added using 
+- DNSResourceRecord was removed. Now DNS records are added using
 DNS::Resource.
 
 - tins.h now includes ppi.h.
@@ -560,21 +580,21 @@ DNS::Resource.
 
 - Added PDUOption<>::to<> which converts a PDUOption to a specific type.
 
-- Layer 3 packets sent using PacketSender::send_recv for which the 
+- Layer 3 packets sent using PacketSender::send_recv for which the
 answer is a different PDU type.
 
 - ICMP::gateway now uses IPv4Address.
 
 - Added support for ICMP address mask request/reply.
 
-- Fixed bug in PacketSender when using send_recv and a layer 2 PDU. The 
-interface in which the packet was sent was not the default_interface 
+- Fixed bug in PacketSender when using send_recv and a layer 2 PDU. The
+interface in which the packet was sent was not the default_interface
 set when the sender was constructed.
 
-- IP packets sent using PacketSender::send_recv now match ICMP 
+- IP packets sent using PacketSender::send_recv now match ICMP
 responses.
 
-- Added support for ICMP timestamp request/reply packets. 
+- Added support for ICMP timestamp request/reply packets.
 ICMP::matches_response now works with these types of packets as well.
 
 - Added support for reassembling of fragmented IP packets via the
@@ -582,20 +602,20 @@ IPv4Reassembler class.
 
 - Fragmented IP packet's inner_pdu PDUs are not decoded now.
 
-- Added 1000ms as the default read timeout used when calling 
+- Added 1000ms as the default read timeout used when calling
 pcap_open_live. Added BaseSniffer::set_timeout to modify this parameter.
 
 - Added the --disable-dot11 configure switch.
 
 - Added support for IPSec.
 
-- Fixed bug triggered when ifaddrs::ifa_addr was null in 
+- Fixed bug triggered when ifaddrs::ifa_addr was null in
 NetworkInterface::addresses.
 
 - Added another overload of Utils::route_entries which returns the
 result either than storing it in a parameter.
 
-- Added ARP monitor, WPS detector, DNS queries sniffer and DNS spoofer 
+- Added ARP monitor, WPS detector, DNS queries sniffer and DNS spoofer
 examples.
 
 - Added another Sniffer constructor which doesn't expect the maximum
@@ -614,10 +634,10 @@ doesn't work well on some linux distributions.
 
 - Added PPI PDU class.
 
-- Fixed a bug in EthernetII triggered when the size of the whole frame 
+- Fixed a bug in EthernetII triggered when the size of the whole frame
 was lower than 60 bytes.
 
-- Added AddressRange class and IPv4Address, IPv6Address and 
+- Added AddressRange class and IPv4Address, IPv6Address and
 HWAddress<>::operator/.
 
 - Added is_broadcast, is_multicast and is_unicast to IPv4, IPv6
@@ -627,7 +647,7 @@ and HWAddress.
 
 - Done some optimizations on TCP's constructor from buffer.
 
-- Added helper functions to Dot11Data to retrieve the source, 
+- Added helper functions to Dot11Data to retrieve the source,
 destination and BSSID addresses.
 
 - Fixed bugs in DNS triggered when parsing MX and unknown records.
@@ -647,7 +667,7 @@ types.
 
 - Added WPA2Decrypter class.
 
-- IEEE 802.11 frames are not parsed if the RadioTap FAILED_FCS flag 
+- IEEE 802.11 frames are not parsed if the RadioTap FAILED_FCS flag
 is on.
 
 - RadioTap now calculates its size everytime it's serialized.
@@ -664,13 +684,13 @@ v1.0 - Tue Apr 23 20:40:57 ART 2013
 - Link layer protocol PDUs now don't hold a NetworkInterface. This led
 to changes in their constructors.
 
-- Removed the obsolete PDU* parameter taken by several classes' 
+- Removed the obsolete PDU* parameter taken by several classes'
 constructors.
 
 - IP now sets the sender's address automatically when no link layer
 PDU is used.
 
-- IP, TCP and UDP now calculate the checksum everytime they're 
+- IP, TCP and UDP now calculate the checksum everytime they're
 serialized.
 
 - Added PDU::rfind_pdu.
@@ -681,7 +701,7 @@ serialized.
 
 - PacketSender is now movable.
 
-- Added an overload of add_option that takes an rvalue-reference in IP, 
+- Added an overload of add_option that takes an rvalue-reference in IP,
 TCP, DHCP, ICMPv6 and Dot11.
 
 - Added support for GNU/kFreeBSD.
@@ -724,7 +744,7 @@ pseudo protocol.
 
 ##### v0.2 - Sat Oct 20 11:26:40 2012
 
-- Added support for big endian architectures. 
+- Added support for big endian architectures.
 
 - Simplified several interfaces.
 
