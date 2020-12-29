@@ -137,7 +137,7 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) {
             const uint8_t ext_type = stream.read<uint8_t>();
             // every ext header is at least 8 bytes long
             // minus one, from the next_header field.
-            const uint32_t ext_size = (static_cast<uint32_t>(stream.read<uint8_t>()) + 1) * 8;
+            const uint32_t ext_size = current_header == AUTHENTICATION ? (static_cast<uint32_t>(stream.read<uint8_t>()) + 2) * 4 : (static_cast<uint32_t>(stream.read<uint8_t>()) + 1) * 8;
             const uint32_t payload_size = ext_size - sizeof(uint8_t) * 2;
             if (!stream.can_read(payload_size)) {
                 throw malformed_packet();
@@ -359,8 +359,10 @@ void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     }
     payload_length(static_cast<uint16_t>(total_sz - sizeof(header_)));
     stream.write(header_);
+    auto prev_nh = header_.next_header;
     for (headers_type::const_iterator it = ext_headers_.begin(); it != ext_headers_.end(); ++it) {
-        write_header(*it, stream);
+        write_header(*it, stream, (ExtensionHeader)prev_nh);
+        prev_nh = it->option();
     }
     // Restore our original header types
     for (size_t i = 0; i < ext_headers_.size(); ++i) {
@@ -425,19 +427,22 @@ uint32_t IPv6::calculate_headers_size() const {
     uint32_t output = 0;
     for (const_iterator iter = ext_headers_.begin(); iter != ext_headers_.end(); ++iter) {
         output += static_cast<uint32_t>(iter->data_size() + sizeof(uint8_t) * 2);
-        output += get_padding_size(*iter);
-
+        bool may_need_padding = iter->option() != AUTHENTICATION;
+        if (may_need_padding)
+            output += get_padding_size(*iter);
     }
     return output;
 }
 
-void IPv6::write_header(const ext_header& header, OutputMemoryStream& stream) {
-    const uint8_t length = header.length_field() / 8;
+void IPv6::write_header(const ext_header& header, OutputMemoryStream& stream, ExtensionHeader type) {
+    const uint8_t length = type == AUTHENTICATION ? ( (2 + header.length_field()) / 4 - 2) : ( (2 + header.length_field()) / 8 - 1);
     stream.write(header.option());
     stream.write(length);
     stream.write(header.data_ptr(), header.data_size());
     // Append padding
-    stream.fill(get_padding_size(header), 0);
+    bool may_need_padding = type != AUTHENTICATION;
+    if (may_need_padding)
+        stream.fill(get_padding_size(header), 0);
 }
 
 } // Tins
