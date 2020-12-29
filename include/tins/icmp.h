@@ -89,7 +89,9 @@ public:
         INFO_REQUEST     = 15,
         INFO_REPLY       = 16,
         ADDRESS_MASK_REQUEST = 17,
-        ADDRESS_MASK_REPLY = 18
+        ADDRESS_MASK_REPLY = 18,
+        EXTENDED_ECHO_REQUEST = 42,
+        EXTENDED_ECHO_REPLY = 43
     };
 
     /**
