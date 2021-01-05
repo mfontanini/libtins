@@ -154,6 +154,7 @@ vector<char> query_route_table(int family) {
         throw exception_base("sysctl failed");
     }
 
+    buf.resize(len);
     return buf;
 }
 
