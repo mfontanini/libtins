@@ -267,6 +267,11 @@ void PacketSender::open_l3_socket(SocketType type) {
         #endif
         const int level = (is_v6) ? IPPROTO_IPV6 : IPPROTO_IP;
         if (setsockopt(sockfd, level, IP_HDRINCL, (option_ptr)&on, sizeof(on)) != 0) {
+            #ifndef _WIN32
+                ::close(sockfd);
+            #else
+                ::closesocket(sockfd);
+            #endif
             throw socket_open_error(make_error_string());
         }
 
