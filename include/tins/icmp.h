@@ -320,7 +320,7 @@ public:
      * \return Returns the gateway field value.
      */
     address_type gateway() const {
-        return address_type(Endian::be_to_host(header_.un.gateway));
+        return address_type(header_.un.gateway);
     }
 
     /**
@@ -383,7 +383,7 @@ public:
       * \return Returns the address mask value.
       */
     address_type address_mask() const {
-        return address_type(Endian::be_to_host(orig_timestamp_or_address_mask_));
+        return address_type(orig_timestamp_or_address_mask_);
     }
 
     /**
