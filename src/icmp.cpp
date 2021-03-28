@@ -98,7 +98,7 @@ void ICMP::sequence(uint16_t new_seq) {
 }
 
 void ICMP::gateway(address_type new_gw) {
-    header_.un.gateway = Endian::host_to_be(static_cast<uint32_t>(new_gw));
+    header_.un.gateway = static_cast<uint32_t>(new_gw);
 }
 
 void ICMP::mtu(uint16_t new_mtu) {
@@ -122,7 +122,7 @@ void ICMP::transmit_timestamp(uint32_t new_timestamp) {
 }
 
 void ICMP::address_mask(address_type new_mask) {
-    orig_timestamp_or_address_mask_ = Endian::host_to_be(static_cast<uint32_t>(new_mask));
+    orig_timestamp_or_address_mask_ = static_cast<uint32_t>(new_mask);
 }
 
 uint32_t ICMP::header_size() const {
