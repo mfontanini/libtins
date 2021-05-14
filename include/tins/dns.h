@@ -652,7 +652,7 @@ public:
     // Getters
     
     /**
-     * \brief Setter for the id field.
+     * \brief Getter for the id field.
      * 
      * \return uint16_t containing the value of the id field.
      */
@@ -661,7 +661,7 @@ public:
     }
     
     /**
-     * \brief Setter for the query response field.
+     * \brief Getter for the query response field.
      * 
      * \return QRType containing the value of the query response
      * field.
@@ -671,7 +671,7 @@ public:
     }
     
     /**
-     * \brief Setter for the opcode field.
+     * \brief Getter for the opcode field.
      * 
      * \return uint8_t containing the value of the opcode field.
      */
@@ -680,7 +680,7 @@ public:
     }
     
     /**
-     * \brief Setter for the authoritative answer field.
+     * \brief Getter for the authoritative answer field.
      * 
      * \return uint8_t containing the value of the authoritative 
      * answer field.
@@ -690,7 +690,7 @@ public:
     }
     
     /**
-     * \brief Setter for the truncated field.
+     * \brief Getter for the truncated field.
      * 
      * \return uint8_t containing the value of the truncated field.
      */
@@ -699,7 +699,7 @@ public:
     }
     
     /**
-     * \brief Setter for the recursion desired field.
+     * \brief Getter for the recursion desired field.
      * 
      * \return uint8_t containing the value of the recursion
      * desired field.
@@ -709,7 +709,7 @@ public:
     }
     
     /**
-     * \brief Setter for the recursion available field.
+     * \brief Getter for the recursion available field.
      * 
      * \return uint8_t containing the value of the recursion
      * available field.
@@ -719,7 +719,7 @@ public:
     }
     
     /**
-     * \brief Setter for the z desired field.
+     * \brief Getter for the z desired field.
      * 
      * \return uint8_t containing the value of the z field.
      */
@@ -728,7 +728,7 @@ public:
     }
     
     /**
-     * \brief Setter for the authenticated data field.
+     * \brief Getter for the authenticated data field.
      * 
      * \return uint8_t containing the value of the authenticated
      * data field.
@@ -738,7 +738,7 @@ public:
     }
     
     /**
-     * \brief Setter for the checking disabled field.
+     * \brief Getter for the checking disabled field.
      * 
      * \return uint8_t containing the value of the checking 
      * disabled field.
@@ -748,7 +748,7 @@ public:
     }
     
     /**
-     * \brief Setter for the rcode field.
+     * \brief Getter for the rcode field.
      * 
      * \return uint8_t containing the value of the rcode field.
      */
@@ -757,7 +757,7 @@ public:
     }
     
     /**
-     * \brief Setter for the questions field.
+     * \brief Getter for the questions field.
      * 
      * \return uint16_t containing the value of the questions field.
      */
@@ -766,7 +766,7 @@ public:
     }
     
     /**
-     * \brief Setter for the answers field.
+     * \brief Getter for the answers field.
      * 
      * \return uint16_t containing the value of the answers field.
      */
@@ -775,7 +775,7 @@ public:
     }
     
     /**
-     * \brief Setter for the authority field.
+     * \brief Getter for the authority field.
      * 
      * \return uint16_t containing the value of the authority field.
      */
@@ -784,7 +784,7 @@ public:
     }
     
     /**
-     * \brief Setter for the additional field.
+     * \brief Getter for the additional field.
      * 
      * \return uint16_t containing the value of the additional field.
      */
