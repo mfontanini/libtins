@@ -66,6 +66,19 @@ public:
     malformed_packet() : exception_base("Malformed packet") { }
 };
 
+class DNS_decompression_pointer_out_of_bounds : public exception_base {
+public:
+    DNS_decompression_pointer_out_of_bounds() : exception_base("DNS decompression pointer out of bounds") { }
+};
+
+/**
+ * \brief Exception thrown when a DNS decompression pointer loops.
+ */
+class DNS_decompression_pointer_loops : public exception_base {
+public:
+    DNS_decompression_pointer_loops() : exception_base("DNS decompression pointer loops") { }
+};
+
 /**
  * \brief Exception thrown when serializing a packet fails.
  */
