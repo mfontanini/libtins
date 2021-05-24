@@ -336,7 +336,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
     const uint8_t* end = &records_data_[0] + records_data_.size();
     const uint8_t* end_ptr = 0;
     char* current_out_ptr = out_ptr;
-    int pointer_counter = 0;
+    uint8_t pointer_counter = 0;
     while (*ptr) {
         if (pointer_counter++ > 30){
             throw DNS_decompression_pointer_loops();

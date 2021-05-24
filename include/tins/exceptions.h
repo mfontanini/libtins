@@ -66,6 +66,9 @@ public:
     malformed_packet() : exception_base("Malformed packet") { }
 };
 
+/**
+ * \brief Exception thrown when a DNS decompression pointer is out of bounds.
+ */
 class DNS_decompression_pointer_out_of_bounds : public exception_base {
 public:
     DNS_decompression_pointer_out_of_bounds() : exception_base("DNS decompression pointer out of bounds") { }
