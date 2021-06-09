@@ -12,6 +12,7 @@ INCLUDE_DIRECTORIES(BEFORE
     ${OPENSSL_INCLUDE_DIR}
     ${PCAP_INCLUDE_DIR}
     ${LIBTINS_INCLUDE_DIR}
+    ${PROJECT_BINARY_DIR}/include
 )
 
 set(SOURCES
@@ -82,7 +83,7 @@ set(HEADERS
     ${LIBTINS_INCLUDE_DIR}/tins/handshake_capturer.h
     ${LIBTINS_INCLUDE_DIR}/tins/stp.h
     ${LIBTINS_INCLUDE_DIR}/tins/pppoe.h
-    ${LIBTINS_INCLUDE_DIR}/tins/config.h
+    ${PROJECT_BINARY_DIR}/include/tins/config.h
     ${LIBTINS_INCLUDE_DIR}/tins/constants.h
     ${LIBTINS_INCLUDE_DIR}/tins/crypto.h
     ${LIBTINS_INCLUDE_DIR}/tins/cxxstd.h

@@ -228,7 +228,7 @@ ENDIF(DOXYGEN_FOUND)
 # Configuration file
 CONFIGURE_FILE(
   "${PROJECT_SOURCE_DIR}/include/tins/config.h.in"
-  "${PROJECT_SOURCE_DIR}/include/tins/config.h"
+  "${PROJECT_BINARY_DIR}/include/tins/config.h"
 )
 
 IF (NOT CMAKE_INSTALL_LIBDIR)
