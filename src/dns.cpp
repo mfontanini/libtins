@@ -339,7 +339,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
     uint8_t pointer_counter = 0;
     while (*ptr) {
         if (pointer_counter++ > 30){
-            throw DNS_decompression_pointer_loops();
+            throw dns_decompression_pointer_loops();
         }
         // It's an offset
         if ((*ptr & 0xc0)) {
@@ -351,7 +351,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
             index = Endian::be_to_host(index) & 0x3fff;
             // Check that the offset is neither too low or too high
             if (index < 0x0c || (&records_data_[0] + (index - 0x0c)) >= end) {
-                throw DNS_decompression_pointer_out_of_bounds();
+                throw dns_decompression_pointer_out_of_bounds();
             }
             // We've probably found the end of the original domain name. Save it.
             if (end_ptr == 0) {
