@@ -69,17 +69,17 @@ public:
 /**
  * \brief Exception thrown when a DNS decompression pointer is out of bounds.
  */
-class DNS_decompression_pointer_out_of_bounds : public exception_base {
+class dns_decompression_pointer_out_of_bounds : public malformed_packet {
 public:
-    DNS_decompression_pointer_out_of_bounds() : exception_base("DNS decompression pointer out of bounds") { }
+    dns_decompression_pointer_out_of_bounds() : exception_base("DNS decompression: pointer out of bounds") { }
 };
 
 /**
  * \brief Exception thrown when a DNS decompression pointer loops.
  */
-class DNS_decompression_pointer_loops : public exception_base {
+class dns_decompression_pointer_loops : public malformed_packet {
 public:
-    DNS_decompression_pointer_loops() : exception_base("DNS decompression pointer loops") { }
+    dns_decompression_pointer_loops() : exception_base("DNS decompression: pointer loops") { }
 };
 
 /**
