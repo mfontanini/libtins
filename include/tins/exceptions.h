@@ -64,7 +64,25 @@ public:
 class malformed_packet : public exception_base {
 public:
     malformed_packet() : exception_base("Malformed packet") { }
+    malformed_packet(const std::string& message) : exception_base(message) { }
 };
+
+/**
+ * \brief Exception thrown when a DNS decompression pointer is out of bounds.
+ */
+class dns_decompression_pointer_out_of_bounds : public malformed_packet {
+public:
+    dns_decompression_pointer_out_of_bounds() : malformed_packet("DNS decompression: pointer out of bounds") { }
+};
+
+/**
+ * \brief Exception thrown when a DNS decompression pointer loops.
+ */
+class dns_decompression_pointer_loops : public malformed_packet {
+public:
+    dns_decompression_pointer_loops() : malformed_packet("DNS decompression: pointer loops") { }
+};
+
 
 /**
  * \brief Exception thrown when serializing a packet fails.
