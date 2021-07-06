@@ -162,6 +162,7 @@ SET(DOT11_DEPENDENT_SOURCES
     dot11/dot11_auth.cpp
     dot11/dot11_probe.cpp
     dot11/dot11_control.cpp
+    dot11/dot11_action.cpp
 )
 
 SET(DOT11_DEPENDENT_HEADERS
@@ -174,6 +175,7 @@ SET(DOT11_DEPENDENT_HEADERS
     ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_auth.h
     ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_probe.h
     ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_control.h
+    ${LIBTINS_INCLUDE_DIR}/tins/dot11/dot11_action.h
 )
 
 IF(LIBTINS_ENABLE_DOT11)
