@@ -347,6 +347,8 @@ INSTALL(
     COMPONENT dev
 )
 
+TARGET_INCLUDE_DIRECTORIES(tins INTERFACE "$<INSTALL_INTERFACE:include/>")
+
 # Install the export set for use with the install-tree
 INSTALL(
     EXPORT libtinsTargets
