@@ -65,7 +65,9 @@ class PDU;
  * - Those that don't contain a link layer PDU. In this case, the 
  * kernel will be responsible for picking the appropriate network interface
  * based on the destination address.
- *
+ *  - Exception: <a href="https://datatracker.ietf.org/doc/html/rfc2553#section-3.3">RFC2553</a> 
+ * requires IPv6 link-scope address have a interface defined.
+ *  .
  * \par Note for Windows users:
  * Sending layer 3 PDUs (without a link layer protocol) is very restricted
  * on Windows (<a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms740548(v=vs.85).aspx">link</a>).

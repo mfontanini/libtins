@@ -366,11 +366,16 @@ void IPv6::write_serialization(uint8_t* buffer, uint32_t total_sz) {
 }
 
 #ifndef BSD
-void IPv6::send(PacketSender& sender, const NetworkInterface &) {
+void IPv6::send(PacketSender& sender, const NetworkInterface& interface) {
     sockaddr_in6 link_addr;
     const PacketSender::SocketType type = PacketSender::IPV6_SOCKET;
     link_addr.sin6_family = AF_INET6;
     link_addr.sin6_port = 0;
+    // Required to set sin6_scope_id to interface index as stated in RFC2553.
+    // https://datatracker.ietf.org/doc/html/rfc2553#section-3.3
+    if (IPv6Address(header_.dst_addr).is_local_unicast()) {
+        link_addr.sin6_scope_id = interface.id();
+    }
     memcpy((uint8_t*)&link_addr.sin6_addr, header_.dst_addr, address_type::address_size);
     sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
 }
