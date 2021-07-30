@@ -179,6 +179,7 @@ private:
     void write_serialization(uint8_t* buffer, uint32_t total_sz);
     
     snap_header snap_;
+    bool eth_type_set;
 };
 
 } // Tins

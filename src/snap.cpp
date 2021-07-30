@@ -44,7 +44,7 @@ using Tins::Memory::OutputMemoryStream;
 namespace Tins {
 
 SNAP::SNAP()
-: snap_() {
+: snap_(), eth_type_set(false) {
     snap_.dsap = snap_.ssap = 0xaa;
     control(3);
 }
@@ -81,6 +81,7 @@ void SNAP::org_code(small_uint<24> new_org) {
 
 void SNAP::eth_type(uint16_t new_eth) {
     snap_.eth_type = Endian::host_to_be(new_eth); 
+    eth_type_set = true;
 }
 
 uint32_t SNAP::header_size() const {
@@ -89,7 +90,7 @@ uint32_t SNAP::header_size() const {
 
 void SNAP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     OutputMemoryStream stream(buffer, total_sz);
-    if (inner_pdu()) {
+    if (!eth_type_set && inner_pdu()) {
         Constants::Ethernet::e flag = Internals::pdu_flag_to_ether_type(
             inner_pdu()->pdu_type()
         );
