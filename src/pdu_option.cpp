@@ -53,7 +53,7 @@ T convert_to_integral(const uint8_t* ptr, uint32_t data_size, PDU::endian_type e
     if (data_size != sizeof(T)) {
         throw malformed_option();
     }
-    T data = *(T*)ptr;
+    T data = *(reinterpret_cast<const T*>(ptr));
     if (endian == PDU::BE) {
         data = Endian::be_to_host(data);
     }

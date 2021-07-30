@@ -33,7 +33,7 @@
     #include <sys/socket.h>
     #include <arpa/inet.h>
 #endif // _WIN32
-#if TINS_IS_CXX11
+#ifdef TINS_IS_CXX11
     // std::hash
     #include <memory>
 #endif // TINS_IS_CXX11

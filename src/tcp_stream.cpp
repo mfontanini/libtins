@@ -40,17 +40,17 @@ namespace Tins {
 static const uint32_t seq_number_diff = 2147483648U;
 
 // Adds sequence numbers
-uint32_t add_sequence_numbers(uint32_t seq1, uint32_t seq2) {
+static uint32_t add_sequence_numbers(uint32_t seq1, uint32_t seq2) {
     return seq1 + seq2;
 }
 
 // Subtract sequence numbers
-uint32_t subtract_sequence_numbers(uint32_t seq1, uint32_t seq2) {
+static uint32_t subtract_sequence_numbers(uint32_t seq1, uint32_t seq2) {
     return seq1 - seq2;
 }
 
 // Compares sequence numbers as defined by RFC 1982.
-int compare_seq_numbers(uint32_t seq1, uint32_t seq2) {
+static int compare_seq_numbers(uint32_t seq1, uint32_t seq2) {
     if (seq1 == seq2) {
         return 0;
     }
@@ -140,7 +140,7 @@ TCPStream::fragments_type TCPStream::clone_fragments(const fragments_type& frags
 void TCPStream::safe_insert(fragments_type& frags, uint32_t seq, RawPDU* raw) {
     RawPDU*& stored_raw = frags[seq];
     // New segment, insert it
-    if (stored_raw == 0) {
+    if (stored_raw == nullptr) {
         stored_raw = raw;
     }
     else {

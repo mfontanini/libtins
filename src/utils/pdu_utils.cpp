@@ -91,6 +91,8 @@ string to_string(PDU::PDUType pduType) {
         ENUM_TEXT(PKTAP);
         ENUM_TEXT(MPLS);
         ENUM_TEXT(USER_DEFINED_PDU);
+        ENUM_TEXT(DOT11_CONTROL_TA);
+        ENUM_TEXT(UNKNOWN);
         default: 
             return "";
     }

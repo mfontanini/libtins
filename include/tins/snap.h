@@ -149,13 +149,13 @@ public:
      * \return The header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
     
@@ -164,7 +164,7 @@ public:
      * 
      * \sa PDU::clone
      */
-    SNAP* clone() const {
+    SNAP* clone() const override {
         return new SNAP(*this);
     }    
 private:
@@ -176,7 +176,7 @@ private:
         uint16_t eth_type;
     } TINS_END_PACK;
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     
     snap_header snap_;
 };

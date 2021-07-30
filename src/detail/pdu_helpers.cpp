@@ -78,6 +78,13 @@ Tins::PDU* pdu_from_flag(Constants::Ethernet::e flag,
             return new Dot1Q(buffer, size);
         case Tins::Constants::Ethernet::MPLS:
             return new MPLS(buffer, size);
+        case Tins::Constants::Ethernet::UNKNOWN:
+        case Tins::Constants::Ethernet::SPRITE:
+        case Tins::Constants::Ethernet::REVARP:
+        case Tins::Constants::Ethernet::AT:
+        case Tins::Constants::Ethernet::AARP:
+        case Tins::Constants::Ethernet::IPX:
+        case Tins::Constants::Ethernet::LOOPBACK:
         default:
             {
                 PDU* pdu = Internals::allocate<EthernetII>(
@@ -89,7 +96,7 @@ Tins::PDU* pdu_from_flag(Constants::Ethernet::e flag,
                     return pdu;
                 }
             }
-            return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
+            return rawpdu_on_no_match ? new RawPDU(buffer, size) : nullptr;
     };
 }
 
@@ -114,13 +121,34 @@ Tins::PDU* pdu_from_flag(Constants::IP::e flag,
             return new Tins::IPSecAH(buffer, size);
         case Constants::IP::PROTO_ESP:
             return new Tins::IPSecESP(buffer, size);
+        case Constants::IP::PROTO_IP:
+        // PROTO_HOPOPTS is the same as PROTO_IP
+        case Constants::IP::PROTO_IGMP:
+        case Constants::IP::PROTO_EGP:
+        case Constants::IP::PROTO_PUP:
+        case Constants::IP::PROTO_IDP:
+        case Constants::IP::PROTO_TP:
+        case Constants::IP::PROTO_DCCP:
+        case Constants::IP::PROTO_ROUTING:
+        case Constants::IP::PROTO_FRAGMENT:
+        case Constants::IP::PROTO_RSVP:
+        case Constants::IP::PROTO_GRE:
+        case Constants::IP::PROTO_NONE:
+        case Constants::IP::PROTO_DSTOPTS:
+        case Constants::IP::PROTO_MTP:
+        case Constants::IP::PROTO_ENCAP:
+        case Constants::IP::PROTO_PIM:
+        case Constants::IP::PROTO_COMP:
+        case Constants::IP::PROTO_SCTP:
+        case Constants::IP::PROTO_UDPLITE:
+        case Constants::IP::PROTO_RAW:
         default:
             break;
     }
     if (rawpdu_on_no_match) {
         return new Tins::RawPDU(buffer, size);
     }
-    return 0;
+    return nullptr;
 }
 
 #ifdef TINS_HAVE_PCAP
@@ -150,7 +178,7 @@ PDU* pdu_from_dlt_flag(int flag,
         case DLT_PPI:
             return new PPI(buffer, size);
         default:
-            return rawpdu_on_no_match ? new RawPDU(buffer, size) : 0;
+            return rawpdu_on_no_match ? new RawPDU(buffer, size) : nullptr;
     };
 }
 #endif // TINS_HAVE_PCAP
@@ -196,8 +224,35 @@ Tins::PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size
             case Tins::PDU::DOT11_QOS_DATA:
                 return Tins::Dot11::from_bytes(buffer, size);
         #endif // TINS_HAVE_DOT11
+        case Tins::PDU::RAW:
+        case Tins::PDU::LLC:
+        case Tins::PDU::SNAP:
+        case Tins::PDU::TCP:
+        case Tins::PDU::UDP:
+        case Tins::PDU::ICMP:
+        case Tins::PDU::BOOTP:
+        case Tins::PDU::DHCP:
+        case Tins::PDU::EAPOL:
+        case Tins::PDU::RC4EAPOL:
+        case Tins::PDU::RSNEAPOL:
+        case Tins::PDU::DNS:
+        case Tins::PDU::LOOPBACK:
+        case Tins::PDU::ICMPv6:
+        case Tins::PDU::SLL:
+        case Tins::PDU::DHCPv6:
+        case Tins::PDU::DOT1AD:
+        case Tins::PDU::DOT1Q:
+        case Tins::PDU::STP:
+        case Tins::PDU::PPI:
+        case Tins::PDU::IPSEC_AH:
+        case Tins::PDU::IPSEC_ESP:
+        case Tins::PDU::PKTAP:
+        case Tins::PDU::MPLS:
+        case Tins::PDU::DOT11_CONTROL_TA:
+        case Tins::PDU::UNKNOWN:
+        case Tins::PDU::USER_DEFINED_PDU:
         default:
-            return 0;
+            return nullptr;
     };
 }
 
@@ -220,6 +275,54 @@ Constants::Ethernet::e pdu_flag_to_ether_type(PDU::PDUType flag) {
         case PDU::RSNEAPOL:
         case PDU::RC4EAPOL:
             return Constants::Ethernet::EAPOL;
+        case PDU::RAW:
+        case PDU::ETHERNET_II:
+        case PDU::IEEE802_3:
+        // DOT3 is the same as IEEE802_3
+        case PDU::RADIOTAP:
+        case PDU::DOT11:
+        case PDU::DOT11_ACK:
+        case PDU::DOT11_ASSOC_REQ:
+        case PDU::DOT11_ASSOC_RESP:
+        case PDU::DOT11_AUTH:
+        case PDU::DOT11_BEACON:
+        case PDU::DOT11_BLOCK_ACK:
+        case PDU::DOT11_BLOCK_ACK_REQ:
+        case PDU::DOT11_CF_END:
+        case PDU::DOT11_DATA:
+        case PDU::DOT11_CONTROL:
+        case PDU::DOT11_DEAUTH:
+        case PDU::DOT11_DIASSOC:
+        case PDU::DOT11_END_CF_ACK:
+        case PDU::DOT11_MANAGEMENT:
+        case PDU::DOT11_PROBE_REQ:
+        case PDU::DOT11_PROBE_RESP:
+        case PDU::DOT11_PS_POLL:
+        case PDU::DOT11_REASSOC_REQ:
+        case PDU::DOT11_REASSOC_RESP:
+        case PDU::DOT11_RTS:
+        case PDU::DOT11_QOS_DATA:
+        case PDU::LLC:
+        case PDU::SNAP:
+        case PDU::TCP:
+        case PDU::UDP:
+        case PDU::ICMP:
+        case PDU::BOOTP:
+        case PDU::DHCP:
+        case PDU::EAPOL:
+        case PDU::DNS:
+        case PDU::LOOPBACK:
+        case PDU::ICMPv6:
+        case PDU::SLL:
+        case PDU::DHCPv6:
+        case PDU::STP:
+        case PDU::PPI:
+        case PDU::IPSEC_AH:
+        case PDU::IPSEC_ESP:
+        case PDU::PKTAP:
+        case PDU::DOT11_CONTROL_TA:
+        case PDU::UNKNOWN:
+        case PDU::USER_DEFINED_PDU:
         default:
             if (Internals::pdu_type_registered<EthernetII>(flag)) {
                 return static_cast<Constants::Ethernet::e>(
@@ -248,6 +351,16 @@ PDU::PDUType ether_type_to_pdu_flag(Constants::Ethernet::e flag) {
         //case PDU::RSNEAPOL
         //case PDU::RC4EAPOL:
         //    return Constants::Ethernet::EAPOL;
+        case Constants::Ethernet::UNKNOWN:
+        case Constants::Ethernet::SPRITE:
+        case Constants::Ethernet::MPLS:
+        case Constants::Ethernet::REVARP:
+        case Constants::Ethernet::AT:
+        case Constants::Ethernet::AARP:
+        case Constants::Ethernet::IPX:
+        case Constants::Ethernet::PPPOES:
+        case Constants::Ethernet::EAPOL:
+        case Constants::Ethernet::LOOPBACK:
         default:
             return PDU::UNKNOWN;
     }
@@ -271,6 +384,55 @@ Constants::IP::e pdu_flag_to_ip_type(PDU::PDUType flag) {
             return Constants::IP::PROTO_AH;
         case PDU::IPSEC_ESP:
             return Constants::IP::PROTO_ESP;
+        case PDU::RAW:
+        case PDU::ETHERNET_II:
+        case PDU::IEEE802_3:
+            // DOT3 is the same as IEEE802_3
+        case PDU::RADIOTAP:
+        case PDU::DOT11:
+        case PDU::DOT11_ACK:
+        case PDU::DOT11_ASSOC_REQ:
+        case PDU::DOT11_ASSOC_RESP:
+        case PDU::DOT11_AUTH:
+        case PDU::DOT11_BEACON:
+        case PDU::DOT11_BLOCK_ACK:
+        case PDU::DOT11_BLOCK_ACK_REQ:
+        case PDU::DOT11_CF_END:
+        case PDU::DOT11_DATA:
+        case PDU::DOT11_CONTROL:
+        case PDU::DOT11_DEAUTH:
+        case PDU::DOT11_DIASSOC:
+        case PDU::DOT11_END_CF_ACK:
+        case PDU::DOT11_MANAGEMENT:
+        case PDU::DOT11_PROBE_REQ:
+        case PDU::DOT11_PROBE_RESP:
+        case PDU::DOT11_PS_POLL:
+        case PDU::DOT11_REASSOC_REQ:
+        case PDU::DOT11_REASSOC_RESP:
+        case PDU::DOT11_RTS:
+        case PDU::DOT11_QOS_DATA:
+        case PDU::LLC:
+        case PDU::SNAP:
+        case PDU::ARP:
+        case PDU::BOOTP:
+        case PDU::DHCP:
+        case PDU::EAPOL:
+        case PDU::RC4EAPOL:
+        case PDU::RSNEAPOL:
+        case PDU::DNS:
+        case PDU::LOOPBACK:
+        case PDU::SLL:
+        case PDU::DHCPv6:
+        case PDU::DOT1AD:
+        case PDU::DOT1Q:
+        case PDU::PPPOE:
+        case PDU::STP:
+        case PDU::PPI:
+        case PDU::PKTAP:
+        case PDU::MPLS:
+        case PDU::DOT11_CONTROL_TA:
+        case PDU::UNKNOWN:
+        case PDU::USER_DEFINED_PDU:
         default:
             return static_cast<Constants::IP::e>(0xff);
     };
@@ -294,6 +456,27 @@ PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag) {
             return PDU::IPSEC_AH;
         case Constants::IP::PROTO_ESP:
             return PDU::IPSEC_ESP;
+        case Constants::IP::PROTO_IP:
+        // PROTO_HOPOPTS is the same as PROTO_IP
+        case Constants::IP::PROTO_IGMP:
+        case Constants::IP::PROTO_EGP:
+        case Constants::IP::PROTO_PUP:
+        case Constants::IP::PROTO_IDP:
+        case Constants::IP::PROTO_TP:
+        case Constants::IP::PROTO_DCCP:
+        case Constants::IP::PROTO_ROUTING:
+        case Constants::IP::PROTO_FRAGMENT:
+        case Constants::IP::PROTO_RSVP:
+        case Constants::IP::PROTO_GRE:
+        case Constants::IP::PROTO_NONE:
+        case Constants::IP::PROTO_DSTOPTS:
+        case Constants::IP::PROTO_MTP:
+        case Constants::IP::PROTO_ENCAP:
+        case Constants::IP::PROTO_PIM:
+        case Constants::IP::PROTO_COMP:
+        case Constants::IP::PROTO_SCTP:
+        case Constants::IP::PROTO_UDPLITE:
+        case Constants::IP::PROTO_RAW:
         default:
             return PDU::UNKNOWN;
     };

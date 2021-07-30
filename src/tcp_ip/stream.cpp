@@ -206,8 +206,8 @@ Flow Stream::extract_client_flow(const PDU& packet) {
     if (const IP* ip = packet.find_pdu<IP>()) {
         return Flow(ip->dst_addr(), tcp->dport(), tcp->seq());
     }
-    else if (const IPv6* ip = packet.find_pdu<IPv6>()) {
-        return Flow(ip->dst_addr(), tcp->dport(), tcp->seq());
+    else if (const IPv6* ip_ = packet.find_pdu<IPv6>()) {
+        return Flow(ip_->dst_addr(), tcp->dport(), tcp->seq());
     }
     else {
         throw invalid_packet();
@@ -222,8 +222,8 @@ Flow Stream::extract_server_flow(const PDU& packet) {
     if (const IP* ip = packet.find_pdu<IP>()) {
         return Flow(ip->src_addr(), tcp->sport(), tcp->ack_seq());
     }
-    else if (const IPv6* ip = packet.find_pdu<IPv6>()) {
-        return Flow(ip->src_addr(), tcp->sport(), tcp->ack_seq());
+    else if (const IPv6* ip_ = packet.find_pdu<IPv6>()) {
+        return Flow(ip_->src_addr(), tcp->sport(), tcp->ack_seq());
     }
     else {
         throw invalid_packet();

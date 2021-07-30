@@ -62,12 +62,12 @@ using std::string;
 
 /** \cond */
 
-addrinfo* resolve_domain(const string& to_resolve, int family) {
+static addrinfo* resolve_domain(const string& to_resolve, int family) {
     addrinfo* result, hints = addrinfo();
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
     hints.ai_family = family;
-    if (!getaddrinfo(to_resolve.c_str(), 0, &hints, &result)) {
+    if (!getaddrinfo(to_resolve.c_str(), nullptr, &hints, &result)) {
         return result;
     }
     else {
@@ -82,14 +82,14 @@ namespace Utils {
 
 IPv4Address resolve_domain(const string& to_resolve) {
     addrinfo* result = ::resolve_domain(to_resolve, AF_INET);
-    IPv4Address addr(((sockaddr_in*)result->ai_addr)->sin_addr.s_addr);
+    IPv4Address addr((reinterpret_cast<sockaddr_in*>(result->ai_addr))->sin_addr.s_addr);
     freeaddrinfo(result);
     return addr;
 }
 
 IPv6Address resolve_domain6(const string& to_resolve) {
     addrinfo* result = ::resolve_domain(to_resolve, AF_INET6);
-    IPv6Address addr((const uint8_t*)&((sockaddr_in6*)result->ai_addr)->sin6_addr);
+    IPv6Address addr(reinterpret_cast<const uint8_t*>(&(reinterpret_cast<sockaddr_in6*>(result->ai_addr))->sin6_addr));
     freeaddrinfo(result);
     return addr;
 }

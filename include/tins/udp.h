@@ -160,7 +160,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
 
     /** 
      * \brief Returns the header size.
@@ -168,18 +168,18 @@ public:
      * This method overrides PDU::header_size. This size includes the
      * payload and options size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return PDU::UDP; }
+    PDUType pdu_type() const override { return PDU::UDP; }
     
     /**
      * \sa PDU::clone
      */
-    UDP* clone() const {
+    UDP* clone() const override{
         return new UDP(*this);
     }
 private:
@@ -191,7 +191,7 @@ private:
         uint16_t check;
     } TINS_END_PACK;
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
 
     udp_header header_;
 };

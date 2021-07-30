@@ -58,20 +58,20 @@ RSNInformation::RSNInformation(const uint8_t* buffer, uint32_t total_sz) {
 void RSNInformation::init(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
     version(stream.read_le<uint16_t>());
-    group_suite((RSNInformation::CypherSuites)stream.read_le<uint32_t>());
+    group_suite(static_cast<RSNInformation::CypherSuites>(stream.read_le<uint32_t>()));
     int pairwise_cyphers_size = stream.read_le<uint16_t>();
     if (!stream.can_read(pairwise_cyphers_size)) {
         throw malformed_packet();
     }
     while (pairwise_cyphers_size--) {
-        add_pairwise_cypher((RSNInformation::CypherSuites)stream.read_le<uint32_t>());
+        add_pairwise_cypher(static_cast<RSNInformation::CypherSuites>(stream.read_le<uint32_t>()));
     }
     int akm_cyphers_size = stream.read_le<uint16_t>();
     if (!stream.can_read(akm_cyphers_size)) {
         throw malformed_packet();
     }
     while (akm_cyphers_size--) {
-        add_akm_cypher((RSNInformation::AKMSuites)stream.read_le<uint32_t>());
+        add_akm_cypher(static_cast<RSNInformation::AKMSuites>(stream.read_le<uint32_t>()));
     }
     capabilities(stream.read_le<uint16_t>());
 }

@@ -70,7 +70,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -80,12 +80,12 @@ public:
      * This method overrides PDU::header_size. 
      * \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \sa PDU::clone
      */
-    PKTAP* clone() const {
+    PKTAP* clone() const override {
         return new PKTAP(*this);
     }
 private:
@@ -107,7 +107,7 @@ private:
         uint8_t ecommand[20];
     };
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override __attribute__((cold, noreturn));
 
     pktap_header header_;
 };

@@ -63,18 +63,18 @@ DNS::DNS(const uint8_t* buffer, uint32_t total_sz)
     stream.read(records_data_, stream.size());
     // Avoid doing this if there's no data. Otherwise VS's asserts fail.
     if (!records_data_.empty()) {
-        InputMemoryStream stream(records_data_);
+        InputMemoryStream stream_(records_data_);
         uint16_t nquestions = questions_count();
         for (uint16_t i(0); i < nquestions; ++i) {
-            skip_to_dname_end(stream);
-            stream.skip(sizeof(uint16_t) * 2);
+            skip_to_dname_end(stream_);
+            stream_.skip(sizeof(uint16_t) * 2);
         }
         const uint8_t* base_offset = &records_data_[0];
-        answers_idx_ = static_cast<uint32_t>(stream.pointer() - base_offset);
-        skip_to_section_end(stream, answers_count());
-        authority_idx_ = static_cast<uint32_t>(stream.pointer() - base_offset);
-        skip_to_section_end(stream, authority_count());
-        additional_idx_ = static_cast<uint32_t>(stream.pointer() - base_offset);
+        answers_idx_ = static_cast<uint32_t>(stream_.pointer() - base_offset);
+        skip_to_section_end(stream_, answers_count());
+        authority_idx_ = static_cast<uint32_t>(stream_.pointer() - base_offset);
+        skip_to_section_end(stream_, authority_count());
+        additional_idx_ = static_cast<uint32_t>(stream_.pointer() - base_offset);
     }
 }
 
@@ -164,18 +164,18 @@ bool DNS::contains_dname(uint16_t type) {
     return type == MX || type == CNAME || type == PTR || type == NS;
 }
 
-void DNS::add_query(const query& query) {
-    string new_str = encode_domain_name(query.dname());
+void DNS::add_query(const query& query_) {
+    string new_str = encode_domain_name(query_.dname());
     size_t previous_length = new_str.size();
     // Epand the string to hold: Type (2 bytes) + Class (2 Bytes)
     new_str.insert(new_str.end(), sizeof(uint16_t) * 2, ' ');
     // Build a stream at the end
     OutputMemoryStream stream(
-        (uint8_t*)&new_str[0] + previous_length, 
+        reinterpret_cast<uint8_t*>(&new_str[0]) + previous_length,
         sizeof(uint16_t) * 2
     );
-    stream.write_be<uint16_t>(query.query_type());
-    stream.write_be<uint16_t>(query.query_class());
+    stream.write_be<uint16_t>(query_.query_type());
+    stream.write_be<uint16_t>(query_.query_class());
 
     uint32_t offset = static_cast<uint32_t>(new_str.size()), threshold = answers_idx_;
     update_records(answers_idx_, answers_count(), threshold, offset);
@@ -189,41 +189,41 @@ void DNS::add_query(const query& query) {
     header_.questions = Endian::host_to_be(static_cast<uint16_t>(questions_count() + 1));
 }
 
-void DNS::add_answer(const resource& resource) {
+void DNS::add_answer(const resource& resource_) {
     sections_type sections;
     sections.push_back(make_pair(&authority_idx_, authority_count()));
     sections.push_back(make_pair(&additional_idx_, additional_count()));
-    add_record(resource, sections);
+    add_record(resource_, sections);
     header_.answers = Endian::host_to_be<uint16_t>(
         answers_count() + 1
     );
 }
 
-void DNS::add_record(const resource& resource, const sections_type& sections) {
+void DNS::add_record(const resource& resource_, const sections_type& sections) {
     // We need to check that the data provided is correct. Otherwise, the sections
     // will end up being inconsistent.
     IPv4Address v4_addr;
     IPv6Address v6_addr;
-    string buffer = encode_domain_name(resource.dname()), 
+    string buffer = encode_domain_name(resource_.dname()), 
            encoded_data;
     // By default the data size is the length of the data field.
-    size_t data_size = resource.data().size();
-    if (resource.query_type() == A) {
-        v4_addr = resource.data();
+    size_t data_size = resource_.data().size();
+    if (resource_.query_type() == A) {
+        v4_addr = resource_.data();
         data_size = 4;
     }
-    else if (resource.query_type() == AAAA) {
-        v6_addr = resource.data();
+    else if (resource_.query_type() == AAAA) {
+        v6_addr = resource_.data();
         data_size = IPv6Address::address_size;
     }
-    else if (contains_dname(resource.query_type())) { 
-        encoded_data = encode_domain_name(resource.data());
+    else if (contains_dname(resource_.query_type())) { 
+        encoded_data = encode_domain_name(resource_.data());
         data_size = encoded_data.size();
     }
     size_t offset = buffer.size() + sizeof(uint16_t) * 3 + sizeof(uint32_t) + data_size, 
            threshold = sections.empty() ? records_data_.size() :* sections.front().first;
     // Take into account the MX preference field
-    if (resource.query_type() == MX) {
+    if (resource_.query_type() == MX) {
         offset += sizeof(uint16_t);
     }
     for (size_t i = 0; i < sections.size(); ++i) {
@@ -242,38 +242,38 @@ void DNS::add_record(const resource& resource, const sections_type& sections) {
     );
     OutputMemoryStream stream(&records_data_[0] + threshold, offset);
     stream.write(buffer.begin(), buffer.end());
-    stream.write_be(resource.query_type());
-    stream.write_be(resource.query_class());
-    stream.write_be(resource.ttl());
-    stream.write_be<uint16_t>(data_size + (resource.query_type() == MX ? 2 : 0));
-    if (resource.query_type() == MX) {
-        stream.write_be(resource.preference());
+    stream.write_be(resource_.query_type());
+    stream.write_be(resource_.query_class());
+    stream.write_be(resource_.ttl());
+    stream.write_be<uint16_t>(data_size + (resource_.query_type() == MX ? 2 : 0));
+    if (resource_.query_type() == MX) {
+        stream.write_be(resource_.preference());
     }
-    if (resource.query_type() == A) {
+    if (resource_.query_type() == A) {
         stream.write(v4_addr);
     }
-    else if (resource.query_type() == AAAA) {
+    else if (resource_.query_type() == AAAA) {
         stream.write(v6_addr);
     }
     else if (!encoded_data.empty()) {
         stream.write(encoded_data.begin(), encoded_data.end());
     }
     else {
-        stream.write(resource.data().begin(), resource.data().end());
+        stream.write(resource_.data().begin(), resource_.data().end());
     }
 }
 
-void DNS::add_authority(const resource& resource) {
+void DNS::add_authority(const resource& resource_) {
     sections_type sections;
     sections.push_back(make_pair(&additional_idx_, additional_count()));
-    add_record(resource, sections);
+    add_record(resource_, sections);
     header_.authority = Endian::host_to_be<uint16_t>(
         authority_count() + 1
     );
 }
 
-void DNS::add_additional(const resource& resource){
-    add_record(resource, sections_type());
+void DNS::add_additional(const resource& resource_){
+    add_record(resource_, sections_type());
     header_.additional = Endian::host_to_be<uint16_t>(
         additional_count() + 1
     );
@@ -300,7 +300,7 @@ string DNS::decode_domain_name(const string& domain_name) {
     if (domain_name.empty()) {
         return output;
     }
-    const uint8_t* ptr = (const uint8_t*)&domain_name[0];
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&domain_name[0]);
     const uint8_t* end = ptr + domain_name.size();
     while (*ptr) {
         // We can't handle offsets
@@ -334,7 +334,7 @@ string DNS::decode_domain_name(const string& domain_name) {
 uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
     const uint8_t* start_ptr = ptr;
     const uint8_t* end = &records_data_[0] + records_data_.size();
-    const uint8_t* end_ptr = 0;
+    const uint8_t* end_ptr = nullptr;
     char* current_out_ptr = out_ptr;
     uint8_t pointer_counter = 0;
     while (*ptr) {
@@ -354,7 +354,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
                 throw dns_decompression_pointer_out_of_bounds();
             }
             // We've probably found the end of the original domain name. Save it.
-            if (end_ptr == 0) {
+            if (end_ptr == nullptr) {
                 end_ptr = ptr + sizeof(uint16_t);
             }
             // Now this is our pointer
@@ -397,15 +397,15 @@ void DNS::inline_convert_v4(uint32_t value, char* output) {
         output, 
         "%d.%d.%d.%d", 
         #if TINS_IS_LITTLE_ENDIAN
-        value & 0xff, 
-        (value >> 8) & 0xff,
-        (value >> 16) & 0xff,
-        (value >> 24) & 0xff
+        static_cast<int>(value & 0xff),
+        static_cast<int>((value >> 8) & 0xff),
+        static_cast<int>((value >> 16) & 0xff),
+        static_cast<int>((value >> 24) & 0xff)
         #else
-        (value >> 24) & 0xff,
-        (value >> 16) & 0xff,
-        (value >> 8) & 0xff,
-        value & 0xff
+        static_cast<int>((value >> 24) & 0xff),
+        static_cast<int>((value >> 16) & 0xff),
+        static_cast<int>((value >> 8) & 0xff),
+        static_cast<int>(value & 0xff)
         #endif // TINS_IS_LITTLE_ENDIAN
     );
     *output = 0;
@@ -560,7 +560,7 @@ DNS::queries_type DNS::queries() const {
             uint16_t query_type = stream.read_be<uint16_t>();
             uint16_t query_class = stream.read_be<uint16_t>();
             #if TINS_IS_CXX11
-                output.emplace_back(buffer, (QueryType)query_type, (QueryClass)query_class);
+                output.emplace_back(buffer, static_cast<QueryType>(query_type), static_cast<QueryClass>(query_class));
             #else
                 output.push_back(
                     query(buffer, (QueryType)query_type, (QueryClass)query_class)
@@ -611,7 +611,7 @@ bool DNS::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const dns_header* hdr = (const dns_header*)ptr;
+    const dns_header* hdr = reinterpret_cast<const dns_header*>(ptr);
     return hdr->id == header_.id;
 }
 
@@ -639,7 +639,7 @@ DNS::soa_record::soa_record(const uint8_t* buffer, uint32_t total_sz) {
 }
 
 DNS::soa_record::soa_record(const DNS::resource& resource) {
-    init((const uint8_t*)&resource.data()[0], resource.data().size());
+    init(reinterpret_cast<const uint8_t*>(&resource.data()[0]), resource.data().size());
 }
 
 void DNS::soa_record::mname(const string& value) {
@@ -689,10 +689,10 @@ PDU::serialization_type DNS::soa_record::serialize() const {
 
 void DNS::soa_record::init(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    string domain = (const char*)stream.pointer();
+    string domain = reinterpret_cast<const char*>(stream.pointer());
     mname_ = DNS::decode_domain_name(domain);
     stream.skip(domain.size() + 1);
-    domain = (const char*)stream.pointer();
+    domain = reinterpret_cast<const char*>(stream.pointer());
     stream.skip(domain.size() + 1);
     rname_ = DNS::decode_domain_name(domain);
     serial_ = stream.read_be<uint32_t>();

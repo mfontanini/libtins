@@ -53,7 +53,7 @@ Timestamp Timestamp::current_time() {
         return Timestamp(timestamp);
     #else
         timeval tv;
-        gettimeofday(&tv, 0);
+        gettimeofday(&tv, nullptr);
         return tv;
     #endif
 }

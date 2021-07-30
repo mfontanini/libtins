@@ -114,7 +114,7 @@ void Dot11ManagementFrame::ssid(const string& new_ssid) {
     add_tagged_option(
         Dot11::SSID, 
         static_cast<uint8_t>(new_ssid.size()),
-        (const uint8_t*)new_ssid.c_str()
+        reinterpret_cast<const uint8_t*>(new_ssid.c_str())
     );
 }
 
@@ -218,7 +218,7 @@ void Dot11ManagementFrame::cf_parameter_set(const cf_params_set& params) {
 
 void Dot11ManagementFrame::ibss_parameter_set(uint16_t atim_window) {
     atim_window = Endian::host_to_le(atim_window);
-    add_tagged_option(IBSS_SET, 2, (uint8_t*)&atim_window);
+    add_tagged_option(IBSS_SET, 2, reinterpret_cast<uint8_t*>(&atim_window));
 }
 
 void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params& params) {
@@ -358,7 +358,7 @@ void Dot11ManagementFrame::challenge_text(const string& text) {
     add_tagged_option(
         CHALLENGE_TEXT, 
         static_cast<uint8_t>(text.size()),
-        (const uint8_t*)text.c_str()
+        reinterpret_cast<const uint8_t*>(text.c_str())
     );
 }
 
@@ -379,11 +379,11 @@ RSNInformation Dot11ManagementFrame::rsn_information() const {
 }
 
 string Dot11ManagementFrame::ssid() const {
-    const Dot11::option* option = search_option(SSID);
-    if (!option) {
+    const Dot11::option* option_ = search_option(SSID);
+    if (!option_) {
         throw option_not_found();
     }
-    return option->to<string>();
+    return option_->to<string>();
 }
 
 Dot11ManagementFrame::rates_type Dot11ManagementFrame::supported_rates() const {
@@ -475,13 +475,13 @@ string Dot11ManagementFrame::challenge_text() const {
 }
 
 Dot11ManagementFrame::vendor_specific_type Dot11ManagementFrame::vendor_specific() const {
-    const Dot11::option* option = search_option(VENDOR_SPECIFIC);
-    if (!option || option->data_size() < 3) {
+    const Dot11::option* option_ = search_option(VENDOR_SPECIFIC);
+    if (!option_ || option_->data_size() < 3) {
         throw option_not_found();
     }
     return vendor_specific_type::from_bytes(
-        option->data_ptr(), 
-        static_cast<uint32_t>(option->data_size())
+        option_->data_ptr(), 
+        static_cast<uint32_t>(option_->data_size())
     );
 }
 
@@ -533,6 +533,9 @@ Dot11ManagementFrame::ibss_dfs_params::from_option(const option& opt) {
     }
     ibss_dfs_params output;
     const uint8_t* ptr = opt.data_ptr(), *end = ptr + opt.data_size();
+    if (ptr == nullptr) {
+        throw malformed_option();
+    }
     output.dfs_owner = ptr;
     ptr += output.dfs_owner.size();
     output.recovery_interval = *(ptr++);

@@ -78,12 +78,12 @@ bool DataTracker::process_payload(uint32_t seq, payload_type payload) {
             // Does it end after our sequence number? 
             if (comparison > 0) {
                 // Then slice it
-                payload_type& payload = iter->second;
+                payload_type& payload__ = iter->second;
                 // First update this counter
-                total_buffered_bytes_ -= payload.size();
-                payload.erase(
-                    payload.begin(),
-                    payload.begin() + (seq_number_ - iter->first)
+                total_buffered_bytes_ -= payload__.size();
+                payload__.erase(
+                    payload__.begin(),
+                    payload__.begin() + (seq_number_ - iter->first)
                 );
                 store_payload(seq_number_, move(iter->second));
                 iter = erase_iterator(iter);

@@ -56,7 +56,7 @@ PDU::metadata IPv6::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
         throw malformed_packet();
     }
     InputMemoryStream stream(buffer, total_sz);
-    const ipv6_header* header = (const ipv6_header*)buffer;
+    const ipv6_header* header = reinterpret_cast<const ipv6_header*>(buffer);
     uint32_t header_size = sizeof(ipv6_header);
     uint8_t current_header = header->next_header;
     stream.skip(sizeof(ipv6_header));
@@ -223,16 +223,16 @@ vector<IPv6::header_option_type> IPv6::parse_header_options(const uint8_t* data,
             if (option == PAD_1) {
                 continue;
             }
-            uint8_t size = stream.read<uint8_t>();
-            if (size > stream.size()) {
+            uint8_t size_ = stream.read<uint8_t>();
+            if (size_ > stream.size()) {
                 throw invalid_ipv6_extension_header();
             }
             if (option != PAD_N) {
                 options.push_back(make_pair(option, vector<uint8_t>(stream.pointer(),
                                                                     stream.pointer() +
-                                                                    size)));
+                                                                    size_)));
             }
-            stream.skip(size);
+            stream.skip(size_);
         } catch (const malformed_packet&) {
             throw invalid_ipv6_extension_header();
         }
@@ -292,7 +292,7 @@ bool IPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(ipv6_header)) {
         return false;
     }
-    const ipv6_header* hdr_ptr = (const ipv6_header*)ptr;
+    const ipv6_header* hdr_ptr = reinterpret_cast<const ipv6_header*>(ptr);
     // checks for ff02 multicast
     if (src_addr() == hdr_ptr->dst_addr && 
         (dst_addr() == hdr_ptr->src_addr || (header_.dst_addr[0] == 0xff && header_.dst_addr[1] == 0x02))) {
@@ -376,8 +376,8 @@ void IPv6::send(PacketSender& sender, const NetworkInterface& interface) {
     if (IPv6Address(header_.dst_addr).is_local_unicast()) {
         link_addr.sin6_scope_id = interface.id();
     }
-    memcpy((uint8_t*)&link_addr.sin6_addr, header_.dst_addr, address_type::address_size);
-    sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+    memcpy(reinterpret_cast<uint8_t*>(&link_addr.sin6_addr), header_.dst_addr, address_type::address_size);
+    sender.send_l3(*this, reinterpret_cast<sockaddr*>(&link_addr), sizeof(link_addr), type);
 }
 
 PDU* IPv6::recv_response(PacketSender& sender, const NetworkInterface &) {
@@ -385,7 +385,7 @@ PDU* IPv6::recv_response(PacketSender& sender, const NetworkInterface &) {
     if (inner_pdu() && inner_pdu()->pdu_type() == PDU::ICMPv6) {
         type = PacketSender::ICMPV6_SOCKET;
     }
-    return sender.recv_l3(*this, 0, sizeof(sockaddr_in6), type);
+    return sender.recv_l3(*this, nullptr, sizeof(sockaddr_in6), type);
 }
 #endif
 
@@ -405,7 +405,7 @@ const IPv6::ext_header* IPv6::search_header(ExtensionHeader id) const {
         }
         ++it;
     }
-    return 0;
+    return nullptr;
 }
 
 void IPv6::set_last_next_header(uint8_t value) {

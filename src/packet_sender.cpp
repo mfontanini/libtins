@@ -83,14 +83,14 @@ const uint32_t PacketSender::DEFAULT_TIMEOUT = 2;
 #ifndef _WIN32
     typedef int socket_type;
     
-    const char* make_error_string() {
+    static const char* make_error_string() {
         return strerror(errno);
     }
 #else
     typedef SOCKET socket_type;
 
     // fixme
-    const char* make_error_string() {
+    static const char* make_error_string() {
         return "error";
     }
 #endif
@@ -217,7 +217,7 @@ void PacketSender::open_l2_socket(const NetworkInterface& iface) {
             throw socket_open_error(make_error_string());
         }
         
-        struct ifreq ifr;
+        ifreq ifr;
         strncpy(ifr.ifr_name, iface.name().c_str(), sizeof(ifr.ifr_name) - 1);
         if (ioctl(sock, BIOCSETIF, (caddr_t)&ifr) < 0) {
             ::close(sock);
@@ -266,7 +266,7 @@ void PacketSender::open_l3_socket(SocketType type) {
         typedef const char* option_ptr;
         #endif
         const int level = (is_v6) ? IPPROTO_IPV6 : IPPROTO_IP;
-        if (setsockopt(sockfd, level, IP_HDRINCL, (option_ptr)&on, sizeof(on)) != 0) {
+        if (setsockopt(sockfd, level, IP_HDRINCL, static_cast<option_ptr>(&on), sizeof(on)) != 0) {
             #ifndef _WIN32
                 ::close(sockfd);
             #else
@@ -275,7 +275,7 @@ void PacketSender::open_l3_socket(SocketType type) {
             throw socket_open_error(make_error_string());
         }
 
-        sockets_[type] = static_cast<int>(sockfd);
+        sockets_[type] = sockfd;
     }
 }
 
@@ -350,14 +350,14 @@ PDU* PacketSender::send_recv(PDU& pdu, const NetworkInterface& iface) {
         pdu.send(*this, iface);
     }
     catch (runtime_error&) {
-        return 0;
+        return nullptr;
     }
     return pdu.recv_response(*this, iface);
 }
 
 #if !defined(_WIN32) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
 void PacketSender::send_l2(PDU& pdu,
-                           struct sockaddr* link_addr, 
+                           sockaddr* link_addr,
                            uint32_t len_addr,
                            const NetworkInterface& iface) {
     PDU::serialization_type buffer = pdu.serialize();
@@ -391,7 +391,7 @@ void PacketSender::send_l2(PDU& pdu,
 
 #ifndef _WIN32
 PDU* PacketSender::recv_l2(PDU& pdu, 
-                           struct sockaddr* link_addr, 
+                           sockaddr* link_addr,
                            uint32_t len_addr,
                            const NetworkInterface& iface) {
     int sock = get_ether_socket(iface);
@@ -401,7 +401,7 @@ PDU* PacketSender::recv_l2(PDU& pdu,
 #endif // _WIN32
 
 PDU* PacketSender::recv_l3(PDU& pdu, 
-                           struct sockaddr* link_addr,
+                           sockaddr* link_addr,
                            uint32_t len_addr,
                            SocketType type) {
     open_l3_socket(type);
@@ -417,21 +417,21 @@ PDU* PacketSender::recv_l3(PDU& pdu,
 }
 
 void PacketSender::send_l3(PDU& pdu, 
-                           struct sockaddr* link_addr,
+                           sockaddr* link_addr,
                            uint32_t len_addr,
                            SocketType type) {
     open_l3_socket(type);
     int sock = sockets_[type];
     PDU::serialization_type buffer = pdu.serialize();
     const int buf_size = static_cast<int>(buffer.size());
-    if (sendto(sock, (const char*)&buffer[0], buf_size, 0, link_addr, len_addr) == -1) {
+    if (sendto(sock, reinterpret_cast<const char*>(&buffer[0]), buf_size, 0, link_addr, len_addr) == -1) {
         throw socket_write_error(make_error_string());
     }
 }
 
 PDU* PacketSender::recv_match_loop(const vector<int>& sockets, 
                                    PDU& pdu,
-                                   struct sockaddr* link_addr,
+                                   sockaddr* link_addr,
                                    uint32_t addrlen,
                                    bool is_layer_3) {
     #ifdef _WIN32
@@ -442,7 +442,7 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
         typedef ssize_t recvfrom_ret_type;
     #endif
     fd_set readfds;
-    struct timeval timeout,  end_time;
+    timeval timeout,  end_time;
     int read;
     #if defined(BSD) || defined(__FreeBSD_kernel__)
         bool is_bsd = true;
@@ -457,7 +457,7 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
     #endif
     
     timeout.tv_sec  = _timeout;
-    end_time.tv_sec = static_cast<long>(time(0) + _timeout);
+    end_time.tv_sec = time(nullptr) + _timeout;
     end_time.tv_usec = timeout.tv_usec = timeout_usec_;
     while (true) {
         FD_ZERO(&readfds);
@@ -466,8 +466,8 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
             FD_SET(*it, &readfds);
             max_fd = (max_fd > *it) ? max_fd : *it;
         }
-        if ((read = select(max_fd + 1, &readfds, 0, 0, &timeout)) == -1) {
-            return 0;
+        if ((read = select(max_fd + 1, &readfds, nullptr, nullptr, &timeout)) == -1) {
+            return nullptr;
         }
         if (read > 0) {
             for (vector<int>::const_iterator it = sockets.begin(); it != sockets.end(); ++it) {
@@ -491,7 +491,7 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
                     }
                     else {
                         socket_len_type length = addrlen;
-                        size = ::recvfrom(*it, (char*)buffer, buffer_size, 0, link_addr, &length);
+                        size = ::recvfrom(*it, reinterpret_cast<char*>(buffer), buffer_size, 0, link_addr, &length);
                         if (pdu.matches_response(buffer, size)) {
                             return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
                         }
@@ -499,43 +499,35 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
                 }
             }
         }
-        #if TINS_IS_CXX11
+        #ifdef TINS_IS_CXX11
             using namespace std::chrono;
             microseconds end = seconds(end_time.tv_sec) + microseconds(end_time.tv_usec);
             microseconds now = duration_cast<microseconds>(system_clock::now().time_since_epoch());
             if (now > end) {
-                return 0;
+                return nullptr;
             }
-            // VC complains if we don't statically cast here
-            #ifdef _WIN32
-                typedef long tv_sec_type;
-                typedef long tv_usec_type;
-            #else
-                typedef time_t tv_sec_type;
-                typedef long tv_usec_type;
-            #endif
             microseconds diff = end - now;
-            timeout.tv_sec = static_cast<tv_sec_type>(duration_cast<seconds>(diff).count());
-            timeout.tv_usec = static_cast<tv_usec_type>((diff - seconds(timeout.tv_sec)).count());
+            timeout.tv_sec = duration_cast<seconds>(diff).count();
+            timeout.tv_usec = (diff - seconds(timeout.tv_sec)).count();
         #else
             #ifdef _WIN32
                 // Can't do much
                 return 0;
             #else
-                struct timeval now;
+                timeval now;
                 gettimeofday(&now, 0);
                 // If now > end_time
                 if (timercmp(&now, &end_time, >)) {
                     return 0;
                 }
-                struct timeval diff;
+                timeval diff;
                 timersub(&end_time, &now, &diff);
                 timeout.tv_sec = diff.tv_sec;
                 timeout.tv_usec = diff.tv_usec;
             #endif // _WIN32
         #endif // TINS_IS_CXX11
     }
-    return 0;
+    return nullptr;
 }
 
 int PacketSender::find_type(SocketType type) {

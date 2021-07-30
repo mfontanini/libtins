@@ -40,12 +40,12 @@ using std::vector;
 namespace Tins {
 namespace Utils {
 
-uint32_t calculate_padding(uint32_t alignment, uint32_t offset) {
+static uint32_t calculate_padding(uint32_t alignment, uint32_t offset) {
     uint32_t extra = offset % alignment;
     return extra == 0 ? 0 : alignment - extra;
 }
 
-uint32_t get_bit(uint32_t value) {
+static uint32_t get_bit(uint32_t value) {
     return round(log2(value));
 }
 
@@ -72,8 +72,8 @@ void RadioTapWriter::write_option(const RadioTap::option& option) {
             return;
         }
         else {
-            const uint32_t bit = get_bit(parser.current_field());
-            const RadioTapParser::FieldMetadata& meta = RadioTapParser::RADIOTAP_METADATA[bit];
+            const uint32_t bit_ = get_bit(parser.current_field());
+            const RadioTapParser::FieldMetadata& meta = RadioTapParser::RADIOTAP_METADATA[bit_];
             candidate_ptr = parser.current_option_ptr() + meta.size;
         }
         parser.advance_field();

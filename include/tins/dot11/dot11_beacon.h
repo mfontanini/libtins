@@ -134,14 +134,14 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -150,7 +150,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11Beacon* clone() const {
+    Dot11Beacon* clone() const override {
         return new Dot11Beacon(*this);
     }
 
@@ -158,7 +158,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 private:
@@ -169,7 +169,7 @@ private:
         capability_information capability;
     } TINS_END_PACK;
 
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     dot11_beacon_body body_;
 };

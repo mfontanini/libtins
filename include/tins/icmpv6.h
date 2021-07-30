@@ -173,8 +173,8 @@ public:
         uint8_t reserved[6];
         addresses_type addresses;
         
-        addr_list_type(const addresses_type& addresses = addresses_type())
-        : addresses(addresses) {
+        addr_list_type(const addresses_type& addresses_ = addresses_type())
+        : addresses(addresses_) {
             std::fill(reserved, reserved + sizeof(reserved), static_cast<uint8_t>(0));
         }
         
@@ -199,8 +199,8 @@ public:
         uint8_t code, status;
         uint8_t reserved[4];
         
-        naack_type(uint8_t code = 0, uint8_t status = 0)
-        : code(code), status(status) {
+        naack_type(uint8_t code_ = 0, uint8_t status_ = 0)
+        : code(code_), status(status_) {
             std::fill(reserved, reserved + 4, static_cast<uint8_t>(0));
         }
         
@@ -219,12 +219,12 @@ public:
         /**
          * Constructor taking an option code and an address.
          * 
-         * \param option_code The option code.
-         * \param address The address to be stored.
+         * \param option_code_ The option code.
+         * \param address_ The address to be stored.
          */
-        lladdr_type(uint8_t option_code = 0, 
-                    const address_type& address = address_type())
-        : option_code(option_code), address(address) {
+        lladdr_type(uint8_t option_code_ = 0,
+                    const address_type& address_ = address_type())
+        : option_code(option_code_), address(address_) {
             
         }
         
@@ -234,11 +234,11 @@ public:
          * This is a helper constructor, since it'll be common to use
          * hwaddress_type as the link layer address.
          * 
-         * \param option_code The option code.
-         * \param address The address to be stored.
+         * \param option_code_ The option code.
+         * \param address_ The address to be stored.
          */
-        lladdr_type(uint8_t option_code, const hwaddress_type& address)
-        : option_code(option_code), address(address.begin(), address.end()) {
+        lladdr_type(uint8_t option_code_, const hwaddress_type& address_)
+        : option_code(option_code_), address(address_.begin(), address_.end()) {
             
         }
         
@@ -256,14 +256,14 @@ public:
                  reserved2;
         ipaddress_type prefix;
         
-        prefix_info_type(uint8_t prefix_len = 0, 
-                         small_uint<1> A = 0,
-                         small_uint<1> L = 0,
-                         uint32_t valid_lifetime = 0, 
-                         uint32_t preferred_lifetime = 0,
-                         const ipaddress_type& prefix = ipaddress_type())
-        : prefix_len(prefix_len), A(A), L(L), valid_lifetime(valid_lifetime),
-          preferred_lifetime(preferred_lifetime), reserved2(0), prefix(prefix) { }
+        prefix_info_type(uint8_t prefix_len_ = 0,
+                         small_uint<1> A_ = 0,
+                         small_uint<1> L_ = 0,
+                         uint32_t valid_lifetime_ = 0,
+                         uint32_t preferred_lifetime_ = 0,
+                         const ipaddress_type& prefix_ = ipaddress_type())
+        : prefix_len(prefix_len_), A(A_), L(L_), valid_lifetime(valid_lifetime_),
+          preferred_lifetime(preferred_lifetime_), reserved2(0), prefix(prefix_) { }
           
         static prefix_info_type from_option(const option& opt);
     };
@@ -338,10 +338,10 @@ public:
         uint8_t option_code, prefix_len;
         ipaddress_type address;
         
-        ip_prefix_type(uint8_t option_code = 0,
-                       uint8_t prefix_len = 0,
-                       const ipaddress_type& address = ipaddress_type())
-        : option_code(option_code), prefix_len(prefix_len), address(address)
+        ip_prefix_type(uint8_t option_code_ = 0,
+                       uint8_t prefix_len_ = 0,
+                       const ipaddress_type& address_ = ipaddress_type())
+        : option_code(option_code_), prefix_len(prefix_len_), address(address_)
         {}
 
         static ip_prefix_type from_option(const option& opt);
@@ -356,13 +356,13 @@ public:
         uint32_t valid_lifetime;
         ipaddress_type address;
         
-        map_type(small_uint<4> dist = 0,
-                 small_uint<4> pref = 0, 
-                 small_uint<1> r = 0, 
-                 uint32_t valid_lifetime = 0, 
-                 const ipaddress_type& address = ipaddress_type())
-        : dist(dist), pref(pref), r(r), valid_lifetime(valid_lifetime),
-          address(address) { }
+        map_type(small_uint<4> dist_ = 0,
+                 small_uint<4> pref_ = 0,
+                 small_uint<1> r_ = 0,
+                 uint32_t valid_lifetime_ = 0,
+                 const ipaddress_type& address_ = ipaddress_type())
+        : dist(dist_), pref(pref_), r(r_), valid_lifetime(valid_lifetime_),
+          address(address_) { }
 
         static map_type from_option(const option& opt);
     };
@@ -378,12 +378,12 @@ public:
         uint32_t route_lifetime;
         prefix_type prefix;
         
-        route_info_type(uint8_t prefix_len = 0, 
-                        small_uint<2> pref = 0, 
-                        uint32_t route_lifetime = 0,
-                        const prefix_type& prefix = prefix_type())
-        : prefix_len(prefix_len), pref(pref), route_lifetime(route_lifetime),
-          prefix(prefix) { }
+        route_info_type(uint8_t prefix_len_ = 0,
+                        small_uint<2> pref_ = 0,
+                        uint32_t route_lifetime_ = 0,
+                        const prefix_type& prefix_ = prefix_type())
+        : prefix_len(prefix_len_), pref(pref_), route_lifetime(route_lifetime_),
+          prefix(prefix_) { }
 
         static route_info_type from_option(const option& opt);
     };
@@ -397,9 +397,9 @@ public:
         uint32_t lifetime;
         servers_type servers;
         
-        recursive_dns_type(uint32_t lifetime = 0, 
-                           const servers_type& servers = servers_type())
-        : lifetime(lifetime), servers(servers) {}
+        recursive_dns_type(uint32_t lifetime_ = 0,
+                           const servers_type& servers_ = servers_type())
+        : lifetime(lifetime_), servers(servers_) {}
 
         static recursive_dns_type from_option(const option& opt);
     };
@@ -413,9 +413,9 @@ public:
         small_uint<4> AT;
         key_type key;
         
-        handover_key_req_type(small_uint<4> AT = 0,
-                              const key_type& key = key_type())
-        : AT(AT), key(key) { }
+        handover_key_req_type(small_uint<4> AT_ = 0,
+                              const key_type& key_ = key_type())
+        : AT(AT_), key(key_) { }
 
         static handover_key_req_type from_option(const option& opt);
     };
@@ -426,10 +426,10 @@ public:
     struct handover_key_reply_type : handover_key_req_type {
         uint16_t lifetime;
         
-        handover_key_reply_type(uint16_t lifetime = 0, 
-                                small_uint<4> AT = 0,
-                                const key_type& key = key_type())
-        : handover_key_req_type(AT, key), lifetime(lifetime) { }
+        handover_key_reply_type(uint16_t lifetime_ = 0,
+                                small_uint<4> AT_ = 0,
+                                const key_type& key_ = key_type())
+        : handover_key_req_type(AT_, key_), lifetime(lifetime_) { }
 
         static handover_key_reply_type from_option(const option& opt);
     };
@@ -443,9 +443,9 @@ public:
         uint8_t option_code;
         hai_type hai;
         
-        handover_assist_info_type(uint8_t option_code=0, 
-                                  const hai_type& hai = hai_type())
-        : option_code(option_code), hai(hai) { }
+        handover_assist_info_type(uint8_t option_code_=0,
+                                  const hai_type& hai_ = hai_type())
+        : option_code(option_code_), hai(hai_) { }
 
         static handover_assist_info_type from_option(const option& opt);
     };
@@ -459,9 +459,9 @@ public:
         uint8_t option_code;
         mn_type mn;
         
-        mobile_node_id_type(uint8_t option_code=0, 
-                            const mn_type& mn = mn_type())
-        : option_code(option_code), mn(mn) { }
+        mobile_node_id_type(uint8_t option_code_=0,
+                            const mn_type& mn_ = mn_type())
+        : option_code(option_code_), mn(mn_) { }
 
         static mobile_node_id_type from_option(const option& opt);
     };
@@ -475,9 +475,9 @@ public:
         uint32_t lifetime;
         domains_type domains;
         
-        dns_search_list_type(uint32_t lifetime = 0,
-                             const domains_type& domains = domains_type())
-        : lifetime(lifetime), domains(domains) { }
+        dns_search_list_type(uint32_t lifetime_ = 0,
+                             const domains_type& domains_ = domains_type())
+        : lifetime(lifetime_), domains(domains_) { }
 
         static dns_search_list_type from_option(const option& opt);
     };
@@ -489,8 +489,8 @@ public:
         uint8_t reserved[6];
         uint64_t timestamp;
 
-        timestamp_type(uint64_t timestamp = 0)
-        : timestamp(timestamp) {
+        timestamp_type(uint64_t timestamp_ = 0)
+        : timestamp(timestamp_) {
             std::fill(reserved, reserved + sizeof(reserved), static_cast<uint8_t>(0));
         }
 
@@ -504,8 +504,8 @@ public:
         uint8_t limit, reserved1;
         uint32_t reserved2;
 
-        shortcut_limit_type(uint8_t limit = 0)
-        : limit(limit), reserved1(), reserved2() {
+        shortcut_limit_type(uint8_t limit_ = 0)
+        : limit(limit_), reserved1(), reserved2() {
 
         }
 
@@ -519,8 +519,8 @@ public:
         uint16_t reserved;
         uint32_t interval;
 
-        new_advert_interval_type(uint32_t interval = 0)
-        : reserved(), interval(interval) {
+        new_advert_interval_type(uint32_t interval_ = 0)
+        : reserved(), interval(interval_) {
 
         }
 
@@ -534,7 +534,7 @@ public:
         typedef std::vector<ipaddress_type> sources_type;
         typedef std::vector<uint8_t> aux_data_type;
 
-        multicast_address_record(uint8_t type = 0) : type(type) { }
+        multicast_address_record(uint8_t type_ = 0) : type(type_) { }
 
         multicast_address_record(const uint8_t* buffer, uint32_t total_sz);
         void serialize(uint8_t* buffer, uint32_t total_sz) const;
@@ -974,7 +974,7 @@ public:
      *
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
 
     /**
      * \brief Checks whether this ICMPv6 object has a target_addr field.
@@ -1012,11 +1012,11 @@ public:
          * 
          * The option is move-constructed.
          * 
-         * \param option The option to be added.
+         * \param option_ The option to be added.
          */
-        void add_option(option &&option) {
-            internal_add_option(option);
-            options_.push_back(std::move(option));
+        void add_option(option &&option_) {
+            internal_add_option(option_);
+            options_.push_back(std::move(option_));
         }
     #endif
 
@@ -1037,7 +1037,7 @@ public:
      * This method overrides PDU::header_size. This size includes the
      * payload and options size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Returns the trailer size.
@@ -1046,7 +1046,7 @@ public:
      *
      * \sa PDU::header_size
      */
-    uint32_t trailer_size() const;
+    uint32_t trailer_size() const override;
     
     /** 
      * \brief Getter for the extensions field.
@@ -1097,7 +1097,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
 
     /**
      * \brief Searchs for an option that matchs the given flag.
@@ -1113,7 +1113,7 @@ public:
     /**
      * \sa PDU::clone
      */
-    ICMPv6* clone() const {
+    ICMPv6* clone() const override {
         return new ICMPv6(*this);
     }
 
@@ -1560,7 +1560,7 @@ private:
     } TINS_END_PACK;
     
     void internal_add_option(const option& option);
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     bool has_options() const;
     void write_option(const option& opt, Memory::OutputMemoryStream& stream);
     void parse_options(Memory::InputMemoryStream& stream);
@@ -1575,11 +1575,11 @@ private:
 
     template <template <typename> class Functor>
     const option* safe_search_option(OptionTypes opt, uint32_t size) const {
-        const option* option = search_option(opt);
-        if (!option || Functor<uint32_t>()(option->data_size(), size)) {
+        const option* option_ = search_option(opt);
+        if (!option_ || Functor<uint32_t>()(option_->data_size(), size)) {
             throw option_not_found();
         }
-        return option;
+        return option_;
     }
 
     template <typename T>

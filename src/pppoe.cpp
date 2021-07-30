@@ -83,7 +83,7 @@ const PPPoE::tag* PPPoE::search_tag(TagTypes identifier) const {
             return &*it;
         }
     }
-    return 0;
+    return nullptr;
 }
 
 void PPPoE::version(small_uint<4> new_version) {

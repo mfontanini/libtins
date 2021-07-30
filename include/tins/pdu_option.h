@@ -213,9 +213,9 @@ public:
      */
     PDUOption(option_type opt = option_type(), 
               size_t length = 0,
-              const data_type* data = 0) 
+              const data_type* data = nullptr)
     : option_(opt), size_(static_cast<uint16_t>(length)), real_size_(0) {
-        if (data != 0) {
+        if (data != nullptr) {
             set_payload_contents(data, data + length);
         }
     }
@@ -251,7 +251,7 @@ public:
         }
         real_size_ = rhs.real_size_;
         if (real_size_ > small_buffer_size) {
-            payload_.big_buffer_ptr = 0;
+            payload_.big_buffer_ptr = nullptr;
             std::swap(payload_.big_buffer_ptr, rhs.payload_.big_buffer_ptr);
             rhs.real_size_ = 0;
         }
@@ -392,14 +392,14 @@ public:
 private:
     template<typename ForwardIterator>
     void set_payload_contents(ForwardIterator start, ForwardIterator end) {
-        size_t total_size = std::distance(start, end);
+        size_t total_size = static_cast<size_t>(std::distance(start, end));
         if (total_size > 65535) {
             throw option_payload_too_large();
         }
         real_size_ = static_cast<uint16_t>(total_size);
         if (real_size_ <= small_buffer_size) {
-            if (total_size > 0) {
-                std::memcpy(payload_.small_buffer, &*start, total_size);
+            if (real_size_ > 0) {
+                std::memcpy(payload_.small_buffer, &*start, real_size_);
             }
         }
         else {

@@ -61,7 +61,7 @@ PDU::metadata IP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < sizeof(ip_header))) {
         throw malformed_packet();
     }
-    const ip_header* header = (const ip_header*)buffer;
+    const ip_header* header = reinterpret_cast<const ip_header*>(buffer);
     PDUType next_type = Internals::ip_type_to_pdu_flag(
         static_cast<Constants::IP::e>(header->protocol));
     return metadata(header->ihl * 4, pdu_flag, next_type);
@@ -86,7 +86,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz) {
     
     // While the end of the options is not reached read an option
     while (stream.pointer() < options_end) {
-        option_identifier opt_type = (option_identifier)stream.read<uint8_t>();
+        option_identifier opt_type = static_cast<option_identifier>(stream.read<uint8_t>());
         if (opt_type.number > NOOP) {
             // Multibyte options with length as second byte
             const uint32_t option_size = stream.read<uint8_t>();
@@ -124,7 +124,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz) {
         // Don't avoid consuming more than we should if tot_len is 0,
         // since this is the case when using TCP segmentation offload
         if (tot_len() != 0) {
-            const uint32_t advertised_length = (uint32_t)tot_len() - head_len() * sizeof(uint32_t);
+            const uint32_t advertised_length = static_cast<uint32_t>(tot_len()) - head_len() * sizeof(uint32_t);
             const uint32_t stream_size = static_cast<uint32_t>(stream.size());
             total_sz = (stream_size < advertised_length) ? stream_size : advertised_length;
         }
@@ -263,7 +263,7 @@ void IP::stream_identifier(uint16_t stream_id) {
         option(
             136,
             sizeof(uint16_t),
-            (const uint8_t*)&stream_id
+            reinterpret_cast<const uint8_t*>(&stream_id)
         )
     );
 }
@@ -347,7 +347,7 @@ bool IP::remove_option(option_identifier id) {
 
 const IP::option* IP::search_option(option_identifier id) const {
     options_type::const_iterator iter = search_option_iterator(id);
-    return (iter != options_.end()) ? &*iter : 0;
+    return (iter != options_.end()) ? &*iter : nullptr;
 }
 
 IP::options_type::const_iterator IP::search_option_iterator(option_identifier id) const {
@@ -377,7 +377,7 @@ uint32_t IP::header_size() const {
     return sizeof(header_) + pad_options_size(calculate_options_size());
 }
 
-PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
+static PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
     switch(type) {
         case PDU::TCP:
             return PacketSender::IP_TCP_SOCKET;
@@ -385,6 +385,60 @@ PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
             return PacketSender::IP_UDP_SOCKET;
         case PDU::ICMP:
             return PacketSender::ICMP_SOCKET;
+        case PDU::RAW:
+        case PDU::ETHERNET_II:
+        case PDU::IEEE802_3:
+        // DOT3 is the same as IEEE802_3
+        case PDU::RADIOTAP:
+        case PDU::DOT11:
+        case PDU::DOT11_ACK:
+        case PDU::DOT11_ASSOC_REQ:
+        case PDU::DOT11_ASSOC_RESP:
+        case PDU::DOT11_AUTH:
+        case PDU::DOT11_BEACON:
+        case PDU::DOT11_BLOCK_ACK:
+        case PDU::DOT11_BLOCK_ACK_REQ:
+        case PDU::DOT11_CF_END:
+        case PDU::DOT11_DATA:
+        case PDU::DOT11_CONTROL:
+        case PDU::DOT11_DEAUTH:
+        case PDU::DOT11_DIASSOC:
+        case PDU::DOT11_END_CF_ACK:
+        case PDU::DOT11_MANAGEMENT:
+        case PDU::DOT11_PROBE_REQ:
+        case PDU::DOT11_PROBE_RESP:
+        case PDU::DOT11_PS_POLL:
+        case PDU::DOT11_REASSOC_REQ:
+        case PDU::DOT11_REASSOC_RESP:
+        case PDU::DOT11_RTS:
+        case PDU::DOT11_QOS_DATA:
+        case PDU::LLC:
+        case PDU::SNAP:
+        case PDU::IP:
+        case PDU::ARP:
+        case PDU::BOOTP:
+        case PDU::DHCP:
+        case PDU::EAPOL:
+        case PDU::RC4EAPOL:
+        case PDU::RSNEAPOL:
+        case PDU::DNS:
+        case PDU::LOOPBACK:
+        case PDU::IPv6:
+        case PDU::ICMPv6:
+        case PDU::SLL:
+        case PDU::DHCPv6:
+        case PDU::DOT1AD:
+        case PDU::DOT1Q:
+        case PDU::PPPOE:
+        case PDU::STP:
+        case PDU::PPI:
+        case PDU::IPSEC_AH:
+        case PDU::IPSEC_ESP:
+        case PDU::PKTAP:
+        case PDU::MPLS:
+        case PDU::DOT11_CONTROL_TA:
+        case PDU::UNKNOWN:
+        case PDU::USER_DEFINED_PDU:
         default:
             return PacketSender::IP_RAW_SOCKET;
     }
@@ -400,7 +454,7 @@ void IP::send(PacketSender& sender, const NetworkInterface &) {
         type = pdu_type_to_sender_type(inner_pdu()->pdu_type());
     }
 
-    sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+    sender.send_l3(*this, reinterpret_cast<sockaddr*>(&link_addr), sizeof(link_addr), type);
 }
 
 PDU* IP::recv_response(PacketSender& sender, const NetworkInterface &) {
@@ -411,7 +465,7 @@ PDU* IP::recv_response(PacketSender& sender, const NetworkInterface &) {
         type = pdu_type_to_sender_type(inner_pdu()->pdu_type());
     }
 
-    return sender.recv_l3(*this, 0, sizeof(link_addr), type);
+    return sender.recv_l3(*this, nullptr, sizeof(link_addr), type);
 }
 
 void IP::prepare_for_serialize() {
@@ -441,7 +495,7 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
 
     uint16_t original_frag_off = header_.frag_off;
     
-    #if __FreeBSD__ || defined(__FreeBSD_kernel__) || __APPLE__
+    #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__APPLE__)
         if (!parent_pdu()) {
             total_sz = Endian::host_to_be<uint16_t>(total_sz);
             header_.frag_off = Endian::be_to_host(header_.frag_off);
@@ -468,14 +522,14 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
         check = (check & 0xffff) + (check >> 16);
     }
     checksum(~check);
-    ((ip_header*)buffer)->check = header_.check;
+    (reinterpret_cast<ip_header*>(buffer))->check = header_.check;
 }
 
 bool IP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const ip_header* ip_ptr = (const ip_header*)ptr;
+    const ip_header* ip_ptr = reinterpret_cast<const ip_header*>(ptr);
     // dest unreachable?
     if (ip_ptr->protocol == Constants::IP::PROTO_ICMP) {
         const uint8_t* pkt_ptr = ptr + sizeof(ip_header);

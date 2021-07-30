@@ -154,8 +154,8 @@ public:
          * \param rhs The PacketWriter to be moved.
          */
         PacketWriter& operator=(PacketWriter &&rhs) TINS_NOEXCEPT {
-            handle_ = 0;
-            dumper_ = 0;
+            handle_ = nullptr;
+            dumper_ = nullptr;
             std::swap(handle_, rhs.handle_);
             std::swap(dumper_, rhs.dumper_);
             return* this;
@@ -216,7 +216,7 @@ private:
     PacketWriter& operator=(const PacketWriter&);
 
     void init(const std::string& file_name, int link_type);
-    void write(PDU& pdu, const struct timeval& tv);
+    void write(PDU& pdu, const timeval& tv);
 
     pcap_t* handle_;
     pcap_dumper_t* dumper_; 

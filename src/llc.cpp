@@ -69,7 +69,7 @@ LLC::LLC(const uint8_t* buffer, uint32_t total_sz) {
 		// TODO: Create information fields if corresponding.
 	}
 	else {
-		type((Format)(*stream.pointer() & 0x03));
+		type(static_cast<Format>(*stream.pointer() & 0x03));
 		control_field_length_ = 2;
 		stream.read(control_field.info);
 	}
@@ -124,6 +124,8 @@ void LLC::type(LLC::Format type) {
 			control_field_length_ = 1;
 			control_field.unnumbered.type_bits = 3;
 			break;
+		default:
+			break;
 	}
 }
 
@@ -144,6 +146,8 @@ void LLC::receive_seq_number(uint8_t seq_number) {
 		case LLC::SUPERVISORY:
 			control_field.super.recv_seq_num = seq_number;
 			break;
+        default:
+            break;
 	}
 }
 
@@ -158,6 +162,8 @@ void LLC::poll_final(bool value) {
 		case LLC::SUPERVISORY:
 			control_field.super.poll_final_bit = value;
 			break;
+        default:
+            break;
 	}
 
 }
@@ -212,6 +218,8 @@ void LLC::write_serialization(uint8_t* buffer, uint32_t total_sz) {
 		case LLC::SUPERVISORY:
             stream.write(control_field.super);
 			break;
+        default:
+            break;
 	}
 
 	for (field_list::const_iterator it = information_fields_.begin(); it != information_fields_.end(); ++it) {

@@ -54,7 +54,7 @@ PacketWriter::~PacketWriter() {
 void PacketWriter::write(PDU& pdu) {
     timeval tv;
     #ifndef _WIN32
-        gettimeofday(&tv, 0);
+        gettimeofday(&tv, nullptr);
     #else
         // fixme
         tv = timeval();
@@ -69,14 +69,14 @@ void PacketWriter::write(Packet& packet) {
     write(*packet.pdu(), tv);
 }
 
-void PacketWriter::write(PDU& pdu, const struct timeval& tv) {
-    struct pcap_pkthdr header;
+void PacketWriter::write(PDU& pdu, const timeval& tv) {
+    pcap_pkthdr header;
     memset(&header, 0, sizeof(header));
     header.ts = tv;
-    header.len = static_cast<bpf_u_int32>(pdu.advertised_size());
+    header.len = pdu.advertised_size();
     PDU::serialization_type buffer = pdu.serialize();
     header.caplen = static_cast<bpf_u_int32>(buffer.size());
-    pcap_dump((u_char*)dumper_, &header, &buffer[0]);
+    pcap_dump(reinterpret_cast<u_char*>(dumper_), &header, &buffer[0]);
 }
 
 void PacketWriter::init(const string& file_name, int link_type) {

@@ -274,7 +274,7 @@ bool ICMPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const icmp6_header* hdr_ptr = (const icmp6_header*)ptr;
+    const icmp6_header* hdr_ptr = reinterpret_cast<const icmp6_header*>(ptr);
     if (type() == ECHO_REQUEST && hdr_ptr->type == ECHO_REPLY) {
         return hdr_ptr->u_echo.identifier == header_.u_echo.identifier &&
                hdr_ptr->u_echo.sequence == header_.u_echo.sequence;
@@ -401,18 +401,43 @@ bool ICMPv6::has_options() const {
         case ROUTER_ADVERT:
         case REDIRECT:
             return true;
+        case DEST_UNREACHABLE:
+        case PACKET_TOOBIG:
+        case TIME_EXCEEDED:
+        case PARAM_PROBLEM:
+        case ECHO_REQUEST:
+        case ECHO_REPLY:
+        case MGM_QUERY:
+        case MGM_REPORT:
+        case MGM_REDUCTION:
+        case ROUTER_RENUMBER:
+        case NI_QUERY:
+        case NI_REPLY:
+        case MLD2_REPORT:
+        case DHAAD_REQUEST:
+        case DHAAD_REPLY:
+        case MOBILE_PREFIX_SOLICIT:
+        case MOBILE_PREFIX_ADVERT:
+        case CERT_PATH_SOLICIT:
+        case CERT_PATH_ADVERT:
+        case MULTICAST_ROUTER_ADVERT:
+        case MULTICAST_ROUTER_SOLICIT:
+        case MULTICAST_ROUTER_TERMINATE:
+        case RPL_CONTROL_MSG:
+        case EXTENDED_ECHO_REQUEST:
+        case EXTENDED_ECHO_REPLY:
         default:
             return false;
     }
 }
 
-void ICMPv6::add_option(const option& option) {
-    internal_add_option(option);
-    options_.push_back(option);
+void ICMPv6::add_option(const option& option_) {
+    internal_add_option(option_);
+    options_.push_back(option_);
 }
 
-void ICMPv6::internal_add_option(const option& option) {
-    options_size_ += static_cast<uint32_t>(option.data_size() + sizeof(uint8_t) * 2);
+void ICMPv6::internal_add_option(const option& option_) {
+    options_size_ += static_cast<uint32_t>(option_.data_size() + sizeof(uint8_t) * 2);
 }
 
 bool ICMPv6::remove_option(OptionTypes type) {
@@ -438,7 +463,7 @@ void ICMPv6::use_mldv2(bool value) {
 const ICMPv6::option* ICMPv6::search_option(OptionTypes type) const {
     // Search for the iterator. If we found something, return it, otherwise return nullptr.
     options_type::const_iterator iter = search_option_iterator(type);
-    return (iter != options_.end()) ? &*iter : 0;
+    return (iter != options_.end()) ? &*iter : nullptr;
 }
 
 ICMPv6::options_type::const_iterator ICMPv6::search_option_iterator(OptionTypes type) const {

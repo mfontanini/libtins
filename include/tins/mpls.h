@@ -73,7 +73,7 @@ public:
      * \brief Getter for the label field.
      */
     small_uint<20> label() const {
-        return (Endian::be_to_host(header_.label_high) << 4) |
+        return (static_cast<small_uint<20>>(Endian::be_to_host(header_.label_high)) << 4) |
                ((header_.label_low_exp_and_bottom >> 4) & 0xf);
     }
 
@@ -137,20 +137,20 @@ public:
      * \return The header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
     /**
      * \sa PDU::clone
      */
-    MPLS* clone() const {
+    MPLS* clone() const override {
         return new MPLS(*this);
     }
 private:
@@ -161,7 +161,7 @@ private:
         uint8_t ttl;
     } TINS_END_PACK;
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
 
     mpls_header header_;
 };

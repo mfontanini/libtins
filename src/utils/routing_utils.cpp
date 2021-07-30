@@ -76,14 +76,14 @@ struct InterfaceCollector {
         return false;
     }
     #else
-    bool operator() (struct ifaddrs* addr) {
+    bool operator() (ifaddrs* addr) {
         ifaces.insert(addr->ifa_name);
         return false;
     }
     #endif
 };
 
-bool from_hex(const string& str, uint32_t& result) {
+static bool from_hex(const string& str, uint32_t& result) {
     size_t i = 0;
     result = 0;
     while (i < str.size()) {
@@ -103,7 +103,7 @@ bool from_hex(const string& str, uint32_t& result) {
     return true;
 }
 
-bool from_hex(const string& str, string& result) {
+static bool from_hex(const string& str, string& result) {
     result.clear();
     for (size_t i = 0; i < str.size(); i+= 2) {
         uint8_t value = 0;
@@ -126,7 +126,7 @@ bool from_hex(const string& str, string& result) {
     return true;
 }
 
-void skip_line(istream& input) {
+static void skip_line(istream& input) {
     int c = 0;
     while (c != '\n' && input) {
         c = input.get();
@@ -158,13 +158,13 @@ vector<char> query_route_table(int family) {
     return buf;
 }
 
-void parse_header(struct rt_msghdr* rtm, vector<sockaddr*>& addrs) {
+void parse_header(rt_msghdr* rtm, vector<sockaddr*>& addrs) {
     char* ptr = (char *)(rtm + 1);
     // Iterate from RTA_DST (0) to RTA_NETMASK (2)
     for (int i = 0; i < 3; ++i) {
         sockaddr* sa = 0;
         if ((rtm->rtm_addrs & (1 << i)) != 0) {
-            sa = (struct sockaddr *)ptr;
+            sa = (sockaddr *)ptr;
             ptr += sa->sa_len;
             if (sa->sa_family == 0) {
                 sa = 0;
@@ -189,10 +189,10 @@ vector<RouteEntry> route_entries() {
             parse_header(rtm, sa);
             if (sa[RTAX_DST] && sa[RTAX_GATEWAY] && if_indextoname(rtm->rtm_index, iface_name)) {
                 RouteEntry entry;
-                entry.destination = IPv4Address(((struct sockaddr_in *)sa[RTAX_DST])->sin_addr.s_addr);
-                entry.gateway = IPv4Address(((struct sockaddr_in *)sa[RTAX_GATEWAY])->sin_addr.s_addr);
+                entry.destination = IPv4Address(((sockaddr_in *)sa[RTAX_DST])->sin_addr.s_addr);
+                entry.gateway = IPv4Address(((sockaddr_in *)sa[RTAX_GATEWAY])->sin_addr.s_addr);
                 if (sa[RTAX_NETMASK]) {
-                    entry.mask = IPv4Address(((struct sockaddr_in *)sa[RTAX_NETMASK])->sin_addr.s_addr);
+                    entry.mask = IPv4Address(((sockaddr_in *)sa[RTAX_NETMASK])->sin_addr.s_addr);
                 }
                 entry.interface = iface_name;
                 entry.metric = 0;
@@ -224,11 +224,11 @@ vector<Route6Entry> route6_entries() {
             parse_header(rtm, sa);
             if (sa[RTAX_DST] && sa[RTAX_GATEWAY] && if_indextoname(rtm->rtm_index, iface_name)) {
                 Route6Entry entry;
-                entry.destination = IPv6Address(((struct sockaddr_in6 *)sa[RTAX_DST])->sin6_addr.s6_addr);
-                entry.gateway = IPv6Address(((struct sockaddr_in6 *)sa[RTAX_GATEWAY])->sin6_addr.s6_addr);
+                entry.destination = IPv6Address(((sockaddr_in6 *)sa[RTAX_DST])->sin6_addr.s6_addr);
+                entry.gateway = IPv6Address(((sockaddr_in6 *)sa[RTAX_GATEWAY])->sin6_addr.s6_addr);
                 int prefix_length = 0;
                 if (sa[RTAX_NETMASK]) {
-                    struct sockaddr_in6  *sin = (struct sockaddr_in6 *)sa[RTAX_NETMASK];
+                    sockaddr_in6  *sin = (sockaddr_in6 *)sa[RTAX_NETMASK];
                     for (size_t i = 0; i < 16; ++i) {
                         uint8_t this_byte = sin->sin6_addr.s6_addr[i];
                         // Stop when we find a zero byte
@@ -376,11 +376,11 @@ vector<Route6Entry> route6_entries() {
         }
         input >> flags >> entry.interface;
         from_hex(destination, temporary);
-        entry.destination = IPv6Address((const uint8_t*)&temporary[0]);
+        entry.destination = IPv6Address(reinterpret_cast<const uint8_t*>(&temporary[0]));
         from_hex(mask_length, temporary_int);
         entry.mask = IPv6Address::from_prefix_length(temporary_int);
         from_hex(next_hop, temporary);
-        entry.gateway = IPv6Address((const uint8_t*)&temporary[0]);
+        entry.gateway = IPv6Address(reinterpret_cast<const uint8_t*>(&temporary[0]));
         from_hex(metric, temporary_int);
         entry.metric = temporary_int;
         // Process flags
@@ -414,10 +414,9 @@ set<string> network_interfaces() {
 #else
 set<string> network_interfaces() {
     set<string> output;
-    struct ifaddrs* ifaddrs = 0;
-    struct ifaddrs* if_it = 0;
+    ifaddrs* ifaddrs = nullptr;
     getifaddrs(&ifaddrs);
-    for (if_it = ifaddrs; if_it; if_it = if_it->ifa_next) {
+    for (struct ifaddrs* if_it = ifaddrs; if_it; if_it = if_it->ifa_next) {
         output.insert(if_it->ifa_name);
     }
     if (ifaddrs) {

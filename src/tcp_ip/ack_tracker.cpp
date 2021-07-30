@@ -46,7 +46,7 @@ using Tins::Internals::seq_compare;
 namespace Tins {
 namespace TCPIP {
 
-uint32_t interval_start(const AckedRange::interval_type& interval) {
+static uint32_t interval_start(const AckedRange::interval_type& interval) {
     if (interval.bounds() == interval_bounds::left_open()) {
         return interval.lower() + 1;
     }
@@ -55,7 +55,7 @@ uint32_t interval_start(const AckedRange::interval_type& interval) {
     }
 }
 
-uint32_t interval_end(const AckedRange::interval_type& interval) {
+static uint32_t interval_end(const AckedRange::interval_type& interval) {
     if (interval.bounds() == interval_bounds::right_open()) {
         return interval.upper() - 1;
     }

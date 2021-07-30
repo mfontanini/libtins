@@ -84,14 +84,14 @@ PDU* IPv4Stream::allocate_pdu() const {
     size_t expected = 0;
     for (fragments_type::const_iterator it = fragments_.begin(); it != fragments_.end(); ++it) {
         if (expected != it->offset()) {
-            return 0;
+            return nullptr;
         }
         expected = it->offset() + it->payload().size();
         buffer.insert(buffer.end(), it->payload().begin(), it->payload().end());
     }
     return Internals::pdu_from_flag(
         static_cast<Constants::IP::e>(first_fragment_.protocol()),
-        buffer.empty() ? 0 :& buffer[0],
+        buffer.empty() ? nullptr :& buffer[0],
         static_cast<uint32_t>(buffer.size())
     );
 }
@@ -106,14 +106,7 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
 
 } // Internals
 
-IPv4Reassembler::IPv4Reassembler()
-: technique_(NONE) {
-
-}
-
-IPv4Reassembler::IPv4Reassembler(OverlappingTechnique technique)
-: technique_(technique) {
-
+IPv4Reassembler::IPv4Reassembler() {
 }
 
 IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
@@ -126,17 +119,17 @@ IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
             Internals::IPv4Stream& stream = streams_[key];
             stream.add_fragment(ip);
             if (stream.is_complete()) {
-                PDU* pdu = stream.allocate_pdu();
+                PDU* pdu_ = stream.allocate_pdu();
                 // Use all field values from the first fragment
                 *ip = stream.first_fragment();
 
                 // Erase this stream, since it's already assembled
                 streams_.erase(key);
                 // The packet is corrupt
-                if (!pdu) {
+                if (!pdu_) {
                     return FRAGMENTED;
                 }
-                ip->inner_pdu(pdu);
+                ip->inner_pdu(pdu_);
                 ip->fragment_offset(0);
                 ip->flags(static_cast<IP::Flags>(0));
                 return REASSEMBLED;

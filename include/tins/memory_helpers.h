@@ -117,7 +117,7 @@ public:
         if (!can_read(output_buffer_size)) {
             throw malformed_packet();
         }
-        read_data(buffer_, (uint8_t*)output_buffer, output_buffer_size);
+        read_data(buffer_, reinterpret_cast<uint8_t*>(output_buffer), output_buffer_size);
         skip(output_buffer_size);
     }
 

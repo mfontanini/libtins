@@ -37,7 +37,7 @@
     #include <ws2tcpip.h>
     #include <mstcpip.h>
 #endif
-#if TINS_IS_CXX11
+#ifdef TINS_IS_CXX11
     // std::hash
     #include <memory>
 #endif // TINS_IS_CXX11
@@ -114,7 +114,7 @@ string IPv6Address::to_string() const {
     #ifdef _WIN32
         // mingw on linux somehow doesn't have InetNtop
         #ifdef _MSC_VER
-            if (InetNtopA(AF_INET6, (PVOID)address_, buffer, sizeof(buffer)) == 0) {
+            if (InetNtopA(AF_INET6, (PVOID)address_, buffer, sizeof(buffer)) == nullptr) {
                 throw invalid_address();
             }
         #else
@@ -124,7 +124,7 @@ string IPv6Address::to_string() const {
             }
         #endif
     #else
-        if (inet_ntop(AF_INET6, address_, buffer, sizeof(buffer)) == 0) {
+        if (inet_ntop(AF_INET6, address_, buffer, sizeof(buffer)) == nullptr) {
             throw invalid_address();
         }
     #endif

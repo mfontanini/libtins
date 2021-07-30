@@ -92,8 +92,8 @@ public:
         uint32_t vendor_id;
         data_type data;
         
-        vendor_spec_type(uint32_t vendor_id = 0, const data_type& data = data_type())
-        : vendor_id(vendor_id), data(data) { }
+        vendor_spec_type(uint32_t vendor_id_ = 0, const data_type& data_ = data_type())
+        : vendor_id(vendor_id_), data(data_) { }
         
         static vendor_spec_type from_option(const tag& opt);
     };
@@ -168,7 +168,7 @@ public:
      *
      * This method overrides PDU::header_size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Returns the list of tags.
@@ -180,7 +180,7 @@ public:
     /**
      * \sa PDU::clone
      */
-    PPPoE* clone() const {
+    PPPoE* clone() const override {
         return new PPPoE(*this);
     }
     
@@ -190,7 +190,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
 
     // Setters
 
@@ -389,7 +389,7 @@ public:
      */
     std::string generic_error() const;
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     
     template<typename T>
     void add_tag_iterable(TagTypes id, const T& data) {

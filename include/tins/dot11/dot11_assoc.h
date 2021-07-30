@@ -97,13 +97,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -112,7 +112,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -121,7 +121,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11Disassoc* clone() const {
+    Dot11Disassoc* clone() const override {
         return new Dot11Disassoc(*this);
     }
 private:
@@ -129,7 +129,7 @@ private:
         uint16_t reason_code;
     };
 
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     dot11_disassoc_body body_;
 };
@@ -215,13 +215,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -230,7 +230,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -239,7 +239,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11AssocRequest* clone() const {
+    Dot11AssocRequest* clone() const override {
         return new Dot11AssocRequest(*this);
     }
 private:
@@ -248,7 +248,7 @@ private:
         uint16_t listen_interval;
     };
 
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     dot11_assoc_request_body body_;
 };
@@ -350,13 +350,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -365,7 +365,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -374,7 +374,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11AssocResponse* clone() const {
+    Dot11AssocResponse* clone() const override {
         return new Dot11AssocResponse(*this);
     }
 private:
@@ -384,7 +384,7 @@ private:
         uint16_t aid;
     };
 
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     dot11_assoc_response_body body_;
 };
@@ -486,13 +486,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -501,7 +501,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -510,7 +510,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11ReAssocRequest* clone() const {
+    Dot11ReAssocRequest* clone() const override {
         return new Dot11ReAssocRequest(*this);
     }
 private:
@@ -520,7 +520,7 @@ private:
         uint8_t current_ap[address_type::address_size];
     };
 
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     dot11_reassoc_request_body body_;
 };
@@ -622,13 +622,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -637,7 +637,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -646,7 +646,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11ReAssocResponse* clone() const {
+    Dot11ReAssocResponse* clone() const override {
         return new Dot11ReAssocResponse(*this);
     }
 private:
@@ -656,7 +656,7 @@ private:
         uint16_t aid;
     };
 
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     dot11_reassoc_response_body body_;
 };

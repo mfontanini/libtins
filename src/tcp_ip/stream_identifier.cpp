@@ -101,9 +101,9 @@ StreamIdentifier StreamIdentifier::make_identifier(const PDU& packet) {
         return StreamIdentifier(serialize(ip->src_addr()), source_port,
                                 serialize(ip->dst_addr()), dest_port);
     }
-    else if (const IPv6* ip = packet.find_pdu<IPv6>()) {
-        return StreamIdentifier(serialize(ip->src_addr()), source_port,
-                                serialize(ip->dst_addr()), dest_port);
+    else if (const IPv6* ip_ = packet.find_pdu<IPv6>()) {
+        return StreamIdentifier(serialize(ip_->src_addr()), source_port,
+                                serialize(ip_->dst_addr()), dest_port);
     }
     else {
         throw invalid_packet();

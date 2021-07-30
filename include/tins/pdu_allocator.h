@@ -65,7 +65,7 @@ public:
 
     static PDU* allocate(id_type identifier, const uint8_t* buffer, uint32_t size) {
         typename allocators_type::const_iterator it = allocators.find(identifier);
-        return (it == allocators.end()) ? 0 : (*it->second)(buffer, size);
+        return (it == allocators.end()) ? nullptr : (*it->second)(buffer, size);
     }
 
     static bool pdu_type_registered(PDU::PDUType type) {

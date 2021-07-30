@@ -223,13 +223,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -238,7 +238,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11::matches_flag(flag);
     }
 
@@ -247,7 +247,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11Data* clone() const {
+    Dot11Data* clone() const override {
         return new Dot11Data(*this);
     }
 protected:
@@ -262,7 +262,7 @@ protected:
     Dot11Data(const uint8_t* buffer, uint32_t total_sz, no_inner_pdu);
 
     uint32_t init(const uint8_t* buffer, uint32_t total_sz);
-    void write_ext_header(Memory::OutputMemoryStream& stream);
+    void write_ext_header(Memory::OutputMemoryStream& stream) override;
 private:
     dot11_extended_header ext_header_;
     address_type addr4_;
@@ -325,14 +325,14 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Clones this PDU.
      *
      * \sa PDU::clone
      */
-    Dot11QoSData* clone() const {
+    Dot11QoSData* clone() const override {
         return new Dot11QoSData(*this);
     }
 
@@ -340,7 +340,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -349,11 +349,11 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11Data::matches_flag(flag);
     }
 private:
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     uint16_t qos_control_;
 };

@@ -167,16 +167,16 @@ public:
         
         /**
          * Constructor using user provided values for each field.
-         * \param number The number field value.
-         * \param op_class The option class field value.
-         * \param copied The copied field value.
+         * \param number_ The number field value.
+         * \param op_class_ The option class field value.
+         * \param copied_ The copied field value.
          */
-        option_identifier(OptionNumber number, OptionClass op_class,
-          small_uint<1> copied) 
+        option_identifier(OptionNumber number_, OptionClass op_class_,
+          small_uint<1> copied_)
         #if TINS_IS_LITTLE_ENDIAN
-        : number(static_cast<uint8_t>(number)), op_class(static_cast<uint8_t>(op_class)), copied(copied) {}
+        : number(static_cast<uint8_t>(number_)), op_class(static_cast<uint8_t>(op_class_)), copied(copied_) {}
         #else
-        : copied(copied), op_class(static_cast<uint8_t>(op_class)), number(static_cast<uint8_t>(number)) {}
+        : copied(copied_), op_class(static_cast<uint8_t>(op_class_)), number(static_cast<uint8_t>(number_)) {}
         #endif
         
         /**
@@ -281,7 +281,7 @@ public:
 
     /* Getters */
 
-    uint32_t advertised_size() const {
+    uint32_t advertised_size() const override {
         return static_cast<uint32_t>(tot_len());
     }
 
@@ -686,12 +686,12 @@ public:
      *
      * This method overrides PDU::header_size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \sa PDU::send()
      */
-    void send(PacketSender& sender, const NetworkInterface &);
+    void send(PacketSender& sender, const NetworkInterface &) override;
 
     /**
      * \brief Check whether ptr points to a valid response for this PDU.
@@ -700,7 +700,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
 
     /**
      * \brief Receives a matching response for this packet.
@@ -708,7 +708,7 @@ public:
      * \sa PDU::recv_response
      * \param sender The packet sender which will receive the packet.
      */
-    PDU* recv_response(PacketSender& sender, const NetworkInterface &);
+    PDU* recv_response(PacketSender& sender, const NetworkInterface &) override;
 
     /**
      * Indicates whether this PDU is fragmented.
@@ -721,14 +721,14 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
     /**
      * \sa PDU::clone
      */
-    IP* clone() const {
+    IP* clone() const override {
         return new IP(*this);
     }
 private:
@@ -757,11 +757,11 @@ private:
     void head_len(small_uint<4> new_head_len);
     void tot_len(uint16_t new_tot_len);
 
-    void prepare_for_serialize();
+    void prepare_for_serialize() override;
     uint32_t calculate_options_size() const;
     uint32_t pad_options_size(uint32_t size) const;
     void init_ip_fields();
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     void write_option(const option& opt, Memory::OutputMemoryStream& stream);
     void add_route_option(option_identifier id, const generic_route_option_type& data);
     generic_route_option_type search_route_option(option_identifier id) const;

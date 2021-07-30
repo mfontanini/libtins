@@ -489,33 +489,33 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
     
     /** 
      * \brief Getter for the header size.
      * \return Returns the BOOTP header size.
      * \sa PDU::header_size
      */ 
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /**
      * \sa PDU::clone
      */
-    DHCP* clone() const {
+    DHCP* clone() const override {
         return new DHCP(*this);
     }
 private:
     static const uint32_t MAX_DHCP_SIZE;
   
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
 
     template <typename T> 
     T search_and_convert(OptionTypes opt) const {
-        const option* option = search_option(opt);
-        if (!option) {
+        const option* option_ = search_option(opt);
+        if (!option_) {
             throw option_not_found();
         }
-        return option->to<T>();
+        return option_->to<T>();
     }
     
     void internal_add_option(const option& opt);

@@ -80,7 +80,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -89,7 +89,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -98,7 +98,7 @@ public:
      *
      * \sa PDU::clone()
      */
-    Dot11ProbeRequest* clone() const {
+    Dot11ProbeRequest* clone() const override {
         return new Dot11ProbeRequest(*this);
     }
 
@@ -201,14 +201,14 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Clones this PDU.
      *
      * \sa PDU::clone()
      */
-    Dot11ProbeResponse* clone() const {
+    Dot11ProbeResponse* clone() const override {
         return new Dot11ProbeResponse(*this);
     }
 
@@ -216,18 +216,18 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
 
     /**
      * \brief Check whether this PDU matches the specified flag.
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
         return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 private:
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     TINS_BEGIN_PACK
     struct dot11_probe_response_header {

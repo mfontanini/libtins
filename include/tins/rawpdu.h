@@ -164,7 +164,7 @@ public:
      *
      * This method overrides PDU::header_size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /** 
      * \brief Returns the payload size.
@@ -185,13 +185,13 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
     
@@ -207,11 +207,11 @@ public:
     /**
      * \sa PDU::clone
      */
-    RawPDU* clone() const {
+    RawPDU* clone() const override {
         return new RawPDU(*this);
     }
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
 
     payload_type payload_;
 };

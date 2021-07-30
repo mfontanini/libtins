@@ -321,7 +321,7 @@ public:
      * \param len_addr The sockaddr struct length.
      * \return Returns the response PDU. If no response is received, then 0 is returned.
      */
-    PDU* recv_l2(PDU& pdu, struct sockaddr* link_addr, uint32_t len_addr,
+    PDU* recv_l2(PDU& pdu, sockaddr* link_addr, uint32_t len_addr,
       const NetworkInterface& iface = NetworkInterface());
 
     #endif // _WIN32
@@ -342,7 +342,7 @@ public:
      * \param link_addr The sockaddr struct which will be used to send the PDU.
      * \param len_addr The sockaddr struct length.
      */
-    void send_l2(PDU& pdu, struct sockaddr* link_addr, uint32_t len_addr, 
+    void send_l2(PDU& pdu, sockaddr* link_addr, uint32_t len_addr,
       const NetworkInterface& iface = NetworkInterface());
     #endif // !_WIN32 || TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
 
@@ -360,7 +360,7 @@ public:
      * \param type The socket protocol type.
      * \return Returns the response PDU. If no response is received, then 0 is returned.
      */
-    PDU* recv_l3(PDU& pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type);
+    PDU* recv_l3(PDU& pdu, sockaddr* link_addr, uint32_t len_addr, SocketType type);
 
     /** 
      * \brief Sends a level 3 PDU.
@@ -377,7 +377,7 @@ public:
      * \param len_addr The sockaddr struct length.
      * \param type The socket protocol type.
      */
-    void send_l3(PDU& pdu, struct sockaddr* link_addr, uint32_t len_addr, SocketType type);
+    void send_l3(PDU& pdu, sockaddr* link_addr, uint32_t len_addr, SocketType type);
 private:
     static const int INVALID_RAW_SOCKET;
 
@@ -400,7 +400,7 @@ private:
     
     PDU* recv_match_loop(const std::vector<int>& sockets, 
                          PDU& pdu,
-                         struct sockaddr* link_addr, 
+                         sockaddr* link_addr,
                          uint32_t addrlen,
                          bool is_layer_3);
 

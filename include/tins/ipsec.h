@@ -148,18 +148,18 @@ public:
      *
      * This method overrides PDU::header_size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
 
     /**
      * \sa PDU::clone
      */
-    IPSecAH* clone() const {
+    IPSecAH* clone() const override{
         return new IPSecAH(*this);
     }
 private:
@@ -168,7 +168,7 @@ private:
         uint32_t spi, seq_number;
     };
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     
     ipsec_header header_;
     byte_array icv_;
@@ -239,18 +239,18 @@ public:
      *
      * This method overrides PDU::header_size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
 
     /**
      * \sa PDU::clone
      */
-    IPSecESP* clone() const {
+    IPSecESP* clone() const override {
         return new IPSecESP(*this);
     }
 private:
@@ -258,7 +258,7 @@ private:
         uint32_t spi, seq_number;
     };
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     
     ipsec_header header_;
 };

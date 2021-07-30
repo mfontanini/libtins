@@ -131,7 +131,7 @@ struct RadioTapFlags {
 } TINS_END_PACK;
 #endif
 
-void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, size_t n) {
+static void align_buffer(const uint8_t* buffer_start, const uint8_t*& buffer, size_t n) {
     uint32_t offset = (buffer - buffer_start) & (n - 1);
     if (offset) {
         offset = n - offset;
@@ -143,8 +143,8 @@ RadioTapParser::RadioTapParser(const vector<uint8_t>& buffer)
 : current_bit_(MAX_RADIOTAP_FIELD), current_flags_(0), namespace_index_(0),
   current_namespace_(RADIOTAP_NS) {
     if (buffer.empty()) {
-        start_ = 0;
-        end_ = 0;
+        start_ = nullptr;
+        end_ = nullptr;
         current_ptr_ = start_;
         current_flags_ = 0;
     }
@@ -188,7 +188,7 @@ const uint8_t* RadioTapParser::current_option_ptr() const {
 
 bool RadioTapParser::advance_field() {
     // If we have no buffer to parse, then we can't advance
-    if (start_ == 0 || current_bit_ == MAX_RADIOTAP_FIELD) {
+    if (start_ == nullptr || current_bit_ == MAX_RADIOTAP_FIELD) {
         return false;
     }
     // If we manage to advance the field, return true
@@ -236,7 +236,7 @@ bool RadioTapParser::has_fields() const {
 bool RadioTapParser::has_field(RadioTap::PresentFlags flag) const {
     const uint8_t* ptr = start_;
     while (ptr + sizeof(uint32_t) < end_) {
-        const RadioTapFlags* flags = (const RadioTapFlags*)ptr;
+        const RadioTapFlags* flags = reinterpret_cast<const RadioTapFlags*>(ptr);
         if (is_field_set(flag, flags)) {
             return true;
         }
@@ -324,7 +324,7 @@ bool RadioTapParser::is_field_set(uint32_t bit, const RadioTapFlags* flags) cons
 }
 
 const RadioTapFlags* RadioTapParser::get_flags_ptr() const {
-    return (const RadioTapFlags*)(start_ + sizeof(uint32_t) * namespace_index_);
+    return reinterpret_cast<const RadioTapFlags*>((start_ + sizeof(uint32_t) * namespace_index_));
 }
 
 void RadioTapParser::load_current_flags() {

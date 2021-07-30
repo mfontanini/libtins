@@ -529,7 +529,7 @@ public:
      *
      * \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /**
      * \brief Check whether ptr points to a valid response for this PDU.
@@ -538,14 +538,14 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
 
     /**
      * \brief Getter for the PDU's type.
      *
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -559,7 +559,7 @@ public:
     /**
      * \sa PDU::clone
      */
-    TCP* clone() const {
+    TCP* clone() const override {
         return new TCP(*this);
     }
 private:
@@ -622,7 +622,7 @@ private:
         return opt->to<T>();
     }
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     void checksum(uint16_t new_check);
     uint32_t calculate_options_size() const;
     uint32_t pad_options_size(uint32_t size) const;

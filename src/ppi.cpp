@@ -85,6 +85,8 @@ PPI::PPI(const uint8_t* buffer, uint32_t total_sz) {
             case DLT_LINUX_SLL:
                 inner_pdu(new Tins::SLL(stream.pointer(), stream.size()));
                 break;
+            default:
+                break;
         }
     }
 }

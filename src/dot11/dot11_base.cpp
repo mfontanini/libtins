@@ -95,7 +95,7 @@ void Dot11::parse_tagged_parameters(InputMemoryStream& stream) {
 
 void Dot11::add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t* val) {
     uint32_t opt_size = len + sizeof(uint8_t) * 2;
-    options_.push_back(option((uint8_t)opt, val, val + len));
+    options_.push_back(option(static_cast<uint8_t>(opt), val, val + len));
     options_size_ += opt_size;
 }
 
@@ -121,7 +121,7 @@ void Dot11::add_option(const option& opt) {
 const Dot11::option* Dot11::search_option(OptionTypes type) const {
     // Search for the iterator. If we found something, return it, otherwise return nullptr.
     options_type::const_iterator iter = search_option_iterator(type);
-    return (iter != options_.end()) ? &*iter : 0;
+    return (iter != options_.end()) ? &*iter : nullptr;
 }
 
 Dot11::options_type::const_iterator Dot11::search_option_iterator(OptionTypes type) const {
@@ -197,14 +197,14 @@ void Dot11::send(PacketSender& sender, const NetworkInterface& iface) {
     #if !defined(BSD) && !defined(__FreeBSD_kernel__)
         sockaddr_ll addr;
 
-        memset(&addr, 0, sizeof(struct sockaddr_ll));
+        memset(&addr, 0, sizeof(sockaddr_ll));
 
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
         addr.sll_halen = 6;
         addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), header_.addr1, 6);
-        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr), iface);
+        sender.send_l2(*this, reinterpret_cast<sockaddr*>(&addr), static_cast<uint32_t>(sizeof(addr)), iface);
     #else
         sender.send_l2(*this, 0, 0, iface);
     #endif
@@ -230,7 +230,7 @@ Dot11* Dot11::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     if (total_sz < 2) {
         throw malformed_packet();
     }
-    const dot11_header* hdr = (const dot11_header*)buffer;
+    const dot11_header* hdr = reinterpret_cast<const dot11_header*>(buffer);
     if (hdr->control.type == MANAGEMENT) {
         switch (hdr->control.subtype) {
             case BEACON:

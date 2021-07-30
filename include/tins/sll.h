@@ -119,7 +119,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
     
     // Setters
 
@@ -158,12 +158,12 @@ public:
      *
      * This method overrides PDU::header_size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /**
      * \sa PDU::clone
      */
-    SLL* clone() const {
+    SLL* clone() const override {
         return new SLL(*this);
     }
 private:
@@ -174,7 +174,7 @@ private:
         uint16_t protocol;
     } TINS_END_PACK;
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     
     sll_header header_;
 };

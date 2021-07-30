@@ -86,7 +86,7 @@ void StreamFollower::process_packet(PDU& packet, const timestamp_type& ts) {
         // to an already running flow).
         // Start on client's SYN, not on server's SYN+ACK
         const bool is_syn = tcp->has_flags(TCP::SYN) && !tcp->has_flags(TCP::ACK);
-        if (is_syn || (attach_to_flows_ && tcp->find_pdu<RawPDU>() != 0)) {
+        if (is_syn || (attach_to_flows_ && tcp->find_pdu<RawPDU>() != nullptr)) {
             iter = streams_.insert(make_pair(identifier, Stream(packet, ts))).first;
             iter->second.setup_flows_callbacks();
             if (on_new_connection_) {

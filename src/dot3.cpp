@@ -100,9 +100,9 @@ void Dot3::send(PacketSender& sender, const NetworkInterface& iface) {
     #if defined(BSD) || defined(__FreeBSD_kernel__) || defined(TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET)
         sender.send_l2(*this, 0, 0, iface);
     #else
-        struct sockaddr_ll addr;
+        sockaddr_ll addr;
 
-        memset(&addr, 0, sizeof(struct sockaddr_ll));
+        memset(&addr, 0, sizeof(sockaddr_ll));
 
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_ALL);
@@ -110,7 +110,7 @@ void Dot3::send(PacketSender& sender, const NetworkInterface& iface) {
         addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), header_.dst_mac, sizeof(header_.dst_mac));
 
-        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr), iface);
+        sender.send_l2(*this, reinterpret_cast<sockaddr*>(&addr), static_cast<uint32_t>(sizeof(addr)), iface);
     #endif
 }
 #endif // !_WIN32 || TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
@@ -119,7 +119,7 @@ bool Dot3::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const dot3_header* eth_ptr = (const dot3_header*)ptr;
+    const dot3_header* eth_ptr = reinterpret_cast<const dot3_header*>(ptr);
     if (address_type(header_.src_mac) == address_type(eth_ptr->dst_mac)) {
         if (address_type(header_.src_mac) == address_type(eth_ptr->dst_mac) || 
             dst_addr() == BROADCAST) {
@@ -143,8 +143,8 @@ PDU* Dot3::recv_response(PacketSender& sender, const NetworkInterface& iface) {
         throw invalid_interface();
     }
     #if !defined(BSD) && !defined(__FreeBSD_kernel__)
-        struct sockaddr_ll addr;
-        memset(&addr, 0, sizeof(struct sockaddr_ll));
+        sockaddr_ll addr;
+        memset(&addr, 0, sizeof(sockaddr_ll));
 
         addr.sll_family = Endian::host_to_be<uint16_t>(PF_PACKET);
         addr.sll_protocol = Endian::host_to_be<uint16_t>(ETH_P_802_3);
@@ -152,7 +152,7 @@ PDU* Dot3::recv_response(PacketSender& sender, const NetworkInterface& iface) {
         addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), header_.dst_mac, sizeof(header_.dst_mac));
 
-        return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        return sender.recv_l2(*this, reinterpret_cast<sockaddr*>(&addr), static_cast<uint32_t>(sizeof(addr)));
     #else
         return sender.recv_l2(*this, 0, 0, iface);
     #endif
