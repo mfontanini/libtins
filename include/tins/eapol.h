@@ -155,7 +155,7 @@ public:
      * \brief Getter for the PDU's type.
      * \return Returns the PDUType corresponding to the PDU.
      */
-    PDUType pdu_type() const { return PDU::EAPOL; }
+    PDUType pdu_type() const override { return PDU::EAPOL; }
 protected:
     /**
      * \brief Protected constructor that sets the packet_type and type fields.
@@ -185,7 +185,7 @@ protected:
      */
     virtual void write_body(Memory::OutputMemoryStream& stream) = 0;
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
 
     eapol_header header_;
 };
@@ -345,13 +345,13 @@ public:
      *
      * \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /**
      * \brief Getter for the PDU's type.
      * \return Returns the PDUType corresponding to the PDU.
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag; 
     }
     
@@ -360,7 +360,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || EAPOL::matches_flag(flag);
     }
     
@@ -369,7 +369,7 @@ public:
      * 
      * \sa PDU::clone
      */
-    RC4EAPOL* clone() const {
+    RC4EAPOL* clone() const override {
         return new RC4EAPOL(*this);
     }
 private:
@@ -383,7 +383,7 @@ private:
         uint8_t key_sign[16];
     } TINS_END_PACK;
     
-    void write_body(Memory::OutputMemoryStream& stream);
+    void write_body(Memory::OutputMemoryStream& stream) override;
     
     
     key_type key_;
@@ -610,7 +610,7 @@ public:
      *
      * \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /* Setters */
     
@@ -752,7 +752,7 @@ public:
      * \brief Getter for the PDU's type.
      * \return Returns the PDUType corresponding to the PDU.
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
     
@@ -761,7 +761,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || EAPOL::matches_flag(flag);
     }
     
@@ -770,7 +770,7 @@ public:
      * 
      * \sa PDU::clone
      */
-    RSNEAPOL* clone() const {
+    RSNEAPOL* clone() const override {
         return new RSNEAPOL(*this);
     }
 private:
@@ -815,7 +815,7 @@ private:
     #endif
     } TINS_END_PACK;
     
-    void write_body(Memory::OutputMemoryStream& stream);
+    void write_body(Memory::OutputMemoryStream& stream) override;
     
     
     rsn_eapol_header header_;

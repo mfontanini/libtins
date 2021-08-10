@@ -974,7 +974,7 @@ public:
      *
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
 
     /**
      * \brief Checks whether this ICMPv6 object has a target_addr field.
@@ -1037,7 +1037,7 @@ public:
      * This method overrides PDU::header_size. This size includes the
      * payload and options size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Returns the trailer size.
@@ -1046,7 +1046,7 @@ public:
      *
      * \sa PDU::header_size
      */
-    uint32_t trailer_size() const;
+    uint32_t trailer_size() const override;
     
     /** 
      * \brief Getter for the extensions field.
@@ -1097,7 +1097,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
 
     /**
      * \brief Searchs for an option that matchs the given flag.
@@ -1113,7 +1113,7 @@ public:
     /**
      * \sa PDU::clone
      */
-    ICMPv6* clone() const {
+    ICMPv6* clone() const override {
         return new ICMPv6(*this);
     }
 
@@ -1560,7 +1560,7 @@ private:
     } TINS_END_PACK;
     
     void internal_add_option(const option& option);
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     bool has_options() const;
     void write_option(const option& opt, Memory::OutputMemoryStream& stream);
     void parse_options(Memory::InputMemoryStream& stream);

@@ -563,13 +563,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     #ifndef _WIN32
     /**
      * \sa PDU::send()
      */
-    void send(PacketSender& sender, const NetworkInterface& iface);
+    void send(PacketSender& sender, const NetworkInterface& iface) override;
     #endif // _WIN32
     
     /**
@@ -617,14 +617,14 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
     
     /**
      * \sa PDU::clone
      */
-    Dot11* clone() const {
+    Dot11* clone() const override {
         return new Dot11(*this);
     }
 
@@ -633,7 +633,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag;
     }
     
@@ -708,7 +708,7 @@ private:
     Dot11(const dot11_header* header_ptr);
     
     void internal_add_option(const option& opt);
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);
 

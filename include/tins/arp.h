@@ -200,7 +200,7 @@ public:
      * \return Returns the ARP header size.
      * \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /* Setters */
 
@@ -271,7 +271,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
 
     /**
      * \brief Creates an ARP Request within an EthernetII PDU.
@@ -312,12 +312,12 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
     
     /**
      * \sa PDU::clone
      */
-    ARP* clone() const {
+    ARP* clone() const override {
         return new ARP(*this);
     }
 private:
@@ -334,7 +334,7 @@ private:
         uint32_t target_ip_address;
     } TINS_END_PACK;
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
 
     arp_header header_;
 };

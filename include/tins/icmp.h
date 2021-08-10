@@ -394,7 +394,7 @@ public:
      *
      * \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Returns the trailer size.
@@ -403,7 +403,7 @@ public:
      *
      * \sa PDU::header_size
      */
-    uint32_t trailer_size() const;
+    uint32_t trailer_size() const override;
 
     /**
      * \brief Check whether ptr points to a valid response for this PDU.
@@ -412,7 +412,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
 
     /** 
      * \brief Getter for the extensions field.
@@ -461,14 +461,14 @@ public:
      *
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
     /**
      * \sa PDU::clone
      */
-    ICMP* clone() const {
+    ICMP* clone() const override {
         return new ICMP(*this);
     }
 private:
@@ -496,7 +496,7 @@ private:
     } TINS_END_PACK;
 
     void checksum(uint16_t new_check);    
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     uint32_t get_adjusted_inner_pdu_size() const;
     void try_parse_extensions(Memory::InputMemoryStream& stream);
     bool are_extensions_allowed() const;

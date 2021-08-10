@@ -129,13 +129,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -144,7 +144,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -153,7 +153,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11Authentication* clone() const {
+    Dot11Authentication* clone() const override {
         return new Dot11Authentication(*this);
     }
 private:
@@ -163,7 +163,7 @@ private:
         uint16_t status_code;
     };
 
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     dot11_auth_body body_;
 };
@@ -229,13 +229,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -244,7 +244,7 @@ public:
      * \param flag The flag to match
      * \sa PDU::matches_flag
      */
-    bool matches_flag(PDUType flag) const {
+    bool matches_flag(PDUType flag) const override {
        return flag == pdu_flag || Dot11ManagementFrame::matches_flag(flag);
     }
 
@@ -253,7 +253,7 @@ public:
      *
      * \sa PDU::clone
      */
-    Dot11Deauthentication* clone() const {
+    Dot11Deauthentication* clone() const override {
         return new Dot11Deauthentication(*this);
     }
 private:
@@ -261,7 +261,7 @@ private:
         uint16_t reason_code;
     };
 
-    void write_fixed_parameters(Memory::OutputMemoryStream& stream);
+    void write_fixed_parameters(Memory::OutputMemoryStream& stream) override;
 
     dot11_deauth_body body_;
 };

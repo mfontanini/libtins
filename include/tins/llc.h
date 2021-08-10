@@ -314,13 +314,13 @@ public:
      * \return The header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
@@ -334,7 +334,7 @@ public:
      *
      * \sa PDU::clone
      */
-    LLC* clone() const {
+    LLC* clone() const override {
         return new LLC(*this);
     }
 private:
@@ -400,7 +400,7 @@ private:
     typedef std::vector<uint8_t> field_type;
     typedef std::vector<field_type> field_list;
 
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
 
     llchdr header_;
     uint8_t control_field_length_;

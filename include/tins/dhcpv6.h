@@ -863,7 +863,7 @@ public:
      *
      * This method overrides PDU::header_size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
         /** 
      * \brief Check whether ptr points to a valid response for this PDU.
@@ -872,24 +872,24 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
     
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { 
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
     
     /**
      * \sa PDU::clone
      */
-    DHCPv6* clone() const {
+    DHCPv6* clone() const override {
         return new DHCPv6(*this);
     }
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     void write_option(const option& option, Memory::OutputMemoryStream& stream) const;
     options_type::const_iterator search_option_iterator(OptionTypes type) const;
     options_type::iterator search_option_iterator(OptionTypes type);

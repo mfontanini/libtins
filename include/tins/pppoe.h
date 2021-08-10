@@ -168,7 +168,7 @@ public:
      *
      * This method overrides PDU::header_size. \sa PDU::header_size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     /**
      * \brief Returns the list of tags.
@@ -180,7 +180,7 @@ public:
     /**
      * \sa PDU::clone
      */
-    PPPoE* clone() const {
+    PPPoE* clone() const override {
         return new PPPoE(*this);
     }
     
@@ -190,7 +190,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const { return pdu_flag; }
+    PDUType pdu_type() const override { return pdu_flag; }
 
     // Setters
 
@@ -389,7 +389,7 @@ public:
      */
     std::string generic_error() const;
 private:
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     
     template<typename T>
     void add_tag_iterable(TagTypes id, const T& data) {

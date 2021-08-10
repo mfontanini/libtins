@@ -174,7 +174,7 @@ public:
     /**
      * \sa PDU::send()
      */
-    void send(PacketSender& sender, const NetworkInterface& iface);
+    void send(PacketSender& sender, const NetworkInterface& iface) override;
     #endif
     
     /**
@@ -407,7 +407,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
     
     /**
      * \brief Returns the RadioTap frame's header length.
@@ -415,13 +415,13 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /**
      * \brief Returns the frame's trailer size.
      * \return The trailer's size.
      */
-    uint32_t trailer_size() const;
+    uint32_t trailer_size() const override;
     
     /**
      * Adds the given option
@@ -442,7 +442,7 @@ public:
     /**
      * \sa PDU::clone
      */
-    RadioTap* clone() const {
+    RadioTap* clone() const override {
         return new RadioTap(*this);
     }
     
@@ -450,7 +450,7 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 private:
@@ -466,7 +466,7 @@ private:
         uint16_t it_len;
     } TINS_END_PACK;
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     option do_find_option(PresentFlags type) const;
 
     radiotap_header header_;

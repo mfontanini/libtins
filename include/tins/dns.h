@@ -797,14 +797,14 @@ public:
      *
      * \return Returns the PDUType corresponding to the PDU.
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
     
     /** 
      * \brief The header's size
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     // Setters
      
@@ -986,12 +986,12 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
     
     /**
      * \sa PDU::clone
      */
-    DNS* clone() const {
+    DNS* clone() const override {
         return new DNS(*this);
     }
 private:
@@ -1045,7 +1045,7 @@ private:
     uint8_t* update_dname(uint8_t* ptr, uint32_t threshold, uint32_t offset);
     static void inline_convert_v4(uint32_t value, char* output);
     static bool contains_dname(uint16_t type);
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     void add_record(const resource& resource, const sections_type& sections);
     
     dns_header header_;

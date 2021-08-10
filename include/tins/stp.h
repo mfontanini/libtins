@@ -180,14 +180,14 @@ public:
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
     /**
      * \sa PDU::clone
      */
-    STP* clone() const {
+    STP* clone() const override {
         return new STP(*this);
     }
     
@@ -196,7 +196,7 @@ public:
     *
     * This method overrides PDU::header_size. \sa PDU::header_size
     */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
 
     // Setters
 
@@ -305,7 +305,7 @@ private:
     static bpdu_id_type convert(const pvt_bpdu_id& id);
     static pvt_bpdu_id convert(const bpdu_id_type& id);
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
     
     stp_header header_;
 };

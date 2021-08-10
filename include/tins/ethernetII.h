@@ -150,7 +150,7 @@ public:
      * \return An uint32_t with the header's size.
      * \sa PDU::header_size()
      */
-    uint32_t header_size() const;
+    uint32_t header_size() const override;
     
     /**
      * \brief Returns the ethernet II frame's padding.
@@ -158,12 +158,12 @@ public:
      * \return An uint32_t with the padding size.
      * \sa PDU::trailer_size()
      */
-    uint32_t trailer_size() const;
+    uint32_t trailer_size() const override;
 
     /**
      * \sa PDU::send()
      */
-    void send(PacketSender& sender, const NetworkInterface& iface);
+    void send(PacketSender& sender, const NetworkInterface& iface) override;
 
     /** 
      * \brief Check whether ptr points to a valid response for this PDU.
@@ -172,7 +172,7 @@ public:
      * \param ptr The pointer to the buffer.
      * \param total_sz The size of the buffer.
      */
-    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const;
+    bool matches_response(const uint8_t* ptr, uint32_t total_sz) const override;
 
     #ifndef _WIN32
     /** 
@@ -180,21 +180,21 @@ public:
      *
      * \sa PDU::recv_response
      */
-    PDU* recv_response(PacketSender& sender, const NetworkInterface& iface);
+    PDU* recv_response(PacketSender& sender, const NetworkInterface& iface) override;
     #endif // _WIN32
 
     /**
      * \brief Getter for the PDU's type.
      * \sa PDU::pdu_type
      */
-    PDUType pdu_type() const {
+    PDUType pdu_type() const override {
         return pdu_flag;
     }
 
     /**
      * \sa PDU::clone
      */
-    EthernetII* clone() const {
+    EthernetII* clone() const override {
         return new EthernetII(*this);
     }
 private:
@@ -208,7 +208,7 @@ private:
         uint16_t payload_type;
     } TINS_END_PACK;
     
-    void write_serialization(uint8_t* buffer, uint32_t total_sz);
+    void write_serialization(uint8_t* buffer, uint32_t total_sz) override;
 
     ethernet_header header_;
 };
