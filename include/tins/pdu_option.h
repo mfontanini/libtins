@@ -398,8 +398,8 @@ private:
         }
         real_size_ = static_cast<uint16_t>(total_size);
         if (real_size_ <= small_buffer_size) {
-            if (total_size > 0) {
-                std::memcpy(payload_.small_buffer, &*start, total_size);
+            if (real_size_ > 0) {
+                std::memcpy(payload_.small_buffer, &*start, real_size_);
             }
         }
         else {
