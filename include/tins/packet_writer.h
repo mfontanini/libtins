@@ -216,7 +216,7 @@ private:
     PacketWriter& operator=(const PacketWriter&);
 
     void init(const std::string& file_name, int link_type);
-    void write(PDU& pdu, const struct timeval& tv);
+    void write(PDU& pdu, const timeval& tv);
 
     pcap_t* handle_;
     pcap_dumper_t* dumper_; 
