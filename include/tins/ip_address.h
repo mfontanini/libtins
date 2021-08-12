@@ -71,7 +71,7 @@ public:
      * 
      * \param ip const char* containing the dotted-notation address.
      */
-    IPv4Address(const char* ip = 0);
+    IPv4Address(const char* ip = nullptr);
     
     /**
      * \brief Constructor taking a std::string.

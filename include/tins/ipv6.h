@@ -160,7 +160,7 @@ public:
      */
     IPv6(address_type ip_dst = address_type(), 
          address_type ip_src = address_type(), 
-         PDU* child = 0);
+         PDU* child = nullptr);
 
     /**
      * \brief Constructs an IPv6 object from a buffer and adds all 

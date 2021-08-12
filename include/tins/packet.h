@@ -142,7 +142,7 @@ public:
      * The PDU* will be set to a null pointer.
      */
     Packet() 
-    : pdu_(0) { }
+    : pdu_(nullptr) { }
     
     /**
      * \brief Constructs a Packet from a PDU* and a Timestamp.
@@ -203,7 +203,7 @@ public:
      * This calls PDU::clone on the rhs's PDU* member.
      */
     Packet(const Packet& rhs) : ts_(rhs.timestamp()) {
-        pdu_ = rhs.pdu() ? rhs.pdu()->clone() : 0;
+        pdu_ = rhs.pdu() ? rhs.pdu()->clone() : nullptr;
     }
     
     /**
@@ -215,7 +215,7 @@ public:
         if (this != &rhs) {
             delete pdu_;
             ts_ = rhs.timestamp();
-            pdu_ = rhs.pdu() ? rhs.pdu()->clone() : 0;
+            pdu_ = rhs.pdu() ? rhs.pdu()->clone() : nullptr;
         }
         return* this;
     }
@@ -287,7 +287,7 @@ public:
      */
     PDU* release_pdu() {
         PDU* some_pdu = pdu_;
-        pdu_ = 0;
+        pdu_ = nullptr;
         return some_pdu;
     }
     

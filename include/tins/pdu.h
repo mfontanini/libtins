@@ -233,7 +233,7 @@ public:
          * \param rhs The PDU to be moved.
          */
         PDU(PDU &&rhs) TINS_NOEXCEPT
-        : inner_pdu_(0), parent_pdu_(0) {
+        : inner_pdu_(nullptr), parent_pdu_(nullptr) {
             std::swap(inner_pdu_, rhs.inner_pdu_);
             if (inner_pdu_) {
                 inner_pdu_->parent_pdu(this);
@@ -247,7 +247,7 @@ public:
          */
         PDU& operator=(PDU &&rhs) TINS_NOEXCEPT {
             delete inner_pdu_;
-            inner_pdu_ = 0;
+            inner_pdu_ = nullptr;
             std::swap(inner_pdu_, rhs.inner_pdu_);
             if (inner_pdu_) {
                 inner_pdu_->parent_pdu(this);
@@ -366,7 +366,7 @@ public:
             }
             pdu = pdu->inner_pdu();
         }
-        return 0;
+        return nullptr;
     }
 
     /**

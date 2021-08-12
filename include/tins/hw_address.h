@@ -131,7 +131,7 @@ public:
      * 
      * \param ptr The pointer from which to construct this address.
      */
-    HWAddress(const storage_type* ptr = 0) {
+    HWAddress(const storage_type* ptr = nullptr) {
         if (ptr) {
             std::memcpy(buffer_, ptr, address_size);
         }

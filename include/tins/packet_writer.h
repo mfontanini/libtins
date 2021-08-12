@@ -154,8 +154,8 @@ public:
          * \param rhs The PacketWriter to be moved.
          */
         PacketWriter& operator=(PacketWriter &&rhs) TINS_NOEXCEPT {
-            handle_ = 0;
-            dumper_ = 0;
+            handle_ = nullptr;
+            dumper_ = nullptr;
             std::swap(handle_, rhs.handle_);
             std::swap(dumper_, rhs.dumper_);
             return* this;
