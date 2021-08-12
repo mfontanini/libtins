@@ -167,16 +167,16 @@ public:
         
         /**
          * Constructor using user provided values for each field.
-         * \param number The number field value.
-         * \param op_class The option class field value.
-         * \param copied The copied field value.
+         * \param number_ The number field value.
+         * \param op_class_ The option class field value.
+         * \param copied_ The copied field value.
          */
-        option_identifier(OptionNumber number, OptionClass op_class,
-          small_uint<1> copied) 
+        option_identifier(OptionNumber number_, OptionClass op_class_,
+          small_uint<1> copied_)
         #if TINS_IS_LITTLE_ENDIAN
-        : number(static_cast<uint8_t>(number)), op_class(static_cast<uint8_t>(op_class)), copied(copied) {}
+        : number(static_cast<uint8_t>(number_)), op_class(static_cast<uint8_t>(op_class_)), copied(copied_) {}
         #else
-        : copied(copied), op_class(static_cast<uint8_t>(op_class)), number(static_cast<uint8_t>(number)) {}
+        : copied(copied_), op_class(static_cast<uint8_t>(op_class_)), number(static_cast<uint8_t>(number_)) {}
         #endif
         
         /**

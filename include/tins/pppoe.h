@@ -92,8 +92,8 @@ public:
         uint32_t vendor_id;
         data_type data;
         
-        vendor_spec_type(uint32_t vendor_id = 0, const data_type& data = data_type())
-        : vendor_id(vendor_id), data(data) { }
+        vendor_spec_type(uint32_t vendor_id_ = 0, const data_type& data_ = data_type())
+        : vendor_id(vendor_id_), data(data_) { }
         
         static vendor_spec_type from_option(const tag& opt);
     };

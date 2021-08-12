@@ -61,9 +61,9 @@ public:
         small_uint<12> ext_id;
         address_type id;
         
-        bpdu_id_type(small_uint<4> priority=0, small_uint<12> ext_id=0, 
-            const address_type& id=address_type())
-        : priority(priority), ext_id(ext_id), id(id) { }
+        bpdu_id_type(small_uint<4> priority_=0, small_uint<12> ext_id_=0,
+            const address_type& id_=address_type())
+        : priority(priority_), ext_id(ext_id_), id(id_) { }
     };
 
     /**

@@ -466,12 +466,12 @@ public:
         fh_params_set()
         : dwell_time(0), hop_set(0), hop_pattern(0), hop_index(0) {}
         
-        fh_params_set(uint16_t dwell_time, 
-                      uint8_t hop_set, 
-                      uint8_t hop_pattern,
-                      uint8_t hop_index) 
-        : dwell_time(dwell_time), hop_set(hop_set), 
-          hop_pattern(hop_pattern), hop_index(hop_index) {}
+        fh_params_set(uint16_t dwell_time_,
+                      uint8_t hop_set_,
+                      uint8_t hop_pattern_,
+                      uint8_t hop_index_)
+        : dwell_time(dwell_time_), hop_set(hop_set_),
+          hop_pattern(hop_pattern_), hop_index(hop_index_) {}
 
         static fh_params_set from_option(const option& opt);
     };
@@ -486,13 +486,13 @@ public:
         cf_params_set()
         : cfp_count(0), cfp_period(0), cfp_max_duration(0), cfp_dur_remaining(0) {}
         
-        cf_params_set(uint8_t cfp_count, 
-                      uint8_t cfp_period,
-                      uint16_t cfp_max_duration,
-                      uint16_t cfp_dur_remaining) 
-        : cfp_count(cfp_count), cfp_period(cfp_period), 
-          cfp_max_duration(cfp_max_duration), 
-          cfp_dur_remaining(cfp_dur_remaining) {}
+        cf_params_set(uint8_t cfp_count_,
+                      uint8_t cfp_period_,
+                      uint16_t cfp_max_duration_,
+                      uint16_t cfp_dur_remaining_)
+        : cfp_count(cfp_count_), cfp_period(cfp_period_),
+          cfp_max_duration(cfp_max_duration_),
+          cfp_dur_remaining(cfp_dur_remaining_) {}
 
         static cf_params_set from_option(const option& opt);
     };
@@ -510,10 +510,10 @@ public:
         ibss_dfs_params() : recovery_interval(0) {}
        
         ibss_dfs_params(const address_type& addr, 
-                        uint8_t recovery_interval,
-                        const channel_map_type& channel_map)
-        : dfs_owner(addr), recovery_interval(recovery_interval),
-          channel_map(channel_map) {}
+                        uint8_t recovery_interval_,
+                        const channel_map_type& channel_map_)
+        : dfs_owner(addr), recovery_interval(recovery_interval_),
+          channel_map(channel_map_) {}
 
         static ibss_dfs_params from_option(const option& opt);
     };
@@ -530,11 +530,11 @@ public:
         
         country_params() {}
         
-        country_params(const std::string& country, 
+        country_params(const std::string& country_,
                        const byte_array& first,
                        const byte_array& number,
                        const byte_array& max) 
-        : country(country), first_channel(first), number_channels(number),
+        : country(country_), first_channel(first), number_channels(number),
           max_transmit_power(max) {}
 
         static country_params from_option(const option& opt);
@@ -552,13 +552,13 @@ public:
         fh_pattern_type()
         : flag(0), number_of_sets(0), modulus(0), offset(0) {}
         
-        fh_pattern_type(uint8_t flag, 
+        fh_pattern_type(uint8_t flag_,
                         uint8_t sets,
-                        uint8_t modulus,
-                        uint8_t offset,
+                        uint8_t modulus_,
+                        uint8_t offset_,
                         const byte_array& table) 
-        : flag(flag), number_of_sets(sets), modulus(modulus), 
-          offset(offset), random_table(table) {}
+        : flag(flag_), number_of_sets(sets), modulus(modulus_),
+          offset(offset_), random_table(table) {}
 
         static fh_pattern_type from_option(const option& opt);
     };
@@ -647,9 +647,9 @@ public:
         oui_type oui;
         byte_array data;
 
-        vendor_specific_type(const oui_type& oui = oui_type(),
-                             const byte_array& data = byte_array())
-        : oui(oui), data(data) { }
+        vendor_specific_type(const oui_type& oui_ = oui_type(),
+                             const byte_array& data_ = byte_array())
+        : oui(oui_), data(data_) { }
 
         static vendor_specific_type from_bytes(const uint8_t* buffer, uint32_t sz);
     };

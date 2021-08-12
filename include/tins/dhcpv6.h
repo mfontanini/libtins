@@ -184,9 +184,9 @@ public:
         uint32_t id, t1, t2;
         options_type options;
         
-        ia_na_type(uint32_t id = 0, uint32_t t1 = 0, uint32_t t2 = 0,
-          const options_type& options = options_type())
-        : id(id), t1(t1), t2(t2), options(options) {}
+        ia_na_type(uint32_t id_ = 0, uint32_t t1_ = 0, uint32_t t2_ = 0,
+          const options_type& options_ = options_type())
+        : id(id_), t1(t1_), t2(t2_), options(options_) {}
 
         static ia_na_type from_option(const option& opt);
     };
@@ -201,9 +201,9 @@ public:
         uint32_t id;
         options_type options;
         
-        ia_ta_type(uint32_t id = 0,
-          const options_type& options = options_type())
-        : id(id), options(options) {}
+        ia_ta_type(uint32_t id_ = 0,
+          const options_type& options_ = options_type())
+        : id(id_), options(options_) {}
 
         static ia_ta_type from_option(const option& opt);
     };
@@ -218,11 +218,11 @@ public:
         uint32_t preferred_lifetime, valid_lifetime;
         options_type options;
         
-        ia_address_type(ipaddress_type address = ipaddress_type(), 
-          uint32_t preferred_lifetime = 0, uint32_t valid_lifetime = 0, 
-          const options_type& options = options_type())
-        : address(address), preferred_lifetime(preferred_lifetime), 
-          valid_lifetime(valid_lifetime), options(options) {}
+        ia_address_type(ipaddress_type address_ = ipaddress_type(),
+          uint32_t preferred_lifetime_ = 0, uint32_t valid_lifetime_ = 0,
+          const options_type& options_ = options_type())
+        : address(address_), preferred_lifetime(preferred_lifetime_),
+          valid_lifetime(valid_lifetime_), options(options_) {}
 
         static ia_address_type from_option(const option& opt);
     };
@@ -237,11 +237,11 @@ public:
         uint64_t replay_detection;
         auth_info_type auth_info;
         
-        authentication_type(uint8_t protocol = 0, uint8_t algorithm = 0,
-          uint8_t rdm = 0, uint64_t replay_detection = 0,
-          const auth_info_type& auth_info = auth_info_type())
-        : protocol(protocol), algorithm(algorithm), rdm(rdm),
-        replay_detection(replay_detection), auth_info(auth_info) {}
+        authentication_type(uint8_t protocol_ = 0, uint8_t algorithm_ = 0,
+          uint8_t rdm_ = 0, uint64_t replay_detection_ = 0,
+          const auth_info_type& auth_info_ = auth_info_type())
+        : protocol(protocol_), algorithm(algorithm_), rdm(rdm_),
+        replay_detection(replay_detection_), auth_info(auth_info_) {}
 
         static authentication_type from_option(const option& opt);
     };
@@ -253,8 +253,8 @@ public:
         uint16_t code;
         std::string message;
         
-        status_code_type(uint16_t code = 0, const std::string& message = "")
-        : code(code), message(message) { }
+        status_code_type(uint16_t code_ = 0, const std::string& message_ = "")
+        : code(code_), message(message_) { }
 
         static status_code_type from_option(const option& opt);
     };
@@ -268,9 +268,9 @@ public:
         uint32_t enterprise_number;
         data_type data;
         
-        vendor_info_type(uint32_t enterprise_number = 0, 
-          const data_type& data = data_type())
-        : enterprise_number(enterprise_number), data(data) { }
+        vendor_info_type(uint32_t enterprise_number_ = 0,
+          const data_type& data_ = data_type())
+        : enterprise_number(enterprise_number_), data(data_) { }
 
         static vendor_info_type from_option(const option& opt);
     };
@@ -289,8 +289,8 @@ public:
         typedef std::vector<class_option_data_type> data_type;
         data_type data;
 
-        user_class_type(const data_type& data = data_type())
-        : data(data) { }
+        user_class_type(const data_type& data_ = data_type())
+        : data(data_) { }
 
         static user_class_type from_option(const option& opt);
     };
@@ -304,10 +304,10 @@ public:
         uint32_t enterprise_number;
         class_data_type vendor_class_data;
         
-        vendor_class_type(uint32_t enterprise_number = 0, 
-          const class_data_type& vendor_class_data = class_data_type())
-        : enterprise_number(enterprise_number), 
-        vendor_class_data(vendor_class_data) { }
+        vendor_class_type(uint32_t enterprise_number_ = 0,
+          const class_data_type& vendor_class_data_ = class_data_type())
+        : enterprise_number(enterprise_number_),
+        vendor_class_data(vendor_class_data_) { }
 
         static vendor_class_type from_option(const option& opt);
     };
@@ -324,9 +324,9 @@ public:
         uint32_t time;
         lladdress_type lladdress;
         
-        duid_llt(uint16_t hw_type = 0, uint32_t time = 0,
-          const lladdress_type& lladdress = lladdress_type())
-        : hw_type(hw_type), time(time), lladdress(lladdress) {}
+        duid_llt(uint16_t hw_type_ = 0, uint32_t time_ = 0,
+          const lladdress_type& lladdress_ = lladdress_type())
+        : hw_type(hw_type_), time(time_), lladdress(lladdress_) {}
         
         PDU::serialization_type serialize() const;
         
@@ -343,9 +343,9 @@ public:
         uint32_t enterprise_number;
         identifier_type identifier;
         
-        duid_en(uint32_t enterprise_number = 0,
-          const identifier_type& identifier = identifier_type())
-        : enterprise_number(enterprise_number), identifier(identifier) {}
+        duid_en(uint32_t enterprise_number_ = 0,
+          const identifier_type& identifier_ = identifier_type())
+        : enterprise_number(enterprise_number_), identifier(identifier_) {}
         
         PDU::serialization_type serialize() const;
         
@@ -362,9 +362,9 @@ public:
         uint16_t hw_type;
         lladdress_type lladdress;
         
-        duid_ll(uint16_t hw_type = 0, 
-          const lladdress_type& lladdress = lladdress_type())
-        : hw_type(hw_type), lladdress(lladdress) {}
+        duid_ll(uint16_t hw_type_ = 0,
+          const lladdress_type& lladdress_ = lladdress_type())
+        : hw_type(hw_type_), lladdress(lladdress_) {}
         
         PDU::serialization_type serialize() const;
         
@@ -381,8 +381,8 @@ public:
         uint16_t id;
         data_type data;
         
-        duid_type(uint16_t id = 0, const data_type& data = data_type())
-        : id(id), data(data) {}
+        duid_type(uint16_t id_ = 0, const data_type& data_ = data_type())
+        : id(id_), data(data_) {}
         
         duid_type(const duid_llt& identifier)
         : id(duid_llt::duid_id), data(identifier.serialize()) {}
@@ -896,20 +896,20 @@ private:
     
     template <template <typename> class Functor>
     const option* safe_search_option(OptionTypes opt, uint32_t size) const {
-        const option* option = search_option(opt);
-        if (!option || Functor<uint32_t>()(option->data_size(), size)) {
+        const option* option_ = search_option(opt);
+        if (!option_ || Functor<uint32_t>()(option_->data_size(), size)) {
             throw option_not_found();
         }
-        return option;
+        return option_;
     }
 
     template<typename T>
     T search_and_convert(OptionTypes opt) const {
-        const option* option = search_option(opt);
-        if (!option) {
+        const option* option_ = search_option(opt);
+        if (!option_) {
             throw option_not_found();
         }
-        return option->to<T>();
+        return option_->to<T>();
     }
 
     uint8_t header_data_[4];

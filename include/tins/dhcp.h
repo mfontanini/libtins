@@ -511,11 +511,11 @@ private:
 
     template <typename T> 
     T search_and_convert(OptionTypes opt) const {
-        const option* option = search_option(opt);
-        if (!option) {
+        const option* option_ = search_option(opt);
+        if (!option_) {
             throw option_not_found();
         }
-        return option->to<T>();
+        return option_->to<T>();
     }
     
     void internal_add_option(const option& opt);
