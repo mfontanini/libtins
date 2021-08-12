@@ -275,7 +275,7 @@ public:
      * \return The type flag for this ICMP PDU.
      */
     Flags type() const {
-        return (Flags)header_.type;
+        return static_cast<Flags>(header_.type);
     }
 
     /**
