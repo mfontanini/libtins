@@ -392,7 +392,7 @@ public:
 private:
     template<typename ForwardIterator>
     void set_payload_contents(ForwardIterator start, ForwardIterator end) {
-        size_t total_size = std::distance(start, end);
+        size_t total_size = static_cast<size_t>(std::distance(start, end));
         if (total_size > 65535) {
             throw option_payload_too_large();
         }

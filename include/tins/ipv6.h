@@ -203,9 +203,9 @@ public:
      */
     small_uint<20> flow_label() const {
         #if TINS_IS_LITTLE_ENDIAN
-        return ((header_.flow_label[0] & 0x0f) << 16)
-                | (header_.flow_label[1] << 8)
-                | (header_.flow_label[2]);
+        return (static_cast<small_uint<20>>((header_.flow_label[0] & 0x0f)) << 16)
+                | (static_cast<small_uint<20>>(header_.flow_label[1]) << 8)
+                | static_cast<small_uint<20>>(header_.flow_label[2]);
         #else
         return header_.flow_label;
         #endif

@@ -73,7 +73,7 @@ public:
      * \brief Getter for the label field.
      */
     small_uint<20> label() const {
-        return (Endian::be_to_host(header_.label_high) << 4) |
+        return (static_cast<small_uint<20>>(Endian::be_to_host(header_.label_high)) << 4) |
                ((header_.label_low_exp_and_bottom >> 4) & 0xf);
     }
 

@@ -462,7 +462,9 @@ public:
      * \return The stored transaction id field.
      */
     small_uint<24> transaction_id() const { 
-        return (header_data_[1] << 16) | (header_data_[2] << 8) | header_data_[3];
+        return (static_cast<small_uint<24>>(header_data_[1]) << 16)
+                | (static_cast<small_uint<24>>(header_data_[2]) << 8)
+                | static_cast<small_uint<24>>(header_data_[3]);
     }
 
     /**
