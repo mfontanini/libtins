@@ -106,14 +106,7 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
 
 } // Internals
 
-IPv4Reassembler::IPv4Reassembler()
-: technique_(NONE) {
-
-}
-
-IPv4Reassembler::IPv4Reassembler(OverlappingTechnique technique)
-: technique_(technique) {
-
+IPv4Reassembler::IPv4Reassembler() {
 }
 
 IPv4Reassembler::PacketStatus IPv4Reassembler::process(PDU& pdu) {
