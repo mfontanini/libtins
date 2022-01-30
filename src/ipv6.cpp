@@ -32,6 +32,9 @@
     #include <netinet/in.h>
     #include <sys/socket.h>
 #else
+    #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+    #endif
     #include <ws2tcpip.h>
 #endif
 #include <tins/ipv6.h>
