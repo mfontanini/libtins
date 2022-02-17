@@ -1,3 +1,21 @@
+##### v4.4 - Thu Feb 17 14:41:59 UTC 2022
+
+- Add RFC8335 extended echo types to `ICMP` and `ICMPv6` (#426)
+
+- Handle loops in DNS name decompression (#444)
+
+- Fix Windows' `interface` macro colliding with uses of that identifier in the code (#458)
+
+- Sending IPv6 packets to a link-scope destination address now uses the right interface index (#448)
+
+- Fix incorrect endian being used for ICMP's `gateway` and `address_mask` (#437)
+
+- Socket in `PacketSender::open_l3_socket` is now closed if `setsockopt` fails (#433)
+
+- Fix various incorrect doxygen documentation comments (#439).
+
+- Fix infinite loop when querying the routing table in \*BSD (#427)
+
 ##### v4.3 - Fri Sep 18 03:08:33 UTC 2020
 
 - Assign a PDUType to `Dot11ControlTA` (#420)
