@@ -7,6 +7,6 @@ jobs:
       - uses: actions/checkout@v2
       - run: git submodule init
       - run: mkdir build
-      - run: cmake build
+      - run: cd build && cmake ..
       - run: cmake --build build --target tests
       - run: ctest build
