@@ -5,8 +5,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: git submodule init
-      - run: mkdir build
-      - run: cd build && cmake ..
-      - run: cmake --build build --target tests
-      - run: ctest build
+
+      - name: Install libpcap
+        run: sudo apt-get install -y libpcap-dev
+
+      - name: Initialize submodules
+        run: git submodule init
+
+      - name: Initialize build system
+        run: mkdir build && cd build && cmake ..
+
+      - name: Build tests
+        run: cmake --build build --target tests
+
+      - name: Run tests
+        run: ctest build
