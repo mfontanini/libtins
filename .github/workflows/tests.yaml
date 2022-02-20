@@ -1,0 +1,11 @@
+name: Tests
+on: [push]
+jobs:
+  Ubuntu-Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: git submodule init
+      - run: mkdir build && cd build
+      - run: cmake ..
+      - run: cmake --build . --target tests
+      - run: ctest .
