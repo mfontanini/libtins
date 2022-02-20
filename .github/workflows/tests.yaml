@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: git submodule init
-      - run: mkdir build && cd build
-      - run: cmake ..
-      - run: cmake --build . --target tests
-      - run: ctest .
+      - run: mkdir build
+      - run: cmake build
+      - run: cmake --build build --target tests
+      - run: ctest build
