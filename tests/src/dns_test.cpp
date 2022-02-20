@@ -551,3 +551,54 @@ TEST_F(DNSTest, SOARecordSerialize) {
     EXPECT_EQ(0x8ad71928U, r2.expire());
     EXPECT_EQ(0x1ad92871U, r2.minimum_ttl());
 }
+
+TEST_F(DNSTest, BadLabelSize) {
+    const uint8_t header[] = {
+                       0x45, 0xbc,    // ID
+                       0x81, 0x80,    // response, recursion desired, recursion available, no error
+                       0x00, 0x01,    // QDCOUNT
+                       0x00, 0x00,    // ANCOUNT
+                       0x00, 0x00,    // NSCOUNT
+                       0x00, 0x00     // ARCOUNT
+    };
+    size_t payload_sz{sizeof(header)};
+    uint8_t payload[512];
+
+    // copy header
+    std::copy(header, 
+              header + payload_sz, 
+              payload);
+
+    // add bad length
+    const size_t bad_label_len{0x80};
+    payload[payload_sz++] = bad_label_len; 
+        
+    // fill label for incorrect length and terminate
+    std::fill(payload + payload_sz,
+              payload + payload_sz + bad_label_len, 
+              'a');
+    payload_sz += bad_label_len;
+    payload[payload_sz++] = 0x0;
+
+    // add type and class
+    const uint8_t type_class[] = {
+        0x00, 0x01,
+        0x00, 0x01
+    };
+    std::copy(type_class, 
+              type_class + sizeof(type_class), 
+              payload + payload_sz);
+    payload_sz += sizeof(type_class);
+
+    // SUCCEED moves from dns_decompression_pointer_out_of_bounds to malformed_packet after fix
+    const DNS packet(payload, payload_sz);
+    EXPECT_EQ(packet.questions_count(), 1);
+    try {
+        const auto queries{packet.queries()};
+        FAIL();
+    } catch (dns_decompression_pointer_out_of_bounds& oob) {
+        FAIL();
+    } catch (malformed_packet& mp) {
+        SUCCEED();
+    }
+}
