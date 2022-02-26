@@ -1034,7 +1034,8 @@ private:
     uint32_t compose_name(const uint8_t* ptr, char* out_ptr) const;
     void convert_records(const uint8_t* ptr, 
                          const uint8_t* end,
-                         resources_type& res) const;
+                         resources_type& res,
+                         const uint16_t rr_count) const;
     void skip_to_section_end(Memory::InputMemoryStream& stream, 
                              const uint32_t num_records) const;
     void skip_to_dname_end(Memory::InputMemoryStream& stream) const;

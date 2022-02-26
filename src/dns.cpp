@@ -414,10 +414,11 @@ void DNS::inline_convert_v4(uint32_t value, char* output) {
 // Parses records in some section.
 void DNS::convert_records(const uint8_t* ptr,
                           const uint8_t* end,
-                          resources_type& res) const {
+                          resources_type& res,
+                          const uint16_t rr_count) const {
     InputMemoryStream stream(ptr, end - ptr);
     char dname[256], small_addr_buf[256];
-    while (stream) {
+    while (stream && (res.size() < rr_count)) {
         string data;
         bool used_small_buffer = false;
         // Retrieve the record's domain name.
@@ -577,7 +578,8 @@ DNS::resources_type DNS::answers() const {
         convert_records(
             &records_data_[0] + answers_idx_, 
             &records_data_[0] + authority_idx_, 
-            res
+            res,
+            answers_count()
         );
     }
     return res;
@@ -589,7 +591,8 @@ DNS::resources_type DNS::authority() const {
         convert_records(
             &records_data_[0] + authority_idx_, 
             &records_data_[0] + additional_idx_, 
-            res
+            res,
+            authority_count()
         );
     }
     return res;
@@ -601,7 +604,8 @@ DNS::resources_type DNS::additional() const {
         convert_records(
             &records_data_[0] + additional_idx_, 
             &records_data_[0] + records_data_.size(), 
-            res
+            res,
+            additional_count()
         );
     }
     return res;
