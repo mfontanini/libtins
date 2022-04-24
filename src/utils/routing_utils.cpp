@@ -413,17 +413,21 @@ set<string> network_interfaces() {
 }
 #else
 set<string> network_interfaces() {
-    set<string> output;
-    struct ifaddrs* ifaddrs = 0;
-    struct ifaddrs* if_it = 0;
-    getifaddrs(&ifaddrs);
-    for (if_it = ifaddrs; if_it; if_it = if_it->ifa_next) {
-        output.insert(if_it->ifa_name);
-    }
-    if (ifaddrs) {
-        freeifaddrs(ifaddrs);
-    }
+    #ifndef ANDROID 
+        set<string> output;
+        struct ifaddrs* ifaddrs = 0;
+        struct ifaddrs* if_it = 0;
+        getifaddrs(&ifaddrs);
+        for (if_it = ifaddrs; if_it; if_it = if_it->ifa_next) {
+            output.insert(if_it->ifa_name);
+        }
+        if (ifaddrs) {
+            freeifaddrs(ifaddrs);
+        }
     return output;
+    #else
+        throw std::runtime_error("android ifaddr not supported");
+    #endif
 }
 #endif // _WIN32
 
