@@ -331,7 +331,7 @@ NetworkInterface::Info NetworkInterface::info() const {
     }
 
     #else // _WIN32
-
+    #ifndef ANDROID 
     struct ifaddrs* ifaddrs = 0;
     struct ifaddrs* if_it = 0;
     getifaddrs(&ifaddrs);
@@ -341,7 +341,9 @@ NetworkInterface::Info NetworkInterface::info() const {
     if (ifaddrs) {
         freeifaddrs(ifaddrs);
     }
-
+    #else
+    throw new std::runtime_error("android ifaddr not supported");
+    #endif
     #endif // _WIN32
     
      // If we didn't even get the hw address or ip address, this went wrong
