@@ -318,7 +318,7 @@ ENDIF()
 # **********************************
 
 if(UNIX)
-    set(CONF_CMAKE_INSTALL_DIR lib/cmake/libtins)
+    set(CONF_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/libtins")
 else()
     set(CONF_CMAKE_INSTALL_DIR CMake)
 endif()
