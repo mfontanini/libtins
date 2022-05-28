@@ -188,7 +188,7 @@ void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, ui
     add_tagged_option(EDCA, sizeof(buffer), buffer);
 }
 
-void Dot11ManagementFrame::request_information(const request_info_type elements) {
+void Dot11ManagementFrame::request_information(const request_info_type& elements) {
     add_tagged_option(REQUEST_INFORMATION, static_cast<uint8_t>(elements.size()), elements.data());
 }
 
