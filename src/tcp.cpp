@@ -181,7 +181,7 @@ bool TCP::has_sack_permitted() const {
 
 void TCP::sack(const sack_type& edges) {
     vector<uint8_t> value(edges.size() * sizeof(uint32_t));
-    if (edges.size()) {
+    if (!edges.empty()) {
         OutputMemoryStream stream(value);
         for (sack_type::const_iterator it = edges.begin(); it != edges.end(); ++it) {
             stream.write_be(*it);

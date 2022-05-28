@@ -161,7 +161,7 @@ uint32_t RC4EAPOL::header_size() const {
 }
 
 void RC4EAPOL::write_body(OutputMemoryStream& stream) {
-    if (key_.size()) {
+    if (!key_.empty()) {
         header_.key_length = Endian::host_to_be(static_cast<uint16_t>(key_.size()));
     }
     stream.write(header_);
@@ -270,12 +270,12 @@ uint32_t RSNEAPOL::header_size() const {
 }
 
 void RSNEAPOL::write_body(OutputMemoryStream& stream) {
-    if (key_.size()) {
+    if (!key_.empty()) {
         if (!header_.key_t && header_.install) {
             header_.key_length = Endian::host_to_be<uint16_t>(32);
             wpa_length(static_cast<uint16_t>(key_.size()));
         }
-        else if (key_.size()) {
+        else if (!key_.empty()) {
             wpa_length(static_cast<uint16_t>(key_.size()));
         }
     }
