@@ -69,7 +69,7 @@ DNS::DNS(const uint8_t* buffer, uint32_t total_sz)
             skip_to_dname_end(stream);
             stream.skip(sizeof(uint16_t) * 2);
         }
-        const uint8_t* base_offset = &records_data_[0];
+        const uint8_t* base_offset = records_data_.data();
         answers_idx_ = static_cast<uint32_t>(stream.pointer() - base_offset);
         skip_to_section_end(stream, answers_count());
         authority_idx_ = static_cast<uint32_t>(stream.pointer() - base_offset);
@@ -171,7 +171,7 @@ void DNS::add_query(const query& query) {
     new_str.insert(new_str.end(), sizeof(uint16_t) * 2, ' ');
     // Build a stream at the end
     OutputMemoryStream stream(
-        reinterpret_cast<uint8_t*>(&new_str[0]) + previous_length, 
+        reinterpret_cast<uint8_t*>(const_cast<char*>(new_str.data())) + previous_length, 
         sizeof(uint16_t) * 2
     );
     stream.write_be<uint16_t>(query.query_type());
@@ -240,7 +240,7 @@ void DNS::add_record(const resource& resource, const sections_type& sections) {
         offset,
         0
     );
-    OutputMemoryStream stream(&records_data_[0] + threshold, offset);
+    OutputMemoryStream stream(records_data_.data() + threshold, offset);
     stream.write(buffer.begin(), buffer.end());
     stream.write_be(resource.query_type());
     stream.write_be(resource.query_class());
@@ -300,7 +300,7 @@ string DNS::decode_domain_name(const string& domain_name) {
     if (domain_name.empty()) {
         return output;
     }
-    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&domain_name[0]);
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(domain_name.data());
     const uint8_t* end = ptr + domain_name.size();
     while (*ptr) {
         // We can't handle offsets
@@ -333,7 +333,7 @@ string DNS::decode_domain_name(const string& domain_name) {
 // unsafe but a lot faster.
 uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
     const uint8_t* start_ptr = ptr;
-    const uint8_t* end = &records_data_[0] + records_data_.size();
+    const uint8_t* end = records_data_.data() + records_data_.size();
     const uint8_t* end_ptr = 0;
     char* current_out_ptr = out_ptr;
     uint8_t pointer_counter = 0;
@@ -350,7 +350,7 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
             memcpy(&index, ptr, sizeof(uint16_t));
             index = Endian::be_to_host(index) & 0x3fff;
             // Check that the offset is neither too low or too high
-            if (index < 0x0c || (&records_data_[0] + (index - 0x0c)) >= end) {
+            if (index < 0x0c || (records_data_.data() + (index - 0x0c)) >= end) {
                 throw dns_decompression_pointer_out_of_bounds();
             }
             // We've probably found the end of the original domain name. Save it.
@@ -554,7 +554,7 @@ void DNS::update_records(uint32_t& section_start,
 DNS::queries_type DNS::queries() const { 
     queries_type output;
     if (!records_data_.empty()) {
-        InputMemoryStream stream(&records_data_[0], answers_idx_);
+        InputMemoryStream stream(records_data_.data(), answers_idx_);
         char buffer[256];
         while (stream) {
             stream.skip(compose_name(stream.pointer(), buffer));
@@ -576,8 +576,8 @@ DNS::resources_type DNS::answers() const {
     resources_type res;
     if (answers_idx_ < records_data_.size()) {
         convert_records(
-            &records_data_[0] + answers_idx_, 
-            &records_data_[0] + authority_idx_, 
+            records_data_.data() + answers_idx_, 
+            records_data_.data() + authority_idx_, 
             res,
             answers_count()
         );
@@ -589,8 +589,8 @@ DNS::resources_type DNS::authority() const {
     resources_type res;
     if (authority_idx_ < records_data_.size()) {
         convert_records(
-            &records_data_[0] + authority_idx_, 
-            &records_data_[0] + additional_idx_, 
+            records_data_.data() + authority_idx_, 
+            records_data_.data() + additional_idx_, 
             res,
             authority_count()
         );
@@ -602,8 +602,8 @@ DNS::resources_type DNS::additional() const {
     resources_type res;
     if (additional_idx_ < records_data_.size()) {
         convert_records(
-            &records_data_[0] + additional_idx_, 
-            &records_data_[0] + records_data_.size(), 
+            records_data_.data() + additional_idx_, 
+            records_data_.data() + records_data_.size(), 
             res,
             additional_count()
         );
@@ -643,7 +643,7 @@ DNS::soa_record::soa_record(const uint8_t* buffer, uint32_t total_sz) {
 }
 
 DNS::soa_record::soa_record(const DNS::resource& resource) {
-    init(reinterpret_cast<const uint8_t*>(&resource.data()[0]), resource.data().size());
+    init(reinterpret_cast<const uint8_t*>(resource.data().data()), resource.data().size());
 }
 
 void DNS::soa_record::mname(const string& value) {

@@ -228,7 +228,7 @@ uint32_t DHCP::rebind_time() const {
 
 PDU::serialization_type DHCP::serialize_list(const vector<ipaddress_type>& ip_list) {
     serialization_type buffer(ip_list.size() * sizeof(uint32_t));
-    uint32_t* ptr = reinterpret_cast<uint32_t*>(&buffer[0]);
+    uint32_t* ptr = reinterpret_cast<uint32_t*>(buffer.data());
     typedef vector<ipaddress_type>::const_iterator iterator;
     for (iterator it = ip_list.begin(); it != ip_list.end(); ++it) {
         *(ptr++) = *it;
@@ -245,7 +245,7 @@ void DHCP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
         vend_type& result = BootP::vend();
         result.resize(size_);
         // Build a stream over the vend vector
-        OutputMemoryStream stream(&result[0], result.size());
+        OutputMemoryStream stream(result.data(), result.size());
         // Magic cookie
         stream.write(Endian::host_to_be<uint32_t>(0x63825363));
         for (options_type::const_iterator it = options_.begin(); it != options_.end(); ++it) {

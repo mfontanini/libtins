@@ -128,7 +128,7 @@ PDU* PDU::release_inner_pdu() {
 
 PDU::serialization_type PDU::serialize() {
     vector<uint8_t> buffer(size());
-    serialize(&buffer[0], static_cast<uint32_t>(buffer.size()));
+    serialize(buffer.data(), static_cast<uint32_t>(buffer.size()));
     return buffer;
 }
 

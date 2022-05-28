@@ -120,12 +120,12 @@ void Dot11ManagementFrame::ssid(const string& new_ssid) {
 
 void Dot11ManagementFrame::rsn_information(const RSNInformation& info) {
     RSNInformation::serialization_type buffer = info.serialize();
-    add_tagged_option(RSN, static_cast<uint8_t>(buffer.size()), &buffer[0]);
+    add_tagged_option(RSN, static_cast<uint8_t>(buffer.size()), buffer.data());
 }
 
 vector<uint8_t> Dot11ManagementFrame::serialize_rates(const rates_type& rates) {
     vector<uint8_t> buffer(rates.size());
-    uint8_t* ptr = &buffer[0];
+    uint8_t* ptr = buffer.data();
     for (rates_type::const_iterator it = rates.begin(); it != rates.end(); ++it) {
         uint8_t result = static_cast<uint8_t>(*it * 2);
         if (result == 2 || result == 4 || result == 11 || result == 22) {
@@ -147,12 +147,12 @@ Dot11ManagementFrame::rates_type Dot11ManagementFrame::deserialize_rates(const o
 
 void Dot11ManagementFrame::supported_rates(const rates_type& new_rates) {
     vector<uint8_t> buffer = serialize_rates(new_rates);
-    add_tagged_option(SUPPORTED_RATES, static_cast<uint8_t>(buffer.size()), &buffer[0]);
+    add_tagged_option(SUPPORTED_RATES, static_cast<uint8_t>(buffer.size()), buffer.data());
 }
 
 void Dot11ManagementFrame::extended_supported_rates(const rates_type& new_rates) {
     vector<uint8_t> buffer = serialize_rates(new_rates);
-    add_tagged_option(EXT_SUPPORTED_RATES, static_cast<uint8_t>(buffer.size()), &buffer[0]);
+    add_tagged_option(EXT_SUPPORTED_RATES, static_cast<uint8_t>(buffer.size()), buffer.data());
 }
 
 void Dot11ManagementFrame::qos_capability(qos_capability_type new_qos_capability) {
@@ -168,12 +168,12 @@ void Dot11ManagementFrame::power_capability(uint8_t min_power, uint8_t max_power
 
 void Dot11ManagementFrame::supported_channels(const channels_type& new_channels) {
     vector<uint8_t> buffer(new_channels.size() * 2);
-    uint8_t* ptr = &buffer[0];
+    uint8_t* ptr = buffer.data();
     for (channels_type::const_iterator it = new_channels.begin(); it != new_channels.end(); ++it) {
         *(ptr++) = it->first;
         *(ptr++) = it->second;
     }
-    add_tagged_option(SUPPORTED_CHANNELS, static_cast<uint8_t>(buffer.size()), &buffer[0]);
+    add_tagged_option(SUPPORTED_CHANNELS, static_cast<uint8_t>(buffer.size()), buffer.data());
 }
 
 void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, uint32_t ac_vi, uint32_t ac_vo) {
@@ -189,7 +189,7 @@ void Dot11ManagementFrame::edca_parameter_set(uint32_t ac_be, uint32_t ac_bk, ui
 }
 
 void Dot11ManagementFrame::request_information(const request_info_type elements) {
-    add_tagged_option(REQUEST_INFORMATION, static_cast<uint8_t>(elements.size()), &elements[0]);
+    add_tagged_option(REQUEST_INFORMATION, static_cast<uint8_t>(elements.size()), elements.data());
 }
 
 void Dot11ManagementFrame::fh_parameter_set(const fh_params_set& fh_params) {
@@ -233,7 +233,7 @@ void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params& params) {
         stream.write(it->second);
     }
 
-    add_tagged_option(IBSS_DFS, static_cast<uint8_t>(buffer.size()), &buffer[0]);
+    add_tagged_option(IBSS_DFS, static_cast<uint8_t>(buffer.size()), buffer.data());
 }
 
 void Dot11ManagementFrame::country(const country_params& params) {
@@ -250,13 +250,13 @@ void Dot11ManagementFrame::country(const country_params& params) {
         sz++;
     }
     vector<uint8_t> buffer(sz);
-    uint8_t* ptr = copy(params.country.begin(), params.country.end(), &buffer[0]);
+    uint8_t* ptr = copy(params.country.begin(), params.country.end(), buffer.data());
     for (size_t i(0); i < params.first_channel.size(); ++i) {
         *(ptr++) = params.first_channel[i];
         *(ptr++) = params.number_channels[i];
         *(ptr++) = params.max_transmit_power[i];
     }
-    add_tagged_option(COUNTRY, static_cast<uint8_t>(sz), &buffer[0]);
+    add_tagged_option(COUNTRY, static_cast<uint8_t>(sz), buffer.data());
 }
 
 void Dot11ManagementFrame::fh_parameters(uint8_t prime_radix, uint8_t number_channels) {
@@ -268,7 +268,7 @@ void Dot11ManagementFrame::fh_parameters(uint8_t prime_radix, uint8_t number_cha
 
 void Dot11ManagementFrame::fh_pattern_table(const fh_pattern_type& params) {
     vector<uint8_t> data(sizeof(uint8_t) * 4 + params.random_table.size());
-    uint8_t* ptr = &data[0];
+    uint8_t* ptr = data.data();
     *(ptr++) = params.flag;
     *(ptr++) = params.number_of_sets;
     *(ptr++) = params.modulus;
@@ -277,7 +277,7 @@ void Dot11ManagementFrame::fh_pattern_table(const fh_pattern_type& params) {
     for (; it != params.random_table.end(); ++it) {
         *(ptr++) = *it;
     }
-    add_tagged_option(HOPPING_PATTERN_TABLE, static_cast<uint8_t>(data.size()), &data[0]);
+    add_tagged_option(HOPPING_PATTERN_TABLE, static_cast<uint8_t>(data.size()), data.data());
 }
 
 void Dot11ManagementFrame::power_constraint(uint8_t local_power_constraint) {
@@ -351,7 +351,7 @@ void Dot11ManagementFrame::tim(const tim_type& data) {
         data.partial_virtual_bitmap.begin(), 
         data.partial_virtual_bitmap.end()
     );
-    add_tagged_option(TIM, static_cast<uint8_t>(buffer.size()), &buffer[0]);
+    add_tagged_option(TIM, static_cast<uint8_t>(buffer.size()), buffer.data());
 }
 
 void Dot11ManagementFrame::challenge_text(const string& text) {
@@ -369,7 +369,7 @@ void Dot11ManagementFrame::vendor_specific(const vendor_specific_type& data) {
         data.data.end(),
         data.oui.copy(buffer.begin())
     );
-    add_tagged_option(VENDOR_SPECIFIC, static_cast<uint8_t>(buffer.size()), &buffer[0]);
+    add_tagged_option(VENDOR_SPECIFIC, static_cast<uint8_t>(buffer.size()), buffer.data());
 }
 
 // Getters

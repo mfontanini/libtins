@@ -187,7 +187,7 @@ void TCP::sack(const sack_type& edges) {
             stream.write_be(*it);
         }
     }
-    add_option(option(SACK, static_cast<uint8_t>(value.size()), &value[0]));
+    add_option(option(SACK, static_cast<uint8_t>(value.size()), value.data()));
 }
 
 TCP::sack_type TCP::sack() const {

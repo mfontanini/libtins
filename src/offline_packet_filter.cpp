@@ -82,7 +82,7 @@ bool OfflinePacketFilter::matches_filter(const uint8_t* buffer, uint32_t total_s
 
 bool OfflinePacketFilter::matches_filter(PDU& pdu) const {
     PDU::serialization_type buffer = pdu.serialize();
-    return matches_filter(&buffer[0], static_cast<uint32_t>(buffer.size()));
+    return matches_filter(buffer.data(), static_cast<uint32_t>(buffer.size()));
 }
 
 } // namespace Tins

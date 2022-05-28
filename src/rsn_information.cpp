@@ -48,7 +48,7 @@ RSNInformation::RSNInformation()
 }
 
 RSNInformation::RSNInformation(const serialization_type& buffer) {
-    init(&buffer[0], static_cast<uint32_t>(buffer.size()));
+    init(buffer.data(), static_cast<uint32_t>(buffer.size()));
 }
 
 RSNInformation::RSNInformation(const uint8_t* buffer, uint32_t total_sz) {
@@ -105,7 +105,7 @@ RSNInformation::serialization_type RSNInformation::serialize() const {
     const uint16_t akm_cyphers_size = Endian::host_to_le<uint16_t>(akm_cyphers_.size());
     
     serialization_type buffer(size);
-    OutputMemoryStream stream(&buffer[0], buffer.size());
+    OutputMemoryStream stream(buffer.data(), buffer.size());
     stream.write(version_);
     stream.write(group_suite_);
     stream.write(pairwise_cyphers_size);

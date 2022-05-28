@@ -285,7 +285,7 @@ void IP::add_route_option(option_identifier id, const generic_route_option_type&
         option(
             id,
             opt_data.size(),
-            &opt_data[0]
+            opt_data.data()
         )
     );
 }
