@@ -76,7 +76,7 @@ void PacketWriter::write(PDU& pdu, const struct timeval& tv) {
     header.len = static_cast<bpf_u_int32>(pdu.advertised_size());
     PDU::serialization_type buffer = pdu.serialize();
     header.caplen = static_cast<bpf_u_int32>(buffer.size());
-    pcap_dump((u_char*)dumper_, &header, &buffer[0]);
+    pcap_dump(reinterpret_cast<u_char*>(dumper_), &header, &buffer[0]);
 }
 
 void PacketWriter::init(const string& file_name, int link_type) {

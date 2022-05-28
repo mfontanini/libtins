@@ -204,7 +204,7 @@ vector<float> convert(const uint8_t* ptr, uint32_t data_size, PDU::endian_type,
     vector<float> output;
     const uint8_t* end = ptr + data_size;
     while (ptr != end) {
-        output.push_back(float(*(ptr++) & 0x7f) / 2);
+        output.push_back(static_cast<float>(*(ptr++) & 0x7f) / 2);
     }
     return output;
 }

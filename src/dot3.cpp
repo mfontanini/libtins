@@ -119,7 +119,7 @@ bool Dot3::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const dot3_header* eth_ptr = (const dot3_header*)ptr;
+    const dot3_header* eth_ptr = reinterpret_cast<const dot3_header*>(ptr);
     if (address_type(header_.src_mac) == address_type(eth_ptr->dst_mac)) {
         if (address_type(header_.src_mac) == address_type(eth_ptr->dst_mac) || 
             dst_addr() == BROADCAST) {
@@ -152,7 +152,7 @@ PDU* Dot3::recv_response(PacketSender& sender, const NetworkInterface& iface) {
         addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), header_.dst_mac, sizeof(header_.dst_mac));
 
-        return sender.recv_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr));
+        return sender.recv_l2(*this, reinterpret_cast<struct sockaddr*>(&addr), static_cast<uint32_t>(sizeof(addr)));
     #else
         return sender.recv_l2(*this, 0, 0, iface);
     #endif

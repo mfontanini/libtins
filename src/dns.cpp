@@ -171,7 +171,7 @@ void DNS::add_query(const query& query) {
     new_str.insert(new_str.end(), sizeof(uint16_t) * 2, ' ');
     // Build a stream at the end
     OutputMemoryStream stream(
-        (uint8_t*)&new_str[0] + previous_length, 
+        reinterpret_cast<uint8_t*>(&new_str[0]) + previous_length, 
         sizeof(uint16_t) * 2
     );
     stream.write_be<uint16_t>(query.query_type());
@@ -300,7 +300,7 @@ string DNS::decode_domain_name(const string& domain_name) {
     if (domain_name.empty()) {
         return output;
     }
-    const uint8_t* ptr = (const uint8_t*)&domain_name[0];
+    const uint8_t* ptr = reinterpret_cast<const uint8_t*>(&domain_name[0]);
     const uint8_t* end = ptr + domain_name.size();
     while (*ptr) {
         // We can't handle offsets
@@ -561,7 +561,7 @@ DNS::queries_type DNS::queries() const {
             uint16_t query_type = stream.read_be<uint16_t>();
             uint16_t query_class = stream.read_be<uint16_t>();
             #if TINS_IS_CXX11
-                output.emplace_back(buffer, (QueryType)query_type, (QueryClass)query_class);
+                output.emplace_back(buffer, static_cast<QueryType>(query_type), static_cast<QueryClass>(query_class));
             #else
                 output.push_back(
                     query(buffer, (QueryType)query_type, (QueryClass)query_class)
@@ -615,7 +615,7 @@ bool DNS::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const dns_header* hdr = (const dns_header*)ptr;
+    const dns_header* hdr = reinterpret_cast<const dns_header*>(ptr);
     return hdr->id == header_.id;
 }
 
@@ -643,7 +643,7 @@ DNS::soa_record::soa_record(const uint8_t* buffer, uint32_t total_sz) {
 }
 
 DNS::soa_record::soa_record(const DNS::resource& resource) {
-    init((const uint8_t*)&resource.data()[0], resource.data().size());
+    init(reinterpret_cast<const uint8_t*>(&resource.data()[0]), resource.data().size());
 }
 
 void DNS::soa_record::mname(const string& value) {
@@ -693,10 +693,10 @@ PDU::serialization_type DNS::soa_record::serialize() const {
 
 void DNS::soa_record::init(const uint8_t* buffer, uint32_t total_sz) {
     InputMemoryStream stream(buffer, total_sz);
-    string domain = (const char*)stream.pointer();
+    string domain = reinterpret_cast<const char*>(stream.pointer());
     mname_ = DNS::decode_domain_name(domain);
     stream.skip(domain.size() + 1);
-    domain = (const char*)stream.pointer();
+    domain = reinterpret_cast<const char*>(stream.pointer());
     stream.skip(domain.size() + 1);
     rname_ = DNS::decode_domain_name(domain);
     serial_ = stream.read_be<uint32_t>();

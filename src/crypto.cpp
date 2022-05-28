@@ -479,7 +479,7 @@ SNAP* SessionKeys::ccmp_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) con
     
     uint8_t AAD[32] = {0};
     AAD[0] = 0;
-    AAD[1] = 22 + 6 * int(dot11.from_ds() && dot11.to_ds());
+    AAD[1] = 22 + 6 * static_cast<int>(dot11.from_ds() && dot11.to_ds());
     if (dot11.subtype() == Dot11::QOS_DATA_DATA)  {
         AAD[1] += 2;
     }

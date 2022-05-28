@@ -236,7 +236,7 @@ bool RadioTapParser::has_fields() const {
 bool RadioTapParser::has_field(RadioTap::PresentFlags flag) const {
     const uint8_t* ptr = start_;
     while (ptr + sizeof(uint32_t) < end_) {
-        const RadioTapFlags* flags = (const RadioTapFlags*)ptr;
+        const RadioTapFlags* flags = reinterpret_cast<const RadioTapFlags*>(ptr);
         if (is_field_set(flag, flags)) {
             return true;
         }
@@ -324,7 +324,7 @@ bool RadioTapParser::is_field_set(uint32_t bit, const RadioTapFlags* flags) cons
 }
 
 const RadioTapFlags* RadioTapParser::get_flags_ptr() const {
-    return (const RadioTapFlags*)(start_ + sizeof(uint32_t) * namespace_index_);
+    return reinterpret_cast<const RadioTapFlags*>(start_ + sizeof(uint32_t) * namespace_index_);
 }
 
 void RadioTapParser::load_current_flags() {

@@ -114,7 +114,7 @@ void Dot11ManagementFrame::ssid(const string& new_ssid) {
     add_tagged_option(
         Dot11::SSID, 
         static_cast<uint8_t>(new_ssid.size()),
-        (const uint8_t*)new_ssid.c_str()
+        reinterpret_cast<const uint8_t*>(new_ssid.c_str())
     );
 }
 
@@ -140,7 +140,7 @@ Dot11ManagementFrame::rates_type Dot11ManagementFrame::deserialize_rates(const o
     rates_type output;
     const uint8_t* ptr = opt->data_ptr(), *end = ptr + opt->data_size();
     while (ptr != end) {
-        output.push_back(float(*(ptr++) & 0x7f) / 2);
+        output.push_back(static_cast<float>(*(ptr++) & 0x7f) / 2);
     }
     return output;
 }
@@ -218,7 +218,7 @@ void Dot11ManagementFrame::cf_parameter_set(const cf_params_set& params) {
 
 void Dot11ManagementFrame::ibss_parameter_set(uint16_t atim_window) {
     atim_window = Endian::host_to_le(atim_window);
-    add_tagged_option(IBSS_SET, 2, (uint8_t*)&atim_window);
+    add_tagged_option(IBSS_SET, 2, reinterpret_cast<uint8_t*>(&atim_window));
 }
 
 void Dot11ManagementFrame::ibss_dfs(const ibss_dfs_params& params) {
@@ -358,7 +358,7 @@ void Dot11ManagementFrame::challenge_text(const string& text) {
     add_tagged_option(
         CHALLENGE_TEXT, 
         static_cast<uint8_t>(text.size()),
-        (const uint8_t*)text.c_str()
+        reinterpret_cast<const uint8_t*>(text.c_str())
     );
 }
 

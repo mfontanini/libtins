@@ -368,7 +368,7 @@ void PacketSender::send_l2(PDU& pdu,
         open_l2_socket(iface);
         pcap_t* handle = pcap_handles_[iface];
         const int buf_size = static_cast<int>(buffer.size());
-        if (pcap_sendpacket(handle, (u_char*)&buffer[0], buf_size) != 0) {
+        if (pcap_sendpacket(handle, static_cast<u_char*>(&buffer[0]), buf_size) != 0) {
             throw pcap_error("Failed to send packet: " + string(pcap_geterr(handle)));
         }
     #else // TINS_HAVE_PACKET_SENDER_PCAP_SENDPACKET
@@ -424,7 +424,7 @@ void PacketSender::send_l3(PDU& pdu,
     int sock = sockets_[type];
     PDU::serialization_type buffer = pdu.serialize();
     const int buf_size = static_cast<int>(buffer.size());
-    if (sendto(sock, (const char*)&buffer[0], buf_size, 0, link_addr, len_addr) == -1) {
+    if (sendto(sock, reinterpret_cast<const char*>(&buffer[0]), buf_size, 0, link_addr, len_addr) == -1) {
         throw socket_write_error(make_error_string());
     }
 }
@@ -491,7 +491,7 @@ PDU* PacketSender::recv_match_loop(const vector<int>& sockets,
                     }
                     else {
                         socket_len_type length = addrlen;
-                        size = ::recvfrom(*it, (char*)buffer, buffer_size, 0, link_addr, &length);
+                        size = ::recvfrom(*it, reinterpret_cast<char*>(buffer), buffer_size, 0, link_addr, &length);
                         if (pdu.matches_response(buffer, size)) {
                             return Internals::pdu_from_flag(pdu.pdu_type(), buffer, size);
                         }

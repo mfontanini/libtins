@@ -58,7 +58,7 @@ Dot1Q::Dot1Q(const uint8_t* buffer, uint32_t total_sz)
     if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
-                (Constants::Ethernet::e)payload_type(),
+                static_cast<Constants::Ethernet::e>(payload_type()),
                 stream.pointer(),
                 stream.size()
             )
@@ -146,7 +146,7 @@ bool Dot1Q::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const dot1q_header* dot1q_ptr = (const dot1q_header*)ptr;
+    const dot1q_header* dot1q_ptr = reinterpret_cast<const dot1q_header*>(ptr);
     if (get_id(dot1q_ptr) == get_id(&header_)) {
         ptr += sizeof(header_);
         total_sz -= sizeof(header_);

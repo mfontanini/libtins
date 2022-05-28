@@ -93,7 +93,7 @@ sniff_data() : tv(), pdu(0), packet_processed(true) { }
 template<typename T>
 T* safe_alloc(const u_char* bytes, bpf_u_int32 len) {
     try {
-        return new T((const uint8_t*)bytes, len);
+        return new T(static_cast<const uint8_t*>(bytes), len);
     }
     catch (malformed_packet&) {
         return 0;
@@ -102,21 +102,21 @@ T* safe_alloc(const u_char* bytes, bpf_u_int32 len) {
 
 template<typename T>
 void sniff_loop_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
-    sniff_data* data = (sniff_data*)user;
+    sniff_data* data = reinterpret_cast<sniff_data*>(user);
     data->packet_processed = true;
     data->tv = h->ts;
     data->pdu = safe_alloc<T>(bytes, h->caplen);
 }
 
 void sniff_loop_eth_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
-    sniff_data* data = (sniff_data*)user;
+    sniff_data* data = reinterpret_cast<sniff_data*>(user);
     data->packet_processed = true;
     data->tv = h->ts;
-    if (Internals::is_dot3((const uint8_t*)bytes, h->caplen)) {
-        data->pdu = safe_alloc<Dot3>((const uint8_t*)bytes, h->caplen);
+    if (Internals::is_dot3(static_cast<const uint8_t*>(bytes), h->caplen)) {
+        data->pdu = safe_alloc<Dot3>(static_cast<const uint8_t*>(bytes), h->caplen);
     }
     else {
-        data->pdu = safe_alloc<EthernetII>((const uint8_t*)bytes, h->caplen);
+        data->pdu = safe_alloc<EthernetII>(static_cast<const uint8_t*>(bytes), h->caplen);
     }
 }
 
@@ -132,23 +132,23 @@ void sniff_loop_raw_handler(u_char* user, const struct pcap_pkthdr* h, const u_c
     #endif
     } TINS_END_PACK;
 
-    sniff_data* data = (sniff_data*)user;
-    const base_ip_header* header = (const base_ip_header*)bytes;
+    sniff_data* data = reinterpret_cast<sniff_data*>(user);
+    const base_ip_header* header = reinterpret_cast<const base_ip_header*>(bytes);
     data->packet_processed = true;
     data->tv = h->ts;
     switch (header->version) {
         case 4:
-            data->pdu = safe_alloc<IP>((const uint8_t*)bytes, h->caplen);
+            data->pdu = safe_alloc<IP>(static_cast<const uint8_t*>(bytes), h->caplen);
             break;
         case 6:
-            data->pdu = safe_alloc<IPv6>((const uint8_t*)bytes, h->caplen);
+            data->pdu = safe_alloc<IPv6>(static_cast<const uint8_t*>(bytes), h->caplen);
             break;
     };
 }
 
 #ifdef TINS_HAVE_DOT11
 void sniff_loop_dot11_handler(u_char* user, const struct pcap_pkthdr* h, const u_char* bytes) {
-    sniff_data* data = (sniff_data*)user;
+    sniff_data* data = reinterpret_cast<sniff_data*>(user);
     data->packet_processed = true;
     data->tv = h->ts;
     try {
@@ -212,7 +212,7 @@ PtrPacket BaseSniffer::next_packet() {
     // keep calling pcap_loop until a well-formed packet is found.
     while (data.pdu == 0 && data.packet_processed) {
         data.packet_processed = false;
-        if (pcap_sniffing_method_(handle_, 1, handler, (u_char*)&data) < 0) {
+        if (pcap_sniffing_method_(handle_, 1, handler, reinterpret_cast<u_char*>(&data)) < 0) {
             return PtrPacket(0, Timestamp());
         }
     }

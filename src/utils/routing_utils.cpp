@@ -376,11 +376,11 @@ vector<Route6Entry> route6_entries() {
         }
         input >> flags >> entry.interface;
         from_hex(destination, temporary);
-        entry.destination = IPv6Address((const uint8_t*)&temporary[0]);
+        entry.destination = IPv6Address(reinterpret_cast<const uint8_t*>(&temporary[0]));
         from_hex(mask_length, temporary_int);
         entry.mask = IPv6Address::from_prefix_length(temporary_int);
         from_hex(next_hop, temporary);
-        entry.gateway = IPv6Address((const uint8_t*)&temporary[0]);
+        entry.gateway = IPv6Address(reinterpret_cast<const uint8_t*>(&temporary[0]));
         from_hex(metric, temporary_int);
         entry.metric = temporary_int;
         // Process flags

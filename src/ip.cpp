@@ -61,7 +61,7 @@ PDU::metadata IP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < sizeof(ip_header))) {
         throw malformed_packet();
     }
-    const ip_header* header = (const ip_header*)buffer;
+    const ip_header* header = reinterpret_cast<const ip_header*>(buffer);
     PDUType next_type = Internals::ip_type_to_pdu_flag(
         static_cast<Constants::IP::e>(header->protocol));
     return metadata(header->ihl * 4, pdu_flag, next_type);
@@ -86,7 +86,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz) {
     
     // While the end of the options is not reached read an option
     while (stream.pointer() < options_end) {
-        option_identifier opt_type = (option_identifier)stream.read<uint8_t>();
+        option_identifier opt_type = option_identifier(stream.read<uint8_t>());
         if (opt_type.number > NOOP) {
             // Multibyte options with length as second byte
             const uint32_t option_size = stream.read<uint8_t>();
@@ -124,7 +124,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz) {
         // Don't avoid consuming more than we should if tot_len is 0,
         // since this is the case when using TCP segmentation offload
         if (tot_len() != 0) {
-            const uint32_t advertised_length = (uint32_t)tot_len() - head_len() * sizeof(uint32_t);
+            const uint32_t advertised_length = static_cast<uint32_t>(tot_len()) - head_len() * sizeof(uint32_t);
             const uint32_t stream_size = static_cast<uint32_t>(stream.size());
             total_sz = (stream_size < advertised_length) ? stream_size : advertised_length;
         }
@@ -263,7 +263,7 @@ void IP::stream_identifier(uint16_t stream_id) {
         option(
             136,
             sizeof(uint16_t),
-            (const uint8_t*)&stream_id
+            reinterpret_cast<const uint8_t*>(&stream_id)
         )
     );
 }
@@ -400,7 +400,7 @@ void IP::send(PacketSender& sender, const NetworkInterface &) {
         type = pdu_type_to_sender_type(inner_pdu()->pdu_type());
     }
 
-    sender.send_l3(*this, (struct sockaddr*)&link_addr, sizeof(link_addr), type);
+    sender.send_l3(*this, reinterpret_cast<struct sockaddr*>(&link_addr), sizeof(link_addr), type);
 }
 
 PDU* IP::recv_response(PacketSender& sender, const NetworkInterface &) {
@@ -468,14 +468,14 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
         check = (check & 0xffff) + (check >> 16);
     }
     checksum(~check);
-    ((ip_header*)buffer)->check = header_.check;
+    (reinterpret_cast<ip_header*>(buffer))->check = header_.check;
 }
 
 bool IP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const ip_header* ip_ptr = (const ip_header*)ptr;
+    const ip_header* ip_ptr = reinterpret_cast<const ip_header*>(ptr);
     // dest unreachable?
     if (ip_ptr->protocol == Constants::IP::PROTO_ICMP) {
         const uint8_t* pkt_ptr = ptr + sizeof(ip_header);

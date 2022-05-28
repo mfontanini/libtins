@@ -69,7 +69,7 @@ DHCP::DHCP(const uint8_t* buffer, uint32_t total_sz)
     while (stream) {
         OptionTypes option_type;
         uint8_t option_length = 0;
-        option_type = (OptionTypes)stream.read<uint8_t>();
+        option_type = static_cast<OptionTypes>(stream.read<uint8_t>());
         // We should only read the length if it's not END nor PAD
         if (option_type != END && option_type != PAD) {
             option_length = stream.read<uint8_t>();
@@ -131,7 +131,7 @@ uint8_t DHCP::type() const {
 
 void DHCP::server_identifier(ipaddress_type ip) {
     uint32_t ip_int = ip;
-    add_option(option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), (const uint8_t*)&ip_int));
+    add_option(option(DHCP_SERVER_IDENTIFIER, sizeof(uint32_t), reinterpret_cast<const uint8_t*>(&ip_int)));
 }
 
 DHCP::ipaddress_type DHCP::server_identifier() const {
@@ -140,7 +140,7 @@ DHCP::ipaddress_type DHCP::server_identifier() const {
 
 void DHCP::lease_time(uint32_t time) {
     time = Endian::host_to_be(time);
-    add_option(option(DHCP_LEASE_TIME, sizeof(uint32_t), (const uint8_t*)&time));
+    add_option(option(DHCP_LEASE_TIME, sizeof(uint32_t), reinterpret_cast<const uint8_t*>(&time)));
 }
 
 uint32_t DHCP::lease_time() const {
@@ -149,7 +149,7 @@ uint32_t DHCP::lease_time() const {
 
 void DHCP::renewal_time(uint32_t time) {
     time = Endian::host_to_be(time);
-    add_option(option(DHCP_RENEWAL_TIME, sizeof(uint32_t), (const uint8_t*)&time));
+    add_option(option(DHCP_RENEWAL_TIME, sizeof(uint32_t), reinterpret_cast<const uint8_t*>(&time)));
 }
         
 uint32_t DHCP::renewal_time() const {
@@ -158,7 +158,7 @@ uint32_t DHCP::renewal_time() const {
 
 void DHCP::subnet_mask(ipaddress_type mask) {
     uint32_t mask_int = mask;
-    add_option(option(SUBNET_MASK, sizeof(uint32_t), (const uint8_t*)&mask_int));
+    add_option(option(SUBNET_MASK, sizeof(uint32_t), reinterpret_cast<const uint8_t*>(&mask_int)));
 }
 
 DHCP::ipaddress_type DHCP::subnet_mask() const {
@@ -185,7 +185,7 @@ vector<DHCP::ipaddress_type> DHCP::domain_name_servers() const {
 
 void DHCP::broadcast(ipaddress_type addr) {
     uint32_t int_addr = addr;
-    add_option(option(BROADCAST_ADDRESS, sizeof(uint32_t), (uint8_t*)&int_addr));
+    add_option(option(BROADCAST_ADDRESS, sizeof(uint32_t), reinterpret_cast<uint8_t*>(&int_addr)));
 }
 
 DHCP::ipaddress_type DHCP::broadcast() const {
@@ -194,7 +194,7 @@ DHCP::ipaddress_type DHCP::broadcast() const {
 
 void DHCP::requested_ip(ipaddress_type addr) {
     uint32_t int_addr = addr;
-    add_option(option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), (uint8_t*)&int_addr));
+    add_option(option(DHCP_REQUESTED_ADDRESS, sizeof(uint32_t), reinterpret_cast<uint8_t*>(&int_addr)));
 }
 
 DHCP::ipaddress_type DHCP::requested_ip() const {
@@ -202,7 +202,7 @@ DHCP::ipaddress_type DHCP::requested_ip() const {
 }
 
 void DHCP::domain_name(const string& name) {
-    add_option(option(DOMAIN_NAME, name.size(), (const uint8_t*)name.c_str()));
+    add_option(option(DOMAIN_NAME, name.size(), reinterpret_cast<const uint8_t*>(name.c_str())));
 }
 
 string DHCP::domain_name() const {
@@ -210,7 +210,7 @@ string DHCP::domain_name() const {
 }
 
 void DHCP::hostname(const string& name) {
-    add_option(option(HOST_NAME, name.size(), (const uint8_t*)name.c_str()));
+    add_option(option(HOST_NAME, name.size(), reinterpret_cast<const uint8_t*>(name.c_str())));
 }
 
 string DHCP::hostname() const {
@@ -219,7 +219,7 @@ string DHCP::hostname() const {
 
 void DHCP::rebind_time(uint32_t time) {
     time = Endian::host_to_be(time);
-    add_option(option(DHCP_REBINDING_TIME, sizeof(uint32_t), (uint8_t*)&time));
+    add_option(option(DHCP_REBINDING_TIME, sizeof(uint32_t), reinterpret_cast<uint8_t*>(&time)));
 }
         
 uint32_t DHCP::rebind_time() const {
@@ -228,7 +228,7 @@ uint32_t DHCP::rebind_time() const {
 
 PDU::serialization_type DHCP::serialize_list(const vector<ipaddress_type>& ip_list) {
     serialization_type buffer(ip_list.size() * sizeof(uint32_t));
-    uint32_t* ptr = (uint32_t*)&buffer[0];
+    uint32_t* ptr = reinterpret_cast<uint32_t*>(&buffer[0]);
     typedef vector<ipaddress_type>::const_iterator iterator;
     for (iterator it = ip_list.begin(); it != ip_list.end(); ++it) {
         *(ptr++) = *it;

@@ -89,7 +89,7 @@ struct InterfaceInfoCollector {
         #else
             #define TINS_BROADCAST_ADDR(addr) (addr->ifa_broadaddr)
             #define TINS_BROADCAST_FLAGS (IFF_BROADCAST)
-            const struct sockaddr_ll* addr_ptr = ((struct sockaddr_ll*)addr->ifa_addr);
+            const struct sockaddr_ll* addr_ptr = (reinterpret_cast<struct sockaddr_ll*>(addr->ifa_addr));
             
             if (!addr->ifa_addr) {
                 return false;
@@ -102,11 +102,11 @@ struct InterfaceInfoCollector {
         #endif
             else if (!std::strcmp(addr->ifa_name, iface_name)) {
                 if (addr->ifa_addr->sa_family == AF_INET) {
-                    info->ip_addr = IPv4Address(((struct sockaddr_in *)addr->ifa_addr)->sin_addr.s_addr);
-                    info->netmask = IPv4Address(((struct sockaddr_in *)addr->ifa_netmask)->sin_addr.s_addr);
+                    info->ip_addr = IPv4Address((reinterpret_cast<struct sockaddr_in *>(addr->ifa_addr))->sin_addr.s_addr);
+                    info->netmask = IPv4Address((reinterpret_cast<struct sockaddr_in *>(addr->ifa_netmask))->sin_addr.s_addr);
                     if ((addr->ifa_flags & (TINS_BROADCAST_FLAGS))) {
                         info->bcast_addr = IPv4Address(
-                            ((struct sockaddr_in *)TINS_BROADCAST_ADDR(addr))->sin_addr.s_addr);
+                            (reinterpret_cast<struct sockaddr_in *>TINS_BROADCAST_ADDR(addr))->sin_addr.s_addr);
                     }
                     else {
                         info->bcast_addr = 0;
@@ -115,8 +115,8 @@ struct InterfaceInfoCollector {
                 }
                 else if (addr->ifa_addr->sa_family == AF_INET6) {
                     Tins::NetworkInterface::IPv6Prefix prefix;
-                    prefix.address = ((struct sockaddr_in6 *)addr->ifa_addr)->sin6_addr.s6_addr;
-                    Tins::IPv6Address mask = ((struct sockaddr_in6 *)addr->ifa_netmask)->sin6_addr.s6_addr;
+                    prefix.address = (reinterpret_cast<struct sockaddr_in6 *>(addr->ifa_addr))->sin6_addr.s6_addr;
+                    Tins::IPv6Address mask = (reinterpret_cast<struct sockaddr_in6 *>(addr->ifa_netmask))->sin6_addr.s6_addr;
                     prefix.prefix_length = 0;
                     for (Tins::IPv6Address::iterator iter = mask.begin(); iter != mask.end(); ++iter) {
                         if (*iter == 255) {
@@ -196,7 +196,7 @@ namespace Tins {
 
 // static
 NetworkInterface NetworkInterface::default_interface() {
-    return NetworkInterface(IPv4Address(uint32_t(0)));
+    return NetworkInterface(IPv4Address(static_cast<uint32_t>(0)));
 }
 
 vector<NetworkInterface> NetworkInterface::all() {

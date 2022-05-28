@@ -55,7 +55,7 @@ SNAP::SNAP(const uint8_t* buffer, uint32_t total_sz) {
     if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
-                (Constants::Ethernet::e)eth_type(), 
+                static_cast<Constants::Ethernet::e>(eth_type()), 
                 stream.pointer(), 
                 stream.size()
             )
