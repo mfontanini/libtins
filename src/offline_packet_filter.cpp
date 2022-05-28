@@ -27,10 +27,10 @@
  *
  */
 
-#include <string.h>
+#include <cstring>
+#include <tins/exceptions.h>
 #include <tins/offline_packet_filter.h>
 #include <tins/pdu.h>
-#include <tins/exceptions.h>
 
 using std::string;
 

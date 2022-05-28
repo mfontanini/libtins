@@ -30,11 +30,11 @@
 #ifndef _WIN32
     #include <sys/time.h>
 #endif
-#include <string.h>
-#include <tins/packet_writer.h>
-#include <tins/packet.h>
-#include <tins/pdu.h>
+#include <cstring>
 #include <tins/exceptions.h>
+#include <tins/packet.h>
+#include <tins/packet_writer.h>
+#include <tins/pdu.h>
 
 using std::string;
 

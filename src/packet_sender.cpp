@@ -45,9 +45,9 @@
         #include <linux/if_ether.h>
         #include <linux/if_packet.h>
     #endif
+    #include <cerrno>
     #include <netdb.h>
     #include <netinet/in.h>
-    #include <errno.h>
 #else
     #include <winsock2.h>
     #include <ws2tcpip.h>
