@@ -88,7 +88,7 @@ OutputType option2class_option_data(const uint8_t* ptr, uint32_t total_sz) {
     return output;
 }
 
-} // Internals 
+} // namespace Internals
 
 PDU::metadata DHCPv6::extract_metadata(const uint8_t* /*buffer*/, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < 2)) {

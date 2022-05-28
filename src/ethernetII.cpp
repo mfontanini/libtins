@@ -215,4 +215,4 @@ PDU* EthernetII::recv_response(PacketSender& sender, const NetworkInterface& ifa
 }
 #endif // _WIN32
 
-} // Tins
+} // namespace Tins

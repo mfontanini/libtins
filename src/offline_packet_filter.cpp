@@ -85,4 +85,4 @@ bool OfflinePacketFilter::matches_filter(PDU& pdu) const {
     return matches_filter(&buffer[0], static_cast<uint32_t>(buffer.size()));
 }
 
-} // Tins
+} // namespace Tins

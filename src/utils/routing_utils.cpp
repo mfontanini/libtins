@@ -456,5 +456,5 @@ bool gateway_from_ip(IPv6Address ip, IPv6Address& gw_addr) {
     return false;
 }
 
-} // Utils
-} // Tins
+} // namespace Utils
+} // namespace Tins

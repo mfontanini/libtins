@@ -100,7 +100,7 @@ private:
     uint8_t data[n];
 };
 
-} // Internals
+} // namespace Internals
 
 namespace Crypto {
 

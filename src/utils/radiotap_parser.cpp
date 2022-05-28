@@ -332,7 +332,7 @@ void RadioTapParser::load_current_flags() {
     current_flags_ = Endian::le_to_host(current_flags_);
 }
 
-} // Utils
-} // Tins
+} // namespace Utils
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

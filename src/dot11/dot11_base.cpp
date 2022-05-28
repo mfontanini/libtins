@@ -289,6 +289,6 @@ Dot11* Dot11::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     return new Dot11(buffer, total_sz);
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

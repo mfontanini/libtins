@@ -283,4 +283,4 @@ void RSNEAPOL::write_body(OutputMemoryStream& stream) {
     stream.write(key_.begin(), key_.end());
 }
 
-} // Tins
+} // namespace Tins

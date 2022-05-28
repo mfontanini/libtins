@@ -706,4 +706,4 @@ void DNS::soa_record::init(const uint8_t* buffer, uint32_t total_sz) {
     minimum_ttl_ = stream.read_be<uint32_t>();
 }
 
-} // Tins
+} // namespace Tins

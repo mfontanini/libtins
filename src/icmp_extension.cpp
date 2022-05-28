@@ -191,4 +191,4 @@ ICMPExtensionsStructure::serialization_type ICMPExtensionsStructure::serialize()
     return output;
 }
 
-} // Tins
+} // namespace Tins

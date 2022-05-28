@@ -160,4 +160,4 @@ PDU* Dot3::recv_response(PacketSender& sender, const NetworkInterface& iface) {
 
 #endif // _WIN32
 
-} // Tins
+} // namespace Tins

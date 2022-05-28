@@ -82,5 +82,5 @@ void try_parse_icmp_extensions(InputMemoryStream& stream,
     }
 }
 
-} // Internals
-} // Tins
+} // namespace Internals
+} // namespace Tins

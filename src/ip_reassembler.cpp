@@ -104,7 +104,7 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
     return ip->fragment_offset() * 8;
 }
 
-} // Internals
+} // namespace Internals
 
 IPv4Reassembler::IPv4Reassembler()
 : technique_(NONE) {
@@ -178,4 +178,4 @@ void IPv4Reassembler::remove_stream(uint16_t id, IPv4Address addr1, IPv4Address 
     );
 }
 
-} // Tins
+} // namespace Tins

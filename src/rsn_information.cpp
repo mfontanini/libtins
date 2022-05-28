@@ -135,6 +135,6 @@ RSNInformation RSNInformation::from_option(const PDUOption<uint8_t, Dot11>& opt)
     return RSNInformation(opt.data_ptr(), static_cast<uint32_t>(opt.data_size()));
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

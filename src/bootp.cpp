@@ -128,4 +128,4 @@ bool BootP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     return bootp_ptr->xid == bootp_.xid;
 }
 
-} // Tins
+} // namespace Tins

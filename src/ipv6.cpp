@@ -440,4 +440,4 @@ void IPv6::write_header(const ext_header& header, OutputMemoryStream& stream) {
     stream.fill(get_padding_size(header), 0);
 }
 
-} // Tins
+} // namespace Tins

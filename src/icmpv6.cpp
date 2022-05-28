@@ -1104,5 +1104,4 @@ uint32_t ICMPv6::multicast_address_record::size() const  {
            aux_data.size();
 }
 
-} // Tins
-
+} // namespace Tins

@@ -422,4 +422,4 @@ bool TCP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
         return false;
 }
 
-} // Tins
+} // namespace Tins

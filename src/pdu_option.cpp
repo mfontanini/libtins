@@ -279,6 +279,6 @@ pair<uint32_t, uint32_t> convert(const uint8_t* ptr, uint32_t data_size, PDU::en
     return convert_pair<uint32_t, uint32_t>(ptr, data_size, endian);
 }
 
-} // Converters
-} // Internals
-} // Tins
+} // namespace Converters
+} // namespace Internals
+} // namespace Tins

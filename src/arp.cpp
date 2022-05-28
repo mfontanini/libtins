@@ -150,4 +150,4 @@ EthernetII ARP::make_arp_reply(ipaddress_type target,
     return EthernetII(hw_tgt, hw_snd) / arp;
 }
 
-} // Tins
+} // namespace Tins

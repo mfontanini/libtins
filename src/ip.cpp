@@ -538,4 +538,4 @@ IP::generic_route_option_type IP::generic_route_option_type::from_option(const o
     return output;
 }
 
-} // Tins
+} // namespace Tins

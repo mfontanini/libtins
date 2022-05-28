@@ -159,6 +159,6 @@ void Dot11QoSData::write_fixed_parameters(OutputMemoryStream& stream) {
     stream.write(qos_control_);
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

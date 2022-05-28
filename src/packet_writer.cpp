@@ -92,4 +92,4 @@ void PacketWriter::init(const string& file_name, int link_type) {
     }
 }
 
-} // Tins
+} // namespace Tins

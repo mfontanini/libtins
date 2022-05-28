@@ -257,4 +257,4 @@ void DHCP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     BootP::write_serialization(buffer, total_sz);
 }
 
-} // Tins
+} // namespace Tins

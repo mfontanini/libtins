@@ -639,6 +639,6 @@ Dot11ManagementFrame::tim_type Dot11ManagementFrame::tim_type::from_option(const
     return output;
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

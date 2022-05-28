@@ -382,6 +382,6 @@ RadioTap::option RadioTap::do_find_option(PresentFlags type) const {
     return parser.current_option();
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

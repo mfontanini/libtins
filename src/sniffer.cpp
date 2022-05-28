@@ -527,4 +527,4 @@ void SnifferConfiguration::set_direction(pcap_direction_t direction) {
     flags_ |= DIRECTION;
 }
 
-} // Tins
+} // namespace Tins

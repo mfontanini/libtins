@@ -406,4 +406,4 @@ NetworkInterface::id_type NetworkInterface::resolve_index(const char* name) {
     #endif // _WIN32
 }
 
-} // Tins
+} // namespace Tins

@@ -156,4 +156,4 @@ bool Dot1Q::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
 
 }
 
-} // Tins
+} // namespace Tins

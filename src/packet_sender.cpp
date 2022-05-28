@@ -548,4 +548,4 @@ int PacketSender::find_type(SocketType type) {
     }
 }
 
-} // Tins
+} // namespace Tins

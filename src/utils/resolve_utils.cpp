@@ -127,6 +127,5 @@ HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender) {
     return resolve_hwaddr(sender.default_interface(), ip, sender);
 }
 
-
-} // Utils
-} // Tins
+} // namespace Utils
+} // namespace Tins
