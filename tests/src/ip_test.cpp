@@ -10,6 +10,7 @@
 #include <tins/rawpdu.h>
 #include <tins/ip_address.h>
 #include <tins/ethernetII.h>
+#include <tins/dns.h>
 
 using namespace std;
 using namespace Tins;
@@ -882,4 +883,51 @@ TEST_F(IPTest, ParseSerializeOptions) {
 
     const vector<uint8_t> buffer(options_packet, options_packet + sizeof(options_packet));
     EXPECT_EQ(buffer, serialized);
+}
+
+TEST_F(IPTest, TotLenByteOrder) {
+        // build DNS request
+        Tins::DNS request{};
+        request.id(1);
+        request.type(Tins::DNS::QUERY);
+        request.opcode(0);
+        request.truncated(0);
+        request.recursion_desired(1);
+        request.z(0);
+        Tins::DNS::query query{};
+        query.dname("a.com");
+        query.query_type(Tins::DNS::A);
+        query.query_class(Tins::DNS::INTERNET);
+        request.add_query(query);
+
+        // build the encapsulating UDP
+        Tins::UDP udp(53, 0);
+        udp.inner_pdu(request);
+
+        // build the encapsulating IP
+        Tins::IP ip("127.0.0.1", "127.0.0.1");
+        ip.inner_pdu(udp);
+
+        // serialize the packet to get the bytes
+        auto packet = ip.serialize();
+
+        // reconstruct the IP packet
+        const IP from_serial{packet.data(), static_cast<uint32_t>(packet.size())};
+        const size_t ip_header_len = from_serial.head_len() * 4;
+
+        // Note: tot_len() returns inverted (incorrectly byte swapped)
+        // value on BSD/Apple prior to fix.
+        EXPECT_EQ(from_serial.tot_len(), 51);
+
+        // reconstruct udp packet
+        const Tins::UDP udp2(packet.data() + ip_header_len, from_serial.tot_len() - ip_header_len);
+        const size_t udp_header_len{8};
+
+        // and dns packet
+        uint8_t* dns_header = packet.data() + ip_header_len + udp_header_len;
+        const size_t dns_packet_size = udp2.length() - udp_header_len;
+        EXPECT_NO_THROW(const Tins::DNS dns(dns_header, dns_packet_size));
+
+        EXPECT_EQ(from_serial.tot_len(), ip_header_len + udp_header_len + dns_packet_size);
+
 }

@@ -443,7 +443,6 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     
     #if __FreeBSD__ || defined(__FreeBSD_kernel__) || __APPLE__
         if (!parent_pdu()) {
-            total_sz = Endian::host_to_be<uint16_t>(total_sz);
             header_.frag_off = Endian::be_to_host(header_.frag_off);
         }
     #endif
