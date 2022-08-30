@@ -12,10 +12,18 @@ using namespace Tins;
 
 class AddressRangeTest : public testing::Test {
 public:
+    void contain_tests0(const IPv4Range& range);
+    void contain_tests0(const IPv6Range& range);
     void contain_tests24(const IPv4Range& range);
     void contain_tests24(const IPv6Range& range);
     void contain_tests26(const IPv4Range& range);
 };
+
+void AddressRangeTest::contain_tests0(const IPv4Range& range) {
+    EXPECT_TRUE(range.contains("0.0.0.0"));
+    EXPECT_TRUE(range.contains("192.168.1.1"));
+    EXPECT_TRUE(range.contains("255.255.255.255"));
+}
 
 void AddressRangeTest::contain_tests24(const IPv4Range& range) {
     EXPECT_TRUE(range.contains("192.168.0.0"));
@@ -33,6 +41,12 @@ void AddressRangeTest::contain_tests26(const IPv4Range& range) {
     EXPECT_FALSE(range.contains("192.168.254.191"));
 }
 
+void AddressRangeTest::contain_tests0(const IPv6Range& range) {
+    EXPECT_TRUE(range.contains("::"));
+    EXPECT_TRUE(range.contains("dead::1:1"));
+    EXPECT_TRUE(range.contains("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"));
+}
+
 void AddressRangeTest::contain_tests24(const IPv6Range& range) {
     EXPECT_TRUE(range.contains("dead::1"));
     EXPECT_TRUE(range.contains("dead::1fee"));
@@ -42,13 +56,22 @@ void AddressRangeTest::contain_tests24(const IPv6Range& range) {
 }
 
 TEST_F(AddressRangeTest, Contains) {
+    contain_tests0(IPv4Range("0.0.0.0", "255.255.255.255"));
+    contain_tests0(IPv4Range::from_mask("0.0.0.0", "0.0.0.0"));
+    contain_tests0(IPv4Range::from_mask("0.0.0.0", IPv4Address::from_prefix_length(0)));
     contain_tests24(IPv4Range("192.168.0.0", "192.168.0.255"));
     contain_tests24(IPv4Range::from_mask("192.168.0.0", "255.255.255.0"));
+    contain_tests24(IPv4Range::from_mask("192.168.0.0", IPv4Address::from_prefix_length(24)));
     contain_tests26(IPv4Range("192.168.254.192", "192.168.254.255"));
     contain_tests26(IPv4Range::from_mask("192.168.254.192", "255.255.255.192"));
+    contain_tests26(IPv4Range::from_mask("192.168.254.192", IPv4Address::from_prefix_length(26)));
     
+    contain_tests0(IPv6Range("::0", "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"));
+    contain_tests0(IPv6Range::from_mask("::", "::"));
+    contain_tests0(IPv6Range::from_mask("::", IPv6Address::from_prefix_length(0)));
     contain_tests24(IPv6Range("dead::0", "dead::ffff"));
     contain_tests24(IPv6Range::from_mask("dead::0", "ffff:ffff:ffff:ffff:ffff:ffff:ffff:0"));
+    contain_tests24(IPv6Range::from_mask("dead::0", IPv6Address::from_prefix_length(112)));
     
     {
         AddressRange<HWAddress<6> > range("00:00:00:00:00:00", "00:00:00:00:00:ff");
