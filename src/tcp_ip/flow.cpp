@@ -115,7 +115,7 @@ void Flow::process_packet(PDU& pdu) {
     }
 
     // can process either way, since it will abort immediately if not needed
-    if (data_tracker_.process_payload(tcp->seq(), move(raw->payload()))) {
+    if (data_tracker_.process_payload(tcp->seq(), std::move(raw->payload()))) {
         if (on_data_callback_) {
             on_data_callback_(*this);
         }
