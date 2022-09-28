@@ -394,7 +394,11 @@ void Sniffer::set_rfmon(bool rfmon_enabled) {
 FileSniffer::FileSniffer(const string& file_name,
                          const SnifferConfiguration& configuration) {
     char error[PCAP_ERRBUF_SIZE];
+#ifdef HAVE_PCAP_OPEN_OFFLINE_WITH_TSTAMP_PRECISION
     pcap_t* phandle = pcap_open_offline_with_tstamp_precision(file_name.c_str(), PCAP_TSTAMP_PRECISION_NANO, error);
+#else
+    pcap_t* phandle = pcap_open_offline(file_name.c_str(), error);
+#endif
     if (!phandle) {
         throw pcap_error(error);
     }
@@ -410,7 +414,11 @@ FileSniffer::FileSniffer(const string& file_name, const string& filter) {
     config.set_filter(filter);
 
     char error[PCAP_ERRBUF_SIZE];
+#ifdef HAVE_PCAP_OPEN_OFFLINE_WITH_TSTAMP_PRECISION
     pcap_t* phandle = pcap_open_offline_with_tstamp_precision(file_name.c_str(), PCAP_TSTAMP_PRECISION_NANO, error);
+#else
+    pcap_t* phandle = pcap_open_offline(file_name.c_str(), error);
+#endif
     if (!phandle) {
         throw pcap_error(error);
     }
