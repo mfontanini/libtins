@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -37,7 +37,7 @@
 
 namespace Tins {
 
-const int MICROSECONDS_IN_SECOND = 1000000;
+const int NANOSECONDS_IN_SECOND = 1000000000;
 
 Timestamp Timestamp::current_time() {
     #ifdef _WIN32
@@ -46,10 +46,10 @@ Timestamp Timestamp::current_time() {
         uint64_t timestamp = file_time.dwHighDateTime;
         timestamp = timestamp << 32;
         timestamp |= file_time.dwLowDateTime;
-        // Convert to microseconds
-        timestamp /= 10;
+        // Convert to nanoseconds
+        timestamp *= 10;
         // Change the epoch to POSIX epoch
-        timestamp -= 11644473600000000ULL;
+        timestamp -= 1164447360000000000ULL;
         return Timestamp(timestamp);
     #else
         timeval tv;
@@ -64,7 +64,7 @@ Timestamp::Timestamp()
 }
 
 Timestamp::Timestamp(const timeval& time_val) {
-    timestamp_ = static_cast<uint64_t>(time_val.tv_sec) * MICROSECONDS_IN_SECOND
+    timestamp_ = static_cast<uint64_t>(time_val.tv_sec) * NANOSECONDS_IN_SECOND
                  + time_val.tv_usec;
 }
 
@@ -74,11 +74,15 @@ Timestamp::Timestamp(uint64_t value)
 }
 
 Timestamp::seconds_type Timestamp::seconds() const {
-    return static_cast<seconds_type>(timestamp_ / MICROSECONDS_IN_SECOND);
+    return static_cast<seconds_type>(timestamp_ / NANOSECONDS_IN_SECOND);
 }
 
 Timestamp::microseconds_type Timestamp::microseconds() const {
-    return timestamp_ % MICROSECONDS_IN_SECOND;
+    return timestamp_ % NANOSECONDS_IN_SECOND / 100;
+}
+
+Timestamp::microseconds_type Timestamp::nanoseconds() const {
+    return timestamp_ % NANOSECONDS_IN_SECOND;
 }
 
 } // Tins

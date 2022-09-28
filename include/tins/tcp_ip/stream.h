@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -57,10 +57,10 @@ class IPv6Address;
 
 namespace TCPIP {
 
-/** 
+/**
  * \brief Represents a TCP stream
  *
- * A TCP stream is made out of 2 Flows, one in each direction, plus 
+ * A TCP stream is made out of 2 Flows, one in each direction, plus
  * some other attributes and callbacks.
  *
  * This class works using callbacks. Whenever the stream is created, you should
@@ -77,11 +77,11 @@ public:
      */
     typedef Flow::payload_type payload_type;
 
-    /** 
+    /**
      * The type used to represent timestamps
      */
-    typedef std::chrono::microseconds timestamp_type;
-    
+    typedef std::chrono::nanoseconds timestamp_type;
+
     /**
      * The type used for callbacks
      */
@@ -107,7 +107,7 @@ public:
 
     /**
      * \brief Constructs a TCP stream using the provided packet.
-     * 
+     *
      * \param initial_packet The first packet of the stream
      * \param ts The first packet's timestamp
      */
@@ -279,7 +279,7 @@ public:
     void server_data_callback(const stream_callback_type& callback);
 
     /**
-     * \brief Sets the callback to be executed when there's new buffered 
+     * \brief Sets the callback to be executed when there's new buffered
      * client data
      *
      * \sa Flow::buffering_callback
@@ -288,7 +288,7 @@ public:
     void client_out_of_order_callback(const stream_packet_callback_type& callback);
 
     /**
-     * \brief Sets the callback to be executed when there's new buffered 
+     * \brief Sets the callback to be executed when there's new buffered
      * client data
      *
      * \sa Flow::buffering_callback
@@ -297,7 +297,7 @@ public:
     void server_out_of_order_callback(const stream_packet_callback_type& callback);
 
     /**
-     * \brief Indicates that the data packets sent by the client should be 
+     * \brief Indicates that the data packets sent by the client should be
      * ignored
      *
      * \sa Flow::ignore_data_packets
@@ -305,7 +305,7 @@ public:
     void ignore_client_data();
 
     /**
-     * \brief Indicates that the data packets sent by the server should be 
+     * \brief Indicates that the data packets sent by the server should be
      * ignored
      *
      * \sa Flow::ignore_data_packets
@@ -313,10 +313,10 @@ public:
     void ignore_server_data();
 
     /**
-     * \brief Sets the internal callbacks. 
+     * \brief Sets the internal callbacks.
      *
      * This shouldn't normally need to be called except if you're constructing
-     * this object and then moving it around before persisting it somewhere.  
+     * this object and then moving it around before persisting it somewhere.
      */
     void setup_flows_callbacks();
 
@@ -325,24 +325,24 @@ public:
      * erased.
      *
      * If this property is true, then whenever there's new data for a stream,
-     * the appropriate callback will be executed and then the payload will be 
-     * erased. 
+     * the appropriate callback will be executed and then the payload will be
+     * erased.
      *
      * If this property is false, then the payload <b>will not</b> be erased
-     * and the user is responsible for clearing the payload vector. 
+     * and the user is responsible for clearing the payload vector.
      *
-     * Setting this property to false is useful if it's desired to hold all 
+     * Setting this property to false is useful if it's desired to hold all
      * of the data sent on the stream before processing it. Note that this
      * can lead to the memory growing a lot.
      *
-     * This property is true by default. 
+     * This property is true by default.
      *
      * \param value The value to be set for this property
      */
     void auto_cleanup_payloads(bool value);
 
     /**
-     * \brief Indicates whether the client flow's payloads should be 
+     * \brief Indicates whether the client flow's payloads should be
      * automatically erased.
      *
      * \sa auto_cleanup_payloads
@@ -350,7 +350,7 @@ public:
     void auto_cleanup_client_data(bool value);
 
     /**
-     * \brief Indicates whether the server flow's payloads should be 
+     * \brief Indicates whether the server flow's payloads should be
      * automatically erased.
      *
      * \sa auto_cleanup_payloads
@@ -401,7 +401,7 @@ public:
      * Recovery mode can be used when either a stream is having high packet loss or on partial
      * streams. On the latter case, if a stream starts with out of order packets, then the holes
      * left by them might never be filled. Enabling recovery mode right after attaching to
-     * a stream allows automatic recovery so the stream will skip the out of order packets 
+     * a stream allows automatic recovery so the stream will skip the out of order packets
      * and continue tracking the stream by ignoring those holes.
      *
      * The way recovery mode is, given a recovery window size, it will skip all out of order
@@ -410,9 +410,9 @@ public:
      * client sequence number is X and a recovery window of size Y, then enabling recovery mode
      * at that point will ignore any out of order packets having sequence numbers in the range
      * (X, X+Y]. "Ignoring" here means that the actual sequence number of the corresponding Flow
-     * (the client one in this case) will be set to the out of order packet's sequece number. 
+     * (the client one in this case) will be set to the out of order packet's sequece number.
      * This means that if an out of order packet is captured having a sequence number X + 5 right
-     * after enabling recovery mode, then the Flow's sequence number will be set to X + 5. 
+     * after enabling recovery mode, then the Flow's sequence number will be set to X + 5.
      */
     void enable_recovery_mode(uint32_t recovery_window);
 
@@ -470,6 +470,6 @@ private:
 } // TCPIP
 } // Tins
 
-#endif // TINS_HAVE_TCPIP 
+#endif // TINS_HAVE_TCPIP
 
 #endif // TINS_TCP_IP_STREAM_H

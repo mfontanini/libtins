@@ -30,7 +30,7 @@ using namespace Tins::TCPIP;
 class FlowTest : public testing::Test {
 public:
     struct order_element {
-        order_element(size_t payload_index, uint32_t payload_size) 
+        order_element(size_t payload_index, uint32_t payload_size)
         : payload_index(payload_index),payload_size(payload_size) {
 
         }
@@ -40,18 +40,18 @@ public:
     };
 
     static const size_t num_packets = 20;
-    static EthernetII packets[], overlapped_packets1[], 
+    static EthernetII packets[], overlapped_packets1[],
                       overlapped_packets2[], overlapped_packets3[],
                       overlapped_packets4[], overlapped_packets5[];
     static const string payload;
     typedef vector<order_element> ordering_info_type;
-    
+
     void cumulative_flow_data_handler(Flow& flow);
     void on_new_stream(Stream& stream);
     void cumulative_stream_client_data_handler(Stream& stream);
     void cumulative_stream_server_data_handler(Stream& stream);
     void out_of_order_handler(Flow& session, uint32_t seq, Flow::payload_type payload);
-    void run_test(uint32_t initial_seq, const ordering_info_type& chunks, 
+    void run_test(uint32_t initial_seq, const ordering_info_type& chunks,
                   const string& payload);
     void run_test(uint32_t initial_seq, const ordering_info_type& chunks);
     void run_tests(const ordering_info_type& chunks, const string& payload);
@@ -59,7 +59,7 @@ public:
     ordering_info_type split_payload(const string& payload, uint32_t chunk_size);
     string merge_chunks(const vector<Flow::payload_type>& chunks);
     vector<EthernetII> chunks_to_packets(uint32_t initial_seq,
-                                         const ordering_info_type& chunks, 
+                                         const ordering_info_type& chunks,
                                          const string& payload);
     vector<EthernetII> three_way_handshake(uint32_t client_seq, uint32_t server_seq,
                                            IPv4Address client_addr, uint16_t client_port,
@@ -67,7 +67,7 @@ public:
     void set_endpoints(vector<EthernetII>& packets, IPv4Address src_addr,
                        uint16_t src_port, IPv4Address dst_addr,
                        uint16_t dst_port);
-    
+
     vector<Flow::payload_type> flow_payload_chunks;
     vector<pair<uint32_t, Flow::payload_type> > flow_out_of_order_chunks;
     vector<Flow::payload_type> stream_client_payload_chunks;
@@ -139,7 +139,7 @@ void FlowTest::out_of_order_handler(Flow& /*session*/, uint32_t seq, Flow::paylo
     flow_out_of_order_chunks.push_back(make_pair(seq, move(payload)));
 }
 
-void FlowTest::run_test(uint32_t initial_seq, const ordering_info_type& chunks, 
+void FlowTest::run_test(uint32_t initial_seq, const ordering_info_type& chunks,
                         const string& payload) {
     using std::placeholders::_1;
     flow_payload_chunks.clear();
@@ -199,14 +199,14 @@ string FlowTest::merge_chunks(const vector<Flow::payload_type>& chunks) {
 }
 
 vector<EthernetII> FlowTest::chunks_to_packets(uint32_t initial_seq,
-                                               const ordering_info_type& chunks, 
+                                               const ordering_info_type& chunks,
                                                const string& payload) {
     vector<EthernetII> output;
     for (size_t i = 0; i < chunks.size(); ++i) {
         const order_element& element = chunks[i];
         assert(element.payload_index + element.payload_size <= payload.size());
         TCP tcp;
-        RawPDU raw(payload.begin() + element.payload_index, 
+        RawPDU raw(payload.begin() + element.payload_index,
                    payload.begin() + element.payload_index + element.payload_size);
         tcp.seq(initial_seq + element.payload_index);
         output.push_back(EthernetII() / IP() / tcp / raw);
@@ -341,7 +341,7 @@ TEST_F(FlowTest, StreamFollower_ThreeWayHandshake) {
     StreamFollower follower;
     follower.new_stream_callback(bind(&FlowTest::on_new_stream, this, _1));
 
-    Stream::timestamp_type ts(10000);
+    Stream::timestamp_type ts = duration_cast<Stream::timestamp_type>(microseconds(10000));
     Stream::timestamp_type create_time = ts;
     for (size_t i = 0; i < packets.size(); ++i) {
         if (i != 0) {
@@ -413,9 +413,9 @@ TEST_F(FlowTest, StreamFollower_CleanupWorks) {
     });
     packets[2].rfind_pdu<IP>().src_addr("6.6.6.6");
     auto base_time = duration_cast<Stream::timestamp_type>(system_clock::now().time_since_epoch());
-    Packet packet1(packets[0], base_time);   
-    Packet packet2(packets[1], base_time + seconds(50));   
-    Packet packet3(packets[2], base_time + minutes(10));   
+    Packet packet1(packets[0], base_time);
+    Packet packet2(packets[1], base_time + seconds(50));
+    Packet packet3(packets[2], base_time + minutes(10));
     follower.process_packet(packet1);
     Stream& stream = follower.find_stream(IPv4Address("1.2.3.4"), 22,
                                           IPv4Address("4.3.2.1"), 25);
@@ -424,7 +424,7 @@ TEST_F(FlowTest, StreamFollower_CleanupWorks) {
     follower.process_packet(packet3);
     // At this point, it should be cleaned up
     EXPECT_THROW(
-        follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25), 
+        follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25),
         stream_not_found
     );
     EXPECT_TRUE(timed_out);
@@ -492,7 +492,7 @@ TEST_F(FlowTest, StreamFollower_StreamIsRemovedWhenFinished) {
 
     // We shouldn't be able to find it
     EXPECT_THROW(
-        follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25), 
+        follower.find_stream(IPv4Address("1.2.3.4"), 22, IPv4Address("4.3.2.1"), 25),
         stream_not_found
     );
 }
@@ -655,7 +655,7 @@ TCP make_tcp_ack(uint32_t ack_number, SackEdges&&... rest) {
     return output;
 }
 
-// This section compares ranges using 
+// This section compares ranges using
 //
 // EXPECT_TRUE(r1 == r2)
 //
@@ -724,20 +724,20 @@ TEST_F(AckTrackerTest, AckingTcp1) {
 TEST_F(AckTrackerTest, AckingTcp2) {
     uint32_t maximum = numeric_limits<uint32_t>::max();
     AckTracker tracker(maximum - 10, false);
-    EXPECT_EQ(maximum - 10, tracker.ack_number());   
+    EXPECT_EQ(maximum - 10, tracker.ack_number());
     tracker.process_packet(make_tcp_ack(maximum - 3));
-    EXPECT_EQ(maximum - 3, tracker.ack_number());   
+    EXPECT_EQ(maximum - 3, tracker.ack_number());
     tracker.process_packet(make_tcp_ack(maximum));
-    EXPECT_EQ(maximum, tracker.ack_number());   
+    EXPECT_EQ(maximum, tracker.ack_number());
     tracker.process_packet(make_tcp_ack(5));
-    EXPECT_EQ(5U, tracker.ack_number());   
+    EXPECT_EQ(5U, tracker.ack_number());
 }
 
 TEST_F(AckTrackerTest, AckingTcp3) {
     uint32_t maximum = numeric_limits<uint32_t>::max();
     AckTracker tracker(maximum - 10, false);
     tracker.process_packet(make_tcp_ack(5));
-    EXPECT_EQ(5U, tracker.ack_number());   
+    EXPECT_EQ(5U, tracker.ack_number());
 }
 
 TEST_F(AckTrackerTest, AckingTcp_Sack1) {

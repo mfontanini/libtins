@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -49,16 +49,18 @@ public:
     #ifdef _WIN32
         typedef long seconds_type;
         typedef long microseconds_type;
+        typedef long nanoseconds_type;
     #else
         typedef time_t seconds_type;
         typedef suseconds_t microseconds_type;
+        typedef suseconds_t nanoseconds_type;
     #endif
-    
+
     /**
      * \brief Constructs a Timestamp which will hold the current time.
      */
     static Timestamp current_time();
-    
+
     /**
      * Default constructs a timestamp.
      */
@@ -70,36 +72,51 @@ public:
          */
         template<typename Rep, typename Period>
         Timestamp(const std::chrono::duration<Rep, Period>& ts) {
-            timestamp_ = std::chrono::duration_cast<std::chrono::microseconds>(ts).count();
+            timestamp_ = std::chrono::duration_cast<std::chrono::nanoseconds>(ts).count();
         }
     #endif
-    
+
     /**
      * Constructs a timestamp from a timeval struct.
      *
      * \param time_val The timeval struct
      */
     Timestamp(const timeval& time_val);
-    
+
     /**
      * Returns the amount of seconds in this timestamp.
      */
     seconds_type seconds() const;
-    
+
     /**
      * \brief Returns the rest of the time in this timestamp in microseconds
      *
-     * This is, after subtracting the seconds part, how many microseconds are 
+     * This is, after subtracting the seconds part, how many microseconds are
      * left in this timestamp
      */
     microseconds_type microseconds() const;
-    
+
+    /**
+     * \brief Returns the rest of the time in this timestamp in nanoseconds
+     *
+     * This is, after subtracting the seconds part, how many nanoseconds are
+     * left in this timestamp
+     */
+    nanoseconds_type nanoseconds() const;
+
     #if TINS_IS_CXX11
         /**
          * Converts this Timestamp to a std::chrono::microseconds
          */
         operator std::chrono::microseconds() const {
             return std::chrono::microseconds(timestamp_);
+        }
+
+        /**
+         * Converts this Timestamp to a std::chrono::nanoseconds
+         */
+        operator std::chrono::nanoseconds() const {
+            return std::chrono::nanoseconds(timestamp_);
         }
     #endif
 private:

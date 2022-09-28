@@ -5,14 +5,14 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
  * * Redistributions in binary form must reproduce the above
  *   copyright notice, this list of conditions and the following disclaimer
  *   in the documentation and/or other materials provided with the
  *   distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -51,11 +51,11 @@ using std::string;
 
 namespace Tins {
 
-BaseSniffer::BaseSniffer() 
+BaseSniffer::BaseSniffer()
 : handle_(0), mask_(0), extract_raw_(false) {
-    
+
 }
-    
+
 BaseSniffer::~BaseSniffer() {
     if (handle_) {
         pcap_close(handle_);
@@ -155,7 +155,7 @@ void sniff_loop_dot11_handler(u_char* user, const struct pcap_pkthdr* h, const u
         data->pdu = Dot11::from_bytes(bytes, h->caplen);
     }
     catch(malformed_packet&) {
-        
+
     }
 }
 #endif
@@ -177,7 +177,7 @@ PtrPacket BaseSniffer::next_packet() {
                 break;
             case DLT_LINUX_SLL:
                 handler = &sniff_loop_handler<SLL>;
-                break; 
+                break;
             case DLT_PPI:
                 handler = &sniff_loop_handler<PPI>;
                 break;
@@ -285,7 +285,7 @@ Sniffer::Sniffer(const string& device, const SnifferConfiguration& configuration
 
 Sniffer::Sniffer(const string& device,
                  unsigned max_packet_size,
-                 bool promisc, 
+                 bool promisc,
                  const string& filter,
                  bool rfmon) {
     SnifferConfiguration configuration;
@@ -297,7 +297,7 @@ Sniffer::Sniffer(const string& device,
     init(device, configuration);
 }
 
-Sniffer::Sniffer(const string& device, 
+Sniffer::Sniffer(const string& device,
                  promisc_type promisc,
                  const string& filter,
                  bool rfmon) {
@@ -391,10 +391,10 @@ void Sniffer::set_rfmon(bool rfmon_enabled) {
 
 // **************************** FileSniffer ****************************
 
-FileSniffer::FileSniffer(const string& file_name, 
+FileSniffer::FileSniffer(const string& file_name,
                          const SnifferConfiguration& configuration) {
     char error[PCAP_ERRBUF_SIZE];
-    pcap_t* phandle = pcap_open_offline(file_name.c_str(), error);
+    pcap_t* phandle = pcap_open_offline_with_tstamp_precision(file_name.c_str(), PCAP_TSTAMP_PRECISION_NANO, error);
     if (!phandle) {
         throw pcap_error(error);
     }
@@ -402,7 +402,7 @@ FileSniffer::FileSniffer(const string& file_name,
 
     // Configure the sniffer
     configuration.configure_sniffer_pre_activation(*this);
-    
+
 }
 
 FileSniffer::FileSniffer(const string& file_name, const string& filter) {
@@ -410,7 +410,7 @@ FileSniffer::FileSniffer(const string& file_name, const string& filter) {
     config.set_filter(filter);
 
     char error[PCAP_ERRBUF_SIZE];
-    pcap_t* phandle = pcap_open_offline(file_name.c_str(), error);
+    pcap_t* phandle = pcap_open_offline_with_tstamp_precision(file_name.c_str(), PCAP_TSTAMP_PRECISION_NANO, error);
     if (!phandle) {
         throw pcap_error(error);
     }
