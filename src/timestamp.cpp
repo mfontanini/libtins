@@ -38,6 +38,7 @@
 namespace Tins {
 
 const int NANOSECONDS_IN_SECOND = 1000000000;
+const int NANOSECONDS_IN_MICROSECOND = 1000;
 
 Timestamp Timestamp::current_time() {
     #ifdef _WIN32
@@ -65,7 +66,7 @@ Timestamp::Timestamp()
 
 Timestamp::Timestamp(const timeval& time_val) {
     timestamp_ = static_cast<uint64_t>(time_val.tv_sec) * NANOSECONDS_IN_SECOND
-                 + time_val.tv_usec;
+                 + time_val.tv_usec * NANOSECONDS_IN_MICROSECOND;
 }
 
 Timestamp::Timestamp(uint64_t value)
@@ -78,7 +79,7 @@ Timestamp::seconds_type Timestamp::seconds() const {
 }
 
 Timestamp::microseconds_type Timestamp::microseconds() const {
-    return timestamp_ % NANOSECONDS_IN_SECOND / 100;
+    return timestamp_ % NANOSECONDS_IN_SECOND / NANOSECONDS_IN_MICROSECOND;
 }
 
 Timestamp::microseconds_type Timestamp::nanoseconds() const {
