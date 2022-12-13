@@ -95,7 +95,7 @@ void DNS::skip_to_dname_end(InputMemoryStream& stream) const {
                 // This is an actual label, skip its contents
                 stream.skip(value);
             } else {
-                // high order two bits of a label must be either 11 or 00
+                // high order two bits of the first octet of a label must be either 11 or 00
                 throw malformed_packet();
             }
         }
