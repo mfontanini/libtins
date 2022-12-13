@@ -571,6 +571,7 @@ TEST_F(DNSTest, BadLabelSize) {
 
     // add bad length
     const size_t bad_label_len{0x80};
+    const size_t label_offset = payload_sz;
     payload[payload_sz++] = bad_label_len; 
         
     // fill label for incorrect length and terminate
@@ -590,13 +591,18 @@ TEST_F(DNSTest, BadLabelSize) {
               payload + payload_sz);
     payload_sz += sizeof(type_class);
 
-    // SUCCEED moves from dns_decompression_pointer_out_of_bounds to malformed_packet after fix
-    const DNS packet(payload, payload_sz);
-    EXPECT_EQ(packet.questions_count(), 1);
+    // invalid high two bits of label first octest is detected early now
     try {
-        const auto queries{packet.queries()};
+        const DNS packet(payload, payload_sz);
         FAIL();
-    } catch (dns_decompression_pointer_out_of_bounds& oob) {
+    } catch (malformed_packet& mp) {
+        SUCCEED();
+    }
+
+    // check the other invalid value of high two bits in label size
+    payload[label_offset] = 0x10;
+    try {
+        const DNS packet(payload, payload_sz);
         FAIL();
     } catch (malformed_packet& mp) {
         SUCCEED();
