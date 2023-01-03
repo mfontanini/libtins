@@ -93,7 +93,7 @@ void DNS::skip_to_dname_end(InputMemoryStream& stream) const {
                 break;
             }
             else if (offset_discriminator == 0) {
-                // This is an actual label, skipt its contents
+                // This is an actual label, skip its contents
                 stream.skip(value);
             } else {
                 // high order two bits of the first octet of a label must be either 11 or 00
