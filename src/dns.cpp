@@ -88,17 +88,12 @@ void DNS::skip_to_dname_end(InputMemoryStream& stream) const {
         else {
             const uint8_t offset_discriminator = value & 0xc0;
             if (offset_discriminator == 0xc0) {
-                // This is an offset label, skip the second byte and we're done
+                // This is an offset pointer, skip the second byte and we're done
                 stream.skip(1);
                 break;
             }
             else if (offset_discriminator == 0) {
-                // This is an offset label, skip the second byte and we're done
-                stream.skip(1);
-                break;
-            }
-            else if ((value & 0x3f) == value) {
-                // This is an actual label, skip its contents
+                // This is an actual label, skipt its contents
                 stream.skip(value);
             } else {
                 // high order two bits of the first octet of a label must be either 11 or 00
