@@ -42,11 +42,11 @@ namespace Tins {
 template<typename Address>
 class AddressRangeIterator {
 public:
-    typedef std::forward_iterator_tag iterator_category;
-    typedef const Address value_type;
-    typedef std::ptrdiff_t difference_type;
-    typedef const Address* pointer;
-    typedef const Address& reference;
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = const Address;
+    using difference_type = std::ptrdiff_t;
+    using pointer = const Address*;
+    using reference = const Address&;
 
     struct end_iterator {
 
