@@ -451,11 +451,11 @@ HandlerProxy<T> make_sniffer_handler(T* ptr,
  */
 class SnifferIterator {
 public:
-    typedef std::forward_iterator_tag iterator_category;
-    typedef Packet value_type;
-    typedef std::ptrdiff_t difference_type;
-    typedef Packet* pointer;
-    typedef Packet& reference;
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = Packet;
+    using difference_type = std::ptrdiff_t;
+    using pointer = Packet*;
+    using reference = Packet&;
 
     /**
      * Constructs a SnifferIterator.
