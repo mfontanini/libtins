@@ -33,7 +33,7 @@
 #include <string>
 #include <iosfwd>
 #include <functional>
-#include <stdint.h>
+#include <cstdint>
 #include <tins/cxxstd.h>
 #include <tins/macros.h>
 
