@@ -30,6 +30,7 @@
 #ifndef TINS_ICMPV6_H
 #define TINS_ICMPV6_H
 
+#include <algorithm>
 #include <vector>
 #include <tins/macros.h>
 #include <tins/pdu.h>
