@@ -391,6 +391,20 @@ void Sniffer::set_rfmon(bool rfmon_enabled) {
 
 // **************************** FileSniffer ****************************
 
+FileSniffer::FileSniffer(FILE *fp,
+                         const SnifferConfiguration& configuration) {
+    char error[PCAP_ERRBUF_SIZE];
+    pcap_t* phandle = pcap_fopen_offline(fp, error);
+    if (!phandle) {
+        throw pcap_error(error);
+    }
+    set_pcap_handle(phandle);
+
+    // Configure the sniffer
+    configuration.configure_sniffer_pre_activation(*this);
+
+}
+
 FileSniffer::FileSniffer(const string& file_name, 
                          const SnifferConfiguration& configuration) {
     char error[PCAP_ERRBUF_SIZE];
@@ -419,6 +433,22 @@ FileSniffer::FileSniffer(const string& file_name, const string& filter) {
     // Configure the sniffer
     config.configure_sniffer_pre_activation(*this);
 }
+
+FileSniffer::FileSniffer(FILE *fp, const string& filter) {
+    SnifferConfiguration config;
+    config.set_filter(filter);
+
+    char error[PCAP_ERRBUF_SIZE];
+    pcap_t* phandle = pcap_fopen_offline(fp, error);
+    if (!phandle) {
+        throw pcap_error(error);
+    }
+    set_pcap_handle(phandle);
+
+    // Configure the sniffer
+    config.configure_sniffer_pre_activation(*this);
+}
+
 
 // ************************ SnifferConfiguration ************************
 
