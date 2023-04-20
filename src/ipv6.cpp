@@ -130,7 +130,7 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) {
     uint32_t actual_payload_length = payload_length();
     bool is_payload_fragmented = false;
     while (stream) {
-        if (is_extension_header(current_header)) {
+        if (is_extension_header(current_header) && current_header != NO_NEXT_HEADER) {
             if (current_header == FRAGMENT) {
                 is_payload_fragmented = true;
             }
