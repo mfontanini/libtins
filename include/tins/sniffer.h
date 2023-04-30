@@ -465,8 +465,14 @@ HandlerProxy<T> make_sniffer_handler(T* ptr,
 /**
  * \brief Iterates over packets sniffed by a BaseSniffer.
  */
-class SnifferIterator : public std::iterator<std::forward_iterator_tag, Packet> {
+class SnifferIterator {
 public:
+    typedef std::forward_iterator_tag iterator_category;
+    typedef Packet value_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef Packet* pointer;
+    typedef Packet& reference;
+
     /**
      * Constructs a SnifferIterator.
      * \param sniffer The sniffer to iterate.
