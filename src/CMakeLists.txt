@@ -73,6 +73,7 @@ set(SOURCES
     utils/routing_utils.cpp
     utils/resolve_utils.cpp
     utils/pdu_utils.cpp
+    vxlan.cpp
 )
 
 set(HEADERS

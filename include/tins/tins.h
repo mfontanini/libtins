@@ -78,7 +78,7 @@
 #include <tins/pdu_allocator.h>
 #include <tins/ipsec.h>
 #include <tins/ip_reassembler.h>
-
 #include <tins/pdu_iterator.h>
+#include <tins/vxlan.h>
 
 #endif // TINS_TINS_H

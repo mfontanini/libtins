@@ -70,6 +70,7 @@ CREATE_TEST(tcp)
 CREATE_TEST(tcp_ip)
 CREATE_TEST(udp)
 CREATE_TEST(utils)
+CREATE_TEST(vxlan)
 
 IF(LIBTINS_ENABLE_PCAP)
     CREATE_TEST(offline_packet_filter)

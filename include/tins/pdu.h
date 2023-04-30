@@ -180,6 +180,7 @@ public:
         PKTAP,
         MPLS,
         DOT11_CONTROL_TA,
+        VXLAN,
         UNKNOWN = 999,
         USER_DEFINED_PDU = 1000
     };
