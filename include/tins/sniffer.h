@@ -408,8 +408,15 @@ class TINS_API FileSniffer : public BaseSniffer {
 public:
     /**
      * \brief Constructs an instance of FileSniffer.
+     * \param fp The pcap file which will be parsed.
+     * \param configuration A SnifferConfiguration to be used on the file.
+     */
+    FileSniffer(FILE *fp, const SnifferConfiguration& configuration);
+
+    /**
+     * \brief Constructs an instance of FileSniffer.
      * \param file_name The pcap file which will be parsed.
-     * \param filter A capture filter to be used on the file.(optional);
+     * \param configuration A SnifferConfiguration to be used on the file.
      */
     FileSniffer(const std::string& file_name, const SnifferConfiguration& configuration);
 
@@ -418,9 +425,18 @@ public:
      *
      * \brief Constructs an instance of FileSniffer.
      * \param file_name The pcap file which will be parsed.
-     * \param filter A capture filter to be used on the file.(optional);
+     * \param filter A capture filter to be used on the file. (optional)
      */
     FileSniffer(const std::string& file_name, const std::string& filter = "");
+
+    /**
+     * \deprecated Use the constructor that takes a SnifferConfiguration instead.
+     *
+     * \brief Constructs an instance of FileSniffer.
+     * \param fp The pcap file which will be parsed.
+     * \param filter A capture filter to be used on the file. (optional)
+     */
+    FileSniffer(FILE *fp, const std::string& filter = "");
 };
 
 template <typename T>
