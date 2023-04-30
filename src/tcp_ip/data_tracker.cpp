@@ -33,8 +33,6 @@
 
 #include <tins/detail/sequence_number_helpers.h>
 
-using std::move;
-
 using Tins::Internals::seq_compare;
 
 namespace Tins {
@@ -67,7 +65,7 @@ bool DataTracker::process_payload(uint32_t seq, payload_type payload) {
     }
     bool added_some = false;
     // Store this payload
-    store_payload(seq, move(payload));
+    store_payload(seq, std::move(payload));
     // Keep looping while the fragments seq is lower or equal to our seq
     buffered_payload_type::iterator iter = buffered_payload_.find(seq_number_);
     while (iter != buffered_payload_.end() && seq_compare(iter->first, seq_number_) <= 0) {
@@ -85,7 +83,7 @@ bool DataTracker::process_payload(uint32_t seq, payload_type payload) {
                     payload.begin(),
                     payload.begin() + (seq_number_ - iter->first)
                 );
-                store_payload(seq_number_, move(iter->second));
+                store_payload(seq_number_, std::move(iter->second));
                 iter = erase_iterator(iter);
             }
             else {
@@ -158,14 +156,14 @@ void DataTracker::store_payload(uint32_t seq, payload_type payload) {
     // New segment, store it
     if (iter == buffered_payload_.end()) {
         total_buffered_bytes_ += payload.size();
-        buffered_payload_.insert(make_pair(seq, move(payload)));
+        buffered_payload_.insert(make_pair(seq, std::move(payload)));
     }
     else if (iter->second.size() < payload.size()) {
         // Increment by the diff between sizes
         total_buffered_bytes_ += (payload.size() - iter->second.size());
         // If we already have payload on this position but it's a shorter
         // chunk than the new one, replace it
-        iter->second = move(payload);
+        iter->second = std::move(payload);
     }
 }
 

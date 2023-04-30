@@ -115,7 +115,7 @@ public:
          * \param data The payload to use.
          */
         RawPDU(payload_type&& data)
-        : payload_(move(data)) { }
+        : payload_(std::move(data)) { }
     #endif // TINS_IS_CXX11
 
     /** 
