@@ -700,7 +700,7 @@ void Tins::BaseSniffer::sniff_loop(Functor function, uint32_t max_packets) {
                 return;
             }
             #else
-            if (!function(*it->pdu())) {
+            if (!function((Tins::Packet &)*it->pdu())) {
                 return;
             }
             #endif
