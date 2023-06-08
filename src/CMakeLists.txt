@@ -152,6 +152,7 @@ set(HEADERS
     ${LIBTINS_INCLUDE_DIR}/tins/utils/routing_utils.h
     ${LIBTINS_INCLUDE_DIR}/tins/utils/resolve_utils.h
     ${LIBTINS_INCLUDE_DIR}/tins/utils/pdu_utils.h
+    ${LIBTINS_INCLUDE_DIR}/tins/vxlan.h
 )
 
 SET(DOT11_DEPENDENT_SOURCES
