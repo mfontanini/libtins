@@ -1,3 +1,31 @@
+##### v4.5 - Sun Aug 20 04:46:53 PM UTC 2023
+
+- Add VXLAN support (#501)
+
+- Add `FileSniffer` constructor taking a `FILE*` (#499).
+
+- Remove use of deprecated `std::iterator` (#481).
+
+- Add missing `algorithm` header include (#497).
+
+- Validate high order two bits of first dns label octet (#494).
+
+- Use `CMAKE_INSTALL_LIBDIR` in `CONF_CMAKE_INSTALL_DIR` (#472).
+
+- Ignore IPv6 packets with payload after one with no Next Header (#500).
+
+- Fix unqualified `std::move` call warnings on clang (#488).
+
+- Fix incorrect IP address range calculation when using /0 prefix (#484) (#486).
+
+- Fall back to system GTest if available (#473).
+
+- Fix compilation issue on android (#471).
+
+- Fix DNS parser reading garbage on misreported packet size (#468).
+
+- Fix DNS parser misinterpreting bad label size (#466).
+
 ##### v4.4 - Thu Feb 17 14:41:59 UTC 2022
 
 - Add RFC8335 extended echo types to `ICMP` and `ICMPv6` (#426)
