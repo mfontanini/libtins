@@ -303,7 +303,7 @@ public:
      * TCP tcp = ...;
      * if(tcp.has_flags(TCP::SYN | TCP::ACK)) {
      *     // It's a SYN+ACK, but it also possible that other flags are set!
-     *     // it is equivalent to: (tpc.flags() & (TCP::SYN | TCP::ACK)) == (TCP::SYN | TCP::ACK)
+     *     // it is equivalent to: (tcp.flags() & (TCP::SYN | TCP::ACK)) == (TCP::SYN | TCP::ACK)
      * }
      * \endcode
      *
