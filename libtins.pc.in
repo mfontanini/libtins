@@ -7,4 +7,4 @@ Name: libtins
 Description: C++ packet crafting, sniffing and interpretation library.
 Version: @pkgconfig_version@
 Libs: -L${libdir} -ltins
-Cflags: -I${includedir}/tins
+Cflags: -I${includedir}
