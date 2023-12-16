@@ -2,11 +2,26 @@
 #include <cstring>
 #include <string>
 #include <utility>
+#include <tins/cxxstd.h>
 #include <tins/ip_reassembler.h>
 #include <tins/ethernetII.h>
 #include <tins/udp.h>
 #include <tins/ip.h>
 #include <tins/rawpdu.h>
+#ifdef WIN32
+    #include <windows.h>
+#else
+    #include <unistd.h>
+#endif // win32
+
+void sleepcp(int milliseconds) // Cross-platform sleep function
+{
+    #ifdef WIN32
+        Sleep(milliseconds);
+    #else
+        usleep(milliseconds * 1000);
+    #endif // win32
+}
 
 using std::vector;
 using std::pair;
@@ -49,6 +64,8 @@ const size_t IPv4ReassemblerTest::orderings[][11] = {
 
 void IPv4ReassemblerTest::test_packets(const vector<pair<const uint8_t*, size_t> >& vt) {
     IPv4Reassembler reassembler;
+    reassembler.set_max_number_packets_to_stream(500);
+    reassembler.set_timeout_to_stream(500, 100);
     for(size_t i = 0; i < vt.size(); ++i) {
         EthernetII eth(vt[i].first, (uint32_t)vt[i].second);
         // Set the TTL for the first fragment to 32 so we can make sure the right "base"
@@ -112,6 +129,52 @@ TEST_F(IPv4ReassemblerTest, PacketHasMFAndDF) {
     EXPECT_TRUE(packet1.rfind_pdu<IP>().is_fragmented());
     EXPECT_TRUE(packet2.rfind_pdu<IP>().is_fragmented());
     IPv4Reassembler reassembler;
+    reassembler.set_max_number_packets_to_stream(500);
+    reassembler.set_timeout_to_stream(500, 100);
+
     EXPECT_EQ(IPv4Reassembler::FRAGMENTED, reassembler.process(packet1));
     EXPECT_EQ(IPv4Reassembler::REASSEMBLED, reassembler.process(packet2));
+}
+
+
+TEST_F(IPv4ReassemblerTest, PackageWasDeletedByTimeout) {
+    const uint8_t raw_packet1[] = {
+        0, 80, 86, 173, 75, 110, 170, 0, 4, 0, 10, 4, 8, 0, 69, 0, 0, 124, 146,
+        205, 96, 0, 64, 6, 107, 153, 7, 7, 7, 7, 7, 7, 7, 1, 152, 191, 0, 80,
+        160, 119, 38, 106, 125, 14, 42, 154, 128, 24, 0, 115, 148, 65, 0, 0, 1,
+        1, 8, 10, 4, 255, 180, 163, 4, 255, 176, 151, 71, 69, 84, 32, 47, 49, 46,
+        104, 116, 109, 108, 63, 32, 72, 84, 84, 80, 47, 49, 46, 49, 13, 10, 85,
+        115, 101, 114, 45, 65, 103, 101, 110, 116, 58, 32, 87, 103, 101, 116,
+        47, 49, 46, 49, 51, 46, 52, 32, 40, 108, 105, 110, 117, 120, 45, 103,
+        110, 117, 41, 13, 10, 65, 99, 99, 101, 112, 116, 58, 32, 42, 47, 42, 13
+    };
+    const uint8_t raw_packet2[] = {
+        0, 80, 86, 173, 75, 110, 170, 0, 4, 0, 10, 4, 8, 0, 69, 0, 0, 62, 146,
+        205, 64, 13, 64, 6, 139, 202, 7, 7, 7, 7, 7, 7, 7, 1, 10, 72, 111, 115,
+        116, 58, 32, 55, 46, 55, 46, 55, 46, 49, 13, 10, 67, 111, 110, 110,
+        101, 99, 116, 105, 111, 110, 58, 32, 75, 101, 101, 112, 45, 65, 108,
+        105, 118, 101, 13, 10, 13, 10
+    };
+    EthernetII packet1(raw_packet1, sizeof(raw_packet1));
+    EthernetII packet2(raw_packet2, sizeof(raw_packet2));
+    EXPECT_TRUE(packet1.rfind_pdu<IP>().is_fragmented());
+    EXPECT_TRUE(packet2.rfind_pdu<IP>().is_fragmented());
+    IPv4Reassembler reassembler;
+    reassembler.set_max_number_packets_to_stream(500);
+    reassembler.set_timeout_to_stream(500, 100);
+
+    EXPECT_EQ(IPv4Reassembler::FRAGMENTED, reassembler.process(packet1));
+    EXPECT_EQ(0, reassembler.total_number_complete_packages());
+    EXPECT_EQ(1, reassembler.current_number_incomplete_packages());
+    EXPECT_EQ(0, reassembler.total_number_damaged_packages());
+    EXPECT_EQ(1, reassembler.current_buffer_size_incomplete_packages());
+
+    sleepcp(1000);
+
+    EXPECT_EQ(IPv4Reassembler::FRAGMENTED, reassembler.process(packet2));
+    
+    EXPECT_EQ(0, reassembler.total_number_complete_packages());
+    EXPECT_EQ(1, reassembler.current_number_incomplete_packages());
+    EXPECT_EQ(0, reassembler.total_number_damaged_packages());
+    EXPECT_EQ(1, reassembler.current_buffer_size_incomplete_packages());
 }

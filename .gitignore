@@ -1,2 +1,3 @@
 build/**
 include/tins/config.h
+.vscode/**
