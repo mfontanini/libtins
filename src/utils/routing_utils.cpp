@@ -413,7 +413,7 @@ set<string> network_interfaces() {
 }
 #else
 set<string> network_interfaces() {
-    #ifndef ANDROID 
+    #if !defined(ANDROID) || (defined(__ANDROID_API__) && __ANDROID_API__ >= 24)
         set<string> output;
         struct ifaddrs* ifaddrs = 0;
         struct ifaddrs* if_it = 0;
