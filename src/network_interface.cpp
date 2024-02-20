@@ -331,7 +331,7 @@ NetworkInterface::Info NetworkInterface::info() const {
     }
 
     #else // _WIN32
-    #ifndef ANDROID 
+    #if !defined(ANDROID) || (defined(__ANDROID_API__) && __ANDROID_API__ >= 24)
     struct ifaddrs* ifaddrs = 0;
     struct ifaddrs* if_it = 0;
     getifaddrs(&ifaddrs);
