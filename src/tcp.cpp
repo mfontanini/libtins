@@ -385,8 +385,10 @@ uint32_t TCP::calculate_options_size() const {
     for (options_type::const_iterator iter = options_.begin(); iter != options_.end(); ++iter) {
         const option& opt = *iter;
         options_size += sizeof(uint8_t);
-        // SACK_OK contains length but not data
-        if (opt.data_size() || opt.option() == SACK_OK) {
+        // Options 0 and 1 are exactly one octet which is their kind field.
+        // All other options have their one octet kind field,
+        // followed by a one octet length field (even if the option payload is empty)
+        if (opt.option() != 0 && opt.option() != 1) {
             options_size += sizeof(uint8_t);    
             options_size += static_cast<uint16_t>(opt.data_size());
         }
