@@ -34,8 +34,8 @@ const uint8_t VXLANTest::expected_packet[PACKET_SIZE] = {
 };
 
 const uint8_t VXLANTest::flags = 8;
-const uint16_t VXLANTest::dport = 19627;
-const uint16_t VXLANTest::sport = 4789;
+const uint16_t VXLANTest::dport = 4789;
+const uint16_t VXLANTest::sport = 19627;
 const uint16_t VXLANTest::p_type = 0xd0ab;
 const small_uint<24> VXLANTest::vni = 0xffffff;
 const IP::address_type VXLANTest::dst_ip = IP::address_type{"2.2.2.2"};
@@ -83,7 +83,11 @@ TEST_F(VXLANTest, ConstructorFromBuffer) {
 
 TEST_F(VXLANTest, OuterUDP) {
     auto pkt = IP{dst_ip, src_ip} / UDP{dport, sport} / VXLAN{expected_packet, PACKET_SIZE};
-    auto const vxlan = pkt.find_pdu<VXLAN>();
+    auto const udp = pkt.find_pdu<UDP>();
+    ASSERT_TRUE(udp != nullptr);
+    EXPECT_EQ(udp->dport(), dport);
+    EXPECT_EQ(udp->sport(), sport);
+    auto const vxlan = udp->find_pdu<VXLAN>();
     ASSERT_TRUE(vxlan != nullptr);
     EXPECT_EQ(vxlan->get_flags(), flags);
     EXPECT_EQ(vxlan->get_vni(), vni);
