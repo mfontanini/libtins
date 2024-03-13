@@ -252,7 +252,9 @@ Dot11* Dot11::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
             case PROBE_REQ:
                 return new Dot11ProbeRequest(buffer, total_sz); 
             case PROBE_RESP:
-                return new Dot11ProbeResponse(buffer, total_sz); 
+                return new Dot11ProbeResponse(buffer, total_sz);
+            case ACTION:
+                return new Dot11Action(buffer, total_sz);
             default: 
                 break;
         };
