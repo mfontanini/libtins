@@ -59,9 +59,11 @@ Stream::Stream(PDU& packet, const timestamp_type& ts)
         client_hw_addr_ = eth->src_addr();
         server_hw_addr_ = eth->dst_addr();
     }
-    const TCP& tcp = packet.rfind_pdu<TCP>();
-    // If this is not the first packet of a stream (SYN), then it's a partial stream
-    is_partial_stream_ = !tcp.has_flags(TCP::SYN);
+    const TCP* tcp = packet.find_pdu<TCP>();
+    if (tcp) {
+        // If this is not the first packet of a stream (SYN), then it's a partial stream
+        is_partial_stream_ = !tcp->has_flags(TCP::SYN);
+    }
 }
 
 void Stream::process_packet(PDU& packet, const timestamp_type& ts) {

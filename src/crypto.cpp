@@ -705,8 +705,11 @@ WPA2Decrypter::bssids_map::const_iterator WPA2Decrypter::find_ap(const Dot11Data
 
 bool WPA2Decrypter::decrypt(PDU& pdu) {
     if (capturer_.process_packet(pdu)) {
-        try_add_keys(pdu.rfind_pdu<Dot11Data>(), capturer_.handshakes().front());
-        capturer_.clear_handshakes();
+        Dot11Data* data = pdu.find_pdu<Dot11Data>();
+        if (data) {
+            try_add_keys(*data, capturer_.handshakes().front());
+            capturer_.clear_handshakes();
+        }
     }
     else if (const Dot11Beacon* beacon = pdu.find_pdu<Dot11Beacon>()) {
         if (aps_.count(beacon->addr3()) == 0) {
