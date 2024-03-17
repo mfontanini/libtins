@@ -248,6 +248,6 @@ uint32_t Dot11BlockAck::header_size() const {
            sizeof(start_sequence_) + sizeof(bitmap_);
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

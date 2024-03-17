@@ -68,4 +68,4 @@ void PKTAP::write_serialization(uint8_t* /*buffer*/, uint32_t /*total_sz*/) {
     throw pdu_not_serializable();
 }
 
-} // Tins
+} // namespace Tins

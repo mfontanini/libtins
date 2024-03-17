@@ -963,7 +963,7 @@ public:
      * \param domain_name The domain name to encode.
      * \return The encoded domain name.
      */
-    static std::string encode_domain_name(const std::string& domain_name);
+    static std::string encode_domain_name(const std::string& dn);
 
     /**
      * \brief Decodes a domain name

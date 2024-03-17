@@ -133,7 +133,7 @@ void RadioTap::tsft(uint64_t new_tsft) {
 }
 
 void RadioTap::flags(FrameFlags new_flags) {
-    add_integral_option(*this, FLAGS, (uint8_t)new_flags);
+    add_integral_option(*this, FLAGS, static_cast<uint8_t>(new_flags));
 }
 
 void RadioTap::rate(uint8_t new_rate) {
@@ -338,7 +338,7 @@ void RadioTap::send(PacketSender& sender, const NetworkInterface& iface) {
             std::copy(dot11_addr.begin(), dot11_addr.end(), addr.sll_addr);
         }
 
-        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr), iface);
+        sender.send_l2(*this, reinterpret_cast<struct sockaddr*>(&addr), static_cast<uint32_t>(sizeof(addr)), iface);
     #else
         sender.send_l2(*this, 0, 0, iface);
     #endif
@@ -349,7 +349,7 @@ bool RadioTap::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (sizeof(header_) < total_sz) {
         return false;
     }
-    const radiotap_header* radio_ptr = (const radiotap_header*)ptr;
+    const radiotap_header* radio_ptr = reinterpret_cast<const radiotap_header*>(ptr);
     if (radio_ptr->it_len <= total_sz) {
         ptr += radio_ptr->it_len;
         total_sz -= radio_ptr->it_len;
@@ -382,6 +382,6 @@ RadioTap::option RadioTap::do_find_option(PresentFlags type) const {
     return parser.current_option();
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

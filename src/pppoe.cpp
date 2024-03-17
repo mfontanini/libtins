@@ -155,7 +155,7 @@ void PPPoE::ac_cookie(const byte_array& value) {
 void PPPoE::vendor_specific(const vendor_spec_type& value) {
     vector<uint8_t> buffer(sizeof(uint32_t) + value.data.size());
     uint32_t tmp_vendor_id = Endian::host_to_be(value.vendor_id);
-    memcpy(&buffer[0], &tmp_vendor_id, sizeof(uint32_t));
+    memcpy(buffer.data(), &tmp_vendor_id, sizeof(uint32_t));
     copy(
         value.data.begin(), 
         value.data.end(), 

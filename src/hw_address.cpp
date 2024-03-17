@@ -121,5 +121,5 @@ bool hw_address_gt_compare(const uint8_t* start1, const uint8_t* end1,
     return lexicographical_compare(start2, end2, start1, end1);
 }
 
-} // Internals
-} // Tins
+} // namespace Internals
+} // namespace Tins
