@@ -65,7 +65,7 @@ ENDIF()
 # Set some Windows specific flags
 IF(WIN32)
     # We need to link against these libs
-    SET(LIBTINS_OS_LIBS Ws2_32.lib Iphlpapi.lib)
+    SET(LIBTINS_OS_LIBS Ws2_32.lib Iphlpapi.lib ntdll.lib)
 
     # Add the NOMINMAX macro to avoid Windows' min and max macros.
     ADD_DEFINITIONS(-DNOMINMAX)
