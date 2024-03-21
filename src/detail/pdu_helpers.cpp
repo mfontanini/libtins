@@ -169,6 +169,8 @@ Tins::PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size
             return new Tins::IEEE802_3(buffer, size);
         case Tins::PDU::PPPOE:
             return new Tins::PPPoE(buffer, size);
+        case Tins::PDU::RAW:
+            return new Tins::RawPDU(buffer, size);
         #ifdef TINS_HAVE_DOT11
             case Tins::PDU::RADIOTAP:
                 return new Tins::RadioTap(buffer, size);

@@ -54,6 +54,7 @@ set(SOURCES
     radiotap.cpp
     rawpdu.cpp
     rsn_information.cpp
+    rtp.cpp
     sll.cpp
     snap.cpp
     stp.cpp
@@ -131,6 +132,7 @@ set(HEADERS
     ${LIBTINS_INCLUDE_DIR}/tins/radiotap.h
     ${LIBTINS_INCLUDE_DIR}/tins/rawpdu.h
     ${LIBTINS_INCLUDE_DIR}/tins/rsn_information.h
+    ${LIBTINS_INCLUDE_DIR}/tins/rtp.h
     ${LIBTINS_INCLUDE_DIR}/tins/sll.h
     ${LIBTINS_INCLUDE_DIR}/tins/small_uint.h
     ${LIBTINS_INCLUDE_DIR}/tins/snap.h
