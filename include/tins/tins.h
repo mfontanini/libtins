@@ -80,5 +80,6 @@
 #include <tins/ip_reassembler.h>
 #include <tins/pdu_iterator.h>
 #include <tins/vxlan.h>
+#include <tins/rtp.h>
 
 #endif // TINS_TINS_H
