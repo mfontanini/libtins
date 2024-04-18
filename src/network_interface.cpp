@@ -347,9 +347,11 @@ NetworkInterface::Info NetworkInterface::info() const {
     #endif // _WIN32
     
      // If we didn't even get the hw address or ip address, this went wrong
-    if (!collector.found_hw && !collector.found_ip) {
-        throw invalid_interface();
-    }
+    // Should this really return an exception?
+    // On Openwrt device with netem, an empty interface is created for sch_teql
+    // if (!collector.found_hw && !collector.found_ip) {
+    //     throw invalid_interface();
+    // }
 
     return info;
 }
