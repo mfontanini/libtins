@@ -100,6 +100,29 @@ TEST_F(HWAddressTest, IsMulticast) {
     EXPECT_FALSE(HWAddress<6>("02:02:03:04:05:06").is_multicast());
 }
 
+TEST_F(HWAddressTest, IsGloballyUnique) {
+    EXPECT_FALSE(HWAddress<6>("ff:ff:ff:ff:ff:ff").is_globally_unique());
+    EXPECT_FALSE(HWAddress<6>("03:02:03:04:05:06").is_globally_unique());
+    EXPECT_FALSE(HWAddress<6>("de:ad:be:ef:00:00").is_globally_unique());
+    EXPECT_TRUE(HWAddress<6>("dc:ad:be:ef:00:00").is_globally_unique());
+    EXPECT_TRUE(HWAddress<6>("00:02:03:04:05:06").is_globally_unique());
+    EXPECT_TRUE(HWAddress<6>("01:02:03:04:05:06").is_globally_unique());
+    EXPECT_FALSE(HWAddress<6>("02:01:03:04:05:06").is_globally_unique());
+    EXPECT_TRUE(HWAddress<6>("04:05:06:07:08:09").is_globally_unique());
+    EXPECT_FALSE(HWAddress<6>("06:05:06:07:08:09").is_globally_unique());
+    EXPECT_TRUE(HWAddress<6>("08:05:06:07:08:09").is_globally_unique());
+}
+
+TEST_F(HWAddressTest, IsLocallyAssigned) {
+    EXPECT_TRUE(HWAddress<6>("ff:ff:ff:ff:ff:ff").is_locally_assigned());
+    EXPECT_FALSE(HWAddress<6>("00:00:00:00:00:00").is_locally_assigned());
+    EXPECT_TRUE(HWAddress<6>("de:ad:be:ef:00:00").is_locally_assigned());
+    EXPECT_TRUE(HWAddress<6>("12:13:14:15:16:17").is_locally_assigned());
+    EXPECT_FALSE(HWAddress<6>("14:13:12:15:16:17").is_locally_assigned());
+    EXPECT_TRUE(HWAddress<6>("03:00:00:00:00:00").is_locally_assigned());
+    EXPECT_FALSE(HWAddress<6>("05:00:00:00:00:00").is_locally_assigned());
+}
+
 TEST_F(HWAddressTest, CopyAssignmentOperator) {
     HWAddress<6> addr1(byte_address), addr2;
     addr2 = addr1;
