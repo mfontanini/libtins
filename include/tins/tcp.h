@@ -110,6 +110,7 @@ public:
         SACK    = 5,
         TSOPT   = 8,
         ALTCHK  = 14,
+        SCPS_CAPABILITIES = 20,
         RFC_EXPERIMENT_1 = 253,
         RFC_EXPERIMENT_2 = 254
     };

@@ -277,6 +277,14 @@ TEST_F(TCPTest, SpoofedOptions) {
     EXPECT_EQ(pdu.serialize().size(), pdu.size());
 }
 
+TEST_F(TCPTest, OptionWithEmptyPayload) {
+    TCP pdu;
+    // it has a payload, it's just empty (unlike EOL/NOP options which have no payload)
+    pdu.add_option(TCP::option(TCP::SCPS_CAPABILITIES, 2));
+    EXPECT_EQ(1U, pdu.options().size());
+    EXPECT_EQ(pdu.serialize().size(), pdu.size());
+}
+
 TEST_F(TCPTest, MalformedOptionAfterEOL) {
     TCP tcp(malformed_option_after_eol_packet, sizeof(malformed_option_after_eol_packet));
     EXPECT_EQ(0U, tcp.options().size());
