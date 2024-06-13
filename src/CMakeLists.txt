@@ -17,6 +17,7 @@ INCLUDE_DIRECTORIES(BEFORE
 set(SOURCES
     address_range.cpp
     arp.cpp
+    bfd.cpp
     bootp.cpp
     crypto.cpp
     detail/address_helpers.cpp
@@ -80,6 +81,7 @@ set(SOURCES
 set(HEADERS
     ${LIBTINS_INCLUDE_DIR}/tins/address_range.h
     ${LIBTINS_INCLUDE_DIR}/tins/arp.h
+    ${LIBTINS_INCLUDE_DIR}/tins/bfd.h
     ${LIBTINS_INCLUDE_DIR}/tins/bootp.h
     ${LIBTINS_INCLUDE_DIR}/tins/handshake_capturer.h
     ${LIBTINS_INCLUDE_DIR}/tins/stp.h

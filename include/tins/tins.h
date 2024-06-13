@@ -81,5 +81,6 @@
 #include <tins/pdu_iterator.h>
 #include <tins/vxlan.h>
 #include <tins/rtp.h>
+#include <tins/bfd.h>
 
 #endif // TINS_TINS_H
