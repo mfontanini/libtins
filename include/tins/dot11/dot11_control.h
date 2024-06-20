@@ -233,7 +233,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == pdu_flag || Dot11Control::matches_flag(flag);
+       return flag == pdu_flag || Dot11ControlTA::matches_flag(flag);
     }
 };
 
@@ -295,7 +295,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-       return flag == pdu_flag || Dot11Control::matches_flag(flag);
+       return flag == pdu_flag || Dot11ControlTA::matches_flag(flag);
     }
 };
 
@@ -357,7 +357,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-        return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11ControlTA::matches_flag(flag);
     }
 };
 
@@ -419,7 +419,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-        return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11ControlTA::matches_flag(flag);
     }
 };
 
@@ -610,7 +610,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-        return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11ControlTA::matches_flag(flag);
     }
 protected:
     void write_ext_header(Memory::OutputMemoryStream& stream);
@@ -759,7 +759,7 @@ public:
      * \sa PDU::matches_flag
      */
     bool matches_flag(PDUType flag) const {
-        return flag == pdu_flag || Dot11Control::matches_flag(flag);
+        return flag == pdu_flag || Dot11ControlTA::matches_flag(flag);
     }
 
     /**
