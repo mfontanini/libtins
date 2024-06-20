@@ -93,7 +93,7 @@ void ICMPExtension::serialize(uint8_t* buffer, uint32_t buffer_size) const {
 
 ICMPExtension::serialization_type ICMPExtension::serialize() const {
     serialization_type output(size());
-    serialize(&output[0], output.size());
+    serialize(output.data(), output.size());
     return output;
 }
 
@@ -187,8 +187,8 @@ void ICMPExtensionsStructure::serialize(uint8_t* buffer, uint32_t buffer_size) {
 
 ICMPExtensionsStructure::serialization_type ICMPExtensionsStructure::serialize() {
     serialization_type output(size());
-    serialize(&output[0], output.size());
+    serialize(output.data(), output.size());
     return output;
 }
 
-} // Tins
+} // namespace Tins

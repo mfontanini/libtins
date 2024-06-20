@@ -818,7 +818,7 @@ public:
      *
      * \param elements The new list of elements.
      */
-    void request_information(const request_info_type elements);
+    void request_information(const request_info_type& elements);
 
     /**
      * \brief Helper method to set the FH parameter set tagged option.

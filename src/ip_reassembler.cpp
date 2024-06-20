@@ -91,7 +91,7 @@ PDU* IPv4Stream::allocate_pdu() const {
     }
     return Internals::pdu_from_flag(
         static_cast<Constants::IP::e>(first_fragment_.protocol()),
-        buffer.empty() ? 0 :& buffer[0],
+        buffer.empty() ? 0 : buffer.data(),
         static_cast<uint32_t>(buffer.size())
     );
 }
@@ -104,7 +104,7 @@ uint16_t IPv4Stream::extract_offset(const IP* ip) {
     return ip->fragment_offset() * 8;
 }
 
-} // Internals
+} // namespace Internals
 
 IPv4Reassembler::IPv4Reassembler()
 : technique_(NONE) {
@@ -178,4 +178,4 @@ void IPv4Reassembler::remove_stream(uint16_t id, IPv4Address addr1, IPv4Address 
     );
 }
 
-} // Tins
+} // namespace Tins

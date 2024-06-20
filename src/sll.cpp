@@ -48,7 +48,7 @@ SLL::SLL(const uint8_t* buffer, uint32_t total_sz) {
     if (stream) {
         inner_pdu(
             Internals::pdu_from_flag(
-                (Constants::Ethernet::e)protocol(), 
+                static_cast<Constants::Ethernet::e>(protocol()), 
                 stream.pointer(), 
                 stream.size()
             )
@@ -91,4 +91,4 @@ void SLL::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     stream.write(header_);
 }
 
-} // Tins
+} // namespace Tins

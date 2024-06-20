@@ -266,4 +266,4 @@ bool TCPStream::StreamInfo::operator<(const StreamInfo& rhs) const {
     }
 }
 
-} // Tins
+} // namespace Tins

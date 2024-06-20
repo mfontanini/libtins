@@ -81,5 +81,5 @@ void OutputMemoryStream::write(const IPv6Address& address) {
     write(address.begin(), address.end());
 }
 
-} // Memory
-} // Tins
+} // namespace Memory
+} // namespace Tins
