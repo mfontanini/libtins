@@ -317,11 +317,7 @@ ENDIF()
 # CMake project configuration export
 # **********************************
 
-if(UNIX)
-    set(CONF_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/libtins")
-else()
-    set(CONF_CMAKE_INSTALL_DIR CMake)
-endif()
+set(CONF_CMAKE_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/libtins")
 
 # Add all targets to the build-tree export set
 EXPORT(
