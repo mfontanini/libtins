@@ -328,23 +328,33 @@ EXPORT(
 # Export the package for use from the build-tree
 # (this registers the build-tree with a global CMake-registry)
 EXPORT(PACKAGE libtins)
+INCLUDE(CMakePackageConfigHelpers)
 
 # Create the libtinsConfig.cmake and libtinsConfigVersion.cmake files
 # for the build tree
-SET(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include")
-CONFIGURE_FILE(
+SET(CONF_INCLUDE_DIRS "include")
+CONFIGURE_PACKAGE_CONFIG_FILE(
     cmake/libtinsConfig.cmake.in
-    "${PROJECT_BINARY_DIR}/libtinsConfig.cmake" @ONLY
+    "${PROJECT_BINARY_DIR}/libtinsConfig.cmake"
+    INSTALL_DESTINATION ${CONF_CMAKE_INSTALL_DIR}
+    PATH_VARS CONF_INCLUDE_DIRS
 )
 CONFIGURE_FILE(
     cmake/libtinsConfigVersion.cmake.in
     "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake" @ONLY
 )
+CONFIGURE_FILE(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/FindPCAP.cmake"
+    "${PROJECT_BINARY_DIR}/FindPCAP.cmake"
+    COPYONLY
+)
+
 # Install the libtinsConfig.cmake and libtinsConfigVersion.cmake
 INSTALL(
     FILES
     "${PROJECT_BINARY_DIR}/libtinsConfig.cmake"
     "${PROJECT_BINARY_DIR}/libtinsConfigVersion.cmake"
+    "${PROJECT_BINARY_DIR}/FindPCAP.cmake"
     DESTINATION ${CONF_CMAKE_INSTALL_DIR}
     COMPONENT dev
 )
