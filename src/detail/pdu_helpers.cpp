@@ -43,6 +43,7 @@
 #include <tins/icmp.h>
 #include <tins/loopback.h>
 #include <tins/sll.h>
+#include <tins/sll2.h>
 #include <tins/ppi.h>
 #include <tins/icmpv6.h>
 #include <tins/mpls.h>
@@ -147,6 +148,8 @@ PDU* pdu_from_dlt_flag(int flag,
             return new Loopback(buffer, size);
         case DLT_LINUX_SLL:
             return new SLL(buffer, size);
+        case DLT_LINUX_SLL2:
+            return new SLL2(buffer, size);
         case DLT_PPI:
             return new PPI(buffer, size);
         default:

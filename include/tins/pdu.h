@@ -169,6 +169,7 @@ public:
         IPv6,
         ICMPv6,
         SLL,
+        SLL2,
         DHCPv6,
         DOT1AD,
         DOT1Q,
