@@ -39,6 +39,7 @@
 // Check if this is Visual Studio
 #ifdef _MSC_VER
     // This is Visual Studio
+
     #define TINS_BEGIN_PACK __pragma( pack(push, 1) )
     #define TINS_END_PACK __pragma( pack(pop) )
     #define TINS_PACKED(DECLARATION) __pragma( pack(push, 1) ) DECLARATION __pragma( pack(pop) )
