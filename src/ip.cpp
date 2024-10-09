@@ -112,7 +112,7 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz) {
             // If the end option found, we're done
             if (TINS_UNLIKELY(stream.pointer() != options_end)) {
                 // Skip to the end of the options list
-                stream.skip(options_end -stream.pointer());
+                stream.skip(options_end - stream.pointer());
             }
             break;
         }
