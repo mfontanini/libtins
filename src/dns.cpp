@@ -342,11 +342,11 @@ uint32_t DNS::compose_name(const uint8_t* ptr, char* out_ptr) const {
     char* current_out_ptr = out_ptr;
     uint8_t pointer_counter = 0;
     while (*ptr) {
-        if (pointer_counter++ > 30){
-            throw dns_decompression_pointer_loops();
-        }
         // It's an offset
         if (((*ptr & 0xc0) == 0xc0)) {
+            if (pointer_counter++ > 30){
+                throw dns_decompression_pointer_loops();
+            }
             if (TINS_UNLIKELY(ptr + sizeof(uint16_t) > end)) {
                 throw malformed_packet();
             }
