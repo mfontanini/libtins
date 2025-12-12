@@ -300,7 +300,7 @@ bool ICMP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(icmp_header)) {
         return false;
     }
-    const icmp_header* icmp_ptr = (const icmp_header*)ptr;
+    const icmp_header* icmp_ptr = reinterpret_cast<const icmp_header*>(ptr);
     if ((header_.type == ECHO_REQUEST && icmp_ptr->type == ECHO_REPLY) || 
         (header_.type == TIMESTAMP_REQUEST && icmp_ptr->type == TIMESTAMP_REPLY) ||
         (header_.type == ADDRESS_MASK_REQUEST && icmp_ptr->type == ADDRESS_MASK_REPLY)) {

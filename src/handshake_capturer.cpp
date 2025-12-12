@@ -102,6 +102,6 @@ bool RSNHandshakeCapturer::do_insert(const handshake_map::key_type& key,
     return false;
 }
 
-} // namespace Tins;
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

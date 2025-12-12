@@ -82,14 +82,14 @@ namespace Utils {
 
 IPv4Address resolve_domain(const string& to_resolve) {
     addrinfo* result = ::resolve_domain(to_resolve, AF_INET);
-    IPv4Address addr(((sockaddr_in*)result->ai_addr)->sin_addr.s_addr);
+    IPv4Address addr((reinterpret_cast<sockaddr_in*>(result->ai_addr))->sin_addr.s_addr);
     freeaddrinfo(result);
     return addr;
 }
 
 IPv6Address resolve_domain6(const string& to_resolve) {
     addrinfo* result = ::resolve_domain(to_resolve, AF_INET6);
-    IPv6Address addr((const uint8_t*)&((sockaddr_in6*)result->ai_addr)->sin6_addr);
+    IPv6Address addr(reinterpret_cast<const uint8_t*>(&(reinterpret_cast<sockaddr_in6*>(result->ai_addr))->sin6_addr));
     freeaddrinfo(result);
     return addr;
 }
@@ -127,6 +127,5 @@ HWAddress<6> resolve_hwaddr(IPv4Address ip, PacketSender& sender) {
     return resolve_hwaddr(sender.default_interface(), ip, sender);
 }
 
-
-} // Utils
-} // Tins
+} // namespace Utils
+} // namespace Tins

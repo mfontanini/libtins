@@ -81,4 +81,4 @@ Timestamp::microseconds_type Timestamp::microseconds() const {
     return timestamp_ % MICROSECONDS_IN_SECOND;
 }
 
-} // Tins
+} // namespace Tins

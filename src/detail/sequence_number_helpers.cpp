@@ -46,5 +46,5 @@ int seq_compare(uint32_t seq1, uint32_t seq2) {
     }
 }
 
-} // Internals
-} // Tins
+} // namespace Internals
+} // namespace Tins

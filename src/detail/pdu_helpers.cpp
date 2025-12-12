@@ -301,5 +301,5 @@ PDU::PDUType ip_type_to_pdu_flag(Constants::IP::e flag) {
     };
 }
 
-} // Internals
-} // Tins
+} // namespace Internals
+} // namespace Tins

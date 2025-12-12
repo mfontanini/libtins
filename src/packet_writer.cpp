@@ -30,11 +30,11 @@
 #ifndef _WIN32
     #include <sys/time.h>
 #endif
-#include <string.h>
-#include <tins/packet_writer.h>
-#include <tins/packet.h>
-#include <tins/pdu.h>
+#include <cstring>
 #include <tins/exceptions.h>
+#include <tins/packet.h>
+#include <tins/packet_writer.h>
+#include <tins/pdu.h>
 
 using std::string;
 
@@ -76,7 +76,7 @@ void PacketWriter::write(PDU& pdu, const struct timeval& tv) {
     header.len = static_cast<bpf_u_int32>(pdu.advertised_size());
     PDU::serialization_type buffer = pdu.serialize();
     header.caplen = static_cast<bpf_u_int32>(buffer.size());
-    pcap_dump((u_char*)dumper_, &header, &buffer[0]);
+    pcap_dump(reinterpret_cast<u_char*>(dumper_), &header, buffer.data());
 }
 
 void PacketWriter::init(const string& file_name, int link_type) {
@@ -92,4 +92,4 @@ void PacketWriter::init(const string& file_name, int link_type) {
     }
 }
 
-} // Tins
+} // namespace Tins

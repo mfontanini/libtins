@@ -40,5 +40,5 @@ uint16_t mhz_to_channel(uint16_t mhz) {
     return (mhz - 2407) / 5;
 }
 
-} // Utils
-} // Tins
+} // namespace Utils
+} // namespace Tins

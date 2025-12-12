@@ -51,7 +51,7 @@ PDU::metadata TCP::extract_metadata(const uint8_t *buffer, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < sizeof(tcp_header))) {
         throw malformed_packet();
     }
-    const tcp_header* header = (const tcp_header*)buffer;
+    const tcp_header* header = reinterpret_cast<const tcp_header*>(buffer);
     return metadata(header->doff * 4, pdu_flag, PDU::UNKNOWN);
 }
 
@@ -80,7 +80,7 @@ TCP::TCP(const uint8_t* buffer, uint32_t total_sz) {
     }
 
     while (stream.pointer() < header_end) {
-        const OptionTypes option_type = (OptionTypes)stream.read<uint8_t>();
+        const OptionTypes option_type = static_cast<OptionTypes>(stream.read<uint8_t>());
         if (option_type == EOL) {
             stream.skip(header_end - stream.pointer());
             break;
@@ -156,7 +156,7 @@ void TCP::data_offset(small_uint<4> new_doff) {
 
 void TCP::mss(uint16_t value) {
     value = Endian::host_to_be(value);
-    add_option(option(MSS, 2, (uint8_t*)&value));
+    add_option(option(MSS, 2, reinterpret_cast<uint8_t*>(&value)));
 }
 
 uint16_t TCP::mss() const {
@@ -181,13 +181,13 @@ bool TCP::has_sack_permitted() const {
 
 void TCP::sack(const sack_type& edges) {
     vector<uint8_t> value(edges.size() * sizeof(uint32_t));
-    if (edges.size()) {
+    if (!edges.empty()) {
         OutputMemoryStream stream(value);
         for (sack_type::const_iterator it = edges.begin(); it != edges.end(); ++it) {
             stream.write_be(*it);
         }
     }
-    add_option(option(SACK, (uint8_t)value.size(), &value[0]));
+    add_option(option(SACK, static_cast<uint8_t>(value.size()), value.data()));
 }
 
 TCP::sack_type TCP::sack() const {
@@ -199,9 +199,9 @@ TCP::sack_type TCP::sack() const {
 }
 
 void TCP::timestamp(uint32_t value, uint32_t reply) {
-    uint64_t buffer = (uint64_t(value) << 32) | reply;
+    uint64_t buffer = (static_cast<uint64_t>(value) << 32) | reply;
     buffer = Endian::host_to_be(buffer);
-    add_option(option(TSOPT, 8, (uint8_t*)&buffer));
+    add_option(option(TSOPT, 8, reinterpret_cast<uint8_t*>(&buffer)));
 }
 
 pair<uint32_t, uint32_t> TCP::timestamp() const {
@@ -346,7 +346,7 @@ void TCP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
             check = (check & 0xffff) + (check >> 16);
     }
     checksum(Endian::host_to_be<uint16_t>(~check));
-    ((tcp_header*)buffer)->check = header_.check;
+    (reinterpret_cast<tcp_header*>(buffer))->check = header_.check;
 }
 
 const TCP::option* TCP::search_option(OptionTypes type) const {
@@ -412,7 +412,7 @@ bool TCP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const tcp_header* tcp_ptr = (const tcp_header*)ptr;
+    const tcp_header* tcp_ptr = reinterpret_cast<const tcp_header*>(ptr);
     if (tcp_ptr->sport == header_.dport && tcp_ptr->dport == header_.sport) {
         const uint32_t data_offset = tcp_ptr->doff * sizeof(uint32_t);
         uint32_t sz = (total_sz < data_offset) ? total_sz : data_offset;
@@ -422,4 +422,4 @@ bool TCP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
         return false;
 }
 
-} // Tins
+} // namespace Tins

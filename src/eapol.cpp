@@ -45,7 +45,7 @@ PDU::metadata EAPOL::extract_metadata(const uint8_t *buffer, uint32_t total_sz) 
     if (TINS_UNLIKELY(total_sz < sizeof(eapol_header))) {
         throw malformed_packet();
     }
-    const eapol_header* header = (const eapol_header*)buffer;
+    const eapol_header* header = reinterpret_cast<const eapol_header*>(buffer);
     uint32_t advertised_size = Endian::be_to_host<uint16_t>(header->length) + 4;
     const uint32_t actual_size = (total_sz < advertised_size) ? total_sz : advertised_size;
     return metadata(actual_size, pdu_flag, PDU::UNKNOWN);
@@ -55,7 +55,7 @@ EAPOL::EAPOL(uint8_t packet_type, EAPOLTYPE type)
 : header_() {
     header_.version = 1;
     header_.packet_type = packet_type;
-    header_.type = (uint8_t)type;
+    header_.type = static_cast<uint8_t>(type);
 }
 
 EAPOL::EAPOL(const uint8_t* buffer, uint32_t total_sz) {
@@ -67,7 +67,7 @@ EAPOL* EAPOL::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < sizeof(eapol_header))) {
         throw malformed_packet();
     }
-    const eapol_header* ptr = (const eapol_header*)buffer;
+    const eapol_header* ptr = reinterpret_cast<const eapol_header*>(buffer);
     uint32_t data_len = Endian::be_to_host<uint16_t>(ptr->length);
     // at least 4 for fields always present
     data_len += 4;
@@ -161,7 +161,7 @@ uint32_t RC4EAPOL::header_size() const {
 }
 
 void RC4EAPOL::write_body(OutputMemoryStream& stream) {
-    if (key_.size()) {
+    if (!key_.empty()) {
         header_.key_length = Endian::host_to_be(static_cast<uint16_t>(key_.size()));
     }
     stream.write(header_);
@@ -270,12 +270,12 @@ uint32_t RSNEAPOL::header_size() const {
 }
 
 void RSNEAPOL::write_body(OutputMemoryStream& stream) {
-    if (key_.size()) {
+    if (!key_.empty()) {
         if (!header_.key_t && header_.install) {
             header_.key_length = Endian::host_to_be<uint16_t>(32);
             wpa_length(static_cast<uint16_t>(key_.size()));
         }
-        else if (key_.size()) {
+        else if (!key_.empty()) {
             wpa_length(static_cast<uint16_t>(key_.size()));
         }
     }
@@ -283,4 +283,4 @@ void RSNEAPOL::write_body(OutputMemoryStream& stream) {
     stream.write(key_.begin(), key_.end());
 }
 
-} // Tins
+} // namespace Tins

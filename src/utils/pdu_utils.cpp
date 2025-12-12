@@ -97,5 +97,5 @@ string to_string(PDU::PDUType pduType) {
 #undef ENUM_TEXT
 }
 
-} // Utils
-} // Tins
+} // namespace Utils
+} // namespace Tins

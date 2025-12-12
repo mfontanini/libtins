@@ -100,7 +100,7 @@ private:
     uint8_t data[n];
 };
 
-} // Internals
+} // namespace Internals
 
 namespace Crypto {
 
@@ -228,7 +228,7 @@ struct RC4Key {
     static RC4Key from_packet(const Dot11Data& dot11, const RawPDU& raw,
                               const vector<uint8_t>& ptk) { 
         const RawPDU::payload_type& pload = raw.payload();
-        const uint8_t* tk = &ptk[0] + 32;
+        const uint8_t* tk = ptk.data() + 32;
         Internals::byte_array<16> rc4_key;
         uint16_t ppk[6];
         const Dot11::address_type addr = dot11.addr2();
@@ -367,7 +367,7 @@ PDU* WEPDecrypter::decrypt(RawPDU& raw, const string& password) {
     RC4Key key(key_buffer_.begin(), key_buffer_.begin() + password.size() + 3);
     rc4(pload.begin() + 4, pload.end(), key, pload.begin());
     uint32_t payload_size = static_cast<uint32_t>(pload.size() - 8);
-    uint32_t crc = Utils::crc32(&pload[0], payload_size);
+    uint32_t crc = Utils::crc32(pload.data(), payload_size);
     if (pload[pload.size() - 8] != (crc & 0xff) ||
         pload[pload.size() - 7] != ((crc >> 8) & 0xff) ||
         pload[pload.size() - 6] != ((crc >> 16) & 0xff) ||
@@ -376,7 +376,7 @@ PDU* WEPDecrypter::decrypt(RawPDU& raw, const string& password) {
     }
 
     try {
-        return new SNAP(&pload[0], payload_size);
+        return new SNAP(pload.data(), payload_size);
     }
     catch (exception_base&) {
         return 0;
@@ -448,16 +448,16 @@ SessionKeys::SessionKeys(const RSNHandshake& hs, const pmk_type& pmk)
     }
     for (int i(0); i < 4; ++i) {
         PKE[99] = i;
-        HMAC(EVP_sha1(), &pmk[0], pmk.size(), PKE, 100, &ptk_[0] + i * 20, 0);
+        HMAC(EVP_sha1(), pmk.data(), pmk.size(), PKE, 100, (ptk_).data() + i * 20, 0);
     }
     RSNEAPOL& last_hs = const_cast<RSNEAPOL&>(hs.handshake()[3]);
     PDU::serialization_type buffer = last_hs.serialize();
     fill(buffer.begin() + 81, buffer.begin() + 81 + 16, 0);
     if (is_ccmp_) {
-        HMAC(EVP_sha1(), &ptk_[0], 16, &buffer[0], buffer.size(), MIC, 0);
+        HMAC(EVP_sha1(), ptk_.data(), 16, buffer.data(), buffer.size(), MIC, 0);
     }
     else {
-        HMAC(EVP_md5(), &ptk_[0], 16, &buffer[0], buffer.size(), MIC, 0);
+        HMAC(EVP_md5(), ptk_.data(), 16, buffer.data(), buffer.size(), MIC, 0);
     }
     
     if (!equal(MIC, MIC + RSNEAPOL::mic_size, last_hs.mic())) {
@@ -479,7 +479,7 @@ SNAP* SessionKeys::ccmp_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) con
     
     uint8_t AAD[32] = {0};
     AAD[0] = 0;
-    AAD[1] = 22 + 6 * int(dot11.from_ds() && dot11.to_ds());
+    AAD[1] = 22 + 6 * static_cast<int>(dot11.from_ds() && dot11.to_ds());
     if (dot11.subtype() == Dot11::QOS_DATA_DATA)  {
         AAD[1] += 2;
     }
@@ -498,7 +498,7 @@ SNAP* SessionKeys::ccmp_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) con
     }
     
     AES_KEY ctx;
-    AES_set_encrypt_key(&ptk_[0] + 32, 128, &ctx);
+    AES_set_encrypt_key(ptk_.data() + 32, 128, &ctx);
     uint8_t crypted_block[16];
     size_t total_sz = raw.payload_size() - 16, offset = 8, blocks = (total_sz + 15) / 16;
     
@@ -544,7 +544,7 @@ SNAP* SessionKeys::ccmp_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) con
         offset += block_sz;
     }
     if (equal(nice_MIC, nice_MIC + sizeof(nice_MIC), MIC)) {
-        return new SNAP(&pload[0], total_sz);
+        return new SNAP(pload.data(), total_sz);
     }
     else {
         return 0;
@@ -560,7 +560,7 @@ SNAP* SessionKeys::tkip_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) con
     RawPDU::payload_type& pload = raw.payload();
     rc4(pload.begin() + 8, pload.end(), key, pload.begin());
 
-    uint32_t crc = Utils::crc32(&pload[0], pload.size() - 12);
+    uint32_t crc = Utils::crc32(pload.data(), pload.size() - 12);
     if (pload[pload.size() - 12] != (crc & 0xff) ||
         pload[pload.size() - 11] != ((crc >> 8) & 0xff) ||
         pload[pload.size() - 10] != ((crc >> 16) & 0xff) ||
@@ -568,7 +568,7 @@ SNAP* SessionKeys::tkip_decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) con
         return 0;
     }
 
-    return new SNAP(&pload[0], pload.size() - 20);
+    return new SNAP(pload.data(), pload.size() - 20);
 }
 
 SNAP* SessionKeys::decrypt_unicast(const Dot11Data& dot11, RawPDU& raw) const {
@@ -596,7 +596,7 @@ SupplicantData::SupplicantData(const string& psk, const string& ssid)
         ssid.size(), 
         4096, 
         pmk_.size(), 
-        &pmk_[0]
+        pmk_.data()
     );
 }
 

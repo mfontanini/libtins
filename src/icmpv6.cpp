@@ -274,7 +274,7 @@ bool ICMPv6::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const icmp6_header* hdr_ptr = (const icmp6_header*)ptr;
+    const icmp6_header* hdr_ptr = reinterpret_cast<const icmp6_header*>(ptr);
     if (type() == ECHO_REQUEST && hdr_ptr->type == ECHO_REPLY) {
         return hdr_ptr->u_echo.identifier == header_.u_echo.identifier &&
                hdr_ptr->u_echo.sequence == header_.u_echo.sequence;
@@ -1104,5 +1104,4 @@ uint32_t ICMPv6::multicast_address_record::size() const  {
            aux_data.size();
 }
 
-} // Tins
-
+} // namespace Tins

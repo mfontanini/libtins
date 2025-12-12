@@ -161,4 +161,4 @@ IPv4Address IPv4Address::operator~() const {
     return IPv4Address(Endian::be_to_host(~ip_addr_));
 }
 
-} // Tins
+} // namespace Tins
