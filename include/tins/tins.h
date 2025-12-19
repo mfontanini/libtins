@@ -70,6 +70,7 @@
 #include <tins/packet.h>
 #include <tins/timestamp.h>
 #include <tins/sll.h>
+#include <tins/sll2.h>
 #include <tins/dhcpv6.h>
 #include <tins/pppoe.h>
 #include <tins/stp.h>
