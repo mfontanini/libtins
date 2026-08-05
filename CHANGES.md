@@ -1,3 +1,17 @@
+#### 4.6 - Wed Aug  5 08:42:15 AM PDT 2026
+
+- Update CMake minimum required version to 3.10 ([#553](https://github.com/mfontanini/libtins/issues/553)).
+
+- Add RTP support ([#530](https://github.com/mfontanini/libtins/issues/530)).
+
+- Replace remaining `rfind_pdu` calls to `find_pdu` in `src` directory ([#527](https://github.com/mfontanini/libtins/issues/527)).
+
+- Update VXLANTest destination port number ([#528](https://github.com/mfontanini/libtins/issues/528)).
+
+- Modify conditional to have Android API version check ([#526](https://github.com/mfontanini/libtins/issues/526)).
+
+- Update tcp.h ([#516](https://github.com/mfontanini/libtins/issues/516)).
+
 ##### v4.5 - Sun Aug 20 04:46:53 PM UTC 2023
 
 - Add VXLAN support (#501)
