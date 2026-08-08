@@ -162,12 +162,12 @@ void sniff_loop_dot11_handler(u_char* user, const struct pcap_pkthdr* h, const u
 
 PtrPacket BaseSniffer::next_packet() {
     sniff_data data;
-    const int iface_type = pcap_datalink(handle_);
     pcap_handler handler = 0;
     if (extract_raw_) {
         handler = &sniff_loop_handler<RawPDU>;
     }
     else {
+        const int iface_type = pcap_datalink(handle_);
         switch (iface_type) {
             case DLT_EN10MB:
                 handler = &sniff_loop_eth_handler;
