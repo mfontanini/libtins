@@ -1,2 +1,4 @@
+.devcontainer/
+.vscode/
 build/**
 include/tins/config.h

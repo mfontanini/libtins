@@ -196,6 +196,7 @@ Tins::PDU* pdu_from_flag(PDU::PDUType type, const uint8_t* buffer, uint32_t size
             case Tins::PDU::DOT11_REASSOC_RESP:
             case Tins::PDU::DOT11_RTS:
             case Tins::PDU::DOT11_QOS_DATA:
+            case Tins::PDU::DOT11_ACTION:
                 return Tins::Dot11::from_bytes(buffer, size);
         #endif // TINS_HAVE_DOT11
         default:
