@@ -20,6 +20,18 @@ using namespace Tins;
     #define TINS_DEFAULT_TEST_IP "127.0.0.1"
 #endif
 
+std::vector<uint8_t> HexToBytes(const std::string& hex) {
+    std::vector<uint8_t> bytes;
+
+    for (unsigned int i = 0; i < hex.length(); i += 2) {
+        std::string byteString = hex.substr(i, 2);
+        uint8_t byte = (uint8_t) strtol(byteString.c_str(), NULL, 16);
+        bytes.push_back(byte);
+    }
+
+    return bytes;
+}
+
 class IPTest : public testing::Test {
 public:
     static const uint8_t expected_packet[], fragmented_packet[], 
@@ -882,4 +894,37 @@ TEST_F(IPTest, ParseSerializeOptions) {
 
     const vector<uint8_t> buffer(options_packet, options_packet + sizeof(options_packet));
     EXPECT_EQ(buffer, serialized);
+}
+
+TEST_F(IPTest, EndOfOptionsBeforeEndOfHeader) {
+    // IPv4 Header with 16 bytes of options where the first byte of options is the EOL option/ UDP (8 bytes)
+    std::string ip_hex_data = "4900002c0001000040110d52ac10080eac100835"
+                              "000000000001010a0000ffffffffffff"
+                              "271000500008701a";
+    std::vector<uint8_t> ip_data_vector = HexToBytes(ip_hex_data);
+    const uint8_t *ip_data = ip_data_vector.data();
+
+    IP packet(ip_data, ip_data_vector.size());
+
+    const IP::options_type &options = packet.options();
+    EXPECT_EQ(options.size(), 1);
+    EXPECT_EQ(options[0].option().number, IP::END);
+    const IP::post_options_type &post_option_bytes = packet.post_option_bytes();
+    const IP::post_options_type expected_post_option_bytes = HexToBytes("0000000001010a0000ffffffffffff");
+    EXPECT_EQ(post_option_bytes, post_option_bytes);
+}
+
+TEST_F(IPTest, EndOfOptionsBeforeEndOfHeaderSerialize) {
+    // IPv4 Header with 16 bytes of options where the first byte of options is the EOL option/ UDP (8 bytes)
+    std::string ip_hex_data = "4900002c0001000040110d52ac10080eac100835"
+                              "000000000001010a0000ffffffffffff"
+                              "271000500008701a";
+    std::vector<uint8_t> ip_data_vector = HexToBytes(ip_hex_data);
+    const uint8_t *ip_data = ip_data_vector.data();
+    IP packet(ip_data, ip_data_vector.size());
+
+    auto serialized = packet.serialize();
+
+    EXPECT_EQ(serialized.size(), ip_data_vector.size());
+    EXPECT_EQ(serialized, ip_data_vector);
 }

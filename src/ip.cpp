@@ -109,10 +109,12 @@ IP::IP(const uint8_t* buffer, uint32_t total_sz) {
             }
         }
         else if (opt_type == END) {
-            // If the end option found, we're done
+            options_.push_back(option(opt_type));
+            // If the end option is found, we're done parsing options, however there may still be data after the end option
             if (TINS_UNLIKELY(stream.pointer() != options_end)) {
-                // Make sure we found the END option at the end of the options list
-                throw malformed_packet();
+                while (stream.pointer() < options_end) {
+                    add_post_option_byte(stream.read<uint8_t>());
+                }
             }
             break;
         }
@@ -314,6 +316,14 @@ uint16_t IP::stream_identifier() const {
     return opt->to<uint16_t>();
 }
 
+void IP::post_option_bytes(const IP::post_options_type& b) {
+    post_option_bytes_ = b;
+}
+
+void IP::add_post_option_byte(const uint8_t b) {
+    post_option_bytes_.push_back(b);
+}
+
 void IP::add_option(const option& opt) {
     options_.push_back(opt);
 }
@@ -374,7 +384,7 @@ void IP::write_option(const option& opt, OutputMemoryStream& stream) {
 // Virtual method overriding
 
 uint32_t IP::header_size() const {
-    return sizeof(header_) + pad_options_size(calculate_options_size());
+    return sizeof(header_) + pad_options_size(calculate_options_size() + post_option_bytes_.size());
 }
 
 PacketSender::SocketType pdu_type_to_sender_type(PDU::PDUType type) {
@@ -459,9 +469,11 @@ void IP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
         write_option(*it, stream);
     }
     const uint32_t options_size = calculate_options_size();
-    const uint32_t padded_options_size = pad_options_size(options_size);
+    stream.write(post_option_bytes_.begin(), post_option_bytes_.end());
+    const uint32_t not_padded_options_size = options_size + post_option_bytes_.size();
+    const uint32_t padded_options_size = pad_options_size(not_padded_options_size);
     // Add option padding
-    stream.fill(padded_options_size - options_size, 0);
+    stream.fill(padded_options_size - not_padded_options_size, 0);
 
     uint32_t check = Utils::do_checksum(buffer, stream.pointer());
     while (check >> 16) {

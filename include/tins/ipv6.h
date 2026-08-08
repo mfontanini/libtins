@@ -407,7 +407,7 @@ private:
     void write_serialization(uint8_t* buffer, uint32_t total_sz);
     void set_last_next_header(uint8_t value);
     uint32_t calculate_headers_size() const;
-    static void write_header(const ext_header& header, Memory::OutputMemoryStream& stream);
+    static void write_header(const ext_header& header, Memory::OutputMemoryStream& stream, ExtensionHeader type);
     static bool is_extension_header(uint8_t header_id);
     static uint32_t get_padding_size(const ext_header& header);
     static std::vector<header_option_type> parse_header_options(const uint8_t* data, size_t size);

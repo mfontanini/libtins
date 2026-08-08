@@ -246,6 +246,11 @@ public:
     typedef std::vector<option> options_type;
 
     /**
+     * The type used to store the bytes after the last parsed option but before the end the IP header.
+     */
+    typedef std::vector<uint8_t> post_options_type;
+
+    /**
      * \brief Extracts metadata for this protocol based on the buffer provided
      *
      * \param buffer Pointer to a buffer
@@ -416,6 +421,14 @@ public:
         return options_;
     }
 
+    /**
+     * \brief Getter for the IP options.
+     * \return The stored options.
+     */
+    const post_options_type& post_option_bytes() const {
+        return post_option_bytes_;
+    }
+
     /* Setters */
 
     /**
@@ -507,6 +520,22 @@ public:
      * \param ver The version field to be set.
      */
     void version(small_uint<4> ver);
+
+    /**
+     * \brief Sets the post option bytes.
+     *
+     * \param b The post_options_type to be set to
+     */
+    void post_option_bytes(const post_options_type& b);
+
+    /**
+     * \brief Adds a byte to the post option bytes.
+     *
+     * The byte is append
+     *
+     * \param b The byte to be added
+     */
+    void add_post_option_byte(uint8_t b);
 
     /**
      * \brief Adds an IP option.
@@ -769,6 +798,7 @@ private:
     options_type::const_iterator search_option_iterator(option_identifier id) const;
     options_type::iterator search_option_iterator(option_identifier id);
 
+    post_options_type post_option_bytes_;
     options_type options_;
     ip_header header_;
 };
