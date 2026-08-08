@@ -170,7 +170,7 @@ IPv6::IPv6(const uint8_t* buffer, uint32_t total_sz) {
         }
         else {
             if (!stream.can_read(actual_payload_length)) {
-                throw malformed_packet();
+                actual_payload_length = stream.size();
             }
             if (is_payload_fragmented) {
                 inner_pdu(new Tins::RawPDU(stream.pointer(), actual_payload_length));
