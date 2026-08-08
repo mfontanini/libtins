@@ -182,7 +182,7 @@ public:
         DMS_RESP,
         LINK_ID,
         WAKEUP_SCHEDULE,
-        CH_SWITCH_TIMING,
+        CH_SWITCH_TIMING = 104,
         PTI_CONTROL,
         TPU_BUFFER_STATUS,
         INTERWORKING,
