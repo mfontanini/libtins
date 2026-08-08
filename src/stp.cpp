@@ -135,4 +135,4 @@ STP::pvt_bpdu_id STP::convert(const bpdu_id_type& id) {
     return result;
 }
 
-} // Tins
+} // namespace Tins

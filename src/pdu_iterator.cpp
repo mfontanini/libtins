@@ -101,4 +101,4 @@ PDUIteratorRange<ConstPDUIterator> iterate_pdus(const Packet& packet) {
     return PDUIteratorRange<ConstPDUIterator>(packet.pdu(), 0);
 }
 
-} // Tins
+} // namespace Tins

@@ -131,25 +131,25 @@ public:
      * \brief Sets the version field.
      * \param value The new version to be set.
      */
-    void version(uint8_t value);
+    void version(uint8_t new_version);
     
     /**
      * \brief Sets the packet type field.
      * \param value The new packet type to be set.
      */
-    void packet_type(uint8_t value);
+    void packet_type(uint8_t new_ptype);
     
     /**
      * \brief Sets the length field.
      * \param value The new length to be set.
      */
-    void length(uint16_t value);
+    void length(uint16_t new_length);
     
     /**
      * \brief Sets the type field.
      * \param value The new type to be set.
      */
-    void type(uint8_t value);
+    void type(uint8_t new_type);
     
     /**
      * \brief Getter for the PDU's type.
@@ -297,7 +297,7 @@ public:
      * \brief Sets the key length field.
      * \param value The new key length to be set.
      */
-    void key_length(uint16_t value);
+    void key_length(uint16_t length);
     
     /**
      * \brief Sets the replay counter field.
@@ -309,31 +309,31 @@ public:
      * \brief Sets the key IV field.
      * \param value The new key IV to be set.
      */
-    void key_iv(const uint8_t* value);
+    void key_iv(const uint8_t* ptr);
     
     /**
      * \brief Sets the key flag field.
      * \param value The new key flag to be set.
      */
-    void key_flag(small_uint<1> value);
+    void key_flag(small_uint<1> flag);
     
     /**
      * \brief Sets the key index field.
      * \param value The new key index to be set.
      */
-    void key_index(small_uint<7> value);
+    void key_index(small_uint<7> new_key_index);
     
     /**
      * \brief Sets the key signature field.
      * \param value The new key signature to be set.
      */
-    void key_sign(const uint8_t* value);
+    void key_sign(const uint8_t* ptr);
     
     /**
      * \brief Sets the key field.
      * \param value The new key to be set.
      */
-    void key(const key_type& value);
+    void key(const key_type& new_key);
     
     /* Virtual method override. */
     
@@ -618,13 +618,13 @@ public:
      * \brief Sets the key length field.
      * \param value The new key length to be set.
      */
-    void key_length(uint16_t value);
+    void key_length(uint16_t length);
     
     /**
      * \brief Sets the replay counter field.
      * \param value The new replay counter to be set.
      */
-    void replay_counter(uint64_t value);
+    void replay_counter(uint64_t new_replay_counter);
     
     /**
      * \brief Sets the key IV field.
@@ -692,13 +692,13 @@ public:
      * \brief Setter for the key_mic field.
      * \param value The new to be set.
      */
-    void key_mic(small_uint<1> value);
+    void key_mic(small_uint<1> flag);
 
     /**
      * \brief Setter for the secure field.
      * \param value The new to be set.
      */
-    void secure(small_uint<1> value);
+    void secure(small_uint<1> flag);
 
     /**
      * \brief Setter for the error field.
@@ -722,7 +722,7 @@ public:
      * \brief Setter for the key_descriptor field.
      * \param value The new to be set.
      */
-    void key_descriptor(small_uint<3> value);
+    void key_descriptor(small_uint<3> new_key_descriptor);
 
     /**
      * \brief Setter for the key_t field.

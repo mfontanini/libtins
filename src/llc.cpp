@@ -69,7 +69,7 @@ LLC::LLC(const uint8_t* buffer, uint32_t total_sz) {
 		// TODO: Create information fields if corresponding.
 	}
 	else {
-		type((Format)(*stream.pointer() & 0x03));
+		type(static_cast<Format>(*stream.pointer() & 0x03));
 		control_field_length_ = 2;
 		stream.read(control_field.info);
 	}
@@ -219,4 +219,4 @@ void LLC::write_serialization(uint8_t* buffer, uint32_t total_sz) {
 	}
 }
 
-} // Tins
+} // namespace Tins

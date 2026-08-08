@@ -176,4 +176,4 @@ IPv6Address IPv6Address::operator~() const {
    return result;
 }
 
-} // Tins
+} // namespace Tins

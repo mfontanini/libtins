@@ -49,4 +49,4 @@ IPv6Range operator/(const IPv6Address& addr, int mask) {
     return IPv6Range::from_mask(addr, IPv6Address::from_prefix_length(mask));
 }
 
-} // Tins
+} // namespace Tins

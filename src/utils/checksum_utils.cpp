@@ -126,6 +126,5 @@ uint32_t crc32(const uint8_t* data, uint32_t data_size) {
     return crc;
 }
 
-
-} // Utils
-} // Tins
+} // namespace Utils
+} // namespace Tins

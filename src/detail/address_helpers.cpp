@@ -74,5 +74,5 @@ IPv6Address last_address_from_mask(IPv6Address addr, const IPv6Address& mask) {
     return addr;
 }
 
-} // Internals
-} // Tins
+} // namespace Internals
+} // namespace Tins

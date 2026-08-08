@@ -88,7 +88,7 @@ OutputType option2class_option_data(const uint8_t* ptr, uint32_t total_sz) {
     return output;
 }
 
-} // Internals 
+} // namespace Internals
 
 PDU::metadata DHCPv6::extract_metadata(const uint8_t* /*buffer*/, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < 2)) {
@@ -109,7 +109,7 @@ DHCPv6::DHCPv6(const uint8_t* buffer, uint32_t total_sz)
         throw malformed_packet();
     }
     // Relay Agent/Server Messages
-    const MessageType message_type = (MessageType)*stream.pointer();
+    const MessageType message_type = static_cast<MessageType>(*stream.pointer());
     bool is_relay_msg = (message_type == RELAY_FORWARD || message_type == RELAY_REPLY);
     uint32_t required_size = is_relay_msg ? 2 : 4;
     stream.read(&header_data_, required_size);
@@ -349,7 +349,7 @@ void DHCPv6::preference(uint8_t value) {
 
 void DHCPv6::elapsed_time(uint16_t value) {
     value = Endian::host_to_be(value);
-    add_option(option(ELAPSED_TIME, 2, (const uint8_t*)&value));
+    add_option(option(ELAPSED_TIME, 2, reinterpret_cast<const uint8_t*>(&value)));
 }
 
 void DHCPv6::relay_message(const relay_msg_type& value) {

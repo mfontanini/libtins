@@ -190,6 +190,6 @@ void Dot11ReAssocResponse::write_fixed_parameters(OutputMemoryStream& stream) {
     stream.write(body_);
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

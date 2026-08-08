@@ -113,4 +113,4 @@ void PPI::parse_80211(const uint8_t* buffer, uint32_t total_sz) {
     #endif // TINS_HAVE_DOT11
 }
 
-} // Tins
+} // namespace Tins

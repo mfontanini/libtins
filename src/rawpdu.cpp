@@ -60,4 +60,4 @@ bool RawPDU::matches_response(const uint8_t* /*ptr*/, uint32_t /*total_sz*/) con
     return true;
 }
 
-} // Tins
+} // namespace Tins

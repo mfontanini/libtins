@@ -52,8 +52,8 @@ ARP::ARP(ipaddress_type target_ip,
          const hwaddress_type& target_hw, 
          const hwaddress_type& sender_hw) 
 : header_() {
-    hw_addr_format((uint16_t)Constants::ARP::ETHER);
-    prot_addr_format((uint16_t)Constants::Ethernet::IP);
+    hw_addr_format(static_cast<uint16_t>(Constants::ARP::ETHER));
+    prot_addr_format(static_cast<uint16_t>(Constants::Ethernet::IP));
     hw_addr_length(Tins::EthernetII::address_type::address_size);
     prot_addr_length(4 /* IP address size */);
     sender_ip_addr(sender_ip);
@@ -119,7 +119,7 @@ bool ARP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(header_)) {
         return false;
     }
-    const arp_header* arp_ptr = (const arp_header*)ptr;
+    const arp_header* arp_ptr = reinterpret_cast<const arp_header*>(ptr);
     return arp_ptr->sender_ip_address == header_.target_ip_address && 
            arp_ptr->target_ip_address == header_.sender_ip_address;
 }
@@ -150,4 +150,4 @@ EthernetII ARP::make_arp_reply(ipaddress_type target,
     return EthernetII(hw_tgt, hw_snd) / arp;
 }
 
-} // Tins
+} // namespace Tins

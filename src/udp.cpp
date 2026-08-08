@@ -109,7 +109,7 @@ uint32_t pseudoheader_checksum(IPv4Address source_ip, IPv4Address dest_ip, uint3
     stream.write(dest_ip);
     stream.write(Endian::host_to_be<uint16_t>(flag));
     stream.write(Endian::host_to_be<uint16_t>(len));
-    uint16_t* ptr = (uint16_t*)buffer, *end = (uint16_t*)(buffer + sizeof(buffer));
+    uint16_t* ptr = reinterpret_cast<uint16_t*>(buffer), *end = reinterpret_cast<uint16_t*>(buffer + sizeof(buffer));
     while (ptr < end) {
         checksum += *ptr++;
     }
@@ -154,14 +154,14 @@ void UDP::write_serialization(uint8_t* buffer, uint32_t total_sz) {
     header_.check = ~checksum;
     // If checksum is 0, it has to be set to 0xffff
     header_.check = (header_.check == 0) ? 0xffff : header_.check;
-    ((udp_header*)buffer)->check = header_.check;
+    (reinterpret_cast<udp_header*>(buffer))->check = header_.check;
 }
 
 bool UDP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     if (total_sz < sizeof(udp_header)) {
         return false;
     }
-    const udp_header* udp_ptr = (const udp_header*)ptr;
+    const udp_header* udp_ptr = reinterpret_cast<const udp_header*>(ptr);
     if (udp_ptr->sport == header_.dport && udp_ptr->dport == header_.sport) {
         if (inner_pdu()) { 
             return inner_pdu()->matches_response(
@@ -176,4 +176,4 @@ bool UDP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
     return false;
 }
 
-} // Tins
+} // namespace Tins

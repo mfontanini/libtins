@@ -95,7 +95,7 @@ void Dot11::parse_tagged_parameters(InputMemoryStream& stream) {
 
 void Dot11::add_tagged_option(OptionTypes opt, uint8_t len, const uint8_t* val) {
     uint32_t opt_size = len + sizeof(uint8_t) * 2;
-    options_.push_back(option((uint8_t)opt, val, val + len));
+    options_.push_back(option(static_cast<uint8_t>(opt), val, val + len));
     options_size_ += opt_size;
 }
 
@@ -204,7 +204,7 @@ void Dot11::send(PacketSender& sender, const NetworkInterface& iface) {
         addr.sll_halen = 6;
         addr.sll_ifindex = iface.id();
         memcpy(&(addr.sll_addr), header_.addr1, 6);
-        sender.send_l2(*this, (struct sockaddr*)&addr, (uint32_t)sizeof(addr), iface);
+        sender.send_l2(*this, reinterpret_cast<struct sockaddr*>(&addr), static_cast<uint32_t>(sizeof(addr)), iface);
     #else
         sender.send_l2(*this, 0, 0, iface);
     #endif
@@ -230,7 +230,7 @@ Dot11* Dot11::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     if (total_sz < 2) {
         throw malformed_packet();
     }
-    const dot11_header* hdr = (const dot11_header*)buffer;
+    const dot11_header* hdr = reinterpret_cast<const dot11_header*>(buffer);
     if (hdr->control.type == MANAGEMENT) {
         switch (hdr->control.subtype) {
             case BEACON:
@@ -289,6 +289,6 @@ Dot11* Dot11::from_bytes(const uint8_t* buffer, uint32_t total_sz) {
     return new Dot11(buffer, total_sz);
 }
 
-} // Tins
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11

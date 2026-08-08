@@ -169,7 +169,7 @@ void RadioTapWriter::update_paddings(const vector<uint8_t>& paddings, uint32_t o
     }
 }
 
-} // Utils
-} // Tins
+} // namespace Utils
+} // namespace Tins
 
 #endif // TINS_HAVE_DOT11
