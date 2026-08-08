@@ -30,6 +30,9 @@
 #ifndef TINS_TINS_H
 #define TINS_TINS_H
 
+#ifdef TINS_HAVE_PCAP
+#include <pcap.h>
+#endif
 #include <tins/dns.h>
 #include <tins/arp.h>
 #include <tins/bootp.h>
