@@ -42,10 +42,18 @@ find_library(PCAP_LIBRARY
     HINTS ${HINT_DIR}
 )
 
+if (PCAP_LIBRARY AND PCAP_INCLUDE_DIR)
+    add_library(PCAP::pcap UNKNOWN IMPORTED)
+    set_target_properties(PCAP::pcap
+        PROPERTIES
+            IMPORTED_LOCATION "${PCAP_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${PCAP_INCLUDE_DIR}")
+    set(PCAP_LIBRARIES PCAP::pcap)
+endif ()
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PCAP DEFAULT_MSG
-    PCAP_LIBRARY
-    PCAP_INCLUDE_DIR
+    PCAP_LIBRARIES PCAP_LIBRARY PCAP_INCLUDE_DIR
 )
 
 include(CheckCXXSourceCompiles)
