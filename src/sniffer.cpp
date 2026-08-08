@@ -42,6 +42,7 @@
 #include <tins/dot3.h>
 #include <tins/pktap.h>
 #include <tins/sll.h>
+#include <tins/sll2.h>
 #include <tins/ppi.h>
 #include <tins/ip.h>
 #include <tins/ipv6.h>
@@ -177,6 +178,9 @@ PtrPacket BaseSniffer::next_packet() {
                 break;
             case DLT_LINUX_SLL:
                 handler = &sniff_loop_handler<SLL>;
+                break; 
+            case DLT_LINUX_SLL2:
+                handler = &sniff_loop_handler<SLL2>;
                 break; 
             case DLT_PPI:
                 handler = &sniff_loop_handler<PPI>;

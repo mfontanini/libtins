@@ -56,6 +56,7 @@ set(SOURCES
     rsn_information.cpp
     rtp.cpp
     sll.cpp
+    sll2.cpp
     snap.cpp
     stp.cpp
     tcp.cpp
@@ -134,6 +135,7 @@ set(HEADERS
     ${LIBTINS_INCLUDE_DIR}/tins/rsn_information.h
     ${LIBTINS_INCLUDE_DIR}/tins/rtp.h
     ${LIBTINS_INCLUDE_DIR}/tins/sll.h
+    ${LIBTINS_INCLUDE_DIR}/tins/sll2.h
     ${LIBTINS_INCLUDE_DIR}/tins/small_uint.h
     ${LIBTINS_INCLUDE_DIR}/tins/snap.h
     ${LIBTINS_INCLUDE_DIR}/tins/tcp.h
