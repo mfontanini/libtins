@@ -30,8 +30,19 @@
 #ifndef TINS_IP_REASSEMBLER_H
 #define TINS_IP_REASSEMBLER_H
 
+#if TINS_IS_CXX11
+    #include <chrono>
+    #include <functional>
+#elif defined(_WIN32)
+    #include <winsock2.h>
+    #include <windows.h>
+#else
+    #include <sys/time.h>
+#endif
+
 #include <vector>
 #include <map>
+#include <list>
 #include <tins/pdu.h>
 #include <tins/macros.h>
 #include <tins/ip_address.h>
@@ -70,11 +81,20 @@ private:
 class TINS_API IPv4Stream {
 public:
     IPv4Stream();
+
+#if TINS_IS_CXX11
+    typedef std::chrono::system_clock::time_point time_point;
+#else
+    typedef uint64_t time_point;
+    static uint64_t current_time();
+#endif
     
     void add_fragment(IP* ip);
     bool is_complete() const;
     PDU* allocate_pdu() const;
     const IP& first_fragment() const;
+    size_t number_fragments() const;
+    time_point start_time_point() const;
 private:
     typedef std::vector<IPv4Fragment> fragments_type;
     
@@ -86,6 +106,7 @@ private:
     size_t total_size_;
     IP first_fragment_;
     bool received_end_;
+    time_point start_time_point_;
 };
 } // namespace Internals
 
@@ -129,6 +150,12 @@ public:
     };
 
     TINS_DEPRECATED(typedef PacketStatus packet_status);
+
+#if TINS_IS_CXX11
+    typedef std::function<void(PDU& pdu)> StreamCallback;
+#else
+    typedef void (*StreamCallback)(PDU& pdu);
+#endif
 
     /**
      * The type used to represent the overlapped segment reassembly 
@@ -183,16 +210,74 @@ public:
      * \sa IP::id
      */
     void remove_stream(uint16_t id, IPv4Address addr1, IPv4Address addr2);
+
+    /**
+     * \brief A limit is set for each streams. 
+     * If max_number == 0, then there are no restrictions.
+     * 
+     * \param max_number Maximum number of packets per stream
+     * \param callback If set, it is called for each overflow stream
+     */
+    void set_max_number_packets_to_stream(uint64_t max_number, StreamCallback callback = 0);
+
+    /**
+     * \brief Set the lifetime for each streams. 
+     * The list of existing streams is checked with a specified time step. 
+     * Attention, the check does not occur in a separate thread, 
+     * but on each incoming package.
+     * 
+     * \param stream_timeout_ms The lifetime of a single stream (milliseconds)
+     * If stream_timeout_ms == 0, then there will be no verification
+     * \param time_to_check_ms Time step for verification (milliseconds)
+     * If time_to_check_ms == 0 and stream_timeout_ms != 0, then the check will be with each new package
+     * \param callback If set, it is called for each expired valid stream
+     */
+    void set_timeout_to_stream(uint64_t stream_timeout_ms, uint64_t time_to_check_ms = 1000, StreamCallback callback = 0);
+
+    /**
+     * \brief Return the total number of complete packets
+     */
+    size_t total_number_complete_packages() const;
+
+    /**
+     * \brief Return the total number of damaged packages
+     */
+    size_t total_number_damaged_packages() const;
+
+    /**
+     * \brief Return the current number of incomplete packets
+     */
+    size_t current_number_incomplete_packages() const;
+
+    /**
+     * \brief Returns the current size of the partial-packet buffer
+     */
+    size_t current_buffer_size_incomplete_packages() const;
 private:
     typedef std::pair<IPv4Address, IPv4Address> address_pair;
     typedef std::pair<uint16_t, address_pair> key_type;
     typedef std::map<key_type, Internals::IPv4Stream> streams_type;
+    typedef std::list< std::pair<key_type, Internals::IPv4Stream::time_point> > streams_history;
 
     key_type make_key(const IP* ip) const;
     address_pair make_address_pair(IPv4Address addr1, IPv4Address addr2) const;
+    void removal_expired_streams();
     
     streams_type streams_;
     OverlappingTechnique technique_;
+    uint64_t max_number_packets_to_stream_;
+    uint64_t stream_timeout_ms_;
+    uint64_t time_to_check_ms_;
+    streams_history streams_history_;
+
+    StreamCallback stream_overflow_callback_;
+    StreamCallback stream_timeout_callback_;
+
+    Internals::IPv4Stream::time_point origin_cycle_time_;
+
+    // Statistics
+    size_t total_number_complete_packages_;
+    size_t total_number_damaged_packages_;
 };
 
 /**
