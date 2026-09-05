@@ -120,3 +120,17 @@ TEST_F(Dot1QTest, SerializeAfterInnerPduRemoved) {
     EthernetII eth2(&buffer[0], buffer.size());
     EXPECT_EQ(eth1.size(), eth2.size());
 }
+
+TEST_F(Dot1QTest, ExtractMetadata) {
+    Dot1Q dot1 = Dot1Q() / IP();
+
+    PDU::serialization_type buffer = dot1.serialize();
+
+    PDU::metadata metadata = Dot1Q::extract_metadata(
+        &buffer[0],
+        buffer.size()
+    );
+
+    EXPECT_EQ(PDU::DOT1Q, metadata.current_pdu_type);
+    EXPECT_EQ(PDU::IP, metadata.next_pdu_type);
+}
