@@ -38,11 +38,14 @@ using Tins::Memory::OutputMemoryStream;
 
 namespace Tins {
 
-PDU::metadata Dot1Q::extract_metadata(const uint8_t* /*buffer*/, uint32_t total_sz) {
+PDU::metadata Dot1Q::extract_metadata(const uint8_t* buffer, uint32_t total_sz) {
     if (TINS_UNLIKELY(total_sz < sizeof(dot1q_header))) {
         throw malformed_packet();
     }
-    return metadata(sizeof(dot1q_header), pdu_flag, PDU::UNKNOWN);
+    const dot1q_header* header = (const dot1q_header *)buffer;
+    PDUType next_type = Internals::ether_type_to_pdu_flag(
+        static_cast<Constants::Ethernet::e>(Endian::be_to_host(header->type)));
+    return metadata(sizeof(dot1q_header), pdu_flag, next_type);
 }
 
 Dot1Q::Dot1Q(small_uint<12> tag_id, bool append_pad)
