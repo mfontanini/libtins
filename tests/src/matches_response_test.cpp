@@ -4,6 +4,7 @@
 #include <tins/rawpdu.h>
 #include <tins/udp.h>
 #include <tins/dhcp.h>
+#include <tins/dns.h>
 #include <tins/dhcpv6.h>
 #include <tins/ip.h>
 
@@ -32,6 +33,51 @@ TEST_F(MatchesResponseTest, TCPSynAck) {
     EthernetII sent(syn_data, sizeof(syn_data));
     EXPECT_TRUE(sent.matches_response(resp_data, sizeof(resp_data)));
     EXPECT_FALSE(sent.matches_response(syn_data, sizeof(syn_data)));
+}
+
+TEST_F(MatchesResponseTest, UDPWithoutPayload) {
+    UDP request(123, 40000);
+    UDP response(40000, 123);
+    PDU::serialization_type bytes = response.serialize();
+    EXPECT_TRUE(request.matches_response(&bytes[0], bytes.size()));
+    for (size_t size = 0; size < response.header_size(); ++size) {
+        EXPECT_FALSE(request.matches_response(&bytes[0], size));
+    }
+    response.sport(124);
+    bytes = response.serialize();
+    EXPECT_FALSE(request.matches_response(&bytes[0], bytes.size()));
+    response.sport(123);
+    response.dport(40001);
+    bytes = response.serialize();
+    EXPECT_FALSE(request.matches_response(&bytes[0], bytes.size()));
+}
+
+TEST_F(MatchesResponseTest, UDPWithoutPayloadThroughEthernetAndIP) {
+    EthernetII request = EthernetII("00:00:00:00:00:02", "00:00:00:00:00:01") /
+                         IP("192.0.2.2", "192.0.2.1") / UDP(123, 40000);
+    EthernetII response = EthernetII("00:00:00:00:00:01", "00:00:00:00:00:02") /
+                          IP("192.0.2.1", "192.0.2.2") / UDP(40000, 123);
+    PDU::serialization_type bytes = response.serialize();
+    EXPECT_TRUE(request.matches_response(&bytes[0], bytes.size()));
+    response.rfind_pdu<IP>().src_addr("192.0.2.3");
+    bytes = response.serialize();
+    EXPECT_FALSE(request.matches_response(&bytes[0], bytes.size()));
+}
+
+TEST_F(MatchesResponseTest, UDPWithDNSPayload) {
+    DNS query;
+    query.id(1234);
+    UDP request = UDP(53, 40000) / query;
+    DNS answer;
+    answer.id(1234);
+    answer.type(DNS::RESPONSE);
+    UDP response = UDP(40000, 53) / answer;
+    PDU::serialization_type bytes = response.serialize();
+    EXPECT_TRUE(request.matches_response(&bytes[0], bytes.size()));
+    response.rfind_pdu<DNS>().id(4321);
+    bytes = response.serialize();
+    EXPECT_FALSE(request.matches_response(&bytes[0], bytes.size()));
+    EXPECT_FALSE(request.matches_response(&bytes[0], response.header_size()));
 }
 
 TEST_F(MatchesResponseTest, UDPMatchesICMPResponse) {
