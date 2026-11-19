@@ -170,7 +170,7 @@ bool UDP::matches_response(const uint8_t* ptr, uint32_t total_sz) const {
             );
         }
         else {
-            return 0;
+            return true;
         }
     }
     return false;
