@@ -112,7 +112,7 @@ void DataTracker::advance_sequence(uint32_t seq) {
     }
 
     for (auto it = buffered_payload_.begin(); it != buffered_payload_.end();) {
-        if (seq_compare(it->first, seq) <= 0) {
+        if (seq_compare(it->first, seq) < 0) {
             total_buffered_bytes_ -= it->second.size();
             it = buffered_payload_.erase(it);
         } else {

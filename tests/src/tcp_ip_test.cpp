@@ -248,6 +248,46 @@ TEST_F(FlowTest, ReassembleStreamPlain) {
     run_tests(chunks);
 }
 
+TEST_F(FlowTest, ReassembleAfterSkippingToBufferedFragment) {
+    using std::placeholders::_1;
+    const string data = "aaaaabbbbbcccccdddddeeeeefffff";
+    const uint32_t initial_sequences[] = {
+        30, numeric_limits<uint32_t>::max() - 12
+    };
+    for (size_t i = 0; i < 2; ++i) {
+        flow_payload_chunks.clear();
+        const uint32_t initial_seq = initial_sequences[i];
+        Flow flow(IPv4Address("1.2.3.4"), 22, initial_seq);
+        flow.data_callback(bind(&FlowTest::cumulative_flow_data_handler, this, _1));
+        vector<EthernetII> packets = chunks_to_packets(
+            initial_seq, split_payload(data, 5), data
+        );
+        flow.process_packet(packets[0]);
+        // The second packet is missing from the capture. Wait before recovering
+        // so that several subsequent packets have already been buffered.
+        flow.process_packet(packets[2]);
+        flow.process_packet(packets[3]);
+        flow.process_packet(packets[4]);
+        ASSERT_EQ(15U, flow.total_buffered_bytes());
+        const uint32_t recovery_seq = initial_seq + 15;
+        flow.advance_sequence(recovery_seq);
+        EXPECT_EQ(recovery_seq, flow.sequence_number());
+        EXPECT_EQ(10U, flow.total_buffered_bytes());
+        EXPECT_EQ(1U, flow.buffered_payload().count(recovery_seq));
+        // Advancing to the same or an earlier sequence remains a no-op.
+        flow.advance_sequence(recovery_seq);
+        flow.advance_sequence(initial_seq + 10);
+        EXPECT_EQ(recovery_seq, flow.sequence_number());
+        EXPECT_EQ(10U, flow.total_buffered_bytes());
+        flow.process_packet(packets[5]);
+        EXPECT_EQ(data.substr(0, 5) + data.substr(15), merge_chunks(flow_payload_chunks));
+        EXPECT_EQ(2U, flow_payload_chunks.size());
+        EXPECT_EQ(initial_seq + static_cast<uint32_t>(data.size()), flow.sequence_number());
+        EXPECT_EQ(0U, flow.total_buffered_bytes());
+        EXPECT_TRUE(flow.buffered_payload().empty());
+    }
+}
+
 TEST_F(FlowTest, ReassembleStreamReordering) {
     ordering_info_type chunks = split_payload(payload, 5);
     // e.g. input [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
